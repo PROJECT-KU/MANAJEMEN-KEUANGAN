@@ -24,24 +24,62 @@ class CategoriesCreditController extends Controller
      */
     public function index()
     {
-        $categories = CategoriesCredit::where('user_id', Auth::user()->id)
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10);
+        $user = Auth::user();
+
+        // Get categories based on user role and company
+        if ($user->level == 'staff') {
+            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
+            ->where('users.company', $user->company)
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // If not a manager or staff, show categories based on user_id
+            $categories = CategoriesCredit::where('user_id', $user->id)
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+        }
+
         return view('account.categories_credit.index', compact('categories'));
+        //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
+        //    ->orderBy('created_at', 'DESC')
+        //    ->paginate(10);
+        //return view('account.categories_credit.index', compact('categories'));
     }
 
-    /**
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
+
     public function search(Request $request)
     {
+
         $search = $request->get('q');
-        $categories = CategoriesCredit::where('user_id', Auth::user()->id)
-            ->where('name', 'LIKE', '%' .$search. '%')
+        $user = Auth::user();
+
+        if ($user->level == 'staff') {
+            // Search for categories based on the user's company and name
+            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
+            ->where('users.company', $user->company)
+                ->where('categories_credit.name', 'LIKE', '%' . $search . '%')
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // If not a manager or staff, search for categories based on user_id and name
+            $search = $request->get('q');
+            $categories = CategoriesCredit::where('user_id', Auth::user()->id)
+                ->where(
+                    'name',
+                    'LIKE',
+                    '%' . $search . '%'
+                )
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
+        }
+
         return view('account.categories_credit.index', compact('categories'));
+        //$search = $request->get('q');
+        //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
+        //    ->where('name', 'LIKE', '%' .$search. '%')
+        //    ->orderBy('created_at', 'DESC')
+        //    ->paginate(10);
+        //return view('account.categories_credit.index', compact('categories'));
     }
 
     /**
@@ -54,12 +92,7 @@ class CategoriesCreditController extends Controller
         return view('account.categories_credit.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
         //set validasi required
@@ -88,24 +121,13 @@ class CategoriesCreditController extends Controller
 
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit(Request $request, CategoriesCredit $categoriesCredit)
     {
         return view('account.categories_credit.edit', compact('categoriesCredit'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request, CategoriesCredit $categoriesCredit)
     {
         //set validasi required

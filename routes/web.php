@@ -22,10 +22,21 @@ Route::prefix('account')->group(function () {
 
     //dashboard account
     Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
+    // Delete pengguna
+    Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');
+    Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
+    Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
+    Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
+    Route::put('/pengguna/{id}',
+        'account\PenggunaController@update'
+    )->name('account.pengguna.update');
+    Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
 
     //categories debit
     Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
     Route::Resource('/categories_debit', 'account\CategoriesDebitController',['as' => 'account']);
+    Route::delete('account/categories_debit/{id}', 'CategoriesDebitController@destroy')->name('account.categories_debit.destroy');
+
     //debit
     Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
     Route::Resource('/debit', 'account\DebitController',['as' => 'account']);
@@ -41,5 +52,8 @@ Route::prefix('account')->group(function () {
     //laporan credit
     Route::get('/laporan_credit', 'account\LaporanCreditController@index')->name('account.laporan_credit.index');
     Route::get('/laporan_credit/check', 'account\LaporanCreditController@check')->name('account.laporan_credit.check');
+
+    Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
+    Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
 
 });
