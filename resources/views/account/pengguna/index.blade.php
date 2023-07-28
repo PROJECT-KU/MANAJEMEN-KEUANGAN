@@ -45,6 +45,7 @@ Uang Masuk dan Keluar - UANGKU
                   <!--<th scope="col" rowspan="2" style="text-align: center;">TANGGAL DI BUAT</th>-->
                   <th scope="col" rowspan="2" style="text-align: center;">JENIS</th>
                   <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">STATUS</th>
                   <th scope="col" style="width: 10%;text-align: center">AKSI</th>
                 </tr>
               </thead>
@@ -75,6 +76,13 @@ Uang Masuk dan Keluar - UANGKU
                   <!--<td style="text-align: center;">{{ date('d-m-Y H:i', strtotime($item->created_at)) }}</td>-->
                   <td style="text-align: center;">{{ $item->jenis }}</td>
                   <td style="text-align: center;">{{ $item->level }}</td>
+                  <td style="text-align: center;">
+                    @if ($item->status == 'on')
+                    <button class="btn btn-success" disabled>ON</button>
+                    @else
+                    <button class="btn btn-danger" disabled>OFF</button>
+                    @endif
+                  </td>
                   <td class="text-center">
                     <a href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary">
                       <i class="fa fa-pencil-alt"></i>

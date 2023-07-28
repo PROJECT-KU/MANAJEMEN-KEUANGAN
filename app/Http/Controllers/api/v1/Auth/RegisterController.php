@@ -17,6 +17,8 @@ class RegisterController extends Controller
             'username'      => ['required', 'unique:users'],
             'email'         => ['required', 'email','unique:users'],
             'password'      => 'required',
+                'telp'          => '',
+                'jenis'         => 'required'
 
         ],
             [
@@ -26,6 +28,8 @@ class RegisterController extends Controller
             'email.required'        => 'Masukkan Alamat Email Anda !',
             'email.unique'          => 'Alamat Email Sudah Terdaftar !',
             'password.required'     => 'Masukkan Password Anda !',
+                'telp.required'         => 'Masukkan No Telp Anda !',
+                'jenis.required'        => 'Silahkan Pilih Jenis Akun Anda !',
         ]);
 
         if($validator->fails()) {

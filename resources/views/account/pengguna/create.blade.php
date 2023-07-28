@@ -27,7 +27,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" name="full_name" placeholder="Masukkan Nama" class="form-control">
+                                    <input type="text" name="full_name" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
 
                                     @error('full_name')
                                     <div class="invalid-feedback" style="display: block">
@@ -39,7 +39,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Email</label>
-                                    <input type="email" class="form-control" name="email" placeholder="Masukan Email">
+                                    <input type="email" class="form-control" name="email" placeholder="Masukan Email" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Email')
                                     <div class="invalid-feedback" style="display: block">
@@ -54,9 +54,21 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama Perusahaan</label>
-                                    <input type="text" name="company" placeholder="Masukkan Nama" class="form-control">
+                                    <input type="text" name="company" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
 
                                     @error('company')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>No Telp</label>
+                                    <input type="text" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+
+                                    @error('telp')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -69,7 +81,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Level</label>
-                                    <select class="form-control" name="level">
+                                    <select class="form-control" name="level" required>
                                         <option value="">Silahkan Pilih</option>
                                         <option value="admin">Admin</option>
                                         <option value="user">User</option>
@@ -87,7 +99,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Jenis</label>
-                                    <select class="form-control" name="jenis">
+                                    <select class="form-control" name="jenis" required>
                                         <option value="">Silahkan Pilih</option>
                                         <option value="bisnis">Bisnis</option>
                                         <option value="perorangan">Perorangan</option>
@@ -106,7 +118,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" name="username" class="form-control" value="" placeholder="Masukan Username">
+                                    <input type="text" name="username" class="form-control" value="" placeholder="Masukan Username" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
 
                                     @error('username')
                                     <div class="invalid-feedback" style="display: block">
@@ -118,7 +130,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Password</label>
-                                    <input type="password" class="form-control" name="password" rows="6" placeholder="Masukkan Password">
+                                    <input type="password" class="form-control" name="password" rows="6" placeholder="Masukkan Password" required>
 
                                     @error('password')
                                     <div class="invalid-feedback" style="display: block">

@@ -18,6 +18,11 @@ Dashboard - UANGKU
                 <b>Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
             </div>
             @endif
+            @if (Auth::user()->status === 'off')
+            <div class="alert alert-danger" role="alert" style="text-align: center;">
+                <b>Akun Anda Di Nonaktifkan Sementara!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
+            </div>
+            @endif
         </div>
         <div class="row">
             <!--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
@@ -180,4 +185,28 @@ Dashboard - UANGKU
 
     </section>
 </div>
+@if (session('message'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Use SweetAlert to display the success message
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Selamat Akun Anda Berhasil Dibuat!',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+<!--@if (Auth::user()->status === 'off')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Use SweetAlert to display the error message
+    Swal.fire({
+        icon: 'error',
+        title: 'Akun Dinonaktifkan',
+        text: 'Akun Anda Telah Dinonaktifkan Sementara!',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif-->
 @stop

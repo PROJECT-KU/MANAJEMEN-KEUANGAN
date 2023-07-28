@@ -97,14 +97,13 @@ Tambah Uang Masuk - UANGKU
 </div>
 <script>
     if ($(".datetimepicker").length) {
-        $('.datetimepicker').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm',
-            defaultDate: new Date(),
-            useCurrent: true,
-            autoclose: true,
-            todayButton: true,
-            todayHighlight: true,
-            showMeridian: false
+        $('.datetimepicker').daterangepicker({
+            locale: {
+                format: 'YYYY-MM-DD hh:mm'
+            },
+            singleDatePicker: true,
+            timePicker: true,
+            timePicker24Hour: true,
         });
     }
 

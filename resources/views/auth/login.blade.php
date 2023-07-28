@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -15,90 +16,147 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
-    </head>
+    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
+    <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
+
+    <!-- show and hide password -->
+    <style>
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 70%;
+            transform: translateY(-50%);
+            z-index: 1;
+            vertical-align: middle;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <!-- end -->
+</head>
 
 <body style="background: #f3f3f3">
-<div id="app">
-    <section class="section">
-        <div class="container mt-5">
-            <div class="row">
-                <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-                    <div class="login-brand">
-                        <img src="{{ asset('assets/img/jewelry.svg') }}" alt="logo" width="100" class="shadow-light rounded-circle">
-                    </div>
+    <div id="app">
+        <section class="section">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+                        <div class="login-brand">
+                            <img src="{{ asset('assets/img/jewelry.svg') }}" alt="logo" width="100" class="shadow-light rounded-circle">
+                        </div>
 
-                    <div class="card card-primary">
-                        <div class="card-header"><h4>MASUK AKUN</h4></div>
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h4>MASUK AKUN</h4>
+                            </div>
+                            <div class="card-body">
 
-                        <div class="card-body">
-                            <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="username">Username</label>
-                                    <input id="username" type="text" class="form-control" name="username" placeholder="Masukkan Username" tabindex="1" required autofocus>
-                                    <div class="invalid-feedback">
-                                        Masukkan Username
+                                <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input id="username" type="text" class="form-control" name="username" placeholder="Masukkan Username" tabindex="1" required autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
+                                        <div class="invalid-feedback">
+                                            Masukkan Username
+                                        </div>
+
                                     </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <div class="d-block">
-                                        <label for="password" class="control-label">Password</label>
-                                        <div class="float-right">
-                                            <a href="" class="text-small">
-                                                Lupa Password?
-                                            </a>
+                                    <div class="form-group password-group">
+                                        <div class="d-block">
+                                            <label for="password" class="control-label">Password</label>
+                                        </div>
+                                        <input id="password" type="password" class="form-control" name="password" placeholder="Masukkan Password" tabindex="2" required>
+                                        <i class="fas fa-eye password-toggle" id="password-toggle"></i>
+                                        <div class="invalid-feedback">
+                                            Masukkan Password
                                         </div>
                                     </div>
-                                    <input id="password" type="password" class="form-control" name="password" placeholder="Masukkan Password" tabindex="2" required>
-                                    <div class="invalid-feedback">
-                                        Masukkan Password
+
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
+                                            <label class="custom-control-label" for="remember-me">Ingatkan Saya</label>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
-                                        <label class="custom-control-label" for="remember-me">Ingatkan Saya</label>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
+                                            MASUK
+                                        </button>
                                     </div>
-                                </div>
+                                </form>
 
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
-                                        MASUK
-                                    </button>
-                                </div>
-                            </form>
-
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-5 text-muted text-center">
-                        Belum punya akun? <a href="{{ route('register') }}">Buat Sekarang!</a>
-                    </div>
-                    <div class="simple-footer">
-                        © <strong>UANGKU</strong> 2019. Hak Cipta Dilindungi.
+                        <div class="mt-5 text-muted text-center">
+                            Belum punya akun? <a href="{{ route('register') }}">Buat Sekarang!</a>
+                        </div>
+                        <div class="simple-footer">
+                            © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 
-<!-- General JS Scripts -->
-<script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
-<script src="{{ asset('assets/modules/popper.js') }}"></script>
-<script src="{{ asset('assets/modules/tooltip.js') }}"></script>
-<script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
-<script src="{{ asset('assets/modules/moment.min.js') }}"></script>
-<script src="{{ asset('assets/js/stisla.js') }}"></script>
+    <!-- popup -->
+    @error('username')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Use SweetAlert to display the error message
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal',
+            text: 'Username atau Password Anda Salah!',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @enderror
+    <!-- end -->
 
-<!-- JS Libraies -->
+    <!-- show and hide password -->
+    <script>
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('password-toggle');
 
-<!-- Page Specific JS File -->
+        passwordToggle.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.classList.remove('fa-eye');
+                passwordToggle.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.classList.remove('fa-eye-slash');
+                passwordToggle.classList.add('fa-eye');
+            }
+        });
+    </script>
+    <!-- end -->
 
-<!-- Template JS File -->
-<script src="{{ asset('assets/js/scripts.js') }}"></script>
-<script src="{{ asset('assets/js/custom.js') }}"></script>
+
+    <!-- General JS Scripts -->
+    <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/popper.js') }}"></script>
+    <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
+    <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/js/stisla.js') }}"></script>
+
+    <!-- JS Libraies -->
+
+    <!-- Page Specific JS File -->
+
+    <!-- Template JS File -->
+    <script src="{{ asset('assets/js/scripts.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
 </body>
+
 </html>

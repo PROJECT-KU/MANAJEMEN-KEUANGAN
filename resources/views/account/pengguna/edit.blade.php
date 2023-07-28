@@ -27,7 +27,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency">
+                                    <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
 
                                     @error('full_name')
                                     <div class="invalid-feedback" style="display: block">
@@ -39,7 +39,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Email</label>
-                                    <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}">
+                                    <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
 
                                     @error('email')
                                     <div class="invalid-feedback" style="display: block">
@@ -54,9 +54,21 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama Perusahaan</label>
-                                    <input type="text" name="company" class="form-control" alue="{{ old('company', $user->company) }}">
+                                    <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
 
                                     @error('company')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>No Telp</label>
+                                    <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+
+                                    @error('telp')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -104,7 +116,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}">
+                                    <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
 
                                     @error('username')
                                     <div class="invalid-feedback" style="display: block">
@@ -154,11 +166,22 @@ Edit Uang Masuk - UANGKU
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-2">
                                 <div class="form-group">
                                     <input type="checkbox" value="1" name="email_verified_at" style="margin-top: 5px;" {{ $user->email_verified_at ? 'checked' : '' }}>
                                     <label>Verifikasi</label>
                                     @error('email_verified_at')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <input type="checkbox" value="1" name="status" style="margin-top: 5px;" {{ $user->status == 'on' ? 'checked' : '' }}>
+                                    <label>Status</label>
+                                    @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
