@@ -16,6 +16,7 @@ Laporan Uang Keluar - UANGKU
             <div class="card">
                 <div class="card-header">
                     <h4><i class="fas fa-chart-area"></i> LAPORAN UANG KELUAR</h4>
+
                 </div>
 
                 <div class="card-body">
@@ -48,12 +49,16 @@ Laporan Uang Keluar - UANGKU
 
 
 
-            @if (isset($credit))
+            @if(isset($credit) && count($credit) > 0)
             <div class="card">
                 <div class="card-header">
                     <h4><i class="fas fa-chart-area"></i> LAPORAN UANG KELUAR</h4>
+                    <div class="card-header-action">
+                        <a href="{{ route('account.laporan_credit.download-pdf', ['tanggal_awal' => $tanggal_awal, 'tanggal_akhir' => $tanggal_akhir]) }}" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> Download PDF
+                        </a>
+                    </div>
                 </div>
-
                 <div class="card-body">
 
                     <div class="table-responsive">
@@ -61,10 +66,10 @@ Laporan Uang Keluar - UANGKU
                             <thead>
                                 <tr>
                                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                    <th scope="col">KATEGORI</th>
-                                    <th scope="col">NOMINAL</th>
-                                    <th scope="col">KETERANGAN</th>
-                                    <th scope="col">TANGGAL</th>
+                                    <th scope="col" style="text-align: center">KATEGORI</th>
+                                    <th scope="col" style="text-align: center">NOMINAL</th>
+                                    <th scope="col" style="text-align: center">KETERANGAN</th>
+                                    <th scope="col" style="text-align: center">TANGGAL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,10 +79,10 @@ Laporan Uang Keluar - UANGKU
                                 @foreach ($credit as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td>{{ $hasil->name }}</td>
-                                    <td>{{ rupiah($hasil->nominal) }}</td>
-                                    <td>{{ $hasil->description }}</td>
-                                    <td>{{ $hasil->credit_date }}</td>
+                                    <td style="text-align: center">{{ $hasil->name }}</td>
+                                    <td style="text-align: center">{{ rupiah($hasil->nominal) }}</td>
+                                    <td style="text-align: center">{{ $hasil->description }}</td>
+                                    <td style="text-align: center">{{ $hasil->credit_date }}</td>
                                 </tr>
                                 @php
                                 $no++;

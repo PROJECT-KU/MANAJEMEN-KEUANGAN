@@ -107,6 +107,23 @@
                                                 @enderror
                                             </div>
                                         </div>
+
+                                        <div class="col-md-6" id="levelDropdown" style="display: none;">
+                                            <div class="form-group">
+                                                <label>Level</label>
+                                                <select class="form-control" name="level">
+                                                    <option value="">Silahkan Pilih</option>
+                                                    <option value="staff">Staff</option>
+                                                </select>
+
+                                                @error('level')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
                                         <div class="col-md-6" id="namaPerusahaanContainer" style="display: none;">
                                             <div class="form-group">
                                                 <label>Nama Perusahaan</label>
@@ -128,7 +145,10 @@
                                             </div>
                                             @enderror
                                         </div>
+
+
                                     </div>
+
 
                                     <div class="form-group col-12">
                                         <label for="email">Alamat Email</label>
@@ -194,27 +214,46 @@
         </section>
     </div>
 
+
+    <!-- ... Your HTML and CSS ... -->
+
     <script>
         // Get the elements
         const jenisDropdown = document.getElementById('jenis');
         const namaPerusahaanContainer = document.getElementById('namaPerusahaanContainer');
+        const levelDropdown = document.getElementById('levelDropdown');
         const telpContainer = document.getElementById('telpContainer');
-        const companyInput = document.querySelector('[name="company"]');
-        const telpInput = document.querySelector('[name="telp"]');
+        const levelSelect = document.querySelector('[name="level"]');
 
-        // Function to handle the visibility of "Nama Perusahaan" and "No Telp" fields
+        // Function to handle the visibility of "Nama Perusahaan", "Level", and "No Telp" fields
         function handleVisibility() {
             const selectedValue = jenisDropdown.value;
             if (selectedValue === 'bisnis') {
                 namaPerusahaanContainer.style.display = 'block';
-                telpContainer.style.display = 'none';
-                companyInput.required = true;
-                telpInput.required = false;
-            } else {
+                telpContainer.style.display = 'block';
+                levelDropdown.style.display = 'block';
+                // If "bisnis" is selected, set the width of "Level" to col-md-6
+                levelDropdown.classList.remove('col-md-4');
+                levelDropdown.classList.add('col-md-6');
+            } else if (selectedValue === 'perorangan') {
                 namaPerusahaanContainer.style.display = 'none';
                 telpContainer.style.display = 'block';
-                companyInput.required = false;
-                telpInput.required = true;
+                levelDropdown.style.display = 'block';
+                // If "perorangan" is selected, set the width of "Level" to col-md-4
+                telpContainer.classList.remove('col-6');
+                telpContainer.classList.add('col-6');
+            } else {
+                // In case "Silahkan Pilih" or an unexpected value is selected, hide all extra fields
+                namaPerusahaanContainer.style.display = 'none';
+                telpContainer.style.display = 'block';
+                levelDropdown.style.display = 'none';
+            }
+
+            // When "Perorangan" is selected, show only "Users" in the level dropdown
+            if (selectedValue === 'perorangan') {
+                levelSelect.innerHTML = '<option value="users">Users</option>';
+            } else if (selectedValue === 'bisnis') {
+                levelSelect.innerHTML = '<option value="staff">Staff</option>';
             }
         }
 
@@ -224,6 +263,8 @@
         // Call the function once on page load to initialize the visibility
         handleVisibility();
     </script>
+    <!-- ... Your remaining HTML ... -->
+
 
 
     <!-- show and hide password -->

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\account;
 use App\Credit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use PDF;
+use Dompdf\Dompdf;
 
 class LaporanCreditController extends Controller
 {
@@ -32,10 +34,12 @@ class LaporanCreditController extends Controller
     public function check(Request $request)
     {
         //set validasi required
-        $this->validate($request, [
-            'tanggal_awal'     => 'required',
-            'tanggal_akhir'    => 'required',
-        ],
+        $this->validate(
+            $request,
+            [
+                'tanggal_awal'     => 'required',
+                'tanggal_akhir'    => 'required',
+            ],
             //set message validation
             [
                 'tanggal_awal.required'  => 'Silahkan Pilih Tanggal Awal!',
@@ -54,5 +58,37 @@ class LaporanCreditController extends Controller
             ->appends(request()->except('page'));
 
         return view('account.laporan_credit.index', compact('credit', 'tanggal_awal', 'tanggal_akhir'));
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        // Fetch data based on the given date range
+        $tanggal_awal  = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        $credit = Credit::select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
+        ->whereDate('credit.credit_date', '>=', $tanggal_awal)
+            ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
+            ->get();
+
+        // Get the Blade view content as HTML
+        $html = view('account.laporan_credit.pdf', compact('credit', 'tanggal_awal', 'tanggal_akhir'))->render();
+
+        // Generate PDF using the HTML content
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+
+        // (Optional) Set paper size and orientation
+        $dompdf->setPaper('A4', 'portrait');
+
+        // Render the PDF
+        $dompdf->render();
+
+        // Set the PDF filename
+        $fileName = 'laporan_credit_' . date('d-m-Y') . '.pdf';
+
+        // Output the generated PDF to the browser
+        return $dompdf->stream($fileName);
     }
 }

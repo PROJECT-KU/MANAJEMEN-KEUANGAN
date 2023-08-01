@@ -27,10 +27,27 @@ Route::prefix('account')->group(function () {
     Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
     Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
     Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
+    Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
     Route::put('/pengguna/{id}',
         'account\PenggunaController@update'
     )->name('account.pengguna.update');
     Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
+    // routes/web.php
+
+    //download excel
+    //Route::get('/account/laporan-semua/download-excel', 'account\LaporanSemuaController@downloadExcel')->name('account.laporan-semua.download-excel');
+    //Route::get('/account/laporan-semua/export-users-to-excel', 'account\LaporanSemuaController@exportUsersToExcel')->name('account.laporan-semua.export-users-to-excel');
+
+    // download pdf
+    Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
+    Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
+    Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
+
+    //pesanan
+    Route::Resource('/pesanan',
+        'account\DebitController',
+        ['as' => 'account']
+    );
 
     //categories debit
     Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');

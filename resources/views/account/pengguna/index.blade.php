@@ -90,6 +90,9 @@ Uang Masuk dan Keluar - UANGKU
                     <button class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
                       <i class="fa fa-trash"></i>
                     </button>
+                    <a href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
                   </td>
                 </tr>
                 @php

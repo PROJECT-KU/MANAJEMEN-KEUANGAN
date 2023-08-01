@@ -50,7 +50,7 @@ Kategori Uang keluar - UANGKU
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td>{{ $hasil->name }}</td>
+                                    <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <!--<td class="text-center">
                                         <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fa fa-pencil-alt"></i>
@@ -101,7 +101,7 @@ Kategori Uang keluar - UANGKU
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td>{{ $hasil->name }}</td>
+                                    <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fa fa-pencil-alt"></i>

@@ -98,6 +98,9 @@ class PenggunaController extends Controller
         $user->level = $request->input('level');
         $user->jenis = $request->input('jenis');
         $user->telp = $request->input('telp');
+        $user->notif = $request->input('notif');
+        $user->tenggat = $request->input('tenggat');
+        $user->title = $request->input('title');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {
@@ -117,6 +120,20 @@ class PenggunaController extends Controller
         $user = User::findOrFail($id);
 
         return view('account.pengguna.edit', compact('user'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function detail($id)
+    {
+        $user = User::findOrFail($id);
+
+        return view('account.pengguna.detail', compact('user'));
     }
 
     /**
@@ -151,6 +168,9 @@ class PenggunaController extends Controller
         $user->level = $request->input('level');
         $user->jenis = $request->input('jenis');
         $user->telp = $request->input('telp');
+        $user->notif = $request->input('notif');
+        $user->tenggat = $request->input('tenggat');
+        $user->title = $request->input('title');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {

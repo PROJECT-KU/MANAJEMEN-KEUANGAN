@@ -105,10 +105,11 @@ class CategoriesCreditController extends Controller
             ]
         );
 
+        $name = strtoupper($request->input('name'));
         //Eloquent simpan data
         $save = CategoriesCredit::create([
             'user_id'       => Auth::user()->id,
-            'name'          => $request->input('name')
+            'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
         if($save){
@@ -140,10 +141,11 @@ class CategoriesCreditController extends Controller
             ]
         );
 
+        $name = strtoupper($request->input('name'));
         //Eloquent simpan data
         $update = CategoriesCredit::whereId($categoriesCredit->id)->update([
             'user_id'       => Auth::user()->id,
-            'name'          => $request->input('name')
+            'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
         if($update){
