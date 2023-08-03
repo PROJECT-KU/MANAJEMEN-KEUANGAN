@@ -100,6 +100,8 @@ Edit Uang Masuk - UANGKU
                                     <label>Jenis</label>
                                     <select class="form-control" name="jenis">
                                         <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis</option>
+                                        <option value="penyewaan" {{ $user->jenis == 'penyewaan' ? 'selected' : '' }}>Penyewaan</option>
+                                        <option value="kasir" {{ $user->jenis == 'kasir' ? 'selected' : '' }}>kasir</option>
                                         <option value="perorangan" {{ $user->jenis == 'perorangan' ? 'selected' : '' }}>Perorangan</option>
                                     </select>
 

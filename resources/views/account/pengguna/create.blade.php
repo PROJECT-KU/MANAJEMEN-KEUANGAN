@@ -102,6 +102,8 @@ Tambah Uang Masuk - UANGKU
                                     <select class="form-control" name="jenis" required>
                                         <option value="">Silahkan Pilih</option>
                                         <option value="bisnis">Bisnis</option>
+                                        <option value="penyewaan">Penyewaan</option>
+                                        <option value="kasir">Kasir</option>
                                         <option value="perorangan">Perorangan</option>
                                     </select>
 

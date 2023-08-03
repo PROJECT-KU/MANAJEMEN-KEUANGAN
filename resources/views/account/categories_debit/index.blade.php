@@ -26,7 +26,7 @@ Kategori Uang Masuk - UANGKU
                                 <!--<div class="input-group-prepend">
                                     <a href="{{ route('account.categories_debit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                                 </div>-->
-                                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan nama kategori">
+                                <input type="text" class="form-control" name="q" placeholder="pencarian">
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                                     </button>
@@ -77,7 +77,7 @@ Kategori Uang Masuk - UANGKU
                                 <div class="input-group-prepend">
                                     <a href="{{ route('account.categories_debit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                                 </div>
-                                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan nama kategori">
+                                <input type="text" class="form-control" name="q" placeholder="pencarian">
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                                     </button>

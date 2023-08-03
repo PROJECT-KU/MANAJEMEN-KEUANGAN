@@ -97,6 +97,8 @@
                                                 <select class="form-control" name="jenis" id="jenis" required>
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="bisnis">Bisnis</option>
+                                                    <option value="penyewaan">Penyewaan</option>
+                                                    <option value="kasir">Kasir</option>
                                                     <option value="perorangan">Perorangan</option>
                                                 </select>
 
@@ -228,7 +230,7 @@
         // Function to handle the visibility of "Nama Perusahaan", "Level", and "No Telp" fields
         function handleVisibility() {
             const selectedValue = jenisDropdown.value;
-            if (selectedValue === 'bisnis') {
+            if (selectedValue === 'bisnis' || selectedValue === 'penyewaan' || selectedValue === 'kasir') {
                 namaPerusahaanContainer.style.display = 'block';
                 telpContainer.style.display = 'block';
                 levelDropdown.style.display = 'block';

@@ -43,11 +43,21 @@ Route::prefix('account')->group(function () {
     Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
     Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
 
-    //pesanan
-    Route::Resource('/pesanan',
-        'account\DebitController',
-        ['as' => 'account']
-    );
+    //penyewaan
+    Route::get('account/penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
+    Route::delete('account/penyewaan/{id}', 'PenyewaanController@destroy')->name('account.penyewaan.destroy');
+    Route::get('/account/penyewaan/create', 'account\PenyewaanController@create')->name('account.penyewaan.create');
+    Route::post('/account/penyewaan/store', 'account\PenyewaanController@store')->name('account.penyewaan.store');
+    Route::get('account/penyewaan/{id}/edit', 'account\PenyewaanController@edit')->name('account.penyewaan.edit');
+    Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
+    Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
+    Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
+
+
+    //tambah barang
+    Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
+    Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
+    Route::delete('account/tambah_barang/{id}', 'TambahBarangController@destroy')->name('account.tambah_barang.destroy');
 
     //categories debit
     Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');

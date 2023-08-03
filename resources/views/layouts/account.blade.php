@@ -131,7 +131,13 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> UANG KELUAR</a></li>
                                     </ul>
                                 </li>
-                                <li class="{{ setActive('account/pesanan') }}"><a class="nav-link" href="{{ route('account.pesanan.index') }}"><i class="fas fa-dice-d6"></i> PESANAN</a></li>
+                                <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/tambah_barang') }}"><a class="nav-link" href="{{ route('account.tambah_barang.index') }}"><i class="fas fa-dice-d6"></i>TAMBAH</a></li>
+                                        <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-money-check-alt"></i>PENYEWAAN</a></li>
+                                    </ul>
+                                </li>
 
                                 <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
