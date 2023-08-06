@@ -29,6 +29,7 @@
     <script src="{{ asset('assets/modules/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap-timepicker/js/bootstrap-timepicker.min.js') }}"></script>
     <script src="{{ asset('assets/js/highcharts.js') }}"></script>
+
     <style>
         .fas,
         .far,
@@ -42,8 +43,11 @@
         }
     </style>
 </head>
-
-<body style="background-color: #f3f3f3;">
+@php
+$isStatusOff = (Auth::user()->status === 'off');
+$tenggatDate = strtotime(Auth::user()->tenggat);
+$currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
+$isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
             <div class="navbar-bg"></div>
@@ -52,6 +56,7 @@
                     <ul class="navbar-nav mr-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
+                    <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
                 </form>
                 <ul class="navbar-nav navbar-right">
 
@@ -66,7 +71,7 @@
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
+                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
                                 <i class="fas fa-sign-out-alt"></i> KELUAR
                             </a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -88,34 +93,65 @@
                         <li class="menu-header">MAIN MENU</li>
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>DASHBOARD</span></a></li>
                         @if (Auth::user()->email_verified_at)
-                        @if (Auth::user()->level === 'admin')
-                        <li class="{{ setActive('account/pengguna') }}"><a class="nav-link" href="{{ route('account.pengguna.index') }}"><i class="fas fa-home"></i> <span>PENGGUNA</span></a></li>
-                        @endif
-                        <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
-                            <ul class="dropdown-menu">
-                                <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
-                                <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> UANG MASUK</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
-                            <ul class="dropdown-menu">
-                                <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
-                                <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> UANG KELUAR</a></li>
-                            </ul>
-                        </li>
+                        @php
+                        $tenggatDate = Auth::user()->tenggat;
+                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || !$tenggatDate)
+                            <li class="{{ setActive('account/pengguna') }}">
+                                <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
+                                    <i class="fas fa-user"></i> <span>PENGGUNA</span>
+                                </a>
+                            </li>
+                            @endif
 
-                        <li class="dropdown {{ setActive('account/laporan_debit'). setActive('account/laporan_credit') }}. {{ setActive('account/laporan_semua') }}">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
-                            <ul class="dropdown-menu">
-                                <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> UANG MASUK</a></li>
-                                <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> UANG KELUAR</a></li>
-                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-pie"></i> SEMUA</a></li>
-                            </ul>
-                        </li>
-                        @else
-                        @endif
+                            @php
+                            $isStatusOff = (Auth::user()->status === 'off');
+                            $tenggatDate = Auth::user()->tenggat;
+                            $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
+                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate); @endphp @if ($isStatusOff || $isTenggatExpired) <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
+                                <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
+                                </li>
+                                <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
+                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
+                                </li>
+                                <li class="dropdown {{ setActive('account/laporan_debit'). setActive('account/laporan_credit') }}. {{ setActive('account/laporan_semua') }}">
+                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
+                                </li>
+                                @else
+                                <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
+                                        <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> UANG MASUK</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
+                                        <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> UANG KELUAR</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/tambah_barang') }}"><a class="nav-link" href="{{ route('account.tambah_barang.index') }}"><i class="fas fa-dice-d6"></i>TAMBAH</a></li>
+                                        <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-money-check-alt"></i>PENYEWAAN</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} show">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> UANG MASUK</a></li>
+                                        <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> UANG KELUAR</a></li>
+                                        <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-pie"></i> SEMUA</a></li>
+                                    </ul>
+                                </li>
+
+                                @endif
+
+                                @else
+                                @endif
                     </ul>
                 </aside>
             </div>
@@ -135,7 +171,33 @@
             </footer>
         </div>
     </div>
+    <!-- ucapan selamat -->
+    <script>
+        function getGreeting() {
+            const currentTime = new Date();
+            const currentHour = currentTime.getHours();
 
+            let greeting;
+
+            if (currentHour >= 5 && currentHour < 11) {
+                greeting = "Selamat Pagi {{ Auth::user()->full_name }}";
+            } else if (currentHour >= 11 && currentHour < 15) {
+                greeting = "Selamat Siang {{ Auth::user()->full_name }}";
+            } else if (currentHour >= 15 && currentHour < 18) {
+                greeting = "Selamat Sore {{ Auth::user()->full_name }}";
+            } else if (currentHour >= 1 && currentHour < 5) {
+                greeting = "Selamat Dini Hari {{ Auth::user()->full_name }}";
+            } else {
+                greeting = "Selamat Malam {{ Auth::user()->full_name }}";
+            }
+
+            return greeting;
+        }
+
+        const greetingElement = document.getElementById("greeting");
+        greetingElement.innerText = getGreeting();
+    </script>
+    <!-- end -->
     <!-- General JS Scripts -->
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
     <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
@@ -151,6 +213,6 @@
     <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-</body>
+    </body>
 
 </html>

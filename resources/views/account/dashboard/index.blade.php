@@ -15,7 +15,20 @@ Dashboard - UANGKU
         <div class=" col-lg-12 col-md-4 col-sm-4 col-xs-4">
             @if (!Auth::user()->email_verified_at)
             <div class="alert alert-danger" role="alert" style="text-align: center;">
-                <b>Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
+                <b style="font-size: 20px;">Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
+            </div>
+            @endif
+            @if (Auth::user()->status === 'off')
+            <div class="alert alert-danger" role="alert" style="text-align: center;">
+                <b style="font-size: 20px;">Akun Anda Di Nonaktifkan Sementara!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
+            </div>
+            @endif
+            @if (Auth::user()->notif === null || Auth::user()->tenggat === null)
+            @else
+            <div class="alert alert-warning" role="alert" style="text-align: center;">
+                <b style="font-size: 20px;">{{ Auth::user()->title }}</b><br>
+                <p style="font-size: 15px;">{{ Auth::user()->notif }}</p>
+                Pada Tanggal {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
             </div>
             @endif
         </div>
@@ -166,18 +179,184 @@ Dashboard - UANGKU
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-chart-pie"></i> STATISTIK KEUANGAN DALAM 1 TAHUN</h4>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
+                        <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
                     </div>
 
                     <div class="card-body">
-                        <div id="container"></div>
+
+                        <div id="chartContainerPemasukan" style="display: none;">
+                            @foreach ($debit as $hasil)
+                            @php
+                            $target = 10000000; // Target nominal 10 juta
+                            $persentase = ($hasil->total_nominal / $target) * 100;
+                            @endphp
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
+                                <div style="display: flex; align-items: center; width: 100%;">
+                                    <span style="margin-right: 5px; margin-left:5px">{{ rupiah($hasil->total_nominal) }}</span>
+                                    <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px;">
+                                        <div class="progress-bar bg-info text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
+                                        </div>
+                                    </div>
+                                    <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3"></div>
+                            @endforeach
+                        </div>
+                        <canvas id="financeChartPemasukan" width="100%" height="40"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
+                        <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div id="chartContainer" style="display: none;">
+                            @foreach ($credit as $hasil)
+                            @php
+                            $target = 10000000; // Target nominal 10 juta
+                            $persentase = ($hasil->total_nominal / $target) * 100;
+                            @endphp
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
+                                <div style="display: flex; align-items: center; width: 100%;">
+                                    <span style="margin-right: 5px; margin-left:5px;">{{ rupiah($hasil->total_nominal) }}</span>
+                                    <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px; width:500px">
+                                        <div class="progress-bar bg-danger text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
+                                        </div>
+                                    </div>
+                                    <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3"></div>
+                            @endforeach
+                        </div>
+                        <canvas id="financeChart" width="100%" height="40"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </section>
 </div>
+
+<!-- open adn close chart pemasukan-->
+<script>
+    function toggleChartPemasukan() {
+        var chartContainerPemasukan = document.getElementById('chartContainerPemasukan');
+        var financeChartPemasukan = document.getElementById('financeChartPemasukan');
+        var toggleBtnPemasukan = document.getElementById('toggleChartBtnPemasukan');
+
+        if (chartContainerPemasukan.style.display === 'none') {
+            chartContainerPemasukan.style.display = 'block';
+            financeChartPemasukan.style.display = 'none';
+            toggleBtnPemasukan.innerText = 'Tutup Chart';
+        } else {
+            chartContainerPemasukan.style.display = 'none';
+            financeChartPemasukan.style.display = 'block';
+            toggleBtnPemasukan.innerText = 'Buka Chart';
+        }
+    }
+</script>
+<!-- end -->
+
+
+<!-- open and close chart pengeluaran -->
+<script>
+    function toggleChart() {
+        var chartContainer = document.getElementById('chartContainer');
+        var financeChart = document.getElementById('financeChart');
+        var toggleBtn = document.getElementById('toggleChartBtn');
+
+        if (chartContainer.style.display === 'none') {
+            chartContainer.style.display = 'block';
+            financeChart.style.display = 'none';
+            toggleBtn.innerText = 'Tutup Chart';
+        } else {
+            chartContainer.style.display = 'none';
+            financeChart.style.display = 'block';
+            toggleBtn.innerText = 'Buka Chart';
+        }
+    }
+</script>
+<!-- end -->
+
+<!-- popup akun berhasil -->
+@if (session('message'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Use SweetAlert to display the success message
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Selamat Akun Anda Berhasil Dibuat!',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+<!-- end -->
+
+<script type="text/javascript" src="chartjs/Chart.js"></script>
+<script>
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 23, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+<!--@if (Auth::user()->status === 'off')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Use SweetAlert to display the error message
+    Swal.fire({
+        icon: 'error',
+        title: 'Akun Dinonaktifkan',
+        text: 'Akun Anda Telah Dinonaktifkan Sementara!',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif-->
 @stop

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PenggunaController extends Controller
 {
@@ -18,9 +20,26 @@ class PenggunaController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('created_at', 'DESC')->paginate(10);
+        $user = Auth::user();
+
+        if ($user->level == 'manager') {
+            // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
+            $users = DB::table('users')
+            ->where('company', $user->company)
+                ->where('level', 'staff')
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager', ambil hanya data pengguna itu sendiri
+            $users = DB::table('users')
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+        }
 
         return view('account.pengguna.index', compact('users'));
+        //$users = User::orderBy('created_at', 'DESC')->paginate(10);
+
+        //return view('account.pengguna.index', compact('users'));
     }
 
     // ... Other methods ...
@@ -59,6 +78,7 @@ class PenggunaController extends Controller
             'password' => 'required',
             'level' => 'required',
             'jenis' => 'required',
+            'telp' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -76,8 +96,18 @@ class PenggunaController extends Controller
         $user->username = $request->input('username');
         $user->password = bcrypt($request->input('password'));
         $user->level = $request->input('level');
-        $user->jenis = $request->input('jenis'); // Save the 'jenis' data
+        $user->jenis = $request->input('jenis');
+        $user->telp = $request->input('telp');
+        $user->notif = $request->input('notif');
+        $user->tenggat = $request->input('tenggat');
+        $user->title = $request->input('title');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
+
+        if ($request->input('status')) {
+            $user->status = 'on';
+        } else {
+            $user->status = 'off';
+        }
 
         // Save the new user
         $user->save();
@@ -99,17 +129,32 @@ class PenggunaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    public function detail($id)
+    {
+        $user = User::findOrFail($id);
+
+        return view('account.pengguna.detail', compact('user'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
 
     public function update(Request $request, $id)
     {
         // Validate the request data
         $request->validate([
             'full_name' => 'required',
-            'company' => 'required',
+            'company' => '',
             'email' => 'required|email',
             'username' => 'required',
             'level' => 'required',
-            'jenis' => 'required', // Add validation rule for 'jenis'
+            'jenis' => 'required',
+            'telp' => 'required',
         ]);
 
         // Find the user by ID
@@ -121,8 +166,18 @@ class PenggunaController extends Controller
         $user->email = $request->input('email');
         $user->username = $request->input('username');
         $user->level = $request->input('level');
-        $user->jenis = $request->input('jenis'); // Update the 'jenis' data
+        $user->jenis = $request->input('jenis');
+        $user->telp = $request->input('telp');
+        $user->notif = $request->input('notif');
+        $user->tenggat = $request->input('tenggat');
+        $user->title = $request->input('title');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
+
+        if ($request->input('status')) {
+            $user->status = 'on';
+        } else {
+            $user->status = 'off';
+        }
 
         // Check if password is being updated
         if ($request->filled('password')) {

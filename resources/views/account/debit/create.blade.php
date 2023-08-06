@@ -57,7 +57,7 @@ Tambah Uang Masuk - UANGKU
                                     <select class="form-control select2" name="category_id" style="width: 100%">
                                         <option value="">-- PILIH KATEGORI --</option>
                                         @foreach ($categories as $hasil)
-                                        <option value="{{ $hasil->id }}"> {{ $hasil->name }}</option>
+                                        <option value="{{ $hasil->id }}" style="text-transform:uppercase;"> {{ strtoupper($hasil->name) }}</option>
                                         @endforeach
                                     </select>
 
@@ -69,6 +69,7 @@ Tambah Uang Masuk - UANGKU
                                 </div>
                             </div>
                         </div>
+
 
                         <div class="row">
                             <div class="col-md-12">
@@ -97,14 +98,13 @@ Tambah Uang Masuk - UANGKU
 </div>
 <script>
     if ($(".datetimepicker").length) {
-        $('.datetimepicker').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm',
-            defaultDate: new Date(),
-            useCurrent: true,
-            autoclose: true,
-            todayButton: true,
-            todayHighlight: true,
-            showMeridian: false
+        $('.datetimepicker').daterangepicker({
+            locale: {
+                format: 'YYYY-MM-DD hh:mm'
+            },
+            singleDatePicker: true,
+            timePicker: true,
+            timePicker24Hour: true,
         });
     }
 

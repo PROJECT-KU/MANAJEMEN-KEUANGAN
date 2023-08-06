@@ -5,6 +5,10 @@ namespace App\Http\Controllers\account;
 use App\Debit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use PDF;
+use Dompdf\Dompdf;
 
 class LaporanDebitController extends Controller
 {
@@ -31,6 +35,7 @@ class LaporanDebitController extends Controller
      */
     public function check(Request $request)
     {
+        $user = Auth::user();
         //set validasi required
         $this->validate($request, [
             'tanggal_awal'     => 'required',
@@ -46,14 +51,60 @@ class LaporanDebitController extends Controller
         $tanggal_awal  = $request->input('tanggal_awal');
         $tanggal_akhir = $request->input('tanggal_akhir');
 
-        $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+            ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+            ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+            ->whereDate('debit.debit_date', '>=', $tanggal_awal)
+                ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+                ->where('users.company', $user->company)
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        } else {
+            $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
             ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
             ->whereDate('debit.debit_date', '>=', $tanggal_awal)
-            ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+                ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+                ->where('debit.user_id', $user->id)
             ->paginate(10)
-            ->appends(request()->except('page'));
+                ->appends(request()->except('page'));
+        }
 
         return view('account.laporan_debit.index', compact('debit', 'tanggal_awal', 'tanggal_akhir'));
+    }
+    public function downloadPdf(Request $request)
+    {
+        $user = Auth::user();
+        // Fetch data based on the given date range
+        $tanggal_awal  = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+            ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+        ->whereDate('debit.debit_date', '>=', $tanggal_awal)
+            ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+            ->where('users.company', $user->company)
+            ->get();
+
+        // Get the Blade view content as HTML
+        $html = view('account.laporan_debit.pdf', compact('debit', 'tanggal_awal', 'tanggal_akhir'))->render();
+
+        // Generate PDF using the HTML content
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+
+        // (Optional) Set paper size and orientation
+        $dompdf->setPaper('A4', 'portrait');
+
+        // Render the PDF
+        $dompdf->render();
+
+        // Set the PDF filename
+        $fileName = 'laporan_debit_' . date('d-m-Y') . '.pdf';
+
+        // Output the generated PDF to the browser
+        return $dompdf->stream($fileName);
     }
 
 }

@@ -88,10 +88,12 @@ class CategoriesDebitController extends Controller
             ]
         );
 
+        $name = strtoupper($request->input('name'));
+
         //Eloquent simpan data
         $save = CategoriesDebit::create([
             'user_id'       => Auth::user()->id,
-            'name'          => $request->input('name')
+            'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
         if($save){
@@ -134,10 +136,11 @@ class CategoriesDebitController extends Controller
             ]
         );
 
+        $name = strtoupper($request->input('name'));
         //Eloquent simpan data
         $update = CategoriesDebit::whereId($categoriesDebit->id)->update([
             'user_id'       => Auth::user()->id,
-            'name'          => $request->input('name')
+            'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
         if($update){

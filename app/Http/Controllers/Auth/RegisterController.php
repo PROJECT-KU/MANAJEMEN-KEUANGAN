@@ -28,7 +28,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/account/dashboard/';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -53,6 +53,8 @@ class RegisterController extends Controller
             'username'      => ['required', 'unique:users'],
             'email'         => ['required', 'email','unique:users'],
             'password'      => ['required', 'confirmed'],
+            'telp'          => [''],
+            'jenis'         => ['required'],
             'agree'         => ['required'],
         ],
             [
@@ -64,6 +66,8 @@ class RegisterController extends Controller
                 'password.required'     => 'Masukkan Password Anda !',
                 'password.confirmed'    => 'Konfirmasi Password Salah !',
                 'agree.required'        => 'Silahkan Centang Kebijakan dan Ketentuan !',
+                'telp.required'         => 'Masukkan No Telp Anda !',
+                'jenis.required'        => 'Silahkan Pilih Jenis Akun Anda!',
             ]
         );
     }
@@ -80,6 +84,10 @@ class RegisterController extends Controller
             'full_name'     => $data['full_name'],
             'username'      => $data['username'],
             'email'         => $data['email'],
+            'telp'          => $data['telp'],
+            'jenis'         => $data['jenis'],
+            'company'       => $data['company'],
+            'level'         => $data['level'],
             'password'      => Hash::make($data['password']),
         ]);
     }

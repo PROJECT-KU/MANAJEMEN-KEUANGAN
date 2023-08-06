@@ -27,7 +27,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency">
+                                    <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
 
                                     @error('full_name')
                                     <div class="invalid-feedback" style="display: block">
@@ -39,7 +39,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Email</label>
-                                    <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}">
+                                    <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
 
                                     @error('email')
                                     <div class="invalid-feedback" style="display: block">
@@ -54,9 +54,21 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama Perusahaan</label>
-                                    <input type="text" name="company" class="form-control" alue="{{ old('company', $user->company) }}">
+                                    <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
 
                                     @error('company')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>No Telp</label>
+                                    <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+
+                                    @error('telp')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -88,6 +100,8 @@ Edit Uang Masuk - UANGKU
                                     <label>Jenis</label>
                                     <select class="form-control" name="jenis">
                                         <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis</option>
+                                        <option value="penyewaan" {{ $user->jenis == 'penyewaan' ? 'selected' : '' }}>Penyewaan</option>
+                                        <option value="kasir" {{ $user->jenis == 'kasir' ? 'selected' : '' }}>kasir</option>
                                         <option value="perorangan" {{ $user->jenis == 'perorangan' ? 'selected' : '' }}>Perorangan</option>
                                     </select>
 
@@ -104,7 +118,7 @@ Edit Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}">
+                                    <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
 
                                     @error('username')
                                     <div class="invalid-feedback" style="display: block">
@@ -125,40 +139,82 @@ Edit Uang Masuk - UANGKU
                                     @enderror
                                 </div>
                             </div>
-                            <!--<div class="col-md-6">
+                        </div>
+
+                        @if(Auth::user()->level === 'admin')
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Akun Dibikin Pada Tanggal</label>
+                                <input class="form-control" name="notif" placeholder="" value="{{ old('created_at', $user->created_at->format('d-m-Y h:i')) }}" readonly>
+                                @error('created_at')
+                                <div class=" invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
+
+                        <hr style="border-radius: 2px; border-width: 3px;">
+                        <div style="text-align: center;">
+                            <p><span style="color: red;">*</span>Notifikasi Untuk Masa Sewa Yang Akan Habis<span style="color: red;">*</span></p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Foto Profil</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            @if ($user->avatar)
-                                            <img src="{{ asset('path/to/old/avatar.jpg') }}" alt="Foto Profil Lama" style="max-width: 200px; max-height: 200px;">
-                                            @else
-                                            <img src="{{ asset('path/to/default/avatar.jpg') }}" alt="Default Foto Profil" style="max-width: 200px; max-height: 200px;">
-                                            @endif
-                                        </div>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="avatar" name="avatar" onchange="previewImage(event)">
-                                            <label class="custom-file-label" for="avatar">Pilih Gambar</label>
-                                        </div>
+                                    <label>Judul</label>
+                                    <textarea class="form-control" name="title" rows="6" placeholder="Masukkan Keterangan">{{ old('title', $user->title) }}</textarea>
+                                    @error('title')
+                                    <div class=" invalid-feedback" style="display: block">
+                                        {{ $message }}
                                     </div>
-                                    <div class="mt-2">
-                                        <img id="imagePreview" src="#" alt="Pratinjau Foto" style="max-width: 200px; max-height: 200px;">
-                                    </div>
-                                    @error('avatar')
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tanggal Berakhir Sewa</label>
+                                    <input type="date" class="form-control" name="tenggat" value="{{ old('tenggat', $user->tenggat) }}"></input>
+
+                                    @error('tenggat')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
                                     @enderror
                                 </div>
-                            </div>-->
+                            </div>
                         </div>
 
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Pesan</label>
+                                <textarea class="form-control" name="notif" rows="6" placeholder="Masukkan Keterangan">{{ old('notif', $user->notif) }}</textarea>
+                                @error('notif')
+                                <div class=" invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                        @endif
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-2">
                                 <div class="form-group">
                                     <input type="checkbox" value="1" name="email_verified_at" style="margin-top: 5px;" {{ $user->email_verified_at ? 'checked' : '' }}>
                                     <label>Verifikasi</label>
                                     @error('email_verified_at')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <input type="checkbox" value="1" name="status" style="margin-top: 5px;" {{ $user->status == 'on' ? 'checked' : '' }}>
+                                    <label>Status</label>
+                                    @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>

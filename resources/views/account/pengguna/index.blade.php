@@ -25,7 +25,7 @@ Uang Masuk dan Keluar - UANGKU
                 <div class="input-group-prepend">
                   <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan keterangan">
+                <input type="text" class="form-control" name="q" placeholder="pencarian">
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                   </button>
@@ -45,6 +45,7 @@ Uang Masuk dan Keluar - UANGKU
                   <!--<th scope="col" rowspan="2" style="text-align: center;">TANGGAL DI BUAT</th>-->
                   <th scope="col" rowspan="2" style="text-align: center;">JENIS</th>
                   <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">STATUS</th>
                   <th scope="col" style="width: 10%;text-align: center">AKSI</th>
                 </tr>
               </thead>
@@ -75,6 +76,13 @@ Uang Masuk dan Keluar - UANGKU
                   <!--<td style="text-align: center;">{{ date('d-m-Y H:i', strtotime($item->created_at)) }}</td>-->
                   <td style="text-align: center;">{{ $item->jenis }}</td>
                   <td style="text-align: center;">{{ $item->level }}</td>
+                  <td style="text-align: center;">
+                    @if ($item->status == 'on')
+                    <button class="btn btn-success" disabled>ON</button>
+                    @else
+                    <button class="btn btn-danger" disabled>OFF</button>
+                    @endif
+                  </td>
                   <td class="text-center">
                     <a href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary">
                       <i class="fa fa-pencil-alt"></i>
@@ -82,6 +90,9 @@ Uang Masuk dan Keluar - UANGKU
                     <button class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
                       <i class="fa fa-trash"></i>
                     </button>
+                    <a href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
                   </td>
                 </tr>
                 @php

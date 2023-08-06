@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Dompdf\Dompdf;
+use App\User;
 
 class LaporanSemuaController extends Controller
 {
@@ -27,6 +30,8 @@ class LaporanSemuaController extends Controller
   public function index()
   {
     $user = Auth::user();
+    $currentMonth = date('Y-m-01 00:00:00');
+    $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $debit = DB::table('debit')
@@ -34,31 +39,36 @@ class LaporanSemuaController extends Controller
         ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
         ->leftJoin('users', 'debit.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
+        ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
         ->orderBy('debit.created_at', 'DESC')
-        ->paginate(10);
+        ->get();
 
       $credit = DB::table('credit')
         ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->leftJoin('users', 'credit.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
+        ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
-        ->paginate(10);
+      ->get();
     } else {
       $debit = DB::table('debit')
         ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
         ->where('debit.user_id', Auth::user()->id)
+        ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
         ->orderBy('debit.created_at', 'DESC')
-        ->paginate(10);
+        ->get();
 
       $credit = DB::table('credit')
         ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
         ->where('credit.user_id', Auth::user()->id)
+        ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
-        ->paginate(10);
+      ->get();
     }
+
     // Mengubah format tanggal menjadi "dd-mm-yyyy h:i" untuk debit
     foreach ($debit as $item) {
       $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
@@ -72,10 +82,6 @@ class LaporanSemuaController extends Controller
     return view('account.laporan_semua.index', compact('debit', 'credit'));
   }
 
-  /**
-   * @param Request $request
-   * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-   */
   public function search(Request $request)
   {
     $search = $request->get('q');
@@ -91,7 +97,7 @@ class LaporanSemuaController extends Controller
           ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('debit.created_at', 'DESC')
-      ->paginate(10);
+    ->get();
 
     foreach ($debit as $item) {
       $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
@@ -108,7 +114,7 @@ class LaporanSemuaController extends Controller
           ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('credit.created_at', 'DESC')
-      ->paginate(10);
+    ->get();
 
     foreach ($credit as $item) {
       $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
@@ -245,4 +251,71 @@ class LaporanSemuaController extends Controller
       ]);
     }
   }
+  public function downloadPdf()
+  {
+    $user = Auth::user();
+    $currentMonthStart = date('Y-m-01 00:00:00'); // First day of the current month
+    $currentMonthEnd = date('Y-m-t 23:59:59'); // Last day of the current month
+
+    if ($user->level == 'manager' || $user->level == 'staff') {
+      $debit = DB::table('debit')
+      ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+      ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+      ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+        ->whereBetween('debit.debit_date', [$currentMonthStart, $currentMonthEnd]) // Filter by current month
+        ->orderBy('debit.debit_date', 'DESC') // Sort by debit date in descending order
+        ->get();
+
+      $credit = DB::table('credit')
+      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+      ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+      ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+        ->whereBetween('credit.credit_date', [$currentMonthStart, $currentMonthEnd]) // Filter by current month
+        ->orderBy('credit.credit_date', 'DESC') // Sort by credit date in descending order
+        ->get();
+    } else {
+      $debit = DB::table('debit')
+      ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+      ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+      ->where('debit.user_id', Auth::user()->id)
+        ->whereBetween('debit.debit_date', [$currentMonthStart, $currentMonthEnd]) // Filter by current month
+        ->orderBy('debit.debit_date', 'DESC') // Sort by debit date in descending order
+        ->get();
+
+      $credit = DB::table('credit')
+      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+      ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
+      ->where('credit.user_id', Auth::user()->id)
+        ->whereBetween('credit.credit_date', [$currentMonthStart, $currentMonthEnd]) // Filter by current month
+        ->orderBy('credit.credit_date', 'DESC') // Sort by credit date in descending order
+        ->get();
+    }
+
+    $users = User::all(); // Get all users
+
+    // Get the HTML content of the view
+    $html = view('account.laporan_semua.pdf', compact('debit', 'credit', 'users'))->render();
+
+    // Instantiate Dompdf with the default configuration
+    $dompdf = new Dompdf();
+
+    // Load the HTML content into Dompdf
+    $dompdf->loadHtml($html);
+
+    // (Optional) Set paper size and orientation
+    $dompdf->setPaper('A4', 'portrait');
+
+    // Render the PDF
+    $dompdf->render();
+
+    // Set the PDF filename
+    $fileName = 'laporan_transaksi_semua_' . date('d-m-Y') . '.pdf';
+
+    // Output the generated PDF to the browser
+    return $dompdf->stream($fileName);
+  }
+
+
 }

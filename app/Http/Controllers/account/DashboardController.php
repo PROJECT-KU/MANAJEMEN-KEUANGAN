@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\CategoriesDebit;
 
 class DashboardController extends Controller
 {
@@ -25,6 +26,8 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $categories = [];
+
         if ($user->level == 'manager' || $user->level == 'staff') {
             $uang_masuk_bulan_ini  = DB::table('debit')
             ->selectRaw('sum(nominal) as nominal')
@@ -170,8 +173,61 @@ class DashboardController extends Controller
                 ->first();
         }
 
+        //statistik pemasukan perkategori
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+            $debit = DB::table('debit')
+                ->select('categories_debit.name', DB::raw('SUM(debit.nominal) as total_nominal'))
+                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+                ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+                ->whereYear('debit_date', Carbon::now()->year)
+                ->whereMonth('debit_date', Carbon::now()->month)
+                ->where('users.company', $user->company)
+                ->groupBy('categories_debit.name')
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
+            $debit = DB::table('debit')
+                ->select('categories_debit.name', DB::raw('SUM(debit.nominal) as total_nominal'))
+                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+                ->whereYear('debit_date', Carbon::now()->year)
+                ->whereMonth('debit_date', Carbon::now()->month)
+                ->where('debit.user_id', $user->id)
+                ->groupBy('categories_debit.name')
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
+        }
+        //end
 
+        //statistik pengeluaran perkategori
 
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+            $credit = DB::table('credit')
+                ->select('categories_credit.name', DB::raw('SUM(credit.nominal) as total_nominal'))
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->whereYear('credit_date', Carbon::now()->year)
+                ->whereMonth('credit_date', Carbon::now()->month)
+                ->where('users.company', $user->company)
+                ->orderBy('credit.created_at', 'DESC')
+                ->groupBy('categories_credit.name')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
+            $credit = DB::table('credit')
+                ->select('categories_credit.name', DB::raw('SUM(credit.nominal) as total_nominal'))
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->whereYear('credit_date', Carbon::now()->year)
+                ->whereMonth('credit_date', Carbon::now()->month)
+                ->where('credit.user_id', $user->id)
+                ->orderBy('credit.created_at', 'DESC')
+                ->groupBy('categories_credit.name')
+                ->paginate(10);
+        }
+//end
+    
 
 
         //saldo bulan ini
@@ -206,7 +262,7 @@ class DashboardController extends Controller
          * chart
          */
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini'));
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit'));
     }
 
 }
