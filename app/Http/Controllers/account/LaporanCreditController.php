@@ -5,6 +5,8 @@ namespace App\Http\Controllers\account;
 use App\Credit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use PDF;
 use Dompdf\Dompdf;
 
@@ -33,6 +35,7 @@ class LaporanCreditController extends Controller
      */
     public function check(Request $request)
     {
+        $user = Auth::user();
         //set validasi required
         $this->validate(
             $request,
@@ -49,13 +52,26 @@ class LaporanCreditController extends Controller
 
         $tanggal_awal  = $request->input('tanggal_awal');
         $tanggal_akhir = $request->input('tanggal_akhir');
-
-        $credit = Credit::select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-            ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
-            ->whereDate('credit.credit_date', '>=', $tanggal_awal)
-            ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
-            ->paginate(10)
-            ->appends(request()->except('page'));
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->whereDate('credit.credit_date', '>=', $tanggal_awal)
+                ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
+                ->where('users.company', $user->company)
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        } else {
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->whereDate('credit.credit_date', '>=', $tanggal_awal)
+                ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
+                ->where('credit.user_id', $user->id)
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        }
 
         return view('account.laporan_credit.index', compact('credit', 'tanggal_awal', 'tanggal_akhir'));
     }

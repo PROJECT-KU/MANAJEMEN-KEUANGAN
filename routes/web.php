@@ -42,6 +42,10 @@ Route::prefix('account')->group(function () {
     Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
     Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
     Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
+    
+    
+
+    
 
     //penyewaan
     Route::get('account/penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
@@ -52,6 +56,8 @@ Route::prefix('account')->group(function () {
     Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
     Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
     Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
+    Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
+    Route::get('/download-pdf/{id}', 'account\PenyewaanController@detailPdf')->name('pdf.download');
 
 
     //tambah barang
@@ -73,6 +79,7 @@ Route::prefix('account')->group(function () {
     //credit
     Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
     Route::Resource('/credit', 'account\CreditController',['as' => 'account']);
+    
     //laporan debit
     Route::get('/laporan_debit', 'account\LaporanDebitController@index')->name('account.laporan_debit.index');
     Route::get('/laporan_debit/check', 'account\LaporanDebitController@check')->name('account.laporan_debit.check');

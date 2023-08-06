@@ -28,5 +28,8 @@ class Penyewaan extends Model
     'total',
     'diskon',
     'lama_peminjaman',
+    'pengembalian',
+    'status',
+    'jaminan',
   ];
 }

@@ -14,8 +14,15 @@ Uang Masuk - UANGKU
     <div class="section-body">
 
       <div class="card">
-        <div class="card-header">
+        <div class="card-header  text-right">
           <h4><i class="fas fa-money-check-alt"></i> LIST PENYEWAAN</h4>
+          <div class="card-header-action">
+            <a href="{{ route('account.laporan_penyewaan.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
+            <br>
+            <i class="fas fa-info-circle info-icon"></i>
+            <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
+            <!-- Add this line -->
+          </div>
         </div>
 
         <div class="card-body">
@@ -38,11 +45,13 @@ Uang Masuk - UANGKU
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                  <th scope="col">KENDARAAN</th>
-                  <th scope="col">NAMA PENYEWA</th>
-                  <th scope="col">NO TELP</th>
-                  <th scope="col">ALAMAT</th>
-                  <th scope="col">IDENTITAS</th>
+                  <th scope="col" class="column-width" style="text-align: center;">KENDARAAN</th>
+                  <th scope="col" class="column-width" style="text-align: center;">NAMA PENYEWA</th>
+                  <th scope="col" class="column-width" style="text-align: center;">NO TELP</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">ALAMAT</th>-->
+                  <th scope="col" class="column-width" style="text-align: center;">IDENTITAS</th>
+                  <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMINJAMAN</th>
+                  <th scope="col" class="column-width" style="text-align: center;">STATUS</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                 </tr>
               </thead>
@@ -53,11 +62,19 @@ Uang Masuk - UANGKU
                 @foreach ($penyewaan as $hasil)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <td>{{ $hasil->nama_barang }}</td>
-                  <td>{{ $hasil->nama }}</td>
-                  <td>{{ $hasil->telp }}</td>
-                  <td>{{ $hasil->alamat }}</td>
-                  <td>{{ $hasil->identitas }}</td>
+                  <td class="column-width" style="text-align: center;">{{ $hasil->nama_barang }}</td>
+                  <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->nama }}</td>
+                  <td class="column-width" style="text-align: center;">{{ $hasil->telp }}</td>
+                  <!--<td class="column-width" style="text-align: center;">{{ $hasil->alamat }}</td>-->
+                  <td class="column-width" style="text-align: center;">{{ $hasil->identitas }}</td>
+                  <td class="column-width" style="text-align: center;">{{ date('d-m-Y', strtotime($hasil->tanggal)) }}</td>
+                  <td style="text-align: center;">
+                    @if ($hasil->status == 'dipakai')
+                    <button class="btn btn-warning" disabled>Sedang Dipakai</button>
+                    @else
+                    <button class="btn btn-success" disabled>DiKembalikan</button>
+                    @endif
+                  </td>
                   <td class="text-center">
                     <a href="{{ route('account.penyewaan.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                       <i class="fa fa-pencil-alt"></i>

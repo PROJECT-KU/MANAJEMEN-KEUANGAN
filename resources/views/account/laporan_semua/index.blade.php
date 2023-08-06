@@ -30,7 +30,7 @@ Uang Masuk dan Keluar - UANGKU
           <form action="{{ route('account.laporan_semua.search') }}" method="GET">
             <div class="form-group">
               <div class="input-group mb-3">
-                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan keterangan">
+                <input type="text" class="form-control" name="q" placeholder="pencarian">
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                   </button>

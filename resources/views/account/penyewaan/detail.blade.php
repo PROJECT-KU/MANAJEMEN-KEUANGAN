@@ -16,6 +16,13 @@ Tambah Kategori Uang Masuk - UANGKU
       <div class="card">
         <div class="card-header">
           <h4><i class="fas fa-dice-d6"></i> DETAIL DATA PEMINJAMAN</h4>
+          <div class="card-header-action">
+            <a href="{{ route('pdf.download', ['id' => $penyewaan->id]) }}" class="btn btn-primary">Download PDF</a>
+            <br>
+            <i class="fas fa-info-circle info-icon"></i>
+            <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
+            <!-- Add this line -->
+          </div>
         </div>
 
         <div class="card-body">
@@ -57,22 +64,34 @@ Tambah Kategori Uang Masuk - UANGKU
           </div>
 
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
-                <label>HARGA</label>
+                <label>HARGA SEWA</label>
                 <input type="text" class="form-control" id="hargaBarang" disabled>
               </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
-                <label>STOK</label>
-                <input type="text" class="form-control" id="stokBarang" disabled>
+                <label>HARGA PER</label>
+                <input type="text" class="form-control" id="hargaPer" disabled>
               </div>
             </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>JENIS KENDARAAN</label>
+                <input type="text" class="form-control" id="jenisBarang" disabled>
+              </div>
+            </div>
+            <!--<div class="col-md-6">
+              <div class="form-group">
+                <label>STOK KENDARAAN </label>
+                <input type="text" class="form-control" id="stokBarang" disabled>
+              </div>
+            </div>-->
           </div>
 
-          <div class="row">
+          <!--<div class="row">
             <div class="col-md-6">
               <div class="form-group">
                 <label>HARGA PER</label>
@@ -81,11 +100,11 @@ Tambah Kategori Uang Masuk - UANGKU
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label>JENIS</label>
+                <label>JENIS KENDARAAN</label>
                 <input type="text" class="form-control" id="jenisBarang" disabled>
               </div>
             </div>
-          </div>
+          </div>-->
 
           <div class="row">
             <div class="col-md-6">
@@ -153,8 +172,8 @@ Tambah Kategori Uang Masuk - UANGKU
 
             <div class="col-md-4">
               <div class="form-group">
-                <label>Lama Peminjaman</label>
-                <input type="text" name="lama_peminjaman" value="{{ old('lama_peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Jumlah Unit Peminjaman" class="form-control" readonly>
+                <label>LAMA PEMINJAMAN (Hari)</label>
+                <input type="text" name="lama_peminjaman" value="{{ old('lama_peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Lama Peminjaman" class="form-control" readonly>
                 @error('lama_peminjaman')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
@@ -165,9 +184,42 @@ Tambah Kategori Uang Masuk - UANGKU
 
             <div class="col-md-4">
               <div class="form-group">
+                <label>JAMINAN</label>
+                <select class="form-control" name="jaminan" disabled="true">
+                  <option value="ktm" {{ $penyewaan->jaminan == 'ktm' ? 'selected' : '' }}>KTM</option>
+                  <option value="sim" {{ $penyewaan->jaminan == 'sim' ? 'selected' : '' }}>SIM</option>
+                  <option value="motor" {{ $penyewaan->jaminan == 'motor' ? 'selected' : '' }}>SEPEDA MOTOR</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row justify-content-center"> <!-- Center the entire row -->
+            <div class="col-md-5">
+              <div class="form-group">
                 <label>TANGGAL PEMINJAMAN</label>
-                <input type="date" name="tanggal" value="{{ old('tanggal', $penyewaan->tanggal) }}" class="form-control" readonly>
+                <input type="date" name="tanggal" id="tanggal_peminjaman" value="{{ old('tanggal', $penyewaan->tanggal) }}" class="form-control" readonly>
+
                 @error('tanggal')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-4"> <!-- Equal width column to center the "S/D" label -->
+              <div class="form-group text-center"> <!-- Center the label text -->
+                <b>S/D</b>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>TANGGAL DIKEMBALIKAN</label>
+                <input type="text" name="pengembalian" id="pengembalian" value="{{ old('pengembalian', $penyewaan->pengembalian) }}" class="form-control" readonly>
+
+                @error('pengembalian')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -177,7 +229,17 @@ Tambah Kategori Uang Masuk - UANGKU
           </div>
 
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>STATUS KENDARAAN</label>
+                <select class="form-control" name="status" disabled="true">
+                  <option value="dipakai" {{ $penyewaan->status == 'dipakai' ? 'selected' : '' }}>Di Pakai</option>
+                  <option value="dikembalikan" {{ $penyewaan->status == 'dikembalikan' ? 'selected' : '' }}>Di Kembalikan</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-4">
               <div class="form-group">
                 <label>SUBTOTAL</label>
                 <input type="text" name="subtotal" value="{{ old('subtotal',  'Rp ' . number_format($penyewaan->subtotal, 0, ',', '.')) }}" class="form-control" readonly></input>
@@ -189,7 +251,7 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label>DISKON</label>
                 <input type="text" name="diskon" value="{{ old('diskon', 'Rp ' . number_format($penyewaan->diskon, 0, ',', '.')) }}" class=" form-control" readonly>
@@ -221,6 +283,29 @@ Tambah Kategori Uang Masuk - UANGKU
   </section>
 </div>
 <script>
+  // Ambil nilai tanggal dari input field
+  const tanggal = document.getElementsByName('pengembalian')[0].value;
+
+  // Ubah format tanggal dari yyyy-mm-dd ke d-m-Y
+  const [year, month, day] = tanggal.split('-');
+  const tanggalFormatted = `${parseInt(day)}-${parseInt(month)}-${year}`;
+
+  // Set nilai kembali ke input field
+  document.getElementsByName('pengembalian')[0].value = tanggalFormatted;
+</script>
+
+<script>
+  if ($(".datetimepicker").length) {
+    $('.datetimepicker').daterangepicker({
+      locale: {
+        format: 'YYYY-MM-DD hh:mm'
+      },
+      singleDatePicker: true,
+      timePicker: true,
+      timePicker24Hour: true,
+    });
+  }
+
   $(document).ready(function() {
     // ... Your existing code ...
 

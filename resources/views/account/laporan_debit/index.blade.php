@@ -95,6 +95,8 @@ Laporan Uang Masuk - UANGKU
 
                 </div>
             </div>
+            @else
+            <h6 style="text-align: center;">Tidak Ada Data Laporan Transaksi Masuk</h6>
             @endif
 
 

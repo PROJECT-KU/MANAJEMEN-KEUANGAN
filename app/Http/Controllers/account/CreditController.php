@@ -42,6 +42,7 @@ class CreditController extends Controller
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->where('credit.user_id', $user->id)
                 ->orderBy('credit.created_at', 'DESC')
                 ->paginate(10);

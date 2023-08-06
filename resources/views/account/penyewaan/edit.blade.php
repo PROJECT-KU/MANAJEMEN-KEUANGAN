@@ -62,14 +62,14 @@ Tambah Kategori Uang Masuk - UANGKU
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>HARGA</label>
+                  <label>HARGA SEWA</label>
                   <input type="text" class="form-control" id="hargaBarang" disabled>
                 </div>
               </div>
 
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>STOK</label>
+                  <label>STOK KENDARAAN </label>
                   <input type="text" class="form-control" id="stokBarang" disabled>
                 </div>
               </div>
@@ -84,7 +84,7 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>JENIS</label>
+                  <label>JENIS KENDARAAN</label>
                   <input type="text" class="form-control" id="jenisBarang" disabled>
                 </div>
               </div>
@@ -156,8 +156,8 @@ Tambah Kategori Uang Masuk - UANGKU
 
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>JUMLAH UNIT</label>
-                  <input type="text" name="lama_peminjaman" value="{{ old('lama_Peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Jumlah Unit Peminjaman" class="form-control">
+                  <label>LAMA PEMINJAMAN (Hari)</label>
+                  <input type="text" name="lama_peminjaman" id="lama_peminjaman" value="{{ old('lama_Peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Lama Peminjaman" class="form-control">
                   @error('lama_peminjaman')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -168,9 +168,59 @@ Tambah Kategori Uang Masuk - UANGKU
 
               <div class="col-md-4">
                 <div class="form-group">
+                  <label>JAMINAN</label>
+                  <select class="form-control" name="jaminan" required>
+                    <option value="ktm" {{ $penyewaan->jaminan == 'ktm' ? 'selected' : '' }}>KTM</option>
+                    <option value="sim" {{ $penyewaan->jaminan == 'sim' ? 'selected' : '' }}>SIM</option>
+                    <option value="motor" {{ $penyewaan->jaminan == 'motor' ? 'selected' : '' }}>SEPEDA MOTOR</option>
+                  </select>
+
+                  @error('jaminan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              <!--<div class="col-md-4">
+                <div class="form-group">
                   <label>TANGGAL PEMINJAMAN</label>
                   <input type="date" name="tanggal" value="{{ old('tanggal', $penyewaan->tanggal) }}" class="form-control">
                   @error('tanggal')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>-->
+            </div>
+
+            <div class="row justify-content-center"> <!-- Center the entire row -->
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>TANGGAL PEMINJAMAN</label>
+                  <input type="date" name="tanggal" id="tanggal_peminjaman" value="{{ old('tanggal', $penyewaan->tanggal) }}" class="form-control">
+
+                  @error('tanggal')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-2 mt-4"> <!-- Equal width column to center the "S/D" label -->
+                <div class="form-group text-center"> <!-- Center the label text -->
+                  <b>S/D</b>
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>TANGGAL DIKEMBALIKAN</label>
+                  <input type="text" name="pengembalian" id="pengembalian" value="{{ old('pengembalian', $penyewaan->pengembalian) }}" class="form-control" readonly>
+
+                  @error('pengembalian')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
                   </div>
@@ -192,15 +242,32 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
             </div>
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>DISKON</label>
-                <input type="text" name="diskon" value="{{ old('diskon', $penyewaan->diskon) }}" class=" form-control currency2" id="diskon">
-                @error('diskon')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS KENDARAAN</label>
+                  <select class="form-control" name="status" required>
+                    <option value="dipakai" {{ $penyewaan->status == 'dipakai' ? 'selected' : '' }}>Di Pakai</option>
+                    <option value="dikembalikan" {{ $penyewaan->status == 'dikembalikan' ? 'selected' : '' }}>Di Kembalikan</option>
+                  </select>
+
+                  @error('status')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @enderror
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>DISKON (Rp.)</label>
+                  <input type="text" name="diskon" value="{{ old('diskon', $penyewaan->diskon) }}" class=" form-control currency2" id="diskon">
+                  @error('diskon')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
               </div>
             </div>
 
@@ -226,6 +293,35 @@ Tambah Kategori Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+
+<script>
+  // Listen for changes in the 'lama_peminjaman' and 'tanggal_peminjaman' fields
+  document.getElementById('lama_peminjaman').addEventListener('change', updatePengembalian);
+  document.getElementById('tanggal_peminjaman').addEventListener('change', updatePengembalian);
+
+  function updatePengembalian() {
+    // Get the values of 'lama_peminjaman' and 'tanggal_peminjaman' fields
+    const lamaPeminjaman = parseInt(document.getElementById('lama_peminjaman').value);
+    const tanggalPeminjaman = new Date(document.getElementById('tanggal_peminjaman').value);
+
+    // Calculate the 'pengembalian' date by adding 'lamaPeminjaman' days to 'tanggalPeminjaman'
+    const pengembalianDate = new Date(tanggalPeminjaman.getTime() + (lamaPeminjaman * 24 * 60 * 60 * 1000));
+
+    // Format the 'pengembalian' date as 'dd-mm-YYYY'
+    const pengembalianFormatted = formatDate(pengembalianDate);
+
+    // Update the 'pengembalian' input field with the calculated date
+    document.getElementById('pengembalian').value = pengembalianFormatted;
+  }
+
+  // Helper function to format date as 'dd-mm-YYYY'
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+</script>
 
 <script>
   $(document).ready(function() {

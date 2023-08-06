@@ -54,34 +54,34 @@ Tambah Kategori Uang Masuk - UANGKU
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>HARGA SEWA</label>
                   <input type="text" class="form-control" id="hargaBarang" disabled>
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>STOK KENDARAAN</label>
                   <input type="text" class="form-control" id="stokBarang" disabled>
                 </div>
               </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>HARGA PER</label>
                   <input type="text" class="form-control" id="hargaPer" disabled>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
-                  <label>JENIS</label>
+                  <label>JENIS KENDARAAN</label>
                   <input type="text" class="form-control" id="jenisBarang" disabled>
                 </div>
               </div>
+            </div>
+
+            <div class="row">
             </div>
 
             <div class="row">
@@ -149,8 +149,8 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>Lama Peminjaman (Hari)</label>
-                  <input type="text" name="lama_peminjaman" value="{{ old('lama_peminjaman') }}" placeholder="Masukkan Lama Peminjaman" class="form-control" required>
+                  <label>LAMA PEMINJAMAN (Hari)</label>
+                  <input type="text" name="lama_peminjaman" id="lama_peminjaman" value="{{ old('lama_peminjaman') }}" placeholder="Masukkan Lama Peminjaman" class="form-control" required>
                   @error('kama_peminjaman')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -160,8 +160,29 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
               <div class="col-md-4">
                 <div class="form-group">
+                  <label>JAMINAN</label>
+                  <select class="form-control" name="jaminan" required>
+                    <option value="">Silahkan Pilih</option>
+                    <option value="ktm">KTM</option>
+                    <option value="sim">SIM</option>
+                    <option value="motor">SEPEDA MOTOR</option>
+                    <!--<option value="dikembalikan">Di Kembalikan</option>-->
+                  </select>
+                  @error('jaminan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
+
+            <div class="row justify-content-center"> <!-- Center the entire row -->
+              <div class="col-md-5">
+                <div class="form-group">
                   <label>TANGGAL PEMINJAMAN</label>
-                  <input type="date" name="tanggal" value="{{ old('tanggal') }}" class="form-control" required>
+                  <input type="date" name="tanggal" id="tanggal_peminjaman" value="{{ old('tanggal') }}" class="form-control" required>
 
                   @error('tanggal')
                   <div class="invalid-feedback" style="display: block">
@@ -170,7 +191,27 @@ Tambah Kategori Uang Masuk - UANGKU
                   @enderror
                 </div>
               </div>
+
+              <div class="col-md-2 mt-4"> <!-- Equal width column to center the "S/D" label -->
+                <div class="form-group text-center"> <!-- Center the label text -->
+                  <b>S/D</b>
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>TANGGAL DIKEMBALIKAN</label>
+                  <input type="text" name="pengembalian" id="pengembalian" value="{{ old('pengembalian') }}" class="form-control" readonly>
+
+                  @error('pengembalian')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
             </div>
+
 
             <div class="col-md-6" hidden>
               <div class="form-group">
@@ -184,23 +225,40 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS KENDARAAN</label>
+                  <select class="form-control" name="status" required>
+                    <option value="">Silahkan Pilih</option>
+                    <option value="dipakai">Di Pakai</option>
+                    <!--<option value="dikembalikan">Di Kembalikan</option>-->
+                  </select>
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>DISKON</label>
-                <input type="text" name="diskon" value="{{ old('diskon') }}" class="form-control currency">
-                @error('diskon')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+                  @error('status')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @enderror
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>DISKON (Rp.)</label>
+                  <input type="text" name="diskon" value="{{ old('diskon') }}" placeholder="Rp." class="form-control currency">
+                  @error('diskon')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
               </div>
             </div>
 
             <div class="col-md-12" hidden>
               <div class="form-group">
                 <label>TOTAL</label>
-                <input type="text" name="total" value="{{ old('total') }}" class="form-control">
+                <input type="text" name="total" id="total" value="{{ old('total') }}" class="form-control">
                 @error('total')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
@@ -220,7 +278,51 @@ Tambah Kategori Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+<!-- Add this script to the bottom of your view or in a separate JavaScript file -->
+<!-- Add this script to the bottom of your view or in a separate JavaScript file -->
 <script>
+  // Listen for changes in the 'lama_peminjaman' and 'tanggal_peminjaman' fields
+  document.getElementById('lama_peminjaman').addEventListener('change', updatePengembalian);
+  document.getElementById('tanggal_peminjaman').addEventListener('change', updatePengembalian);
+
+  function updatePengembalian() {
+    // Get the values of 'lama_peminjaman' and 'tanggal_peminjaman' fields
+    const lamaPeminjaman = parseInt(document.getElementById('lama_peminjaman').value);
+    const tanggalPeminjaman = new Date(document.getElementById('tanggal_peminjaman').value);
+
+    // Calculate the 'pengembalian' date by adding 'lamaPeminjaman' days to 'tanggalPeminjaman'
+    const pengembalianDate = new Date(tanggalPeminjaman.getTime() + (lamaPeminjaman * 24 * 60 * 60 * 1000));
+
+    // Format the 'pengembalian' date as 'dd-mm-YYYY'
+    const pengembalianFormatted = formatDate(pengembalianDate);
+
+    // Update the 'pengembalian' input field with the calculated date
+    document.getElementById('pengembalian').value = pengembalianFormatted;
+  }
+
+  // Helper function to format date as 'dd-mm-YYYY'
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+</script>
+
+
+<script>
+  if ($(".datetimepicker").length) {
+    $('.datetimepicker').daterangepicker({
+      locale: {
+        format: 'DD-MM-YYYY hh:mm'
+      },
+      singleDatePicker: true,
+      timePicker: true,
+      timePicker24Hour: true,
+    });
+  }
+
+
   $(document).ready(function() {
     // Function to format the number to rupiah
     function formatToRupiah(number) {
