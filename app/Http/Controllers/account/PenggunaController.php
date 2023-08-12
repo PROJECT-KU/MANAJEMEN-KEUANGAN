@@ -26,7 +26,7 @@ class PenggunaController extends Controller
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
             ->where('company', $user->company)
-                ->where('level', 'staff')
+                ->whereIn('level', ['staff', 'karyawan'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         } else {

@@ -87,6 +87,7 @@ Tambah Uang Masuk - UANGKU
                                         <option value="user">User</option>
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
+                                        <option value="karyawan">Karyawan</option>
                                     </select>
 
                                     @error('level')

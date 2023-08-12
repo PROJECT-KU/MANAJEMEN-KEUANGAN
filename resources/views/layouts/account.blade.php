@@ -95,11 +95,19 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         @if (Auth::user()->email_verified_at)
                         @php
                         $tenggatDate = Auth::user()->tenggat;
-                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || !$tenggatDate)
+                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->jenis === 'penyewaan' )
                             <li class="{{ setActive('account/pengguna') }}">
                                 <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                     <i class="fas fa-user"></i> <span>PENGGUNA</span>
                                 </a>
+                            </li>
+                            @endif
+                            @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan')
+                            <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
+                                <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
+                                <ul class="dropdown-menu">
+                                    <li class="{{ setActive('account/gaji') }}"><a class="nav-link" href="{{ route('account.gaji.index') }}"><i class="fas fa-dollar-sign"></i>GAJI</a></li>
+                                </ul>
                             </li>
                             @endif
 
@@ -107,8 +115,13 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             $isStatusOff = (Auth::user()->status === 'off');
                             $tenggatDate = Auth::user()->tenggat;
                             $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
-                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate); @endphp @if ($isStatusOff || $isTenggatExpired) <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                                <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
+                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate); $isPenyewaanUser=(Auth::user()->jenis === 'penyewaan');
+                                $isAdminOrPenyewaan = (Auth::user()->level === 'admin' || $isPenyewaanUser);
+                                @endphp
+
+                                @if ($isStatusOff || $isTenggatExpired)
+                                <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
+                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
                                 </li>
                                 <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
                                     <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
@@ -131,13 +144,17 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> UANG KELUAR</a></li>
                                     </ul>
                                 </li>
+
+                                @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
                                     <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/tambah_barang') }}"><a class="nav-link" href="{{ route('account.tambah_barang.index') }}"><i class="fas fa-dice-d6"></i>TAMBAH</a></li>
-                                        <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-money-check-alt"></i>PENYEWAAN</a></li>
+                                        <li class="{{ setActive('account/tambah_barang') }}"><a class="nav-link" href="{{ route('account.tambah_barang.index') }}"><i class="fas fa-plus"></i>TAMBAH
+                                            </a></li>
+                                        <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-list"></i>PENYEWAAN</a></li>
                                     </ul>
                                 </li>
+                                @endif
 
                                 <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>

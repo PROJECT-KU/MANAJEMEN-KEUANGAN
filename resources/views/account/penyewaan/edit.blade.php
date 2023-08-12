@@ -17,6 +17,18 @@ Tambah Kategori Uang Masuk - UANGKU
         <div class="card-header">
           <h4><i class="fas fa-dice-d6"></i> EDIT DATA PEMINJAMAN</h4>
         </div>
+        <div class="card-header">
+          <h6>ID Transaksi : {{ old('id_transaksi', $penyewaan->id_transaksi) }}</h6>
+        </div>
+
+        @if(session('status') === 'error')
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <b>{{ session('message') }}</b>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        @endif
 
         <div class="card-body">
 
@@ -49,7 +61,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>NAMA PEMINJAM</label>
-                  <input type="text" name="nama" value="{{ old('nama', $penyewaan->nama) }}" placeholder="Masukkan Nama Peminjam" class="form-control" style="text-transform: uppercase">
+                  <input type="text" name="nama" value="{{ old('nama', $penyewaan->nama) }}" placeholder="Masukkan Nama Peminjam" class="form-control" style="text-transform: uppercase" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
                   @error('nama')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -60,29 +72,28 @@ Tambah Kategori Uang Masuk - UANGKU
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>HARGA SEWA</label>
                   <input type="text" class="form-control" id="hargaBarang" disabled>
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>STOK KENDARAAN </label>
                   <input type="text" class="form-control" id="stokBarang" disabled>
                 </div>
               </div>
-            </div>
 
-            <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>HARGA PER</label>
                   <input type="text" class="form-control" id="hargaPer" disabled>
                 </div>
               </div>
-              <div class="col-md-6">
+
+              <div class="col-md-3">
                 <div class="form-group">
                   <label>JENIS KENDARAAN</label>
                   <input type="text" class="form-control" id="jenisBarang" disabled>
@@ -94,7 +105,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>EMAIL PEMINJAM</label>
-                  <input type="email" name="email" value="{{ old('email', $penyewaan->email) }}" placeholder="Masukkan Email" class="form-control">
+                  <input type="email" name="email" value="{{ old('email', $penyewaan->email) }}" placeholder="Masukkan Email" class="form-control" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
                   @error('email')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -105,7 +116,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>NO TELP</label>
-                  <input type="text" name="telp" value="{{ old('telp', $penyewaan->telp) }}" placeholder="Masukkan Telp" class="form-control">
+                  <input type="text" name="telp" value="{{ old('telp', $penyewaan->telp) }}" placeholder="Masukkan Telp" class="form-control" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
                   @error('telp')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -130,7 +141,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>NO IDENTITAS (KTP)</label>
-                  <input type="text" name="identitas" value="{{ old('identitas', $penyewaan->identitas) }}" placeholder="Masukkan No Identitas" class="form-control">
+                  <input type="text" name="identitas" value="{{ old('identitas', $penyewaan->identitas) }}" placeholder="Masukkan No Identitas" class="form-control" maxlength="50" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
 
                   @error('identitas')
                   <div class="invalid-feedback" style="display: block">
@@ -145,7 +156,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-4">
                 <div class="form-group">
                   <label>JUMLAH UNIT</label>
-                  <input type="text" name="jumlah" value="{{ old('jumlah', $penyewaan->jumlah) }}" placeholder="Masukkan Jumlah Unit Peminjaman" class="form-control">
+                  <input type="text" name="jumlah" value="{{ old('jumlah', $penyewaan->jumlah) }}" placeholder="Masukkan Jumlah Unit Peminjaman" class="form-control" maxlength="30" minlength="1" onkeypress="return event.charCode >= 48 && event.charCode <=57">
                   @error('jumlah')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -157,7 +168,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-4">
                 <div class="form-group">
                   <label>LAMA PEMINJAMAN (Hari)</label>
-                  <input type="text" name="lama_peminjaman" id="lama_peminjaman" value="{{ old('lama_Peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Lama Peminjaman" class="form-control">
+                  <input type="text" name="lama_peminjaman" id="lama_peminjaman" value="{{ old('lama_Peminjaman', $penyewaan->lama_peminjaman) }}" placeholder="Masukkan Lama Peminjaman" class="form-control" maxlength="30" minlength="1" onkeypress="return event.charCode >= 48 && event.charCode <=57">
                   @error('lama_peminjaman')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -182,20 +193,9 @@ Tambah Kategori Uang Masuk - UANGKU
                   @enderror
                 </div>
               </div>
-              <!--<div class="col-md-4">
-                <div class="form-group">
-                  <label>TANGGAL PEMINJAMAN</label>
-                  <input type="date" name="tanggal" value="{{ old('tanggal', $penyewaan->tanggal) }}" class="form-control">
-                  @error('tanggal')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>-->
             </div>
 
-            <div class="row justify-content-center"> <!-- Center the entire row -->
+            <div class="row justify-content-center">
               <div class="col-md-5">
                 <div class="form-group">
                   <label>TANGGAL PEMINJAMAN</label>
@@ -209,8 +209,8 @@ Tambah Kategori Uang Masuk - UANGKU
                 </div>
               </div>
 
-              <div class="col-md-2 mt-4"> <!-- Equal width column to center the "S/D" label -->
-                <div class="form-group text-center"> <!-- Center the label text -->
+              <div class="col-md-2 mt-4">
+                <div class="form-group text-center">
                   <b>S/D</b>
                 </div>
               </div>
@@ -243,14 +243,14 @@ Tambah Kategori Uang Masuk - UANGKU
             </div>
 
             <div class="row">
+              @if ($penyewaan->status == 'dikembalikan')
               <div class="col-md-6">
                 <div class="form-group">
                   <label>STATUS KENDARAAN</label>
-                  <select class="form-control" name="status" required>
+                  <select class="form-control" name="status" disabled="true">
                     <option value="dipakai" {{ $penyewaan->status == 'dipakai' ? 'selected' : '' }}>Di Pakai</option>
                     <option value="dikembalikan" {{ $penyewaan->status == 'dikembalikan' ? 'selected' : '' }}>Di Kembalikan</option>
                   </select>
-
                   @error('status')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -258,6 +258,57 @@ Tambah Kategori Uang Masuk - UANGKU
                   @enderror
                 </div>
               </div>
+              @else
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS KENDARAAN</label>
+                  <select class="form-control" name="status" required>
+                    <option value="dipakai" {{ $penyewaan->status == 'dipakai' ? 'selected' : '' }}>Di Pakai</option>
+                    <option value="dikembalikan" {{ $penyewaan->status == 'dikembalikan' ? 'selected' : '' }}>Di Kembalikan</option>
+                  </select>
+                  @error('status')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              @endif
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>JENIS PEMBAYARAN</label>
+                  <select class="form-control" name="jenis_pembayaran" id="jenis_pembayaran" required>
+                    <option value="dp" {{ $penyewaan->jenis_pembayaran == 'dp' ? 'selected' : '' }}>DP</option>
+                    <option value="lunas" {{ $penyewaan->jenis_pembayaran == 'lunas' ? 'selected' : '' }}>LUNAS</option>
+                  </select>
+                  @error('jenis_pembayaran')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6" id="jumlah_pembayaran_container">
+                <div class="form-group">
+                  <label>DP PEMBAYARAN</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="jumlah_pembayaran" value="{{ old('jumlah_pembayaran', $penyewaan->jumlah_pembayaran) }}" class="form-control currency4">
+                  </div>
+                  @error('jumlah_pembayaran')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
               <div class="col-md-6">
                 <div class="form-group">
                   <label>DISKON (Rp.)</label>
@@ -293,6 +344,23 @@ Tambah Kategori Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Mendapatkan elemen dropdown jenis_pembayaran
+    const jenisPembayaranSelect = document.getElementById("jenis_pembayaran");
+
+    // Mendapatkan elemen input jumlah_pembayaran
+    const jumlahPembayaranInput = document.querySelector("[name='jumlah_pembayaran']");
+
+    // Menambahkan event listener untuk perubahan nilai dropdown
+    jenisPembayaranSelect.addEventListener("change", function() {
+      if (this.value === "lunas") {
+        jumlahPembayaranInput.value = "0";
+      }
+    });
+  });
+</script>
 
 <script>
   // Listen for changes in the 'lama_peminjaman' and 'tanggal_peminjaman' fields
@@ -431,6 +499,11 @@ Tambah Kategori Uang Masuk - UANGKU
   var timeoutHandler = null;
 
   var cleaveC = new Cleave('.currency3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency4', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

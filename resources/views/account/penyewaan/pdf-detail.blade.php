@@ -16,13 +16,6 @@ Tambah Kategori Uang Masuk - UANGKU
       <div class="card">
         <div class="card-header text-right">
           <h4><i class="fas fa-dice-d6"></i> DETAIL DATA PEMINJAMAN</h4>
-          <div class="card-header-action">
-            <a href="{{ route('pdf.show', ['id' => $penyewaan->id]) }}" class="btn btn-primary">Download PDF</a>
-            <br>
-            <i class="fas fa-info-circle info-icon"></i>
-            <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
-            <!-- Add this line -->
-          </div>
         </div>
         <div class="card-header">
           <h6>ID Transaksi : {{ old('id_transaksi', $penyewaan->id_transaksi) }}</h6>

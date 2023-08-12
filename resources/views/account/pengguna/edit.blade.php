@@ -86,6 +86,7 @@ Edit Uang Masuk - UANGKU
                                         <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
                                         <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                                         <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
+                                        <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
                                     </select>
 
                                     @error('level')

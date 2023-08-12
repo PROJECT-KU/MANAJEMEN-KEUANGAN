@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Response;
+use PDF;
 
 class PenyewaanController extends Controller
 {
@@ -20,11 +22,16 @@ class PenyewaanController extends Controller
     $this->middleware('auth');
   }
 
-  /**
-   * Display a listing of the resource.
-   *
-   * @return \Illuminate\Http\Response
-   */
+  public function generateRandomId($length)
+  {
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $id = '';
+    for ($i = 0; $i < $length; $i++) {
+      $id .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $id;
+  }
+
   public function index()
   {
     $user = Auth::user();
@@ -62,6 +69,9 @@ class PenyewaanController extends Controller
           ->orWhere('penyewaan.nama', 'LIKE', '%' . $search . '%')
           ->orWhere('penyewaan.telp', 'LIKE', '%' . $search . '%')
           ->orWhere('penyewaan.alamat', 'LIKE', '%' . $search . '%')
+      ->orWhere('penyewaan.id_transaksi', 'LIKE', '%' . $search . '%')
+      ->orWhere('penyewaan.tanggal', 'LIKE', '%' . $search . '%')
+      ->orWhere('penyewaan.status', 'LIKE', '%' . $search . '%')
           ->orWhere('penyewaan.identitas', 'LIKE', '%' . $search . '%');
       });
 
@@ -99,6 +109,9 @@ class PenyewaanController extends Controller
   public function store(Request $request)
   {
     $user = Auth::user();
+
+    $id_transaksi = $this->generateRandomId(5);
+
     $this->validate(
       $request,
       [
@@ -113,6 +126,7 @@ class PenyewaanController extends Controller
         'status' => 'required',
         'jaminan' => 'required',
         'lama_peminjaman' => 'required|min:1',
+        'jenis_pembayaran' => 'required',
       ],
       [
         'nama.required' => 'Masukkan Nama Peminjam!',
@@ -127,16 +141,17 @@ class PenyewaanController extends Controller
         'lama_peminjaman.required' => 'Masukkan Lama Peminjaman kendaaraan!',
         'status.required' => 'Silahkan Pilih Status Kendaraan!',
         'jaminan.required' => 'Silahkan Pilih Jaminan Kendaraan!',
+        'jenis_pembayaran.required' => 'Silahkan Pilih Jenis Pembayaran!',
       ]
     );
 
     $tambahBarang = TambahBarang::find($request->input('tambah_barang_id'));
     if (!$tambahBarang) {
-      return redirect()->back()->with(['error' => 'Data Kendaraan Tidak Ditemukan!']);
+      return redirect()->back()->with(['status' => 'error', 'message' => 'Data Kendaraan Tidak Ditemukan!']);
     }
 
     if ($tambahBarang->stok < $request->input('jumlah')) {
-      return redirect()->back()->with(['error' => 'Stok kendaraan tidak mencukupi!']);
+      return redirect()->back()->with(['status' => 'error', 'message' => 'Stok kendaraan tidak mencukupi!']);
     }
 
     // Calculate subtotal based on harga_barang * jumlah
@@ -148,8 +163,18 @@ class PenyewaanController extends Controller
     $diskon = $request->input('diskon');
     $diskon = empty($diskon) ? 0 : str_replace(",", "", $diskon); // Convert to numeric value or set to 0 if empty
 
+    $jumlah_pembayaran = $request->input('jumlah_pembayaran');
+    $jumlah_pembayaran = empty($jumlah_pembayaran) ? 0 : str_replace(",", "", $jumlah_pembayaran);
+
+    $total = $subtotal - $diskon;
+    $kekurangan_pembayaran = $total - $jumlah_pembayaran;
+
+    if ($request->input('jenis_pembayaran') === 'lunas') {
+      $kekurangan_pembayaran = 0;
+    }
+
     // Buat data transaksi baru
-    $save = Penyewaan::create([
+    $save = Penyewaan::create(['id_transaksi' => $id_transaksi, 
       'user_id' => Auth::user()->id,
       'tambah_barang_id' => $request->input('tambah_barang_id'),
       'nama' => $request->input('nama'),
@@ -164,8 +189,11 @@ class PenyewaanController extends Controller
       'status' => $request->input('status'),
       'jaminan' => $request->input('jaminan'),
       'subtotal' => $subtotal, // Set the calculated subtotal
-      'total' => $subtotal - $diskon, // Calculate the total by subtracting diskon from subtotal
+      'total' => $total, // Calculate the total by subtracting diskon from subtotal
       'diskon' => $diskon,
+      'jenis_pembayaran' => $request->input('jenis_pembayaran'),
+      'kekurangan_pembayaran' => $kekurangan_pembayaran, // Calculate kekurangan_pembayaran
+      'jumlah_pembayaran' => $jumlah_pembayaran,
     ]);
 
     // Redirect with success or error message
@@ -221,6 +249,7 @@ class PenyewaanController extends Controller
   public function update(Request $request, $id)
   {
     $user = Auth::user();
+
     $penyewaan = Penyewaan::findOrFail($id);
 
     $this->validate(
@@ -252,24 +281,45 @@ class PenyewaanController extends Controller
 
     $tambahBarang = TambahBarang::find($request->input('tambah_barang_id'));
     if (!$tambahBarang) {
-      return redirect()->back()->with(['error' => 'Data Kendaraan Tidak Ditemukan!']);
+      return redirect()->back()->with(['status' => 'error', 'message' => 'Data Kendaraan Tidak Ditemukan!']);
     }
 
     if ($tambahBarang->stok < $request->input('jumlah')) {
-      return redirect()->back()->with(['error' => 'Stok kendaraan tidak mencukupi!']);
+      return redirect()->back()->with(['status' => 'error', 'message' => 'Stok kendaraan tidak mencukupi!']);
     }
 
     // Calculate subtotal based on harga_barang * jumlah
     $subtotal = $tambahBarang->harga_barang * $request->input('jumlah') * $request->input('lama_peminjaman');
 
     // Update stok of the selected kendaraan
-    $tambahBarang->stok -= $request->input('jumlah');
-    $tambahBarang->save();
+    
     $diskon = $request->input('diskon');
     $diskon = empty($diskon) ? 0 : str_replace(",", "", $diskon); // Convert to numeric value or set to 0 if empty
 
+    $jumlah = $request->input('jumlah');
+    $oldStok = $tambahBarang->stok;
+
+    $jumlah_pembayaran = $request->input('jumlah_pembayaran');
+    $jumlah_pembayaran = empty($jumlah_pembayaran) ? 0 : str_replace(",", "", $jumlah_pembayaran);
+
+    $total = $subtotal - $diskon;
+    $kekurangan_pembayaran = $total - $jumlah_pembayaran;
+
+    if ($request->input('status') === 'dikembalikan') {
+      $tambahBarang->stok += $jumlah;
+    }
+
+    if ($tambahBarang->stok !== $oldStok) {
+      $tambahBarang->save();
+    } else {
+      $tambahBarang->stok -= $jumlah;
+    }
+    if ($request->input('jenis_pembayaran') === 'lunas') {
+      $kekurangan_pembayaran = 0;
+    }
     // Update data transaksi
     $penyewaan->update([
+      'user_id' => Auth::user()->id,
       'tambah_barang_id' => $request->input('tambah_barang_id'),
       'nama' => $request->input('nama'),
       'email' => $request->input('email'),
@@ -283,9 +333,13 @@ class PenyewaanController extends Controller
       'status' => $request->input('status'),
       'jaminan' => $request->input('jaminan'),
       'subtotal' => $subtotal, // Set the calculated subtotal
-      'total' => $subtotal - $diskon, // Calculate the total by subtracting diskon from subtotal
+      'total' => $total, // Calculate the total by subtracting diskon from subtotal
       'diskon' => $diskon,
+      'jenis_pembayaran' => $request->input('jenis_pembayaran'),
+      'kekurangan_pembayaran' => $kekurangan_pembayaran,
+      'jumlah_pembayaran' => $jumlah_pembayaran,
     ]);
+
 
     // Redirect with success or error message
     if ($penyewaan) {
@@ -302,9 +356,9 @@ class PenyewaanController extends Controller
     $penyewaan = Penyewaan::find($id);
     if ($penyewaan) {
       $penyewaan->delete();
-      return response()->json(['status' => 'success']);
+      return response()->json(['status' => 'success', 'message' => 'Data Berhasil Dihapus!']);
     } else {
-      return response()->json(['status' => 'error']);
+      return response()->json(['status' => 'error', 'message' => 'Data Gagal Dihapus!']);
     }
   }
 
@@ -357,39 +411,21 @@ class PenyewaanController extends Controller
     return $dompdf->stream($fileName);
   }
 
-  public function detailPdf($id)
+  public function detailPDF($id)
   {
-    $penyewaan = Penyewaan::findOrFail($id);
+    // Retrieve the data based on the provided ID
     $user = Auth::user();
+    $penyewaan = Penyewaan::findOrFail($id);
+    $tambahBarang = TambahBarang::where('user_id', Auth::user()->id)->get();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $tambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
-        ->get(['tambah_barang.*']);
-    } else {
-      $tambahBarang = TambahBarang::where('user_id', Auth::user()->id)
-        ->get();
-    }
+    // Generate the PDF using the 'pdf-detail' blade view and the retrieved data
+    $pdf = PDF::loadView(
+      'account.penyewaan.pdf-detail',
+      compact('penyewaan', 'tambahBarang')
+    );
 
-    // Get the Blade view content as HTML
-    $html = view('account.penyewaan.detail', compact('penyewaan', 'tambahBarang'))->render();
-
-    // Generate PDF using the HTML content
-    $dompdf = new Dompdf();
-    $dompdf->loadHtml($html);
-
-    // (Optional) Set paper size and orientation
-    $dompdf->setPaper('A4', 'portrait');
-
-    // Render the PDF
-    $dompdf->render();
-
-    // Set the PDF filename
-    $fileName = 'laporan_detail_penyewaan_' . date('d-m-Y') . '.pdf';
-    $filePath = public_path('pdf/' . $fileName);
-    file_put_contents($filePath, $output);
-
-    // Force the download
-    return response()->download(public_path('pdf/' . $fileName))->deleteFileAfterSend(true);
+    // Return the PDF content to be downloaded
+    return $pdf->download('detail_penyewaan_' . $id . '.pdf');
   }
+
 }

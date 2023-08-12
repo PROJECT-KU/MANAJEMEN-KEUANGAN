@@ -31,5 +31,9 @@ class Penyewaan extends Model
     'pengembalian',
     'status',
     'jaminan',
+    'jenis_pembayaran',
+    'kekurangan_pembayaran',
+    'jumlah_pembayaran',
+    'id_transaksi',
   ];
 }
