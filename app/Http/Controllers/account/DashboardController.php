@@ -174,18 +174,26 @@ class DashboardController extends Controller
         }
 
         //statistik pemasukan perkategori
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+        if (
+            $user->level == 'manager' || $user->level == 'staff'
+        ) {
             $debit = DB::table('debit')
                 ->select('categories_debit.name', DB::raw('SUM(debit.nominal) as total_nominal'))
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
                 ->whereYear('debit_date', Carbon::now()->year)
                 ->whereMonth('debit_date', Carbon::now()->month)
-                ->where('users.company', $user->company)
-                ->groupBy('categories_debit.name')
-                ->orderBy('debit.created_at', 'DESC')
-                ->paginate(10);
+            ->where(function ($query) use ($user) {
+                $query->where('users.company', $user->company)
+                    ->orWhere('debit.user_id', $user->id);
+            })
+            ->where(function ($query) {
+                $query->where('users.level', 'manager')
+                ->orWhere('users.level', 'staff');
+            })
+            ->groupBy('categories_debit.name')
+            ->orderBy('debit.created_at', 'DESC')
+            ->paginate(10);
         } else {
             // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $debit = DB::table('debit')
