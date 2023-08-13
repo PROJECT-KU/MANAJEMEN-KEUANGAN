@@ -59,7 +59,14 @@ class LaporanCreditController extends Controller
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->whereDate('credit.credit_date', '>=', $tanggal_awal)
                 ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->paginate(10)
                 ->appends(request()->except('page'));
         } else {

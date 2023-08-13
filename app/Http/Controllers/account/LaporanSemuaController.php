@@ -38,7 +38,14 @@ class LaporanSemuaController extends Controller
         ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
         ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
+        ->where(function ($query) use ($user) {
+          $query->where('users.company', $user->company)
+            ->orWhere('debit.user_id', $user->id);
+        })
+        ->where(function ($query) {
+          $query->where('users.level', 'manager')
+            ->orWhere('users.level', 'staff');
+        })
         ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
         ->orderBy('debit.created_at', 'DESC')
         ->get();
@@ -47,7 +54,14 @@ class LaporanSemuaController extends Controller
         ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
+        ->where(function ($query) use ($user) {
+          $query->where('users.company', $user->company)
+            ->orWhere('credit.user_id', $user->id);
+        })
+        ->where(function ($query) {
+          $query->where('users.level', 'manager')
+            ->orWhere('users.level', 'staff');
+        })
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
       ->get();

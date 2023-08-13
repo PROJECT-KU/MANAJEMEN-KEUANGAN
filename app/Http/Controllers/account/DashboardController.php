@@ -218,7 +218,14 @@ class DashboardController extends Controller
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->whereYear('credit_date', Carbon::now()->year)
                 ->whereMonth('credit_date', Carbon::now()->month)
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->orderBy('credit.created_at', 'DESC')
                 ->groupBy('categories_credit.name')
                 ->paginate(10);
