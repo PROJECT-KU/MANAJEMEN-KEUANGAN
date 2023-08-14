@@ -33,7 +33,7 @@ Profile - Management
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama</label>
-                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
 
                   @error('full_name')
                   <div class="invalid-feedback" style="display: block">
@@ -54,7 +54,7 @@ Profile - Management
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama Perusahaan</label>
-                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
+                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
 
                   @error('company')
                   <div class="invalid-feedback" style="display: block">
@@ -66,7 +66,7 @@ Profile - Management
               <div class="col-md-6">
                 <div class="form-group">
                   <label>No Telp</label>
-                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
 
                   @error('telp')
                   <div class="invalid-feedback" style="display: block">
@@ -110,7 +110,7 @@ Profile - Management
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Username</label>
-                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
+                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
 
                   @error('username')
                   <div class="invalid-feedback" style="display: block">

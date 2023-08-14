@@ -111,6 +111,20 @@
         </section>
     </div>
 
+    <!-- pop up success logout -->
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Log Out',
+            text: 'Anda telah berhasil keluar.',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!-- end -->
+
     <!-- popup -->
     @error('username')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
