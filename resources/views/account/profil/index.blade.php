@@ -1,39 +1,51 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Uang Masuk - UANGKU
+Profile - Management
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PENGGUNA</h1>
+      <h1>PROFILE</h1>
     </div>
+
+    @if (session('success'))
+    <div id="successAlert" class="alert alert-success" role="alert" style="text-align: center;">
+      <b style="font-size: 20px;">DATA DIRI BERHASIL DI PERBARUI</b><br>
+    </div>
+    @endif
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-money-check-alt"></i> DETAIL PENGGUNA</h4>
+          <h4><i class="fas fa-user"></i> PROFILE</h4>
         </div>
 
         <div class="card-body">
 
-          <form action="{{ route('account.pengguna.update', $user->id) }}" method="POST">
+          <form action="{{ route('account.profil.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama</label>
-                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" readonly>
+                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+
+                  @error('full_name')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Email</label>
-                  <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" readonly>
+                  <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" readonly>
                 </div>
               </div>
             </div>
@@ -42,81 +54,102 @@ Detail Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama Perusahaan</label>
-                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" readonly>
+                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
+
+                  @error('company')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
                   <label>No Telp</label>
-                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" readonly>
+                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+
+                  @error('telp')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Level</label>
                   <select class="form-control" name="level" disabled="true">
+                    <option value="" disabled selected>Silahkan Pilih</option>
                     <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
                     <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
                     <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                     <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
+                    <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
                   </select>
+
                 </div>
               </div>
-              <div class="col-md-6">
+
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Jenis</label>
                   <select class="form-control" name="jenis" disabled="true">
+                    <option value="" disabled selected>Silahkan Pilih</option>
                     <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis</option>
+                    <option value="penyewaan" {{ $user->jenis == 'penyewaan' ? 'selected' : '' }}>Penyewaan</option>
+                    <option value="kasir" {{ $user->jenis == 'kasir' ? 'selected' : '' }}>kasir</option>
                     <option value="perorangan" {{ $user->jenis == 'perorangan' ? 'selected' : '' }}>Perorangan</option>
                   </select>
+
                 </div>
               </div>
-            </div>
 
-            <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Username</label>
-                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" readonly>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Tanggal Dibikin</label>
-                  <?php
-                  // Import Carbon at the top of the file if not already imported
-                  use Carbon\Carbon;
+                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
 
-                  // Convert the created_at value to a Carbon instance
-                  $createdAt = Carbon::parse($user->created_at);
-                  // Format the Carbon instance in "tanggal-bulan-tahun jam-menit-detik" format
-                  $formattedDate = $createdAt->format('d-m-Y H:i:s');
-                  ?>
-                  <input type="text" name="username" class="form-control" value="{{ old('created_at', $formattedDate) }}" readonly>
+                  @error('username')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
             </div>
+
+
 
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
                   <label>NIK</label>
-                  <input type="text" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" readonly>
+                  <input type="text" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                  @error('nik')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">
                   <label>NOMOR REKENING</label>
-                  <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" readonly>
+                  <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                  @error('norek')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">
                   <label>BANK</label>
-                  <select class="form-control bank" name="bank" disabled="true">
+                  <select class="form-control bank" name="bank" required>
                     <option value="" disabled selected>Silahkan Pilih</option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -177,25 +210,15 @@ Detail Uang Masuk - UANGKU
                     <option value="135" {{ $user->bank == '135' ? 'selected' : '' }}>BPD SULAWESI TENGGARA</option>
                     <option value="137" {{ $user->bank == '137' ? 'selected' : '' }}>BPD BANTEN</option>
                   </select>
+                  @error('bank')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
               </div>
             </div>
 
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="checkbox" value="1" name="email_verified_at" style="margin-top: 5px;" {{ $user->email_verified_at ? 'checked' : '' }} disabled="true">
-                  <label>Verifikasi</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="checkbox" value="1" name="status" style="margin-top: 5px;" {{ $user->status == 'on' ? 'checked' : '' }} disabled="true">
-                  <label>Status</label>
-                </div>
-              </div>
-            </div>
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
             <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
@@ -207,6 +230,19 @@ Detail Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+<!-- waktu untuk menampilkan alerts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var successAlert = document.getElementById('successAlert');
+    if (successAlert) {
+      setTimeout(function() {
+        successAlert.style.display = 'none';
+      }, 3000);
+    }
+  });
+</script>
+<!-- end -->
+
 <script>
   function previewImage(event) {
     var reader = new FileReader();

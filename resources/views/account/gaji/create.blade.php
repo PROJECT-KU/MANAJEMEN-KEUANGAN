@@ -1,0 +1,401 @@
+@extends('layouts.account')
+
+@section('title')
+Tambah Kategori Uang Masuk - UANGKU
+@stop
+
+@section('content')
+<div class="main-content">
+  <section class="section">
+    <div class="section-header">
+      <h1>TAMBAH GAJI KARYAWAN</h1>
+    </div>
+
+    <div class="section-body">
+
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-dice-d6"></i> TAMBAH GAJI KARYAWAN</h4>
+        </div>
+
+        @if(session('status') === 'error')
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <b>{{ session('message') }}</b>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        @endif
+
+        <div class="card-body">
+
+          <form action="{{ route('account.gaji.store') }}" method="POST">
+            @csrf
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>NAMA KARYAWAN</label>
+                  <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
+                    <option value="">-- PILIH NAMA KARYAWAN --</option>
+                    @foreach ($users as $user)
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}">{{ $user->full_name }}</option>
+                    @endforeach
+                  </select>
+
+                  @error('user_id')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>NIK</label>
+                  <input type="text" class="form-control" id="nik" disabled>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>NOMOR REKENING</label>
+                  <input type="text" class="form-control" id="norek" disabled>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>BANK</label>
+                  <input type="text" class="form-control" id="bank" disabled>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>NO TELP</label>
+                  <input type="text" class="form-control" id="telp" disabled>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+            </div>
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>GAJI POKOK</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency">
+                </div>
+                @error('gaji_pokok')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="lembur" value="{{ old('lembur') }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency1">
+                  </div>
+                  @error('lembur')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <input type="text" name="jumlah_lembur" value="{{ old('jumlah_lembur') }}" placeholder="Masukkan Total Jam" class="form-control">
+                  @error('jumlah_lembur')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
+
+
+            @if (Auth::user()->company === 'rumahscopus')
+            <div class="row">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus" value="{{ old('bonus') }}" placeholder="Bonus Per Hari" class="form-control currency2">
+                  </div>
+                  @error('bonus')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <input type="text" name="jumlah_bonus" value="{{ old('jumlah_bonus') }}" placeholder="Masukkan Total Hari" class="form-control">
+                  @error('jumlah_bonus')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus_luar" value="{{ old('bonus_luar') }}" placeholder="Bonus Per Hari" class="form-control currency5">
+                  </div>
+                  @error('bonus_luar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <input type="text" name="jumlah_bonus_luar" value="{{ old('jumlah_bonus_luar') }}" placeholder="Masukkan Total Hari" class="form-control">
+                  @error('jumlah_bonus_luar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+            @else
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>BAYARAN BONUS (Hari)</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus" value="{{ old('bonus') }}" placeholder="Masukkan Bayaran Bonus Per Hari" class="form-control currency2">
+                  </div>
+                  @error('bonus')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>TOTAL BONUS (Hari)</label>
+                  <input type="text" name="jumlah_bonus" value="{{ old('jumlah_bonus') }}" placeholder="Masukkan Total Hari" class="form-control">
+                  @error('jumlah')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+            @endif
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan" id="tunjangan" value="{{ old('tunjangan') }}" placeholder="Masukkan Total Tunjangan" class="form-control currency3">
+                  </div>
+                  @error('tunjangan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>POTONGAN</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="potongan" id="potongan" value="{{ old('potongan') }}" placeholder="Masukkan Total Potongan" class="form-control currency4">
+                  </div>
+                  @error('potongan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TANGGAL DIBAYARKAN</label>
+                  <input type="text" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control datetimepicker">
+                </div>
+                @error('tanggal')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+
+<script>
+  if ($(".datetimepicker").length) {
+    $('.datetimepicker').daterangepicker({
+      locale: {
+        format: 'DD-MM-YYYY HH:mm' // Format tanggal dan waktu dalam 24 jam
+      },
+      singleDatePicker: true,
+      timePicker: true,
+      timePicker24Hour: true,
+    });
+  }
+
+
+
+  $(document).ready(function() {
+    // ... (kode lainnya)
+
+    // Function to update the input fields based on selected karyawan
+    function updateFields() {
+      var selectedKaryawanOption = $('#karyawanSelect option:selected');
+
+      if (selectedKaryawanOption.length) {
+        var nik = selectedKaryawanOption.data('nik');
+        var norek = selectedKaryawanOption.data('norek');
+        var bank = selectedKaryawanOption.data('bank');
+        var telp = selectedKaryawanOption.data('telp');
+
+        $('#nik').val(nik);
+        $('#norek').val(norek);
+        $('#bank').val(bank);
+        $('#telp').val(telp);
+      } else {
+        $('#nik').val('');
+        $('#norek').val('');
+        $('#bank').val('');
+        $('#telp').val('');
+      }
+    }
+
+    // Call the function when the page loads to initialize the values
+    updateFields();
+
+    // Call the function whenever the user selects a karyawan
+    $('#karyawanSelect').on('change', function() {
+      updateFields();
+    });
+  });
+</script>
+
+
+
+<script>
+  var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency2', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency4', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var timeoutHandler = null;
+</script>
+
+<script>
+  /**
+   * btn submit loader
+   */
+  $(".btn-submit").click(function() {
+    $(".btn-submit").addClass('btn-progress');
+    if (timeoutHandler) clearTimeout(timeoutHandler);
+
+    timeoutHandler = setTimeout(function() {
+      $(".btn-submit").removeClass('btn-progress');
+
+    }, 1000);
+  });
+
+  /**
+   * btn reset loader
+   */
+  $(".btn-reset").click(function() {
+    $(".btn-reset").addClass('btn-progress');
+    if (timeoutHandler) clearTimeout(timeoutHandler);
+
+    timeoutHandler = setTimeout(function() {
+      $(".btn-reset").removeClass('btn-progress');
+
+    }, 500);
+  })
+</script>
+
+@stop

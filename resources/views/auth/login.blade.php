@@ -78,10 +78,12 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
-                                            <label class="custom-control-label" for="remember-me">Ingatkan Saya</label>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
+                                                <label class="custom-control-label" for="remember-me">Ingatkan Saya</label>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -90,13 +92,16 @@
                                             MASUK
                                         </button>
                                     </div>
+                                    <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
+                                    Belum punya akun? <br> <a href="{{ route('register') }}">Buat Sekarang!</a>
                                 </form>
 
                             </div>
+                            <!--<div class="mb-3 text-muted text-center">
+                                Belum punya akun? <a href="{{ route('register') }}">Buat Sekarang!</a>
+                            </div>-->
                         </div>
-                        <div class="mt-5 text-muted text-center">
-                            Belum punya akun? <a href="{{ route('register') }}">Buat Sekarang!</a>
-                        </div>
+
                         <div class="simple-footer">
                             © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
                         </div>

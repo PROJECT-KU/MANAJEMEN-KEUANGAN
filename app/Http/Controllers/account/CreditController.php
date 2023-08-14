@@ -34,7 +34,14 @@ class CreditController extends Controller
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
             ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
             ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
             ->orderBy('credit.created_at', 'DESC')
             ->paginate(10);
         } else {

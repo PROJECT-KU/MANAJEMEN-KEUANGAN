@@ -32,7 +32,7 @@ Uang Masuk - UANGKU
                 <div class="input-group-prepend">
                   <a href="{{ route('account.penyewaan.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan keterangan">
+                <input type="text" class="form-control" name="q" placeholder="pencarian">
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                   </button>
@@ -45,11 +45,12 @@ Uang Masuk - UANGKU
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                  <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
                   <th scope="col" class="column-width" style="text-align: center;">KENDARAAN</th>
                   <th scope="col" class="column-width" style="text-align: center;">NAMA PENYEWA</th>
                   <th scope="col" class="column-width" style="text-align: center;">NO TELP</th>
                   <!--<th scope="col" class="column-width" style="text-align: center;">ALAMAT</th>-->
-                  <th scope="col" class="column-width" style="text-align: center;">IDENTITAS</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">IDENTITAS KTP</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMINJAMAN</th>
                   <th scope="col" class="column-width" style="text-align: center;">STATUS</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
@@ -62,11 +63,12 @@ Uang Masuk - UANGKU
                 @foreach ($penyewaan as $hasil)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
+                  <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                   <td class="column-width" style="text-align: center;">{{ $hasil->nama_barang }}</td>
                   <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->nama }}</td>
                   <td class="column-width" style="text-align: center;">{{ $hasil->telp }}</td>
                   <!--<td class="column-width" style="text-align: center;">{{ $hasil->alamat }}</td>-->
-                  <td class="column-width" style="text-align: center;">{{ $hasil->identitas }}</td>
+                  <!--<td class="column-width" style="text-align: center;">{{ $hasil->identitas }}</td>-->
                   <td class="column-width" style="text-align: center;">{{ date('d-m-Y', strtotime($hasil->tanggal)) }}</td>
                   <td style="text-align: center;">
                     @if ($hasil->status == 'dipakai')

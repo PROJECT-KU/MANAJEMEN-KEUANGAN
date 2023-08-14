@@ -26,7 +26,7 @@ Tambah Kategori Uang Masuk - UANGKU
               <div class="col-md-6">
                 <div class="form-group">
                   <label>NAMA KENDARAAN</label>
-                  <input type="text" name="nama_barang" value="{{ old('nama_barang') }}" placeholder="Masukkan Nama Kendaraan" class="form-control" style="text-transform:uppercase" required>
+                  <input type="text" name="nama_barang" value="{{ old('nama_barang') }}" placeholder="Masukkan Nama Kendaraan" class="form-control" style="text-transform:uppercase" maxlength="30" minlength="2" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
                   @error('nama_barang')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}

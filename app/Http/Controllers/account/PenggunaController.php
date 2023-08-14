@@ -26,7 +26,7 @@ class PenggunaController extends Controller
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
             ->where('company', $user->company)
-                ->where('level', 'staff')
+                ->whereIn('level', ['staff', 'karyawan'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -79,6 +79,9 @@ class PenggunaController extends Controller
             'level' => 'required',
             'jenis' => 'required',
             'telp' => 'required',
+            'nik' => 'required',
+            'norek' => 'required',
+            'bank' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -101,6 +104,9 @@ class PenggunaController extends Controller
         $user->notif = $request->input('notif');
         $user->tenggat = $request->input('tenggat');
         $user->title = $request->input('title');
+        $user->nik = $request->input('nik');
+        $user->norek = $request->input('norek');
+        $user->bank = $request->input('bank');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {
@@ -171,6 +177,9 @@ class PenggunaController extends Controller
         $user->notif = $request->input('notif');
         $user->tenggat = $request->input('tenggat');
         $user->title = $request->input('title');
+        $user->nik = $request->input('nik');
+        $user->norek = $request->input('norek');
+        $user->bank = $request->input('bank');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {

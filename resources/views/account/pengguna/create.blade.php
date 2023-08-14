@@ -82,11 +82,12 @@ Tambah Uang Masuk - UANGKU
                                 <div class="form-group">
                                     <label>Level</label>
                                     <select class="form-control" name="level" required>
-                                        <option value="">Silahkan Pilih</option>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="admin">Admin</option>
                                         <option value="user">User</option>
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
+                                        <option value="karyawan">Karyawan</option>
                                     </select>
 
                                     @error('level')
@@ -100,7 +101,7 @@ Tambah Uang Masuk - UANGKU
                                 <div class="form-group">
                                     <label>Jenis</label>
                                     <select class="form-control" name="jenis" required>
-                                        <option value="">Silahkan Pilih</option>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="bisnis">Bisnis</option>
                                         <option value="penyewaan">Penyewaan</option>
                                         <option value="kasir">Kasir</option>
@@ -141,28 +142,102 @@ Tambah Uang Masuk - UANGKU
                                     @enderror
                                 </div>
                             </div>
-                            <!--<div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Foto Profil</label>
-                                    <div class="input-group">
-                                        <div class="input-group-append">
-                                            <img id="imagePreview" src="#" alt="Preview Foto" style="max-width: 200px; max-height: 200px;">
-                                        </div>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="avatar" name="avatar" onchange="previewImage(event)">
-                                            <label class="custom-file-label" for="avatar">Pilih Gambar</label>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2">
+                        </div>
 
-                                    </div>
-                                    @error('avatar')
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>NIK</label>
+                                    <input type="text" name="nik" class="form-control" value="" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    @error('nik')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
                                     @enderror
                                 </div>
-                            </div>-->
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>NOMOR REKENING</label>
+                                    <input type="text" name="norek" class="form-control" value="" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    @error('norek')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>BANK</label>
+                                    <select class="form-control bank" name="bank" required>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="002">BRI</option>
+                                        <option value="008">BANK MANDIRI</option>
+                                        <option value="009">BNI</option>
+                                        <option value="200">BANK TABUNGAN NEGARA</option>
+                                        <option value="011">BANK DANAMON</option>
+                                        <option value="013">BANK PERMATA</option>
+                                        <option value="014">BCA</option>
+                                        <option value="016">MAYBANK</option>
+                                        <option value="019">PANINBANK</option>
+                                        <option value="022">CIMB NIAGA</option>
+                                        <option value="023">BANK UOB INDONESIA</option>
+                                        <option value="028">BANK OCBC NISP</option>
+                                        <option value="087">BANK HSBC INDONESIA</option>
+                                        <option value="147">BANK MUAMALAT</option>
+                                        <option value="153">BANK SINARMAS</option>
+                                        <option value="426">BANK MEGA</option>
+                                        <option value="441">BANK BUKOPIN</option>
+                                        <option value="451">BSI</option>
+                                        <option value="484">BANK KEB HANA INDONESIA</option>
+                                        <option value="494">BANK RAYA INDONESIA</option>
+                                        <option value="506">BANK MEGA SYARIAH</option>
+                                        <option value="046">BANK DBS INDONESIA</option>
+                                        <option value="947">BANK ALADIN SYARIAH</option>
+                                        <option value="950">BANK COMMONWEALTH</option>
+                                        <option value="213">BANK BTPN</option>
+                                        <option value="490">BANK NEO COMMERCE</option>
+                                        <option value="501">BANK DIGITAL BCA</option>
+                                        <option value="521">BANK BUKOPIN SYARIAH </option>
+                                        <option value="535">SEABANK INDONESIA</option>
+                                        <option value="542">BANK JAGO</option>
+                                        <option value="567">ALLO BANK</option>
+                                        <option value="110">BPD JAWA BARAT</option>
+                                        <option value="111">BPD DKI</option>
+                                        <option value="112">BPD DAERAH ISTIMEWA YOGYAKARTA</option>
+                                        <option value="113">BPD JAWA TENGAH</option>
+                                        <option value="114">BPD JAWA TIMUR</option>
+                                        <option value="115">BPD JAMBI</option>
+                                        <option value="116">BANK ACEH SYARIAH</option>
+                                        <option value="117">BPD SUMATERA UTARA</option>
+                                        <option value="118">BANK NAGARI</option>
+                                        <option value="119">BPD RIAU KEPRI SYARIAH</option>
+                                        <option value="120">BPD SUMATERA SELATAN DAN BANGKA BELITUNG</option>
+                                        <option value="121">BPD LAMPUNG</option>
+                                        <option value="122">BPD KALIMANTAN SELATAN</option>
+                                        <option value="123">BPD KALIMANTAN BARAT</option>
+                                        <option value="124">BPD KALIMANTAN TIMUR DAN KALIMANTAN UTARA</option>
+                                        <option value="125">BPD KALIMANTAN TENGAH</option>
+                                        <option value="126">BPD SULAWESI SELATAN DAN SULAWESI BARAT</option>
+                                        <option value="127">BPD SULAWESI UTARA DAN GORONTALO</option>
+                                        <option value="128">BANK NTB SYARIAH</option>
+                                        <option value="129">BPD BALI</option>
+                                        <option value="130">BPD NUSA TENGGARA TIMUR</option>
+                                        <option value="131">BPD MALUKU DAN MALUKU UTARA</option>
+                                        <option value="132">BPD PAPUA</option>
+                                        <option value="133">BPD BENGKULU</option>
+                                        <option value="134">BPD SULAWESI TENGAH</option>
+                                        <option value="135">BPD SULAWESI TENGGARA</option>
+                                        <option value="137">BPD BANTEN</option>
+                                    </select>
+                                    @error('bank')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -188,6 +263,7 @@ Tambah Uang Masuk - UANGKU
         </div>
     </section>
 </div>
+
 <script>
     function previewImage(event) {
         var reader = new FileReader();

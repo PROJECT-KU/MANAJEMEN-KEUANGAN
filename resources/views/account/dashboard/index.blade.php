@@ -31,6 +31,12 @@ Dashboard - UANGKU
                 Pada Tanggal {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
             </div>
             @endif
+            @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null)
+            <div class="alert alert-warning" role="alert" style="text-align: center;">
+                <b style="font-size: 20px;">DATA DIRI</b><br>
+                <p style="font-size: 15px;">Data diri anda masih ada yang kosong! Silahkan Lengkapi data diri anda terlebih dahulu!</p>
+            </div>
+            @endif
         </div>
         <div class="row">
             <!--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
