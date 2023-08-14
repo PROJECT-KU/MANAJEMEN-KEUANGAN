@@ -20,6 +20,8 @@ Auth::routes();
  */
 Route::prefix('account')->group(function () {
 
+    //reset password
+    Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
     //dashboard account
     Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
 
@@ -39,6 +41,10 @@ Route::prefix('account')->group(function () {
     //download excel
     //Route::get('/account/laporan-semua/download-excel', 'account\LaporanSemuaController@downloadExcel')->name('account.laporan-semua.download-excel');
     //Route::get('/account/laporan-semua/export-users-to-excel', 'account\LaporanSemuaController@exportUsersToExcel')->name('account.laporan-semua.export-users-to-excel');
+
+    //profil
+    Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
+    Route::put('/profil/update/{id}', 'account\ProfilController@update')->name('account.profil.update');
 
     // download pdf
     Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');

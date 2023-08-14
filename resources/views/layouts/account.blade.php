@@ -66,7 +66,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong></div>
-                            <a href="features-profile.html" class="dropdown-item has-icon">
+                            <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
