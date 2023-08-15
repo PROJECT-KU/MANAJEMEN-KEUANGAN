@@ -166,10 +166,10 @@ class GajiController extends Controller
       return Redirect::route(
         'account.gaji.detail',
         ['id' => $gajiId]
-      )->with('success', 'Data Berhasil Disimpan!');
+      )->with(['success' => 'Data Berhasil Disimpan!']);
     } else {
       // Redirect with an error message if data creation fails
-      return redirect()->route('account.gaji.index')->with('error', 'Data Gagal Disimpan!');
+      return redirect()->route('account.gaji.index')->with(['error' => 'Data Gagal Disimpan!']);
     }
   }
 
@@ -264,12 +264,11 @@ class GajiController extends Controller
         'account.gaji.detail',
         ['id' => $id]
       )->with(
-        'success',
-        'Data Berhasil Disimpan!'
+        ['success' => 'Data Berhasil Disimpan!']
       );
     } else {
       // Redirect with an error message if data creation fails
-      return redirect()->route('account.gaji.index')->with('error', 'Data Gagal Disimpan!');
+      return redirect()->route('account.gaji.index')->with(['error' => 'Data Gagal Disimpan!']);
     }
   }
 

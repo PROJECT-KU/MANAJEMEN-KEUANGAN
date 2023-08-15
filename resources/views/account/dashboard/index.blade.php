@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Dashboard - UANGKU
+Dashboard - MANAGEMENT
 @stop
 
 @section('content')
@@ -13,30 +13,49 @@ Dashboard - UANGKU
 <div class="main-content">
     <section class="section">
         <div class=" col-lg-12 col-md-4 col-sm-4 col-xs-4">
+
+            <!-- akun belum di verifikasi -->
             @if (!Auth::user()->email_verified_at)
             <div class="alert alert-danger" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
             </div>
             @endif
+            <!-- end -->
+
+            <!-- akun dinonaktifkan -->
             @if (Auth::user()->status === 'off')
             <div class="alert alert-danger" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">Akun Anda Di Nonaktifkan Sementara!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
             </div>
             @endif
-            @if (Auth::user()->notif === null || Auth::user()->tenggat === null)
-            @else
+            <!-- end -->
+
+            <!-- masa sewa akun akan habis -->
+            @if (Auth::user()->tenggat === null)
+            @elseif (now() > Auth::user()->tenggat)
+            <div class="alert alert-danger" role="alert" style="text-align: center;">
+                <b style="font-size: 20px;">MASA SEWA TELAH HABIS</b><br>
+                <p style="font-size: 15px;">Masa sewa anda telah berakhir.</p>
+                TELAH HABIS SEJAK TANGGAL {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
+            </div>
+            @elseif (now()->addDays(3) >= Auth::user()->tenggat)
             <div class="alert alert-warning" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">{{ Auth::user()->title }}</b><br>
-                <p style="font-size: 15px;">{{ Auth::user()->notif }}</p>
-                Pada Tanggal {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
+                <b style="font-size: 20px;">MASA SEWA SEGERA HABIS</b><br>
+                <p style="font-size: 15px;">Masa sewa anda akan segera habis.</p>
+                HABIS PADA TANGGAL {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
             </div>
             @endif
+            <!-- end -->
+
+
+            <!-- jika data diri masih ada yang kosong -->
             @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null)
             <div class="alert alert-warning" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">DATA DIRI</b><br>
                 <p style="font-size: 15px;">Data diri anda masih ada yang kosong! Silahkan Lengkapi data diri anda terlebih dahulu!</p>
             </div>
             @endif
+            <!-- end -->
         </div>
         <div class="row">
             <!--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
@@ -69,6 +88,7 @@ Dashboard - UANGKU
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                 <div class="card card-statistic-2">
                     <div class="card-icon shadow-primary bg-primary">
@@ -102,6 +122,7 @@ Dashboard - UANGKU
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="card card-statistic-2" style="background-color:#AFEEEE;">
                     <div class="card-icon shadow-primary bg-primary">
@@ -117,6 +138,7 @@ Dashboard - UANGKU
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="card card-statistic-2" style="background-color:#AFEEEE;">
                     <div class="card-icon shadow-primary bg-primary">
@@ -150,6 +172,7 @@ Dashboard - UANGKU
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="card card-statistic-2" style="background-color:#FFB6C1;">
                     <div class="card-icon shadow-primary bg-primary">
@@ -165,6 +188,7 @@ Dashboard - UANGKU
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="card card-statistic-2" style="background-color:#FFB6C1;">
                     <div class="card-icon shadow-primary bg-primary">
@@ -189,9 +213,7 @@ Dashboard - UANGKU
                         <h4><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
                         <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
                     </div>
-
                     <div class="card-body">
-
                         <div id="chartContainerPemasukan" style="display: none;">
                             @foreach ($debit as $hasil)
                             @php
@@ -225,9 +247,7 @@ Dashboard - UANGKU
                         <h4><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
                         <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
                     </div>
-
                     <div class="card-body">
-
                         <div id="chartContainer" style="display: none;">
                             @foreach ($credit as $hasil)
                             @php
@@ -257,7 +277,7 @@ Dashboard - UANGKU
     </section>
 </div>
 
-<!-- open adn close chart pemasukan-->
+<!-- open and close chart pemasukan-->
 <script>
     function toggleChartPemasukan() {
         var chartContainerPemasukan = document.getElementById('chartContainerPemasukan');
@@ -276,7 +296,6 @@ Dashboard - UANGKU
     }
 </script>
 <!-- end -->
-
 
 <!-- open and close chart pengeluaran -->
 <script>
@@ -353,16 +372,4 @@ Dashboard - UANGKU
         }
     });
 </script>
-<!--@if (Auth::user()->status === 'off')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    // Use SweetAlert to display the error message
-    Swal.fire({
-        icon: 'error',
-        title: 'Akun Dinonaktifkan',
-        text: 'Akun Anda Telah Dinonaktifkan Sementara!',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif-->
 @stop

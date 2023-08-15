@@ -11,11 +11,7 @@ Profile - Management
       <h1>PROFILE</h1>
     </div>
 
-    @if (session('success'))
-    <div id="successAlert" class="alert alert-success" role="alert" style="text-align: center;">
-      <b style="font-size: 20px;">DATA DIRI BERHASIL DI PERBARUI</b><br>
-    </div>
-    @endif
+
 
     <div class="section-body">
 
@@ -230,6 +226,21 @@ Profile - Management
     </div>
   </section>
 </div>
+
+<!-- pop up data berhasil di perbarui -->
+@if (session('success'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Berhasil',
+    text: 'Data Diri Berhasil Di Perbarui',
+    confirmButtonText: 'OK'
+  });
+</script>
+@endif
+<!-- end -->
+
 <!-- waktu untuk menampilkan alerts -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {

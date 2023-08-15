@@ -185,7 +185,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
             <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
                 <div class="footer-left">
-                    © <strong>UANGKU</strong> 2019. Hak Cipta Dilindungi.
+                    © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
                 </div>
                 <div class="footer-right">
 
@@ -235,6 +235,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
     <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+
+    @extends('layouts.alerts')
     </body>
 
 </html>

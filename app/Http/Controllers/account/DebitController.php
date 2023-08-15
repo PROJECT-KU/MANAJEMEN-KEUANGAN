@@ -163,7 +163,7 @@ class DebitController extends Controller
             // Redirect dengan pesan sukses
             if ($save) {
                 //redirect dengan pesan sukses
-                return redirect()->route('account.debit.index')->with(['success' => 'Data Berhasil Disimpan!']);
+                return redirect()->route('account.debit.index')->with(['success', 'message' => 'Data Berhasil Disimpan!']);
             } else {
                 //redirect dengan pesan error
                 return redirect()->route('account.debit.index')->with(['error' => 'Data Gagal Disimpan!']);

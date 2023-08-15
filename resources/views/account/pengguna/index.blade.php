@@ -153,32 +153,29 @@ Uang Masuk dan Keluar - UANGKU
 </script>
 
 <script>
-  /**
-   * Sweet alert
-   */
-  @if($message = Session::get('success'))
-  swal({
-    type: "success",
-    icon: "success",
-    title: "BERHASIL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @elseif($message = Session::get('error'))
-  swal({
-    type: "error",
-    icon: "error",
-    title: "GAGAL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @endif
+  //@if($message = Session::get('success'))
+  //swal({
+  //  type: "success",
+  //  icon: "success",
+  //  title: "BERHASIL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@elseif($message = Session::get('error'))
+  //swal({
+  //  type: "error",
+  //  icon: "error",
+  //  title: "GAGAL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@endif
 
   // delete
   function Delete(id) {

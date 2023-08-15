@@ -29,9 +29,12 @@ Uang Masuk - UANGKU
 
           <div class="form-group">
             <div class="input-group mb-3">
+              @if (Auth::user()->level == 'karyawan')
+              @else
               <div class="input-group-prepend">
                 <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
               </div>
+              @endif
               <input type="text" class="form-control" name="q" placeholder="pencarian">
               <div class="input-group-append">
                 <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
@@ -47,10 +50,11 @@ Uang Masuk - UANGKU
                   <th scope="col" style="text-align: center;width: 6%">NO.</th>
                   <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
                   <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                  <th scope="col" class="column-width" style="text-align: center;">NIK</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
                   <th scope="col" class="column-width" style="text-align: center;">BANK</th>
                   <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
+                  <th scope="col" class="column-width" style="text-align: center;">TERBAYAR</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                 </tr>
               </thead>
@@ -63,7 +67,7 @@ Uang Masuk - UANGKU
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                  <td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>
+                  <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                   <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
                   <td class="column-width" style="text-align: center;">
                     @php
@@ -136,6 +140,14 @@ Uang Masuk - UANGKU
                     @endif
                   </td>
                   <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
+                  <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
+                  @if (Auth::user()->level == 'karyawan')
+                  <td class="text-center">
+                    <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                  @else
                   <td class="text-center">
                     <a href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                       <i class="fa fa-pencil-alt"></i>
@@ -147,6 +159,7 @@ Uang Masuk - UANGKU
                       <i class="fa fa-eye"></i>
                     </a>
                   </td>
+                  @endif
                 </tr>
                 @php
                 $no++;
