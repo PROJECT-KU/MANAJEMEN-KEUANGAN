@@ -26,22 +26,27 @@ Uang Masuk - UANGKU
         </div>
 
         <div class="card-body">
-
-          <div class="form-group">
-            <div class="input-group mb-3">
-              @if (Auth::user()->level == 'karyawan')
-              @else
-              <div class="input-group-prepend">
-                <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-              </div>
-              @endif
-              <input type="text" class="form-control" name="q" placeholder="pencarian">
-              <div class="input-group-append">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                </button>
+          <form action="{{ route('account.gaji.search') }}" method="GET">
+            <div class="form-group">
+              <div class="input-group mb-3">
+                @if (Auth::user()->level == 'karyawan')
+                @else
+                <div class="input-group-prepend">
+                  <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                </div>
+                @endif
+                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                  </button>
+                </div>
+                @if(request()->has('q'))
+                <a href="{{ route('account.gaji.search') }}" class="btn btn-danger">
+                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                </a>
+                @endif
               </div>
             </div>
-          </div>
           </form>
           <div class="table-responsive">
             <table class="table table-bordered">
@@ -178,32 +183,29 @@ Uang Masuk - UANGKU
 </div>
 
 <script>
-  /**
-   * Sweet alert
-   */
-  @if($message = Session::get('success'))
-  swal({
-    type: "success",
-    icon: "success",
-    title: "BERHASIL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @elseif($message = Session::get('error'))
-  swal({
-    type: "error",
-    icon: "error",
-    title: "GAGAL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @endif
+  //@if($message = Session::get('success'))
+  //swal({
+  //  type: "success",
+  //  icon: "success",
+  //  title: "BERHASIL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@elseif($message = Session::get('error'))
+  //swal({
+  //  type: "error",
+  //  icon: "error",
+  //  title: "GAGAL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@endif
 
   // delete
   // delete

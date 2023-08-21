@@ -19,20 +19,32 @@ Uang Masuk dan Keluar - UANGKU
         </div>
 
         <div class="card-body">
-          <form action="" method="GET">
+          <form action="{{ route('account.pengguna.search') }}" method="GET">
             <div class="form-group">
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                    <i class="fa fa-plus-circle"></i> TAMBAH
+                  </a>
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="pencarian">
+                <input type="text" class="form-control" name="q" placeholder="pencarian" value="{{ app('request')->input('q') }}">
+                <!-- Menggunakan app('request')->input('q') untuk mempertahankan nilai pencarian -->
                 <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-search"></i> CARI
                   </button>
                 </div>
+                @if(request()->has('q'))
+                <a href="{{ route('account.pengguna.search') }}" class="btn btn-danger">
+                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                </a>
+                @endif
+                <!-- Menampilkan tombol "HAPUS PENCARIAN" hanya jika ada query parameter 'q' -->
               </div>
             </div>
           </form>
+
+
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>

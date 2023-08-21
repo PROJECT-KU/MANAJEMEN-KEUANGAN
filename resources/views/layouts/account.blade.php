@@ -69,6 +69,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
+                            <a href="{{ route('account.profil.password', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                                <i class="fas fa-unlock-alt"></i> RESET PASSWORD
+                            </a>
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                     document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
@@ -106,7 +109,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
 
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->jenis === 'penyewaan' )
-                                <li class="{{ setActive('account/pengguna') }}">
+                                <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>PENGGUNA</span>
                                     </a>
@@ -181,6 +184,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <!-- Main Content -->
             @yield('content')
 
+            <?php
+            $version = "1.8";
+            ?>
+
+
 
 
             <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
@@ -188,7 +196,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
                 </div>
                 <div class="footer-right">
-
+                    Version {{$version }}
                 </div>
             </footer>
         </div>

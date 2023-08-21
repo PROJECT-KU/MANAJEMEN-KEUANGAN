@@ -4,6 +4,19 @@
 Tambah Uang Masuk - UANGKU
 @stop
 
+<style>
+    .password-input {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+</style>
 @section('content')
 <div class="main-content">
     <section class="section">
@@ -133,8 +146,10 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Password</label>
-                                    <input type="password" class="form-control" name="password" rows="6" placeholder="Masukkan Password" required>
-
+                                    <div class="password-input">
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="Masukkan Password" required>
+                                        <i class="fas fa-eye password-toggle" id="password-toggle"></i>
+                                    </div>
                                     @error('password')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -263,6 +278,38 @@ Tambah Uang Masuk - UANGKU
         </div>
     </section>
 </div>
+
+<!-- show and hide password -->
+<script>
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('password-toggle');
+
+    passwordToggle.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordToggle.classList.remove('fa-eye');
+            passwordToggle.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('fa-eye-slash');
+            passwordToggle.classList.add('fa-eye');
+        }
+    });
+    const passwordInput2 = document.getElementById('password2');
+    const passwordToggle2 = document.getElementById('password-toggle2');
+
+    passwordToggle2.addEventListener('click', function() {
+        if (passwordInput2.type === 'password') {
+            passwordInput2.type = 'text';
+            passwordToggle2.classList.remove('fa-eye');
+            passwordToggle2.classList.add('fa-eye-slash');
+        } else {
+            passwordInput2.type = 'password';
+            passwordToggle2.classList.remove('fa-eye-slash');
+            passwordToggle2.classList.add('fa-eye');
+        }
+    });
+</script>
 
 <script>
     function previewImage(event) {

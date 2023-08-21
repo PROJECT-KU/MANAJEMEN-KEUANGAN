@@ -31,11 +31,9 @@ Route::prefix('account')->group(function () {
     Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
     Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
     Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
-    Route::put(
-        '/pengguna/{id}',
-        'account\PenggunaController@update'
-    )->name('account.pengguna.update');
+    Route::put('/pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
     Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
+    Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
     // routes/web.php
 
     //download excel
@@ -45,6 +43,8 @@ Route::prefix('account')->group(function () {
     //profil
     Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
     Route::put('/profil/update/{id}', 'account\ProfilController@update')->name('account.profil.update');
+    Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
+    Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
 
     // download pdf
     Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
@@ -107,4 +107,5 @@ Route::prefix('account')->group(function () {
     Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
+    Route::get('/gaji/search', 'account\GajiController@search')->name('account.gaji.search');
 });
