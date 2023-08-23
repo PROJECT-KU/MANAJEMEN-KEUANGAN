@@ -17,17 +17,17 @@
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">ID TRANSAKSI</th>
-                  <th scope="col" colspan="3" style="text-align: center;">JENIS TRANSAKSI</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width: 20px;">NAMA KARYAWAN</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">KATEGORI</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">KETERANGAN</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">TANGGAL</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">ID TRANSAKSI</th>
+                  <th scope="col" colspan="3" style="text-align: center; width:150px">JENIS TRANSAKSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">NAMA KARYAWAN</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">KATEGORI</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">KETERANGAN</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">TANGGAL</th>
                 </tr>
                 <tr>
-                  <th scope="col" style="text-align: center;">MASUK</th>
-                  <th scope="col" style="text-align: center;">KELUAR</th>
-                  <th scope="col" style="text-align: center;">GAJI</th>
+                  <th scope="col" style="text-align: center; width:80px">MASUK</th>
+                  <th scope="col" style="text-align: center; width:80px">KELUAR</th>
+                  <th scope="col" style="text-align: center; width:80px">GAJI</th>
                 </tr>
               </thead>
               <tbody>

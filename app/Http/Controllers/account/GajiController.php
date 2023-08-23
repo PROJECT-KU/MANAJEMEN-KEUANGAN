@@ -42,24 +42,22 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     } else if ($user->level == 'karyawan') {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
-        ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     } else {
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
-        ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     }
@@ -383,6 +381,8 @@ class GajiController extends Controller
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
+      'status' => $request->input('status'),
+      'note' => $request->input('note'),
     ]);
 
     // Redirect with success or error message
@@ -684,6 +684,8 @@ class GajiController extends Controller
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
+      'status' => $request->input('status'),
+      'note' => $request->input('note'),
     ]);
 
     // Redirect with success or error message
@@ -730,5 +732,60 @@ class GajiController extends Controller
     } catch (\Exception $e) {
       return response()->json(['status' => 'error', 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()], 500);
     }
+  }
+
+  public function downloadPdf()
+  {
+    $user = Auth::user();
+    $currentMonth = date('Y-m-01 00:00:00');
+    $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+
+    if ($user->level == 'manager' || $user->level == 'staff') {
+      $gaji = DB::table('gaji')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
+    } else if ($user->level == 'karyawan') {
+      $gaji = DB::table('gaji')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+      ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
+    } else {
+      $gaji = Gaji::select('gaji.*', 'users.name as full_name')
+      ->join('users', 'gaji.user_id', '=', 'users.id')
+      ->where('gaji.user_id', $user->id)
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
+    }
+
+    // Calculate total gaji
+    $totalGaji = $gaji->sum('total');
+
+    $users = User::all(); // Get all users
+
+    // Get the HTML content of the view
+    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji'))->render();
+
+    // Instantiate Dompdf with the default configuration
+    $dompdf = new Dompdf();
+
+    // Load the HTML content into Dompdf
+    $dompdf->loadHtml($html);
+
+    // (Optional) Set paper size and orientation
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Render the PDF
+    $dompdf->render();
+
+    // Set the PDF filename
+    $fileName = 'laporan_gaji_karyawan_' . date('d-m-Y') . '.pdf';
+
+    // Output the generated PDF to the browser
+    return $dompdf->stream($fileName);
   }
 }

@@ -16,13 +16,12 @@ Uang Masuk - UANGKU
       <div class="card">
         <div class="card-header  text-right">
           <h4><i class="fas fa-money-check-alt"></i> LIST GAJI KARYAWAN</h4>
+          @if (Auth::user()->level == 'karyawan')
+          @else
           <div class="card-header-action">
-
-            <br>
-            <i class="fas fa-info-circle info-icon"></i>
-            <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
-            <!-- Add this line -->
+            <a href="{{ route('account.laporan_gaji.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
           </div>
+          @endif
         </div>
 
         <div class="card-body">
@@ -48,6 +47,7 @@ Uang Masuk - UANGKU
               </div>
             </div>
           </form>
+
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
@@ -57,24 +57,29 @@ Uang Masuk - UANGKU
                   <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
                   <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
-                  <th scope="col" class="column-width" style="text-align: center;">BANK</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">BANK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
-                  <th scope="col" class="column-width" style="text-align: center;">TERBAYAR</th>
+                  <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMBAYARAN</th>
+                  <th scope="col" class="column-width" style="text-align: center;">STATUS PEMBAYARAN</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 @php
                 $no = 1;
+                $terbayarCount = 0; // Count of terbayar records
                 @endphp
                 @foreach ($gaji as $hasil)
+                @if (Auth::user()->level == 'karyawan' && $hasil->status == 'pending')
+                <!-- Skip displaying records where user is karyawan and status is pending -->
+                @else
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
                   <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                   <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
-                  <td class="column-width" style="text-align: center;">
+                  <!--<td class="column-width" style="text-align: center;">
                     @php
                     $bankNames = [
                     '002' => 'BRI',
@@ -143,9 +148,16 @@ Uang Masuk - UANGKU
                     @else
                     Bank Name Not Found
                     @endif
-                  </td>
+                  </td>-->
                   <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                   <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
+                  <td class="column-width" style="text-align: center;">
+                    @if($hasil->status == 'pending')
+                    <button type="button" class="btn btn-warning">PENDING</button>
+                    @else
+                    <button type="button" class="btn btn-success">TERBAYAR</button>
+                    @endif
+                  </td>
                   @if (Auth::user()->level == 'karyawan')
                   <td class="text-center">
                     <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
@@ -168,14 +180,18 @@ Uang Masuk - UANGKU
                 </tr>
                 @php
                 $no++;
+                $terbayarCount++;
                 @endphp
+                @endif
                 @endforeach
               </tbody>
             </table>
             <div style="text-align: center">
               {{$gaji->links("vendor.pagination.bootstrap-4")}}
             </div>
+
           </div>
+
         </div>
       </div>
     </div>

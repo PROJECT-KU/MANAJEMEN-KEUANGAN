@@ -90,6 +90,42 @@ Tambah Uang Masuk - UANGKU
                             </div>
                         </div>
 
+                        @if (Auth::user()->level == 'manager')
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Level</label>
+                                    <select class="form-control" name="level" required>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="staff">Staff</option>
+                                        <option value="karyawan">Karyawan</option>
+                                    </select>
+
+                                    @error('level')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Jenis</label>
+                                    <select class="form-control" name="jenis" required>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="bisnis">Bisnis</option>
+                                    </select>
+
+                                    @error('jenis')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        @else
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -129,6 +165,8 @@ Tambah Uang Masuk - UANGKU
                                 </div>
                             </div>
                         </div>
+                        @endif
+
 
                         <div class="row">
                             <div class="col-md-6">

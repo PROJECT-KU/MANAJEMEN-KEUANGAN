@@ -1444,6 +1444,39 @@ Tambah Kategori Uang Masuk - UANGKU
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS PEMBAYARAN</label>
+                  <select class="form-control" name="status" required>
+                    <option value="" disabled selected>Silahkan Pilih</option>
+                    <option value="pending">PENDING</option>
+                    <option value="terbauar">TERBAYAR</option>
+                  </select>
+                  @error('status')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>CATATAN</label>
+                  <div class="input-group">
+                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
+                  </div>
+                  @error('note')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
+
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
             <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
 
@@ -1454,6 +1487,13 @@ Tambah Kategori Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+
+<!-- Include CKEditor JS -->
+<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+  CKEDITOR.replace('note');
+</script>
+<!-- end ckeditor -->
 
 <!-- add dan remove field lembur -->
 <script>

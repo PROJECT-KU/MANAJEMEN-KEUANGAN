@@ -90,5 +90,7 @@ class Gaji extends Model
     'total_bonus',
     'potongan',
     'total',
+    'status',
+    'note',
   ];
 }

@@ -22,7 +22,7 @@ Profile - Management
 
         <div class="card-body">
 
-          <form action="{{ route('account.profil.update', $user->id) }}" method="POST">
+          <form action="{{ route('account.profil.update', $user->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="row">
@@ -215,6 +215,30 @@ Profile - Management
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>GAMBAR</label>
+                  <div class="input-group">
+                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+                  </div>
+                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
+                  @error('gambar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <div class="thumbnail-circle" style="width: 12rem;">
+                    <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('storage/assets/img/presensi/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                  </div>
+
+                </div>
+              </div>
+            </div>
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
             <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
@@ -227,22 +251,27 @@ Profile - Management
   </section>
 </div>
 
-<!-- pop up data berhasil di perbarui -->
-@if (session('success'))
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- upload image -->
 <script>
-  Swal.fire({
-    icon: 'success',
-    title: 'Berhasil',
-    text: 'Data Diri Berhasil Di Perbarui',
-    confirmButtonText: 'OK'
+  const imageInput = document.getElementById('gambar');
+  const imagePreview = document.getElementById('image-preview');
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block'; // Show the preview
+      };
+      reader.readAsDataURL(file);
+    }
   });
 </script>
-@endif
-<!-- end -->
+<!-- end upload image -->
 
 <!-- waktu untuk menampilkan alerts -->
-<script>
+<!--<script>
   document.addEventListener('DOMContentLoaded', function() {
     var successAlert = document.getElementById('successAlert');
     if (successAlert) {
@@ -251,19 +280,9 @@ Profile - Management
       }, 3000);
     }
   });
-</script>
+</script>-->
 <!-- end -->
 
-<script>
-  function previewImage(event) {
-    var reader = new FileReader();
-    reader.onload = function() {
-      var output = document.getElementById('imagePreview');
-      output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
-</script>
 <script>
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({

@@ -61,7 +61,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 <ul class="navbar-nav navbar-right">
 
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle mr-1">
+                            <img alt="image" src="{{ asset('storage/assets/img/presensi/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
@@ -131,10 +131,12 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @else
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan')
-                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
+                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/gaji') }}"><a class="nav-link" href="{{ route('account.gaji.index') }}"><i class="fas fa-dollar-sign"></i>GAJI</a></li>
+                                        <li class="{{ setActive('account/presensi') }}"><a class="nav-link" href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock"></i>PRESENSI</a></li>
+
                                     </ul>
                                 </li>
                                 @endif

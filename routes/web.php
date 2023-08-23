@@ -108,4 +108,10 @@ Route::prefix('account')->group(function () {
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
     Route::get('/gaji/search', 'account\GajiController@search')->name('account.gaji.search');
+    Route::get('account/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
+
+    //presensi
+    Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
+    Route::get('/presensi/create', 'account\PresensiController@create')->name('account.presensi.create');
+    Route::post('/account/presensi/store', 'account\PresensiController@store')->name('account.presensi.store');
 });
