@@ -72,7 +72,7 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
-      ->select(/* ... your columns ... */)
+        ->select(/* ... your columns ... */)
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->where(function ($query) use ($search) {
@@ -122,11 +122,15 @@ class GajiController extends Controller
 
     $this->validate(
       $request,
-      //[
-      //  'gaji_pokok' => 'required',
-      //],
+      [
+        'gaji_pokok' => 'required',
+        'tanggal' => 'required',
+        'status' => 'required',
+      ],
       [
         'gaji_pokok.required' => 'Masukkan Gaji Pokok Karyawan!',
+        'tanggal.required' => 'Pilih Tanggal Pembayaran Gaji Karyawan!',
+        'status.required' => 'Pilih Status Pembayaran Gaji Karyawan!',
       ]
     );
 
@@ -303,6 +307,15 @@ class GajiController extends Controller
     $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan - $potongan;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
+    //save image to path
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName;
+      $image->storeAs('public/assets/img/presensi', $imageName); // Store the image
+    }
+    //end
+
 
     $save = Gaji::create([
       'id_transaksi' => $id_transaksi,
@@ -375,14 +388,8 @@ class GajiController extends Controller
       'jumlah_bonus_luar7' => $jumlah_bonus_luar7,
       'jumlah_bonus_luar8' => $jumlah_bonus_luar8,
       'jumlah_bonus_luar9' => $jumlah_bonus_luar9,
-      'jumlah_bonus_luar10' => $jumlah_bonus_luar10,
-      'tanggal' => $request->input('tanggal'),
-      'potongan' => $potongan,
-      'total_lembur' => $total_lembur,
-      'total_bonus' => $total_bonus,
-      'total' => $total,
-      'status' => $request->input('status'),
-      'note' => $request->input('note'),
+      'jumlah_bonus_luar10' => $jumlah_bonus_luar10,'tanggal' => $request->input('tanggal'), 'potongan' => $potongan, 'total_lembur' => $total_lembur, 'total_bonus' => $total_bonus, 'total' => $total, 'status' => $request->input('status'), 'note' => $request->input('note'), 'gambar' => $imagePath ?? null,
+
     ]);
 
     // Redirect with success or error message
@@ -436,7 +443,7 @@ class GajiController extends Controller
     $gaji_pokok = $request->input('gaji_pokok');
     $gaji_pokok = empty($gaji_pokok) ? 0 : str_replace(",", "", $gaji_pokok); // Convert to numeric value or set to 0 if empty
 
-     //lembur
+    //lembur
     $lembur = $request->input('lembur');
     $lembur = empty($lembur) ? 0 : str_replace(",", "", $lembur);
 
@@ -607,6 +614,18 @@ class GajiController extends Controller
 
     $existingUserId = $gaji->user_id;
 
+    //save image to path
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName;
+      $image->storeAs('public/assets/img/presensi', $imageName); // Store the image
+    } else {
+      // If no new image uploaded, keep using the old image path
+      $imagePath = $gaji->gambar;
+    }
+    //end
+
     $gaji->update([
       //'id_transaksi' => $id_transaksi,
       'user_id' => $existingUserId,
@@ -685,7 +704,7 @@ class GajiController extends Controller
       'total_bonus' => $total_bonus,
       'total' => $total,
       'status' => $request->input('status'),
-      'note' => $request->input('note'),
+      'note' => $request->input('note'),'gambar' => $imagePath, // Store the image path
     ]);
 
     // Redirect with success or error message
@@ -742,22 +761,22 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     } else if ($user->level == 'karyawan') {
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     } else {
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
-      ->join('users', 'gaji.user_id', '=', 'users.id')
-      ->where('gaji.user_id', $user->id)
+        ->join('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     }

@@ -197,8 +197,9 @@ Detail Uang Masuk - UANGKU
               </div>
             </div>
 
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            <a href="{{ route('account.pengguna.index') }}" class="btn btn-info mr-1">
+              <i class="fa fa-list"></i> LIST PENGGUNA
+            </a>
 
           </form>
 

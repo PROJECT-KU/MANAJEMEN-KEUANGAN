@@ -21,7 +21,7 @@
                   <th scope="col" colspan="3" style="text-align: center; width:150px">JENIS TRANSAKSI</th>
                   <th scope="col" rowspan="2" style="text-align: center; width:150px">NAMA KARYAWAN</th>
                   <th scope="col" rowspan="2" style="text-align: center; width:150px">KATEGORI</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">KETERANGAN</th>
+                  <!--<th scope="col" rowspan="2" style="text-align: center; width:150px">KETERANGAN</th>-->
                   <th scope="col" rowspan="2" style="text-align: center; width:150px">TANGGAL</th>
                 </tr>
                 <tr>
@@ -115,13 +115,13 @@
                     {{ $item->name }}
                     @endif
                   </td>
-                  <td style="text-align: center;">
+                  <!--<td style="text-align: center;">
                     @if ($transaction['type'] === 'gaji')
                     -
                     @else
                     {{ $item->description }}
                     @endif
-                  </td>
+                  </td>-->
                   <td style="text-align: center;">
                     @if ($transaction['type'] === 'debit')
                     {{ date('d-m-Y H:i', strtotime($item->debit_date)) }}
@@ -152,11 +152,4 @@
     </div>
   </section>
 </div>
-<footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
-  <div class="footer-left">
-    © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
-  </div>
-  <div class="footer-right">
-    Version 1.8
-  </div>
-</footer>
+@extends('layouts.version')

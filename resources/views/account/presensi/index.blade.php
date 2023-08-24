@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Presensi Karyawan - MANAGEMENT
+Presensi Karyawan | MANAGEMENT
 @stop
 
 @section('content')
@@ -25,24 +25,21 @@ Presensi Karyawan - MANAGEMENT
         </div>
 
         <div class="card-body">
-          <form action="" method="GET">
+          <form action="{{ route('account.presensi.search') }}" method="GET">
             <div class="form-group">
               <div class="input-group mb-3">
-                @if (Auth::user()->level == 'karyawan')
-                @else
                 <div class="input-group-prepend">
                   <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                 </div>
-                @endif
                 <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                   </button>
                 </div>
                 @if(request()->has('q'))
-                <!--<a href="{{ route('account.gaji.search') }}" class="btn btn-danger">
+                <a href="{{ route('account.presensi.search') }}" class="btn btn-danger">
                   <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                </a>-->
+                </a>
                 @endif
               </div>
             </div>
@@ -55,8 +52,8 @@ Presensi Karyawan - MANAGEMENT
                   <th scope="col" style="text-align: center;width: 6%">NO.</th>
                   <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
                   <th scope="col" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
-                  <th scope="col" class="column-width" style="text-align: center;">STATUS</th>
-                  <th scope="col" class="column-width" style="text-align: center;">GAMBAR</th>
+                  <th scope="col" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
+                  <th scope="col" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                 </tr>
               </thead>
@@ -69,25 +66,50 @@ Presensi Karyawan - MANAGEMENT
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
                   <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->created_at)) }}</td>
-                  <td class="column-width" style="text-align: center;">{{ $hasil->status }}</td>
                   <td class="column-width" style="text-align: center;">
-                    <div class="thumbnail-circle">
-                      <img style="width: 100px; height:100px;" src="{{ asset('storage/assets/img/presensi/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
-                    </div>
-                  </td>
-                  <td class="column-width" style="text-align: center;">
-                    @if($hasil->status == 'hadir')
+                    @if ($hasil->status == 'hadir')
                     <button type="button" class="btn btn-success">HADIR</button>
-                    @elseif($hasil->status == 'remote')
-                    <button type="button" class="btn btn-warning">REMOTE</button>
-                    @else
-                    <button type="button" class="btn btn-danger">IZIN</button>
+                    @elseif ($hasil->status == 'remote')
+                    <button type="button" class="btn btn-info">REMOTE</button>
+                    @elseif ($hasil->status == 'izin')
+                    <button type="button" class="btn btn-warning">IZIN</button>
+                    @elseif ($hasil->status == 'dinas luar kota')
+                    <button type="button" class="btn btn-info">DINAS LUAR KOTA</button>
+                    @elseif ($hasil->status == 'lembur')
+                    <button type="button" class="btn btn-primary">LEMBUR</button>
+                    @elseif ($hasil->status == 'cuti')
+                    <button type="button" class="btn btn-warning">CUII</button>
+                    @elseif ($hasil->status == 'terlambat')
+                    <button type="button" class="btn btn-danger">TERLAMBAT</button>
+                    @elseif ($hasil->status == 'pulang')
+                    <button type="button" class="btn btn-danger">PULANG</button>
                     @endif
                   </td>
+                  <td class="column-width" style="text-align: center;">
+                    <a href="{{ asset('storage/assets/img/presensi/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                      <div class="thumbnail-circle">
+                        <img style="width: 100px; height:100px;" src="{{ asset('storage/assets/img/presensi/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                      </div>
+                    </a>
+                  </td>
                   @if (Auth::user()->level == 'karyawan')
-
+                  <td class="text-center">
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
                   @else
-
+                  <td class="text-center">
+                    <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                      <i class="fa fa-pencil-alt"></i>
+                    </a>
+                    <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
                   @endif
                 </tr>
                 @php
@@ -163,7 +185,7 @@ Presensi Karyawan - MANAGEMENT
       if (isConfirm) {
         // ajax delete
         $.ajax({
-          url: "/account/gaji/" + id,
+          url: "/account/presensi/" + id,
           data: {
             "_token": token,
             "_method": "DELETE"

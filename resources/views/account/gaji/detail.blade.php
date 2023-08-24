@@ -29,7 +29,7 @@ Tambah Kategori Uang Masuk - UANGKU
 
         <div class="card-body">
 
-          <form action="{{ route('account.gaji.store') }}" method="POST">
+          <form action="{{ route('account.gaji.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
               <div class="col-md-6">
@@ -1027,7 +1027,7 @@ Tambah Kategori Uang Masuk - UANGKU
                   <select class="form-control" name="status" disabled>
                     <option value="" disabled selected>Silahkan Pilih</option>
                     <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
-                    <option value="terbauar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
+                    <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
                   </select>
                   @error('status')
                   <div class="invalid-feedback" style="display: block">
@@ -1048,6 +1048,36 @@ Tambah Kategori Uang Masuk - UANGKU
                     {{ $message }}
                   </div>
                   @enderror
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>BUKTI PEMBAYARAN</label>
+                  <div class="input-group">
+                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
+                  </div>
+                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
+                  @error('gambar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <a href="{{ asset('storage/assets/img/presensi/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
+                    <div class="card" style="width: 18rem;">
+                      @if ($gaji->gambar == null)
+                      <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
+                      @else
+                      <img id="image-preview" class="card-img-top" src="{{ asset('storage/assets/img/presensi/' . $gaji->gambar) }}" alt="Preview Image">
+                      @endif
+                    </div>
+                  </a>
                 </div>
               </div>
             </div>
@@ -1075,6 +1105,24 @@ Tambah Kategori Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+<!-- upload image -->
+<script>
+  const imageInput = document.getElementById('gambar');
+  const imagePreview = document.getElementById('image-preview');
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block'; // Show the preview
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+<!-- end upload image -->
 
 <!-- Include CKEditor JS -->
 <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>

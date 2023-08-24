@@ -29,7 +29,10 @@
     <script src="{{ asset('assets/modules/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap-timepicker/js/bootstrap-timepicker.min.js') }}"></script>
     <script src="{{ asset('assets/js/highcharts.js') }}"></script>
-
+    <!-- zoom image -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <!-- end -->
     <style>
         .fas,
         .far,
@@ -61,7 +64,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 <ul class="navbar-nav navbar-right">
 
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                            @if (Auth::user()->gambar == null)
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            @else
                             <img alt="image" src="{{ asset('storage/assets/img/presensi/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
@@ -186,21 +193,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <!-- Main Content -->
             @yield('content')
 
-            <?php
-            $version = "1.8";
-            ?>
-
-
-
-
-            <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
-                <div class="footer-left">
-                    © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
-                </div>
-                <div class="footer-right">
-                    Version {{$version }}
-                </div>
-            </footer>
+            @extends('layouts.version')
         </div>
     </div>
     <!-- ucapan selamat -->

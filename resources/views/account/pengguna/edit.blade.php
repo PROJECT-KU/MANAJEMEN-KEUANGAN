@@ -15,7 +15,7 @@ Edit Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> EDIT PENGGUNA</h4>
+                    <h4><i class="fas fa-money-check-alt"></i> UPDATE PENGGUNA</h4>
                 </div>
 
                 <div class="card-body">
@@ -356,7 +356,9 @@ Edit Uang Masuk - UANGKU
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                        <a href="{{ route('account.pengguna.index') }}" class="btn btn-info mr-1">
+                            <i class="fa fa-list"></i> LIST PENGGUNA
+                        </a>
 
                     </form>
 

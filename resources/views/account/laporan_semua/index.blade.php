@@ -47,7 +47,7 @@
                     <th scope="col" colspan="3" style="text-align: center;">JENIS TRANSAKSI</th>
                     <th scope="col" rowspan="2" style="text-align: center;">NAMA KARYAWAN</th>
                     <th scope="col" rowspan="2" style="text-align: center;">KATEGORI</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">KETERANGAN</th>
+                    <!--<th scope="col" rowspan="2" style="text-align: center;">KETERANGAN</th>-->
                     <th scope="col" rowspan="2" style="text-align: center;">TANGGAL</th>
                   </tr>
                   <tr>
@@ -141,13 +141,13 @@
                       {{ $item->name }}
                       @endif
                     </td>
-                    <td style="text-align: center;">
+                    <!--<td style="text-align: center;">
                       @if ($transaction['type'] === 'gaji')
                       -
                       @else
                       {{ $item->description }}
                       @endif
-                    </td>
+                    </td>-->
                     <td style="text-align: center;">
                       @if ($transaction['type'] === 'debit')
                       {{ date('d-m-Y H:i', strtotime($item->debit_date)) }}

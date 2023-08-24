@@ -36644,7 +36644,7 @@ var Popper = function () {
      * @static
      * @private
      * @type {Object}
-     * @deprecated since version 1.8
+     * @deprecated since version 1.9
      * @member Utils
      * @memberof Popper
      */

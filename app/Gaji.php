@@ -92,5 +92,6 @@ class Gaji extends Model
     'total',
     'status',
     'note',
+    'gambar',
   ];
 }
