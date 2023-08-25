@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Create Presensi Karyawan | MANAGEMENT
+Tambah Presensi Karyawan | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Create Presensi Karyawan | MANAGEMENT
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dice-d6"></i> PRESENSI KARYAWAN</h4>
+          <h4><i class="fas fa-user-clock"></i> TAMBAH PRESENSI KARYAWAN</h4>
         </div>
 
         <div class="card-body">

@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Edit Uang Masuk - UANGKU
+Update Pengguna | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Edit Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> UPDATE PENGGUNA</h4>
+                    <h4><i class="fas fa-user-edit"></i> UPDATE PENGGUNA</h4>
                 </div>
 
                 <div class="card-body">

@@ -94,7 +94,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="index.html"><i class="fas fa-gem" style="font-size: 18px"></i> <span style="font-size: 17px;"> Manajemen</span><span style="font-size: 10px;"></span></a>
+                        <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="200">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
                         <a href="index.html"><i class="fa fa-gem"></i></a>

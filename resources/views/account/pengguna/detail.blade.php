@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Uang Masuk - UANGKU
+Detail Pengguna | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Detail Uang Masuk - UANGKU
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-money-check-alt"></i> DETAIL PENGGUNA</h4>
+          <h4><i class="fas fa-users-cog"></i> DETAIL PENGGUNA</h4>
         </div>
 
         <div class="card-body">
@@ -181,6 +181,34 @@ Detail Uang Masuk - UANGKU
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>GAMBAR</label>
+                  <div class="input-group">
+                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
+                  </div>
+                  @error('gambar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <a href="{{ asset('storage/assets/img/presensi/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                    <div class="thumbnail-circle" style="width: 12rem;">
+                      @if ($user->gambar == null)
+                      <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                      @else
+                      <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('storage/assets/img/presensi/' .  $user->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                      @endif
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
 
             <div class="row">
               <div class="col-2">
@@ -208,17 +236,27 @@ Detail Uang Masuk - UANGKU
     </div>
   </section>
 </div>
+<!-- upload image -->
 <script>
-  function previewImage(event) {
-    var reader = new FileReader();
-    reader.onload = function() {
-      var output = document.getElementById('imagePreview');
-      output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
+  const imageInput = document.getElementById('gambar');
+  const imagePreview = document.getElementById('image-preview');
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block'; // Show the preview
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 </script>
+<!-- end upload image -->
+
 <script>
+  //date with datepicker
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({
       locale: {
@@ -229,17 +267,17 @@ Detail Uang Masuk - UANGKU
       timePicker24Hour: true,
     });
   }
+  //end
 
+  //update angka to rupiah
   var cleaveC = new Cleave('.currency', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
 
   var timeoutHandler = null;
+  //end
 
-  /**
-   * btn submit loader
-   */
   $(".btn-submit").click(function() {
     $(".btn-submit").addClass('btn-progress');
     if (timeoutHandler) clearTimeout(timeoutHandler);

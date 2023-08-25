@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Presensi Karyawan | MANAGEMENT
+List Presensi Karyawan | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>LIST PRESENSI KARYAWAN</h1>
+      <h1>PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header  text-right">
-          <h4><i class="fas fa-money-check-alt"></i> LIST PRESENSI KARYAWAN</h4>
+          <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
           @if (Auth::user()->level == 'karyawan')
           @else
           <!--<div class="card-header-action">

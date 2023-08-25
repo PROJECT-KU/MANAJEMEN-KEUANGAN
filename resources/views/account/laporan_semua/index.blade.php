@@ -1,7 +1,7 @@
   @extends('layouts.account')
 
   @section('title')
-  Uang Masuk dan Keluar - UANGKU
+  Laporan Transaksi Semua | MANAGEMENT
   @stop
 
   @section('content')
@@ -15,7 +15,7 @@
 
         <div class="card">
           <div class="card-header text-right">
-            <h4><i class="fas fa-money-check-alt"></i> LAPORAN TRANSAKSI SEMUA</h4>
+            <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
             <div class="card-header-action">
               <a href="{{ route('account.laporan_semua.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
               <br>

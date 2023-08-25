@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-Profile - Management
+Profil | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PROFILE</h1>
+      <h1>PROFIL</h1>
     </div>
 
 
@@ -17,7 +17,7 @@ Profile - Management
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-user"></i> PROFILE</h4>
+          <h4><i class="fas fa-user-edit"></i> PROFIL</h4>
         </div>
 
         <div class="card-body">

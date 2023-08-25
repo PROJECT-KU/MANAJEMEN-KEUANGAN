@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Reset Password - MANAGEMENT
+Reset Password | MANAGEMENT
 @stop
 
 <style>
@@ -30,7 +30,7 @@ Reset Password - MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>RESET PASSWORD</h1>
+      <h1>PASSWORD</h1>
     </div>
 
 

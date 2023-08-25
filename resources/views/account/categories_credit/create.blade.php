@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Kategori Uang keluar - UANGKU
+Tambah Kategori Uang keluar | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Tambah Kategori Uang keluar - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-dice-d6"></i> TAMBAH KATEGORI UANG KELUAR</h4>
+                    <h4><i class="fas fa-hand-holding-usd"></i> TAMBAH KATEGORI UANG KELUAR</h4>
                 </div>
 
                 <div class="card-body">

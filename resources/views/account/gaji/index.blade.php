@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Uang Masuk - UANGKU
+List Gaji Karyawan | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>LIST GAJI KARYAWAN</h1>
+      <h1>GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header  text-right">
-          <h4><i class="fas fa-money-check-alt"></i> LIST GAJI KARYAWAN</h4>
+          <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
           @if (Auth::user()->level == 'karyawan')
           @else
           <div class="card-header-action">

@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Kategori Uang Masuk - UANGKU
+Update Gaji Karyawan | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DETAIL GAJI KARYAWAN</h1>
+      <h1>GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dice-d6"></i> DETAIL GAJI KARYAWAN</h4>
+          <h4><i class="fas fa-dollar-sign"></i> UPDATE GAJI KARYAWAN</h4>
         </div>
 
         @if(session('status') === 'error')
@@ -2530,7 +2530,9 @@ Tambah Kategori Uang Masuk - UANGKU
             </div>
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            <a href="{{ route('account.gaji.index') }}" class="btn btn-info mr-1">
+              <i class="fa fa-list"></i> LIST GAJI KARYAWAN
+            </a>
 
           </form>
 

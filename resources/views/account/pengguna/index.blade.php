@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Uang Masuk dan Keluar - UANGKU
+List Pengguna | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA PENGGUNA</h1>
+      <h1>PENGGUNA</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-money-check-alt"></i> DATA PENGGUNA</h4>
+          <h4><i class="fas fa-list"></i> LIST PENGGUNA</h4>
         </div>
 
         <div class="card-body">

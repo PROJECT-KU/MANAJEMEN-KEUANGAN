@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Kategori Uang Masuk - UANGKU
+Tambah Gaji Karyawan | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>TAMBAH GAJI KARYAWAN</h1>
+      <h1>GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dice-d6"></i> TAMBAH GAJI KARYAWAN</h4>
+          <h4><i class="fas fa-hand-holding-usd"></i>TAMBAH GAJI KARYAWAN</h4>
         </div>
 
         @if(session('status') === 'error')

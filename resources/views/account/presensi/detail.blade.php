@@ -8,14 +8,14 @@ Detail Presensi Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DETAIL PRESENSI KARYAWAN</h1>
+      <h1>PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dice-d6"></i> DETAIL PRESENSI KARYAWAN</h4>
+          <h4><i class="fas fa-user-clock"></i> DETAIL PRESENSI KARYAWAN</h4>
         </div>
 
         <div class="card-body">
@@ -88,8 +88,8 @@ Detail Presensi Karyawan | MANAGEMENT
               </div>
             </div>
 
-            <a href="{{ route('account.presensi.index') }}" class="btn btn-primary mr-1">
-              <i class="fa fa-list"></i> LIST DATA PRESENSI KARYAWAN
+            <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
+              <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
             </a>
 
           </form>

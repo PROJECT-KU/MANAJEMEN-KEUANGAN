@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Uang Masuk - UANGKU
+Tambah Pengguna | MANAGEMENT
 @stop
 
 <style>
@@ -28,7 +28,7 @@ Tambah Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> TAMBAH PENGGUNA</h4>
+                    <h4><i class="fas fa-user-plus"></i> TAMBAH PENGGUNA</h4>
                 </div>
 
                 <div class="card-body">

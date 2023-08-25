@@ -8,14 +8,14 @@ Update Presensi Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>UPDATE PRESENSI KARYAWAN</h1>
+      <h1>PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dice-d6"></i> UPDATE PRESENSI KARYAWAN</h4>
+          <h4><i class="fas fa-user-clock"></i> UPDATE PRESENSI KARYAWAN</h4>
         </div>
 
         <div class="card-body">
@@ -88,7 +88,9 @@ Update Presensi Karyawan | MANAGEMENT
             </div>
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
+              <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
+            </a>
 
           </form>
 
