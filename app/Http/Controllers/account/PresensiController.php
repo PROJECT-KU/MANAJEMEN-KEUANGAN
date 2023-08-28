@@ -153,9 +153,9 @@ class PresensiController extends Controller
     if ($save) {
       $employee = User::find($request->input('user_id'));
 
-      if ($employee && $employee->email) {
-        Mail::to($employee->email)->send(new PresensiNotification($employee->full_name));
-      }
+      //if ($employee && $employee->email) {
+      //  Mail::to($employee->email)->send(new PresensiNotification($employee->full_name));
+      //}
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       // Redirect with an error message if data creation fails
