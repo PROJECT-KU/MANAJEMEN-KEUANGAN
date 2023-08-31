@@ -1,9 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Uang Masuk - UANGKU
+Tambah Pengguna | MANAGEMENT
 @stop
 
+<style>
+    .password-input {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+</style>
 @section('content')
 <div class="main-content">
     <section class="section">
@@ -15,7 +28,7 @@ Tambah Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> TAMBAH PENGGUNA</h4>
+                    <h4><i class="fas fa-user-plus"></i> TAMBAH PENGGUNA</h4>
                 </div>
 
                 <div class="card-body">
@@ -27,7 +40,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" name="full_name" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
+                                    <input type="text" id="full_name" name="full_name" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
 
                                     @error('full_name')
                                     <div class="invalid-feedback" style="display: block">
@@ -39,7 +52,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Email</label>
-                                    <input type="email" class="form-control" name="email" placeholder="Masukan Email" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="email" id="email" class="form-control" name="email" placeholder="Masukan Email" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Email')
                                     <div class="invalid-feedback" style="display: block">
@@ -54,7 +67,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama Perusahaan</label>
-                                    <input type="text" name="company" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
+                                    <input type="text" id="company" name="company" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
 
                                     @error('company')
                                     <div class="invalid-feedback" style="display: block">
@@ -66,7 +79,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="text" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    <input type="text" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -77,11 +90,47 @@ Tambah Uang Masuk - UANGKU
                             </div>
                         </div>
 
+                        @if (Auth::user()->level == 'manager')
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Level</label>
-                                    <select class="form-control" name="level" required>
+                                    <select class="form-control" id="level" name="level" required>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="staff">Staff</option>
+                                        <option value="karyawan">Karyawan</option>
+                                    </select>
+
+                                    @error('level')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Jenis</label>
+                                    <select class="form-control" id="jenis" name="jenis" required>
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="bisnis">Bisnis</option>
+                                    </select>
+
+                                    @error('jenis')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        @else
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Level</label>
+                                    <select class="form-control" id="level" name="level" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="admin">Admin</option>
                                         <option value="user">User</option>
@@ -100,7 +149,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Jenis</label>
-                                    <select class="form-control" name="jenis" required>
+                                    <select class="form-control" id="jenis" name="jenis" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="bisnis">Bisnis</option>
                                         <option value="penyewaan">Penyewaan</option>
@@ -116,12 +165,14 @@ Tambah Uang Masuk - UANGKU
                                 </div>
                             </div>
                         </div>
+                        @endif
+
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" name="username" class="form-control" value="" placeholder="Masukan Username" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
+                                    <input type="text" id="username" name="username" class="form-control" value="" placeholder="Masukan Username" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
 
                                     @error('username')
                                     <div class="invalid-feedback" style="display: block">
@@ -133,8 +184,10 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Password</label>
-                                    <input type="password" class="form-control" name="password" rows="6" placeholder="Masukkan Password" required>
-
+                                    <div class="password-input">
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="Masukkan Password" required>
+                                        <i class="fas fa-eye password-toggle" id="password-toggle"></i>
+                                    </div>
                                     @error('password')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -148,7 +201,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>NIK</label>
-                                    <input type="text" name="nik" class="form-control" value="" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    <input type="text" id="" name="nik" class="form-control" value="" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
                                     @error('nik')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -159,7 +212,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>NOMOR REKENING</label>
-                                    <input type="text" name="norek" class="form-control" value="" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    <input type="text" id="norek" name="norek" class="form-control" value="" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
                                     @error('norek')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -170,7 +223,7 @@ Tambah Uang Masuk - UANGKU
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>BANK</label>
-                                    <select class="form-control bank" name="bank" required>
+                                    <select class="form-control bank" id="bank" name="bank" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="002">BRI</option>
                                         <option value="008">BANK MANDIRI</option>
@@ -243,7 +296,7 @@ Tambah Uang Masuk - UANGKU
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <input type="checkbox" name="email_verified_at" style="margin-top: 5px;">
+                                    <input type="checkbox" id="email_verified_at" name="email_verified_at" style="margin-top: 5px;">
                                     <label>Verifikasi</label>
                                     @error('email_verified_at')
                                     <div class="invalid-feedback" style="display: block">
@@ -263,6 +316,38 @@ Tambah Uang Masuk - UANGKU
         </div>
     </section>
 </div>
+
+<!-- show and hide password -->
+<script>
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('password-toggle');
+
+    passwordToggle.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordToggle.classList.remove('fa-eye');
+            passwordToggle.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('fa-eye-slash');
+            passwordToggle.classList.add('fa-eye');
+        }
+    });
+    const passwordInput2 = document.getElementById('password2');
+    const passwordToggle2 = document.getElementById('password-toggle2');
+
+    passwordToggle2.addEventListener('click', function() {
+        if (passwordInput2.type === 'password') {
+            passwordInput2.type = 'text';
+            passwordToggle2.classList.remove('fa-eye');
+            passwordToggle2.classList.add('fa-eye-slash');
+        } else {
+            passwordInput2.type = 'password';
+            passwordToggle2.classList.remove('fa-eye-slash');
+            passwordToggle2.classList.add('fa-eye');
+        }
+    });
+</script>
 
 <script>
     function previewImage(event) {
@@ -316,7 +401,16 @@ Tambah Uang Masuk - UANGKU
 
         timeoutHandler = setTimeout(function() {
             $(".btn-reset").removeClass('btn-progress');
-
+            $("#full_name").val('');
+            $("#email").val('');
+            $("#company").val('');
+            $("#telp").val('');
+            $("#level").val('');
+            $("#jenis").val('');
+            $("#password").val('');
+            $("#nik").val('');
+            $("#norek").val('');
+            $("#bank").val('');
         }, 500);
     })
 </script>

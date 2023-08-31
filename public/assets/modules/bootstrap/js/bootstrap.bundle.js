@@ -146,9 +146,9 @@
         }
 
         try {
-          return document.querySelector(selector) ? selector : null;
+            return document.querySelector(selector) ? selector : null;
         } catch (err) {
-          return null;
+            return null;
         }
       },
       getTransitionDurationFromElement: function getTransitionDurationFromElement(element) {

@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Edit Kategori Uang keluar - UANGKU
+Update Kategori Uang keluar | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Edit Kategori Uang keluar - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-dice-d6"></i> EDIT KATEGORI UANG KELUAR</h4>
+                    <h4><i class="fas fa-hand-holding-usd"></i> UPDATE KATEGORI UANG KELUAR</h4>
                 </div>
 
                 <div class="card-body">
@@ -35,7 +35,9 @@ Edit Kategori Uang keluar - UANGKU
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                        <a href="{{ route('account.categories_credit.index') }}" class="btn btn-info mr-1">
+                            <i class="fa fa-list"></i> LIST KATEGORI UANG KELUAR
+                        </a>
 
                     </form>
 

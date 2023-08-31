@@ -209,7 +209,6 @@ class DashboardController extends Controller
         //end
 
         //statistik pengeluaran perkategori
-
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')

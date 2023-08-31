@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Edit Uang Masuk - UANGKU
+Update Uang Masuk | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Edit Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> EDIT UANG MASUK</h4>
+                    <h4><i class="fas fa-hand-holding-usd"></i> UPDATE UANG MASUK</h4>
                 </div>
 
                 <div class="card-body">
@@ -90,8 +90,9 @@ Edit Uang Masuk - UANGKU
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
-
+                        <a href="{{ route('account.debit.index') }}" class="btn btn-info mr-1">
+                            <i class="fa fa-list"></i> LIST UANG MASUK
+                        </a>
                     </form>
 
                 </div>

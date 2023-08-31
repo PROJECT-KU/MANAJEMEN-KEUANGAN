@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PenggunaController extends Controller
 {
@@ -25,31 +26,67 @@ class PenggunaController extends Controller
         if ($user->level == 'manager') {
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
-            ->where('company', $user->company)
+                ->where('company', $user->company)
                 ->whereIn('level', ['staff', 'karyawan'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         } else {
             // Jika user bukan 'manager', ambil hanya data pengguna itu sendiri
             $users = DB::table('users')
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10);
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
         }
 
         return view('account.pengguna.index', compact('users'));
-        //$users = User::orderBy('created_at', 'DESC')->paginate(10);
-
-        //return view('account.pengguna.index', compact('users'));
     }
 
-    // ... Other methods ...
-    // ... Other methods ...
+    public function search(Request $request)
+    {
+        $search = $request->get('q');
+        $user = Auth::user();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+            $users = DB::table('users')
+                ->where('company', $user->company)
+                ->whereIn('level', ['staff', 'karyawan'])
+                ->orderBy('created_at', 'DESC')
+                ->where(function ($query) use ($search) {
+                    $query->where('users.full_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.email', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.username', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.level', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.status', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('users.created_at', 'DESC')
+                ->paginate(10);
+            $users->appends(['q' => $search]);
+        } else {
+            $users = DB::table('users')
+                ->orderBy('created_at', 'DESC')
+                ->where(function ($query) use ($search) {
+                    $query->where('users.full_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.email', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.username', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.level', 'LIKE', '%' . $search . '%')
+                        ->orWhere('users.status', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('users.created_at', 'DESC')
+                ->paginate(10);
+            $users->appends(['q' => $search]);
+        }
+
+        if ($users->isEmpty()) {
+            return redirect()->route('account.pengguna.index')->with('error', 'Data Pengguna tidak ditemukan.');
+        }
+
+        return view('account.pengguna.index', compact('users'));
+    }
+
     public function create()
     {
         return view('account.pengguna.create');
@@ -214,5 +251,92 @@ class PenggunaController extends Controller
 
         // Redirect with success message
         return redirect()->route('account.pengguna.index')->with('success', 'Data pengguna berhasil dihapus!');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Auth::user(); // Get the authenticated user
+
+        // Check if the old password matches the user's current password
+        // ... You can add your old password check logic here if needed
+
+        // Update the user's password with the new one
+        $user->password = bcrypt($request->input('password'));
+        $user->save();
+
+        return redirect()->with('success', 'Password berhasil diubah'); // Redirect to the desired route
+    }
+
+    public function password($id)
+    {
+        $user = User::findOrFail($id);
+
+        return view('account.profil.resetpassword', compact('user'));
+    }
+
+    public function company($id)
+    {
+        $user = User::findOrFail($id);
+
+        return view('account.company.index', compact('user'));
+    }
+    public function updateCompany(Request $request, $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+
+        // Validate the request data (uncomment and modify as needed)
+        // $request->validate([
+        //     'full_name' => 'required',
+        //     'company' => '',
+        //     'email' => 'required|email',
+        //     'username' => 'required',
+        //     'level' => 'required',
+        //     'jenis' => 'required',
+        //     'telp' => 'required',
+        // ]);
+
+        // Save image to path if provided
+        if ($request->hasFile('logo_company')) {
+            $image = $request->file('logo_company');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $imageName;
+            $image->move(public_path('images'), $imageName); // Store the image
+        } else {
+            // If no new image uploaded, keep using the old image path
+            $imagePath = $user->logo_company;
+        }
+
+        // Update user data
+        $user->update([
+            'company' => $request->input('company'),
+            'alamat_company' => $request->input('alamat_company'),
+            'telp_company' => $request->input('telp_company'),
+            'email_company' => $request->input('email_company'),
+            'pj_company' => $request->input('pj_company'),
+            'logo_company' => $imagePath ?? null,
+        ]);
+
+        // If the user is a manager, update the company data for employees in the same company
+        if ($user->level === 'manager') {
+            $managerCompany = $user->company;
+
+            // Update company data for all users with the same company
+            User::where('company', $managerCompany)->update([
+                'alamat_company' => $request->input('alamat_company'),
+                'telp_company' => $request->input('telp_company'),
+                'email_company' => $request->input('email_company'),
+                'pj_company' => $request->input('pj_company'),
+                'logo_company' => $imagePath ?? null,
+            ]);
+        }
+
+        // Redirect with success message
+        return redirect()->route('account.company.edit', $user->id)->with('success', 'Data pengguna berhasil diperbarui!');
     }
 }

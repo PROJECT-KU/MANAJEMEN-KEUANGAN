@@ -1,20 +1,14 @@
-<style>
-  /* Define the fixed width for the columns */
-  .column-width {
-    width: 130px;
-  }
-</style>
 <div class="main-content">
   <section class="section">
-    <center>
-      <div class="section-header">
+    <div class="section-header">
+      <center>
         <h1>LAPORAN TRANSAKSI SEMUA</h1>
-      </div>
-    </center>
+      </center>
+    </div>
+
     <div class="section-body">
 
       <div class="card">
-
 
         <div class="card-body">
 
@@ -23,14 +17,17 @@
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <th scope="col" colspan="2" style="text-align: center;">JENIS TRANSAKSI</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">KATEGORI</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">KETERANGAN</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">TANGGAL</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">ID TRANSAKSI</th>
+                  <th scope="col" colspan="3" style="text-align: center; width:150px">JENIS TRANSAKSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">NAMA KARYAWAN</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">KATEGORI</th>
+                  <!--<th scope="col" rowspan="2" style="text-align: center; width:150px">KETERANGAN</th>-->
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">TANGGAL</th>
                 </tr>
                 <tr>
-                  <th scope="col" style="text-align: center;">MASUK</th>
-                  <th scope="col" style="text-align: center;">KELUAR</th>
+                  <th scope="col" style="text-align: center; width:80px">MASUK</th>
+                  <th scope="col" style="text-align: center; width:80px">KELUAR</th>
+                  <th scope="col" style="text-align: center; width:80px">GAJI</th>
                 </tr>
               </thead>
               <tbody>
@@ -55,6 +52,15 @@
                 ]);
                 }
 
+                // Add gaji transactions to the combined collection with type 'gaji' and tanggal as transaction_date
+                foreach ($gaji as $item) {
+                $combinedTransactions->push([
+                'type' => 'gaji',
+                'transaction_date' => $item->tanggal,
+                'data' => $item,
+                ]);
+                }
+
                 // Sort the combined transactions by transaction date in descending order
                 $sortedTransactions = $combinedTransactions->sortByDesc(function ($item) {
                 return strtotime($item['transaction_date']);
@@ -67,27 +73,64 @@
                 @php $item = $transaction['data']; @endphp
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <td class="column-width" style="text-align: center">
+                  <td style="text-align: center;">
+                    @if ($transaction['type'] === 'gaji')
+                    {{ $item->id_transaksi }}
+                    @else
+                    -
+                    @endif
+                  </td>
+                  <td style="text-align: center;">
                     @if ($transaction['type'] === 'debit')
                     {{ rupiah($item->nominal) }}
                     @else
                     -
                     @endif
                   </td>
-                  <td class="column-width" style="text-align: center">
+                  <td style="text-align: center;">
                     @if ($transaction['type'] === 'credit')
                     {{ rupiah($item->nominal) }}
                     @else
                     -
                     @endif
                   </td>
-                  <td class="column-width" style="text-align: center">{{ $item->name }}</td>
-                  <td class="column-width" style="text-align: center">{{ $item->description }}</td>
-                  <td class="column-width" style="text-align: center">
+                  <td style="text-align: center;">
+                    @if ($transaction['type'] === 'gaji')
+                    {{ rupiah($item->total) }}
+                    @else
+                    -
+                    @endif
+                  </td>
+                  <td style="text-align: center;">
+                    @if ($transaction['type'] === 'gaji')
+                    {{ $item->full_name }}
+                    @else
+                    -
+                    @endif
+                  </td>
+                  <td style="text-align: center;">
+                    @if ($transaction['type'] === 'gaji')
+                    GAJI KARYAWAN
+                    @else
+                    {{ $item->name }}
+                    @endif
+                  </td>
+                  <!--<td style="text-align: center;">
+                    @if ($transaction['type'] === 'gaji')
+                    -
+                    @else
+                    {{ $item->description }}
+                    @endif
+                  </td>-->
+                  <td style="text-align: center;">
                     @if ($transaction['type'] === 'debit')
                     {{ date('d-m-Y H:i', strtotime($item->debit_date)) }}
-                    @else
+                    @elseif ($transaction['type'] === 'credit')
                     {{ date('d-m-Y H:i', strtotime($item->credit_date)) }}
+                    @elseif ($transaction['type'] === 'gaji')
+                    {{ date('d-m-Y H:i', strtotime($item->tanggal)) }}
+                    @else
+                    {{ date('d-m-Y H:i', strtotime($item->tanggal)) }}
                     @endif
                   </td>
                 </tr>
@@ -95,9 +138,18 @@
                 @endforeach
               </tbody>
             </table>
+
+            <div class="mt-5" style="color: red;">
+              <h4>TOTAL TRANSAKSI MASUK : Rp. {{ number_format($totalDebit, 0, ',', ',') }}</h4>
+              <h4>TOTAL TRANSAKSI KELUAR : Rp. {{ number_format($totalCredit, 0, ',', ',') }}</h4>
+              <h4>TOTAL GAJI KARYAWAN : Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h4>
+            </div>
+
+
           </div>
         </div>
       </div>
     </div>
   </section>
 </div>
+@extends('layouts.version')

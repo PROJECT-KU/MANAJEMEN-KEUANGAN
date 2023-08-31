@@ -1,39 +1,35 @@
 @extends('layouts.account')
 
 @section('title')
-Profile - Management
+Profil | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PROFILE</h1>
+      <h1>PROFIL</h1>
     </div>
 
-    @if (session('success'))
-    <div id="successAlert" class="alert alert-success" role="alert" style="text-align: center;">
-      <b style="font-size: 20px;">DATA DIRI BERHASIL DI PERBARUI</b><br>
-    </div>
-    @endif
+
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-user"></i> PROFILE</h4>
+          <h4><i class="fas fa-user-edit"></i> PROFIL</h4>
         </div>
 
         <div class="card-body">
 
-          <form action="{{ route('account.profil.update', $user->id) }}" method="POST">
+          <form action="{{ route('account.profil.update', $user->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama</label>
-                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
 
                   @error('full_name')
                   <div class="invalid-feedback" style="display: block">
@@ -54,7 +50,7 @@ Profile - Management
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Nama Perusahaan</label>
-                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
+                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
 
                   @error('company')
                   <div class="invalid-feedback" style="display: block">
@@ -66,7 +62,7 @@ Profile - Management
               <div class="col-md-6">
                 <div class="form-group">
                   <label>No Telp</label>
-                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                  <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
 
                   @error('telp')
                   <div class="invalid-feedback" style="display: block">
@@ -110,7 +106,7 @@ Profile - Management
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Username</label>
-                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
+                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
 
                   @error('username')
                   <div class="invalid-feedback" style="display: block">
@@ -219,6 +215,33 @@ Profile - Management
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>GAMBAR</label>
+                  <div class="input-group">
+                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+                  </div>
+                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
+                  @error('gambar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <div class="thumbnail-circle" style="width: 12rem;">
+                    @if (Auth::user()->gambar == null)
+                    <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                    @else
+                    <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
             <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
@@ -230,8 +253,28 @@ Profile - Management
     </div>
   </section>
 </div>
-<!-- waktu untuk menampilkan alerts -->
+
+<!-- upload image -->
 <script>
+  const imageInput = document.getElementById('gambar');
+  const imagePreview = document.getElementById('image-preview');
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block'; // Show the preview
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+<!-- end upload image -->
+
+<!-- waktu untuk menampilkan alerts -->
+<!--<script>
   document.addEventListener('DOMContentLoaded', function() {
     var successAlert = document.getElementById('successAlert');
     if (successAlert) {
@@ -240,19 +283,9 @@ Profile - Management
       }, 3000);
     }
   });
-</script>
+</script>-->
 <!-- end -->
 
-<script>
-  function previewImage(event) {
-    var reader = new FileReader();
-    reader.onload = function() {
-      var output = document.getElementById('imagePreview');
-      output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
-</script>
 <script>
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({

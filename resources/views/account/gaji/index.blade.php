@@ -1,45 +1,53 @@
 @extends('layouts.account')
 
 @section('title')
-Uang Masuk - UANGKU
+List Gaji Karyawan | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>LIST GAJI KARYAWAN</h1>
+      <h1>GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header  text-right">
-          <h4><i class="fas fa-money-check-alt"></i> LIST GAJI KARYAWAN</h4>
+          <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
+          @if (Auth::user()->level == 'karyawan')
+          @else
           <div class="card-header-action">
-
-            <br>
-            <i class="fas fa-info-circle info-icon"></i>
-            <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
-            <!-- Add this line -->
+            <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
           </div>
+          @endif
         </div>
 
         <div class="card-body">
-
-          <div class="form-group">
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-              </div>
-              <input type="text" class="form-control" name="q" placeholder="pencarian">
-              <div class="input-group-append">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                </button>
+          <form action="{{ route('account.gaji.search') }}" method="GET">
+            <div class="form-group">
+              <div class="input-group mb-3">
+                @if (Auth::user()->level == 'karyawan')
+                @else
+                <div class="input-group-prepend">
+                  <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                </div>
+                @endif
+                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                  </button>
+                </div>
+                @if(request()->has('q'))
+                <a href="{{ route('account.gaji.search') }}" class="btn btn-danger">
+                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                </a>
+                @endif
               </div>
             </div>
-          </div>
           </form>
+
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
@@ -47,25 +55,31 @@ Uang Masuk - UANGKU
                   <th scope="col" style="text-align: center;width: 6%">NO.</th>
                   <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
                   <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                  <th scope="col" class="column-width" style="text-align: center;">NIK</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
-                  <th scope="col" class="column-width" style="text-align: center;">BANK</th>
+                  <!--<th scope="col" class="column-width" style="text-align: center;">BANK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
+                  <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMBAYARAN</th>
+                  <th scope="col" class="column-width" style="text-align: center;">STATUS PEMBAYARAN</th>
                   <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 @php
                 $no = 1;
+                $terbayarCount = 0; // Count of terbayar records
                 @endphp
                 @foreach ($gaji as $hasil)
+                @if (Auth::user()->level == 'karyawan' && $hasil->status == 'pending')
+                <!-- Skip displaying records where user is karyawan and status is pending -->
+                @else
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                  <td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>
+                  <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                   <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
-                  <td class="column-width" style="text-align: center;">
+                  <!--<td class="column-width" style="text-align: center;">
                     @php
                     $bankNames = [
                     '002' => 'BRI',
@@ -134,8 +148,26 @@ Uang Masuk - UANGKU
                     @else
                     Bank Name Not Found
                     @endif
-                  </td>
+                  </td>-->
                   <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
+                  <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
+                  <td class="column-width" style="text-align: center;">
+                    @if($hasil->status == 'pending')
+                    <button type="button" class="btn btn-warning">PENDING</button>
+                    @else
+                    <button type="button" class="btn btn-success">TERBAYAR</button>
+                    @endif
+                  </td>
+                  @if (Auth::user()->level == 'karyawan')
+                  <td class="text-center">
+                    <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                    <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
+                      <i class="fa fa-download"></i> Slip Gaji
+                    </a>
+                  </td>
+                  @else
                   <td class="text-center">
                     <a href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                       <i class="fa fa-pencil-alt"></i>
@@ -146,18 +178,26 @@ Uang Masuk - UANGKU
                     <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>
                     </a>
+                    <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                      <i class="fa fa-download"></i> Slip Gaji
+                    </a>
                   </td>
+                  @endif
                 </tr>
                 @php
                 $no++;
+                $terbayarCount++;
                 @endphp
+                @endif
                 @endforeach
               </tbody>
             </table>
             <div style="text-align: center">
               {{$gaji->links("vendor.pagination.bootstrap-4")}}
             </div>
+
           </div>
+
         </div>
       </div>
     </div>
@@ -165,32 +205,29 @@ Uang Masuk - UANGKU
 </div>
 
 <script>
-  /**
-   * Sweet alert
-   */
-  @if($message = Session::get('success'))
-  swal({
-    type: "success",
-    icon: "success",
-    title: "BERHASIL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @elseif($message = Session::get('error'))
-  swal({
-    type: "error",
-    icon: "error",
-    title: "GAGAL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @endif
+  //@if($message = Session::get('success'))
+  //swal({
+  //  type: "success",
+  //  icon: "success",
+  //  title: "BERHASIL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@elseif($message = Session::get('error'))
+  //swal({
+  //  type: "error",
+  //  icon: "error",
+  //  title: "GAGAL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@endif
 
   // delete
   // delete
@@ -257,4 +294,43 @@ Uang Masuk - UANGKU
   }
 </script>
 
+<!-- tabel in pdf -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+<script>
+  document.getElementById("generate-pdf-btn").addEventListener("click", function() {
+    const doc = new jsPDF();
+
+    // Add a title to the PDF
+    doc.text("List Gaji Karyawan", 105, 15, {
+      align: "center"
+    });
+
+    // Define the table's headers and data
+    const headers = ["NO.", "ID TRANSAKSI", "NAMA KARYAWAN", "NO REKENING", "TOTAL GAJI", "TANGGAL PEMBAYARAN", "STATUS PEMBAYARAN"];
+    const data = [];
+
+    // Loop through the table rows and add data to the data array
+    const tableRows = document.querySelectorAll(".table tbody tr");
+    tableRows.forEach((row) => {
+      const rowData = [];
+      row.querySelectorAll("td").forEach((cell) => {
+        rowData.push(cell.textContent.trim());
+      });
+      data.push(rowData);
+    });
+
+    // Add the table to the PDF
+    doc.autoTable({
+      head: [headers],
+      body: data,
+      startY: 25,
+    });
+
+    // Save the PDF
+    doc.save("gaji_karyawan.pdf");
+  });
+</script>
+<!-- end -->
 @stop

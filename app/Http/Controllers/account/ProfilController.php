@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\account;
 
+use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\User; // Make sure to import the User model if not imported already
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Response;
+use PDF;
+use Illuminate\Support\Facades\DB;
 
 class ProfilController extends Controller
 {
@@ -39,15 +44,11 @@ class ProfilController extends Controller
 
   public function update(Request $request, $id)
   {
+
+    $user = User::find($id);
     // Validate the request data
-    $request->validate([
-      'full_name' => 'required',
-      'company' => 'required',
-      'username' => 'required',
-      'telp' => 'required',
-      'nik' => 'required',
-      'norek' => 'required',
-      'bank' => 'required',
+    $request->validate(['full_name' => 'required', 'company' => 'required', 'username' => 'required', 'telp' => 'required', 'nik' => 'required', 'norek' => 'required',
+      'bank' => 'required', 'gambar' => 'max:5120', // Validate image
     ], [
       'full_name.required'   => 'Masukkan Nama Lengkap!',
       'company.required'  => 'Masukkan Nama Tempat Anda Bekerja!',
@@ -56,20 +57,37 @@ class ProfilController extends Controller
       'nik.required'          => 'Masukkan NIK Anda!',
       'norek.required'          => 'Masukkan Nomor Rekening Anda!',
       'bank.required'          => 'Masukkan BANK Anda!',
+      'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
     ]);
+
+
+    // Initialize the $imagePath variable
+
+   //menyinpan image di path
+   $imagePath = null;
+
+   if ($request->hasFile('gambar')) {
+       $image = $request->file('gambar');
+       $imageName = time() . '.' . $image->getClientOriginalExtension();
+       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+       $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+   }
+   //end
 
     // Find the user by ID
     $user = User::findOrFail($id);
-
-    // Update user data
-    $user->full_name = $request->input('full_name');
-    $user->company = $request->input('company');
-    $user->username = $request->input('username');
-    $user->telp = $request->input('telp');
-    $user->nik = $request->input('nik');
-    $user->norek = $request->input('norek');
-    $user->bank = $request->input('bank');
-
+    $user->update([
+      // Update user data
+      'full_name' => $request->input('full_name'),
+      'company' => $request->input('company'),
+      'username' => $request->input('username'),
+      'telp' => $request->input('telp'),
+      'nik' => $request->input('nik'),
+      'norek' => $request->input('norek'),
+      'bank' => $request->input('bank'),
+      'gambar' => $imagePath, // Update the image path
+    ]);
+    
     // Save the updated user data
     $user->save();
 

@@ -25,6 +25,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
-        "sweetalert2": "^11.7.20"
+        "sweetalert2": "^11.7.20",
+        "tailwindcss": "^3.3.3"
     }
 }

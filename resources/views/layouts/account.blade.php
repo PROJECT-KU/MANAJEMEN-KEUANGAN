@@ -29,7 +29,10 @@
     <script src="{{ asset('assets/modules/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap-timepicker/js/bootstrap-timepicker.min.js') }}"></script>
     <script src="{{ asset('assets/js/highcharts.js') }}"></script>
-
+    <!-- zoom image -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <!-- end -->
     <style>
         .fas,
         .far,
@@ -61,13 +64,20 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 <ul class="navbar-nav navbar-right">
 
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle mr-1">
+                            @if (Auth::user()->gambar == null)
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            @else
+                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong></div>
                             <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
+                            </a>
+                            <a href="{{ route('account.profil.password', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                                <i class="fas fa-unlock-alt"></i> RESET PASSWORD
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
@@ -84,7 +94,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="index.html"><i class="fas fa-gem" style="font-size: 18px"></i> <span style="font-size: 17px;"> Manajemen</span><span style="font-size: 10px;"></span></a>
+                        <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="200">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
                         <a href="index.html"><i class="fa fa-gem"></i></a>
@@ -106,9 +116,14 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
 
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->jenis === 'penyewaan' )
-                                <li class="{{ setActive('account/pengguna') }}">
+                                <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>PENGGUNA</span>
+                                    </a>
+                                </li>
+                                <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
+                                        <i class="fas fa-building"></i> <span>COMPANY</span>
                                     </a>
                                 </li>
                                 @endif
@@ -128,10 +143,12 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @else
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan')
-                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
+                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/gaji') }}"><a class="nav-link" href="{{ route('account.gaji.index') }}"><i class="fas fa-dollar-sign"></i>GAJI</a></li>
+                                        <li class="{{ setActive('account/presensi') }}"><a class="nav-link" href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock"></i>PRESENSI</a></li>
+
                                     </ul>
                                 </li>
                                 @endif
@@ -181,16 +198,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <!-- Main Content -->
             @yield('content')
 
-
-
-            <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
-                <div class="footer-left">
-                    © <strong>UANGKU</strong> 2019. Hak Cipta Dilindungi.
-                </div>
-                <div class="footer-right">
-
-                </div>
-            </footer>
+            @extends('layouts.version')
         </div>
     </div>
     <!-- ucapan selamat -->
@@ -235,6 +243,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
     <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+
+    @extends('layouts.alerts')
     </body>
 
 </html>

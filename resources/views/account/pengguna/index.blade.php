@@ -1,38 +1,50 @@
 @extends('layouts.account')
 
 @section('title')
-Uang Masuk dan Keluar - UANGKU
+List Pengguna | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA PENGGUNA</h1>
+      <h1>PENGGUNA</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-money-check-alt"></i> DATA PENGGUNA</h4>
+          <h4><i class="fas fa-list"></i> LIST PENGGUNA</h4>
         </div>
 
         <div class="card-body">
-          <form action="" method="GET">
+          <form action="{{ route('account.pengguna.search') }}" method="GET">
             <div class="form-group">
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                    <i class="fa fa-plus-circle"></i> TAMBAH
+                  </a>
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="pencarian">
+                <input type="text" class="form-control" name="q" placeholder="pencarian" value="{{ app('request')->input('q') }}">
+                <!-- Menggunakan app('request')->input('q') untuk mempertahankan nilai pencarian -->
                 <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-search"></i> CARI
                   </button>
                 </div>
+                @if(request()->has('q'))
+                <a href="{{ route('account.pengguna.search') }}" class="btn btn-danger">
+                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                </a>
+                @endif
+                <!-- Menampilkan tombol "HAPUS PENCARIAN" hanya jika ada query parameter 'q' -->
               </div>
             </div>
           </form>
+
+
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
@@ -153,32 +165,29 @@ Uang Masuk dan Keluar - UANGKU
 </script>
 
 <script>
-  /**
-   * Sweet alert
-   */
-  @if($message = Session::get('success'))
-  swal({
-    type: "success",
-    icon: "success",
-    title: "BERHASIL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @elseif($message = Session::get('error'))
-  swal({
-    type: "error",
-    icon: "error",
-    title: "GAGAL!",
-    text: "{{ $message }}",
-    timer: 1500,
-    showConfirmButton: false,
-    showCancelButton: false,
-    buttons: false,
-  });
-  @endif
+  //@if($message = Session::get('success'))
+  //swal({
+  //  type: "success",
+  //  icon: "success",
+  //  title: "BERHASIL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@elseif($message = Session::get('error'))
+  //swal({
+  //  type: "error",
+  //  icon: "error",
+  //  title: "GAGAL!",
+  //  text: "{{ $message }}",
+  //  timer: 1500,
+  //  showConfirmButton: false,
+  //  showCancelButton: false,
+  //  buttons: false,
+  //});
+  //@endif
 
   // delete
   function Delete(id) {

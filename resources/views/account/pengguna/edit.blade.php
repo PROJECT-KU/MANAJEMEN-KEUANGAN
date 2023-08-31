@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Edit Uang Masuk - UANGKU
+Update Pengguna | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Edit Uang Masuk - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> EDIT PENGGUNA</h4>
+                    <h4><i class="fas fa-user-edit"></i> UPDATE PENGGUNA</h4>
                 </div>
 
                 <div class="card-body">
@@ -77,6 +77,40 @@ Edit Uang Masuk - UANGKU
                             </div>
                         </div>
 
+                        @if (Auth::user()->level == 'manager')
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Level</label>
+                                    <select class="form-control" name="level">
+                                        <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
+                                        <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
+                                        <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                                    </select>
+
+                                    @error('level')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Jenis</label>
+                                    <select class="form-control" name="jenis">
+                                        <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis</option>
+                                    </select>
+
+                                    @error('jenis')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        @else
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -114,6 +148,7 @@ Edit Uang Masuk - UANGKU
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                         <div class="row">
                             <div class="col-md-6">
@@ -321,7 +356,9 @@ Edit Uang Masuk - UANGKU
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                        <a href="{{ route('account.pengguna.index') }}" class="btn btn-info mr-1">
+                            <i class="fa fa-list"></i> LIST PENGGUNA
+                        </a>
 
                     </form>
 

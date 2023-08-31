@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Laporan Uang Keluar - UANGKU
+Laporan Uang Keluar | MANAGEMENT
 @stop
 
 @section('content')

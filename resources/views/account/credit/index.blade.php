@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Uang Keluar - UANGKU
+List Uang Keluar | MANAGEMENT
 @stop
 
 @section('content')
@@ -15,7 +15,7 @@ Uang Keluar - UANGKU
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-money-check-alt"></i> UANG KELUAR</h4>
+                    <h4><i class="fas fa-list"></i> LIST UANG KELUAR</h4>
                 </div>
 
                 <div class="card-body">
