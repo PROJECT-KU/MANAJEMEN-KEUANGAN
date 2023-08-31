@@ -110,6 +110,7 @@ Route::prefix('account')->group(function () {
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
     Route::get('/gaji/search', 'account\GajiController@search')->name('account.gaji.search');
     Route::get('account/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
+    Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
 
     //presensi
     Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
@@ -123,4 +124,8 @@ Route::prefix('account')->group(function () {
 
     //email
     Route::get('/email', 'account\EmailController@index')->name('account.email.index');
+
+    // company
+    Route::get('/company/{id}/edit', 'account\PenggunaController@company')->name('account.company.edit');
+    Route::put('/company/{id}', 'account\PenggunaController@updateCompany')->name('account.company.update');
 });

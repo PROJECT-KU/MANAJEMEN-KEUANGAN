@@ -87,9 +87,9 @@ List Presensi Karyawan | MANAGEMENT
                       @endif
                     </td>
                     <td class="column-width" style="text-align: center;">
-                      <a href="{{ asset('storage/assets/img/presensi/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                      <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
                         <div class="thumbnail-circle">
-                          <img style="width: 100px; height:100px;" src="{{ asset('storage/assets/img/presensi/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                          <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
                         </div>
                       </a>
                     </td>

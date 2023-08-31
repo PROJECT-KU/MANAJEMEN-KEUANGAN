@@ -19,7 +19,7 @@ List Gaji Karyawan | MANAGEMENT
           @if (Auth::user()->level == 'karyawan')
           @else
           <div class="card-header-action">
-            <a href="{{ route('account.laporan_gaji.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
+            <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
           </div>
           @endif
         </div>
@@ -163,6 +163,9 @@ List Gaji Karyawan | MANAGEMENT
                     <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>
                     </a>
+                    <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
+                      <i class="fa fa-download"></i> Slip Gaji
+                    </a>
                   </td>
                   @else
                   <td class="text-center">
@@ -174,6 +177,9 @@ List Gaji Karyawan | MANAGEMENT
                     </button>
                     <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>
+                    </a>
+                    <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                      <i class="fa fa-download"></i> Slip Gaji
                     </a>
                   </td>
                   @endif
@@ -288,4 +294,43 @@ List Gaji Karyawan | MANAGEMENT
   }
 </script>
 
+<!-- tabel in pdf -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+<script>
+  document.getElementById("generate-pdf-btn").addEventListener("click", function() {
+    const doc = new jsPDF();
+
+    // Add a title to the PDF
+    doc.text("List Gaji Karyawan", 105, 15, {
+      align: "center"
+    });
+
+    // Define the table's headers and data
+    const headers = ["NO.", "ID TRANSAKSI", "NAMA KARYAWAN", "NO REKENING", "TOTAL GAJI", "TANGGAL PEMBAYARAN", "STATUS PEMBAYARAN"];
+    const data = [];
+
+    // Loop through the table rows and add data to the data array
+    const tableRows = document.querySelectorAll(".table tbody tr");
+    tableRows.forEach((row) => {
+      const rowData = [];
+      row.querySelectorAll("td").forEach((cell) => {
+        rowData.push(cell.textContent.trim());
+      });
+      data.push(rowData);
+    });
+
+    // Add the table to the PDF
+    doc.autoTable({
+      head: [headers],
+      body: data,
+      startY: 25,
+    });
+
+    // Save the PDF
+    doc.save("gaji_karyawan.pdf");
+  });
+</script>
+<!-- end -->
 @stop

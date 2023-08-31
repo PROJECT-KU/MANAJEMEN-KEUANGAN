@@ -62,14 +62,17 @@ class ProfilController extends Controller
 
 
     // Initialize the $imagePath variable
-    $imagePath = null;
 
-    if ($request->hasFile('gambar')) {
-      $image = $request->file('gambar');
-      $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName;
-      $image->storeAs('public/assets/img/presensi', $imageName);
-    }
+   //menyinpan image di path
+   $imagePath = null;
+
+   if ($request->hasFile('gambar')) {
+       $image = $request->file('gambar');
+       $imageName = time() . '.' . $image->getClientOriginalExtension();
+       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+       $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+   }
+   //end
 
     // Find the user by ID
     $user = User::findOrFail($id);

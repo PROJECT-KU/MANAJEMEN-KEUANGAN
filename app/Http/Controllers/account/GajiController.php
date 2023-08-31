@@ -12,6 +12,8 @@ use Dompdf\Dompdf;
 use Illuminate\Support\Facades\Response;
 use PDF;
 use Illuminate\Support\Facades\DB;
+use Riskihajar\Terbilang\Facades\Terbilang;
+use App\Models\Employee;
 
 class GajiController extends Controller
 {
@@ -291,14 +293,14 @@ class GajiController extends Controller
     //end jumlah bonus luar kota
 
     $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) +
-    ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
+      ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
     $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
 
     $total_bonus =
-    ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
-    ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
-    ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
-    ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
+      ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
+      ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
+      ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
     $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
 
     $potongan = $request->input('potongan');
@@ -307,12 +309,17 @@ class GajiController extends Controller
     $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan - $potongan;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
-    //save image to path
+    //menyinpan image di path
+    $imagePath = null;
+
     if ($request->hasFile('gambar')) {
       $image = $request->file('gambar');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName;
-      $image->storeAs('public/assets/img/presensi', $imageName); // Store the image
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    } else {
+      // If no new image uploaded, keep using the old image path
+      $imagePath = $gaji->gambar;
     }
     //end
 
@@ -388,7 +395,15 @@ class GajiController extends Controller
       'jumlah_bonus_luar7' => $jumlah_bonus_luar7,
       'jumlah_bonus_luar8' => $jumlah_bonus_luar8,
       'jumlah_bonus_luar9' => $jumlah_bonus_luar9,
-      'jumlah_bonus_luar10' => $jumlah_bonus_luar10,'tanggal' => $request->input('tanggal'), 'potongan' => $potongan, 'total_lembur' => $total_lembur, 'total_bonus' => $total_bonus, 'total' => $total, 'status' => $request->input('status'), 'note' => $request->input('note'), 'gambar' => $imagePath ?? null,
+      'jumlah_bonus_luar10' => $jumlah_bonus_luar10,
+      'tanggal' => $request->input('tanggal'),
+      'potongan' => $potongan,
+      'total_lembur' => $total_lembur,
+      'total_bonus' => $total_bonus,
+      'total' => $total,
+      'status' => $request->input('status'),
+      'note' => $request->input('note'),
+      'gambar' => $imagePath ?? null,
 
     ]);
 
@@ -600,10 +615,10 @@ class GajiController extends Controller
     $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
 
     $total_bonus =
-    ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
-    ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
-    ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
-    ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
+      ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
+      ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
+      ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
     $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
 
     $potongan = $request->input('potongan');
@@ -614,12 +629,23 @@ class GajiController extends Controller
 
     $existingUserId = $gaji->user_id;
 
+    //menyinpan image di path
+    $imagePath = null;
+
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    }
+    //end
+
     //save image to path
     if ($request->hasFile('gambar')) {
       $image = $request->file('gambar');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
       $imagePath = $imageName;
-      $image->storeAs('public/assets/img/presensi', $imageName); // Store the image
+      $image->move(public_path('images'), $imageName); // Store the image
     } else {
       // If no new image uploaded, keep using the old image path
       $imagePath = $gaji->gambar;
@@ -704,7 +730,7 @@ class GajiController extends Controller
       'total_bonus' => $total_bonus,
       'total' => $total,
       'status' => $request->input('status'),
-      'note' => $request->input('note'),'gambar' => $imagePath, // Store the image path
+      'note' => $request->input('note'), 'gambar' => $imagePath, // Store the image path
     ]);
 
     // Redirect with success or error message
@@ -802,9 +828,39 @@ class GajiController extends Controller
     $dompdf->render();
 
     // Set the PDF filename
-    $fileName = 'laporan_gaji_karyawan_' . date('d-m-Y') . '.pdf';
+    $fileName = 'Slip-Gaji-Karyawan_' . date('d-m-Y') . '.pdf';
 
     // Output the generated PDF to the browser
     return $dompdf->stream($fileName);
+  }
+
+  public function SlipGaji($id)
+  {
+    $user = Auth::user();
+    $gaji = Gaji::findOrFail($id);
+
+    // Calculate total gaji
+    $totalGaji = $gaji->total;
+    $terbilang = Terbilang::make($totalGaji, ' rupiah');
+    // Fetch the associated employee information
+    $employee = User::find($gaji->user_id); // Assuming user_id corresponds to the employee's ID
+    $userWithNorekBank = User::find($employee->id);
+    // Get the HTML content of the view
+    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank'))->render();
+
+    // Instantiate Dompdf with the default configuration
+    $dompdf = new Dompdf();
+
+    // Load the HTML content into Dompdf
+    $dompdf->loadHtml($html);
+
+    // (Optional) Set paper size and orientation
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Render the PDF
+    $dompdf->render();
+
+    // Output the generated PDF to the browser
+    return $dompdf->stream('Slip-Gaji-Karyawan_' . date('d-m-Y') . '.pdf');
   }
 }

@@ -29,7 +29,7 @@ Detail Gaji Karyawan | MANAGEMENT
 
         <div class="card-body">
 
-          <form action="{{ route('account.gaji.store') }}" method="POST" enctype="multipart/form-data">
+          <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
             @csrf
             <div class="row">
               <div class="col-md-6">
@@ -1069,12 +1069,12 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <a href="{{ asset('storage/assets/img/presensi/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
+                  <a href="{{ asset('images/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
                     <div class="card" style="width: 18rem;">
                       @if ($gaji->gambar == null)
                       <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
                       @else
-                      <img id="image-preview" class="card-img-top" src="{{ asset('storage/assets/img/presensi/' . $gaji->gambar) }}" alt="Preview Image">
+                      <img id="image-preview" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
                       @endif
                     </div>
                   </a>

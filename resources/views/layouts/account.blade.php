@@ -67,7 +67,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             @if (Auth::user()->gambar == null)
                             <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
                             @else
-                            <img alt="image" src="{{ asset('storage/assets/img/presensi/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -119,6 +119,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>PENGGUNA</span>
+                                    </a>
+                                </li>
+                                <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
+                                        <i class="fas fa-building"></i> <span>COMPANY</span>
                                     </a>
                                 </li>
                                 @endif

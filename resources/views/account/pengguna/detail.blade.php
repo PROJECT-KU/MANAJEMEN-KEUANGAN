@@ -197,12 +197,12 @@ Detail Pengguna | MANAGEMENT
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <a href="{{ asset('storage/assets/img/presensi/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                  <a href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
                     <div class="thumbnail-circle" style="width: 12rem;">
                       @if ($user->gambar == null)
                       <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
                       @else
-                      <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('storage/assets/img/presensi/' .  $user->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                      <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  $user->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
                       @endif
                     </div>
                   </a>

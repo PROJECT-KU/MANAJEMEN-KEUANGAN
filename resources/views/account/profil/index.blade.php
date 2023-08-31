@@ -236,7 +236,7 @@ Profil | MANAGEMENT
                     @if (Auth::user()->gambar == null)
                     <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
                     @else
-                    <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('storage/assets/img/presensi/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                    <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
                     @endif
                   </div>
                 </div>
