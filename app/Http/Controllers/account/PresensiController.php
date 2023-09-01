@@ -108,10 +108,10 @@ class PresensiController extends Controller
     $imagePath = null;
 
     if ($request->hasFile('gambar')) {
-        $image = $request->file('gambar');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-        $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-        $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
     }
     //end
 
@@ -125,13 +125,17 @@ class PresensiController extends Controller
     } else if ($currentTime > '09:00:00') {
       // Check if an existing record for the user and date exists with specific statuses
       $existingHadirRecord = Presensi::where('user_id', $request->input('user_id'))
-      ->whereIn('status', ['hadir', 'dinas luar kota', 'remote'])
-      ->whereDate('created_at', $clientDateTime->format('Y-m-d'))
-      ->exists();
+        ->whereIn('status', ['hadir', 'dinas luar kota', 'remote'])
+        ->whereDate('created_at', $clientDateTime->format('Y-m-d'))
+        ->exists();
 
+      // if (!$existingHadirRecord) {
+      //   $status = 'hadir';
+      // } else {
+      //   $status = 'terlambat';
+      // }
       if (!$existingHadirRecord) {
-        $status = 'hadir';
-      } else {
+
         $status = 'terlambat';
       }
     } else {
@@ -172,7 +176,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $users = User::join('presensi', 'users.id', '=', 'presensi.user_id')
-      ->where('users.company', $user->company)
+        ->where('users.company', $user->company)
         ->get(['users.*']);
     } else {
       $users = User::where('id', $presensi->user_id)->get();
@@ -187,7 +191,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $users = User::join('presensi', 'users.id', '=', 'presensi.user_id')
-      ->where('users.company', $user->company)
+        ->where('users.company', $user->company)
         ->get(['users.*']);
     } else {
       $users = User::where('id', $presensi->user_id)->get();
@@ -214,14 +218,14 @@ class PresensiController extends Controller
     //);
 
     //save image to path
-   $imagePath = null;
+    $imagePath = null;
 
-if ($request->hasFile('gambar')) {
-    $image = $request->file('gambar');
-    $imageName = time() . '.' . $image->getClientOriginalExtension();
-    $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-    $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-}
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    }
     //end
 
     $presensi->update([
@@ -264,13 +268,13 @@ if ($request->hasFile('gambar')) {
     $user = Auth::user();
 
     $presensi = DB::table('presensi')
-    ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
-    ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
-    ->where('users.company', $user->company)
+      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
+      ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
       ->where(function ($query) use ($search) {
         $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-        ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
-        ->orWhere(DB::raw("DATE_FORMAT(presensi.created_at, '%d-%m-%Y %H:%i')"), 'LIKE', '%' . $search . '%');
+          ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
+          ->orWhere(DB::raw("DATE_FORMAT(presensi.created_at, '%d-%m-%Y %H:%i')"), 'LIKE', '%' . $search . '%');
       })
       ->orderBy('presensi.created_at', 'DESC')
       ->paginate(10);
@@ -283,6 +287,4 @@ if ($request->hasFile('gambar')) {
 
     return view('account.presensi.index', compact('presensi'));
   }
-
-
 }

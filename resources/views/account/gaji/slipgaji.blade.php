@@ -22,7 +22,14 @@
             <div class="col-12">
               <h2 class="page-header">
                 <center><i class="fas fa-globe"></i> SLIP GAJI KARYAWAN<br>
-                  <p style="margin-top: -3px; font-size:15px"><strong>Periode</strong> {{ date('j F, Y', strtotime('first day of this month')) }} - {{ date('j F, Y', strtotime('last day of this month')) }}</p>
+                  <p style="margin-top: -3px; font-size: 15px"><strong>Periode</strong>
+                    <?php
+                    $tanggalPembayaran = strtotime($gaji->tanggal);
+                    $awalBulan = date('j F, Y', strtotime('first day of this month', $tanggalPembayaran));
+                    $akhirBulan = date('j F, Y', strtotime('last day of this month', $tanggalPembayaran));
+                    echo $awalBulan . ' - ' . $akhirBulan;
+                    ?>
+                  </p>
                 </center>
               </h2>
             </div>

@@ -317,9 +317,6 @@ class GajiController extends Controller
       $imageName = time() . '.' . $image->getClientOriginalExtension();
       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
       $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-    } else {
-      // If no new image uploaded, keep using the old image path
-      $imagePath = $gaji->gambar;
     }
     //end
 
@@ -629,16 +626,6 @@ class GajiController extends Controller
 
     $existingUserId = $gaji->user_id;
 
-    //menyinpan image di path
-    $imagePath = null;
-
-    if ($request->hasFile('gambar')) {
-      $image = $request->file('gambar');
-      $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-    }
-    //end
 
     //save image to path
     if ($request->hasFile('gambar')) {
@@ -730,7 +717,8 @@ class GajiController extends Controller
       'total_bonus' => $total_bonus,
       'total' => $total,
       'status' => $request->input('status'),
-      'note' => $request->input('note'), 'gambar' => $imagePath, // Store the image path
+      'note' => $request->input('note'),
+      'gambar' => $imagePath, // Store the image path
     ]);
 
     // Redirect with success or error message
@@ -809,11 +797,11 @@ class GajiController extends Controller
 
     // Calculate total gaji
     $totalGaji = $gaji->sum('total');
-
+    $terbilang = Terbilang::make($totalGaji, ' rupiah');
     $users = User::all(); // Get all users
 
     // Get the HTML content of the view
-    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji'))->render();
+    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji', 'user', 'terbilang'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();
@@ -828,7 +816,7 @@ class GajiController extends Controller
     $dompdf->render();
 
     // Set the PDF filename
-    $fileName = 'Slip-Gaji-Karyawan_' . date('d-m-Y') . '.pdf';
+    $fileName = 'List-Gaji-Karyawan_' . date('d-m-Y') . '.pdf';
 
     // Output the generated PDF to the browser
     return $dompdf->stream($fileName);

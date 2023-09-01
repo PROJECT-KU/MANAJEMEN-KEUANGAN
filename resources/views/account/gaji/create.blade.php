@@ -2059,7 +2059,7 @@ Tambah Gaji Karyawan | MANAGEMENT
 
     timeoutHandler = setTimeout(function() {
       $(".btn-reset").removeClass('btn-progress');
-
+      $("#karyawanSelect").val('');
     }, 500);
   })
 </script>
