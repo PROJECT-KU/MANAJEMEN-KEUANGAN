@@ -79,7 +79,7 @@ List Presensi Karyawan | MANAGEMENT
                       @elseif ($hasil->status == 'lembur')
                       <button type="button" class="btn btn-primary">LEMBUR</button>
                       @elseif ($hasil->status == 'cuti')
-                      <button type="button" class="btn btn-warning">CUII</button>
+                      <button type="button" class="btn btn-warning">CUTI</button>
                       @elseif ($hasil->status == 'terlambat')
                       <button type="button" class="btn btn-danger">TERLAMBAT</button>
                       @elseif ($hasil->status == 'pulang')

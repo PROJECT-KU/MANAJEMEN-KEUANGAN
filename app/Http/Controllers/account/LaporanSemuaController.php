@@ -65,7 +65,7 @@ class LaporanSemuaController extends Controller
         })
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
-      ->get();
+        ->get();
 
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
@@ -74,7 +74,6 @@ class LaporanSemuaController extends Controller
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
-
     } else {
       $debit = DB::table('debit')
         ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
@@ -90,7 +89,7 @@ class LaporanSemuaController extends Controller
         ->where('credit.user_id', Auth::user()->id)
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
-      ->get();
+        ->get();
 
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
@@ -138,7 +137,7 @@ class LaporanSemuaController extends Controller
           ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('debit.created_at', 'DESC')
-    ->get();
+      ->get();
 
     foreach ($debit as $item) {
       $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
@@ -155,7 +154,7 @@ class LaporanSemuaController extends Controller
           ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('credit.created_at', 'DESC')
-    ->get();
+      ->get();
 
     foreach ($credit as $item) {
       $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
@@ -300,9 +299,9 @@ class LaporanSemuaController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $debit = DB::table('debit')
-      ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-      ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
-      ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+        ->leftJoin('users', 'debit.user_id', '=', 'users.id')
         ->where(function ($query) use ($user) {
           $query->where('users.company', $user->company)
             ->orWhere('debit.user_id', $user->id);
@@ -316,49 +315,49 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $credit = DB::table('credit')
-      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-      ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-      ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-      ->where(function ($query) use ($user) {
-        $query->where('users.company', $user->company)
-          ->orWhere('credit.user_id', $user->id);
-      })
+        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+        ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+        ->where(function ($query) use ($user) {
+          $query->where('users.company', $user->company)
+            ->orWhere('credit.user_id', $user->id);
+        })
         ->where(function ($query) {
           $query->where('users.level', 'manager')
-          ->orWhere('users.level', 'staff');
+            ->orWhere('users.level', 'staff');
         })
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
         ->get();
 
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     } else {
       $debit = DB::table('debit')
-      ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-      ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
-      ->where('debit.user_id', Auth::user()->id)
+        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+        ->where('debit.user_id', Auth::user()->id)
         ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
         ->orderBy('debit.created_at', 'DESC')
         ->get();
 
       $credit = DB::table('credit')
-      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-      ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
-      ->where('credit.user_id', Auth::user()->id)
+        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
+        ->where('credit.user_id', Auth::user()->id)
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
         ->orderBy('credit.created_at', 'DESC')
         ->get();
 
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->where('gaji.user_id', Auth::user()->id)
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', Auth::user()->id)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
@@ -376,7 +375,7 @@ class LaporanSemuaController extends Controller
     $users = User::all(); // Get all users
 
     // Get the HTML content of the view
-    $html = view('account.laporan_semua.pdf', compact('debit', 'credit', 'users', 'gaji', 'totalDebit', 'totalCredit', 'totalGaji'))->render();
+    $html = view('account.laporan_semua.pdf', compact('debit', 'credit', 'user', 'gaji', 'totalDebit', 'totalCredit', 'totalGaji'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();
@@ -419,9 +418,9 @@ class LaporanSemuaController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-      ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
-      ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-      ->whereDate('debit.debit_date', '>=', $tanggal_awal)
+        ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+        ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+        ->whereDate('debit.debit_date', '>=', $tanggal_awal)
         ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
         ->where(function ($query) use ($user) {
           $query->where('users.company', $user->company)
@@ -429,16 +428,16 @@ class LaporanSemuaController extends Controller
         })
         ->where(function ($query) {
           $query->where('users.level', 'manager')
-          ->orWhere('users.level', 'staff');
+            ->orWhere('users.level', 'staff');
         })
         ->paginate(10)
         ->appends(request()->except('page'));
 
       $credit = DB::table('credit')
-      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-      ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-      ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-      ->whereDate('credit.credit_date', '>=', $tanggal_awal)
+        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+        ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+        ->whereDate('credit.credit_date', '>=', $tanggal_awal)
         ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
         ->where(function ($query) use ($user) {
           $query->where('users.company', $user->company)
@@ -446,15 +445,15 @@ class LaporanSemuaController extends Controller
         })
         ->where(function ($query) {
           $query->where('users.level', 'manager')
-          ->orWhere('users.level', 'staff');
+            ->orWhere('users.level', 'staff');
         })
         ->paginate(10)
         ->appends(request()->except('page'));
 
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->whereDate('gaji.tanggal', '>=', $tanggal_awal)
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->whereDate('gaji.tanggal', '>=', $tanggal_awal)
         ->whereDate('gaji.tanggal', '<=', $tanggal_akhir)
         ->where(function ($query) use ($user) {
           $query->where('users.company', $user->company)
@@ -462,32 +461,32 @@ class LaporanSemuaController extends Controller
         })
         ->where(function ($query) {
           $query->where('users.level', 'manager')
-          ->orWhere('users.level', 'staff');
+            ->orWhere('users.level', 'staff');
         })
         ->paginate(10)
         ->appends(request()->except('page'));
     } else {
       $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-      ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
-      ->whereDate('debit.debit_date', '>=', $tanggal_awal)
+        ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+        ->whereDate('debit.debit_date', '>=', $tanggal_awal)
         ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
         ->where('debit.user_id', $user->id)
         ->paginate(10)
         ->appends(request()->except('page'));
 
       $credit = DB::table('credit')
-      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-      ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-      ->whereDate('credit.credit_date', '>=', $tanggal_awal)
+        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+        ->whereDate('credit.credit_date', '>=', $tanggal_awal)
         ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
         ->where('credit.user_id', $user->id)
         ->paginate(10)
         ->appends(request()->except('page'));
 
       $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->whereDate('gaji.tanggal', '>=', $tanggal_awal)
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->whereDate('gaji.tanggal', '>=', $tanggal_awal)
         ->whereDate('gaji.tanggal', '<=', $tanggal_akhir)
         ->where('gaji.user_id', $user->id)
         ->paginate(10)
@@ -496,5 +495,4 @@ class LaporanSemuaController extends Controller
 
     return view('account.laporan_debit.index', compact('debit', 'credit', 'gaji', 'tanggal_awal', 'tanggal_akhir'));
   }
-
 }

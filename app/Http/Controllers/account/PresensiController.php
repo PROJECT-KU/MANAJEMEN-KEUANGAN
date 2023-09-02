@@ -129,15 +129,15 @@ class PresensiController extends Controller
         ->whereDate('created_at', $clientDateTime->format('Y-m-d'))
         ->exists();
 
-      // if (!$existingHadirRecord) {
-      //   $status = 'hadir';
-      // } else {
-      //   $status = 'terlambat';
-      // }
       if (!$existingHadirRecord) {
-
+        $status = 'hadir';
+      } else {
         $status = 'terlambat';
       }
+      // if (!$existingHadirRecord) {
+
+      //   $status = 'terlambat';
+      // }
     } else {
       // Use the provided status if available, or set to 'terlambat' by default
       $status = $request->input('status', 'terlambat');
@@ -146,7 +146,7 @@ class PresensiController extends Controller
     //$clientDateTime = Carbon::parse($request->input('client_date_time'));
     $save = Presensi::create([
       'user_id' => $request->input('user_id'),
-      'status' => $status,
+      'status' => $request->input('status'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
       'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data

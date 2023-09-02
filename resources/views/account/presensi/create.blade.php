@@ -23,76 +23,99 @@ Tambah Presensi Karyawan | MANAGEMENT
           <form action="{{ route('account.presensi.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>STATUS PRESENSI</label>
-                  <select class="form-control" name="status" id="status" required>
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="hadir">HADIR</option>
-                    <option value="remote">REMOTE</option>
+            @if ((date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '07:00:00' )) <div class="alert alert-warning" role="alert">
+                Mohon Maaf.. Kamu Di Luar Jam Kerja! Silahkan Presensi Setelah Jam 07.00 Ya!
+        </div>
+        @endif
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>STATUS PRESENSI</label>
+              <select class="form-control" name="status" id="status" required>
+                @if (date('H:i:s') >= '07:00:00' && date('H:i:s') <= '09:00:00' ) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                  <option value="hadir">HADIR</option>
+                  <option value="remote">REMOTE</option>
+                  <option value="izin">IZIN</option>
+                  <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                  <option value="lembur">LEMBUR</option>
+                  <option value="cuti">CUTI</option>
+                  <option value="pulang" disabled>PULANG</option>
+                  @elseif (date('H:i') >= '09:00:00' && date('H:i:s') <= '22:00:00' ) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                    <option value="terlambat">HADIR</option>
+                    <option value="terlambat">REMOTE</option>
                     <option value="izin">IZIN</option>
-                    <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                    <option value="terlambat">DINAS LUAR KOTA</option>
                     <option value="lembur">LEMBUR</option>
                     <option value="cuti">CUTI</option>
-                    <option value="terlambat" hidden>TERLAMBAT</option>
                     <option value="pulang">PULANG</option>
-                  </select>
+                    @elseif (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '07:00:00' ) <!-- <option value="terlambat">HADIR</option>
+                        <option value="terlambat">REMOTE</option>
+                        <option value="izin">IZIN</option>
+                        <option value="terlambat">DINAS LUAR KOTA</option>
+                        <option value="lembur">LEMBUR</option>
+                        <option value="cuti">CUTI</option>
+                        <option value="pulang">PULANG</option> -->
+                        @else
+                        <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 07:00.</option>
+                        @endif
+              </select>
 
-                  @error('status')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
+              @error('status')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
               </div>
+              @enderror
             </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>CATATAN</label>
-                  <div class="input-group">
-                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control"></textarea>
-                  </div>
-                  @error('note')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>BUKTI PRESENSI</label>
-                  <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-                  </div>
-                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
-                  @error('gambar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-                <div class="mt-3">
-                  <div class="card" style="width: 12rem;">
-                    <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
-
-          </form>
-
+          </div>
         </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>CATATAN</label>
+              <div class="input-group">
+                <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control"></textarea>
+              </div>
+              @error('note')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>BUKTI PRESENSI</label>
+              <div class="input-group">
+                <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+              </div>
+              <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
+              @error('gambar')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+            <div class="mt-3">
+              <div class="card" style="width: 12rem;">
+                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+
+        </form>
+
       </div>
     </div>
-  </section>
 </div>
+</section>
+</div>
+
 
 <!-- upload image -->
 <script>
