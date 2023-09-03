@@ -9,8 +9,11 @@
     <center>
       <div class="section-header">
         <h1> LAPORAN UANG MASUK</h1>
+        <h4>{{ $user->alamat_company }}</h4>
+        <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
       </div>
     </center>
+    <hr><br><br>
 
     <div class="section-body">
 
@@ -52,4 +55,5 @@
       @endif
     </div>
   </section>
-</div>
+</div><br><br>
+@extends('layouts.version')

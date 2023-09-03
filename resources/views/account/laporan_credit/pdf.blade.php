@@ -9,8 +9,11 @@
     <center>
       <div class="section-header">
         <h1> LAPORAN UANG KELUAR</h1>
+        <h4>{{ $user->alamat_company }}</h4>
+        <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
       </div>
     </center>
+    <hr><br><br>
 
     <div class="section-body">
       @if(isset($credit) && count($credit) > 0)
@@ -47,16 +50,12 @@
                   @endforeach
                 </tbody>
               </table>
-
             </table>
-
           </div>
-
         </div>
       </div>
       @endif
-
-
     </div>
   </section>
 </div>
+@extends('layouts.version')
