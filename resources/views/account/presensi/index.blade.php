@@ -66,24 +66,28 @@ List Presensi Karyawan | MANAGEMENT
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                    <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->created_at)) }}</td>
+                    <td class="column-width" style="text-align: center;">
+                      <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
+                      {{ strftime('%A, %d %B %Y %H:%M', strtotime($hasil->created_at)) }}
+                    </td>
+
                     <td class="column-width" style="text-align: center;">
                       @if ($hasil->status == 'hadir')
-                      <button type="button" class="btn btn-success">HADIR</button>
+                      <span class="badge badge-success">HADIR</span>
                       @elseif ($hasil->status == 'remote')
-                      <button type="button" class="btn btn-info">REMOTE</button>
+                      <span class="badge badge-info">REMOTE</span>
                       @elseif ($hasil->status == 'izin')
-                      <button type="button" class="btn btn-warning">IZIN</button>
+                      <span class="badge badge-warning">IZIN</span>
                       @elseif ($hasil->status == 'dinas luar kota')
-                      <button type="button" class="btn btn-info">DINAS LUAR KOTA</button>
+                      <span class="badge badge-info">DINAS LUAR KOTA</span>
                       @elseif ($hasil->status == 'lembur')
-                      <button type="button" class="btn btn-primary">LEMBUR</button>
+                      <span class="badge badge-primary">LEMBUR</span>
                       @elseif ($hasil->status == 'cuti')
-                      <button type="button" class="btn btn-warning">CUTI</button>
+                      <span class="badge badge-warning">CUTI</span>
                       @elseif ($hasil->status == 'terlambat')
-                      <button type="button" class="btn btn-danger">TERLAMBAT</button>
+                      <span class="badge badge-danger">TERLAMBAT</span>
                       @elseif ($hasil->status == 'pulang')
-                      <button type="button" class="btn btn-danger">PULANG</button>
+                      <span class="badge badge-danger">PULANG</span>
                       @endif
                     </td>
                     <td class="column-width" style="text-align: center;">

@@ -274,7 +274,10 @@ class PresensiController extends Controller
       ->where(function ($query) use ($search) {
         $query->where('users.full_name', 'LIKE', '%' . $search . '%')
           ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
-          ->orWhere(DB::raw("DATE_FORMAT(presensi.created_at, '%d-%m-%Y %H:%i')"), 'LIKE', '%' . $search . '%');
+          ->orWhere(function ($subquery) use ($search) {
+            // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
+            $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+          });
       })
       ->orderBy('presensi.created_at', 'DESC')
       ->paginate(10);
