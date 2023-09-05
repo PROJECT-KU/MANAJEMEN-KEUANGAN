@@ -90,7 +90,6 @@ Tambah Presensi Karyawan | MANAGEMENT
               <div class="input-group">
                 <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
               </div>
-              <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
               @error('gambar')
               <div class="invalid-feedback" style="display: block">
                 {{ $message }}

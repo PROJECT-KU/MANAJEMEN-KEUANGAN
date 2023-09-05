@@ -27,7 +27,7 @@ List Pengguna | MANAGEMENT
                     <i class="fa fa-plus-circle"></i> TAMBAH
                   </a>
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="pencarian" value="{{ app('request')->input('q') }}">
+                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                 <!-- Menggunakan app('request')->input('q') untuk mempertahankan nilai pencarian -->
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-primary">

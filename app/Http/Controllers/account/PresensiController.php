@@ -225,11 +225,12 @@ class PresensiController extends Controller
       $imageName = time() . '.' . $image->getClientOriginalExtension();
       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
       $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    } else {
+      $imagePath = $presensi->gambar;
     }
     //end
 
     $presensi->update([
-      'user_id' => $request->input('user_id'),
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
