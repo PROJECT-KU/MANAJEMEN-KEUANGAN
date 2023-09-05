@@ -2485,18 +2485,43 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN</label>
+                  <label>TUNJANGAN BPJS</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
                     </div>
-                    <input type="text" name="tunjangan" id="tunjangan" value="{{ $gaji->tunjangan }}" placeholder="Masukkan Total Tunjangan" class="form-control currency3">
+                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS">
                   </div>
                 </div>
               </div>
 
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN THR</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ $gaji->tunjangan_thr }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
+                  </div>
+                </div>
+              </div>
 
               <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN LAINNYA</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan" id="tunjangan" value="{{ $gaji->tunjangan }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency3">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>POTONGAN</label>
                   <div class="input-group">
@@ -2508,7 +2533,7 @@ Update Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>TANGGAL DIBAYARKAN</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
@@ -2555,7 +2580,6 @@ Update Gaji Karyawan | MANAGEMENT
                   <div class="input-group">
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
                   </div>
-                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
                   @error('gambar')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -2570,7 +2594,7 @@ Update Gaji Karyawan | MANAGEMENT
                       @if ($gaji->gambar == null)
                       <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
                       @else
-                      <img id="image-preview" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
+                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
                       @endif
                     </div>
                   </a>
@@ -2995,6 +3019,16 @@ Update Gaji Karyawan | MANAGEMENT
   });
 
   var cleaveC = new Cleave('.currency6', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_tunjanganBPJS', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_tunjanganTHR', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

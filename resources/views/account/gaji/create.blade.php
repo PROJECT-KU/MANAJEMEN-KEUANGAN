@@ -1399,7 +1399,41 @@ Tambah Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN</label>
+                  <label>TUNJANGAN BPJS</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS">
+                  </div>
+                  @error('tunjangan_bpjs')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN THR</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ old('tunjangan_thr') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
+                  </div>
+                  @error('tunjangan_thr')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN LAINNYA</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1413,8 +1447,10 @@ Tambah Gaji Karyawan | MANAGEMENT
                   @enderror
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-4">
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>POTONGAN</label>
                   <div class="input-group">
@@ -1431,7 +1467,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>TANGGAL DIBAYARKAN</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control datetimepicker" required>
@@ -1483,7 +1519,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group">
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
                   </div>
-                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
+                  <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera -->
                   @error('gambar')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -1904,6 +1940,14 @@ Tambah Gaji Karyawan | MANAGEMENT
   });
 
   var cleaveC = new Cleave('.currency5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_tunjanganBPJS', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_tunjanganTHR', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

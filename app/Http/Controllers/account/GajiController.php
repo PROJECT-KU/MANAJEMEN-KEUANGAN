@@ -249,6 +249,10 @@ class GajiController extends Controller
 
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
+    $tunjangan_bpjs = $request->input('tunjangan_bpjs');
+    $tunjangan_bpjs = empty($tunjangan_bpjs) ? 0 : str_replace(",", "", $tunjangan_bpjs);
+    $tunjangan_thr = $request->input('tunjangan_thr');
+    $tunjangan_thr = empty($tunjangan_thr) ? 0 : str_replace(",", "", $tunjangan_thr);
 
     //jumlah lembur
     $jumlah_lembur = $request->input('jumlah_lembur') ?? 0;
@@ -306,7 +310,7 @@ class GajiController extends Controller
     $potongan = $request->input('potongan');
     $potongan = empty($potongan) ? 0 : str_replace(",", "", $potongan);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan - $potongan;
+    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr - $potongan;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     //menyinpan image di path
@@ -371,6 +375,8 @@ class GajiController extends Controller
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
       'tunjangan' => $tunjangan,
+      'tunjangan_bpjs' => $tunjangan_bpjs,
+      'tunjangan_thr' => $tunjangan_thr,
       'jumlah_bonus' => $jumlah_bonus,
       'jumlah_bonus1' => $jumlah_bonus1,
       'jumlah_bonus2' => $jumlah_bonus2,
@@ -565,6 +571,10 @@ class GajiController extends Controller
 
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
+    $tunjangan_bpjs = $request->input('tunjangan_bpjs');
+    $tunjangan_bpjs = empty($tunjangan_bpjs) ? 0 : str_replace(",", "", $tunjangan_bpjs);
+    $tunjangan_thr = $request->input('tunjangan_thr');
+    $tunjangan_thr = empty($tunjangan_thr) ? 0 : str_replace(",", "", $tunjangan_thr);
 
     //jumlah lembur
     $jumlah_lembur = $request->input('jumlah_lembur') ?? 0;
@@ -621,7 +631,7 @@ class GajiController extends Controller
     $potongan = $request->input('potongan');
     $potongan = empty($potongan) ? 0 : str_replace(",", "", $potongan);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan - $potongan;
+    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr - $potongan;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     $existingUserId = $gaji->user_id;
@@ -689,6 +699,8 @@ class GajiController extends Controller
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
       'tunjangan' => $tunjangan,
+      'tunjangan_bpjs' => $tunjangan_bpjs,
+      'tunjangan_thr' => $tunjangan_thr,
       'jumlah_bonus' => $jumlah_bonus,
       'jumlah_bonus1' => $jumlah_bonus1,
       'jumlah_bonus2' => $jumlah_bonus2,

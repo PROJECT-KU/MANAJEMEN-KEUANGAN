@@ -145,9 +145,9 @@ Detail Gaji Karyawan | MANAGEMENT
                 <label>GAJI POKOK</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+                    <span class="input-group-text" style="border-color: red;">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_pokok" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" readonly>
+                  <input type="text" name="gaji_pokok" style="border-color: red;" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" readonly>
                 </div>
               </div>
             </div>
@@ -990,7 +990,31 @@ Detail Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN</label>
+                  <label>TUNJANGAN BPJS</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ number_format($gaji->tunjangan_bpjs, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN THR</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ number_format($gaji->tunjangan_thr, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TUNJANGAN LAINNYA</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -999,8 +1023,10 @@ Detail Gaji Karyawan | MANAGEMENT
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-4">
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>POTONGAN</label>
                   <div class="input-group">
@@ -1012,7 +1038,7 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>TANGGAL DIBAYARKAN</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ date('d-m-Y H:i', strtotime($gaji->tanggal)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
@@ -1059,7 +1085,6 @@ Detail Gaji Karyawan | MANAGEMENT
                   <div class="input-group">
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
                   </div>
-                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
                   @error('gambar')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -1074,7 +1099,7 @@ Detail Gaji Karyawan | MANAGEMENT
                       @if ($gaji->gambar == null)
                       <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
                       @else
-                      <img id="image-preview" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
+                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
                       @endif
                     </div>
                   </a>
@@ -1276,6 +1301,17 @@ Detail Gaji Karyawan | MANAGEMENT
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
+
+  var cleaveC = new Cleave('.currency_tunjanganBPJS', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_tunjanganTHR', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
   var timeoutHandler = null;
 </script>
 
