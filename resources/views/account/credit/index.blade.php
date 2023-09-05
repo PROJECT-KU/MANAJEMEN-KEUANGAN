@@ -19,7 +19,7 @@ List Uang Keluar | MANAGEMENT
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('account.credit.search') }}" method="GET">
+                    <form action="{{ route('account.credit.search') }}" method="GET" enctype="multipart/form-data">
                         <div class="form-group">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
@@ -42,6 +42,7 @@ List Uang Keluar | MANAGEMENT
                                     <th scope="col">NOMINAL</th>
                                     <th scope="col">KETERANGAN</th>
                                     <th scope="col">TANGGAL</th>
+                                    <th scope="col">BUKTI UANG KELUAR</th>
                                     <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                                 </tr>
                             </thead>
@@ -56,6 +57,13 @@ List Uang Keluar | MANAGEMENT
                                     <td>{{ rupiah($hasil->nominal) }}</td>
                                     <td>{{ $hasil->description }}</td>
                                     <td>{{ $hasil->credit_date }}</td>
+                                    <td class="column-width" style="text-align: center;">
+                                        <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                                            <div class="thumbnail-circle">
+                                                <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                                            </div>
+                                        </a>
+                                    </td>
                                     <td class="text-center">
                                         <a href="{{ route('account.credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fa fa-pencil-alt"></i>
@@ -80,34 +88,42 @@ List Uang Keluar | MANAGEMENT
         </div>
     </section>
 </div>
+<script>
+    @if(Session::has('success'))
+    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000); // Refresh halaman setelah 2 detik
+    @endif
+</script>
 
 <script>
     /**
      * Sweet alert
      */
-    @if($message = Session::get('success'))
-    swal({
-        type: "success",
-        icon: "success",
-        title: "BERHASIL!",
-        text: "{{ $message }}",
-        timer: 1500,
-        showConfirmButton: false,
-        showCancelButton: false,
-        buttons: false,
-    });
-    @elseif($message = Session::get('error'))
-    swal({
-        type: "error",
-        icon: "error",
-        title: "GAGAL!",
-        text: "{{ $message }}",
-        timer: 1500,
-        showConfirmButton: false,
-        showCancelButton: false,
-        buttons: false,
-    });
-    @endif
+    // @if($message = Session::get('success'))
+    // swal({
+    //     type: "success",
+    //     icon: "success",
+    //     title: "BERHASIL!",
+    //     text: "{{ $message }}",
+    //     timer: 1500,
+    //     showConfirmButton: false,
+    //     showCancelButton: false,
+    //     buttons: false,
+    // });
+    // @elseif($message = Session::get('error'))
+    // swal({
+    //     type: "error",
+    //     icon: "error",
+    //     title: "GAGAL!",
+    //     text: "{{ $message }}",
+    //     timer: 1500,
+    //     showConfirmButton: false,
+    //     showCancelButton: false,
+    //     buttons: false,
+    // });
+    // @endif
 
     // delete
     function Delete(id) {

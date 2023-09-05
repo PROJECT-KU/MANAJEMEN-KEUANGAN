@@ -31,9 +31,9 @@ class CreditController extends Controller
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-            ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-            ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description',  'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->where(function ($query) use ($user) {
                     $query->where('users.company', $user->company)
                         ->orWhere('credit.user_id', $user->id);
@@ -42,12 +42,12 @@ class CreditController extends Controller
                     $query->where('users.level', 'manager')
                         ->orWhere('users.level', 'staff');
                 })
-            ->orderBy('credit.created_at', 'DESC')
-            ->paginate(10);
+                ->orderBy('credit.created_at', 'DESC')
+                ->paginate(10);
         } else {
             // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->where('credit.user_id', $user->id)
@@ -85,21 +85,21 @@ class CreditController extends Controller
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-            ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-            ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
-            ->where(function ($query) use ($search) {
-                $query->where('credit.description', 'LIKE', '%' . $search . '%')
-                    ->orWhere(
-                        'categories_credit.name',
-                        'LIKE',
-                        '%' . $search . '%'
-                    )
-                    ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
-                    ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
-            })
-            ->orderBy('credit.created_at', 'DESC')
-            ->paginate(10);
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->where(function ($query) use ($search) {
+                    $query->where('credit.description', 'LIKE', '%' . $search . '%')
+                        ->orWhere(
+                            'categories_credit.name',
+                            'LIKE',
+                            '%' . $search . '%'
+                        )
+                        ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
+                        ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('credit.created_at', 'DESC')
+                ->paginate(10);
         } else {
             // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $credit = DB::table('credit')
@@ -152,7 +152,7 @@ class CreditController extends Controller
         // Get all categories for users who are managers and staff in the same company
         if ($user->level == 'manager' || $user->level == 'staff') {
             $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->get(['categories_credit.*']);
 
             return view('account.credit.create', compact('categories'));
@@ -188,6 +188,18 @@ class CreditController extends Controller
                 ]
             );
 
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            }
+            //end
+
+
             //Eloquent simpan data
             $save = Credit::create([
                 'user_id'       => Auth::user()->id,
@@ -195,6 +207,7 @@ class CreditController extends Controller
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
             //cek apakah data berhasil disimpan
             if ($save) {
@@ -221,6 +234,16 @@ class CreditController extends Controller
                     'description.required' => 'Masukkan Keterangan!',
                 ]
             );
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            }
+            //end
 
             //Eloquent simpan data
             $save = Credit::create([
@@ -229,6 +252,7 @@ class CreditController extends Controller
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
             //cek apakah data berhasil disimpan
             if ($save) {
@@ -250,7 +274,7 @@ class CreditController extends Controller
         // Get all categories for users who are managers and staff in the same company
         if ($user->level == 'manager' || $user->level == 'staff') {
             $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->get(['categories_credit.*']);
 
             return  view('account.credit.edit', compact('credit', 'categories'));
@@ -270,7 +294,7 @@ class CreditController extends Controller
         $user = Auth::user();
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Cek apakah user memiliki hak akses untuk mengedit data transaksi
-            if ($debit->user_id == $user->id) {
+            if ($credit->user_id == $user->id) {
                 $this->validate(
                     $request,
                     [
@@ -288,6 +312,19 @@ class CreditController extends Controller
                     ]
                 );
 
+                //save image to path
+                $imagePath = null;
+
+                if ($request->hasFile('gambar')) {
+                    $image = $request->file('gambar');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                    $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+                } else {
+                    $imagePath = $credit->gambar;
+                }
+                //end
+
                 //Eloquent simpan data
                 $update = Credit::whereId($credit->id)->update([
                     'user_id'       => Auth::user()->id,
@@ -295,6 +332,7 @@ class CreditController extends Controller
                     'credit_date'    => $request->input('credit_date'),
                     'nominal'       => str_replace(",", "", $request->input('nominal')),
                     'description'   => $request->input('description'),
+                    'gambar' => $imagePath, // Store the image path
                 ]);
                 //cek apakah data berhasil disimpan
                 if ($update) {
@@ -323,6 +361,19 @@ class CreditController extends Controller
                 ]
             );
 
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            } else {
+                $imagePath = $credit->gambar;
+            }
+            //end
+
             //Eloquent simpan data
             $update = Credit::whereId($credit->id)->update([
                 'user_id'       => Auth::user()->id,
@@ -330,6 +381,7 @@ class CreditController extends Controller
                 'credit_date'    => $request->input('credit_date'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
             //cek apakah data berhasil disimpan
             if ($update) {
