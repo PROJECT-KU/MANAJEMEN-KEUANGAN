@@ -100,11 +100,7 @@
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td style="text-align: center;">
-                      @if ($transaction['type'] === 'gaji')
                       {{ $item->id_transaksi }}
-                      @else
-                      -
-                      @endif
                     </td>
                     <td style="text-align: center;">
                       @if ($transaction['type'] === 'debit')

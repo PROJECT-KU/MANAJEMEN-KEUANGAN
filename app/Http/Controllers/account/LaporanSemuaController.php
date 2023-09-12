@@ -36,7 +36,7 @@ class LaporanSemuaController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $debit = DB::table('debit')
-        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
         ->leftJoin('users', 'debit.user_id', '=', 'users.id')
         ->where(function ($query) use ($user) {
@@ -52,7 +52,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->leftJoin('users', 'credit.user_id', '=', 'users.id')
         ->where(function ($query) use ($user) {
@@ -76,7 +76,7 @@ class LaporanSemuaController extends Controller
         ->get();
     } else {
       $debit = DB::table('debit')
-        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
         ->where('debit.user_id', Auth::user()->id)
         ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
@@ -84,7 +84,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
         ->where('credit.user_id', Auth::user()->id)
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
@@ -127,7 +127,7 @@ class LaporanSemuaController extends Controller
     $search = $request->get('q');
 
     $debit = DB::table('debit')
-      ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+      ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
       ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
       ->where('debit.user_id', Auth::user()->id)
       ->where(function ($query) use ($search) {
@@ -144,7 +144,7 @@ class LaporanSemuaController extends Controller
     }
 
     $credit = DB::table('credit')
-      ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+      ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
       ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
       ->where('credit.user_id', Auth::user()->id)
       ->where(function ($query) use ($search) {
@@ -299,7 +299,7 @@ class LaporanSemuaController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $debit = DB::table('debit')
-        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
         ->leftJoin('users', 'debit.user_id', '=', 'users.id')
         ->where(function ($query) use ($user) {
@@ -315,7 +315,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->leftJoin('users', 'credit.user_id', '=', 'users.id')
         ->where(function ($query) use ($user) {
@@ -339,7 +339,7 @@ class LaporanSemuaController extends Controller
         ->get();
     } else {
       $debit = DB::table('debit')
-        ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+        ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
         ->where('debit.user_id', Auth::user()->id)
         ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
@@ -347,7 +347,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
         ->where('credit.user_id', Auth::user()->id)
         ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
@@ -417,7 +417,7 @@ class LaporanSemuaController extends Controller
     $tanggal_akhir = $request->input('tanggal_akhir');
 
     if ($user->level == 'manager' || $user->level == 'staff') {
-      $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+      $debit = Debit::select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
         ->leftJoin('users', 'debit.user_id', '=', 'users.id')
         ->whereDate('debit.debit_date', '>=', $tanggal_awal)
@@ -434,7 +434,7 @@ class LaporanSemuaController extends Controller
         ->appends(request()->except('page'));
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->leftJoin('users', 'credit.user_id', '=', 'users.id')
         ->whereDate('credit.credit_date', '>=', $tanggal_awal)
@@ -466,7 +466,7 @@ class LaporanSemuaController extends Controller
         ->paginate(10)
         ->appends(request()->except('page'));
     } else {
-      $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+      $debit = Debit::select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
         ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
         ->whereDate('debit.debit_date', '>=', $tanggal_awal)
         ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
@@ -475,7 +475,7 @@ class LaporanSemuaController extends Controller
         ->appends(request()->except('page'));
 
       $credit = DB::table('credit')
-        ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+        ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
         ->whereDate('credit.credit_date', '>=', $tanggal_awal)
         ->whereDate('credit.credit_date', '<=', $tanggal_akhir)

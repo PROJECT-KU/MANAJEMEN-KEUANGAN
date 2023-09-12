@@ -100,6 +100,11 @@ Route::prefix('account')->group(function () {
     Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
     Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
 
+    //laporan neraca
+    Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');
+    Route::Resource('/neraca', 'account\NeracaController', ['as' => 'account']);
+
+
     //gaji
     Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
     Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');

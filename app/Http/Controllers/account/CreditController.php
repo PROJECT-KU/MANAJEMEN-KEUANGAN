@@ -23,6 +23,17 @@ class CreditController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function generateRandomId($length)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $id;
+    }
+
     public function index()
     {
 
@@ -170,6 +181,8 @@ class CreditController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        $id_transaksi = $this->generateRandomId(5);
+
         if ($user->level == 'manager' || $user->level == 'staff') {
             $this->validate(
                 $request,
@@ -203,6 +216,7 @@ class CreditController extends Controller
             //Eloquent simpan data
             $save = Credit::create([
                 'user_id'       => Auth::user()->id,
+                'id_transaksi' => $id_transaksi,
                 'credit_date'   => $request->input('credit_date'),
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),

@@ -88,6 +88,8 @@ List Uang Keluar | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!-- reload data ketika success -->
 <script>
     @if(Session::has('success'))
     // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
@@ -96,11 +98,9 @@ List Uang Keluar | MANAGEMENT
     }, 1000); // Refresh halaman setelah 2 detik
     @endif
 </script>
+<!-- end -->
 
 <script>
-    /**
-     * Sweet alert
-     */
     // @if($message = Session::get('success'))
     // swal({
     //     type: "success",

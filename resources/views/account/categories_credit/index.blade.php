@@ -128,33 +128,41 @@ List Kategori Uang keluar | MANAGEMENT
     </section>
 </div>
 
+<!-- reload data ketika success -->
 <script>
-    /**
-     * Sweet alert
-     */
-    @if($message = Session::get('success'))
-    swal({
-        type: "success",
-        icon: "success",
-        title: "BERHASIL!",
-        text: "{{ $message }}",
-        timer: 1500,
-        showConfirmButton: false,
-        showCancelButton: false,
-        buttons: false,
-    });
-    @elseif($message = Session::get('error'))
-    swal({
-        type: "error",
-        icon: "error",
-        title: "GAGAL!",
-        text: "{{ $message }}",
-        timer: 1500,
-        showConfirmButton: false,
-        showCancelButton: false,
-        buttons: false,
-    });
+    @if(Session::has('success'))
+    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000); // Refresh halaman setelah 2 detik
     @endif
+</script>
+<!-- end -->
+
+<script>
+    // @if($message = Session::get('success'))
+    // swal({
+    //     type: "success",
+    //     icon: "success",
+    //     title: "BERHASIL!",
+    //     text: "{{ $message }}",
+    //     timer: 1500,
+    //     showConfirmButton: false,
+    //     showCancelButton: false,
+    //     buttons: false,
+    // });
+    // @elseif($message = Session::get('error'))
+    // swal({
+    //     type: "error",
+    //     icon: "error",
+    //     title: "GAGAL!",
+    //     text: "{{ $message }}",
+    //     timer: 1500,
+    //     showConfirmButton: false,
+    //     showCancelButton: false,
+    //     buttons: false,
+    // });
+    // @endif
 
     // delete
     function Delete(id) {

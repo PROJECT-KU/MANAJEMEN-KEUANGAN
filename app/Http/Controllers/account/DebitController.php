@@ -24,6 +24,17 @@ class DebitController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function generateRandomId($length)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $id;
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -133,6 +144,8 @@ class DebitController extends Controller
     {
         // Pastikan hanya user dengan role 'manager' atau 'staff' yang bisa melakukan create
         $user = Auth::user();
+        $id_transaksi = $this->generateRandomId(5);
+
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Lakukan validasi data yang diinputkan
             $this->validate(
@@ -165,6 +178,7 @@ class DebitController extends Controller
             // Buat data transaksi baru
             $save = Debit::create([
                 'user_id'       => Auth::user()->id,
+                'id_transaksi' => $id_transaksi,
                 'debit_date'   => $request->input('debit_date'),
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
