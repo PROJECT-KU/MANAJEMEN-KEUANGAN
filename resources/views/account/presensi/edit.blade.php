@@ -70,7 +70,6 @@ Update Presensi Karyawan | MANAGEMENT
                   <div class="input-group">
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
                   </div>
-                  <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera
                   @error('gambar')
                   <div class="invalid-feedback" style="display: block">
                     {{ $message }}
@@ -80,7 +79,7 @@ Update Presensi Karyawan | MANAGEMENT
                 <div class="mt-3">
                   <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
                     <div class="card" style="width: 12rem;">
-                      <img id="image-preview" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
                     </div>
                   </a>
                 </div>

@@ -81,7 +81,7 @@ Detail Presensi Karyawan | MANAGEMENT
                   <label>BUKTI PRESENSI</label>
                   <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
                     <div class="card" style="width: 12rem;">
-                      <img id="image-preview" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
                     </div>
                   </a>
                 </div>

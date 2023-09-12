@@ -178,12 +178,18 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif
 
-                                <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} show">
+                                <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> UANG MASUK</a></li>
                                         <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> UANG KELUAR</a></li>
-                                        <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-pie"></i> SEMUA</a></li>
+                                        <li class="dropdown {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
+                                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>SEMUA</span></a>
+                                            <ul class="dropdown-menu">
+                                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-pie"></i>CATATAN</a></li>
+                                                <li class="{{ setActive('account/neraca') }}"><a class="nav-link" href="{{ route('account.neraca.index') }}"><i class="fas fa-chart-pie"></i>NERACA</a></li>
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </li>
 

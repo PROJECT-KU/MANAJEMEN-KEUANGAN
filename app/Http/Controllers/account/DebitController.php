@@ -24,6 +24,17 @@ class DebitController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function generateRandomId($length)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $id;
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -31,7 +42,7 @@ class DebitController extends Controller
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
                 ->where(function ($query) use ($user) {
@@ -42,12 +53,12 @@ class DebitController extends Controller
                     $query->where('users.level', 'manager')
                         ->orWhere('users.level', 'staff');
                 })
-            ->orderBy('debit.created_at', 'DESC')
-            ->paginate(10);
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
         } else {
             // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
                 ->where('debit.user_id', $user->id)
                 ->orderBy('debit.created_at', 'DESC')
@@ -85,8 +96,8 @@ class DebitController extends Controller
                         ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
                         ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
                 })
-            ->orderBy('debit.created_at', 'DESC')
-            ->paginate(10);
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
         } else {
             // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $debit = DB::table('debit')
@@ -119,7 +130,7 @@ class DebitController extends Controller
         $user = Auth::user();
         if ($user->level == 'manager' || $user->level == 'staff') {
             $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->get(['categories_debit.*']);
 
             return view('account.debit.create', compact('categories'));
@@ -133,6 +144,8 @@ class DebitController extends Controller
     {
         // Pastikan hanya user dengan role 'manager' atau 'staff' yang bisa melakukan create
         $user = Auth::user();
+        $id_transaksi = $this->generateRandomId(5);
+
         if ($user->level == 'manager' || $user->level == 'staff') {
             // Lakukan validasi data yang diinputkan
             $this->validate(
@@ -151,19 +164,32 @@ class DebitController extends Controller
                 ]
             );
 
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            }
+            //end
+
             // Buat data transaksi baru
             $save = Debit::create([
                 'user_id'       => Auth::user()->id,
+                'id_transaksi' => $id_transaksi,
                 'debit_date'   => $request->input('debit_date'),
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
 
             // Redirect dengan pesan sukses
             if ($save) {
                 //redirect dengan pesan sukses
-                return redirect()->route('account.debit.index')->with(['success', 'message' => 'Data Berhasil Disimpan!']);
+                return redirect()->route('account.debit.index')->with(['success' => 'Data Berhasil Disimpan!']);
             } else {
                 //redirect dengan pesan error
                 return redirect()->route('account.debit.index')->with(['error' => 'Data Gagal Disimpan!']);
@@ -186,6 +212,17 @@ class DebitController extends Controller
                 ]
             );
 
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            }
+            //end
+
             // Buat data transaksi baru
             $save = Debit::create([
                 'user_id'       => Auth::user()->id,
@@ -193,6 +230,7 @@ class DebitController extends Controller
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
 
             // Redirect dengan pesan sukses
@@ -214,7 +252,7 @@ class DebitController extends Controller
         // Get all categories for users who are managers and staff in the same company
         if ($user->level == 'manager' || $user->level == 'staff') {
             $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->get(['categories_debit.*']);
 
             return  view('account.debit.edit', compact('debit', 'categories'));
@@ -253,12 +291,27 @@ class DebitController extends Controller
                     ]
                 );
 
+                //save image to path
+                $imagePath = null;
+
+                if ($request->hasFile('gambar')) {
+                    $image = $request->file('gambar');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                    $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+                } else {
+                    $imagePath = $debit->gambar;
+                }
+                //end
+
+
                 // Perbarui data transaksi
                 $debit->update([
                     'debit_date'   => $request->input('debit_date'),
                     'category_id'  => $request->input('category_id'),
                     'nominal'      => str_replace(",", "", $request->input('nominal')),
                     'description'  => $request->input('description'),
+                    'gambar' => $imagePath, // Store the image path
                 ]);
 
                 // Redirect dengan pesan sukses
@@ -287,12 +340,27 @@ class DebitController extends Controller
                 ]
             );
 
+            //save image to path
+            $imagePath = null;
+
+            if ($request->hasFile('gambar')) {
+                $image = $request->file('gambar');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+            } else {
+                $imagePath = $debit->gambar;
+            }
+            //end
+
+
             // Perbarui data transaksi
             $debit->update([
                 'debit_date'   => $request->input('debit_date'),
                 'category_id'  => $request->input('category_id'),
                 'nominal'      => str_replace(",", "", $request->input('nominal')),
                 'description'  => $request->input('description'),
+                'gambar' => $imagePath, // Store the image path
             ]);
 
             // Redirect dengan pesan sukses

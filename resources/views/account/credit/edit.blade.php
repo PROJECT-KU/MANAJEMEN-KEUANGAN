@@ -20,7 +20,7 @@ Update Uang keluar | MANAGEMENT
 
                 <div class="card-body">
 
-                    <form action="{{ route('account.credit.update', $credit->id) }}" method="POST">
+                    <form action="{{ route('account.credit.update', $credit->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="row">
@@ -72,6 +72,26 @@ Update Uang keluar | MANAGEMENT
                                     @enderror
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>BUKTI UANG KELUAR</label>
+                                    <div class="input-group">
+                                        <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+                                    </div>
+                                    @error('gambar')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                                <div class="mt-3">
+                                    <a href="{{ asset('images/' . $credit->gambar) }}" data-lightbox="{{ $credit->id }}">
+                                        <div class="card" style="width: 12rem;">
+                                            <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $credit->gambar) }}" alt="Preview Image">
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -101,6 +121,26 @@ Update Uang keluar | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!-- upload image -->
+<script>
+    const imageInput = document.getElementById('gambar');
+    const imagePreview = document.getElementById('image-preview');
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block'; // Show the preview
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+<!-- end upload image -->
+
 <script>
     var cleaveC = new Cleave('.currency', {
         numeral: true,

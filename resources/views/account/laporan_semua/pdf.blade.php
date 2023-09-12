@@ -3,8 +3,11 @@
     <div class="section-header">
       <center>
         <h1>LAPORAN TRANSAKSI SEMUA</h1>
+        <h4>{{ $user->alamat_company }}</h4>
+        <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
       </center>
     </div>
+    <hr><br><br>
 
     <div class="section-body">
 
@@ -17,17 +20,17 @@
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">ID TRANSAKSI</th>
-                  <th scope="col" colspan="3" style="text-align: center; width:150px">JENIS TRANSAKSI</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">NAMA KARYAWAN</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">KATEGORI</th>
-                  <!--<th scope="col" rowspan="2" style="text-align: center; width:150px">KETERANGAN</th>-->
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">TANGGAL</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:175px">ID TRANSAKSI</th>
+                  <th scope="col" colspan="3" style="text-align: center; width:175px">JENIS TRANSAKSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:175px">NAMA KARYAWAN</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:175px">KATEGORI</th>
+                  <!--<th scope="col" rowspan="2" style="text-align: center; width:175px">KETERANGAN</th>-->
+                  <th scope="col" rowspan="2" style="text-align: center; width:175px">TANGGAL</th>
                 </tr>
                 <tr>
-                  <th scope="col" style="text-align: center; width:80px">MASUK</th>
-                  <th scope="col" style="text-align: center; width:80px">KELUAR</th>
-                  <th scope="col" style="text-align: center; width:80px">GAJI</th>
+                  <th scope="col" style="text-align: center; width:100px">MASUK</th>
+                  <th scope="col" style="text-align: center; width:100px">KELUAR</th>
+                  <th scope="col" style="text-align: center; width:100px">GAJI</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,14 +140,27 @@
                 @php $no++; @endphp
                 @endforeach
               </tbody>
+            </table><br><br>
+
+            <hr>
+            <table class="table table-bordered mt-5">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL TRANSAKSI MASUK</th>
+                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL TRANSAKSI KELUAR</th>
+                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL GAJI KARYAWAN</th>
+                </tr>
+              </thead>
+              <br>
+              <tbody>
+                <tr style="text-align: center; font-weight: bold;">
+                  <td>Rp. {{ number_format($totalDebit, 0, ',', ',') }}</td>
+                  <td>Rp. {{ number_format($totalCredit, 0, ',', ',') }}</td>
+                  <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
+                </tr>
+              </tbody>
             </table>
-
-            <div class="mt-5" style="color: red;">
-              <h4>TOTAL TRANSAKSI MASUK : Rp. {{ number_format($totalDebit, 0, ',', ',') }}</h4>
-              <h4>TOTAL TRANSAKSI KELUAR : Rp. {{ number_format($totalCredit, 0, ',', ',') }}</h4>
-              <h4>TOTAL GAJI KARYAWAN : Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h4>
-            </div>
-
+            <hr><br><br>
 
           </div>
         </div>

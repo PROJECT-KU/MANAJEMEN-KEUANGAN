@@ -40,7 +40,7 @@ List Gaji Karyawan | MANAGEMENT
                   </button>
                 </div>
                 @if(request()->has('q'))
-                <a href="{{ route('account.gaji.search') }}" class="btn btn-danger">
+                <a href="{{ route('account.gaji.index') }}" class="btn btn-danger">
                   <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                 </a>
                 @endif
@@ -149,13 +149,16 @@ List Gaji Karyawan | MANAGEMENT
                     Bank Name Not Found
                     @endif
                   </td>-->
-                  <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
-                  <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
+                  <td class="column-width" style="text-align: center; width:150px">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
+                  <td class="column-width" style="text-align: center; width:200px">
+                    {{ strftime('%d %B %Y %H:%M', strtotime($hasil->tanggal)) }}
+                  </td>
+
                   <td class="column-width" style="text-align: center;">
                     @if($hasil->status == 'pending')
-                    <button type="button" class="btn btn-warning">PENDING</button>
+                    <span class="badge badge-warning">PENDING</span>
                     @else
-                    <button type="button" class="btn btn-success">TERBAYAR</button>
+                    <span class="badge badge-success">TERBAYAR</span>
                     @endif
                   </td>
                   @if (Auth::user()->level == 'karyawan')
@@ -203,6 +206,17 @@ List Gaji Karyawan | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!-- reload data ketika success -->
+<script>
+  @if(Session::has('success'))
+  // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+  setTimeout(function() {
+    window.location.reload();
+  }, 1000); // Refresh halaman setelah 2 detik
+  @endif
+</script>
+<!-- end -->
 
 <script>
   //@if($message = Session::get('success'))

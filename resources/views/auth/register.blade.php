@@ -116,6 +116,7 @@
                                                 <select class="form-control" name="level">
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="staff">Staff</option>
+                                                    <option value="karyawan">Karyawan</option>
                                                 </select>
 
                                                 @error('level')
@@ -255,7 +256,7 @@
             if (selectedValue === 'perorangan') {
                 levelSelect.innerHTML = '<option value="users">Users</option>';
             } else if (selectedValue === 'bisnis') {
-                levelSelect.innerHTML = '<option value="staff">Staff</option>';
+                levelSelect.innerHTML = '<option value="staff">Staff</option> <option value="karyawan">Karyawan</option>';
             }
         }
 

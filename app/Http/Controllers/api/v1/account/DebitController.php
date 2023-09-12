@@ -25,7 +25,7 @@ class DebitController extends Controller
     public function index()
     {
         $debit = DB::table('debit')
-            ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name as category_name')
+            ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'debit.gambar', 'categories_debit.id as id_category', 'categories_debit.name as category_name')
             ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
             ->where('debit.user_id', Auth::user()->id)
             ->orderBy('debit.created_at', 'DESC')
@@ -34,8 +34,7 @@ class DebitController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $debit
-        ],200);
-
+        ], 200);
     }
 
     /**
@@ -44,28 +43,39 @@ class DebitController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(
+            $request->all(),
+            [
 
-            'nominal'        => 'required',
-            'debit_date'     => 'required',
-            'category_id'    => 'required',
-            'description'    => 'required',
+                'nominal'        => 'required',
+                'debit_date'     => 'required',
+                'category_id'    => 'required',
+                'description'    => 'required',
 
-        ],
+            ],
             [
                 'nominal.required' => 'Masukkan Nominal Debit / Uang Masuk!',
                 'debit_date.required' => 'Silahkan Pilih Tanggal!',
                 'category_id.required' => 'Silahkan Pilih Kategori!',
                 'description.required' => 'Masukkan Keterangan!',
-            ]);
+            ]
+        );
+
+        $imagePath = null;
+
+        if ($request->hasFile('gambar')) {
+            $image = $request->file('gambar');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+            $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+        }
 
         if ($validator->fails()) {
 
             return response()->json([
                 'success' => false,
                 'data'    => $validator->errors()
-            ],401);
-
+            ], 401);
         } else {
 
             Debit::create([
@@ -74,14 +84,13 @@ class DebitController extends Controller
                 'category_id'   => $request->input('category_id'),
                 'nominal'       => str_replace(",", "", $request->input('nominal')),
                 'description'   => $request->input('description'),
+                'gambar' => $imagePath ?? null, // Store the image path
             ]);
 
             return response()->json([
                 'success' => true,
                 'data'    => 'Data Berhasil Disimpan !'
-            ],200);
-
+            ], 200);
         }
     }
-
 }

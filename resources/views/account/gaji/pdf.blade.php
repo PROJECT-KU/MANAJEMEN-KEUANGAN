@@ -3,8 +3,11 @@
     <center>
       <div class="section-header">
         <h1>LIST GAJI KARYAWAN</h1>
+        <h4>{{ $user->alamat_company }}</h4>
+        <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
       </div>
     </center>
+    <hr><br><br>
 
     <div class="section-body">
 
@@ -130,13 +133,15 @@
               @endif
               @endforeach
             </tbody>
-          </table>
-          <div class="mt-5" style="color: red;">
-            <h4>TOTAL GAJI KARYAWAN : Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h4>
-          </div>
-
-
-
+          </table><br><br>
+          <hr>
+          <center>
+            <div class="mt-5">
+              <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h3>
+              <p><i>{{ $terbilang }}</i></p>
+            </div>
+          </center>
+          <hr>
         </div>
       </div>
     </div>

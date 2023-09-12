@@ -6,9 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Slip Gaji Karyawan | MANAGEMENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ asset('public/adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="{{ asset('public/adminlte/dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
   </head>
 
@@ -16,13 +16,20 @@
     <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
       @csrf
       <div class="wrapper">
-        <img src="{{ storage_path('app/public/images/images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;">
+        <!-- <img src="{{ storage_path('app/images/images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;"> -->
         <section class="invoice">
           <div class="row">
             <div class="col-12">
               <h2 class="page-header">
                 <center><i class="fas fa-globe"></i> SLIP GAJI KARYAWAN<br>
-                  <p style="margin-top: -3px; font-size:15px"><strong>Periode</strong> {{ date('j F, Y', strtotime('first day of this month')) }} - {{ date('j F, Y', strtotime('last day of this month')) }}</p>
+                  <p style="margin-top: -3px; font-size: 15px"><strong>Periode</strong>
+                    <?php
+                    $tanggalPembayaran = strtotime($gaji->tanggal);
+                    $awalBulan = date('j F, Y', strtotime('first day of this month', $tanggalPembayaran));
+                    $akhirBulan = date('j F, Y', strtotime('last day of this month', $tanggalPembayaran));
+                    echo $awalBulan . ' - ' . $akhirBulan;
+                    ?>
+                  </p>
                 </center>
               </h2>
             </div>
@@ -126,8 +133,8 @@
                       Bank Name Not Found
                       @endif
                       <br>
-                      <b>Pembayaran : </b> {{ date('d-m-Y H:i', strtotime($gaji->tanggal)) }}<br>
-                      <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b> {{ date('d/m/Y') }}
+                      <b>Pembayaran : </b>{{ date('j F Y H:i', strtotime($gaji->tanggal)) }}<br>
+                      <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b> {{ date('d F Y') }}
                     </td>
                   </tr>
                 </tbody>
@@ -140,20 +147,24 @@
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th scope="col" style="text-align: center; width:200px">Gaji Pokok</th>
-                    <th scope="col" style="text-align: center; width:200px">Lemburan</th>
-                    <th scope="col" style="text-align: center; width:200px">Bonus</th>
-                    <th scope="col" style="text-align: center; width:200px">Tunjangan</th>
-                    <th scope="col" style="text-align: center; width:200px">Potongan</th>
+                    <th scope="col" style="text-align: center; width:145px">Gaji Pokok</th>
+                    <th scope="col" style="text-align: center; width:145px">Lemburan</th>
+                    <th scope="col" style="text-align: center; width:145px">Bonus</th>
+                    <th scope="col" style="text-align: center; width:145px">Tunjangan BPJS</th>
+                    <th scope="col" style="text-align: center; width:145px">Tunjangan THR</th>
+                    <th scope="col" style="text-align: center; width:145px">Tunjangan Lainnya</th>
+                    <th scope="col" style="text-align: center; width:145px">Potongan</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td scope="col" style="text-align: center; width:200px">Rp. {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td>
-                    <td scope="col" style="text-align: center; width:200px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
-                    <td scope="col" style="text-align: center; width:200px">Rp. {{ number_format($gaji->total_bonus, 0, ',', '.') }}</td>
-                    <td scope="col" style="text-align: center; width:200px">Rp. {{ number_format($gaji->tunjangan, 0, ',', '.') }}</td>
-                    <td scope="col" style="text-align: center; width:200px">Rp. {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->total_bonus, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->tunjangan_bpjs, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->tunjangan_thr, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->tunjangan, 0, ',', '.') }}</td>
+                    <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -172,7 +183,7 @@
               <center>
                 <p class="lead">Yogyakarta, {{ date('j F Y', strtotime($gaji->tanggal)) }}</p>
                 <p class="lead"> Manager Operasional</p><br>
-                <img src="{{ asset('adminlte/dist/img/credit/mastercard.png') }}" alt="Mastercard"><br>
+                <!-- <img src="{{ asset('adminlte/dist/img/credit/mastercard.png') }}" alt="Mastercard"><br> -->
                 <p class="lead">
                   {{ $user->pj_company }}
                 </p>
