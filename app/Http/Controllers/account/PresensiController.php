@@ -44,7 +44,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -52,7 +52,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -232,10 +232,12 @@ class PresensiController extends Controller
 
     $presensi->update([
       'status' => $request->input('status'),
+      'status_pulang' => $request->input('status_pulang'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
       'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data
       'gambar' => $imagePath ?? null, // Store the image path
+      'time_pulang' => now(),
     ]);
 
     // Redirect with success or error message

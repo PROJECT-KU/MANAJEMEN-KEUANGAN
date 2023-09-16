@@ -17,7 +17,7 @@ Laporan Transaksi Neraca | MANAGEMENT
                 <div class="card-header text-right">
                     <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI NERACA</h4>
                     <div class="card-header-action">
-                        <a href="{{ route('account.laporan_semua.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
+                        <a href="{{ route('account.laporan_neraca.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
                         <br>
                         <i class="fas fa-info-circle info-icon"></i>
                         <span class="info-text" style="font-size: 13px;">Data yang terdownload hanya data bulan saat ini</span>
@@ -27,7 +27,7 @@ Laporan Transaksi Neraca | MANAGEMENT
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('account.laporan_semua.search') }}" method="GET">
+                    <form action="{{ route('account.neraca.search') }}" method="GET">
                         <div class="form-group">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" name="q" placeholder="pencarian">

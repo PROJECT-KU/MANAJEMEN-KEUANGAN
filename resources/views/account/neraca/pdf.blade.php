@@ -20,17 +20,13 @@
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:175px">ID TRANSAKSI</th>
-                  <th scope="col" colspan="3" style="text-align: center; width:175px">JENIS TRANSAKSI</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:175px">NAMA KARYAWAN</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:175px">KATEGORI</th>
-                  <!--<th scope="col" rowspan="2" style="text-align: center; width:175px">KETERANGAN</th>-->
-                  <th scope="col" rowspan="2" style="text-align: center; width:175px">TANGGAL</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:200px">ID TRANSAKSI</th>
+                  <th scope="col" colspan="2" style="text-align: center; width:200px">JENIS TRANSAKSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:200px">TANGGAL</th>
                 </tr>
                 <tr>
-                  <th scope="col" style="text-align: center; width:100px">MASUK</th>
-                  <th scope="col" style="text-align: center; width:100px">KELUAR</th>
-                  <th scope="col" style="text-align: center; width:100px">GAJI</th>
+                  <th scope="col" style="text-align: center; width:150px">MASUK</th>
+                  <th scope="col" style="text-align: center; width:150px">KELUAR</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,11 +73,9 @@
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td style="text-align: center;">
-                    @if ($transaction['type'] === 'gaji')
+
                     {{ $item->id_transaksi }}
-                    @else
-                    -
-                    @endif
+
                   </td>
                   <td style="text-align: center;">
                     @if ($transaction['type'] === 'debit')
@@ -93,38 +87,12 @@
                   <td style="text-align: center;">
                     @if ($transaction['type'] === 'credit')
                     {{ rupiah($item->nominal) }}
-                    @else
-                    -
-                    @endif
-                  </td>
-                  <td style="text-align: center;">
-                    @if ($transaction['type'] === 'gaji')
+                    @elseif ( $transaction['type'] === 'gaji')
                     {{ rupiah($item->total) }}
                     @else
                     -
                     @endif
                   </td>
-                  <td style="text-align: center;">
-                    @if ($transaction['type'] === 'gaji')
-                    {{ $item->full_name }}
-                    @else
-                    -
-                    @endif
-                  </td>
-                  <td style="text-align: center;">
-                    @if ($transaction['type'] === 'gaji')
-                    GAJI KARYAWAN
-                    @else
-                    {{ $item->name }}
-                    @endif
-                  </td>
-                  <!--<td style="text-align: center;">
-                    @if ($transaction['type'] === 'gaji')
-                    -
-                    @else
-                    {{ $item->description }}
-                    @endif
-                  </td>-->
                   <td style="text-align: center;">
                     @if ($transaction['type'] === 'debit')
                     {{ date('d-m-Y H:i', strtotime($item->debit_date)) }}
@@ -148,7 +116,7 @@
                 <tr>
                   <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL TRANSAKSI MASUK</th>
                   <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL TRANSAKSI KELUAR</th>
-                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:350px">TOTAL GAJI KARYAWAN</th>
+                  <!-- <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL GAJI KARYAWAN</th> -->
                 </tr>
               </thead>
               <br>
@@ -156,7 +124,7 @@
                 <tr style="text-align: center; font-weight: bold;">
                   <td>Rp. {{ number_format($totalDebit, 0, ',', ',') }}</td>
                   <td>Rp. {{ number_format($totalCredit, 0, ',', ',') }}</td>
-                  <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
+                  <!-- <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td> -->
                 </tr>
               </tbody>
             </table>

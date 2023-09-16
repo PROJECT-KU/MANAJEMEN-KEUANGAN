@@ -125,17 +125,26 @@ class NeracaController extends Controller
     public function search(Request $request)
     {
         $search = $request->get('q');
+        $user = Auth::user();
+        $currentMonth = date('Y-m-01 00:00:00');
+        $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
 
         $debit = DB::table('debit')
             ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-            ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
-            ->where('debit.user_id', Auth::user()->id)
+            ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+            ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+            ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
                 $query->where('debit.description', 'LIKE', '%' . $search . '%')
                     ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
                     ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
                     ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
             })
+            ->where(function ($query) {
+                $query->where('users.level', 'manager')
+                    ->orWhere('users.level', 'staff');
+            })
+            ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
             ->orderBy('debit.created_at', 'DESC')
             ->get();
 
@@ -145,14 +154,16 @@ class NeracaController extends Controller
 
         $credit = DB::table('credit')
             ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-            ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
-            ->where('credit.user_id', Auth::user()->id)
+            ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+            ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+            ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
                 $query->where('credit.description', 'LIKE', '%' . $search . '%')
                     ->orWhere('categories_credit.name', 'LIKE', '%' . $search . '%')
                     ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
                     ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
             })
+            ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
             ->orderBy('credit.created_at', 'DESC')
             ->get();
 
@@ -160,7 +171,23 @@ class NeracaController extends Controller
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
-        return view('account.neraca.index', compact('debit', 'credit'));
+        $gaji = DB::table('gaji')
+            ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+            ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+            ->where('users.company', $user->company)
+            ->where(function ($query) use ($search) {
+                $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
+                    ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
+                    ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
+            })
+            ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
+            ->orderBy('gaji.created_at', 'DESC')
+            ->get();
+        $gaji->appends(['q' => $search]);
+
+        return view('account.neraca.index', compact('debit', 'credit', 'gaji'));
     }
     public function create()
     {
@@ -367,7 +394,8 @@ class NeracaController extends Controller
         $totalDebit = $debit->sum('nominal');
 
         // Calculate total credit
-        $totalCredit = $credit->sum('nominal');
+        $totalCredit = $credit->sum('nominal') + $gaji->sum('total');
+
 
         // Calculate total gaji
         $totalGaji = $gaji->sum('total');
@@ -384,13 +412,13 @@ class NeracaController extends Controller
         $dompdf->loadHtml($html);
 
         // (Optional) Set paper size and orientation
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->setPaper('A4', 'portrait');
 
         // Render the PDF
         $dompdf->render();
 
         // Set the PDF filename
-        $fileName = 'laporan_transaksi_semua_' . date('d-m-Y') . '.pdf';
+        $fileName = 'laporan_transaksi_neraca_' . date('d-m-Y') . '.pdf';
 
         // Output the generated PDF to the browser
         return $dompdf->stream($fileName);
