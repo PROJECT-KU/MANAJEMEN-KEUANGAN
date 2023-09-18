@@ -231,7 +231,7 @@ class PresensiController extends Controller
     //end
 
     $presensi->update([
-      'status' => $request->input('status'),
+      'status' => $presensi->status ?? $request->input('status'),
       'status_pulang' => $request->input('status_pulang'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),

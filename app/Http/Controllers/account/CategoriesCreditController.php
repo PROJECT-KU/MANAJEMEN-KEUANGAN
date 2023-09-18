@@ -29,7 +29,7 @@ class CategoriesCreditController extends Controller
         // Get categories based on user role and company
         if ($user->level == 'staff') {
             $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -56,8 +56,9 @@ class CategoriesCreditController extends Controller
         if ($user->level == 'staff') {
             // Search for categories based on the user's company and name
             $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->where('categories_credit.name', 'LIKE', '%' . $search . '%')
+                ->where('categories_credit.kode', 'LIKE', '%' . $search . '%')
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -69,8 +70,8 @@ class CategoriesCreditController extends Controller
                     'LIKE',
                     '%' . $search . '%'
                 )
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10);
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
         }
 
         return view('account.categories_credit.index', compact('categories'));
@@ -96,30 +97,42 @@ class CategoriesCreditController extends Controller
     public function store(Request $request)
     {
         //set validasi required
-        $this->validate($request, [
-            'name'  => 'required'
-        ],
+        $this->validate(
+            $request,
+            [
+                'name'  => 'required'
+            ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
             ]
         );
 
+        // Ambil nilai terakhir dari kolom 'kode'
+        $lastCode = CategoriesCredit::max('kode');
+
+        if (empty($lastCode)) {
+            $newCode = 'C002';
+        } else {
+            // Tambahkan 1 ke kode terakhir dan format menjadi angka 3 digit
+            $newCode = sprintf('C%03d', intval(substr($lastCode, 1)) + 1);
+        }
+
         $name = strtoupper($request->input('name'));
         //Eloquent simpan data
         $save = CategoriesCredit::create([
             'user_id'       => Auth::user()->id,
+            'kode'           => $newCode,
             'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
-        if($save){
+        if ($save) {
             //redirect dengan pesan sukses
             return redirect()->route('account.categories_credit.index')->with(['success' => 'Data Berhasil Disimpan!']);
-        }else{
+        } else {
             //redirect dengan pesan error
             return redirect()->route('account.categories_credit.index')->with(['error' => 'Data Gagal Disimpan!']);
         }
-
     }
 
 
@@ -128,13 +141,15 @@ class CategoriesCreditController extends Controller
         return view('account.categories_credit.edit', compact('categoriesCredit'));
     }
 
-    
+
     public function update(Request $request, CategoriesCredit $categoriesCredit)
     {
         //set validasi required
-        $this->validate($request, [
-            'name'  => 'required'
-        ],
+        $this->validate(
+            $request,
+            [
+                'name'  => 'required'
+            ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
@@ -148,10 +163,10 @@ class CategoriesCreditController extends Controller
             'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
-        if($update){
+        if ($update) {
             //redirect dengan pesan sukses
             return redirect()->route('account.categories_credit.index')->with(['success' => 'Data Berhasil Diupdate!']);
-        }else{
+        } else {
             //redirect dengan pesan error
             return redirect()->route('account.categories_credit.index')->with(['error' => 'Data Gagal Diupdate!']);
         }
@@ -167,11 +182,11 @@ class CategoriesCreditController extends Controller
     {
         $delete = CategoriesCredit::find($id)->delete($id);
 
-        if($delete){
+        if ($delete) {
             return response()->json([
                 'status' => 'success'
             ]);
-        }else{
+        } else {
             return response()->json([
                 'status' => 'error'
             ]);

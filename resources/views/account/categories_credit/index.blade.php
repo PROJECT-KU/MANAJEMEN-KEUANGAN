@@ -39,6 +39,7 @@ List Kategori Uang keluar | MANAGEMENT
                             <thead>
                                 <tr>
                                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                    <th scope="col">KODE KATEGORI</th>
                                     <th scope="col">NAMA KATEGORI</th>
                                     <!--<th scope="col" style="width: 15%;text-align: center">AKSI</th>-->
                                 </tr>
@@ -50,6 +51,7 @@ List Kategori Uang keluar | MANAGEMENT
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
+                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
                                     <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <!--<td class="text-center">
                                         <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
@@ -90,6 +92,7 @@ List Kategori Uang keluar | MANAGEMENT
                             <thead>
                                 <tr>
                                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                    <th scope="col">KODE KATEGORI</th>
                                     <th scope="col">NAMA KATEGORI</th>
                                     <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                                 </tr>
@@ -101,6 +104,7 @@ List Kategori Uang keluar | MANAGEMENT
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
+                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
                                     <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">

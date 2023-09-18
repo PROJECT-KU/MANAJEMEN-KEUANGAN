@@ -30,7 +30,7 @@ class CategoriesDebitController extends Controller
         // Get categories based on user role and company
         if ($user->level == 'staff') {
             $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -51,8 +51,9 @@ class CategoriesDebitController extends Controller
         if ($user->level == 'staff') {
             // Search for categories based on the user's company and name
             $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+                ->where('users.company', $user->company)
                 ->where('categories_debit.name', 'LIKE', '%' . $search . '%')
+                ->where('categories_debit.kode', 'LIKE', '%' . $search . '%')
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -79,9 +80,11 @@ class CategoriesDebitController extends Controller
     public function store(Request $request)
     {
         //set validasi required
-        $this->validate($request, [
-            'name'  => 'required'
-        ],
+        $this->validate(
+            $request,
+            [
+                'name'  => 'required'
+            ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
@@ -90,20 +93,31 @@ class CategoriesDebitController extends Controller
 
         $name = strtoupper($request->input('name'));
 
+        // Ambil nilai terakhir dari kolom 'kode'
+        $lastCode = CategoriesDebit::max('kode');
+
+
+        if (empty($lastCode)) {
+            $newCode = 'D002';
+        } else {
+            // Tambahkan 1 ke kode terakhir dan format menjadi angka 3 digit
+            $newCode = sprintf('D%03d', intval(substr($lastCode, 1)) + 1);
+        }
+
         //Eloquent simpan data
         $save = CategoriesDebit::create([
             'user_id'       => Auth::user()->id,
+            'kode'           => $newCode,
             'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
-        if($save){
+        if ($save) {
             //redirect dengan pesan sukses
             return redirect()->route('account.categories_debit.index')->with(['success' => 'Data Berhasil Disimpan!']);
-        }else{
+        } else {
             //redirect dengan pesan error
             return redirect()->route('account.categories_debit.index')->with(['error' => 'Data Gagal Disimpan!']);
         }
-
     }
 
     /**
@@ -127,9 +141,11 @@ class CategoriesDebitController extends Controller
     public function update(Request $request, CategoriesDebit $categoriesDebit)
     {
         //set validasi required
-        $this->validate($request, [
-            'name'  => 'required'
-        ],
+        $this->validate(
+            $request,
+            [
+                'name'  => 'required'
+            ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
@@ -143,10 +159,10 @@ class CategoriesDebitController extends Controller
             'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
-        if($update){
+        if ($update) {
             //redirect dengan pesan sukses
             return redirect()->route('account.categories_debit.index')->with(['success' => 'Data Berhasil Diupdate!']);
-        }else{
+        } else {
             //redirect dengan pesan error
             return redirect()->route('account.categories_debit.index')->with(['error' => 'Data Gagal Diupdate!']);
         }

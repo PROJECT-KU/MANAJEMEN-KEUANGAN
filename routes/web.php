@@ -83,6 +83,7 @@ Route::prefix('account')->group(function () {
     //categories credit
     Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
     Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
+    Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
 
     //credit
     Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');

@@ -49,13 +49,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                     <option value="lembur">LEMBUR</option>
                     <option value="cuti">CUTI</option>
                     <option value="pulang">PULANG</option>
-                    @elseif (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '07:00:00' ) <!-- <option value="terlambat">HADIR</option>
-                        <option value="terlambat">REMOTE</option>
-                        <option value="izin">IZIN</option>
-                        <option value="terlambat">DINAS LUAR KOTA</option>
-                        <option value="lembur">LEMBUR</option>
-                        <option value="cuti">CUTI</option>
-                        <option value="pulang">PULANG</option> -->
+                    @elseif (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '07:00:00' ) <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 07:00.</option>
                         @else
                         <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 07:00.</option>
                         @endif

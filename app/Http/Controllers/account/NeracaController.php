@@ -36,7 +36,7 @@ class NeracaController extends Controller
 
         if ($user->level == 'manager' || $user->level == 'staff') {
             $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name', 'categories_debit.kode')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
                 ->where(function ($query) use ($user) {
@@ -52,7 +52,7 @@ class NeracaController extends Controller
                 ->get();
 
             $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name', 'categories_credit.kode')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
                 ->where(function ($query) use ($user) {
@@ -76,7 +76,7 @@ class NeracaController extends Controller
                 ->get();
         } else {
             $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name', 'categories_debit.kode')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
                 ->where('debit.user_id', Auth::user()->id)
                 ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
@@ -84,7 +84,7 @@ class NeracaController extends Controller
                 ->get();
 
             $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name', 'categories_credit.kode')
                 ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
                 ->where('credit.user_id', Auth::user()->id)
                 ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
@@ -114,7 +114,7 @@ class NeracaController extends Controller
         $totalDebit = $debit->sum('nominal');
 
         // Calculate total credit
-        $totalCredit = $credit->sum('nominal') + $gaji->sum('total');
+        $totalCredit = $credit->sum('nominal');
 
         // Calculate total gaji
         $totalGaji = $gaji->sum('total');
@@ -129,52 +129,69 @@ class NeracaController extends Controller
         $currentMonth = date('Y-m-01 00:00:00');
         $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
 
+        // Debit
         $debit = DB::table('debit')
             ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
             ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
             ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
-            ->where(function ($query) use ($search) {
-                $query->where('debit.description', 'LIKE', '%' . $search . '%')
-                    ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
-                    ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
+            ->where(function ($query) use ($user) {
+                $query->where('users.company', $user->company)
+                    ->orWhere('debit.user_id', $user->id);
             })
             ->where(function ($query) {
                 $query->where('users.level', 'manager')
                     ->orWhere('users.level', 'staff');
             })
             ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
+            ->where(function ($query) use ($search) {
+                $query->where('debit.description', 'LIKE', '%' . $search . '%')
+                    ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
+                    ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
+            })
             ->orderBy('debit.created_at', 'DESC')
             ->get();
+
+        $totalDebit = $debit->sum('nominal');
 
         foreach ($debit as $item) {
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
 
+        // Credit
         $credit = DB::table('credit')
             ->select('credit.id', 'credit.category_id', 'credit.id_transaksi', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
             ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
             ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
+            ->where(function ($query) use ($user) {
+                $query->where('users.company', $user->company)
+                    ->orWhere('credit.user_id', $user->id);
+            })
+            ->where(function ($query) {
+                $query->where('users.level', 'manager')
+                    ->orWhere('users.level', 'staff');
+            })
+            ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
             ->where(function ($query) use ($search) {
                 $query->where('credit.description', 'LIKE', '%' . $search . '%')
                     ->orWhere('categories_credit.name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
-                    ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
+                    ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%');
             })
-            ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
             ->orderBy('credit.created_at', 'DESC')
             ->get();
+
+        $totalCredit = $credit->sum('nominal');
 
         foreach ($credit as $item) {
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
+        // Gaji
         $gaji = DB::table('gaji')
             ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
             ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
+            ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
             ->where(function ($query) use ($search) {
                 $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
                     ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
@@ -182,13 +199,19 @@ class NeracaController extends Controller
                     ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
                     ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
             })
-            ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
             ->orderBy('gaji.created_at', 'DESC')
             ->get();
-        $gaji->appends(['q' => $search]);
 
-        return view('account.neraca.index', compact('debit', 'credit', 'gaji'));
+        $totalGaji = $gaji->sum('total');
+
+        foreach ($gaji as $item) {
+            $item->tanggal = date('d-m-Y', strtotime($item->tanggal));
+        }
+
+        return view('account.neraca.index', compact('debit', 'credit', 'gaji', 'search', 'totalDebit', 'totalCredit', 'totalGaji'));
     }
+
+
     public function create()
     {
         $categories = CategoriesDebit::where('user_id', Auth::user()->id)

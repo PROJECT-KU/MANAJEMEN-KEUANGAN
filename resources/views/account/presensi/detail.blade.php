@@ -23,6 +23,42 @@ Detail Presensi Karyawan | MANAGEMENT
           <form action="" method="GET" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+
+            if (Auth::user()->level == 'karyawan')
+            @php
+            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->first();
+            @endphp
+            @if ($todayPresensi)
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS PRESENSI KEHADIRAN</label>
+                  <select class="form-control" name="status" id="status" disabled>
+                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                    <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+                    <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
+                    <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
+                    <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
+                    <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
+                    <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
+                    <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
+                    <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>STATUS PRESENSI PULANG</label>
+                  <select class="form-control" name="status_pulang" id="status_pulang" disabled>
+                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                    <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            @else
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -49,7 +85,7 @@ Detail Presensi Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
-
+            @endif
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">

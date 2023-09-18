@@ -29,9 +29,30 @@ List Presensi Karyawan | MANAGEMENT
             <form action="{{ route('account.presensi.search') }}" method="GET">
               <div class="form-group">
                 <div class="input-group mb-3">
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+                  @php
+                  $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                  ->whereDate('created_at', now()->toDateString())
+                  ->first();
+                  @endphp
+                  <td class="text-center">
+                    @if ($todayPresensi)
+                    <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
+                      <i class="fa fa-pencil-alt"></i> UPDATE
+                    </a>
+                    @else
+                    <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH
+                    </a>
+                    @endif
+                  </td>
+                  @endif
+
+                  @if (Auth::user()->level == 'manager')
                   <div class="input-group-prepend">
                     <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                   </div>
+                  @endif
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
@@ -50,12 +71,18 @@ List Presensi Karyawan | MANAGEMENT
               <table class="table table-bordered">
                 <thead>
                   <tr>
-                    <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                    <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                    <th scope="col" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
-                    <th scope="col" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
-                    <th scope="col" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
-                    <th scope="col" style="width: 15%;text-align: center">AKSI</th>
+                    <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
+                    <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
+                    <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">HADIR</th>
+                    <th scope="col" style="text-align: center;">PULANG</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -70,7 +97,32 @@ List Presensi Karyawan | MANAGEMENT
                       <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
                       {{ strftime('%A, %d %B %Y %H:%M', strtotime($hasil->created_at)) }}
                     </td>
+                    <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
+                    @if($hasil->time_pulang == null)
+                    <td class="column-width" style="text-align: center;"></td>
+                    @else
+                    <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
+                    @endif
+                    @if($hasil->time_pulang == null)
+                    <td class="column-width" style="text-align: center;"></td>
+                    @else
+                    <td class="column-width" style="text-align: center;">
+                      <?php
+                      $created_at = strtotime($hasil->created_at);
+                      $time_pulang = strtotime($hasil->time_pulang);
 
+                      // Menghitung selisih waktu dalam detik
+                      $selisih_detik = $time_pulang - $created_at;
+
+                      // Menghitung jumlah jam dan menit
+                      $jam = floor($selisih_detik / 3600);
+                      $menit = floor(($selisih_detik % 3600) / 60);
+
+                      // Menampilkan lama kerja dalam format "jam jam menit menit"
+                      echo sprintf('%02d jam %02d menit', $jam, $menit);
+                      ?>
+                    </td>
+                    @endif
                     <td class="column-width" style="text-align: center;">
                       @if ($hasil->status == 'hadir')
                       <span class="badge badge-success">HADIR</span>
@@ -89,6 +141,24 @@ List Presensi Karyawan | MANAGEMENT
                       @elseif ($hasil->status == 'pulang')
                       <span class="badge badge-danger">PULANG</span>
                       @endif
+                      <br>
+                      @if ($hasil->status_pulang == 'hadir')
+                      <span class="badge badge-success mt-2">HADIR</span>
+                      @elseif ($hasil->status_pulang == 'remote')
+                      <span class="badge badge-info mt-2">REMOTE</span>
+                      @elseif ($hasil->status_pulang == 'izin')
+                      <span class="badge badge-warning mt-2">IZIN</span>
+                      @elseif ($hasil->status_pulang == 'dinas luar kota')
+                      <span class="badge badge-info mt-2">DINAS LUAR KOTA</span>
+                      @elseif ($hasil->status_pulang == 'lembur')
+                      <span class="badge badge-primary mt-2">LEMBUR</span>
+                      @elseif ($hasil->status_pulang == 'cuti')
+                      <span class="badge badge-warning mt-2">CUTI</span>
+                      @elseif ($hasil->status_pulang == 'terlambat')
+                      <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                      @elseif ($hasil->status_pulang == 'pulang')
+                      <span class="badge badge-danger mt-2">PULANG</span>
+                      @endif
                     </td>
                     <td class="column-width" style="text-align: center;">
                       <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
@@ -97,7 +167,7 @@ List Presensi Karyawan | MANAGEMENT
                         </div>
                       </a>
                     </td>
-                    @if (Auth::user()->level == 'karyawan')
+                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
                     <td class="text-center">
                       <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                         <i class="fa fa-eye"></i>
