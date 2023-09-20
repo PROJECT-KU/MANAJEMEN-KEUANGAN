@@ -100,6 +100,7 @@ Route::prefix('account')->group(function () {
     //laporan semua
     Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
     Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
+    Route::get('/account/laporan-semua/filter', [LaporanSemuaController::class, 'filterByDate'])->name('laporan_semua.filter');
 
     //laporan neraca
     Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');

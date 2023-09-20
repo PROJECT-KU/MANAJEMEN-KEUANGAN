@@ -3,6 +3,15 @@
     <div class="section-header">
       <center>
         <h1>LAPORAN TRANSAKSI SEMUA</h1>
+        <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+            @if ($startDate && $endDate)
+            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+            @else
+            {{ date('F Y') }}
+            @endif
+          </strong>
+        </p>
+        <hr>
         <h4>{{ $user->alamat_company }}</h4>
         <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
       </center>
