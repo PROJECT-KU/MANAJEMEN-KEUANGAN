@@ -81,7 +81,8 @@ class LaporanCreditController extends Controller
                 ->appends(request()->except('page'));
         }
 
-        return view('account.laporan_credit.index', compact('credit', 'tanggal_awal', 'tanggal_akhir'));
+        $totalCredit = $credit->sum('nominal');
+        return view('account.laporan_credit.index', compact('credit', 'tanggal_awal', 'tanggal_akhir', 'totalCredit'));
     }
 
     public function downloadPdf(Request $request)
@@ -118,9 +119,11 @@ class LaporanCreditController extends Controller
                 ->paginate(10)
                 ->appends(request()->except('page'));
         }
+
+        $totalCredit = $credit->sum('nominal');
         $users = User::all(); // Get all users
         // Get the Blade view content as HTML
-        $html = view('account.laporan_credit.pdf', compact('credit', 'tanggal_awal', 'tanggal_akhir', 'user'))->render();
+        $html = view('account.laporan_credit.pdf', compact('credit', 'tanggal_awal', 'tanggal_akhir', 'user', 'totalCredit'))->render();
 
         // Generate PDF using the HTML content
         $dompdf = new Dompdf();

@@ -59,6 +59,17 @@ Laporan Uang Keluar | MANAGEMENT
                         </a>
                     </div>
                 </div>
+                <div class="card-header">
+                    <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                            @if ($tanggal_awal && $tanggal_akhir)
+                            {{ date('d F Y', strtotime($tanggal_awal)) }} - {{ date('d F Y', strtotime($tanggal_akhir)) }}
+                            @else
+                            {{ date('F Y') }}
+                            @endif
+                        </strong>
+                    </p>
+                </div>
+
                 <div class="card-body">
 
                     <div class="table-responsive">
@@ -82,12 +93,24 @@ Laporan Uang Keluar | MANAGEMENT
                                     <td style="text-align: center">{{ $hasil->name }}</td>
                                     <td style="text-align: center">{{ rupiah($hasil->nominal) }}</td>
                                     <td style="text-align: center">{{ $hasil->description }}</td>
-                                    <td style="text-align: center">{{ $hasil->credit_date }}</td>
+                                    <td style="text-align: center">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->credit_date)) }}</td>
                                 </tr>
                                 @php
                                 $no++;
                                 @endphp
                                 @endforeach
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered mt-5">
+                            <thead style="border: 2px solid red;">
+                                <tr>
+                                    <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="text-align: center; font-weight: bold;">
+                                    <td>Rp. {{ number_format($totalCredit, 0, ',', ',')}}</td>
+                                </tr>
                             </tbody>
                         </table>
                         <div style="text-align: center">

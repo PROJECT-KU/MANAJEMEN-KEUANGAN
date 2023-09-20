@@ -52,7 +52,7 @@ Laporan Transaksi Neraca | MANAGEMENT
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
+                    <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI NERACA</h4>
                     <div class="card-header-action">
                         <a href="{{ route('account.laporan_neraca.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
                             <i class="fas fa-file-pdf"></i> Download PDF

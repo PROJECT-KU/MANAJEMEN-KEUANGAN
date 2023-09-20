@@ -130,25 +130,24 @@
             </table>
 
             <br><br>
-            <hr>
             @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
-            <center>
-              <table class="table table-bordered mt-5">
-                <thead>
-                  <tr>
-                    <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:750px">KEUNTUNGAN</th>
-                  </tr>
-                </thead>
-                <br>
-                <tbody>
-                  <tr style="text-align: center; font-weight: bold;">
-                    <td>Rp. {{ number_format($totalDebit-$totalCredit-$totalGaji, 0, ',', ',')}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </center>
+            <hr>
+            <table class="table table-bordered mt-5">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:750px">KEUNTUNGAN</th>
+                </tr>
+              </thead>
+              <br>
+              <tbody>
+                <tr style="text-align: center; font-weight: bold;">
+                  <td>Rp. {{ number_format($totalDebit-$totalCredit-$totalGaji, 0, ',', ',')}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <hr>
+            <br><br>
             @endif
-            <hr><br><br>
 
           </div>
         </div>

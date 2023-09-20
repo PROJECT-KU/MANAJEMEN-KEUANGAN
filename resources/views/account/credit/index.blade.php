@@ -53,10 +53,10 @@ List Uang Keluar | MANAGEMENT
                                 @foreach ($credit as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td>{{ $hasil->name }}</td>
-                                    <td>{{ rupiah($hasil->nominal) }}</td>
-                                    <td>{{ $hasil->description }}</td>
-                                    <td>{{ $hasil->credit_date }}</td>
+                                    <td class="column-width" style="text-align: center;">{{ $hasil->name }}</td>
+                                    <td class="column-width" style="text-align: center;">{{ rupiah($hasil->nominal) }}</td>
+                                    <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
+                                    <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->credit_date)) }}</td>
                                     <td class="column-width" style="text-align: center;">
                                         <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
                                             <div class="thumbnail-circle">
