@@ -855,7 +855,7 @@ class GajiController extends Controller
     $dompdf->loadHtml($html);
 
     // (Optional) Set paper size and orientation
-    $dompdf->setPaper('A4', 'landscape');
+    $dompdf->setPaper('A4', 'potrait');
 
     // Render the PDF
     $dompdf->render();

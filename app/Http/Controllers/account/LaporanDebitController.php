@@ -80,7 +80,8 @@ class LaporanDebitController extends Controller
                 ->appends(request()->except('page'));
         }
 
-        return view('account.laporan_debit.index', compact('debit', 'tanggal_awal', 'tanggal_akhir'));
+        $totalDebit = $debit->sum('nominal');
+        return view('account.laporan_debit.index', compact('debit', 'tanggal_awal', 'tanggal_akhir', 'totalDebit'));
     }
     public function downloadPdf(Request $request)
     {
@@ -115,9 +116,10 @@ class LaporanDebitController extends Controller
                 ->appends(request()->except('page'));
         }
 
+        $totalDebit = $debit->sum('nominal');
         $users = User::all(); // Get all users
         // Get the Blade view content as HTML
-        $html = view('account.laporan_debit.pdf', compact('debit', 'tanggal_awal', 'tanggal_akhir', 'user'))->render();
+        $html = view('account.laporan_debit.pdf', compact('debit', 'tanggal_awal', 'tanggal_akhir', 'user', 'totalDebit'))->render();
 
         // Generate PDF using the HTML content
         $dompdf = new Dompdf();

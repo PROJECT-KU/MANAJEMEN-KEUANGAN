@@ -186,8 +186,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="dropdown {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
                                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>SEMUA</span></a>
                                             <ul class="dropdown-menu">
-                                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-pie"></i>CATATAN</a></li>
-                                                <li class="{{ setActive('account/neraca') }}"><a class="nav-link" href="{{ route('account.neraca.index') }}"><i class="fas fa-chart-pie"></i>NERACA</a></li>
+                                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-area"></i>CATATAN</a></li>
+                                                <li class="{{ setActive('account/neraca') }}"><a class="nav-link" href="{{ route('account.neraca.index') }}"><i class="fas fa-balance-scale"></i>NERACA</a></li>
                                             </ul>
                                         </li>
                                     </ul>

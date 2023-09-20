@@ -42,8 +42,8 @@
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th scope="col" style="text-align: left; width:350px">Dari</th>
-                    <th scope="col" style="text-align: left; width:350px">Untuk</th>
+                    <th scope="col" style="text-align: left; width:260px">Dari</th>
+                    <th scope="col" style="text-align: left; width:200px">Untuk</th>
                     <th scope="col" style="text-align: left;"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
                     </th>
                   </tr>
@@ -133,8 +133,9 @@
                       Bank Name Not Found
                       @endif
                       <br>
-                      <b>Pembayaran : </b>{{ date('j F Y H:i', strtotime($gaji->tanggal)) }}<br>
-                      <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b> {{ date('d F Y') }}
+                      <b>Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
+                      <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
+                      <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
                     </td>
                   </tr>
                 </tbody>
@@ -145,7 +146,7 @@
           <div class="row">
             <div class="col-12 table-responsive">
               <table class="table table-striped">
-                <thead>
+                <!-- <thead>
                   <tr>
                     <th scope="col" style="text-align: center; width:145px">Gaji Pokok</th>
                     <th scope="col" style="text-align: center; width:145px">Lemburan</th>
@@ -166,7 +167,46 @@
                     <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->tunjangan, 0, ',', '.') }}</td>
                     <td scope="col" style="text-align: center; width:145px">Rp. {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
                   </tr>
+                </tbody> -->
+                <thead>
+                  <tr>
+                    <th scope="col" style="text-align: left; width:225px; margin-left:100px;">
+                      <u>Penghasilan</u>
+                    </th>
+                    <th></th>
+                    <th scope="col" style="text-align: left; width:225px"><u>Potongan</u></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="text-align: left; width:145px">Gaji Pokok</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td>
+
+                    <td style="text-align: left; width:145px">Potongan</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left; width:145px">Lemburan</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left; width:145px">Bonus</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_bonus, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left; width:145px">Tunjangan BPJS</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan_bpjs, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left; width:145px">Tunjangan THR</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan_thr, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left; width:145px">Tunjangan Lainnya</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan, 0, ',', '.') }}</td>
+                  </tr>
                 </tbody>
+
               </table>
               <br>
               <hr>

@@ -17,10 +17,12 @@ class Presensi extends Model
   protected $fillable = [
     'user_id',
     'status',
+    'status_pulang',
     'note',
     'gambar',
     'lokasi',
+    'time_pulang',
     'created_at',
-    'update_at',
+    'updated_at',
   ];
 }

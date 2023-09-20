@@ -57,7 +57,7 @@ List Gaji Karyawan | MANAGEMENT
                   <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
                   <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                   <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
-                  <!--<th scope="col" class="column-width" style="text-align: center;">BANK</th>-->
+                  <th scope="col" class="column-width" style="text-align: center;">BANK</th>
                   <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
                   <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMBAYARAN</th>
                   <th scope="col" class="column-width" style="text-align: center;">STATUS PEMBAYARAN</th>
@@ -79,7 +79,7 @@ List Gaji Karyawan | MANAGEMENT
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
                   <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                   <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
-                  <!--<td class="column-width" style="text-align: center;">
+                  <td class="column-width" style="text-align: center; width:100px">
                     @php
                     $bankNames = [
                     '002' => 'BRI',
@@ -148,7 +148,7 @@ List Gaji Karyawan | MANAGEMENT
                     @else
                     Bank Name Not Found
                     @endif
-                  </td>-->
+                  </td>
                   <td class="column-width" style="text-align: center; width:150px">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                   <td class="column-width" style="text-align: center; width:200px">
                     {{ strftime('%d %B %Y %H:%M', strtotime($hasil->tanggal)) }}

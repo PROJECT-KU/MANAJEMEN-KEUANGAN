@@ -51,7 +51,7 @@ Route::prefix('account')->group(function () {
     Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
     Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
     Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
-
+    Route::get('account/laporan_neraca/download-pdf', 'account\NeracaController@downloadPdf')->name('account.laporan_neraca.download-pdf');
 
     //penyewaan
     Route::get('penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
@@ -83,6 +83,7 @@ Route::prefix('account')->group(function () {
     //categories credit
     Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
     Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
+    Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
 
     //credit
     Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
@@ -99,6 +100,7 @@ Route::prefix('account')->group(function () {
     //laporan semua
     Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
     Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
+    Route::get('/account/laporan-semua/filter', [LaporanSemuaController::class, 'filterByDate'])->name('laporan_semua.filter');
 
     //laporan neraca
     Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');

@@ -39,6 +39,7 @@ List Kategori Uang Masuk | MANAGEMENT
                             <thead>
                                 <tr>
                                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                    <th scope="col">KODE KATEGORI</th>
                                     <th scope="col">NAMA KATEGORI</th>
                                     <!--<th scope="col" style="width: 15%;text-align: center">AKSI</th>-->
                                 </tr>
@@ -50,6 +51,7 @@ List Kategori Uang Masuk | MANAGEMENT
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
+                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
                                     <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <!--<td class="text-center">
                                         <a href="{{ route('account.categories_debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
@@ -90,6 +92,7 @@ List Kategori Uang Masuk | MANAGEMENT
                             <thead>
                                 <tr>
                                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                    <th scope="col">KODE KATEGORI</th>
                                     <th scope="col">NAMA KATEGORI</th>
                                     <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                                 </tr>
@@ -101,6 +104,7 @@ List Kategori Uang Masuk | MANAGEMENT
                                 @foreach ($categories as $hasil)
                                 <tr>
                                     <th scope="row" style="text-align: center">{{ $no }}</th>
+                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
                                     <td style="text-transform:uppercase">{{ $hasil->name }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('account.categories_debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
@@ -188,7 +192,7 @@ List Kategori Uang Masuk | MANAGEMENT
                         if (response.status === "success") {
                             swal({
                                 title: 'BERHASIL!',
-                                text: response.message,
+                                text: 'DATA BERHASIL DIHAPUS!',
                                 icon: 'success',
                                 timer: 1000,
                                 showConfirmButton: false,
@@ -200,7 +204,7 @@ List Kategori Uang Masuk | MANAGEMENT
                         } else {
                             swal({
                                 title: 'GAGAL!',
-                                text: response.message,
+                                text: 'DATA GAGAL DIHAPUS!',
                                 icon: 'error',
                                 timer: 1000,
                                 showConfirmButton: false,
