@@ -50,6 +50,7 @@ Laporan Transaksi Neraca | MANAGEMENT
                 </div>
             </div>
 
+            @if (isset($debit) && count($debit) > 0 || isset($credit) && count($credit) > 0 || isset($gaji) && count($gaji) > 0)
             <div class="card">
                 <div class="card-header">
                     <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI NERACA</h4>
@@ -189,10 +190,37 @@ Laporan Transaksi Neraca | MANAGEMENT
                 </table>
                 @endif
             </div>
+
+            @else
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
+                </div>
+                <div class="card-header">
+                    <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                            @if ($startDate && $endDate)
+                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                            @else
+                            {{ date('F Y') }}
+                            @endif
+                        </strong>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <h6 style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Tidak Ada Data Laporan Transaksi Pada Periode
+                            @if ($startDate && $endDate)
+                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                            @else
+                            {{ date('F Y') }}
+                            @endif
+                        </strong>
+                    </h6>
+                </div>
+            </div>
+            @endif
         </div>
-</div>
-</div>
-</section>
+
+    </section>
 </div>
 
 

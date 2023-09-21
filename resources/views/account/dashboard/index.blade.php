@@ -209,7 +209,7 @@ Dashboard | MANAGEMENT
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
                         <h4><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
                         <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
                     </div>
@@ -243,7 +243,7 @@ Dashboard | MANAGEMENT
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
                         <h4><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
                         <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
                     </div>
@@ -274,10 +274,50 @@ Dashboard | MANAGEMENT
             </div>
         </div>
 
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
+                        <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
+                    </div>
+                    <div class="row" style="margin: 10px;">
+                        @foreach($users as $user)
+                        @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
+                            <div class="card text-center card-hover">
+                                @if ($user->gambar == null)
+                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
+                                    @else
+                                    <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                                        @endif
+                                        <div class="thumbnail-circle">
+                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                        </div>
+                                    </a>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $user->full_name }}</h5>
+                                    </div>
+                            </div>
+
+                    </div>
+                    @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
 
 
     </section>
 </div>
+
+
+<style>
+    /* CSS for the hover effect */
+    .card-hover:hover {
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    }
+</style>
 
 <!-- open and close chart pemasukan-->
 <script>

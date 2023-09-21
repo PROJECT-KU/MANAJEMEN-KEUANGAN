@@ -117,7 +117,7 @@ Update Pengguna | MANAGEMENT
                                     <label>Level</label>
                                     <select class="form-control" name="level">
                                         <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
+                                        <option value="users" {{ $user->level == 'users' ? 'selected' : '' }}>Users</option>
                                         <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                                         <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
                                         <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>

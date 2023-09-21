@@ -133,7 +133,7 @@ Tambah Pengguna | MANAGEMENT
                                     <select class="form-control" id="level" name="level" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="admin">Admin</option>
-                                        <option value="user">User</option>
+                                        <option value="users">Users</option>
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>

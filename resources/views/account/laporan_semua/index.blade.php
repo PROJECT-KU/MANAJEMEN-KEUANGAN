@@ -216,14 +216,25 @@
           <div class="card-header">
             <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
           </div>
+          <div class="card-header">
+            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </p>
+          </div>
           <div class="card-body">
-            @php
-            $startMonthYear = date('F Y', strtotime($startDate));
-            $endMonthYear = date('F Y', strtotime($endDate));
-            $startDateFormatted = date('d F Y', strtotime($startDate));
-            $endDateFormatted = date('d F Y', strtotime($endDate));
-            @endphp
-            <h6 style="text-align: center;">Tidak Ada Data Laporan Transaksi Pada Periode {{ $startDateFormatted }} - {{ $endDateFormatted }}</h6>
+            <h6 style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Tidak Ada Data Laporan Transaksi Pada Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </h6>
           </div>
         </div>
         @endif

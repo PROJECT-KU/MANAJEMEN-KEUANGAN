@@ -96,13 +96,30 @@ class CategoriesDebitController extends Controller
         // Ambil nilai terakhir dari kolom 'kode'
         $lastCode = CategoriesDebit::max('kode');
 
+        $prefix = '';
 
-        if (empty($lastCode)) {
-            $newCode = 'D002';
+        if (Auth::user()->level == "manager") {
+            $prefix = 'DM';
+        } elseif (Auth::user()->level == "admin") {
+            $prefix = 'DA';
+        } elseif (Auth::user()->level == "karyawan") {
+            $prefix = 'DK';
         } else {
-            // Tambahkan 1 ke kode terakhir dan format menjadi angka 3 digit
-            $newCode = sprintf('D%03d', intval(substr($lastCode, 1)) + 1);
+            $prefix = 'DU';
         }
+
+        $existingCategoriesCount = CategoriesDebit::where('kode', 'like', $prefix . '%')->count();
+
+        if (empty($lastCode) || $existingCategoriesCount == 0) {
+            // If no existing categories or first category for the level, start with '002'
+            $newCode = $prefix . '002';
+        } else {
+            // If there are existing categories, get the highest code and increment it
+            $lastCategory = CategoriesDebit::where('kode', 'like', $prefix . '%')->orderBy('kode', 'desc')->first();
+            $lastCode = $lastCategory->kode;
+            $newCode = sprintf($prefix . '%03d', intval(substr($lastCode, 2)) + 1);
+        }
+
 
         //Eloquent simpan data
         $save = CategoriesDebit::create([

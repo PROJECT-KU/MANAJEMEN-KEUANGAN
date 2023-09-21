@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/newlogo2.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -97,7 +97,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="200">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <a href="index.html"><i class="fa fa-gem"></i></a>
+                        <img src="{{ asset('assets/img/newlogo2.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>
