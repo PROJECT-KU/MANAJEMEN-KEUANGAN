@@ -122,6 +122,47 @@ Update Uang keluar | MANAGEMENT
     </section>
 </div>
 
+<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('gambar').addEventListener('change', function() {
+        const maxFileSizeInBytes = 1024 * 1024; // 1MB
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const fileInput = this;
+
+        if (fileInput.files.length > 0) {
+            const selectedFile = fileInput.files[0];
+            const fileSize = selectedFile.size; // Get the file size in bytes
+            const fileName = selectedFile.name.toLowerCase();
+
+            // Check file size
+            if (fileSize > maxFileSizeInBytes) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Melebihi Batas',
+                    text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+                });
+                fileInput.value = ''; // Clear the file input
+                return;
+            }
+
+            // Check file extension
+            const fileExtension = fileName.split('.').pop();
+            if (!allowedExtensions.includes(fileExtension)) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jenis File Tidak Valid',
+                    text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+                });
+                fileInput.value = ''; // Clear the file input
+            }
+        }
+    });
+</script>
+<!-- end -->
+
 <!-- upload image -->
 <script>
     const imageInput = document.getElementById('gambar');
