@@ -1026,7 +1026,7 @@ Detail Gaji Karyawan | MANAGEMENT
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>POTONGAN</label>
                   <div class="input-group">
@@ -1038,7 +1038,19 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>PPH 21</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="pph" id="pph" value="{{ number_format($gaji->pph, 0, ',', ',') }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL DIBAYARKAN</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ date('d-m-Y H:i', strtotime($gaji->tanggal)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
@@ -1308,6 +1320,11 @@ Detail Gaji Karyawan | MANAGEMENT
   });
 
   var cleaveC = new Cleave('.currency_tunjanganTHR', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_pph', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

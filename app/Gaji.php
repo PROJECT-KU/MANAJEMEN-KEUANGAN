@@ -91,6 +91,7 @@ class Gaji extends Model
     'total_lembur',
     'total_bonus',
     'potongan',
+    'pph',
     'total',
     'status',
     'note',

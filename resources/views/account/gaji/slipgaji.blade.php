@@ -188,6 +188,9 @@
                   <tr>
                     <td style="text-align: left; width:145px">Lemburan</td>
                     <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
+
+                    <td style="text-align: left; width:145px">PPH 21</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->pph, 0, ',', '.') }}</td>
                   </tr>
                   <tr>
                     <td style="text-align: left; width:145px">Bonus</td>
