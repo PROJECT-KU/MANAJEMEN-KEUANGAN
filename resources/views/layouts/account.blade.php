@@ -61,8 +61,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     </ul>
                     <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
                 </form>
-                <ul class="navbar-nav navbar-right">
 
+                <a href="{{ route('account.notifikasi.index') }}">
+                    <button style="background-color: transparent; border: none; outline: none; color:#ffffff"><i class="fas fa-bell"></i></button>
+                </a>
+                <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
                             <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
@@ -193,11 +196,15 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     </ul>
                                 </li>
 
+
                                 @endif
 
                                 @else
                                 @endif
                     </ul>
+
+
+
                 </aside>
             </div>
 

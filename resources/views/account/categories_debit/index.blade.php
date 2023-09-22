@@ -180,8 +180,7 @@ List Kategori Uang Masuk | MANAGEMENT
             dangerMode: true,
         }).then(function(isConfirm) {
             if (isConfirm) {
-
-                //ajax delete
+                // Ajax delete
                 jQuery.ajax({
                     url: "/account/categories_debit/" + id,
                     data: {
@@ -210,10 +209,19 @@ List Kategori Uang Masuk | MANAGEMENT
                                 showConfirmButton: false,
                                 showCancelButton: false,
                                 buttons: false,
-                            }).then(function() {
-                                location.reload();
                             });
                         }
+                    },
+                    error: function() {
+                        swal({
+                            title: 'GAGAL!',
+                            text: 'KATEGORI MASIH TERHUBUNG DENGAN UANG MASUK!, silahkan hapus terlebih dahulu uang masuk!',
+                            icon: 'error',
+                            timer: 1000,
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            buttons: false,
+                        });
                     }
                 });
 

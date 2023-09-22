@@ -219,6 +219,17 @@ List Kategori Uang keluar | MANAGEMENT
                                 location.reload();
                             });
                         }
+                    },
+                    error: function() {
+                        swal({
+                            title: 'GAGAL!',
+                            text: 'KATEGORI MASIH TERHUBUNG DENGAN UANG KELUAR!, silahkan hapus terlebih dahulu uang keluar!',
+                            icon: 'error',
+                            timer: 1000,
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            buttons: false,
+                        });
                     }
                 });
 
