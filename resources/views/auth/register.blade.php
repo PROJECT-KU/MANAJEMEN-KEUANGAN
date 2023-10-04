@@ -98,7 +98,7 @@
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="bisnis">Bisnis</option>
                                                     <option value="penyewaan">Penyewaan</option>
-                                                    <option value="kasir">Kasir</option>
+                                                    <!-- <option value="kasir">Kasir</option> -->
                                                     <option value="perorangan">Perorangan</option>
                                                 </select>
 

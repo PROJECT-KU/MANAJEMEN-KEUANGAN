@@ -6,6 +6,7 @@ use App\CategoriesDebit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class CategoriesDebitController extends Controller
@@ -40,7 +41,11 @@ class CategoriesDebitController extends Controller
                 ->paginate(10);
         }
 
-        return view('account.categories_debit.index', compact('categories'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.categories_debit.index', compact('categories', 'maintenances'));
     }
 
     public function search(Request $request)

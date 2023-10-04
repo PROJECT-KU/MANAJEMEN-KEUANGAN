@@ -37,7 +37,11 @@ class PenggunaController extends Controller
                 ->paginate(10);
         }
 
-        return view('account.pengguna.index', compact('users'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.pengguna.index', compact('users', 'maintenances'));
     }
 
     public function search(Request $request)
@@ -276,14 +280,22 @@ class PenggunaController extends Controller
     {
         $user = User::findOrFail($id);
 
-        return view('account.profil.resetpassword', compact('user'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.profil.resetpassword', compact('user', 'maintenances'));
     }
 
     public function company($id)
     {
         $user = User::findOrFail($id);
 
-        return view('account.company.index', compact('user'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.company.index', compact('user', 'maintenances'));
     }
     public function updateCompany(Request $request, $id)
     {

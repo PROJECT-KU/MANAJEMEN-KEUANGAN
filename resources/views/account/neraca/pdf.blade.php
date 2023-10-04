@@ -88,8 +88,9 @@
                 'nominal_gaji' => 0,
                 ];
                 }
-
+                if ($item->status != 'pending') {
                 $mergedItems[$key]['nominal_gaji'] += $item->total;
+                }
                 }
                 // Menampilkan data yang telah digabung
                 foreach ($mergedItems as $key => $item) {

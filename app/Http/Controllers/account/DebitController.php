@@ -70,7 +70,11 @@ class DebitController extends Controller
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
 
-        return view('account.debit.index', compact('debit'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.debit.index', compact('debit', 'maintenances'));
     }
 
 

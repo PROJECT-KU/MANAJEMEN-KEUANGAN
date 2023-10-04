@@ -93,7 +93,8 @@
                                             MASUK
                                         </button>
                                     </div>
-                                    <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
+                                    <!-- <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a> -->
+                                    <a href="{{ route('account.page-maintenance.blank') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
                                     Belum punya akun? <br> <a href="{{ route('register') }}">Buat Sekarang!</a>
                                 </form>
 

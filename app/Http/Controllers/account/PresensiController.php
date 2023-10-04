@@ -66,7 +66,11 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
-    return view('account.presensi.index', compact('presensi'));
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    return view('account.presensi.index', compact('presensi', 'maintenances'));
   }
 
   public function create()

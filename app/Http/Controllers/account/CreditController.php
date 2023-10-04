@@ -71,7 +71,11 @@ class CreditController extends Controller
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
-        return view('account.credit.index', compact('credit'));
+        $maintenances = DB::table('maintenance')
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
+        return view('account.credit.index', compact('credit', 'maintenances'));
         //$credit = DB::table('credit')
         //    ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
         //    ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')

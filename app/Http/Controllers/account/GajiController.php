@@ -64,7 +64,12 @@ class GajiController extends Controller
         ->paginate(10);
     }
 
-    return view('account.gaji.index', compact('gaji'));
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+
+    return view('account.gaji.index', compact('gaji', 'maintenances'));
   }
 
   public function search(Request $request)
@@ -841,7 +846,6 @@ class GajiController extends Controller
     // Output the generated PDF to the browser
     return $dompdf->stream($fileName);
   }
-
   public function SlipGaji($id)
   {
     $user = Auth::user();
@@ -850,11 +854,20 @@ class GajiController extends Controller
     // Calculate total gaji
     $totalGaji = $gaji->total;
     $terbilang = Terbilang::make($totalGaji, ' rupiah');
+
     // Fetch the associated employee information
     $employee = User::find($gaji->user_id); // Assuming user_id corresponds to the employee's ID
     $userWithNorekBank = User::find($employee->id);
+
     // Get the HTML content of the view
-    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank'))->render();
+    $userLogoPath = public_path('images/' . $user->logo_company);
+
+    if (!file_exists($userLogoPath)) {
+      // Handle the case where the image file does not exist.
+      return response('Image not found', 404);
+    }
+
+    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank', 'userLogoPath'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();
@@ -863,7 +876,7 @@ class GajiController extends Controller
     $dompdf->loadHtml($html);
 
     // (Optional) Set paper size and orientation
-    $dompdf->setPaper('A4', 'potrait');
+    $dompdf->setPaper('A4', 'portrait'); // Change 'potrait' to 'portrait'
 
     // Render the PDF
     $dompdf->render();

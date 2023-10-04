@@ -31,12 +31,16 @@ class ProfilController extends Controller
       return redirect()->route('account.profil.index')->with('error', 'User not found.');
     }
 
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
     // Jika user adalah 'manager' dan pengguna memiliki perusahaan yang sama, atau jika user bukan 'manager' dan ID pengguna sesuai dengan ID user saat ini
     if (
       Auth::check() && Auth::user()->level == 'manager' && Auth::user()->company == $user->company ||
       Auth::check() && Auth::user()->id == $user->id
     ) {
-      return view('account.profil.index', compact('user'));
+      return view('account.profil.index', compact('user', 'maintenances'));
     } else {
       return redirect()->route('account.profil.index')->with('error', 'Access denied.');
     }
@@ -47,7 +51,8 @@ class ProfilController extends Controller
 
     $user = User::find($id);
     // Validate the request data
-    $request->validate(['full_name' => 'required', 'company' => 'required', 'username' => 'required', 'telp' => 'required', 'nik' => 'required', 'norek' => 'required',
+    $request->validate([
+      'full_name' => 'required', 'company' => 'required', 'username' => 'required', 'telp' => 'required', 'nik' => 'required', 'norek' => 'required',
       'bank' => 'required', 'gambar' => 'max:5120', // Validate image
     ], [
       'full_name.required'   => 'Masukkan Nama Lengkap!',
@@ -63,16 +68,16 @@ class ProfilController extends Controller
 
     // Initialize the $imagePath variable
 
-   //menyinpan image di path
-   $imagePath = null;
+    //menyinpan image di path
+    $imagePath = null;
 
-   if ($request->hasFile('gambar')) {
-       $image = $request->file('gambar');
-       $imageName = time() . '.' . $image->getClientOriginalExtension();
-       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-       $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-   }
-   //end
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    }
+    //end
 
     // Find the user by ID
     $user = User::findOrFail($id);
@@ -87,7 +92,7 @@ class ProfilController extends Controller
       'bank' => $request->input('bank'),
       'gambar' => $imagePath, // Update the image path
     ]);
-    
+
     // Save the updated user data
     $user->save();
 

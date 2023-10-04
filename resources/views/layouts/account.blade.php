@@ -62,9 +62,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
                 </form>
 
-                <a href="{{ route('account.notifikasi.index') }}">
+                <!-- <a href="{{ route('account.notifikasi.index') }}">
                     <button style="background-color: transparent; border: none; outline: none; color:#ffffff"><i class="fas fa-bell"></i></button>
-                </a>
+                </a> -->
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
@@ -195,16 +195,21 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         </li>
                                     </ul>
                                 </li>
-
-
                                 @endif
+
+                                <!-- jika user dengan level admin maka dapat akses menu maintenance -->
+                                @if (Auth::user()->level === 'admin')
+                                <li class="{{ setActive('account/maintenance') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link" href="{{ route('account.maintenance.index') }}">
+                                        <i class="fas fa-user"></i> <span>MAINTENANCE</span>
+                                    </a>
+                                </li>
+                                @endif
+                                <!-- end maintenance -->
 
                                 @else
                                 @endif
                     </ul>
-
-
-
                 </aside>
             </div>
 

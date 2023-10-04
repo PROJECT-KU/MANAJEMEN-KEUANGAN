@@ -259,6 +259,10 @@ class DashboardController extends Controller
         }
         // end
 
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
         //saldo bulan ini
         $saldo_bulan_ini = $uang_masuk_bulan_ini->nominal - $uang_keluar_bulan_ini->nominal;
 
@@ -293,6 +297,6 @@ class DashboardController extends Controller
          * chart
          */
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users'));
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users', 'maintenances'));
     }
 }

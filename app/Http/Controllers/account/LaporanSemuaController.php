@@ -76,7 +76,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -100,7 +100,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', Auth::user()->id)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -178,7 +178,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -202,7 +202,7 @@ class LaporanSemuaController extends Controller
         ->get();
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', Auth::user()->id)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])

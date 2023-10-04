@@ -113,11 +113,13 @@
 
                   // Add gaji transactions to the combined collection with type 'gaji' and tanggal as transaction_date
                   foreach ($gaji as $item) {
+                  if ($item->status != 'pending') {
                   $combinedTransactions->push([
                   'type' => 'gaji',
                   'transaction_date' => $item->tanggal,
                   'data' => $item,
                   ]);
+                  }
                   }
 
                   // Sort the combined transactions by transaction date in descending order
@@ -149,13 +151,15 @@
                       -
                       @endif
                     </td>
+
                     <td style="text-align: center;">
-                      @if ($transaction['type'] === 'gaji')
+                      @if ($transaction['type'] === 'gaji' && $item->status != 'pending')
                       {{ rupiah($item->total) }}
                       @else
                       -
                       @endif
                     </td>
+
                     <td style="text-align: center;">
                       @if ($transaction['type'] === 'gaji')
                       {{ $item->full_name }}
@@ -204,6 +208,14 @@
                   <tr style="text-align: center; font-weight: bold;">
                     <td>Rp. {{ number_format($totalDebit, 0, ',', ',') }}</td>
                     <td>Rp. {{ number_format($totalCredit, 0, ',', ',') }}</td>
+                    @php
+                    $totalGaji = 0;
+                    foreach ($gaji as $item) {
+                    if ($item->status != 'pending') {
+                    $totalGaji += $item->total;
+                    }
+                    }
+                    @endphp
                     <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
                   </tr>
                 </tbody>

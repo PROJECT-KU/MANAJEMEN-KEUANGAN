@@ -13,78 +13,97 @@ List Uang Masuk | MANAGEMENT
 
         <div class="section-body">
 
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-list"></i> LIST UANG MASUK</h4>
-                </div>
+            <!-- jika maintenace aktif -->
+            @if (!$maintenances->isEmpty())
+            @foreach($maintenances as $maintenance)
+            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+                <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
 
-                <div class="card-body">
-                    <form action="{{ route('account.debit.search') }}" method="GET">
-                        <div class="form-group">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <a href="{{ route('account.debit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                                </div>
-                                <input type="text" class="form-control" name="q" placeholder="cari berdasarkan keterangan">
-                                <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                                    </button>
+
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
+                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
+                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+
+
+                </div </ </div>
+                @endif
+                @endforeach
+                @endif
+                <!-- end -->
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-list"></i> LIST UANG MASUK</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{{ route('account.debit.search') }}" method="GET">
+                            <div class="form-group">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <a href="{{ route('account.debit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                                    </div>
+                                    <input type="text" class="form-control" name="q" placeholder="cari berdasarkan keterangan">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                    <th scope="col">KATEGORI</th>
-                                    <th scope="col">NOMINAL</th>
-                                    <th scope="col">KETERANGAN</th>
-                                    <th scope="col">TANGGAL</th>
-                                    <th scope="col">BUKTI UANG MASUK</th>
-                                    <th scope="col" style="width: 15%;text-align: center">AKSI</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                $no = 1;
-                                @endphp
-                                @foreach ($debit as $hasil)
-                                <tr>
-                                    <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td class="column-width" style="text-align: center;">{{ $hasil->name }}</td>
-                                    <td class="column-width" style="text-align: center;">{{ rupiah($hasil->nominal) }}</td>
-                                    <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
-                                    <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->debit_date)) }}</td>
-                                    <td class="column-width" style="text-align: center;">
-                                        <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
-                                            <div class="thumbnail-circle">
-                                                <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
-                                            </div>
-                                        </a>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('account.debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-pencil-alt"></i>
-                                        </a>
-                                        <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                @php
-                                $no++;
-                                @endphp
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div style="text-align: center">
-                            {{$debit->links("vendor.pagination.bootstrap-4")}}
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                        <th scope="col">KATEGORI</th>
+                                        <th scope="col">NOMINAL</th>
+                                        <th scope="col">KETERANGAN</th>
+                                        <th scope="col">TANGGAL</th>
+                                        <th scope="col">BUKTI UANG MASUK</th>
+                                        <th scope="col" style="width: 15%;text-align: center">AKSI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                    $no = 1;
+                                    @endphp
+                                    @foreach ($debit as $hasil)
+                                    <tr>
+                                        <th scope="row" style="text-align: center">{{ $no }}</th>
+                                        <td class="column-width" style="text-align: center;">{{ $hasil->name }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ rupiah($hasil->nominal) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->debit_date)) }}</td>
+                                        <td class="column-width" style="text-align: center;">
+                                            <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                                                <div class="thumbnail-circle">
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                                                </div>
+                                            </a>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{{ route('account.debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-pencil-alt"></i>
+                                            </a>
+                                            <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @php
+                                    $no++;
+                                    @endphp
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <div style="text-align: center">
+                                {{$debit->links("vendor.pagination.bootstrap-4")}}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </section>
 </div>

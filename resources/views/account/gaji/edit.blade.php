@@ -998,7 +998,7 @@ Update Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end lembur field 10 -->
 
-            @if (Auth::user()->company === 'rumahscopus')
+            <!-- (Auth::user()->company === 'rumahscopus') -->
 
             <!-- bonus default -->
             <div class="row">
@@ -2449,8 +2449,8 @@ Update Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end bonus field 10 -->
 
-            @else
-            <div class="row">
+
+            <!-- <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>BAYARAN BONUS (Hari)</label>
@@ -2479,8 +2479,8 @@ Update Gaji Karyawan | MANAGEMENT
                   @enderror
                 </div>
               </div>
-            </div>
-            @endif
+            </div> -->
+
 
             <div class="row">
               <div class="col-md-4">

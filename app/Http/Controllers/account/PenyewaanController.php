@@ -53,8 +53,14 @@ class PenyewaanController extends Controller
         ->paginate(10);
     }
 
-    return view('account.penyewaan.index', compact('penyewaan'));
+    $maintenances = DB::table('maintenance')
+    ->orderBy('created_at', 'DESC')
+    ->get();
+
+
+    return view('account.penyewaan.index', compact('penyewaan', 'maintenances'));
   }
+  
 
   public function search(Request $request)
   {

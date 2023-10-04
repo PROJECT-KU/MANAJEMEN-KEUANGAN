@@ -6,6 +6,8 @@ use App\CategoriesCredit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CategoriesCreditController extends Controller
 {
@@ -39,7 +41,12 @@ class CategoriesCreditController extends Controller
                 ->paginate(10);
         }
 
-        return view('account.categories_credit.index', compact('categories'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+
+        return view('account.categories_credit.index', compact('categories', 'maintenances'));
         //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
         //    ->orderBy('created_at', 'DESC')
         //    ->paginate(10);

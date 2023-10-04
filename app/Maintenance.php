@@ -9,7 +9,7 @@ class Maintenance extends Model
     /**
      * @var string
      */
-    protected $table = 'presensi';
+    protected $table = 'maintenance';
 
     /**
      * @var array
@@ -19,6 +19,9 @@ class Maintenance extends Model
         'note',
         'start_date',
         'end_date',
+        'gambar',
+        'title',
+        'status',
         'created_at',
         'updated_at',
     ];
