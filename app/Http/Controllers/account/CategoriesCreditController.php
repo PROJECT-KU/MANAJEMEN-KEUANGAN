@@ -28,17 +28,21 @@ class CategoriesCreditController extends Controller
     {
         $user = Auth::user();
 
-        // Get categories based on user role and company
-        if ($user->level == 'staff') {
-            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+        if ($user->level == 'staff' || $user->level == 'manager') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->join('users', 'categories_credit.user_id', '=', 'users.id')
+                ->whereIn('users.level', ['staff', 'manager'])
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->paginate(10);
+        } elseif ($user->level == 'karyawan') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->where('categories_credit.user_id', $user->id)
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } else {
-            // If not a manager or staff, show categories based on user_id
-            $categories = CategoriesCredit::where('user_id', $user->id)
-                ->orderBy('created_at', 'DESC')
-                ->paginate(10);
+            $categories = [];
         }
 
         $maintenances = DB::table('maintenance')

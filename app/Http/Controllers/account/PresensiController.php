@@ -119,33 +119,30 @@ class PresensiController extends Controller
     }
     //end
 
-    $currentTime = now()->format('H:i:s');
+    // ... (validasi gambar dan lainnya)
+
     $clientDateTime = Carbon::parse($request->input('client_date_time'));
 
-    // Check if the current time is between 07:00:00 and 09:00:00
-    if ($currentTime >= '07:00:00' && $currentTime <= '09:00:00') {
-      // Use the provided status if available, or set to 'terlambat' by default
-      $status = $request->input('status', 'terlambat');
-    } else if ($currentTime > '09:00:00') {
-      // Check if an existing record for the user and date exists with specific statuses
-      $existingHadirRecord = Presensi::where('user_id', $request->input('user_id'))
-        ->whereIn('status', ['hadir', 'dinas luar kota', 'remote'])
-        ->whereDate('created_at', $clientDateTime->format('Y-m-d'))
-        ->exists();
+    // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+    $currentDay = $clientDateTime->dayOfWeek;
 
-      if (!$existingHadirRecord) {
-        $status = 'hadir';
-      } else {
-        $status = 'terlambat';
-      }
-      // if (!$existingHadirRecord) {
+    // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+    $currentTime = now()->format('H:i:s');
 
-      //   $status = 'terlambat';
-      // }
-    } else {
-      // Use the provided status if available, or set to 'terlambat' by default
-      $status = $request->input('status', 'terlambat');
+    // Inisialisasi status default
+    $status = 'terlambat';
+
+    // Logika berdasarkan hari dan waktu
+    if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00')) {
+      $status = 'hadir';
+    } elseif (in_array($currentDay, [2, 3])) {
+      $status = 'libur';
+    } elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00')) {
+      $status = 'hadir';
+    } elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00')) {
+      $status = 'hadir';
     }
+
 
     //$clientDateTime = Carbon::parse($request->input('client_date_time'));
     $save = Presensi::create([

@@ -72,8 +72,8 @@ class CreditController extends Controller
         }
 
         $maintenances = DB::table('maintenance')
-        ->orderBy('created_at', 'DESC')
-        ->get();
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
         return view('account.credit.index', compact('credit', 'maintenances'));
         //$credit = DB::table('credit')
@@ -165,20 +165,23 @@ class CreditController extends Controller
         $user = Auth::user();
 
         // Get all categories for users who are managers and staff in the same company
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
-                ->get(['categories_credit.*']);
-
-            return view('account.credit.create', compact('categories'));
-        } else {
-            $categories = CategoriesCredit::where('user_id', Auth::user()->id)
+        if ($user->level == 'staff' || $user->level == 'manager') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->join('users', 'categories_credit.user_id', '=', 'users.id')
+                ->whereIn('users.level', ['staff', 'manager'])
+                ->orderBy('categories_credit.created_at', 'DESC')
                 ->get();
-            return view('account.credit.create', compact('categories'));
+        } elseif ($user->level == 'karyawan') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->where('categories_credit.user_id', $user->id)
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->get();
+        } else {
+            $categories = [];
         }
-        //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
-        //    ->get();
-        //return view('account.credit.create', compact('categories'));
+        return view('account.credit.create', compact('categories'));
     }
 
 
@@ -290,128 +293,80 @@ class CreditController extends Controller
         $user = Auth::user();
 
         // Get all categories for users who are managers and staff in the same company
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
-                ->get(['categories_credit.*']);
-
-            return  view('account.credit.edit', compact('credit', 'categories'));
-        } else {
-            $categories = CategoriesCredit::where('user_id', Auth::user()->id)
+        if ($user->level == 'staff' || $user->level == 'manager') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->join('users', 'categories_credit.user_id', '=', 'users.id')
+                ->whereIn('users.level', ['staff', 'manager'])
+                ->orderBy('categories_credit.created_at', 'DESC')
                 ->get();
-            return  view('account.credit.edit', compact('credit', 'categories'));
+        } elseif ($user->level == 'karyawan') {
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->where('categories_credit.user_id', $user->id)
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->get();
+        } else {
+            $categories = [];
         }
         //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
         //    ->get();
-        //return  view('account.credit.edit', compact('credit', 'categories'));
+        return  view('account.credit.edit', compact('credit', 'categories'));
     }
 
 
     public function update(Request $request, Credit $credit)
     {
         $user = Auth::user();
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            // Cek apakah user memiliki hak akses untuk mengedit data transaksi
-            if ($credit->user_id == $user->id) {
-                $this->validate(
-                    $request,
-                    [
-                        'nominal'       => 'required',
-                        'credit_date'    => 'required',
-                        'category_id'   => 'required',
-                        'description'   => 'required'
-                    ],
-                    //set message validation
-                    [
-                        'nominal.required' => 'Masukkan Nominal Debit / Uang Keluar!',
-                        'credit_date.required' => 'Silahkan Pilih Tanggal!',
-                        'category_id.required' => 'Silahkan Pilih Kategori!',
-                        'description.required' => 'Masukkan Keterangan!',
-                    ]
-                );
 
-                //save image to path
-                $imagePath = null;
+        $this->validate(
+            $request,
+            [
+                'nominal'       => 'required',
+                'credit_date'    => 'required',
+                'category_id'   => 'required',
+                'description'   => 'required'
+            ],
+            [
+                'nominal.required' => 'Masukkan Nominal Debit / Uang Keluar!',
+                'credit_date.required' => 'Silahkan Pilih Tanggal!',
+                'category_id.required' => 'Silahkan Pilih Kategori!',
+                'description.required' => 'Masukkan Keterangan!',
+            ]
+        );
 
-                if ($request->hasFile('gambar')) {
-                    $image = $request->file('gambar');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-                    $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-                    $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-                } else {
-                    $imagePath = $credit->gambar;
-                }
-                //end
+        //save image to path
+        $imagePath = null;
 
-                //Eloquent simpan data
-                $update = Credit::whereId($credit->id)->update([
-                    'user_id'       => Auth::user()->id,
-                    'category_id'   => $request->input('category_id'),
-                    'credit_date'    => $request->input('credit_date'),
-                    'nominal'       => str_replace(",", "", $request->input('nominal')),
-                    'description'   => $request->input('description'),
-                    'gambar' => $imagePath, // Store the image path
-                ]);
-                //cek apakah data berhasil disimpan
-                if ($update) {
-                    //redirect dengan pesan sukses
-                    return redirect()->route('account.credit.index')->with(['success' => 'Data Berhasil Diupdate!']);
-                } else {
-                    //redirect dengan pesan error
-                    return redirect()->route('account.credit.index')->with(['error' => 'Data Gagal Diupdate!']);
-                }
-            }
+        if ($request->hasFile('gambar')) {
+            $image = $request->file('gambar');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+            $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
         } else {
-            $this->validate(
-                $request,
-                [
-                    'nominal'       => 'required',
-                    'credit_date'    => 'required',
-                    'category_id'   => 'required',
-                    'description'   => 'required'
-                ],
-                //set message validation
-                [
-                    'nominal.required' => 'Masukkan Nominal Debit / Uang Keluar!',
-                    'credit_date.required' => 'Silahkan Pilih Tanggal!',
-                    'category_id.required' => 'Silahkan Pilih Kategori!',
-                    'description.required' => 'Masukkan Keterangan!',
-                ]
-            );
+            $imagePath = $credit->gambar;
+        }
+        //end
 
-            //save image to path
-            $imagePath = null;
+        //Eloquent simpan data
+        $update = Credit::whereId($credit->id)->update([
+            'user_id'       => Auth::user()->id,
+            'category_id'   => $request->input('category_id'),
+            'credit_date'    => $request->input('credit_date'),
+            'nominal'       => str_replace(",", "", $request->input('nominal')),
+            'description'   => $request->input('description'),
+            'gambar' => $imagePath, // Store the image path
+        ]);
 
-            if ($request->hasFile('gambar')) {
-                $image = $request->file('gambar');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-                $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-            } else {
-                $imagePath = $credit->gambar;
-            }
-            //end
-
-            //Eloquent simpan data
-            $update = Credit::whereId($credit->id)->update([
-                'user_id'       => Auth::user()->id,
-                'category_id'   => $request->input('category_id'),
-                'credit_date'    => $request->input('credit_date'),
-                'nominal'       => str_replace(",", "", $request->input('nominal')),
-                'description'   => $request->input('description'),
-                'gambar' => $imagePath, // Store the image path
-            ]);
-            //cek apakah data berhasil disimpan
-            if ($update) {
-                //redirect dengan pesan sukses
-                return redirect()->route('account.credit.index')->with(['success' => 'Data Berhasil Diupdate!']);
-            } else {
-                //redirect dengan pesan error
-                return redirect()->route('account.credit.index')->with(['error' => 'Data Gagal Diupdate!']);
-            }
+        //cek apakah data berhasil disimpan
+        if ($update) {
+            //redirect dengan pesan sukses
+            return redirect()->route('account.credit.index')->with(['success' => 'Data Berhasil Diupdate!']);
+        } else {
+            //redirect dengan pesan error
+            return redirect()->route('account.credit.index')->with(['error' => 'Data Gagal Diupdate!']);
         }
     }
-
 
     public function destroy($id)
     {
