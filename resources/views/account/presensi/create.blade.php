@@ -23,85 +23,101 @@ Tambah Presensi Karyawan | MANAGEMENT
           <form action="{{ route('account.presensi.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+            @php
+            $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+            $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+            @endphp
 
-            @if ((date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '07:00:00' )) <div class="alert alert-warning" role="alert">
-                Mohon Maaf.. Kamu Di Luar Jam Kerja! Silahkan Presensi Setelah Jam 07.00 Ya!
+            @if (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) <div class="alert alert-warning" role="alert">
+              Mohon Maaf.. Kamu Di Luar Jam Kerja! Silahkan Presensi Besok Ya :D, Jangan Rajin-Rajin hehe..!
         </div>
-        @endif
+        @elseif ($currentDay == 1 && ($currentTime>= '00:00:00' && $currentTime <= '07:59:59' )) <div class="alert alert-warning" role="alert">
+          Kok Rajin Banget Sih hehe.. Tunggu jam 08.00 ya! BERCYANDYAA..
+      </div>
+      @elseif (in_array($currentDay, [2, 3]) && ($currentTime>= '00:00:00' && $currentTime <= '23:59:59' )) <div class="alert alert-warning" role="alert">
+        LIBUR LO! Kok Mau Presensi terus sih.. jangan rajin-rajin Kesehatan juga perlu diperhatikan seperti kamu memperhatikan dia :D CUAKSS..
+    </div>
+    @elseif ($currentDay == 4 && ($currentTime>= '00:00:00' && $currentTime <= '11:59:59' )) <div class="alert alert-warning" role="alert">
+      Kok Rajin Banget Sih hehe.. Tunggu jam 12.00 ya! BERCYANDYAA..
+</div>
+@elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '00:00:00' && $currentTime <= '06:59:99' )) <div class="alert alert-warning" role="alert">
+  Kok Rajin Banget Sih hehe.. Tunggu jam 07.00 ya! BERCYANDYAA..
+  </div>
+  @endif
 
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group">
-              <label>STATUS PRESENSI</label>
-              <select class="form-control" name="status" id="status" required>
-                <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                @php
-                $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
-                $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
-                @endphp
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <label>STATUS PRESENSI</label>
+        <select class="form-control" name="status" id="status" required>
+          <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+          @php
+          $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+          $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+          @endphp
 
-                <!-- senin -->
-                @if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                  <option value="hadir">HADIR</option>
-                  <option value="remote">REMOTE</option>
-                  <option value="izin">IZIN</option>
-                  <option value="dinas luar kota">DINAS LUAR KOTA</option>
-                  <option value="lembur">LEMBUR</option>
-                  <option value="cuti">CUTI</option>
-                  @elseif ($currentDay == 1 && ($currentTime >= '10:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
-                    <option value="terlambat">REMOTE</option>
-                    <option value="izin">IZIN</option>
-                    <option value="terlambat">DINAS LUAR KOTA</option>
-                    <option value="lembur">LEMBUR</option>
-                    <option value="cuti">CUTI</option>
-                    @elseif ($currentDay == 1 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
-                      @elseif (in_array($currentDay, [2, 3]) && ($currentTime>= '00:00:00' && $currentTime <= '23:59:00' )) <option value="tidak bisa presensi" selected>Ciee yang libur kerja, Jangan lupa hiling jangan kerja terus. Kesehatan juga perlu diperhatikan seperti kamu memperhatikan dia :D</option>
-                        <!-- end senin -->
+          <!-- senin -->
+          @if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="hadir">HADIR</option>
+            <option value="remote">REMOTE</option>
+            <option value="izin">IZIN</option>
+            <option value="dinas luar kota">DINAS LUAR KOTA</option>
+            <option value="lembur">LEMBUR</option>
+            <option value="cuti">CUTI</option>
+            @elseif ($currentDay == 1 && ($currentTime >= '10:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
+              <option value="terlambat">REMOTE</option>
+              <option value="izin">IZIN</option>
+              <option value="terlambat">DINAS LUAR KOTA</option>
+              <option value="lembur">LEMBUR</option>
+              <option value="cuti">CUTI</option>
+              @elseif ($currentDay == 1 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
+                @elseif (in_array($currentDay, [2, 3]) && ($currentTime>= '00:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Ciee yang libur kerja, Jangan lupa hiling jangan kerja terus. Kesehatan juga perlu diperhatikan seperti kamu memperhatikan dia :D</option>
+                  <!-- end senin -->
 
-                        <!-- selasa & rabu -->
-                        @elseif (in_array($currentDay, [2, 3]))
-                        <option value="libur" selected>LIBUR</option>
-                        @elseif ($currentDay == 4 && ($currentTime>= '00:00:00' && $currentTime <= '12:00:00' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 12.00.</option>
-                          <!-- end selasa & rabu -->
+                  <!-- selasa & rabu -->
+                  @elseif (in_array($currentDay, [2, 3]))
+                  <option value="libur" selected>LIBUR</option>
+                  @elseif ($currentDay == 4 && ($currentTime>= '00:00:00' && $currentTime <= '11:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 12.00.</option>
+                    <!-- end selasa & rabu -->
 
-                          <!-- kamis -->
-                          @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                            <option value="hadir">HADIR</option>
-                            <option value="remote">REMOTE</option>
-                            <option value="izin">IZIN</option>
-                            <option value="dinas luar kota">DINAS LUAR KOTA</option>
-                            <option value="lembur">LEMBUR</option>
-                            <option value="cuti">CUTI</option>
-                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
-                              <option value="terlambat">REMOTE</option>
+                    <!-- kamis -->
+                    @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                      <option value="hadir">HADIR</option>
+                      <option value="remote">REMOTE</option>
+                      <option value="izin">IZIN</option>
+                      <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                      <option value="lembur">LEMBUR</option>
+                      <option value="cuti">CUTI</option>
+                      @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
+                        <option value="terlambat">REMOTE</option>
+                        <option value="izin">IZIN</option>
+                        <option value="terlambat">DINAS LUAR KOTA</option>
+                        <option value="lembur">LEMBUR</option>
+                        <option value="cuti">CUTI</option>
+                        @elseif ($currentDay == 4 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
+                          @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '00:00:00' && $currentTime <= '06:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 07.00.</option>
+                            <!-- end kamis -->
+
+                            <!-- jumat, sabtu & minggu -->
+                            @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                              <option value="hadir">HADIR</option>
+                              <option value="remote">REMOTE</option>
                               <option value="izin">IZIN</option>
-                              <option value="terlambat">DINAS LUAR KOTA</option>
+                              <option value="dinas luar kota">DINAS LUAR KOTA</option>
                               <option value="lembur">LEMBUR</option>
                               <option value="cuti">CUTI</option>
-                              @elseif ($currentDay == 4 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
-                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '00:00:00' && $currentTime <= '07:00:00' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 07.00.</option>
-                                  <!-- end kamis -->
-
-                                  <!-- jumat, sabtu & minggu -->
-                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                                    <option value="hadir">HADIR</option>
-                                    <option value="remote">REMOTE</option>
-                                    <option value="izin">IZIN</option>
-                                    <option value="dinas luar kota">DINAS LUAR KOTA</option>
-                                    <option value="lembur">LEMBUR</option>
-                                    <option value="cuti">CUTI</option>
-                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
-                                      <option value="terlambat">REMOTE</option>
-                                      <option value="izin">IZIN</option>
-                                      <option value="terlambat">DINAS LUAR KOTA</option>
-                                      <option value="lembur">LEMBUR</option>
-                                      <option value="cuti">CUTI</option>
-                                      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari. </option>
-                                        @elseif ($currentDay == 1 && ($currentTime>= '00:00:00' && $currentTime <= '08:00:00' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 08.00.</option>
-                                          <!-- end jumat, sabtu & minggu -->
-                                          @endif
-              </select>
-              <!-- <select class="form-control" name="status" id="status" required>
+                              @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
+                                <option value="terlambat">REMOTE</option>
+                                <option value="izin">IZIN</option>
+                                <option value="terlambat">DINAS LUAR KOTA</option>
+                                <option value="lembur">LEMBUR</option>
+                                <option value="cuti">CUTI</option>
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari. </option>
+                                  @elseif ($currentDay == 1 && ($currentTime>= '00:00:00' && $currentTime <= '07:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 08.00.</option>
+                                    <!-- end jumat, sabtu & minggu -->
+                                    @endif
+        </select>
+        <!-- <select class="form-control" name="status" id="status" required>
                 @if (date('H:i:s') >= '07:00:00' && date('H:i:s') <= '09:00:00' ) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                   <option value="hadir">HADIR</option>
                   <option value="remote">REMOTE</option>
@@ -124,152 +140,152 @@ Tambah Presensi Karyawan | MANAGEMENT
                         @endif
               </select> -->
 
-              @error('status')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
-              </div>
-              @enderror
-            </div>
-          </div>
+        @error('status')
+        <div class="invalid-feedback" style="display: block">
+          {{ $message }}
         </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group">
-              <label>CATATAN</label>
-              <div class="input-group">
-                <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control"></textarea>
-              </div>
-              @error('note')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
-              </div>
-              @enderror
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label>BUKTI PRESENSI</label>
-              <div class="input-group">
-                <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-              </div>
-              @error('gambar')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
-              </div>
-              @enderror
-            </div>
-            <div class="mt-3">
-              <div class="card" style="width: 12rem;">
-                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none;">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
-
-        </form>
-
+        @enderror
       </div>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>CATATAN</label>
+        <div class="input-group">
+          <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control"></textarea>
+        </div>
+        @error('note')
+        <div class="invalid-feedback" style="display: block">
+          {{ $message }}
+        </div>
+        @enderror
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>BUKTI PRESENSI</label>
+        <div class="input-group">
+          <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+        </div>
+        @error('gambar')
+        <div class="invalid-feedback" style="display: block">
+          {{ $message }}
+        </div>
+        @enderror
+      </div>
+      <div class="mt-3">
+        <div class="card" style="width: 12rem;">
+          <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+  <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+
+  </form>
+
+  </div>
+  </div>
   </section>
-</div>
+  </div>
 
-<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  document.getElementById('gambar').addEventListener('change', function() {
-    const maxFileSizeInBytes = 1024 * 1024; // 1MB
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
-    const fileInput = this;
+  <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.getElementById('gambar').addEventListener('change', function() {
+      const maxFileSizeInBytes = 1024 * 1024; // 1MB
+      const allowedExtensions = ['jpg', 'jpeg', 'png'];
+      const fileInput = this;
 
-    if (fileInput.files.length > 0) {
-      const selectedFile = fileInput.files[0];
-      const fileSize = selectedFile.size; // Get the file size in bytes
-      const fileName = selectedFile.name.toLowerCase();
+      if (fileInput.files.length > 0) {
+        const selectedFile = fileInput.files[0];
+        const fileSize = selectedFile.size; // Get the file size in bytes
+        const fileName = selectedFile.name.toLowerCase();
 
-      // Check file size
-      if (fileSize > maxFileSizeInBytes) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Ukuran File Melebihi Batas',
-          text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
-        });
-        fileInput.value = ''; // Clear the file input
-        return;
+        // Check file size
+        if (fileSize > maxFileSizeInBytes) {
+          // Display a SweetAlert error message
+          Swal.fire({
+            icon: 'error',
+            title: 'Ukuran File Melebihi Batas',
+            text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+          });
+          fileInput.value = ''; // Clear the file input
+          return;
+        }
+
+        // Check file extension
+        const fileExtension = fileName.split('.').pop();
+        if (!allowedExtensions.includes(fileExtension)) {
+          // Display a SweetAlert error message
+          Swal.fire({
+            icon: 'error',
+            title: 'Jenis File Tidak Valid',
+            text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+          });
+          fileInput.value = ''; // Clear the file input
+        }
       }
+    });
+  </script>
+  <!-- end -->
 
-      // Check file extension
-      const fileExtension = fileName.split('.').pop();
-      if (!allowedExtensions.includes(fileExtension)) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Jenis File Tidak Valid',
-          text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
-        });
-        fileInput.value = ''; // Clear the file input
+  <!-- upload image -->
+  <script>
+    const imageInput = document.getElementById('gambar');
+    const imagePreview = document.getElementById('image-preview');
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block'; // Show the preview
+        };
+        reader.readAsDataURL(file);
       }
-    }
-  });
-</script>
-<!-- end -->
+    });
+  </script>
+  <!-- end upload image -->
 
-<!-- upload image -->
-<script>
-  const imageInput = document.getElementById('gambar');
-  const imagePreview = document.getElementById('image-preview');
+  <!-- Include CKEditor JS -->
+  <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+  <script>
+    CKEDITOR.replace('note');
+  </script>
+  <!-- end ckeditor -->
 
-  imageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = 'block'; // Show the preview
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-</script>
-<!-- end upload image -->
+  <script>
+    /**
+     * btn submit loader
+     */
+    $(".btn-submit").click(function() {
+      $(".btn-submit").addClass('btn-progress');
+      if (timeoutHandler) clearTimeout(timeoutHandler);
 
-<!-- Include CKEditor JS -->
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-  CKEDITOR.replace('note');
-</script>
-<!-- end ckeditor -->
+      timeoutHandler = setTimeout(function() {
+        $(".btn-submit").removeClass('btn-progress');
 
-<script>
-  /**
-   * btn submit loader
-   */
-  $(".btn-submit").click(function() {
-    $(".btn-submit").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
+      }, 1000);
+    });
 
-    timeoutHandler = setTimeout(function() {
-      $(".btn-submit").removeClass('btn-progress');
+    /**
+     * btn reset loader
+     */
+    $(".btn-reset").click(function() {
+      $(".btn-reset").addClass('btn-progress');
+      if (timeoutHandler) clearTimeout(timeoutHandler);
 
-    }, 1000);
-  });
+      timeoutHandler = setTimeout(function() {
+        $(".btn-reset").removeClass('btn-progress');
 
-  /**
-   * btn reset loader
-   */
-  $(".btn-reset").click(function() {
-    $(".btn-reset").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
+      }, 500);
+    })
+  </script>
 
-    timeoutHandler = setTimeout(function() {
-      $(".btn-reset").removeClass('btn-progress');
-
-    }, 500);
-  })
-</script>
-
-@stop
+  @stop
