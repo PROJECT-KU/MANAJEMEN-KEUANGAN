@@ -52,8 +52,15 @@ class ProfilController extends Controller
     $user = User::find($id);
     // Validate the request data
     $request->validate([
-      'full_name' => 'required', 'company' => 'required', 'username' => 'required', 'telp' => 'required', 'nik' => 'required', 'norek' => 'required',
-      'bank' => 'required', 'gambar' => 'max:5120', // Validate image
+      'full_name' => 'required',
+      'company' => 'required',
+      'username' => 'required',
+      'telp' => 'required',
+      'nik' => 'required',
+      'norek' => 'required',
+      'bank' => 'required',
+      'gambar' => 'max:5120',
+      'jobdesk' => 'required',
     ], [
       'full_name.required'   => 'Masukkan Nama Lengkap!',
       'company.required'  => 'Masukkan Nama Tempat Anda Bekerja!',
@@ -63,6 +70,7 @@ class ProfilController extends Controller
       'norek.required'          => 'Masukkan Nomor Rekening Anda!',
       'bank.required'          => 'Masukkan BANK Anda!',
       'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
+      'jobdesk.required'          => 'Masukkan Jobdesk Anda!',
     ]);
 
 
@@ -90,6 +98,7 @@ class ProfilController extends Controller
       'nik' => $request->input('nik'),
       'norek' => $request->input('norek'),
       'bank' => $request->input('bank'),
+      'jobdesk' => $request->input('jobdesk'),
       'gambar' => $imagePath, // Update the image path
     ]);
 

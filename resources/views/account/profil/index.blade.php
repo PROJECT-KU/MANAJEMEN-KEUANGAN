@@ -262,6 +262,22 @@ Profil | MANAGEMENT
                 </div>
               </div>
 
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>JOBDESK</label>
+                    <div class="input-group">
+                      <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required>{{ old('jobdesk', $user->jobdesk) }}</textarea>
+                    </div>
+                    @error('jobdesk')
+                    <div class="invalid-feedback" style="display: block">
+                      {{ $message }}
+                    </div>
+                    @enderror
+                  </div>
+                </div>
+              </div>
+
               <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
               <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
 
@@ -332,6 +348,23 @@ Profil | MANAGEMENT
   });
 </script>
 <!-- end upload image -->
+
+<!-- Include CKEditor JS -->
+<style>
+  .ckeditor-container {
+    width: 100%;
+  }
+</style>
+
+<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+  // Replace 'jobdesk' textarea with CKEditor
+  CKEDITOR.replace('jobdesk', {
+    width: '100%', // Set CKEditor width to 100%
+    height: '300px' // You can adjust the height as needed
+  });
+</script>
+<!-- end ckeditor -->
 
 <!-- waktu untuk menampilkan alerts -->
 <!--<script>

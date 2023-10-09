@@ -273,6 +273,22 @@ Update Pengguna | MANAGEMENT
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>JOBDESK</label>
+                                    <div class="input-group">
+                                        <textarea name="jobdesk" id="jobdesk" value="{{ old('jobdesk', $user->jobdesk) }}" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"> {{ old('jobdesk', $user->jobdesk) }}</textarea>
+                                    </div>
+                                    @error('jobdesk')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         @if(Auth::user()->level === 'admin')
                         <div class="col-md-12">
                             <div class="form-group">
@@ -367,6 +383,25 @@ Update Pengguna | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!-- Include CKEditor JS -->
+<style>
+    .ckeditor-container {
+        width: 100%;
+    }
+</style>
+
+<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+    // Replace 'jobdesk' textarea with CKEditor
+    CKEDITOR.replace('jobdesk', {
+        width: '100%', // Set CKEditor width to 100%
+        height: '300px' // You can adjust the height as needed
+    });
+</script>
+<!-- end ckeditor -->
+
+
 <script>
     function previewImage(event) {
         var reader = new FileReader();

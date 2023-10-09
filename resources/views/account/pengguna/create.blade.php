@@ -185,7 +185,7 @@ Tambah Pengguna | MANAGEMENT
                                 <div class="form-group">
                                     <label>Password</label>
                                     <div class="password-input">
-                                        <input type="password" id="password" class="form-control" name="password" placeholder="Masukkan Password" required>
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="Masukkan Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
                                         <i class="fas fa-eye password-toggle" id="password-toggle"></i>
                                     </div>
                                     @error('password')
@@ -294,6 +294,22 @@ Tambah Pengguna | MANAGEMENT
                         </div>
 
                         <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>JOBDESK</label>
+                                    <div class="input-group">
+                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required></textarea>
+                                    </div>
+                                    @error('jobdesk')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <input type="checkbox" id="email_verified_at" name="email_verified_at" style="margin-top: 5px;">
@@ -316,6 +332,23 @@ Tambah Pengguna | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!-- Include CKEditor JS -->
+<style>
+    .ckeditor-container {
+        width: 100%;
+    }
+</style>
+
+<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+    // Replace 'jobdesk' textarea with CKEditor
+    CKEDITOR.replace('jobdesk', {
+        width: '100%', // Set CKEditor width to 100%
+        height: '300px' // You can adjust the height as needed
+    });
+</script>
+<!-- end ckeditor -->
 
 <!-- show and hide password -->
 <script>

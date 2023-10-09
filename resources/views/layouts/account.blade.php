@@ -97,10 +97,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="200">
+                        <img src="{{ asset('assets/img/logo2.png') }}" alt="logo" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <img src="{{ asset('assets/img/newlogo2.png') }}" alt="logo" width="50px">
+                        <img src="{{ asset('assets/img/logo3.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>

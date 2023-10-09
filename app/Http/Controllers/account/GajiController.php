@@ -35,18 +35,26 @@ class GajiController extends Controller
     return $id;
   }
 
-  public function index()
+  public function index(Request $request)
   {
     $user = Auth::user();
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
 
-    $currentMonth = now()->startOfMonth();
-    $nextMonth = now()->addMonth()->startOfMonth();
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     } else if ($user->level == 'karyawan') {
@@ -54,12 +62,14 @@ class GajiController extends Controller
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     } else {
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     }
@@ -69,7 +79,7 @@ class GajiController extends Controller
       ->get();
 
 
-    return view('account.gaji.index', compact('gaji', 'maintenances'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate'));
   }
 
   public function search(Request $request)
@@ -94,13 +104,18 @@ class GajiController extends Controller
       $gaji->appends(['q' => $search]);
     }
 
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
+    $endDate = $request->get('end_date');
+
     if ($gaji->isEmpty()) {
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji Karyawan tidak ditemukan.');
     }
-    return view('account.gaji.index', compact('gaji'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate'));
   }
-
-
 
   public function create()
   {
@@ -792,30 +807,43 @@ class GajiController extends Controller
     }
   }
 
-  public function downloadPdf()
+  public function downloadPdf(Request $request)
   {
     $user = Auth::user();
-    $currentMonth = date('Y-m-01 00:00:00');
-    $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     } else if ($user->level == 'karyawan') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->where('gaji.user_id', $user->id)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     } else {
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
     }
@@ -825,8 +853,13 @@ class GajiController extends Controller
     $terbilang = Terbilang::make($totalGaji, ' rupiah');
     $users = User::all(); // Get all users
 
+    // total gaji yang status terbayar
+    $gajiTerbayar = $gaji->where('status', 'terbayar');
+    $totalGajiTerbayar = $gajiTerbayar->sum('total');
+    $terbilangterbayar = Terbilang::make($totalGajiTerbayar, ' rupiah');
+
     // Get the HTML content of the view
-    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji', 'user', 'terbilang'))->render();
+    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji', 'user', 'terbilang', 'startDate', 'endDate', 'totalGajiTerbayar', 'terbilangterbayar'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();
@@ -846,6 +879,7 @@ class GajiController extends Controller
     // Output the generated PDF to the browser
     return $dompdf->stream($fileName);
   }
+
   public function SlipGaji($id)
   {
     $user = Auth::user();

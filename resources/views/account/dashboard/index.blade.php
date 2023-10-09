@@ -46,7 +46,7 @@ Dashboard | MANAGEMENT
             <!-- end -->
 
             <!-- jika data diri masih ada yang kosong -->
-            @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null || Auth::user()->gambar == null)
+            @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null || Auth::user()->gambar == null || Auth::user()->jobdesk == null)
             <div class="alert alert-warning" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">DATA DIRI</b><br>
                 <p style="font-size: 15px;">Data diri anda masih ada yang kosong! Silahkan Lengkapi data diri anda terlebih dahulu!</p>

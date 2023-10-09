@@ -122,7 +122,18 @@ class PenggunaController extends Controller
             'telp' => 'required',
             'nik' => 'required',
             'norek' => 'required',
+            'jobdesk' => 'required',
             'bank' => 'required',
+        ], [
+            'full_name.required'   => 'Masukkan Nama Lengkap!',
+            'company.required'  => 'Masukkan Nama Tempat Anda Bekerja!',
+            'username.required'          => 'Masukkan Username Anda!',
+            'telp.required'          => 'Masukkan No Telp Anda!',
+            'nik.required'          => 'Masukkan NIK Anda!',
+            'norek.required'          => 'Masukkan Nomor Rekening Anda!',
+            'bank.required'          => 'Masukkan BANK Anda!',
+            'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
+            'jobdesk.required'          => 'Masukkan Jobdesk Anda!',
         ]);
 
         if ($validator->fails()) {
@@ -148,6 +159,7 @@ class PenggunaController extends Controller
         $user->nik = $request->input('nik');
         $user->norek = $request->input('norek');
         $user->bank = $request->input('bank');
+        $user->jobdesk = $request->input('jobdesk');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {
@@ -202,6 +214,7 @@ class PenggunaController extends Controller
             'level' => 'required',
             'jenis' => 'required',
             'telp' => 'required',
+            'jobdesk' => 'required',
         ]);
 
         // Find the user by ID
@@ -221,6 +234,7 @@ class PenggunaController extends Controller
         $user->nik = $request->input('nik');
         $user->norek = $request->input('norek');
         $user->bank = $request->input('bank');
+        $user->jobdesk = $request->input('jobdesk');
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {

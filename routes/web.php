@@ -108,7 +108,7 @@ Route::prefix('account')->group(function () {
     //gaji
     Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
     Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
-    Route::post('/account/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
+    Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
     Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
     Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
