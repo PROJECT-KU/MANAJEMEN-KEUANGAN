@@ -89,7 +89,7 @@ List Gaji Karyawan | MANAGEMENT
                   <div class="btn-group" style="width: 100%;">
                     <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                     <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                      <i class="fa fa-times-circle mt-2"></i> HAPUS FILTER
+                      <i class="fa fa-times-circle mt-2"></i> HAPUS
                     </a>
                   </div>
                   @else

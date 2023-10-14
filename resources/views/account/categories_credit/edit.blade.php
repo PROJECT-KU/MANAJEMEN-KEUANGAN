@@ -23,15 +23,31 @@ Update Kategori Uang keluar | MANAGEMENT
                     <form action="{{ route('account.categories_credit.update', $categoriesCredit->id) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="form-group">
-                            <label>NAMA KATEGORI</label>
-                            <input type="text" name="name" value="{{ old('name', $categoriesCredit->name) }}" placeholder="Masukkan Nama Kategori" class="form-control" style="text-transform:uppercase">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>KODE KATEGORI</label>
+                                    <input type="text" name="kode" value="{{ old('kode', $categoriesCredit->kode) }}" placeholder="Masukkan Kode Kategori" class="form-control" style="text-transform:uppercase">
 
-                            @error('name')
-                            <div class="invalid-feedback" style="display: block">
-                                {{ $message }}
+                                    @error('kode')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
                             </div>
-                            @enderror
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>NAMA KATEGORI</label>
+                                    <input type="text" name="name" value="{{ old('name', $categoriesCredit->name) }}" placeholder="Masukkan Nama Kategori" class="form-control" style="text-transform:uppercase">
+
+                                    @error('name')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>

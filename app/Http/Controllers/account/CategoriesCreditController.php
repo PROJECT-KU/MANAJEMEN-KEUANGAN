@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\account;
 
 use App\CategoriesCredit;
+use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,11 +20,6 @@ class CategoriesCreditController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $user = Auth::user();
@@ -57,53 +53,70 @@ class CategoriesCreditController extends Controller
         //return view('account.categories_credit.index', compact('categories'));
     }
 
-
     public function search(Request $request)
     {
-
-        $search = $request->get('q');
         $user = Auth::user();
+        $search = $request->get('q');
 
-        if ($user->level == 'staff') {
-            // Search for categories based on the user's company and name
-            $categories = CategoriesCredit::join('users', 'categories_credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
-                ->where('categories_credit.name', 'LIKE', '%' . $search . '%')
-                ->where('categories_credit.kode', 'LIKE', '%' . $search . '%')
-                ->orderBy('categories_credit.created_at', 'DESC')
-                ->paginate(10);
-        } else {
-            // If not a manager or staff, search for categories based on user_id and name
-            $search = $request->get('q');
-            $categories = CategoriesCredit::where('user_id', Auth::user()->id)
-                ->where(
-                    'name',
-                    'LIKE',
-                    '%' . $search . '%'
-                )
+        if ($user->level == 'manager') {
+            $categories = CategoriesCredit::where('user_id', $user->id)
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('kode', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
+            if ($categories->isEmpty()) {
+                // Jika tidak ada hasil, tampilkan error
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
+        } else if ($user->level == 'staff') {
+            $manager = User::where('level', 'manager')
+                ->where('company', $user->company)
+                ->first();
+
+            if ($manager) {
+                $categories = CategoriesCredit::where('user_id', $manager->id)
+                    ->where(function ($query) use ($search) {
+                        $query->where('name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('kode', 'LIKE', '%' . $search . '%');
+                    })
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(10);
+
+                if ($categories->isEmpty()) {
+                    // Jika tidak ada hasil, tampilkan pesan error
+                    return redirect()->back()->with('error', 'Data tidak ditemukan.');
+                }
+            } else {
+                // Jika tidak ada manajer yang sesuai, tampilkan error
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
+        } else {
+            $categories = CategoriesCredit::where('user_id', $user->id)
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('kode', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+            if ($categories->isEmpty()) {
+                // Jika tidak ada hasil, tampilkan error
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
         }
 
-        return view('account.categories_credit.index', compact('categories'));
-        //$search = $request->get('q');
-        //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
-        //    ->where('name', 'LIKE', '%' .$search. '%')
-        //    ->orderBy('created_at', 'DESC')
-        //    ->paginate(10);
-        //return view('account.categories_credit.index', compact('categories'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.categories_credit.index', compact('categories', 'maintenances'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('account.categories_credit.create');
     }
-
 
     public function store(Request $request)
     {
@@ -111,46 +124,48 @@ class CategoriesCreditController extends Controller
         $this->validate(
             $request,
             [
-                'name'  => 'required'
+                'name'  => 'required',
+                'kode'  => 'required'
             ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
+                'kode.required' => 'Masukkan Kode Kategori !',
             ]
         );
 
-        // Ambil nilai terakhir dari kolom 'kode'
-        $lastCode = CategoriesCredit::max('kode');
+        // untuk membuat kode kategori otomatis
+        // $lastCode = CategoriesCredit::max('kode');
 
-        $prefix = '';
+        // $prefix = '';
 
-        if (Auth::user()->level == "manager") {
-            $prefix = 'CM';
-        } elseif (Auth::user()->level == "admin") {
-            $prefix = 'CA';
-        } elseif (Auth::user()->level == "karyawan") {
-            $prefix = 'CK';
-        } else {
-            $prefix = 'CU';
-        }
+        // if (Auth::user()->level == "manager") {
+        //     $prefix = 'CM';
+        // } elseif (Auth::user()->level == "admin") {
+        //     $prefix = 'CA';
+        // } elseif (Auth::user()->level == "karyawan") {
+        //     $prefix = 'CK';
+        // } else {
+        //     $prefix = 'CU';
+        // }
 
-        $existingCategoriesCount = CategoriesCredit::where('kode', 'like', $prefix . '%')->count();
+        // $existingCategoriesCount = CategoriesCredit::where('kode', 'like', $prefix . '%')->count();
 
-        if (empty($lastCode) || $existingCategoriesCount == 0) {
-            // If no existing categories or first category for the level, start with '002'
-            $newCode = $prefix . '002';
-        } else {
-            // If there are existing categories, get the highest code and increment it
-            $lastCategory = CategoriesCredit::where('kode', 'like', $prefix . '%')->orderBy('kode', 'desc')->first();
-            $lastCode = $lastCategory->kode;
-            $newCode = sprintf($prefix . '%03d', intval(substr($lastCode, 2)) + 1);
-        }
+        // if (empty($lastCode) || $existingCategoriesCount == 0) {
+        //     $newCode = $prefix . '002';
+        // } else {
+        //     $lastCategory = CategoriesCredit::where('kode', 'like', $prefix . '%')->orderBy('kode', 'desc')->first();
+        //     $lastCode = $lastCategory->kode;
+        //     $newCode = sprintf($prefix . '%03d', intval(substr($lastCode, 2)) + 1);
+        // }
 
         $name = strtoupper($request->input('name'));
+        $kode = strtoupper($request->input('kode'));
+
         //Eloquent simpan data
         $save = CategoriesCredit::create([
             'user_id'       => Auth::user()->id,
-            'kode'           => $newCode,
+            'kode'           => $kode,
             'name'          => $name
         ]);
         //cek apakah data berhasil disimpan
@@ -176,19 +191,23 @@ class CategoriesCreditController extends Controller
         $this->validate(
             $request,
             [
-                'name'  => 'required'
+                'name'  => 'required',
+                'kode'  => 'required'
             ],
             //set message validation
             [
                 'name.required' => 'Masukkan Nama Kategori !',
+                'kode.required' => 'Masukkan Kode Kategori !',
             ]
         );
 
         $name = strtoupper($request->input('name'));
+        $kode = strtoupper($request->input('kode'));
         //Eloquent simpan data
         $update = CategoriesCredit::whereId($categoriesCredit->id)->update([
             'user_id'       => Auth::user()->id,
-            'name'          => $name
+            'name'          => $name,
+            'kode'          => $kode
         ]);
         //cek apakah data berhasil disimpan
         if ($update) {
@@ -200,12 +219,6 @@ class CategoriesCreditController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $delete = CategoriesCredit::find($id)->delete($id);

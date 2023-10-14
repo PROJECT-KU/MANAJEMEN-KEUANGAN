@@ -182,110 +182,121 @@ Tambah Presensi Karyawan | MANAGEMENT
       </div>
     </div>
   </div>
+  <?php
+  $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+  $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+  ?>
+  @if (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @elseif ($currentDay == 1 && ($currentTime >= '00:00:00' && $currentTime <= '07:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+      @elseif (in_array($currentDay, [2, 3]) && ($currentTime >= '00:00:00' && $currentTime <= '23:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+        @elseif ($currentDay == 4 && ($currentTime >= '00:00:00' && $currentTime <= '11:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+          @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '00:00:00' && $currentTime <= '06:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+            @else
+            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+            @endif
 
-  <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-  <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            </form>
 
-  </form>
 
-  </div>
-  </div>
-  </section>
-  </div>
+            </div>
+            </div>
+            </section>
+            </div>
 
-  <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    document.getElementById('gambar').addEventListener('change', function() {
-      const maxFileSizeInBytes = 1024 * 1024; // 1MB
-      const allowedExtensions = ['jpg', 'jpeg', 'png'];
-      const fileInput = this;
+            <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+              document.getElementById('gambar').addEventListener('change', function() {
+                const maxFileSizeInBytes = 1024 * 1024; // 1MB
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                const fileInput = this;
 
-      if (fileInput.files.length > 0) {
-        const selectedFile = fileInput.files[0];
-        const fileSize = selectedFile.size; // Get the file size in bytes
-        const fileName = selectedFile.name.toLowerCase();
+                if (fileInput.files.length > 0) {
+                  const selectedFile = fileInput.files[0];
+                  const fileSize = selectedFile.size; // Get the file size in bytes
+                  const fileName = selectedFile.name.toLowerCase();
 
-        // Check file size
-        if (fileSize > maxFileSizeInBytes) {
-          // Display a SweetAlert error message
-          Swal.fire({
-            icon: 'error',
-            title: 'Ukuran File Melebihi Batas',
-            text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
-          });
-          fileInput.value = ''; // Clear the file input
-          return;
-        }
+                  // Check file size
+                  if (fileSize > maxFileSizeInBytes) {
+                    // Display a SweetAlert error message
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Ukuran File Melebihi Batas',
+                      text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+                    });
+                    fileInput.value = ''; // Clear the file input
+                    return;
+                  }
 
-        // Check file extension
-        const fileExtension = fileName.split('.').pop();
-        if (!allowedExtensions.includes(fileExtension)) {
-          // Display a SweetAlert error message
-          Swal.fire({
-            icon: 'error',
-            title: 'Jenis File Tidak Valid',
-            text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
-          });
-          fileInput.value = ''; // Clear the file input
-        }
-      }
-    });
-  </script>
-  <!-- end -->
+                  // Check file extension
+                  const fileExtension = fileName.split('.').pop();
+                  if (!allowedExtensions.includes(fileExtension)) {
+                    // Display a SweetAlert error message
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Jenis File Tidak Valid',
+                      text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+                    });
+                    fileInput.value = ''; // Clear the file input
+                  }
+                }
+              });
+            </script>
+            <!-- end -->
 
-  <!-- upload image -->
-  <script>
-    const imageInput = document.getElementById('gambar');
-    const imagePreview = document.getElementById('image-preview');
+            <!-- upload image -->
+            <script>
+              const imageInput = document.getElementById('gambar');
+              const imagePreview = document.getElementById('image-preview');
 
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imagePreview.src = e.target.result;
-          imagePreview.style.display = 'block'; // Show the preview
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  </script>
-  <!-- end upload image -->
+              imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // Show the preview
+                  };
+                  reader.readAsDataURL(file);
+                }
+              });
+            </script>
+            <!-- end upload image -->
 
-  <!-- Include CKEditor JS -->
-  <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-  <script>
-    CKEDITOR.replace('note');
-  </script>
-  <!-- end ckeditor -->
+            <!-- Include CKEditor JS -->
+            <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+            <script>
+              CKEDITOR.replace('note');
+            </script>
+            <!-- end ckeditor -->
 
-  <script>
-    /**
-     * btn submit loader
-     */
-    $(".btn-submit").click(function() {
-      $(".btn-submit").addClass('btn-progress');
-      if (timeoutHandler) clearTimeout(timeoutHandler);
+            <script>
+              /**
+               * btn submit loader
+               */
+              $(".btn-submit").click(function() {
+                $(".btn-submit").addClass('btn-progress');
+                if (timeoutHandler) clearTimeout(timeoutHandler);
 
-      timeoutHandler = setTimeout(function() {
-        $(".btn-submit").removeClass('btn-progress');
+                timeoutHandler = setTimeout(function() {
+                  $(".btn-submit").removeClass('btn-progress');
 
-      }, 1000);
-    });
+                }, 1000);
+              });
 
-    /**
-     * btn reset loader
-     */
-    $(".btn-reset").click(function() {
-      $(".btn-reset").addClass('btn-progress');
-      if (timeoutHandler) clearTimeout(timeoutHandler);
+              /**
+               * btn reset loader
+               */
+              $(".btn-reset").click(function() {
+                $(".btn-reset").addClass('btn-progress');
+                if (timeoutHandler) clearTimeout(timeoutHandler);
 
-      timeoutHandler = setTimeout(function() {
-        $(".btn-reset").removeClass('btn-progress');
+                timeoutHandler = setTimeout(function() {
+                  $(".btn-reset").removeClass('btn-progress');
 
-      }, 500);
-    })
-  </script>
+                }, 500);
+              })
+            </script>
 
-  @stop
+            @stop
