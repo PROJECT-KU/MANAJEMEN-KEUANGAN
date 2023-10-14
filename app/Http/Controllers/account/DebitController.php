@@ -4,6 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\CategoriesDebit;
 use App\Debit;
+use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,29 +84,33 @@ class DebitController extends Controller
         $search = $request->get('q');
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
-            $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
-                ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
-                ->where(function ($query) use ($search) {
-                    $query->where('debit.description', 'LIKE', '%' . $search . '%')
-                        ->orWhere(
-                            'categories_debit.name',
-                            'LIKE',
-                            '%' . $search . '%'
-                        )
-                        ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
-                        ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
-                })
-                ->orderBy('debit.created_at', 'DESC')
-                ->paginate(10);
+        if ($user->level == 'staff') {
+            $manager = User::where('level', 'manager')
+                ->where('company', $user->company)
+                ->first();
+
+            if ($manager) {
+                $debit = DB::table('debit')
+                    ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'debit.gambar', 'categories_debit.id as id_category', 'categories_debit.name')
+                    ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+                    ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+                    ->where('users.company', $user->company)
+                    ->where('users.level', 'manager')
+                    ->where(function ($query) use ($search) {
+                        $query->where('debit.description', 'LIKE', '%' . $search . '%')
+                            ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
+                            ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
+                    })
+                    ->orderBy('debit.created_at', 'DESC')
+                    ->paginate(10);
+            } else {
+                // If there is no matching manager, return an error
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
         } else {
-            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'debit.gambar', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
                 ->where('debit.user_id', $user->id)
                 ->where(function ($query) use ($search) {
@@ -122,12 +127,21 @@ class DebitController extends Controller
                 ->paginate(10);
         }
 
+        if ($debit->isEmpty()) {
+            // If there are no results, return an error
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+
         foreach ($debit as $item) {
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
-        return view('account.debit.index', compact('debit'));
-    }
 
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.debit.index', compact('debit', 'maintenances'));
+    }
 
     public function create()
     {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\CategoriesCredit;
 use App\Credit;
+use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,49 +77,40 @@ class CreditController extends Controller
             ->get();
 
         return view('account.credit.index', compact('credit', 'maintenances'));
-        //$credit = DB::table('credit')
-        //    ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-        //    ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
-        //    ->where('credit.user_id', Auth::user()->id)
-        //    ->orderBy('credit.created_at', 'DESC')
-        //    ->paginate(10);
-
-        //foreach ($credit as $item) {
-        //    $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
-        //}
-
-        //return view('account.credit.index', compact('credit'));
     }
-
 
     public function search(Request $request)
     {
         $search = $request->get('q');
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
-            $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
-                ->where(function ($query) use ($search) {
-                    $query->where('credit.description', 'LIKE', '%' . $search . '%')
-                        ->orWhere(
-                            'categories_credit.name',
-                            'LIKE',
-                            '%' . $search . '%'
-                        )
-                        ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
-                        ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
-                })
-                ->orderBy('credit.created_at', 'DESC')
-                ->paginate(10);
+        if ($user->level == 'staff') {
+            $manager = User::where('level', 'manager')
+                ->where('company', $user->company)
+                ->first();
+
+            if ($manager) {
+                $credit = DB::table('credit')
+                    ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
+                    ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                    ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                    ->where('users.company', $user->company)
+                    ->where('users.level', 'manager')
+                    ->where(function ($query) use ($search) {
+                        $query->where('credit.description', 'LIKE', '%' . $search . '%')
+                            ->orWhere('categories_credit.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
+                            ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
+                    })
+                    ->orderBy('credit.created_at', 'DESC')
+                    ->paginate(10);
+            } else {
+                // If there is no matching manager, return an error
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
         } else {
-            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
             $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
                 ->where('credit.user_id', $user->id)
                 ->where(function ($query) use ($search) {
@@ -135,29 +127,21 @@ class CreditController extends Controller
                 ->paginate(10);
         }
 
+        if ($credit->isEmpty()) {
+            // If there are no results, return an error
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+
         foreach ($credit as $item) {
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
-        return view('account.credit.index', compact('credit'));
-        //$search = $request->get('q');
-        //$credit = DB::table('credit')
-        //    ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
-        //    ->join('categories_credit', 'credit.category_id', '=', 'categories_credit.id', 'LEFT')
-        //    ->where('credit.user_id', Auth::user()->id)
-        //    ->where(function ($query) use ($search) {
-        //        $query->where('credit.description', 'LIKE', '%' . $search . '%')
-        //            ->orWhere('categories_credit.name', 'LIKE', '%' . $search . '%')
-        //            ->orWhere('credit.nominal', 'LIKE', '%' . $search . '%')
-        //            ->orWhere('credit.credit_date', 'LIKE', '%' . $search . '%');
-        //    })
-        //    ->orderBy('credit.created_at', 'DESC')
-        //    ->paginate(10);
-        //foreach ($credit as $item) {
-        //    $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
-        //}
-        //return view('account.credit.index', compact('credit'));
-    }
 
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.credit.index', compact('credit', 'maintenances'));
+    }
 
     public function create()
     {
