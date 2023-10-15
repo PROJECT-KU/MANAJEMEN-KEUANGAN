@@ -38,13 +38,16 @@ List Kategori Uang keluar | MANAGEMENT
                     </div>
 
                     <div class="card-body">
-                        @if(Auth::user()->level === 'staff')
+
                         <form action="{{ route('account.categories_credit.search') }}" method="GET">
                             <div class="form-group">
                                 <div class="input-group mb-3">
-                                    <!--<div class="input-group-prepend">
-                                    <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                                </div>-->
+                                    @if(Auth::user()->level === 'staff')
+                                    @else
+                                    <div class="input-group-prepend">
+                                        <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                                    </div>
+                                    @endif
                                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                                     <div class="input-group-append">
                                         <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
@@ -64,7 +67,7 @@ List Kategori Uang keluar | MANAGEMENT
 
         <div class="card">
             <div class="card-header">
-                <h4><i class="fas fa-list"></i> LIST KATEGORI UANG KELUAR</h4>
+                <h4><i class="fas fa-list"></i> LIST KATEGORI UANG MASUK</h4>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -105,65 +108,6 @@ List Kategori Uang keluar | MANAGEMENT
                         {{$categories->links("vendor.pagination.bootstrap-4")}}
                     </div>
                 </div>
-                @else
-                <form action="{{ route('account.categories_credit.search') }}" method="GET">
-                    <div class="form-group">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                            </div>
-                            <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                                </button>
-                            </div>
-                            @if(request()->has('q'))
-                            <a href="{{ route('account.categories_credit.index') }}" class="btn btn-danger ml-1">
-                                <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                            </a>
-                            @endif
-                        </div>
-                    </div>
-                </form>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                <th scope="col">KODE KATEGORI</th>
-                                <th scope="col">NAMA KATEGORI</th>
-                                <th scope="col" style="width: 15%;text-align: center">AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                            $no = 1;
-                            @endphp
-                            @foreach ($categories as $hasil)
-                            <tr>
-                                <th scope="row" style="text-align: center">{{ $no }}</th>
-                                <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
-                                <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                <td class="text-center">
-                                    <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-pencil-alt"></i>
-                                    </a>
-                                    <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            @php
-                            $no++;
-                            @endphp
-                            @endforeach
-                        </tbody>
-                    </table>
-                    <div style="text-align: center">
-                        {{$categories->links("vendor.pagination.bootstrap-4")}}
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
 </div>

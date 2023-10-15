@@ -88,7 +88,12 @@ class PenggunaController extends Controller
             return redirect()->route('account.pengguna.index')->with('error', 'Data Pengguna tidak ditemukan.');
         }
 
-        return view('account.pengguna.index', compact('users'));
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+
+        return view('account.pengguna.index', compact('users', 'maintenances'));
     }
 
     public function create()

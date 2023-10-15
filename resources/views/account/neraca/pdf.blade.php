@@ -147,7 +147,7 @@
               </tbody>
             </table>
             <hr>
-            <br><br>
+            <br>
             @endif
 
           </div>

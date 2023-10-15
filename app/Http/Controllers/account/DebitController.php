@@ -99,8 +99,8 @@ class DebitController extends Controller
                     ->where(function ($query) use ($search) {
                         $query->where('debit.description', 'LIKE', '%' . $search . '%')
                             ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
-                            ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
-                            ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
+                            ->orWhere(DB::raw("CAST(REPLACE(debit.nominal, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
+                            ->orWhere(DB::raw("DATE_FORMAT(debit.debit_date, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
                     })
                     ->orderBy('debit.created_at', 'DESC')
                     ->paginate(10);
@@ -120,8 +120,8 @@ class DebitController extends Controller
                         '%' . $search . '%'
                     )
                         ->orWhere('categories_debit.name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('debit.nominal', 'LIKE', '%' . $search . '%')
-                        ->orWhere('debit.debit_date', 'LIKE', '%' . $search . '%');
+                        ->orWhere(DB::raw("CAST(REPLACE(debit.nominal, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
+                        ->orWhere(DB::raw("DATE_FORMAT(debit.debit_date, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
                 })
                 ->orderBy('debit.created_at', 'DESC')
                 ->paginate(10);

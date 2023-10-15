@@ -179,7 +179,7 @@
                 </tr>
               </tbody>
             </table>
-            <hr><br><br>
+            <hr><br>
 
           </div>
         </div>

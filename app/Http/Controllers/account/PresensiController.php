@@ -36,11 +36,19 @@ class PresensiController extends Controller
     return $id;
   }
 
-  public function index()
+  public function index(Request $request)
   {
     $user = Auth::user();
-    $currentMonth = date('Y-m-01 00:00:00');
-    $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
@@ -70,7 +78,7 @@ class PresensiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
-    return view('account.presensi.index', compact('presensi', 'maintenances'));
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
   }
 
   public function create()
@@ -272,7 +280,7 @@ class PresensiController extends Controller
     $user = Auth::user();
 
     $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
+      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'presensi.time_pulang', 'presensi.status_pulang', 'users.id as user_id', 'users.full_name as full_name', 'presensi.time_pulang')
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->where(function ($query) use ($search) {
@@ -292,6 +300,11 @@ class PresensiController extends Controller
       return redirect()->route('account.presensi.index')->with('error', 'Data presensi Karyawan tidak ditemukan.');
     }
 
-    return view('account.presensi.index', compact('presensi'));
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+
+    return view('account.presensi.index', compact('presensi', 'maintenances'));
   }
 }
