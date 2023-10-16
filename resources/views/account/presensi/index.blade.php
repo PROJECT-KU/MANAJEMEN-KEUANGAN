@@ -149,6 +149,7 @@ List Presensi Karyawan | MANAGEMENT
                 <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
                 <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
                 <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
+                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
                 <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
               </tr>
               <tr>
@@ -236,6 +237,11 @@ List Presensi Karyawan | MANAGEMENT
                     <div class="thumbnail-circle">
                       <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
                     </div>
+                  </a>
+                </td>
+                <td class="column-width" style="text-align: center;">
+                  <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
+                    Lihat di Google Maps
                   </a>
                 </td>
                 @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')

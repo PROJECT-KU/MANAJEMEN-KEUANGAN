@@ -182,6 +182,15 @@ Tambah Presensi Karyawan | MANAGEMENT
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <input type="hidden" name="latitude" id="latitude" value="">
+        <input type="hidden" name="longitude" id="longitude" value="">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
   <?php
   $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
   $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
@@ -203,6 +212,50 @@ Tambah Presensi Karyawan | MANAGEMENT
             </div>
             </section>
             </div>
+
+            <!-- lokasi -->
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+            <!-- Include Leaflet JavaScript -->
+            <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+            <style>
+              /* Define the size of the map */
+              #map {
+                width: 100%;
+                height: 400px;
+              }
+            </style>
+            <script>
+              var marker;
+
+              // Initialize the map
+              var map = L.map('map').setView([-7.805682594463084, 110.38436878165705], 16);
+
+              // Add a base layer to the map
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+
+              // Add a marker to the map
+              marker = L.marker([-7.805682594463084, 110.38436878165705], {
+                  draggable: true //jika tidak ingin bergeser lokasi nya ubah ke false jika ingin geser ke true
+                }).addTo(map)
+                .bindPopup('Lokasi Pengguna')
+                .openPopup();
+
+              // Function to update latitude and longitude input fields
+              function updateLatLngInput(latlng) {
+                document.getElementById('latitude').value = latlng.lat;
+                document.getElementById('longitude').value = latlng.lng;
+              }
+
+              // Event listener when marker is dragged
+              marker.on('dragend', function(e) {
+                updateLatLngInput(e.target.getLatLng());
+              });
+
+              // Initialize with the default values
+              updateLatLngInput(marker.getLatLng());
+            </script>
 
             <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
