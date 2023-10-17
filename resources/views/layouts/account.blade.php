@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/newlogo2.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -61,8 +61,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     </ul>
                     <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
                 </form>
-                <ul class="navbar-nav navbar-right">
 
+                <!-- <a href="{{ route('account.notifikasi.index') }}">
+                    <button style="background-color: transparent; border: none; outline: none; color:#ffffff"><i class="fas fa-bell"></i></button>
+                </a> -->
+                <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
                             <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
@@ -94,10 +97,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="200">
+                        <img src="{{ asset('assets/img/logo2.png') }}" alt="logo" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <a href="index.html"><i class="fa fa-gem"></i></a>
+                        <img src="{{ asset('assets/img/logo3.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>
@@ -192,8 +195,17 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         </li>
                                     </ul>
                                 </li>
-
                                 @endif
+
+                                <!-- jika user dengan level admin maka dapat akses menu maintenance -->
+                                @if (Auth::user()->level === 'admin')
+                                <li class="{{ setActive('account/maintenance') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link" href="{{ route('account.maintenance.index') }}">
+                                        <i class="fas fa-user"></i> <span>MAINTENANCE</span>
+                                    </a>
+                                </li>
+                                @endif
+                                <!-- end maintenance -->
 
                                 @else
                                 @endif

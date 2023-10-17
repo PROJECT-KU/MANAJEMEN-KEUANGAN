@@ -3,8 +3,21 @@
     <center>
       <div class="section-header">
         <h1>LIST GAJI KARYAWAN</h1>
-        <h4>{{ $user->alamat_company }}</h4>
-        <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
+        <div class="section-header">
+          <center>
+            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </p>
+            <hr>
+            <h4>{{ $user->alamat_company }}</h4>
+            <h4>Email : {{ $user->email_company }} Telp : {{ $user->telp_company }}</h4>
+          </center>
+        </div>
       </div>
     </center>
     <hr><br><br>
@@ -39,7 +52,9 @@
               @foreach ($gaji as $hasil)
               @if (Auth::user()->level == 'karyawan' && $hasil->status == 'pending')
               <!-- Skip displaying records where user is karyawan and status is pending -->
+              @continue
               @else
+              @if ($hasil->status == 'terbayar')
               <tr>
                 <th scope="row" style="text-align: center">{{ $no }}</th>
                 <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
@@ -126,9 +141,12 @@
                   @endif
                 </td>
               </tr>
+              @endif
               @php
-              $no++;
+              if ($hasil->status == 'terbayar') {
+              $no++; // Increment the number only for terbayar records
               $terbayarCount++;
+              }
               @endphp
               @endif
               @endforeach
@@ -137,8 +155,10 @@
           <hr>
           <center>
             <div class="mt-5">
-              <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h3>
-              <p><i>{{ $terbilang }}</i></p>
+              <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGajiTerbayar, 0, ',', ',') }}</h3>
+              <p><i>{{ $terbilangterbayar }}</i></p>
+              <!-- <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h3>
+              <p><i>{{ $terbilang }}</i></p> -->
             </div>
           </center>
           <hr>

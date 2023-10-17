@@ -15,86 +15,146 @@ Company | MANAGEMENT
 
         <div class="section-body">
 
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-building"></i> UPDATE COMPANY</h4>
-                </div>
+            <!-- jika maintenace aktif -->
+            @if (!$maintenances->isEmpty())
+            @foreach($maintenances as $maintenance)
+            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+                <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
 
-                <div class="card-body">
 
-                    <form action="{{ route('account.company.update', $user->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>NAMA PERUSAHAAN</label>
-                                    <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
+                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
+                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+
+
+                </div </ </div>
+                @endif
+                @endforeach
+                @endif
+                <!-- end -->
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-building"></i> UPDATE COMPANY</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form action="{{ route('account.company.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>NAMA PERUSAHAAN</label>
+                                        <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>EMAIL PERUSAHAAN</label>
-                                    <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>EMAIL PERUSAHAAN</label>
+                                        <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>MANAGER PERUSAHAAN</label>
-                                    <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>ALAMAT PERUSAHAAN</label>
-                                    <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>TELP PERUSAHAAN</label>
-                                    <input type="text" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>LOGO PERUSAHAAN</label>
-                                    <div class="input-group">
-                                        <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>MANAGER PERUSAHAAN</label>
+                                        <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="thumbnail-circle" style="width: 12rem;">
-                                        @if (Auth::user()->logo_company == null)
-                                        <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
-                                        @else
-                                        <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->logo_company) }}" alt="Preview Image" style="width: 100px; height:100px;">
-                                        @endif
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ALAMAT PERUSAHAAN</label>
+                                        <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>TELP PERUSAHAAN</label>
+                                        <input type="text" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <!-- <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button> -->
 
-                    </form>
 
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>LOGO PERUSAHAAN</label>
+                                        <div class="input-group">
+                                            <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="thumbnail-circle" style="width: 12rem;">
+                                            @if (Auth::user()->logo_company == null)
+                                            <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                                            @else
+                                            <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->logo_company) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
+                            <!-- <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button> -->
+
+                        </form>
+
+                    </div>
                 </div>
-            </div>
         </div>
     </section>
 </div>
+
+<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('logo_company').addEventListener('change', function() {
+        const maxFileSizeInBytes = 1024 * 1024; // 1MB
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const fileInput = this;
+
+        if (fileInput.files.length > 0) {
+            const selectedFile = fileInput.files[0];
+            const fileSize = selectedFile.size; // Get the file size in bytes
+            const fileName = selectedFile.name.toLowerCase();
+
+            // Check file size
+            if (fileSize > maxFileSizeInBytes) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Melebihi Batas',
+                    text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+                });
+                fileInput.value = ''; // Clear the file input
+                return;
+            }
+
+            // Check file extension
+            const fileExtension = fileName.split('.').pop();
+            if (!allowedExtensions.includes(fileExtension)) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jenis File Tidak Valid',
+                    text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+                });
+                fileInput.value = ''; // Clear the file input
+            }
+        }
+    });
+</script>
+<!-- end -->
 
 <!-- upload image -->
 <script>

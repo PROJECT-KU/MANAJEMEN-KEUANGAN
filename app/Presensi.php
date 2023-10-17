@@ -22,6 +22,8 @@ class Presensi extends Model
     'gambar',
     'lokasi',
     'time_pulang',
+    'latitude',
+    'longitude',
     'created_at',
     'updated_at',
   ];

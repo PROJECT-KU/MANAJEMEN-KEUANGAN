@@ -13,47 +13,83 @@ List Kategori Uang keluar | MANAGEMENT
 
         <div class="section-body">
 
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-list"></i> LIST KATEGORI UANG KELUAR</h4>
-                </div>
+            <!-- jika maintenace aktif -->
+            @if (!$maintenances->isEmpty())
+            @foreach($maintenances as $maintenance)
+            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+                <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
 
-                <div class="card-body">
-                    @if(Auth::user()->level === 'staff')
-                    <form action="{{ route('account.categories_credit.search') }}" method="GET">
-                        <div class="form-group">
-                            <div class="input-group mb-3">
-                                <!--<div class="input-group-prepend">
-                                    <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                                </div>-->
-                                <input type="text" class="form-control" name="q" placeholder="pencarian">
-                                <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                                    </button>
+
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
+                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
+                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+
+
+                </div>
+                @endif
+                @endforeach
+                @endif
+                <!-- end -->
+
+                <div class="card">
+                    <div class="card-header  text-right">
+                        <h4><i class="fas fa-list"></i> LIST KATEGORI UANG KELUAR</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form action="{{ route('account.categories_credit.search') }}" method="GET">
+                            <div class="form-group">
+                                <div class="input-group mb-3">
+                                    @if(Auth::user()->level === 'staff')
+                                    @else
+                                    <div class="input-group-prepend">
+                                        <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                                    </div>
+                                    @endif
+                                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                                        </button>
+                                    </div>
+                                    @if(request()->has('q'))
+                                    <a href="{{ route('account.categories_credit.index') }}" class="btn btn-danger ml-1">
+                                        <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                    <th scope="col">KODE KATEGORI</th>
-                                    <th scope="col">NAMA KATEGORI</th>
-                                    <!--<th scope="col" style="width: 15%;text-align: center">AKSI</th>-->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                $no = 1;
-                                @endphp
-                                @foreach ($categories as $hasil)
-                                <tr>
-                                    <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
-                                    <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                    <!--<td class="text-center">
+                        </form>
+                    </div>
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-list"></i> LIST KATEGORI UANG MASUK</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                <th scope="col">KODE KATEGORI</th>
+                                <th scope="col">NAMA KATEGORI</th>
+                                <!--<th scope="col" style="width: 15%;text-align: center">AKSI</th>-->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                            $no = 1;
+                            @endphp
+                            @foreach ($categories as $hasil)
+                            <tr>
+                                <th scope="row" style="text-align: center">{{ $no }}</th>
+                                <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
+                                <td style="text-transform:uppercase">{{ $hasil->name }}</td>
+                                <!--<td class="text-center">
                                         <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fa fa-pencil-alt"></i>
                                         </a>
@@ -61,75 +97,21 @@ List Kategori Uang keluar | MANAGEMENT
                                             <i class="fa fa-trash"></i>
                                         </button>
                                     </td>-->
-                                </tr>
-                                @php
-                                $no++;
-                                @endphp
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div style="text-align: center">
-                            {{$categories->links("vendor.pagination.bootstrap-4")}}
-                        </div>
+                            </tr>
+                            @php
+                            $no++;
+                            @endphp
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div style="text-align: center">
+                        {{$categories->links("vendor.pagination.bootstrap-4")}}
                     </div>
-                    @else
-                    <form action="{{ route('account.categories_credit.search') }}" method="GET">
-                        <div class="form-group">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                                </div>
-                                <input type="text" class="form-control" name="q" placeholder="pencarian">
-                                <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                    <th scope="col">KODE KATEGORI</th>
-                                    <th scope="col">NAMA KATEGORI</th>
-                                    <th scope="col" style="width: 15%;text-align: center">AKSI</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                $no = 1;
-                                @endphp
-                                @foreach ($categories as $hasil)
-                                <tr>
-                                    <th scope="row" style="text-align: center">{{ $no }}</th>
-                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
-                                    <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                    <td class="text-center">
-                                        <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-pencil-alt"></i>
-                                        </a>
-                                        <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                @php
-                                $no++;
-                                @endphp
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div style="text-align: center">
-                            {{$categories->links("vendor.pagination.bootstrap-4")}}
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
-    </section>
+</div>
+</section>
 </div>
 
 <!-- reload data ketika success -->
@@ -219,6 +201,17 @@ List Kategori Uang keluar | MANAGEMENT
                                 location.reload();
                             });
                         }
+                    },
+                    error: function() {
+                        swal({
+                            title: 'GAGAL!',
+                            text: 'KATEGORI MASIH TERHUBUNG DENGAN UANG KELUAR!, silahkan hapus terlebih dahulu uang keluar!',
+                            icon: 'error',
+                            timer: 1000,
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            buttons: false,
+                        });
                     }
                 });
 

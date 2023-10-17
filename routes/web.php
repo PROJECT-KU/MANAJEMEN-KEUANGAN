@@ -65,7 +65,6 @@ Route::prefix('account')->group(function () {
     Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
     Route::get('/penyewaan/pdf/{id}', 'account\PenyewaanController@detailPDF')->name('pdf.show');
 
-
     //tambah barang
     Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
     Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
@@ -106,11 +105,10 @@ Route::prefix('account')->group(function () {
     Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');
     Route::Resource('/neraca', 'account\NeracaController', ['as' => 'account']);
 
-
     //gaji
     Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
     Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
-    Route::post('/account/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
+    Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
     Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
     Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
@@ -135,4 +133,16 @@ Route::prefix('account')->group(function () {
     // company
     Route::get('/company/{id}/edit', 'account\PenggunaController@company')->name('account.company.edit');
     Route::put('/company/{id}', 'account\PenggunaController@updateCompany')->name('account.company.update');
+
+    // notifikasi
+    Route::get('/notifikasi', 'account\NotifikasiController@showNotifications')->name('account.notifikasi.index');
+
+    // maintenance
+    Route::get('/maintenance', 'account\MaintenanceController@index')->name('account.maintenance.index');
+    Route::get('/maintenance/create', 'account\MaintenanceController@create')->name('account.maintenance.create');
+    Route::post('/maintenance', 'account\MaintenanceController@store')->name('account.maintenance.store');
+    Route::get('/maintenance/{id}/edit', 'account\MaintenanceController@edit')->name('account.maintenance.edit');
+    Route::post('/maintenance/{id}', 'account\MaintenanceController@update')->name('account.maintenance.update');
+    Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
+    Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 });

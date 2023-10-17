@@ -16,7 +16,7 @@
     <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
       @csrf
       <div class="wrapper">
-        <!-- <img src="{{ storage_path('app/images/images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;"> -->
+        <img src="{{ asset('images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;">
         <section class="invoice">
           <div class="row">
             <div class="col-12">
@@ -188,6 +188,9 @@
                   <tr>
                     <td style="text-align: left; width:145px">Lemburan</td>
                     <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
+
+                    <td style="text-align: left; width:145px">PPH 21</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->pph, 0, ',', '.') }}</td>
                   </tr>
                   <tr>
                     <td style="text-align: left; width:145px">Bonus</td>

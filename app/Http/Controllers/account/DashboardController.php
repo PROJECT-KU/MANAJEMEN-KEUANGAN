@@ -243,7 +243,25 @@ class DashboardController extends Controller
         }
         //end
 
+        // user baru
+        if ($user->level == 'manager') {
+            // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
+            $users = DB::table('users')
+                ->where('company', $user->company)
+                ->whereIn('level', ['staff', 'karyawan'])
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager', ambil hanya data pengguna itu sendiri
+            $users = DB::table('users')
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+        }
+        // end
 
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
         //saldo bulan ini
         $saldo_bulan_ini = $uang_masuk_bulan_ini->nominal - $uang_keluar_bulan_ini->nominal;
@@ -279,6 +297,6 @@ class DashboardController extends Controller
          * chart
          */
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers'));
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users', 'maintenances'));
     }
 }

@@ -36,15 +36,23 @@ class PresensiController extends Controller
     return $id;
   }
 
-  public function index()
+  public function index(Request $request)
   {
     $user = Auth::user();
-    $currentMonth = date('Y-m-01 00:00:00');
-    $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -52,7 +60,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -66,7 +74,11 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
-    return view('account.presensi.index', compact('presensi'));
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
   }
 
   public function create()
@@ -115,33 +127,33 @@ class PresensiController extends Controller
     }
     //end
 
-    $currentTime = now()->format('H:i:s');
+    // ... (validasi gambar dan lainnya)
+
     $clientDateTime = Carbon::parse($request->input('client_date_time'));
 
-    // Check if the current time is between 07:00:00 and 09:00:00
-    if ($currentTime >= '07:00:00' && $currentTime <= '09:00:00') {
-      // Use the provided status if available, or set to 'terlambat' by default
-      $status = $request->input('status', 'terlambat');
-    } else if ($currentTime > '09:00:00') {
-      // Check if an existing record for the user and date exists with specific statuses
-      $existingHadirRecord = Presensi::where('user_id', $request->input('user_id'))
-        ->whereIn('status', ['hadir', 'dinas luar kota', 'remote'])
-        ->whereDate('created_at', $clientDateTime->format('Y-m-d'))
-        ->exists();
+    // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+    $currentDay = $clientDateTime->dayOfWeek;
 
-      if (!$existingHadirRecord) {
-        $status = 'hadir';
-      } else {
-        $status = 'terlambat';
-      }
-      // if (!$existingHadirRecord) {
+    // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+    $currentTime = now()->format('H:i:s');
 
-      //   $status = 'terlambat';
-      // }
-    } else {
-      // Use the provided status if available, or set to 'terlambat' by default
-      $status = $request->input('status', 'terlambat');
+    // Inisialisasi status default
+    $status = 'terlambat';
+
+    // Logika berdasarkan hari dan waktu
+    if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00')) {
+      $status = 'hadir';
+    } elseif (in_array($currentDay, [2, 3])) {
+      $status = 'libur';
+    } elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00')) {
+      $status = 'hadir';
+    } elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00')) {
+      $status = 'hadir';
     }
+
+    // Get the user's location from the request
+    $latitude = $request->input('latitude');
+    $longitude = $request->input('longitude');
 
     //$clientDateTime = Carbon::parse($request->input('client_date_time'));
     $save = Presensi::create([
@@ -151,6 +163,8 @@ class PresensiController extends Controller
       'lokasi' => $request->input('lokasi'),
       'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data
       'gambar' => $imagePath ?? null, // Store the image path
+      'latitude' => $latitude,
+      'longitude' => $longitude,
       'created_at' => $clientDateTime,
 
     ]);
@@ -271,7 +285,7 @@ class PresensiController extends Controller
     $user = Auth::user();
 
     $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'users.id as user_id', 'users.full_name as full_name')
+      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'presensi.time_pulang', 'presensi.status_pulang', 'users.id as user_id', 'users.full_name as full_name', 'presensi.time_pulang')
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->where(function ($query) use ($search) {
@@ -291,6 +305,11 @@ class PresensiController extends Controller
       return redirect()->route('account.presensi.index')->with('error', 'Data presensi Karyawan tidak ditemukan.');
     }
 
-    return view('account.presensi.index', compact('presensi'));
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+
+    return view('account.presensi.index', compact('presensi', 'maintenances'));
   }
 }

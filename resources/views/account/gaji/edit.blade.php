@@ -998,7 +998,7 @@ Update Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end lembur field 10 -->
 
-            @if (Auth::user()->company === 'rumahscopus')
+            <!-- (Auth::user()->company === 'rumahscopus') -->
 
             <!-- bonus default -->
             <div class="row">
@@ -2449,8 +2449,8 @@ Update Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end bonus field 10 -->
 
-            @else
-            <div class="row">
+
+            <!-- <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>BAYARAN BONUS (Hari)</label>
@@ -2479,8 +2479,8 @@ Update Gaji Karyawan | MANAGEMENT
                   @enderror
                 </div>
               </div>
-            </div>
-            @endif
+            </div> -->
+
 
             <div class="row">
               <div class="col-md-4">
@@ -2521,7 +2521,7 @@ Update Gaji Karyawan | MANAGEMENT
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>POTONGAN</label>
                   <div class="input-group">
@@ -2533,7 +2533,19 @@ Update Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>PPH 21</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="pph" id="pph" value="{{ $gaji->pph }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL DIBAYARKAN</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
@@ -2626,6 +2638,48 @@ Update Gaji Karyawan | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById('gambar').addEventListener('change', function() {
+    const maxFileSizeInBytes = 1024 * 1024; // 1MB
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileInput = this;
+
+    if (fileInput.files.length > 0) {
+      const selectedFile = fileInput.files[0];
+      const fileSize = selectedFile.size; // Get the file size in bytes
+      const fileName = selectedFile.name.toLowerCase();
+
+      // Check file size
+      if (fileSize > maxFileSizeInBytes) {
+        // Display a SweetAlert error message
+        Swal.fire({
+          icon: 'error',
+          title: 'Ukuran File Melebihi Batas',
+          text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+        });
+        fileInput.value = ''; // Clear the file input
+        return;
+      }
+
+      // Check file extension
+      const fileExtension = fileName.split('.').pop();
+      if (!allowedExtensions.includes(fileExtension)) {
+        // Display a SweetAlert error message
+        Swal.fire({
+          icon: 'error',
+          title: 'Jenis File Tidak Valid',
+          text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+        });
+        fileInput.value = ''; // Clear the file input
+      }
+    }
+  });
+</script>
+<!-- end -->
+
 <!-- upload image -->
 <script>
   const imageInput = document.getElementById('gambar');
@@ -3029,6 +3083,11 @@ Update Gaji Karyawan | MANAGEMENT
   });
 
   var cleaveC = new Cleave('.currency_tunjanganTHR', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_pph', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

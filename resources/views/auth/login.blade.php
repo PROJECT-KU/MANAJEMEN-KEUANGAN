@@ -48,7 +48,8 @@
                     <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
                         <div class="login-brand">
                             <!--<img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="100" class="shadow-light rounded-circle">-->
-                            <img src="{{ asset('assets/img/newlogo.png') }}" alt="logo" width="300">
+                            <img src="{{ asset('assets/img/logo2.png') }}" alt="logo" width="350">
+                            <!-- <p>TMIS <br> Rumah Scopus <br> total management integrated system</p> -->
                         </div>
 
                         <div class="card card-primary">
@@ -93,7 +94,8 @@
                                             MASUK
                                         </button>
                                     </div>
-                                    <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
+                                    <!-- <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a> -->
+                                    <a href="{{ route('account.page-maintenance.blank') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
                                     Belum punya akun? <br> <a href="{{ route('register') }}">Buat Sekarang!</a>
                                 </form>
 

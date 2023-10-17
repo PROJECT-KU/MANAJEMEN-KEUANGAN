@@ -211,6 +211,22 @@ Detail Pengguna | MANAGEMENT
             </div>
 
             <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>JOBDESK</label>
+                  <div class="input-group">
+                    <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" readonly>{{ old('jobdesk', $user->jobdesk) }}</textarea>
+                  </div>
+                  @error('jobdesk')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
               <div class="col-2">
                 <div class="form-group">
                   <input type="checkbox" value="1" name="email_verified_at" style="margin-top: 5px;" {{ $user->email_verified_at ? 'checked' : '' }} disabled="true">
@@ -236,6 +252,24 @@ Detail Pengguna | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!-- Include CKEditor JS -->
+<style>
+  .ckeditor-container {
+    width: 100%;
+  }
+</style>
+
+<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+  // Replace 'jobdesk' textarea with CKEditor
+  CKEDITOR.replace('jobdesk', {
+    width: '100%', // Set CKEditor width to 100%
+    height: '300px' // You can adjust the height as needed
+  });
+</script>
+<!-- end ckeditor -->
+
 <!-- upload image -->
 <script>
   const imageInput = document.getElementById('gambar');

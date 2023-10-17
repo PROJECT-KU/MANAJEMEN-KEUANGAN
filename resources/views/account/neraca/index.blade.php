@@ -43,32 +43,46 @@ Laporan Transaksi Neraca | MANAGEMENT
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-primary mr-1 btn-submit btn-block" type="submit" style="margin-top: 30px"><i class="fa fa-filter"></i> FILTER</button>
+                                @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                                <div class="btn-group" style="width: 100%;">
+                                    <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                                    <a href="{{ route('account.neraca.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                                        <i class="fa fa-times-circle mt-2"></i> HAPUS
+                                    </a>
+                                </div>
+                                @else
+                                <button class="btn btn-primary mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                                @endif
                             </div>
+
                         </div>
-                    </form>
+                </div>
+                </form>
+            </div>
+        </div>
+
+        @if (isset($debit) && count($debit) > 0 || isset($credit) && count($credit) > 0 || isset($gaji) && count($gaji) > 0)
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI NERACA</h4>
+                <div class="card-header-action">
+                    <a href="{{ route('account.laporan_neraca.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
                 </div>
             </div>
+            <div class="card-header">
+                <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                        @if ($startDate && $endDate)
+                        {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                        @else
+                        {{ date('F Y') }}
+                        @endif
+                    </strong>
+                </p>
+            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI NERACA</h4>
-                    <div class="card-header-action">
-                        <a href="{{ route('account.laporan_neraca.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-                            <i class="fas fa-file-pdf"></i> Download PDF
-                        </a>
-                    </div>
-                </div>
-                <div class="card-header">
-                    <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                            @if ($startDate && $endDate)
-                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                            @else
-                            {{ date('F Y') }}
-                            @endif
-                        </strong>
-                    </p>
-                </div>
+            <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
@@ -133,8 +147,9 @@ Laporan Transaksi Neraca | MANAGEMENT
                             'nominal_gaji' => 0,
                             ];
                             }
-
+                            if ($item->status != 'pending') {
                             $mergedItems[$key]['nominal_gaji'] += $item->total;
+                            }
                             }
                             // Menampilkan data yang telah digabung
                             foreach ($mergedItems as $key => $item) {
@@ -174,6 +189,7 @@ Laporan Transaksi Neraca | MANAGEMENT
                         </tbody>
                     </table>
                 </div>
+
                 @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
                 <table class="table table-bordered mt-5">
                     <thead style="border: 2px solid red;">
@@ -189,9 +205,37 @@ Laporan Transaksi Neraca | MANAGEMENT
                 </table>
                 @endif
             </div>
+
+            @else
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
+                </div>
+                <div class="card-header">
+                    <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                            @if ($startDate && $endDate)
+                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                            @else
+                            {{ date('F Y') }}
+                            @endif
+                        </strong>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <h6 style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Tidak Ada Data Laporan Transaksi Pada Periode
+                            @if ($startDate && $endDate)
+                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                            @else
+                            {{ date('F Y') }}
+                            @endif
+                        </strong>
+                    </h6>
+                </div>
+            </div>
+            @endif
         </div>
 </div>
-</div>
+
 </section>
 </div>
 
