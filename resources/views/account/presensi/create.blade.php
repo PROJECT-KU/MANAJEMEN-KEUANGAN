@@ -197,7 +197,7 @@ Tambah Presensi Karyawan | MANAGEMENT
   ?>
   @if (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
     @elseif ($currentDay == 1 && ($currentTime >= '00:00:00' && $currentTime <= '07:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
-      @elseif (in_array($currentDay, [2, 3]) && ($currentTime >= '00:00:00' && $currentTime <= '23:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+      @elseif (in_array($currentDay, [2, 3]) && ($currentTime >= '23:00:00' && $currentTime <= '23:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
         @elseif ($currentDay == 4 && ($currentTime >= '00:00:00' && $currentTime <= '11:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
           @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '00:00:00' && $currentTime <= '06:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
             @else
@@ -213,49 +213,59 @@ Tambah Presensi Karyawan | MANAGEMENT
             </section>
             </div>
 
-            <!-- lokasi -->
+            <!-- live lokasi -->
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-            <!-- Include Leaflet JavaScript -->
             <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+            <script>
+              function initMap() {
+                if ("geolocation" in navigator) {
+                  const options = {
+                    enableHighAccuracy: true, // Request high-accuracy location data
+                  };
+
+                  const map = L.map('map').setView([0, 0], 16); // Initial view
+                  let marker = null; // Initialize marker
+
+                  // Set up the map
+                  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  }).addTo(map);
+
+                  navigator.geolocation.watchPosition(
+                    function(position) {
+                      const latitude = position.coords.latitude;
+                      const longitude = position.coords.longitude;
+
+                      // Update the input fields with the new location
+                      document.getElementById('latitude').value = latitude;
+                      document.getElementById('longitude').value = longitude;
+
+                      // Update the map with the new location
+                      if (marker) {
+                        map.removeLayer(marker);
+                      }
+                      marker = L.marker([latitude, longitude]).addTo(map);
+                      marker.bindPopup('Lokasi Anda').openPopup();
+                      map.setView([latitude, longitude]);
+                    },
+                    function(error) {
+                      console.log(`Error getting location: ${error.message}`);
+                    },
+                    options
+                  );
+                } else {
+                  alert('Geolocation tidak didukung oleh browser Anda.');
+                }
+              }
+              window.onload = initMap;
+            </script>
             <style>
-              /* Define the size of the map */
               #map {
                 width: 100%;
                 height: 400px;
               }
             </style>
-            <script>
-              var marker;
-
-              // Initialize the map
-              var map = L.map('map').setView([-7.805682594463084, 110.38436878165705], 16);
-
-              // Add a base layer to the map
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              }).addTo(map);
-
-              // Add a marker to the map
-              marker = L.marker([-7.805682594463084, 110.38436878165705], {
-                  draggable: true //jika tidak ingin bergeser lokasi nya ubah ke false jika ingin geser ke true
-                }).addTo(map)
-                .bindPopup('Lokasi Pengguna')
-                .openPopup();
-
-              // Function to update latitude and longitude input fields
-              function updateLatLngInput(latlng) {
-                document.getElementById('latitude').value = latlng.lat;
-                document.getElementById('longitude').value = latlng.lng;
-              }
-
-              // Event listener when marker is dragged
-              marker.on('dragend', function(e) {
-                updateLatLngInput(e.target.getLatLng());
-              });
-
-              // Initialize with the default values
-              updateLatLngInput(marker.getLatLng());
-            </script>
+            <!-- end live lokasi -->
 
             <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
