@@ -18,17 +18,38 @@ List Gaji Karyawan | MANAGEMENT
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
         <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
           <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
           <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
           <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
           <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
         </div>
         @endif
         @endforeach
+        @endif
+        <!-- end -->
+
+        <!-- jika gaji masih ada yang status pending -->
+        @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager'))
+        @php
+        $totalPendingSalaries = 0;
+        @endphp
+
+        @foreach ($gaji as $item)
+        @if ($item->status === 'pending')
+        @php
+        $totalPendingSalaries++;
+        @endphp
+        @endif
+        @endforeach
+
+        @if ($totalPendingSalaries > 0)
+        <div class="alert alert-warning" role="alert" style="text-align: center;">
+          <p style="font-size: 16px;">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Ada <b>{{ $totalPendingSalaries }}</b> gaji karyawan dengan status pending yang belum terbayarkan, segara bayarkan dan ubah status menjadi terbayar
+          </p>
+        </div>
+        @endif
         @endif
         <!-- end -->
 

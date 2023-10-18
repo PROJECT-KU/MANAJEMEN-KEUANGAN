@@ -250,6 +250,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                     },
                     function(error) {
                       console.log(`Error getting location: ${error.message}`);
+                      // Handle location errors here, e.g., display an error message to the user.
                     },
                     options
                   );
@@ -257,8 +258,12 @@ Tambah Presensi Karyawan | MANAGEMENT
                   alert('Geolocation tidak didukung oleh browser Anda.');
                 }
               }
+
+              // Panggil fungsi initMap() saat halaman dimuat
               window.onload = initMap;
             </script>
+
+            <!-- Style untuk peta (gunakan CSS sesuai dengan preferensi Anda) -->
             <style>
               #map {
                 width: 100%;
