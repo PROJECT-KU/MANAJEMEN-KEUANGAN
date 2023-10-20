@@ -100,6 +100,7 @@ Tambah Pengguna | MANAGEMENT
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>
+                                        <option value="trainer">Trainer</option>
                                     </select>
 
                                     @error('level')
@@ -137,6 +138,7 @@ Tambah Pengguna | MANAGEMENT
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>
+                                        <option value="trainer">Trainer</option>
                                     </select>
 
                                     @error('level')

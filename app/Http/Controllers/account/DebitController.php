@@ -153,7 +153,7 @@ class DebitController extends Controller
                 ->whereIn('users.level', ['staff', 'manager'])
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->get();
-        } elseif ($user->level == 'karyawan') {
+        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->where('categories_debit.user_id', $user->id)
@@ -280,7 +280,7 @@ class DebitController extends Controller
                 ->whereIn('users.level', ['staff', 'manager'])
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->get();
-        } elseif ($user->level == 'karyawan') {
+        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->where('categories_debit.user_id', $user->id)

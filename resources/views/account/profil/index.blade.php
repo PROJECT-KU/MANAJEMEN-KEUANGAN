@@ -103,6 +103,7 @@ Profil | MANAGEMENT
                       <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                       <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
                       <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                      <option value="trainer" {{ $user->level == 'trainer' ? 'selected' : '' }}>Trainer</option>
                     </select>
 
                   </div>

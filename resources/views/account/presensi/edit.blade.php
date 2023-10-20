@@ -24,7 +24,7 @@ Update Presensi Karyawan | MANAGEMENT
             @csrf
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
             @php
             $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
             ->whereDate('created_at', now()->toDateString())

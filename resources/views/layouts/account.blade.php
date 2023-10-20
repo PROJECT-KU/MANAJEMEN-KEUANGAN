@@ -97,10 +97,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/logo2.png') }}" alt="logo" width="150">
+                        <img src="{{ asset('assets/img/logonew.png') }}" alt="logo" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <img src="{{ asset('assets/img/logo3.png') }}" alt="logo" width="50px">
+                        <img src="{{ asset('assets/img/logonew1.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>
@@ -145,7 +145,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
                                 </li>
                                 @else
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan')
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan' || Auth::user()->level === 'trainer')
                                 <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                     <ul class="dropdown-menu">

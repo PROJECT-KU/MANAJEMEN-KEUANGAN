@@ -58,7 +58,7 @@ class PresensiController extends Controller
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
         ->paginate(10);
-    } else if ($user->level == 'karyawan') {
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')

@@ -46,7 +46,7 @@ List Presensi Karyawan | MANAGEMENT
             </p>
           </div>
           @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
-          @elseif ((Auth::user()->level === 'karyawan' || Auth::user()->level === 'staff') && $item->status_pulang === null && $todayPresensi)
+          @elseif ((Auth::user()->level === 'karyawan' || Auth::user()->level === 'staff' || Auth::user()->level == 'trainer') && $item->status_pulang === null && $todayPresensi)
           <div class="alert alert-danger" role="alert" style="text-align: center;">
             <p style="font-size: 16px;">
               <i class="fas fa-exclamation-circle mr-1"></i>
@@ -61,7 +61,7 @@ List Presensi Karyawan | MANAGEMENT
           <div class="card">
             <div class="card-header  text-right">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
-              @if (Auth::user()->level == 'karyawan')
+              @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
               @else
               <!--<div class="card-header-action">
             <a href="{{ route('account.laporan_gaji.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
@@ -73,7 +73,7 @@ List Presensi Karyawan | MANAGEMENT
               <form action="{{ route('account.presensi.search') }}" method="GET">
                 <div class="form-group">
                   <div class="input-group mb-3">
-                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                     @php
                     $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
                     ->whereDate('created_at', now()->toDateString())
@@ -269,7 +269,7 @@ List Presensi Karyawan | MANAGEMENT
                     Lihat di Google Maps
                   </a>
                 </td>
-                @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+                @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                 <td class="text-center">
                   <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                     <i class="fa fa-eye"></i>

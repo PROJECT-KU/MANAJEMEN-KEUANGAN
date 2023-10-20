@@ -197,7 +197,7 @@ Tambah Presensi Karyawan | MANAGEMENT
   ?>
   @if (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
     @elseif ($currentDay == 1 && ($currentTime >= '00:00:00' && $currentTime <= '07:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
-      @elseif (in_array($currentDay, [2, 3]) && ($currentTime >= '23:00:00' && $currentTime <= '23:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+      @elseif (in_array($currentDay, [2, 3]) && ($currentTime >= '00:00:00' && $currentTime <= '23:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
         @elseif ($currentDay == 4 && ($currentTime >= '00:00:00' && $currentTime <= '11:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
           @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '00:00:00' && $currentTime <= '06:59:59' )) <button class="btn btn-secondary mr-1 btn-submit" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
             @else
