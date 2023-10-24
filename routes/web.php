@@ -35,6 +35,8 @@ Route::prefix('account')->group(function () {
     Route::put('/pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
     Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
     Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
+
+
     // routes/web.php
 
     //download excel
@@ -145,4 +147,5 @@ Route::prefix('account')->group(function () {
     Route::post('/maintenance/{id}', 'account\MaintenanceController@update')->name('account.maintenance.update');
     Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
     Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
+    Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
 });

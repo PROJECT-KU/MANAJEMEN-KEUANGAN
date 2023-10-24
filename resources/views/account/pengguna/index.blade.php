@@ -73,7 +73,7 @@ List Pengguna | MANAGEMENT
             <thead>
               <tr>
                 <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                <th scope="col" rowspan="2" style="text-align: center;">NAMA</th>
+                <!-- <th scope="col" rowspan="2" style="text-align: center;">NAMA</th> -->
                 <th scope="col" rowspan="2" style="text-align: center;">EMAIL</th>
                 <th scope="col" rowspan="2" style="text-align: center;">USERNAME</th>
                 <th scope="col" rowspan="2" style="text-align: center;">VERIFIKASI EMAIL</th>
@@ -91,7 +91,7 @@ List Pengguna | MANAGEMENT
               @foreach ($users as $item)
               <tr>
                 <th scope="row" style="text-align: center">{{ $no }}</th>
-                <td style="text-align: center;">{{ $item->full_name }}</td>
+                <!-- <td style="text-align: center;">{{ $item->full_name }}</td> -->
                 <td style="text-align: center;">{{ $item->email }}</td>
                 <td style="text-align: center;">{{ $item->username }}</td>
                 <td style="text-align: center;">

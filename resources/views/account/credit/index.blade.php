@@ -16,7 +16,7 @@ List Uang Keluar | MANAGEMENT
             <!-- jika maintenace aktif -->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+            @if ($maintenance->status === 'aktif' && ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
 
 

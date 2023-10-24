@@ -38,7 +38,11 @@ class CategoriesCreditController extends Controller
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } else {
-            $categories = [];
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->where('categories_credit.user_id', $user->id)
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->paginate(10);
         }
 
         $maintenances = DB::table('maintenance')
