@@ -11,28 +11,22 @@ Company | MANAGEMENT
             <h1>COMPANY</h1>
         </div>
 
-
-
         <div class="section-body">
 
-            <!-- jika maintenace aktif -->
+            <!--================== jika maintenace aktif ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
             @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
                     <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
-                </div </ </div>
+                </div>
                 @endif
                 @endforeach
                 @endif
-                <!-- end -->
+                <!--================== end ==================-->
 
                 <div class="card">
                     <div class="card-header">
@@ -75,7 +69,7 @@ Company | MANAGEMENT
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>TELP PERUSAHAAN</label>
-                                        <input type="text" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                        <input type="tel" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
                                     </div>
                                 </div>
                             </div>
@@ -114,6 +108,21 @@ Company | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!--================== format telp ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== end ==================-->
 
 <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

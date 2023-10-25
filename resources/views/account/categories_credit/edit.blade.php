@@ -30,7 +30,7 @@ Update Kategori Uang keluar | MANAGEMENT
                                     @php
                                     $initialValue = old('kode', $categoriesCredit->kode);
                                     @endphp
-                                    <input type="text" name="kode" value="{{ $initialValue }}" placeholder="Huruf-angka" minlength="5" maxlength="15" class="form-control" style="text-transform: uppercase" required>
+                                    <input type="text" name="kode" value="{{ $initialValue }}" placeholder="Huruf-angka" minlength="5" maxlength="15" class="form-control" style="text-transform: uppercase">
                                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
                                     <script>
                                         var kodeInput = document.querySelector('input[name="kode"]');

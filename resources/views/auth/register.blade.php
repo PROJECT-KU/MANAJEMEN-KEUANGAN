@@ -165,13 +165,22 @@
 
                                         <div class="form-group col-md-6" id="telpContainer" style="display: block;">
                                             <label for="telp">No Telp</label>
-                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)">
                                             @error('telp')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>
                                             @enderror
                                         </div>
+                                        <!-- <div class="form-group col-md-6" id="telpContainer" style="display: block;">
+                                            <label for="telp">No Telp</label>
+                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                            @error('telp')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div> -->
 
 
                                     </div>
@@ -266,8 +275,22 @@
         <!-- end -->
     </div>
 
-    <!-- ... Your HTML and CSS ... -->
+    <!--================== format telp ==================-->
+    <script>
+        function formatPhoneNumber(input) {
+            // Menghapus semua karakter non-digit
+            var phoneNumber = input.value.replace(/\D/g, '');
 
+            // Menggunakan ekspresi reguler untuk memformat nomor telepon
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+            // Mengatur nilai input dengan nomor telepon yang diformat
+            input.value = phoneNumber;
+        }
+    </script>
+    <!--================== end ==================-->
+
+    <!--================== change jenis akun ==================-->
     <script>
         // Get the elements
         const jenisDropdown = document.getElementById('jenis');
@@ -314,11 +337,9 @@
         // Call the function once on page load to initialize the visibility
         handleVisibility();
     </script>
-    <!-- ... Your remaining HTML ... -->
+    <!--================== end ==================-->
 
-
-
-    <!-- show and hide password -->
+    <!--================== show and hide password ==================-->
     <script>
         const passwordInput = document.getElementById('password');
         const passwordToggle = document.getElementById('password-toggle');
@@ -349,7 +370,8 @@
             }
         });
     </script>
-    <!-- end -->
+    <!--================== end ==================-->
+
     <!-- General JS Scripts -->
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
@@ -358,12 +380,6 @@
     <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
     <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
-
-    <!-- JS Libraies -->
-
-    <!-- Page Specific JS File -->
-
-    <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
 </body>

@@ -81,7 +81,7 @@ Profil | MANAGEMENT
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>No Telp</label>
-                    <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
 
                     @error('telp')
                     <div class="invalid-feedback" style="display: block">
@@ -289,6 +289,21 @@ Profil | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!--================== format telp ==================-->
+<script>
+  function formatPhoneNumber(input) {
+    // Menghapus semua karakter non-digit
+    var phoneNumber = input.value.replace(/\D/g, '');
+
+    // Menggunakan ekspresi reguler untuk memformat nomor telepon
+    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+    // Mengatur nilai input dengan nomor telepon yang diformat
+    input.value = phoneNumber;
+  }
+</script>
+<!--================== end ==================-->
 
 <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

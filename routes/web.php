@@ -148,4 +148,11 @@ Route::prefix('account')->group(function () {
     Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
     Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
     Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
+
+    // sewa
+    Route::get('/sewa', 'account\SewaController@index')->name('account.sewa.index');
+    Route::get('/sewa/create', 'account\SewaController@create')->name('account.sewa.create');
+    Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
+    Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
+    Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
 });

@@ -62,9 +62,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
                 </form>
 
-                <!-- <a href="{{ route('account.notifikasi.index') }}">
-                    <button style="background-color: transparent; border: none; outline: none; color:#ffffff"><i class="fas fa-bell"></i></button>
-                </a> -->
+                <!--================== dropdown profil ==================-->
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
@@ -75,7 +73,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong></div>
+                            <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong>
+                                <hr>
+                            </div>
                             <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
@@ -93,6 +93,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         </div>
                     </li>
                 </ul>
+                <!--================== end ==================-->
             </nav>
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
@@ -202,6 +203,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/maintenance') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
                                         <i class="fas fa-user"></i> <span>MAINTENANCE</span>
+                                    </a>
+                                </li>
+                                <li class="{{ setActive('account/sewa') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link" href="{{ route('account.sewa.index') }}">
+                                        <i class="fas fa-bell"></i> <span>NOTIF SEWA</span>
                                     </a>
                                 </li>
                                 @endif

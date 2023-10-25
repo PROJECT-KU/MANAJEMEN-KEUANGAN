@@ -66,7 +66,7 @@ Update Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="text" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -307,16 +307,16 @@ Update Pengguna | MANAGEMENT
 
                         <hr style="border-radius: 2px; border-width: 3px;">
                         <div style="text-align: center;">
-                            <p><span style="color: red;">*</span>Notifikasi Untuk Masa Sewa Yang Akan Habis<span style="color: red;">*</span></p>
+                            <p><span style="color: red;">*</span>Notifikasi Untuk Masa Sewa Yang Akan Habis Untuk Akun Perorangan<span style="color: red;">*</span></p>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Judul</label>
-                                    <textarea class="form-control" name="title" rows="6" placeholder="Masukkan Keterangan">{{ old('title', $user->title) }}</textarea>
+                                    <textarea class="form-control" name="title" id="title" rows="6" placeholder="Masukkan Keterangan">{{ old('title', $user->title) }}</textarea>
                                     @error('title')
-                                    <div class=" invalid-feedback" style="display: block">
+                                    <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
                                     @enderror
@@ -325,8 +325,7 @@ Update Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Tanggal Berakhir Sewa</label>
-                                    <input type="date" class="form-control" name="tenggat" value="{{ old('tenggat', $user->tenggat) }}"></input>
-
+                                    <input type="date" class="form-control" name="tenggat" id="tenggat" value="{{ old('tenggat', $user->tenggat) }}">
                                     @error('tenggat')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -339,9 +338,9 @@ Update Pengguna | MANAGEMENT
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>Pesan</label>
-                                <textarea class="form-control" name="notif" rows="6" placeholder="Masukkan Keterangan">{{ old('notif', $user->notif) }}</textarea>
+                                <textarea class="form-control" name="notif" id="notif" rows="6" placeholder="Masukkan Keterangan">{{ old('notif', $user->notif) }}</textarea>
                                 @error('notif')
-                                <div class=" invalid-feedback" style="display: block">
+                                <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
                                 @enderror
@@ -385,6 +384,50 @@ Update Pengguna | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!--================== masa tenggat jika nama company sama ==================-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Mengambil elemen input
+        var titleInput = document.getElementById('title');
+        var tenggatInput = document.getElementById('tenggat');
+        var notifInput = document.getElementById('notif');
+
+        // Mendeteksi perubahan pada input Judul dan Tanggal Berakhir Sewa
+        titleInput.addEventListener('input', function() {
+            updateNotifIfCompanyMatches();
+        });
+
+        tenggatInput.addEventListener('input', function() {
+            updateNotifIfCompanyMatches();
+        });
+
+        // Fungsi untuk memeriksa apakah user->company sama dan mengisi input Pesan jika perlu
+        function updateNotifIfCompanyMatches() {
+            var company = "{{ $user->company }}"; // Gantilah ini dengan cara Anda mendapatkan nilai user->company
+
+            if (titleInput.value && tenggatInput.value && company === "nilai yang diinginkan") {
+                notifInput.value = "Pesan otomatis sesuai dengan perusahaan yang cocok";
+            }
+        }
+    });
+</script>
+<!--================== end ==================-->
+
+<!--================== format telp ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== end ==================-->
 
 <!-- Include CKEditor JS -->
 <style>

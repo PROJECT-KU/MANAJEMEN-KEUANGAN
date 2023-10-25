@@ -1,55 +1,58 @@
 @extends('layouts.account')
 
 @section('title')
-List Kategori Uang Masuk | MANAGEMENT
+List Notif Sewa | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI UANG MASUK</h1>
+            <h1>NOTIFIKASI SEWA</h1>
         </div>
 
         <div class="section-body">
 
-            <!-- jika maintenace aktif --><!--================== jika maintenace aktif ==================-->
+            <!-- jika maintenace aktif -->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
             @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
+
+
                     <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-                </div>
+
+
+                </div </ </div>
                 @endif
                 @endforeach
                 @endif
-                <!--================== end ==================-->
+                <!-- end -->
 
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-list"></i> LIST KATEGORI UANG MASUK</h4>
+                        <h4><i class="fas fa-list"></i> NOTIFIKASI SEWA</h4>
                     </div>
 
                     <div class="card-body">
-                        <form action="{{ route('account.categories_debit.search') }}" method="GET">
+                        <form action="{{ route('account.pengguna.search') }}" method="GET">
                             <div class="form-group">
                                 <div class="input-group mb-3">
-                                    @if(Auth::user()->level === 'staff')
-                                    @else
                                     <div class="input-group-prepend">
-                                        <a href="{{ route('account.categories_debit.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                                        <a href="{{ route('account.sewa.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                                            <i class="fa fa-plus-circle"></i> TAMBAH
+                                        </a>
                                     </div>
-                                    @endif
                                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                                     <div class="input-group-append">
                                         <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
                                         </button>
                                     </div>
                                     @if(request()->has('q'))
-                                    <a href="{{ route('account.categories_debit.index') }}" class="btn btn-danger ml-1">
+                                    <a href="{{ route('account.pengguna.index') }}" class="btn btn-danger ml-1">
                                         <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                                     </a>
                                     @endif
@@ -62,36 +65,31 @@ List Kategori Uang Masuk | MANAGEMENT
 
         <div class="card">
             <div class="card-header">
-                <h4><i class="fas fa-list"></i> LIST KATEGORI UANG MASUK</h4>
+                <h4><i class="fas fa-list"></i> LIST NOTIFIKASI SEWA</h4>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                <th scope="col">KODE KATEGORI</th>
-                                <th scope="col">NAMA KATEGORI</th>
-                                <th scope="col" style="width: 15%;text-align: center">AKSI</th>
+                                <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
+                                <th scope="col" rowspan="2" style="text-align: center;">NAMA LENGKAP</th>
+                                <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
+                                <th scope="col" rowspan="2" style="text-align: center;">COMPANY</th>
+                                <th scope="col" rowspan="2" style="text-align: center;">TENGGAT</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php
                             $no = 1;
                             @endphp
-                            @foreach ($categories as $hasil)
+                            @foreach ($users as $item)
                             <tr>
                                 <th scope="row" style="text-align: center">{{ $no }}</th>
-                                <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
-                                <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                <td class="text-center">
-                                    <a href="{{ route('account.categories_debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-pencil-alt"></i>
-                                    </a>
-                                    <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
+                                <td style="text-align: center;">{{ $item->full_name }}</td>
+                                <td style="text-align: center;">{{ $item->level }}</td>
+                                <td style="text-align: center;">{{ $item->company }}</td>
+                                <td style="text-align: center;">{{ $item->tenggat }}</td>
                             </tr>
                             @php
                             $no++;
@@ -100,7 +98,7 @@ List Kategori Uang Masuk | MANAGEMENT
                         </tbody>
                     </table>
                     <div style="text-align: center">
-                        {{$categories->links("vendor.pagination.bootstrap-4")}}
+                        {{ $users->links("vendor.pagination.bootstrap-4") }}
                     </div>
                 </div>
             </div>
@@ -121,36 +119,12 @@ List Kategori Uang Masuk | MANAGEMENT
 <!-- end -->
 
 <script>
-    // @if($message = Session::get('success'))
-    // swal({
-    //     type: "success",
-    //     icon: "success",
-    //     title: "BERHASIL!",
-    //     text: "{{ $message }}",
-    //     timer: 1500,
-    //     showConfirmButton: false,
-    //     showCancelButton: false,
-    //     buttons: false,
-    // });
-    // @elseif($message = Session::get('error'))
-    // swal({
-    //     type: "error",
-    //     icon: "error",
-    //     title: "GAGAL!",
-    //     text: "{{ $message }}",
-    //     timer: 1500,
-    //     showConfirmButton: false,
-    //     showCancelButton: false,
-    //     buttons: false,
-    // });
-    // @endif
-
     // delete
-    function Delete(id) {
+    function handleDelete(id) {
         var token = $("meta[name='csrf-token']").attr("content");
 
         swal({
-            title: "APAKAH KAMU YAKIN?",
+            title: "APAKAH KAMU YAKIN ?",
             text: "INGIN MENGHAPUS DATA INI!",
             icon: "warning",
             buttons: ['TIDAK', 'YA'],
@@ -158,12 +132,55 @@ List Kategori Uang Masuk | MANAGEMENT
         }).then(function(isConfirm) {
             if (isConfirm) {
                 // Ajax delete
-                jQuery.ajax({
-                    url: "/account/categories_debit/" + id,
+                $.ajax({
+                    url: "{{ route('account.pengguna.destroy', '') }}/" + id,
                     data: {
-                        "_token": token
+                        "_token": token,
+                        "_method": "DELETE"
                     },
-                    type: 'DELETE',
+                    type: 'POST',
+                    success: function(response) {
+                        swal({
+                            title: 'BERHASIL!',
+                            text: 'DATA BERHASIL DIHAPUS!',
+                            icon: 'success',
+                            timer: 1000,
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            buttons: false,
+                        }).then(function() {
+                            location.reload();
+                        });
+                    }
+                });
+            } else {
+                return true;
+            }
+        });
+    }
+</script>
+
+<script>
+    // delete
+    function Delete(id) {
+        var token = $("meta[name='csrf-token']").attr("content");
+
+        swal({
+            title: "APAKAH KAMU YAKIN ?",
+            text: "INGIN MENGHAPUS DATA INI!",
+            icon: "warning",
+            buttons: ['TIDAK', 'YA'],
+            dangerMode: true,
+        }).then(function(isConfirm) {
+            if (isConfirm) {
+                // Ajax delete
+                $.ajax({
+                    url: "{{ route('account.pengguna.destroy', '') }}/" + id,
+                    data: {
+                        "_token": token,
+                        "_method": "DELETE"
+                    },
+                    type: 'POST',
                     success: function(response) {
                         if (response.status === "success") {
                             swal({
@@ -186,27 +203,16 @@ List Kategori Uang Masuk | MANAGEMENT
                                 showConfirmButton: false,
                                 showCancelButton: false,
                                 buttons: false,
+                            }).then(function() {
+                                location.reload();
                             });
                         }
-                    },
-                    error: function() {
-                        swal({
-                            title: 'GAGAL!',
-                            text: 'KATEGORI MASIH TERHUBUNG DENGAN UANG MASUK!, silahkan hapus terlebih dahulu uang masuk!',
-                            icon: 'error',
-                            timer: 1000,
-                            showConfirmButton: false,
-                            showCancelButton: false,
-                            buttons: false,
-                        });
                     }
                 });
-
             } else {
                 return true;
             }
-        })
+        });
     }
 </script>
-
 @stop
