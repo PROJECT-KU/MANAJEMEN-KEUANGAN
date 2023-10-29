@@ -52,7 +52,7 @@ Update Presensi Karyawan | MANAGEMENT
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label>STATUS PRESENSI KEHADIRAN</label>
+          <label>Status Presensi Kehadiran</label>
           <select class="form-control" name="status" id="status" disabled>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
@@ -69,7 +69,7 @@ Update Presensi Karyawan | MANAGEMENT
       @if ($presensi->status_pulang == null)
       <div class="col-md-6">
         <div class="form-group">
-          <label>STATUS PRESENSI PULANG</label>
+          <label>Status Presensi Pulang</label>
           <select class="form-control" name="status_pulang" id="status_pulang">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
@@ -79,7 +79,7 @@ Update Presensi Karyawan | MANAGEMENT
       @else
       <div class="col-md-6">
         <div class="form-group">
-          <label>STATUS PRESENSI PULANG</label>
+          <label>Status Presensi Pulang</label>
           <select class="form-control" name="status_pulang" id="status_pulang" disabled>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
@@ -92,7 +92,7 @@ Update Presensi Karyawan | MANAGEMENT
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">
-          <label>STATUS PRESENSI KEHADIRAN</label>
+          <label>Status Presensi Kehadiran</label>
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
@@ -120,7 +120,7 @@ Update Presensi Karyawan | MANAGEMENT
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label>STATUS PRESENSI KEHADIRAN</label>
+          <label>Status Presensi Kehadiran</label>
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
@@ -136,7 +136,7 @@ Update Presensi Karyawan | MANAGEMENT
       </div>
       <div class="col-md-6">
         <div class="form-group">
-          <label>STATUS PRESENSI PULANG</label>
+          <label>Status Presensi Pulang</label>
           <select class="form-control" name="status_pulang" id="status_pulang">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
@@ -146,12 +146,10 @@ Update Presensi Karyawan | MANAGEMENT
     </div>
     @endif
 
-
-
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label>CATATAN</label>
+          <label>Catatan</label>
           <div class="input-group">
             <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
           </div>
@@ -164,7 +162,7 @@ Update Presensi Karyawan | MANAGEMENT
       </div>
       <div class="col-md-6">
         <div class="form-group">
-          <label>BUKTI PRESENSI</label>
+          <label>Bukti Presensi</label>
           <div class="input-group">
             <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
           </div>
@@ -183,8 +181,11 @@ Update Presensi Karyawan | MANAGEMENT
         </div>
       </div>
     </div>
-
+    @if ($presensi->status_pulang == null)
     <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @else
+    <button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @endif
     <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
       <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
     </a>

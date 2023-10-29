@@ -213,7 +213,7 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>NOMOR REKENING</label>
+                                    <label>Nomor Rekening</label>
                                     <input type="text" id="norek" name="norek" class="form-control" value="" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
                                     @error('norek')
                                     <div class="invalid-feedback" style="display: block">
@@ -224,7 +224,7 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>BANK</label>
+                                    <label>Bank</label>
                                     <select class="form-control bank" id="bank" name="bank" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="002">BRI</option>
@@ -298,7 +298,7 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>JOBDESK</label>
+                                    <label>Jobdesk</label>
                                     <div class="input-group">
                                         <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required></textarea>
                                     </div>

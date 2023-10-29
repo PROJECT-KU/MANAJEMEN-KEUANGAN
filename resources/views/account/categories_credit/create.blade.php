@@ -24,7 +24,7 @@ Tambah Kategori Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>KODE KATEGORI</label>
+                                    <label>Kode Kategori</label>
                                     <input type="text" name="kode" value="{{ old('kode') }}" placeholder="huruf-angka" minlength="5" maxlength="15" class="form-control" style="text-transform:uppercase" required>
                                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
                                     <script>
@@ -51,7 +51,7 @@ Tambah Kategori Uang keluar | MANAGEMENT
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>NAMA KATEGORI</label>
+                                    <label>Nama Kategori</label>
                                     <input type="text" name="name" value="{{ old('name') }}" placeholder="Masukkan Nama Kategori" minlength="5" maxlength="15" onkeypress="return/[a-zA-Z0-9 -]/i.test(event.key)" class="form-control" style="text-transform:uppercase" title="Harus berisi setidaknya 5 karakter atau lebih" required>
 
                                     @error('name')

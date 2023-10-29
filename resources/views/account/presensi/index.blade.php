@@ -82,11 +82,11 @@ List Presensi Karyawan | MANAGEMENT
                     <td class="text-center">
                       @if ($todayPresensi)
                       <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
-                        <i class="fa fa-pencil-alt"></i> UPDATE
+                        <i class="fa fa-pencil-alt"></i> PULANG
                       </a>
                       @else
                       <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                        <i class="fa fa-plus-circle"></i> TAMBAH
+                        <i class="fa fa-plus-circle"></i> MASUK
                       </a>
                       @endif
                     </td>

@@ -41,19 +41,19 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>NAMA PERUSAHAAN</label>
+                                        <label>Nama Perusahaan</label>
                                         <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>EMAIL PERUSAHAAN</label>
+                                        <label>Email Perusahaan</label>
                                         <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>MANAGER PERUSAHAAN</label>
+                                        <label>Manager Perusahaan</label>
                                         <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
                                     </div>
                                 </div>
@@ -62,13 +62,13 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>ALAMAT PERUSAHAAN</label>
+                                        <label>Alamat Perusahaan</label>
                                         <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>TELP PERUSAHAAN</label>
+                                        <label>Telp Perusahaan</label>
                                         <input type="tel" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
                                     </div>
                                 </div>
@@ -79,7 +79,7 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>LOGO PERUSAHAAN</label>
+                                        <label>Logo Perusahaan</label>
                                         <div class="input-group">
                                             <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
                                         </div>

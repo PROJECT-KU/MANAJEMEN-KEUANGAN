@@ -135,7 +135,7 @@
 
                                         <div class="col-md-6" id="levelDropdown" style="display: none;">
                                             <div class="form-group">
-                                                <label>Level</label>
+                                                <label>Role</label>
                                                 <select class="form-control" name="level">
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="staff">Staff</option>

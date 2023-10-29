@@ -34,7 +34,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>NAMA KARYAWAN</label>
+                  <label>Nama Karyawan</label>
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" disabled="true">
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($users as $user)
@@ -61,14 +61,13 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>NOMOR REKENING</label>
+                  <label>Nomor Rekening</label>
                   <input type="text" class="form-control" id="norek" disabled>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>BANK</label>
-                  <!--<input type="text" class="form-control" id="bank" disabled>-->
+                  <label>Bank</label>
                   <select class="form-control bank" name="bank" id="bank" disabled="true">
                     <option value="" disabled selected></option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
@@ -134,7 +133,7 @@ Update Gaji Karyawan | MANAGEMENT
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>NO TELP</label>
+                  <label>No Telp</label>
                   <input type="text" class="form-control" id="telp" disabled>
                 </div>
               </div>
@@ -143,7 +142,7 @@ Update Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-12">
               <div class="form-group">
-                <label>GAJI POKOK</label>
+                <label>Gaji Pokok</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
@@ -162,7 +161,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -179,7 +178,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Masukkan Total Jam" class="form-control">
                   @error('jumlah_lembur')
                   <div class="invalid-feedback" style="display: block">
@@ -203,7 +202,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field0" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -220,7 +219,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control">
                   @error('jumlah_lembur1')
                   <div class="invalid-feedback" style="display: block">
@@ -241,7 +240,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field0">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -258,7 +257,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control">
                   @error('jumlah_lembur1')
                   <div class="invalid-feedback" style="display: block">
@@ -283,7 +282,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field2" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -300,7 +299,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur2')
                   <div class="invalid-feedback" style="display: block">
@@ -321,7 +320,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field2">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -338,7 +337,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur2')
                   <div class="invalid-feedback" style="display: block">
@@ -363,7 +362,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field3" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -380,7 +379,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur3')
                   <div class="invalid-feedback" style="display: block">
@@ -401,7 +400,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field3">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -418,7 +417,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur3')
                   <div class="invalid-feedback" style="display: block">
@@ -443,7 +442,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field4" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -460,7 +459,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur4')
                   <div class="invalid-feedback" style="display: block">
@@ -481,7 +480,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field4">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -498,7 +497,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur4')
                   <div class="invalid-feedback" style="display: block">
@@ -523,7 +522,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field5" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -540,7 +539,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur5')
                   <div class="invalid-feedback" style="display: block">
@@ -561,7 +560,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field5">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -578,7 +577,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur5')
                   <div class="invalid-feedback" style="display: block">
@@ -603,7 +602,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field6" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -620,7 +619,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur6')
                   <div class="invalid-feedback" style="display: block">
@@ -641,7 +640,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field6">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -658,7 +657,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur6')
                   <div class="invalid-feedback" style="display: block">
@@ -683,7 +682,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field7" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -700,7 +699,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur7')
                   <div class="invalid-feedback" style="display: block">
@@ -721,7 +720,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field7">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -738,7 +737,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur7')
                   <div class="invalid-feedback" style="display: block">
@@ -763,7 +762,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field8" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -780,7 +779,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur8')
                   <div class="invalid-feedback" style="display: block">
@@ -801,7 +800,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field8">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -818,7 +817,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur8')
                   <div class="invalid-feedback" style="display: block">
@@ -843,7 +842,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field9" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -860,7 +859,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur9')
                   <div class="invalid-feedback" style="display: block">
@@ -881,7 +880,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field9">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -898,7 +897,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur9')
                   <div class="invalid-feedback" style="display: block">
@@ -923,7 +922,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field10" style="display: none;">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -940,7 +939,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur10')
                   <div class="invalid-feedback" style="display: block">
@@ -961,7 +960,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row lembur-field10">
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>BAYARAN LEMBUR (Jam)</label>
+                  <label>Bonus Lembur (Per Jam)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -978,7 +977,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-5">
                 <div class="form-group">
-                  <label>TOTAL JAM LEMBUR (Jam)</label>
+                  <label>Total Jam Lembur</label>
                   <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
                   @error('jumlah_lembur10')
                   <div class="invalid-feedback" style="display: block">
@@ -1004,7 +1003,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1021,7 +1020,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus" value="{{ $gaji->jumlah_bonus }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus')
                   <div class="invalid-feedback" style="display: block">
@@ -1033,7 +1032,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1050,7 +1049,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar" value="{{ $gaji->jumlah_bonus_luar }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar')
                   <div class="invalid-feedback" style="display: block">
@@ -1074,7 +1073,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field1" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1091,7 +1090,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus1" value="{{ $gaji->jumlah_bonus1 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus1')
                   <div class="invalid-feedback" style="display: block">
@@ -1103,7 +1102,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1120,7 +1119,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar1" value="{{ $gaji->jumlah_bonus_luar1 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar1')
                   <div class="invalid-feedback" style="display: block">
@@ -1141,7 +1140,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field1">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1158,7 +1157,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus1" value="{{ $gaji->jumlah_bonus1 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus1')
                   <div class="invalid-feedback" style="display: block">
@@ -1170,7 +1169,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1187,7 +1186,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar1" value="{{ $gaji->jumlah_bonus_luar1 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar1')
                   <div class="invalid-feedback" style="display: block">
@@ -1212,7 +1211,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field2" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1229,7 +1228,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus2" value="{{ $gaji->jumlah_bonus2 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus2')
                   <div class="invalid-feedback" style="display: block">
@@ -1241,7 +1240,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1258,7 +1257,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar2" value="{{ $gaji->jumlah_bonus_luar2 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar2')
                   <div class="invalid-feedback" style="display: block">
@@ -1279,7 +1278,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field2">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1296,7 +1295,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus2" value="{{ $gaji->jumlah_bonus2 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus2')
                   <div class="invalid-feedback" style="display: block">
@@ -1308,7 +1307,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1325,7 +1324,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar2" value="{{ $gaji->jumlah_bonus_luar2 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar2')
                   <div class="invalid-feedback" style="display: block">
@@ -1350,7 +1349,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field3" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1367,7 +1366,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus3" value="{{ $gaji->jumlah_bonus3 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus3')
                   <div class="invalid-feedback" style="display: block">
@@ -1379,7 +1378,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1396,7 +1395,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar3" value="{{ $gaji->jumlah_bonus_luar3 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar3')
                   <div class="invalid-feedback" style="display: block">
@@ -1417,7 +1416,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field3">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1434,7 +1433,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus3" value="{{ $gaji->jumlah_bonus3 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus3')
                   <div class="invalid-feedback" style="display: block">
@@ -1446,7 +1445,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1463,7 +1462,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hariv (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar3" value="{{ $gaji->jumlah_bonus_luar3 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar3')
                   <div class="invalid-feedback" style="display: block">
@@ -1488,7 +1487,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field4" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1505,7 +1504,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus4" value="{{ $gaji->jumlah_bonus4 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus4')
                   <div class="invalid-feedback" style="display: block">
@@ -1517,7 +1516,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1534,7 +1533,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar4" value="{{ $gaji->jumlah_bonus_luar4 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar4')
                   <div class="invalid-feedback" style="display: block">
@@ -1555,7 +1554,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field4">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1572,7 +1571,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus4" value="{{ $gaji->jumlah_bonus4 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus4')
                   <div class="invalid-feedback" style="display: block">
@@ -1584,7 +1583,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1601,7 +1600,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar4" value="{{ $gaji->jumlah_bonus_luar4 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar4')
                   <div class="invalid-feedback" style="display: block">
@@ -1626,7 +1625,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field5" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1643,7 +1642,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus5" value="{{ $gaji->jumlah_bonus5 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus5')
                   <div class="invalid-feedback" style="display: block">
@@ -1655,7 +1654,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1672,7 +1671,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar5" value="{{ $gaji->jumlah_bonus_luar5 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar5')
                   <div class="invalid-feedback" style="display: block">
@@ -1693,7 +1692,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field5">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1710,7 +1709,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus5" value="{{ $gaji->jumlah_bonus5 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus5')
                   <div class="invalid-feedback" style="display: block">
@@ -1722,7 +1721,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1739,7 +1738,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar5" value="{{ $gaji->jumlah_bonus_luar5}}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar5')
                   <div class="invalid-feedback" style="display: block">
@@ -1764,7 +1763,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field6" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1781,7 +1780,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus6" value="{{ $gaji->jumlah_bonus6 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus6')
                   <div class="invalid-feedback" style="display: block">
@@ -1793,7 +1792,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1810,7 +1809,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar6" value="{{ $gaji->jumlah_bonus_luar6 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar6')
                   <div class="invalid-feedback" style="display: block">
@@ -1831,7 +1830,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field6">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1848,7 +1847,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus6" value="{{ $gaji->jumlah_bonus6 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus6')
                   <div class="invalid-feedback" style="display: block">
@@ -1860,7 +1859,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1877,7 +1876,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar6" value="{{ $gaji->jumlah_bonus_luar6 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar6')
                   <div class="invalid-feedback" style="display: block">
@@ -1902,7 +1901,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field7" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1919,7 +1918,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus7" value="{{ $gaji->jumlah_bonus7 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus7')
                   <div class="invalid-feedback" style="display: block">
@@ -1931,7 +1930,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1948,7 +1947,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar7" value="{{ $gaji->jumlah_bonus_luar7 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar7')
                   <div class="invalid-feedback" style="display: block">
@@ -1969,7 +1968,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field7">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -1986,7 +1985,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus7" value="{{ $gaji->jumlah_bonus7 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus7')
                   <div class="invalid-feedback" style="display: block">
@@ -1998,7 +1997,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2015,7 +2014,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar7" value="{{ $gaji->jumlah_bonus_luar7 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar7')
                   <div class="invalid-feedback" style="display: block">
@@ -2040,7 +2039,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field8" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2057,7 +2056,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus8" value="{{ $gaji->jumlah_bonus8 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus8')
                   <div class="invalid-feedback" style="display: block">
@@ -2069,7 +2068,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2086,7 +2085,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar8" value="{{ $gaji->jumlah_bonus_luar8 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar8')
                   <div class="invalid-feedback" style="display: block">
@@ -2107,7 +2106,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field8">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2124,7 +2123,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus8" value="{{ $gaji->jumlah_bonus8 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus8')
                   <div class="invalid-feedback" style="display: block">
@@ -2136,7 +2135,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2153,7 +2152,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar8" value="{{ $gaji->jumlah_bonus_luar8 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar8')
                   <div class="invalid-feedback" style="display: block">
@@ -2178,7 +2177,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field9" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2195,7 +2194,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus9" value="{{ $gaji->jumlah_bonus9 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus9')
                   <div class="invalid-feedback" style="display: block">
@@ -2207,7 +2206,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2224,7 +2223,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar9" value="{{ $gaji->jumlah_bonus_luar9 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar9')
                   <div class="invalid-feedback" style="display: block">
@@ -2245,7 +2244,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field9">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2262,7 +2261,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus9" value="{{ $gaji->jumlah_bonus9 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus9')
                   <div class="invalid-feedback" style="display: block">
@@ -2274,7 +2273,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>BBonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2291,7 +2290,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar9" value="{{ $gaji->jumlah_bonus_luar9 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar9')
                   <div class="invalid-feedback" style="display: block">
@@ -2316,7 +2315,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field10" style="display: none;">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2333,7 +2332,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus10" value="{{ $gaji->jumlah_bonus10 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus10')
                   <div class="invalid-feedback" style="display: block">
@@ -2345,7 +2344,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2362,7 +2361,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar10" value="{{ $gaji->jumlah_bonus_luar10 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar10')
                   <div class="invalid-feedback" style="display: block">
@@ -2383,7 +2382,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row bonus-field10">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS DALAM KOTA (Per Hari)</label>
+                  <label>Bonus Dalam Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2400,7 +2399,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Dalam Kota)</label>
+                  <label>Total Hari (Dalam Kota)</label>
                   <input type="text" name="jumlah_bonus10" value="{{ $gaji->jumlah_bonus10 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus10')
                   <div class="invalid-feedback" style="display: block">
@@ -2412,7 +2411,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BAYARAN BONUS LUAR KOTA (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2429,7 +2428,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>JUMLAH HARI (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar10" value="{{ $gaji->jumlah_bonus_luar10 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar10')
                   <div class="invalid-feedback" style="display: block">
@@ -2448,7 +2447,6 @@ Update Gaji Karyawan | MANAGEMENT
             </div>
             @endif
             <!-- end bonus field 10 -->
-
 
             <!-- <div class="row">
               <div class="col-md-6">
@@ -2485,7 +2483,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN BPJS</label>
+                  <label>Tunjangan BPJS</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2497,7 +2495,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN THR</label>
+                  <label>Tunjangan THR</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2509,7 +2507,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TUNJANGAN LAINNYA</label>
+                  <label>Tunjangan Lainnya</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2523,7 +2521,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>POTONGAN</label>
+                  <label>Potongan</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2547,7 +2545,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>TANGGAL DIBAYARKAN</label>
+                  <label>Tanggal Dibayarkan</label>
                   <input type="text" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
                 </div>
               </div>
@@ -2556,7 +2554,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>STATUS PEMBAYARAN</label>
+                  <label>Status Pembayaran</label>
                   <select class="form-control" name="status">
                     <option value="" disabled selected>Silahkan Pilih</option>
                     <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
@@ -2572,7 +2570,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>CATATAN</label>
+                  <label>Catatan</label>
                   <div class="input-group">
                     <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;">{{ $gaji->note }}</textarea>
                   </div>
@@ -2588,7 +2586,7 @@ Update Gaji Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>BUKTI PEMBAYARAN</label>
+                  <label>Bukti Pembayaran</label>
                   <div class="input-group">
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
                   </div>
@@ -2616,7 +2614,7 @@ Update Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-12">
               <div class="form-group">
-                <label>TOTAL GAJI</label>
+                <label>Total Gaji</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>

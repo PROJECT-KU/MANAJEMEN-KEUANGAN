@@ -26,7 +26,7 @@ Update Kategori Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>KODE KATEGORI</label>
+                                    <label>Kode Kategori</label>
                                     @php
                                     $initialValue = old('kode', $categoriesCredit->kode);
                                     @endphp
@@ -63,7 +63,7 @@ Update Kategori Uang keluar | MANAGEMENT
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>NAMA KATEGORI</label>
+                                    <label>Nama Kategori</label>
                                     <input type="text" name="name" value="{{ old('name', $categoriesCredit->name) }}" placeholder="Masukkan Nama Kategori" class="form-control" style="text-transform:uppercase">
 
                                     @error('name')

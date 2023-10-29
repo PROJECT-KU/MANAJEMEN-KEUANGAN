@@ -58,13 +58,13 @@ Tambah Presensi Karyawan | MANAGEMENT
   $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
   @endphp
 
-  @if ($currentDay == 1 && ($currentTime>= '09:00:00' && $currentTime <= '16:00:00' )) <div class="alert alert-info" role="alert">
+  @if ($currentDay == 1 && ($currentTime>= '09:00:00' && $currentTime <= '22:00:00' )) <div class="alert alert-info" role="alert">
     Jam kerja mulai dari 09.00 - 16.00 WIB
     </div>
-    @elseif ($currentDay == 4 && ($currentTime>= '13:00:00' && $currentTime <= '20:00:00' )) <div class="alert alert-info" role="alert">
+    @elseif ($currentDay == 4 && ($currentTime>= '13:00:00' && $currentTime <= '22:00:00' )) <div class="alert alert-info" role="alert">
       Jam kerja mulai dari 13.00 - 20.00 WIB
       </div>
-      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '08:30:00' && $currentTime <= '20:00:00' )) <div class="alert alert-info" role="alert">
+      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '08:30:00' && $currentTime <= '22:00:00' )) <div class="alert alert-info" role="alert">
         Jam kerja mulai dari 08.30 - 20.00 WIB
         </div>
         @endif
@@ -73,7 +73,7 @@ Tambah Presensi Karyawan | MANAGEMENT
         <div class="row">
           <div class="col-md-12">
             <div class="form-group">
-              <label>STATUS PRESENSI</label>
+              <label>Status Presensi</label>
               <select class="form-control" name="status" id="status" required>
                 <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                 @php
@@ -177,7 +177,7 @@ Tambah Presensi Karyawan | MANAGEMENT
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label>CATATAN</label>
+              <label>Catatan</label>
               <div class="input-group">
                 <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control"></textarea>
               </div>
@@ -190,7 +190,7 @@ Tambah Presensi Karyawan | MANAGEMENT
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label>BUKTI PRESENSI</label>
+              <label>Bukti Presensi</label>
               <div class="input-group">
                 <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
               </div>
