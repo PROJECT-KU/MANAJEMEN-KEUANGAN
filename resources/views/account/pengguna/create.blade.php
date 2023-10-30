@@ -79,7 +79,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="text" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    <input type="tel" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -100,6 +100,7 @@ Tambah Pengguna | MANAGEMENT
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>
+                                        <option value="trainer">Trainer</option>
                                     </select>
 
                                     @error('level')
@@ -137,6 +138,7 @@ Tambah Pengguna | MANAGEMENT
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>
+                                        <option value="trainer">Trainer</option>
                                     </select>
 
                                     @error('level')
@@ -211,7 +213,7 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>NOMOR REKENING</label>
+                                    <label>Nomor Rekening</label>
                                     <input type="text" id="norek" name="norek" class="form-control" value="" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
                                     @error('norek')
                                     <div class="invalid-feedback" style="display: block">
@@ -222,7 +224,7 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>BANK</label>
+                                    <label>Bank</label>
                                     <select class="form-control bank" id="bank" name="bank" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="002">BRI</option>
@@ -296,7 +298,7 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>JOBDESK</label>
+                                    <label>Jobdesk</label>
                                     <div class="input-group">
                                         <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required></textarea>
                                     </div>
@@ -332,6 +334,21 @@ Tambah Pengguna | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!--================== format telp ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== end ==================-->
 
 <!-- Include CKEditor JS -->
 <style>

@@ -13,24 +13,20 @@ List Kategori Uang keluar | MANAGEMENT
 
         <div class="section-body">
 
-            <!-- jika maintenace aktif -->
+            <!--================== jika maintenace aktif ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
             @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
                     <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
                 </div>
                 @endif
                 @endforeach
                 @endif
-                <!-- end -->
+                <!--================== end ==================-->
 
                 <div class="card">
                     <div class="card-header  text-right">
@@ -77,7 +73,7 @@ List Kategori Uang keluar | MANAGEMENT
                                 <th scope="col" style="text-align: center;width: 6%">NO.</th>
                                 <th scope="col">KODE KATEGORI</th>
                                 <th scope="col">NAMA KATEGORI</th>
-                                <!--<th scope="col" style="width: 15%;text-align: center">AKSI</th>-->
+                                <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,14 +85,14 @@ List Kategori Uang keluar | MANAGEMENT
                                 <th scope="row" style="text-align: center">{{ $no }}</th>
                                 <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
                                 <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                <!--<td class="text-center">
-                                        <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-pencil-alt"></i>
-                                        </a>
-                                        <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>-->
+                                <td class="text-center">
+                                    <a href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                    <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
                             </tr>
                             @php
                             $no++;

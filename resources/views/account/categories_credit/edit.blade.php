@@ -26,9 +26,33 @@ Update Kategori Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>KODE KATEGORI</label>
-                                    <input type="text" name="kode" value="{{ old('kode', $categoriesCredit->kode) }}" placeholder="Masukkan Kode Kategori" class="form-control" style="text-transform:uppercase">
+                                    <label>Kode Kategori</label>
+                                    @php
+                                    $initialValue = old('kode', $categoriesCredit->kode);
+                                    @endphp
+                                    <input type="text" name="kode" value="{{ $initialValue }}" placeholder="Huruf-angka" minlength="5" maxlength="15" class="form-control" style="text-transform: uppercase">
+                                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+                                    <script>
+                                        var kodeInput = document.querySelector('input[name="kode"]');
+                                        var initialValue = "{!! $initialValue !!}";
 
+                                        kodeInput.addEventListener('blur', function() {
+                                            var pattern = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9-]+)$/;
+                                            if (!pattern.test(this.value)) {
+                                                // Use SweetAlert for the validation message
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: 'Oops...',
+                                                    text: 'KODE KATEGORI harus mengandung huruf dan angka',
+                                                    allowOutsideClick: false, // Prevent dismissing the alert by clicking outside
+                                                }).then(function() {
+                                                    // Restore the initial input value
+                                                    kodeInput.value = initialValue;
+                                                    kodeInput.focus(); // Focus back on the input field
+                                                });
+                                            }
+                                        });
+                                    </script>
                                     @error('kode')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -36,9 +60,10 @@ Update Kategori Uang keluar | MANAGEMENT
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>NAMA KATEGORI</label>
+                                    <label>Nama Kategori</label>
                                     <input type="text" name="name" value="{{ old('name', $categoriesCredit->name) }}" placeholder="Masukkan Nama Kategori" class="form-control" style="text-transform:uppercase">
 
                                     @error('name')

@@ -38,10 +38,10 @@
                 <th scope="col" class="column-width" style="text-align: center; width:150px">NAMA KARYAWAN</th>
                 <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                 <th scope="col" class="column-width" style="text-align: center; width:150px">NO REKENING</th>
-                <!--<th scope="col" class="column-width" style="text-align: center;">BANK</th>-->
+                <th scope="col" class="column-width" style="text-align: center;">BANK</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">TOTAL GAJI</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">TANGGAL PEMBAYARAN</th>
-                <th scope="col" class="column-width" style="text-align: center; width:150px">STATUS PEMBAYARAN</th>
+                <!-- <th scope="col" class="column-width" style="text-align: center; width:150px">STATUS PEMBAYARAN</th> -->
               </tr>
             </thead>
             <tbody>
@@ -50,7 +50,7 @@
               $terbayarCount = 0; // Count of terbayar records
               @endphp
               @foreach ($gaji as $hasil)
-              @if (Auth::user()->level == 'karyawan' && $hasil->status == 'pending')
+              @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
               <!-- Skip displaying records where user is karyawan and status is pending -->
               @continue
               @else
@@ -133,13 +133,13 @@
                 </td>
                 <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                 <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
-                <td class="column-width" style="text-align: center;">
+                <!-- <td class="column-width" style="text-align: center;">
                   @if($hasil->status == 'pending')
                   <button type="button" class="btn btn-warning">PENDING</button>
                   @else
                   <button type="button" class="btn btn-success">TERBAYAR</button>
                   @endif
-                </td>
+                </td> -->
               </tr>
               @endif
               @php

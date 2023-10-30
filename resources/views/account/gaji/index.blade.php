@@ -18,17 +18,38 @@ List Gaji Karyawan | MANAGEMENT
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
         <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
           <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
           <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
           <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
           <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
         </div>
         @endif
         @endforeach
+        @endif
+        <!-- end -->
+
+        <!-- jika gaji masih ada yang status pending -->
+        @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager'))
+        @php
+        $totalPendingSalaries = 0;
+        @endphp
+
+        @foreach ($gaji as $item)
+        @if ($item->status === 'pending')
+        @php
+        $totalPendingSalaries++;
+        @endphp
+        @endif
+        @endforeach
+
+        @if ($totalPendingSalaries > 0)
+        <div class="alert alert-warning" role="alert" style="text-align: center;">
+          <p style="font-size: 16px;">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Ada <b>{{ $totalPendingSalaries }}</b> gaji karyawan dengan status pending yang belum terbayarkan, segara bayarkan dan ubah status menjadi terbayar
+          </p>
+        </div>
+        @endif
         @endif
         <!-- end -->
 
@@ -47,7 +68,7 @@ List Gaji Karyawan | MANAGEMENT
             <form action="{{ route('account.gaji.search') }}" method="GET">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  @if (Auth::user()->level == 'karyawan')
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                   @else
                   <div class="input-group-prepend">
                     <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
@@ -146,7 +167,7 @@ List Gaji Karyawan | MANAGEMENT
                 $terbayarCount = 0; // Count of terbayar records
                 @endphp
                 @foreach ($gaji as $hasil)
-                @if (Auth::user()->level == 'karyawan' && $hasil->status == 'pending')
+                @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
                 <!-- Skip displaying records where user is karyawan and status is pending -->
                 @else
                 <tr>
@@ -237,7 +258,7 @@ List Gaji Karyawan | MANAGEMENT
                     <span class="badge badge-success">TERBAYAR</span>
                     @endif
                   </td>
-                  @if (Auth::user()->level == 'karyawan')
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                   <td class="text-center">
                     <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>

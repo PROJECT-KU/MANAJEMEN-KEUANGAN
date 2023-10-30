@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Daftar Akun | MANAGEMENT</title>
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -49,16 +49,39 @@
         }
     </style>
     <!-- end -->
+
+    <!-- background -->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: block;
+            background-color: #0e4166;
+            background-image: linear-gradient(to bottom, rgba(14, 65, 102, 0.86), #0e4166);
+        }
+    </style>
+    <!-- end -->
 </head>
 
-<body style="background: #f3f3f3">
+<!-- <body style="background: #f3f3f3"> -->
+
+<body>
     <div id="app">
         <section class="section">
             <div class="container mt-5">
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <div class="login-brand">
-                            <img src="{{ asset('assets/img/logo2.png') }}" alt="logo" width="350">
+                            <img src="{{ asset('assets/img/logonew.png') }}" alt="logo" width="350">
                         </div>
 
                         <div class="card card-primary">
@@ -97,7 +120,7 @@
                                                 <select class="form-control" name="jenis" id="jenis" required>
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="bisnis">Bisnis</option>
-                                                    <option value="penyewaan">Penyewaan</option>
+                                                    <!-- <option value="penyewaan">Penyewaan</option> -->
                                                     <!-- <option value="kasir">Kasir</option> -->
                                                     <option value="perorangan">Perorangan</option>
                                                 </select>
@@ -112,11 +135,12 @@
 
                                         <div class="col-md-6" id="levelDropdown" style="display: none;">
                                             <div class="form-group">
-                                                <label>Level</label>
+                                                <label>Role</label>
                                                 <select class="form-control" name="level">
                                                     <option value="">Silahkan Pilih</option>
                                                     <option value="staff">Staff</option>
                                                     <option value="karyawan">Karyawan</option>
+                                                    <option value="trainer">Trainer</option>
                                                 </select>
 
                                                 @error('level')
@@ -141,13 +165,22 @@
 
                                         <div class="form-group col-md-6" id="telpContainer" style="display: block;">
                                             <label for="telp">No Telp</label>
-                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)">
                                             @error('telp')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>
                                             @enderror
                                         </div>
+                                        <!-- <div class="form-group col-md-6" id="telpContainer" style="display: block;">
+                                            <label for="telp">No Telp</label>
+                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                            @error('telp')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div> -->
 
 
                                     </div>
@@ -215,11 +248,49 @@
                 </div>
             </div>
         </section>
+
+        <!-- bacground -->
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" style="position: fixed; top: 0; left: 0; z-index: -1;">
+            <defs>
+                <linearGradient id="bg">
+                    <stop offset="0%" style="stop-color:rgba(130, 158, 249, 0.06)"></stop>
+                    <stop offset="50%" style="stop-color:rgba(76, 190, 255, 0.6)"></stop>
+                    <stop offset="100%" style="stop-color:rgba(115, 209, 72, 0.2)"></stop>
+                </linearGradient>
+                <path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0
+        s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
+            </defs>
+            <g>
+                <use xlink:href='#wave' opacity=".3">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="10s" calcMode="spline" values="270 230; -334 180; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+                <use xlink:href='#wave' opacity=".6">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calcMode="spline" values="-270 230;243 220;-270 230" keyTimes="0; .6; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+                <use xlink:href='#wave' opacty=".9">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="6s" calcMode="spline" values="0 230;-140 200;0 230" keyTimes="0; .4; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+            </g>
+        </svg>
+        <!-- end -->
     </div>
 
+    <!--================== format telp ==================-->
+    <script>
+        function formatPhoneNumber(input) {
+            // Menghapus semua karakter non-digit
+            var phoneNumber = input.value.replace(/\D/g, '');
 
-    <!-- ... Your HTML and CSS ... -->
+            // Menggunakan ekspresi reguler untuk memformat nomor telepon
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
 
+            // Mengatur nilai input dengan nomor telepon yang diformat
+            input.value = phoneNumber;
+        }
+    </script>
+    <!--================== end ==================-->
+
+    <!--================== change jenis akun ==================-->
     <script>
         // Get the elements
         const jenisDropdown = document.getElementById('jenis');
@@ -256,7 +327,7 @@
             if (selectedValue === 'perorangan') {
                 levelSelect.innerHTML = '<option value="users">Users</option>';
             } else if (selectedValue === 'bisnis') {
-                levelSelect.innerHTML = '<option value="staff">Staff</option> <option value="karyawan">Karyawan</option>';
+                levelSelect.innerHTML = '<option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
             }
         }
 
@@ -266,11 +337,9 @@
         // Call the function once on page load to initialize the visibility
         handleVisibility();
     </script>
-    <!-- ... Your remaining HTML ... -->
+    <!--================== end ==================-->
 
-
-
-    <!-- show and hide password -->
+    <!--================== show and hide password ==================-->
     <script>
         const passwordInput = document.getElementById('password');
         const passwordToggle = document.getElementById('password-toggle');
@@ -301,7 +370,8 @@
             }
         });
     </script>
-    <!-- end -->
+    <!--================== end ==================-->
+
     <!-- General JS Scripts -->
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
@@ -310,12 +380,6 @@
     <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
     <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
-
-    <!-- JS Libraies -->
-
-    <!-- Page Specific JS File -->
-
-    <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
 </body>

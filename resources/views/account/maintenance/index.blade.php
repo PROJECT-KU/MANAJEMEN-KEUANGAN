@@ -130,7 +130,7 @@ List Pengguna | MANAGEMENT
             if (isConfirm) {
                 // Ajax delete
                 $.ajax({
-                    url: "{{ route('account.pengguna.destroy', '') }}/" + id,
+                    url: "{{ route('account.maintenance.destroy', '') }}/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

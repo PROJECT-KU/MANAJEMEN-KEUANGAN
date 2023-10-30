@@ -27,7 +27,7 @@ class PenggunaController extends Controller
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
-                ->whereIn('level', ['staff', 'karyawan'])
+                ->whereIn('level', ['staff', 'karyawan', 'trainer'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -53,7 +53,7 @@ class PenggunaController extends Controller
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
-                ->whereIn('level', ['staff', 'karyawan'])
+                ->whereIn('level', ['staff', 'karyawan', 'trainer'])
                 ->orderBy('created_at', 'DESC')
                 ->where(function ($query) use ($search) {
                     $query->where('users.full_name', 'LIKE', '%' . $search . '%')

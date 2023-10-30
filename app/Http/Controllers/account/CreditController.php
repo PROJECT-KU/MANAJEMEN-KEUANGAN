@@ -156,7 +156,7 @@ class CreditController extends Controller
                 ->whereIn('users.level', ['staff', 'manager'])
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->get();
-        } elseif ($user->level == 'karyawan') {
+        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
             $categories = DB::table('categories_credit')
                 ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
                 ->where('categories_credit.user_id', $user->id)
@@ -284,7 +284,7 @@ class CreditController extends Controller
                 ->whereIn('users.level', ['staff', 'manager'])
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->get();
-        } elseif ($user->level == 'karyawan') {
+        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
             $categories = DB::table('categories_credit')
                 ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
                 ->where('categories_credit.user_id', $user->id)

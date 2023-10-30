@@ -24,71 +24,89 @@ Update Presensi Karyawan | MANAGEMENT
             @csrf
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+            <!--================== alerts info jam kerja ==================-->
             @php
-            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-            ->whereDate('created_at', now()->toDateString())
-            ->first();
+            $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+            $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
             @endphp
-            @if ($todayPresensi)
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>STATUS PRESENSI KEHADIRAN</label>
-                  <select class="form-control" name="status" id="status" disabled>
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
-                    <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
-                    <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-                    <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
-                    <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
-                    <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-                    <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-                    <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-              @if ($presensi->status_pulang == null)
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>STATUS PRESENSI PULANG</label>
-                  <select class="form-control" name="status_pulang" id="status_pulang">
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-              @else
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>STATUS PRESENSI PULANG</label>
-                  <select class="form-control" name="status_pulang" id="status_pulang" disabled>
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-              @endif
-            </div>
-            @else
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>STATUS PRESENSI KEHADIRAN</label>
-                  <select class="form-control" name="status" id="status">
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
-                    <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
-                    <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-                    <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
-                    <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
-                    <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-                    <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-                    <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-              <!--<div class="col-md-6">
+
+            @if ($currentDay == 1 && ($currentTime>= '09:00:00' && $currentTime <= '16:00:00' )) <div class="alert alert-info" role="alert">
+              Jam kerja mulai dari 09.00 - 16.00 WIB
+        </div>
+        @elseif ($currentDay == 4 && ($currentTime>= '13:00:00' && $currentTime <= '20:00:00' )) <div class="alert alert-info" role="alert">
+          Jam kerja mulai dari 13.00 - 20.00 WIB
+      </div>
+      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '08:30:00' && $currentTime <= '20:00:00' )) <div class="alert alert-info" role="alert">
+        Jam kerja mulai dari 08.30 - 20.00 WIB
+    </div>
+    @endif
+    <!--================== end ==================-->
+
+    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+    @php
+    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+    ->whereDate('created_at', now()->toDateString())
+    ->first();
+    @endphp
+    @if ($todayPresensi)
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Status Presensi Kehadiran</label>
+          <select class="form-control" name="status" id="status" disabled>
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
+            <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
+            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
+            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
+            <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
+            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
+            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
+        </div>
+      </div>
+      @if ($presensi->status_pulang == null)
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Status Presensi Pulang</label>
+          <select class="form-control" name="status_pulang" id="status_pulang">
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
+        </div>
+      </div>
+      @else
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Status Presensi Pulang</label>
+          <select class="form-control" name="status_pulang" id="status_pulang" disabled>
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
+        </div>
+      </div>
+      @endif
+    </div>
+    @else
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>Status Presensi Kehadiran</label>
+          <select class="form-control" name="status" id="status">
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
+            <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
+            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
+            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
+            <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
+            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
+            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
+        </div>
+      </div>
+      <!--<div class="col-md-6">
                 <div class="form-group">
                   <label>NAMA KARYAWAN</label>
                   <div class="input-group">
@@ -96,87 +114,88 @@ Update Presensi Karyawan | MANAGEMENT
                   </div>
                 </div>
               </div>-->
-            </div>
-            @endif
-            @else
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>STATUS PRESENSI KEHADIRAN</label>
-                  <select class="form-control" name="status" id="status">
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
-                    <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
-                    <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-                    <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
-                    <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
-                    <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-                    <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-                    <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>STATUS PRESENSI PULANG</label>
-                  <select class="form-control" name="status_pulang" id="status_pulang">
-                    <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                    <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            @endif
-
-
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>CATATAN</label>
-                  <div class="input-group">
-                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
-                  </div>
-                  @error('note')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>BUKTI PRESENSI</label>
-                  <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-                  </div>
-                  @error('gambar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-                <div class="mt-3">
-                  <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
-                    <div class="card" style="width: 12rem;">
-                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
-            </a>
-
-          </form>
-
+    </div>
+    @endif
+    @else
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Status Presensi Kehadiran</label>
+          <select class="form-control" name="status" id="status">
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
+            <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
+            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
+            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
+            <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
+            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
+            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Status Presensi Pulang</label>
+          <select class="form-control" name="status_pulang" id="status_pulang">
+            <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
+          </select>
         </div>
       </div>
     </div>
-  </section>
+    @endif
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Catatan</label>
+          <div class="input-group">
+            <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
+          </div>
+          @error('note')
+          <div class="invalid-feedback" style="display: block">
+            {{ $message }}
+          </div>
+          @enderror
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Bukti Presensi</label>
+          <div class="input-group">
+            <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+          </div>
+          @error('gambar')
+          <div class="invalid-feedback" style="display: block">
+            {{ $message }}
+          </div>
+          @enderror
+        </div>
+        <div class="mt-3">
+          <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
+            <div class="card" style="width: 12rem;">
+              <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    @if ($presensi->status_pulang == null)
+    <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @else
+    <button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @endif
+    <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
+      <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
+    </a>
+
+    </form>
+
+</div>
+</div>
+</div>
+</section>
 </div>
 
 <!-- maksimal upload gambar & jenis file yang di perbolehkan -->

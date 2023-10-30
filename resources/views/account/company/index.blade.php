@@ -11,28 +11,22 @@ Company | MANAGEMENT
             <h1>COMPANY</h1>
         </div>
 
-
-
         <div class="section-body">
 
-            <!-- jika maintenace aktif -->
+            <!--================== jika maintenace aktif ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
             @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
                     <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
-                </div </ </div>
+                </div>
                 @endif
                 @endforeach
                 @endif
-                <!-- end -->
+                <!--================== end ==================-->
 
                 <div class="card">
                     <div class="card-header">
@@ -47,19 +41,19 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>NAMA PERUSAHAAN</label>
+                                        <label>Nama Perusahaan</label>
                                         <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>EMAIL PERUSAHAAN</label>
+                                        <label>Email Perusahaan</label>
                                         <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>MANAGER PERUSAHAAN</label>
+                                        <label>Manager Perusahaan</label>
                                         <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
                                     </div>
                                 </div>
@@ -68,14 +62,14 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>ALAMAT PERUSAHAAN</label>
+                                        <label>Alamat Perusahaan</label>
                                         <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>TELP PERUSAHAAN</label>
-                                        <input type="text" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                        <label>Telp Perusahaan</label>
+                                        <input type="tel" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +79,7 @@ Company | MANAGEMENT
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>LOGO PERUSAHAAN</label>
+                                        <label>Logo Perusahaan</label>
                                         <div class="input-group">
                                             <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
                                         </div>
@@ -114,6 +108,21 @@ Company | MANAGEMENT
         </div>
     </section>
 </div>
+
+<!--================== format telp ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== end ==================-->
 
 <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

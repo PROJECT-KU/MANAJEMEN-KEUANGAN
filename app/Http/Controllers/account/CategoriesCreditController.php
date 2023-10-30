@@ -31,14 +31,18 @@ class CategoriesCreditController extends Controller
                 ->whereIn('users.level', ['staff', 'manager'])
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
-        } elseif ($user->level == 'karyawan') {
+        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
             $categories = DB::table('categories_credit')
                 ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
                 ->where('categories_credit.user_id', $user->id)
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } else {
-            $categories = [];
+            $categories = DB::table('categories_credit')
+                ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
+                ->where('categories_credit.user_id', $user->id)
+                ->orderBy('categories_credit.created_at', 'DESC')
+                ->paginate(10);
         }
 
         $maintenances = DB::table('maintenance')

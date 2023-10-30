@@ -19,24 +19,49 @@ List Presensi Karyawan | MANAGEMENT
         @foreach($maintenances as $maintenance)
         @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
           <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
-
-
             <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
             <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
             <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
             <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-
-
           </div </ </div>
           @endif
           @endforeach
           @endif
           <!-- end -->
 
+
+          <!-- jika belum melakukan presensi pulang -->
+          @php
+          $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+          ->whereDate('created_at', now()->toDateString())
+          ->first();
+          @endphp
+
+          @foreach ($presensi as $item)
+          @if ((Auth::user()->level === 'manager') && $item->status_pulang === null )
+          <div class="alert alert-warning" role="alert" style="text-align: center;">
+            <p style="font-size: 16px;">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Terdapat Karyawan atau staff yang belum melakukan presensi pulang, silahkan ingatkan.
+            </p>
+          </div>
+          @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
+          @elseif ((Auth::user()->level === 'karyawan' || Auth::user()->level === 'staff' || Auth::user()->level == 'trainer') && $item->status_pulang === null && $todayPresensi)
+          <div class="alert alert-danger" role="alert" style="text-align: center;">
+            <p style="font-size: 16px;">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Anda belum melakukan presensi pulang, segera presensi pulang.
+            </p>
+          </div>
+          @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
+          @endif
+          @endforeach
+          <!-- end -->
+
           <div class="card">
             <div class="card-header  text-right">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
-              @if (Auth::user()->level == 'karyawan')
+              @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
               @else
               <!--<div class="card-header-action">
             <a href="{{ route('account.laporan_gaji.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
@@ -48,7 +73,7 @@ List Presensi Karyawan | MANAGEMENT
               <form action="{{ route('account.presensi.search') }}" method="GET">
                 <div class="form-group">
                   <div class="input-group mb-3">
-                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                     @php
                     $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
                     ->whereDate('created_at', now()->toDateString())
@@ -57,11 +82,11 @@ List Presensi Karyawan | MANAGEMENT
                     <td class="text-center">
                       @if ($todayPresensi)
                       <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
-                        <i class="fa fa-pencil-alt"></i> UPDATE
+                        <i class="fa fa-pencil-alt"></i> PULANG
                       </a>
                       @else
                       <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                        <i class="fa fa-plus-circle"></i> TAMBAH
+                        <i class="fa fa-plus-circle"></i> MASUK
                       </a>
                       @endif
                     </td>
@@ -244,7 +269,7 @@ List Presensi Karyawan | MANAGEMENT
                     Lihat di Google Maps
                   </a>
                 </td>
-                @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff')
+                @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                 <td class="text-center">
                   <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                     <i class="fa fa-eye"></i>

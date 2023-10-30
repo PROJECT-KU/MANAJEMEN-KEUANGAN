@@ -155,4 +155,19 @@ class MaintenanceController extends Controller
     {
         return view('errors.page-maintenance', compact('maintenance'));
     }
+
+    public function destroy($id)
+    {
+        $delete = Maintenance::find($id)->delete($id);
+
+        if ($delete) {
+            return response()->json([
+                'status' => 'success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error'
+            ]);
+        }
+    }
 }

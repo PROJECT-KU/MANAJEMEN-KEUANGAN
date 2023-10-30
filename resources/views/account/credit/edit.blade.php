@@ -26,9 +26,13 @@ Update Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>NOMINAL (Rp.)</label>
-                                    <input type="text" name="nominal" value="{{ old('nominal', $credit->nominal) }}" placeholder="Masukkan Nominal" class="form-control currency">
-
+                                    <label>Nominal</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Rp.</span>
+                                        </div>
+                                        <input type="text" name="nominal" value="{{ old('nominal', $credit->nominal) }}" placeholder="Masukkan Nominal" class="form-control currency">
+                                    </div>
                                     @error('nominal')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -38,7 +42,7 @@ Update Uang keluar | MANAGEMENT
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>TANGGAL</label>
+                                    <label>Tanggal</label>
                                     <input type="text" class="form-control datetimepicker" name="credit_date" value="{{ old('credit_date', $credit->credit_date) }}" placeholder="Pilih Tanggal">
 
                                     @error('date_debit')
@@ -53,7 +57,7 @@ Update Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>KATEGORI</label>
+                                    <label>Kategori</label>
                                     <select class="form-control select2" name="category_id" style="width: 100%">
                                         <option value="">-- PILIH KATEGORI --</option>
                                         @foreach ($categories as $hasil)
@@ -74,7 +78,7 @@ Update Uang keluar | MANAGEMENT
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>BUKTI UANG KELUAR</label>
+                                    <label>Bukti Uang Keluar</label>
                                     <div class="input-group">
                                         <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
                                     </div>
@@ -97,7 +101,7 @@ Update Uang keluar | MANAGEMENT
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>KETERANGAN</label>
+                                    <label>Keterangan</label>
                                     <textarea class="form-control" name="description" rows="6" placeholder="Masukkan Keterangan">{{ old('description', $credit->description) }}</textarea>
 
                                     @error('description')

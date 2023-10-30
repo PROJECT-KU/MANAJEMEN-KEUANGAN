@@ -57,7 +57,7 @@ class GajiController extends Controller
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
-    } else if ($user->level == 'karyawan') {
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -110,7 +110,7 @@ class GajiController extends Controller
     $endDate = $request->get('end_date');
 
     if ($gaji->isEmpty()) {
-      return redirect()->route('account.gaji.index')->with('error', 'Data Gaji Karyawan tidak ditemukan.');
+      return redirect()->route('account.gaji.index')->with('error', 'Data Gaji tidak ditemukan.');
     }
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate'));
   }
@@ -829,7 +829,7 @@ class GajiController extends Controller
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->get();
-    } else if ($user->level == 'karyawan') {
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
