@@ -301,7 +301,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                   <script>
                     document.getElementById('gambar').addEventListener('change', function() {
-                      const maxFileSizeInBytes = 1024 * 1024; // 1MB
+                      const maxFileSizeInBytes = 5024 * 5024; // 5MB
                       const allowedExtensions = ['jpg', 'jpeg', 'png'];
                       const fileInput = this;
 
@@ -316,7 +316,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                           Swal.fire({
                             icon: 'error',
                             title: 'Ukuran File Melebihi Batas',
-                            text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+                            text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
                           });
                           fileInput.value = ''; // Clear the file input
                           return;

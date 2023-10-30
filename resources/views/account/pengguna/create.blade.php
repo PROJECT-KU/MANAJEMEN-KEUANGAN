@@ -335,6 +335,39 @@ Tambah Pengguna | MANAGEMENT
     </section>
 </div>
 
+<!--================== show and hide password ==================-->
+<script>
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('password-toggle');
+
+    passwordToggle.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordToggle.classList.remove('fa-eye');
+            passwordToggle.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('fa-eye-slash');
+            passwordToggle.classList.add('fa-eye');
+        }
+    });
+    const passwordInput2 = document.getElementById('password2');
+    const passwordToggle2 = document.getElementById('password-toggle2');
+
+    passwordToggle2.addEventListener('click', function() {
+        if (passwordInput2.type === 'password') {
+            passwordInput2.type = 'text';
+            passwordToggle2.classList.remove('fa-eye');
+            passwordToggle2.classList.add('fa-eye-slash');
+        } else {
+            passwordInput2.type = 'password';
+            passwordToggle2.classList.remove('fa-eye-slash');
+            passwordToggle2.classList.add('fa-eye');
+        }
+    });
+</script>
+<!--================== end ==================-->
+
 <!--================== format telp ==================-->
 <script>
     function formatPhoneNumber(input) {

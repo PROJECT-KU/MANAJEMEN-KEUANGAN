@@ -164,7 +164,7 @@ Update Presensi Karyawan | MANAGEMENT
         <div class="form-group">
           <label>Bukti Presensi</label>
           <div class="input-group">
-            <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+            <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
           </div>
           @error('gambar')
           <div class="invalid-feedback" style="display: block">
@@ -202,7 +202,7 @@ Update Presensi Karyawan | MANAGEMENT
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.getElementById('gambar').addEventListener('change', function() {
-    const maxFileSizeInBytes = 1024 * 1024; // 1MB
+    const maxFileSizeInBytes = 5024 * 5024; // 5MB
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     const fileInput = this;
 
@@ -217,7 +217,7 @@ Update Presensi Karyawan | MANAGEMENT
         Swal.fire({
           icon: 'error',
           title: 'Ukuran File Melebihi Batas',
-          text: 'Ukuran File Yang Diperbolehkan Dibawah 1MB.',
+          text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
         });
         fileInput.value = ''; // Clear the file input
         return;
