@@ -19,7 +19,7 @@ Profil | MANAGEMENT
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
-        <div class="alert alert-danger" role="alert" style="text-align: center; background-image: url('{{ asset('/images/background-maintenance.png') }}'">
+        <div class="alert alert-danger" role="alert" style="text-align: center;">
           <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
           <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
           <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
