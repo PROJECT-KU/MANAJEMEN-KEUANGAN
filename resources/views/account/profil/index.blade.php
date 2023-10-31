@@ -236,7 +236,7 @@ Profil | MANAGEMENT
                   <div class="form-group">
                     <label for="gambar">FOTO PROFIL</label>
                     <div class="input-group">
-                      <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" style="display: none;">
+                      <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" style="display: none;">
                       <label for="gambar" class="custom-file-upload">
                         <i class="fas fa-camera"></i> Upload Gambar atau Gunakan Kamera
                       </label>
@@ -245,17 +245,15 @@ Profil | MANAGEMENT
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
                     </div>
-                    @enderror
                   </div>
                 </div>
-
                 <div class="col-md-6">
                   <div class="form-group">
                     <div class="thumbnail-circle" style="width: 12rem;">
                       @if (Auth::user()->gambar == null)
-                      <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                      <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height: 100px;">
                       @else
-                      <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                      <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height: 100px;">
                       @endif
                     </div>
                   </div>
