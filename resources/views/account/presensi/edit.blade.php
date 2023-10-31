@@ -170,10 +170,10 @@ Update Presensi Karyawan | MANAGEMENT
             {{ $message }}
           </div>
           @enderror -->
-          <div class="mb-3" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+          <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
             <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
-              <div class="cardgambar" style="width: max-content;">
-                <img id="image-preview" style="width: max-content; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+              <div class="cardgambar" style="width: 200px;">
+                <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
               </div>
             </a>
           </div>
@@ -192,9 +192,9 @@ Update Presensi Karyawan | MANAGEMENT
           </div>
           @enderror
         </div>
-        <div class="mb-3" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-          <div class="cardgambar" style="width: max-content;">
-            <img id="image-preview-pulang" style="width: max-content; height:200px; display:none;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+        <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+          <div class="cardgambar" style="width: 200px;">
+            <img id="image-preview-pulang" style="width: 200px; height:200px; display:none;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
           </div>
         </div>
       </div>
@@ -211,10 +211,10 @@ Update Presensi Karyawan | MANAGEMENT
           </div>
           @enderror
         </div>
-        <div class="mb-3" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+        <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
           <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
-            <div class="cardgambar" style="width: max-content;">
-              <img id="image-preview" style="width: max-content; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+            <div class="cardgambar" style="width: 200px;">
+              <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
             </div>
           </a>
         </div>
