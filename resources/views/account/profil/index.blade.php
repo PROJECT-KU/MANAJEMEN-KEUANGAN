@@ -234,11 +234,13 @@ Profil | MANAGEMENT
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>FOTO PROFIL</label>
+                    <label for="gambar">FOTO PROFIL</label>
                     <div class="input-group">
-                      <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+                      <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" style="display: none;">
+                      <label for="gambar" class="custom-file-upload">
+                        <i class="fas fa-camera"></i> Upload Gambar atau Gunakan Kamera
+                      </label>
                     </div>
-                    <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera -->
                     @error('gambar')
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
@@ -246,6 +248,7 @@ Profil | MANAGEMENT
                     @enderror
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
                     <div class="thumbnail-circle" style="width: 12rem;">
