@@ -196,6 +196,13 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         </li>
                                     </ul>
                                 </li>
+
+                                <li class="dropdown show">
+                                    <a href="https://mail.hostinger.com/" class="nav-link" target="_blank">
+                                        <i class="fas fa-envelope-open"></i>
+                                        <span>MASUK EMAIL</span>
+                                    </a>
+                                </li>
                                 @endif
 
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->
