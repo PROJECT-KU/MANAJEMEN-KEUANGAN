@@ -184,7 +184,10 @@ Update Presensi Karyawan | MANAGEMENT
         <div class="form-group">
           <label>Bukti Presensi Pulang</label>
           <div class="input-group">
-            <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control" accept="image/*" capture="camera">
+            <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+            <label for="gambar" class="custom-file-upload">
+              <i class="fa fa-camera"></i> Capture Image
+            </label>
           </div>
           @error('gambar_pulang')
           <div class="invalid-feedback" style="display: block">
