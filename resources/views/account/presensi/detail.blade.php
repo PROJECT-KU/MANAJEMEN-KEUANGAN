@@ -4,6 +4,19 @@
 Detail Presensi Karyawan | MANAGEMENT
 @stop
 
+<!--================== animasi image ==================-->
+<style>
+  .cardgambar {
+    transition: transform 0.2s ease;
+  }
+
+  .cardgambar:hover {
+    transform: scale(1.05);
+  }
+</style>
+<!--================== end ==================-->
+
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -141,6 +154,33 @@ Detail Presensi Karyawan | MANAGEMENT
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
+                  <label>Bukti Presensi Masuk</label>
+                  <div class="mb-3" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                    <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
+                      <div class="cardgambar" style="width: max-content;">
+                        <img id="image-preview" style="width: max-content; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Bukti Presensi Pulang</label>
+                  <div class="mb-3" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                    <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
+                      <div class="cardgambar" style="width: max-content;">
+                        <img id="image-preview-pulang" style="width: max-content; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Belum Presensi Pulang">
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
                   <label>Catatan</label>
                   <div class="input-group">
                     <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" disabled>{{ $presensi->note }}</textarea>
@@ -152,32 +192,8 @@ Detail Presensi Karyawan | MANAGEMENT
                   @enderror
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Bukti Presensi</label>
-                  <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
-                  </div>
-                  @error('gambar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-                <div class="mt-3">
-                  <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
-                    <div class="card" style="width: 12rem;">
-                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
-                    </div>
-                  </a>
-                </div>
-              </div>
             </div>
-            @if ($presensi->status_pulang == null)
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            @else
-            <button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            @endif
+
             <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
               <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
             </a>
@@ -190,7 +206,7 @@ Detail Presensi Karyawan | MANAGEMENT
   </section>
 </div>
 
-<!-- upload image -->
+<!--================== view upload image ==================-->
 <script>
   const imageInput = document.getElementById('gambar');
   const imagePreview = document.getElementById('image-preview');
@@ -207,15 +223,32 @@ Detail Presensi Karyawan | MANAGEMENT
     }
   });
 </script>
-<!-- end upload image -->
+<script>
+  const imageInputPulang = document.getElementById('gambargambar_pulang');
+  const imagePreviewPulang = document.getElementById('image-preview-pulang');
 
-<!-- Include CKEditor JS -->
+  imageInputPulang.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreviewPulang.src = e.target.result;
+        imagePreviewPulang.style.display = 'block'; // Show the preview
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== Include CKEditor JS ==================-->
 <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
 <script>
   CKEDITOR.replace('note');
 </script>
-<!-- end ckeditor -->
+<!--================== end ==================-->
 
+<!--================== submit & reset button loader ==================-->
 <script>
   /**
    * btn submit loader
@@ -243,5 +276,6 @@ Detail Presensi Karyawan | MANAGEMENT
     }, 500);
   })
 </script>
+<!--================== end ==================-->
 
 @stop
