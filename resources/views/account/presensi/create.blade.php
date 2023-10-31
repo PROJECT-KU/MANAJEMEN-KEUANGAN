@@ -212,8 +212,8 @@ Tambah Presensi Karyawan | MANAGEMENT
               @enderror
             </div>
             <div class="mt-3">
-              <div class="cardgambar" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: max-content; height: 200px;">
+              <div class="cardgambar" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: 200px; height: 200px;">
               </div>
             </div>
           </div>
