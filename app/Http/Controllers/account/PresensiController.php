@@ -122,13 +122,8 @@ class PresensiController extends Controller
     if ($request->hasFile('gambar')) {
       $image = $request->file('gambar');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $image->move(public_path('images'), $imageName);
-
-      // Save the image path
-      $imagePath = 'images/' . $imageName;
-    } else {
-      // Handle the case where no image was uploaded
-      $imagePath = null;
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
     }
     //end
 
