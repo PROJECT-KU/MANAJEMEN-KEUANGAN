@@ -2588,7 +2588,7 @@ Update Gaji Karyawan | MANAGEMENT
                 <div class="form-group">
                   <label>Bukti Pembayaran</label>
                   <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
+                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*">
                   </div>
                   @error('gambar')
                   <div class="invalid-feedback" style="display: block">
