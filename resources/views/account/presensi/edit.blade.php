@@ -196,59 +196,58 @@ Update Presensi Karyawan | MANAGEMENT
           </div>
         </div>
       </div>
-    </div>
-    @else
-    <div class="col-md-6">
-      <div class="form-group">
-        <label>Bukti Presensi Pulang</label>
-        <div class="input-group">
-          <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control" accept="image/*" capture="camera" disabled>
-        </div>
-        @error('gambar_pulang')
-        <div class="invalid-feedback" style="display: block">
-          {{ $message }}
-        </div>
-        @enderror
-      </div>
-      <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-        <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
-          <div class="cardgambar" style="width: 200px;">
-            <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+      @else
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Bukti Presensi Pulang</label>
+          <div class="input-group">
+            <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control" accept="image/*" capture="camera" disabled>
           </div>
-        </a>
+          @error('gambar_pulang')
+          <div class="invalid-feedback" style="display: block">
+            {{ $message }}
+          </div>
+          @enderror
+        </div>
+        <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+          <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
+            <div class="cardgambar" style="width: 200px;">
+              <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+            </div>
+          </a>
+        </div>
+      </div>
+      @endif
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>Catatan</label>
+          <div class="input-group">
+            <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
+          </div>
+          @error('note')
+          <div class="invalid-feedback" style="display: block">
+            {{ $message }}
+          </div>
+          @enderror
+        </div>
       </div>
     </div>
+
+    @if ($presensi->status_pulang == null)
+    <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @elseif (Auth::user()->level == 'manager')
+    <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+    @else
+    <button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
     @endif
-</div>
+    <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
+      <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
+    </a>
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="form-group">
-      <label>Catatan</label>
-      <div class="input-group">
-        <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
-      </div>
-      @error('note')
-      <div class="invalid-feedback" style="display: block">
-        {{ $message }}
-      </div>
-      @enderror
-    </div>
-  </div>
-</div>
-
-@if ($presensi->status_pulang == null)
-<button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-@elseif (Auth::user()->level == 'manager')
-<button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-@else
-<button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
-@endif
-<a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
-  <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
-</a>
-
-</form>
+    </form>
 
 </div>
 </div>
