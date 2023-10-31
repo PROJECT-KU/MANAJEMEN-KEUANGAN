@@ -20,6 +20,7 @@ class Presensi extends Model
     'status_pulang',
     'note',
     'gambar',
+    'gambar_pulang',
     'lokasi',
     'time_pulang',
     'latitude',

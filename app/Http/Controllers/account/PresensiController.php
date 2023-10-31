@@ -52,7 +52,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -60,7 +60,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -234,13 +234,13 @@ class PresensiController extends Controller
     //save image to path
     $imagePath = null;
 
-    if ($request->hasFile('gambar')) {
-      $image = $request->file('gambar');
+    if ($request->hasFile('gambar_pulang')) {
+      $image = $request->file('gambar_pulang');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
       $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar_pulang ke direktori public/images
     } else {
-      $imagePath = $presensi->gambar;
+      $imagePath = $presensi->gambar_pulang;
     }
     //end
 
@@ -250,7 +250,7 @@ class PresensiController extends Controller
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
       'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data
-      'gambar' => $imagePath ?? null, // Store the image path
+      'gambar_pulang' => $imagePath ?? null, // Store the image path
       'time_pulang' => now(),
     ]);
 

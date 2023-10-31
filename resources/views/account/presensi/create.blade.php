@@ -4,6 +4,18 @@
 Tambah Presensi Karyawan | MANAGEMENT
 @stop
 
+<!--================== animasi image ==================-->
+<style>
+  .cardgambar {
+    transition: transform 0.2s ease;
+  }
+
+  .cardgambar:hover {
+    transform: scale(1.05);
+  }
+</style>
+<!--================== end ==================-->
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -96,51 +108,50 @@ Tambah Presensi Karyawan | MANAGEMENT
                     <option value="lembur">LEMBUR</option>
                     <option value="cuti">CUTI</option>
                     @elseif ($currentDay == 1 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
-                      @elseif (in_array($currentDay, [2, 3]) && ($currentTime>= '00:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Ciee yang libur kerja, Jangan lupa hiling jangan kerja terus. Kesehatan juga perlu diperhatikan seperti kamu memperhatikan dia :D</option>
-                        <!-- end senin -->
+                      <!-- end senin -->
 
-                        <!-- selasa & rabu -->
-                        @elseif (in_array($currentDay, [2, 3]))
-                        <option value="libur" selected>LIBUR</option>
-                        @elseif ($currentDay == 4 && ($currentTime>= '00:00:00' && $currentTime <= '11:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 12.00.</option>
-                          <!-- end selasa & rabu -->
+                      <!-- selasa & rabu -->
+                      @elseif (in_array($currentDay, [2, 3]))
+                      <option value="libur" selected>LIBUR</option>
+                      @elseif ($currentDay == 4 && ($currentTime>= '00:00:00' && $currentTime <= '11:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 12.00.</option>
+                        <!-- end selasa & rabu -->
 
-                          <!-- kamis -->
-                          @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                            <option value="hadir">HADIR</option>
-                            <option value="remote">REMOTE</option>
+                        <!-- kamis -->
+                        @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                          <option value="hadir">HADIR</option>
+                          <option value="remote">REMOTE</option>
+                          <option value="izin">IZIN</option>
+                          <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                          <option value="lembur">LEMBUR</option>
+                          <option value="cuti">CUTI</option>
+                          @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
+                            <option value="terlambat">REMOTE</option>
                             <option value="izin">IZIN</option>
-                            <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                            <option value="terlambat">DINAS LUAR KOTA</option>
                             <option value="lembur">LEMBUR</option>
                             <option value="cuti">CUTI</option>
-                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
-                              <option value="terlambat">REMOTE</option>
-                              <option value="izin">IZIN</option>
-                              <option value="terlambat">DINAS LUAR KOTA</option>
-                              <option value="lembur">LEMBUR</option>
-                              <option value="cuti">CUTI</option>
-                              @elseif ($currentDay == 4 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
-                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '00:00:00' && $currentTime <= '06:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 07.00.</option>
-                                  <!-- end kamis -->
+                            @elseif ($currentDay == 4 && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari.</option>
+                              @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime>= '00:00:00' && $currentTime <= '06:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 07.00.</option>
+                                <!-- end kamis -->
 
-                                  <!-- jumat, sabtu & minggu -->
-                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                                    <option value="hadir">HADIR</option>
-                                    <option value="remote">REMOTE</option>
+                                <!-- jumat, sabtu & minggu -->
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+                                  <option value="hadir">HADIR</option>
+                                  <option value="remote">REMOTE</option>
+                                  <option value="izin">IZIN</option>
+                                  <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                                  <option value="lembur">LEMBUR</option>
+                                  <option value="cuti">CUTI</option>
+                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
+                                    <option value="terlambat">REMOTE</option>
                                     <option value="izin">IZIN</option>
-                                    <option value="dinas luar kota">DINAS LUAR KOTA</option>
+                                    <option value="terlambat">DINAS LUAR KOTA</option>
                                     <option value="lembur">LEMBUR</option>
                                     <option value="cuti">CUTI</option>
-                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <option value="terlambat">HADIR</option>
-                                      <option value="terlambat">REMOTE</option>
-                                      <option value="izin">IZIN</option>
-                                      <option value="terlambat">DINAS LUAR KOTA</option>
-                                      <option value="lembur">LEMBUR</option>
-                                      <option value="cuti">CUTI</option>
-                                      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari. </option>
-                                        @elseif ($currentDay == 1 && ($currentTime>= '00:00:00' && $currentTime <= '07:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 08.00.</option>
-                                          <!-- end jumat, sabtu & minggu -->
-                                          @endif
+                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '22:00:00' && $currentTime <= '23:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Harap presensi kembali pada keesokan hari. </option>
+                                      @elseif ($currentDay == 1 && ($currentTime>= '00:00:00' && $currentTime <= '07:59:59' )) <option value="tidak bisa presensi" selected>Belum dapat presensi. Dapat presensi mulai pukul 08.00.</option>
+                                        <!-- end jumat, sabtu & minggu -->
+                                        @endif
               </select>
               <!-- <select class="form-control" name="status" id="status" required>
                 @if (date('H:i:s') >= '07:00:00' && date('H:i:s') <= '09:00:00' ) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
@@ -201,8 +212,8 @@ Tambah Presensi Karyawan | MANAGEMENT
               @enderror
             </div>
             <div class="mt-3">
-              <div class="card" style="width: 12rem;">
-                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none;">
+              <div class="cardgambar" style="width: max-content; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: max-content; height: 200px;">
               </div>
             </div>
           </div>
@@ -231,7 +242,6 @@ Tambah Presensi Karyawan | MANAGEMENT
 
                   <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
                   </form>
-
 
                   </div>
                   </div>
