@@ -43,7 +43,7 @@ Tambah Uang Keluar | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Tanggal</label>
-                                    <input type="text" class="form-control datetimepicker" name="credit_date" placeholder="Pilih Tanggal">
+                                    <input type="datetime-local" class="form-control" name="credit_date" placeholder="Pilih Tanggal">
 
                                     @error('date_debit')
                                     <div class="invalid-feedback" style="display: block">
