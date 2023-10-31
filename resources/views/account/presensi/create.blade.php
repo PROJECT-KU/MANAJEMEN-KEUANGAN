@@ -202,10 +202,7 @@ Tambah Presensi Karyawan | MANAGEMENT
           <div class="col-md-6">
             <div class="form-group">
               <label for="gambar">Bukti Presensi</label>
-              <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-              <label for="gambar" class="custom-file-upload">
-                <i class="fa fa-camera"></i> Capture Image
-              </label>
+              <input type="file" name="gambar" id="gambar" class="form-control custom-file-upload" accept="image/*" capture="camera">
             </div>
             @error('gambar')
             <div class="invalid-feedback" style="display: block">
