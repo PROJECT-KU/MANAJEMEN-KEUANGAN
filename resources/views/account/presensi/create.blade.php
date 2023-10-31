@@ -201,22 +201,24 @@ Tambah Presensi Karyawan | MANAGEMENT
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label>Bukti Presensi</label>
-              <div class="input-group">
-                <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-              </div>
-              @error('gambar')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
-              </div>
-              @enderror
+              <label for="gambar">Bukti Presensi</label>
+              <input type="file" name="gambar" id="gambar" class="form-control" style="display: none;">
+              <label for="gambar" class="custom-file-upload">
+                <i class="fa fa-camera"></i> Capture Image
+              </label>
             </div>
-            <div class="mt-3">
+            @error('gambar')
+            <div class="invalid-feedback" style="display: block">
+              {{ $message }}
+            </div>
+            @enderror
+            <div class="mb-3">
               <div class="cardgambar" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
                 <img id="image-preview" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: 200px; height: 200px;">
               </div>
             </div>
           </div>
+
         </div>
         <div class="row">
           <div class="col-md-12">
