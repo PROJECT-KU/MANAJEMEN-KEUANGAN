@@ -23,7 +23,7 @@ Profil | MANAGEMENT
           <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
           <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
           <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
-          <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY H:i') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY H:i') }}</p>
+          <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
         </div>
         @endif
         @endforeach
