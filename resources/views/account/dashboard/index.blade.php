@@ -69,23 +69,7 @@ Dashboard | MANAGEMENT
                 @endforeach
                 @endif
                 <!--================== end ==================-->
-
                 <div class="row">
-                    <!--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                <div class="card card-statistic-2">
-                    <div class="card-icon shadow-primary bg-primary">
-                        <i class="fas fa-money-check-alt"></i>
-                    </div>
-                    <div class="card-wrap">
-                        <div class="card-header">
-                            <h4>SEMUA SALDO </h4>
-                        </div>
-                        <div class="card-body" style="font-size: 20px">
-                            {{ rupiah($saldo_selama_ini) }}
-                        </div>
-                    </div>
-                </div>
-            </div>-->
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <div class="card card-statistic-2">
                             <div class="card-icon shadow-primary bg-primary">
