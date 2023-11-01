@@ -35,142 +35,193 @@ class DashboardController extends Controller
                 ->whereYear('debit_date', Carbon::now()->year)
                 ->whereMonth('debit_date', Carbon::now()->month)
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_keluar_bulan_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
                 ->whereMonth('credit_date', Carbon::now()->month)
-
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_masuk_bulan_lalu  = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
                 ->whereMonth('debit_date', Carbon::now()->subMonths())
-
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_keluar_bulan_lalu = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
                 ->whereMonth('credit_date', Carbon::now()->subMonths())
-
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_masuk_selama_ini  = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
-
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_keluar_selama_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
-
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_keluar_hari_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereDate('credit_date', Carbon::today())
-
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_masuk_hari_ini = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereDate('debit_date', Carbon::today())
-
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_masuk_tahun_ini = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
-
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
 
             $uang_keluar_tahun_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
-
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('users.company', $user->company)
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->first();
         } else {
             $uang_masuk_bulan_ini  = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
                 ->whereMonth('debit_date', Carbon::now()->month)
-                ->where('user_id', Auth::user()->id)
+                ->where('debit.user_id', $user->id)
                 ->first();
 
             $uang_keluar_bulan_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
                 ->whereMonth('credit_date', Carbon::now()->month)
-                ->where('user_id', Auth::user()->id)
+                ->where('credit.user_id', $user->id)
                 ->first();
 
-            $uang_masuk_bulan_lalu  = DB::table('debit')
+            $uang_masuk_bulan_lalu = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
                 ->whereMonth('debit_date', Carbon::now()->subMonths())
-                ->where('user_id', Auth::user()->id)
+                ->where('debit.user_id', $user->id)
                 ->first();
 
             $uang_keluar_bulan_lalu = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
                 ->whereMonth('credit_date', Carbon::now()->subMonths())
-                ->where('user_id', Auth::user()->id)
+                ->where('credit.user_id', $user->id)
                 ->first();
 
-            $uang_masuk_selama_ini  = DB::table('debit')
+            $uang_masuk_selama_ini = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
-                ->where('user_id', Auth::user()->id)
+                ->where('debit.user_id', $user->id)
                 ->first();
 
             $uang_keluar_selama_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
-                ->where('user_id', Auth::user()->id)
+                ->where('credit.user_id', $user->id)
                 ->first();
 
             $uang_keluar_hari_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereDate('credit_date', Carbon::today())
-                ->where('user_id', Auth::user()->id)
+                ->where('credit.user_id', $user->id)
                 ->first();
 
             $uang_masuk_hari_ini = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereDate('debit_date', Carbon::today())
-                ->where('user_id', Auth::user()->id)
+                ->where('debit.user_id', $user->id)
                 ->first();
 
             $uang_masuk_tahun_ini = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
-                ->where('user_id', Auth::user()->id)
+                ->where('debit.user_id', $user->id)
                 ->first();
 
             $uang_keluar_tahun_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
-                ->where('user_id', Auth::user()->id)
+                ->where('credit.user_id', $user->id)
                 ->first();
         }
 
@@ -263,6 +314,7 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
+
         //saldo bulan ini
         $saldo_bulan_ini = $uang_masuk_bulan_ini->nominal - $uang_keluar_bulan_ini->nominal;
 
@@ -289,6 +341,7 @@ class DashboardController extends Controller
 
         //pengeluaran tahun ini
         $pengeluaran_tahun_ini = $uang_keluar_tahun_ini->nominal;
+
 
         // Ambil data karyawan terbaru
         $latestUsers = User::orderBy('created_at', 'desc')->limit(6)->get();
