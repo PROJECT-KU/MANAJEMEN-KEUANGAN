@@ -56,19 +56,19 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3">
+                    <ul class="navbar-nav mr-3 mb-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
-                    <h6 id="greeting" style="color: #ffffff;">{{ Auth::user()->full_name }}</h6>
+                    <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;"></p>
                 </form>
 
                 <!--================== dropdown profil ==================-->
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle mb-3" style="width: 50px; height:50px;">
                             @else
-                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle mb-3" style="width: 50px; height:50px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -237,19 +237,25 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
         function getGreeting() {
             const currentTime = new Date();
             const currentHour = currentTime.getHours();
+            let fullName = "{{ Auth::user()->full_name }}"; // Ganti ini dengan cara Anda mendapatkan nama lengkap pengguna
+
+            // Batasi nama hingga 50 karakter
+            if (fullName.length > 15) {
+                fullName = fullName.slice(0, 15);
+            }
 
             let greeting;
 
             if (currentHour >= 5 && currentHour < 11) {
-                greeting = "Selamat Pagi {{ Auth::user()->full_name }}";
+                greeting = "Selamat Pagi " + fullName;
             } else if (currentHour >= 11 && currentHour < 15) {
-                greeting = "Selamat Siang {{ Auth::user()->full_name }}";
+                greeting = "Selamat Siang " + fullName;
             } else if (currentHour >= 15 && currentHour < 18) {
-                greeting = "Selamat Sore {{ Auth::user()->full_name }}";
+                greeting = "Selamat Sore " + fullName;
             } else if (currentHour >= 1 && currentHour < 5) {
-                greeting = "Selamat Dini Hari {{ Auth::user()->full_name }}";
+                greeting = "Selamat Dini Hari " + fullName;
             } else {
-                greeting = "Selamat Malam {{ Auth::user()->full_name }}";
+                greeting = "Selamat Malam " + fullName;
             }
 
             return greeting;
