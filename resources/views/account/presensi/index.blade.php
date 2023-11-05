@@ -73,7 +73,7 @@ List Presensi Karyawan | MANAGEMENT
               <form action="{{ route('account.presensi.search') }}" method="GET">
                 <div class="form-group">
                   <div class="input-group mb-3">
-                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                    <!-- @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                     @php
                     $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
                     ->whereDate('created_at', now()->toDateString())
@@ -88,6 +88,27 @@ List Presensi Karyawan | MANAGEMENT
                       <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
                         <i class="fa fa-plus-circle"></i> MASUK
                       </a>
+                      @endif
+                    </td>
+                    @endif -->
+
+                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                    @php
+                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                    ->whereDate('created_at', now()->toDateString())
+                    ->first();
+                    @endphp
+                    <td class="text-center">
+                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
+                        <i class="fa fa-pencil-alt"></i> PULANG
+                      </a>
+                      @elseif (!$todayPresensi)
+                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                        <i class="fa fa-plus-circle"></i> MASUK
+                      </a>
+                      @else
+
                       @endif
                     </td>
                     @endif
@@ -192,7 +213,7 @@ List Presensi Karyawan | MANAGEMENT
                 <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
                 <td class="column-width" style="text-align: center;">
                   <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
-                  {{ strftime('%A, %d %B %Y %H:%M', strtotime($hasil->created_at)) }}
+                  {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
                 </td>
                 <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
                 @if($hasil->time_pulang == null)
@@ -277,9 +298,9 @@ List Presensi Karyawan | MANAGEMENT
                 </td>
                 @else
                 <td class="text-center">
-                  <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                  <!-- <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                     <i class="fa fa-pencil-alt"></i>
-                  </a>
+                  </a> -->
                   <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                     <i class="fa fa-trash"></i>
                   </button>
