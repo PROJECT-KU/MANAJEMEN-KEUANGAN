@@ -28,7 +28,14 @@ class CategoriesDebitController extends Controller
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->join('users', 'categories_debit.user_id', '=', 'users.id')
-                ->whereIn('users.level', ['staff', 'manager'])
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('categories_debit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->paginate(10);
         } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {

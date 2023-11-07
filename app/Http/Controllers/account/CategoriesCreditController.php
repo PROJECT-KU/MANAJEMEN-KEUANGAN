@@ -28,7 +28,14 @@ class CategoriesCreditController extends Controller
             $categories = DB::table('categories_credit')
                 ->select('categories_credit.id', 'categories_credit.kode', 'categories_credit.name')
                 ->join('users', 'categories_credit.user_id', '=', 'users.id')
-                ->whereIn('users.level', ['staff', 'manager'])
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('categories_credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
                 ->orderBy('categories_credit.created_at', 'DESC')
                 ->paginate(10);
         } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
