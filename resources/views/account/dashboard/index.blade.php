@@ -104,6 +104,131 @@ Dashboard | MANAGEMENT
                 </div>
 
                 <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                                <h4 style="color: white;">AKSES CEPAT</h4>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="row">
+
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.debit.create') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/moneyin.png') }}" style="margin-left: 30px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-4">Tambah Uang Masuk</label>
+                                            </div>
+                                        </center>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.credit.create') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/moneyout.png') }}" style="margin-left: 40px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-4">Tambah Uang Keluar</label>
+                                            </div>
+                                        </center>
+                                    </div>
+
+                                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                                    @php
+                                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                                    ->whereDate('created_at', now()->toDateString())
+                                    ->first();
+                                    @endphp
+                                    @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}">
+                                                    <img alt="image" src="{{ asset('assets/img/presensi.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">Presensi Kepulangan</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @elseif (!$todayPresensi)
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.presensi.create') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">Presensi Kehadiran</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @else
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="#">
+                                                    <img alt="image" src="{{ asset('assets/img/presensiselesai.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">Presensi Selesai</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @endif
+                                    @endif
+                                    @if (Auth::user()->level == 'manager')
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.presensi.create') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/presensi.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">Tambah Presensi</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @endif
+
+                                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.gaji.index') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/gaji.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">List Gaji Karyawan</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @else
+                                    <div class="col-md-3">
+                                        <center>
+                                            <div class="form-group">
+                                                <a href="{{ route('account.gaji.create') }}">
+                                                    <img alt="image" src="{{ asset('assets/img/gaji.png') }}" style="margin-left: 10px;">
+                                                </a>
+                                                <br>
+                                                <label class="text-center ml-3">Tambah Gaji Karyawan</label>
+                                            </div>
+                                        </center>
+                                    </div>
+                                    @endif
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                         <div class="card card-statistic-2" style="background-color:#AFEEEE;">
                             <div class="card-icon shadow-primary bg-primary">
@@ -206,8 +331,8 @@ Dashboard | MANAGEMENT
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
-                                <h4><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                                <h4 style="color: white;"><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
                                 <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
                             </div>
                             <div class="card-body">
@@ -240,8 +365,8 @@ Dashboard | MANAGEMENT
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
-                                <h4><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                                <h4 style="color: white;"><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
                                 <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
                             </div>
                             <div class="card-body">
@@ -316,7 +441,27 @@ Dashboard | MANAGEMENT
     }
 </style>
 
-<!-- open and close chart pemasukan-->
+<!--================== open and close chart akses cepat ==================-->
+<script>
+    function toggleChartAksescepat() {
+        var chartContainerAksescepat = document.getElementById('chartContainerAksescepat');
+        var financeChartAksescepat = document.getElementById('financeChartAksescepat');
+        var toggleBtnAksescepat = document.getElementById('toggleChartBtnAksescepat');
+
+        if (chartContainerAksescepat.style.display === 'none') {
+            chartContainerAksescepat.style.display = 'block';
+            financeChartAksescepat.style.display = 'none';
+            toggleBtnAksescepat.innerText = 'Tutup Chart';
+        } else {
+            chartContainerAksescepat.style.display = 'none';
+            financeChartAksescepat.style.display = 'block';
+            toggleBtnAksescepat.innerText = 'Buka Chart';
+        }
+    }
+</script>
+<!--================== end ==================-->
+
+<!--================== open and close chart pemasukan ==================-->
 <script>
     function toggleChartPemasukan() {
         var chartContainerPemasukan = document.getElementById('chartContainerPemasukan');
@@ -334,9 +479,9 @@ Dashboard | MANAGEMENT
         }
     }
 </script>
-<!-- end -->
+<!--================== end ==================-->
 
-<!-- open and close chart pengeluaran -->
+<!--================== open and close chart pengeluaran ==================-->
 <script>
     function toggleChart() {
         var chartContainer = document.getElementById('chartContainer');
@@ -354,9 +499,9 @@ Dashboard | MANAGEMENT
         }
     }
 </script>
-<!-- end -->
+<!--================== end ==================-->
 
-<!-- popup akun berhasil -->
+<!--================== popup akun berhasil ==================-->
 @if (session('message'))
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -369,7 +514,7 @@ Dashboard | MANAGEMENT
     });
 </script>
 @endif
-<!-- end -->
+<!--================== end ==================-->
 
 <script type="text/javascript" src="chartjs/Chart.js"></script>
 <script>

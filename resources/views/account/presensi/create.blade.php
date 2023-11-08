@@ -94,8 +94,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                 @endphp
 
                 <!-- senin -->
-                @if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                  <option value="hadir">HADIR</option>
+                @if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00' )) <option value="hadir">HADIR</option>
                   <option value="remote">REMOTE</option>
                   <option value="izin">IZIN</option>
                   <option value="dinas luar kota">DINAS LUAR KOTA</option>
@@ -117,8 +116,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                         <!-- end selasa & rabu -->
 
                         <!-- kamis -->
-                        @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                          <option value="hadir">HADIR</option>
+                        @elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00' )) <option value="hadir">HADIR</option>
                           <option value="remote">REMOTE</option>
                           <option value="izin">IZIN</option>
                           <option value="dinas luar kota">DINAS LUAR KOTA</option>
@@ -135,8 +133,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                                 <!-- end kamis -->
 
                                 <!-- jumat, sabtu & minggu -->
-                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
-                                  <option value="hadir">HADIR</option>
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00' )) <option value="hadir">HADIR</option>
                                   <option value="remote">REMOTE</option>
                                   <option value="izin">IZIN</option>
                                   <option value="dinas luar kota">DINAS LUAR KOTA</option>
@@ -202,7 +199,7 @@ Tambah Presensi Karyawan | MANAGEMENT
           <div class="col-md-6">
             <div class="form-group">
               <label for="gambar">Bukti Presensi</label>
-              <input type="file" name="gambar" id="gambar" class="form-control custom-file-upload" accept="image/*" capture="camera">
+              <input type="file" name="gambar" id="gambar" class="form-control custom-file-upload" accept="image/*" capture="camera" required>
             </div>
             @error('gambar')
             <div class="invalid-feedback" style="display: block">

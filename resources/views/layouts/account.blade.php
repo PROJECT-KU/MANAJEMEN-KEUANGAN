@@ -59,16 +59,16 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     <ul class="navbar-nav mr-3 mb-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
-                    <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;"></p>
+                    <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
                 </form>
 
                 <!--================== dropdown profil ==================-->
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @if (Auth::user()->gambar == null)
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle mb-3" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
                             @else
-                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle mb-3" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('images/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
