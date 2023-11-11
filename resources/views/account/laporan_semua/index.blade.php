@@ -207,30 +207,7 @@
               </tbody>
             </table>
 
-            <table class="table table-bordered mt-5">
-              <thead style="border: 2px solid red;">
-                <tr>
-                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL TRANSAKSI MASUK</th>
-                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL TRANSAKSI KELUAR</th>
-                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL GAJI KARYAWAN</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="text-align: center; font-weight: bold;">
-                  <td>Rp. {{ number_format($totalDebit, 0, ',', ',') }}</td>
-                  <td>Rp. {{ number_format($totalCredit, 0, ',', ',') }}</td>
-                  @php
-                  $totalGaji = 0;
-                  foreach ($gaji as $item) {
-                  if ($item->status != 'pending') {
-                  $totalGaji += $item->total;
-                  }
-                  }
-                  @endphp
-                  <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
-                </tr>
-              </tbody>
-            </table>
+
           </div>
         </div>
       </div>
@@ -262,7 +239,32 @@
       </div>
       @endif
 
+      <table class="table table-bordered mt-5" style="border: 2px solid red;">
+        <thead>
+          <tr>
+            <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL TRANSAKSI MASUK</th>
+            <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL TRANSAKSI KELUAR</th>
+            <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">TOTAL GAJI KARYAWAN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="text-align: center; font-weight: bold;">
+            <td>Rp. {{ number_format($totalDebit, 0, ',', ',') }}</td>
+            <td>Rp. {{ number_format($totalCredit, 0, ',', ',') }}</td>
+            @php
+            $totalGaji = 0;
+            foreach ($gaji as $item) {
+            if ($item->status != 'pending') {
+            $totalGaji += $item->total;
+            }
+            }
+            @endphp
+            <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
+          </tr>
+        </tbody>
+      </table>
   </div>
+
   </div>
   </section>
   </div>

@@ -78,8 +78,10 @@ class GajiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
+    // Calculate total gaji
+    $totalGaji = $gaji->sum('total');
 
-    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
   }
 
   public function search(Request $request)

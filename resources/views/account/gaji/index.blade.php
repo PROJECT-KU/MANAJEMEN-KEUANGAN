@@ -301,6 +301,21 @@ List Gaji Karyawan | MANAGEMENT
       </div>
 
     </div>
+
+    @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
+    <table class="table table-bordered mt-5" style="border: 2px solid red;">
+      <thead>
+        <tr>
+          <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;"><b>TOTAL GAJI</b></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="text-align: center; font-weight: bold;">
+          <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
+        </tr>
+      </tbody>
+    </table>
+    @endif
 </div>
 </section>
 </div>
