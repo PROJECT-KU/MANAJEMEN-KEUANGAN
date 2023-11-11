@@ -190,20 +190,7 @@ Laporan Transaksi Neraca | MANAGEMENT
                     </table>
                 </div>
 
-                @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
-                <table class="table table-bordered mt-5">
-                    <thead style="border: 2px solid red;">
-                        <tr>
-                            <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">KEUNTUNGAN</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="text-align: center; font-weight: bold;">
-                            <td>Rp. {{ number_format($totalDebit-$totalCredit-$totalGaji, 0, ',', ',')}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                @endif
+
             </div>
 
             @else
@@ -234,6 +221,20 @@ Laporan Transaksi Neraca | MANAGEMENT
             </div>
             @endif
         </div>
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
+        <table class="table table-bordered mt-5" style="border: 2px solid red;">
+            <thead>
+                <tr>
+                    <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;">KEUNTUNGAN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="text-align: center; font-weight: bold;">
+                    <td>Rp. {{ number_format($totalDebit-$totalCredit-$totalGaji, 0, ',', ',')}}</td>
+                </tr>
+            </tbody>
+        </table>
+        @endif
 </div>
 
 </section>

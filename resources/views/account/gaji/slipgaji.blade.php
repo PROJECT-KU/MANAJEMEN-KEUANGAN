@@ -205,6 +205,10 @@
                     <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan_thr, 0, ',', '.') }}</td>
                   </tr>
                   <tr>
+                    <td style="text-align: left; width:145px">Tunjangan Pulsa</td>
+                    <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan_pulsa, 0, ',', '.') }}</td>
+                  </tr>
+                  <tr>
                     <td style="text-align: left; width:145px">Tunjangan Lainnya</td>
                     <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan, 0, ',', '.') }}</td>
                   </tr>
