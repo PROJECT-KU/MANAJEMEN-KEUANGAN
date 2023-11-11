@@ -447,7 +447,7 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
 
-            @if (Auth::user()->company === 'rumahscopus')
+
 
             <!-- bonus field default -->
             <div class="row">
@@ -493,8 +493,7 @@ Detail Gaji Karyawan | MANAGEMENT
             <!-- end filed bonus default -->
 
             <!-- filed bonus 1 -->
-            @if($gaji->bonus1 == null || $gaji->jumlah_bonus1 == null || $gaji->bonus_luar1 == null || $gaji->jumlah_bonus_luar1 == null || $gaji->bonus1 == '0' || $gaji->jumlah_bonus1 == '0' || $gaji->bonus_luar1 == '0' || $gaji->jumlah_bonus_luar1 == '0')
-            @else
+            @if($gaji->bonus1 !== '0' || $gaji->jumlah_bonus1 !== '0' || $gaji->bonus_luar1 !== '0' || $gaji->jumlah_bonus_luar1 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -535,12 +534,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 1 -->
 
             <!-- filed bonus 2 -->
-            @if($gaji->bonus2 == null || $gaji->jumlah_bonus2 == null || $gaji->bonus_luar2 == null || $gaji->jumlah_bonus_luar2 == null || $gaji->bonus2 == '0' || $gaji->jumlah_bonus2 == '0' || $gaji->bonus_luar2 == '0' || $gaji->jumlah_bonus_luar2 == '0')
-            @else
+            @if($gaji->bonus2 !== '0' || $gaji->jumlah_bonus2 !== '0' || $gaji->bonus_luar2 !== '0' || $gaji->jumlah_bonus_luar2 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -581,12 +580,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 2 -->
 
             <!-- filed bonus 3 -->
-            @if($gaji->bonus3 == null || $gaji->jumlah_bonus3 == null || $gaji->bonus_luar3 == null || $gaji->jumlah_bonus_luar3 == null || $gaji->bonus3 == '0' || $gaji->jumlah_bonus3 == '0' || $gaji->bonus_luar3 == '0' || $gaji->jumlah_bonus_luar3 == '0')
-            @else
+            @if($gaji->bonus3 !== '0' || $gaji->jumlah_bonus3 !== '0' || $gaji->bonus_luar3 !== '0' || $gaji->jumlah_bonus_luar3 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -627,12 +626,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 3 -->
 
             <!-- filed bonus 4 -->
-            @if($gaji->bonus4 == null || $gaji->jumlah_bonus4 == null || $gaji->bonus_luar4 == null || $gaji->jumlah_bonus_luar4 == null || $gaji->bonus4 == '0' || $gaji->jumlah_bonus4 == '0' || $gaji->bonus_luar4 == '0' || $gaji->jumlah_bonus_luar4 == '0')
-            @else
+            @if( $gaji->bonus4 !== '0' || $gaji->jumlah_bonus4 !== '0' || $gaji->bonus_luar4 !== '0' || $gaji->jumlah_bonus_luar4 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -673,12 +672,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 4 -->
 
             <!-- filed bonus 5 -->
-            @if($gaji->bonus5 == null || $gaji->jumlah_bonus5 == null || $gaji->bonus_luar5 == null || $gaji->jumlah_bonus_luar5 == null || $gaji->bonus5 == '0' || $gaji->jumlah_bonus5 == '0' || $gaji->bonus_luar5 == '0' || $gaji->jumlah_bonus_luar5 == '0')
-            @else
+            @if($gaji->bonus5 !== '0' || $gaji->jumlah_bonus5 !== '0' || $gaji->bonus_luar5 !== '0' || $gaji->jumlah_bonus_luar5 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -719,12 +718,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 5 -->
 
             <!-- filed bonus 6 -->
-            @if($gaji->bonus6 == null || $gaji->jumlah_bonus6 == null || $gaji->bonus_luar6 == null || $gaji->jumlah_bonus_luar6 == null || $gaji->bonus6 == '0' || $gaji->jumlah_bonus6 == '0' || $gaji->bonus_luar6 == '0' || $gaji->jumlah_bonus_luar6 == '0')
-            @else
+            @if($gaji->bonus6 !== '0' || $gaji->jumlah_bonus6 !== '0' || $gaji->bonus_luar6 !== '0' || $gaji->jumlah_bonus_luar6 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -765,12 +764,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 6 -->
 
             <!-- filed bonus 7 -->
-            @if($gaji->bonus7 == null || $gaji->jumlah_bonus7 == null || $gaji->bonus_luar7 == null || $gaji->jumlah_bonus_luar7 == null || $gaji->bonus7 == '0' || $gaji->jumlah_bonus7 == '0' || $gaji->bonus_luar7 == '0' || $gaji->jumlah_bonus_luar7 == '0')
-            @else
+            @if($gaji->bonus7 !== '0' || $gaji->jumlah_bonus7 !== '0' || $gaji->bonus_luar7 !== '0' || $gaji->jumlah_bonus_luar7 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -811,12 +810,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 7 -->
 
             <!-- filed bonus 8 -->
-            @if($gaji->bonus8 == null || $gaji->jumlah_bonus8 == null || $gaji->bonus_luar8 == null || $gaji->jumlah_bonus_luar8 == null || $gaji->bonus8 == '0' || $gaji->jumlah_bonus8 == '0' || $gaji->bonus_luar8 == '0' || $gaji->jumlah_bonus_luar8 == '0')
-            @else
+            @if($gaji->bonus8 !== '0' || $gaji->jumlah_bonus8 !== '0' || $gaji->bonus_luar8 !== '0' || $gaji->jumlah_bonus_luar8 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -857,12 +856,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 8 -->
 
             <!-- filed bonus 9 -->
-            @if($gaji->bonus9 == null || $gaji->jumlah_bonus9 == null || $gaji->bonus_luar9 == null || $gaji->jumlah_bonus_luar9 == null || $gaji->bonus9 == '0' || $gaji->jumlah_bonus9 == '0' || $gaji->bonus_luar9 == '0' || $gaji->jumlah_bonus_luar9 == '0')
-            @else
+            @if($gaji->bonus9 !== '0' || $gaji->jumlah_bonus9 !== '0' || $gaji->bonus_luar9 !== '0' || $gaji->jumlah_bonus_luar9 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -903,12 +902,12 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 9 -->
 
             <!-- filed bonus 10 -->
-            @if($gaji->bonus10 == null || $gaji->jumlah_bonus10 == null || $gaji->bonus_luar10 == null || $gaji->jumlah_bonus_luar10 == null || $gaji->bonus10 == '0' || $gaji->jumlah_bonus10 == '0' || $gaji->bonus_luar10 == '0' || $gaji->jumlah_bonus_luar10 == '0')
-            @else
+            @if($gaji->bonus10 !== '0' || $gaji->jumlah_bonus10 !== '0' || $gaji->bonus_luar10 !== '0' || $gaji->jumlah_bonus_luar10 !== '0')
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -949,31 +948,11 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+            @else
             @endif
             <!-- end field bonus 10 -->
 
-            @else
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Bayaran Bonus (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus" value="{{ $gaji->bonus }}" placeholder="Masukkan Bayaran Bonus Per Hari" class="form-control currency2" readonly>
-                  </div>
-                </div>
-              </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Total Bonus (Per Hari)</label>
-                  <input type="text" name="jumlah_bonus" value="{{ $gaji->jumlah_bonus }}" placeholder="Masukkan Total Hari" class="form-control" readonly>
-                </div>
-              </div>
-            </div>
-            @endif
 
             <div class="col-md-12">
               <div class="form-group">

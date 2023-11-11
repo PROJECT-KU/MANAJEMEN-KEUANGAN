@@ -129,7 +129,7 @@ Dashboard | MANAGEMENT
                                         <center>
                                             <div class="form-group">
                                                 <a href="{{ route('account.credit.create') }}">
-                                                    <img alt="image" src="{{ asset('assets/img/moneyout.png') }}" style="margin-left: 40px;">
+                                                    <img alt="image" src="{{ asset('assets/img/moneyout.png') }}" style="margin-left: 25px;">
                                                 </a>
                                                 <br>
                                                 <label class="text-center ml-4">Tambah Uang Keluar</label>
