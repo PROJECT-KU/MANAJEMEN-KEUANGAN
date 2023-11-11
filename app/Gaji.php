@@ -87,6 +87,7 @@ class Gaji extends Model
     'tunjangan',
     'tunjangan_bpjs',
     'tunjangan_thr',
+    'tunjangan_pulsa',
     'tanggal',
     'total_lembur',
     'total_bonus',

@@ -1395,7 +1395,7 @@ Tambah Gaji Karyawan | MANAGEMENT
 
 
             <div class="row">
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan BPJS</label>
                   <div class="input-group">
@@ -1412,7 +1412,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan THR</label>
                   <div class="input-group">
@@ -1428,8 +1428,27 @@ Tambah Gaji Karyawan | MANAGEMENT
                   @enderror
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-4">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan Pulsa</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ old('tunjangan_pulsa') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
+                  </div>
+                  @error('tunjangan_pulsa')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan Lainnya</label>
                   <div class="input-group">
@@ -2004,6 +2023,10 @@ Tambah Gaji Karyawan | MANAGEMENT
     numeralThousandsGroupStyle: 'thousand'
   });
   var cleaveC = new Cleave('.currency_tunjanganTHR', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_tunjanganPulsa', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
