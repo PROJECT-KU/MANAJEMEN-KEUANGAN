@@ -997,7 +997,7 @@ Update Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end lembur field 10 -->
 
-            <!-- (Auth::user()->company === 'rumahscopus') -->
+
 
             <!-- bonus default -->
             <div class="row">
@@ -1069,74 +1069,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus default -->
 
             <!-- bonus field 1 -->
-            @if($gaji->bonus1 == null || $gaji->jumlah_bonus1 == null || $gaji->bonus_luar1 == null || $gaji->jumlah_bonus_luar1 == null || $gaji->bonus1 == '0' || $gaji->jumlah_bonus1 == '0' || $gaji->bonus_luar1 == '0' || $gaji->jumlah_bonus_luar1 == '0')
-            <div class="row bonus-field1" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus1" value="{{ $gaji->bonus1 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus1">
-                  </div>
-                  @error('bonus1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus1" value="{{ $gaji->jumlah_bonus1 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar1" value="{{ $gaji->bonus_luar1 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar1">
-                  </div>
-                  @error('bonus_luar1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar1" value="{{ $gaji->jumlah_bonus_luar1 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus1"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus1 !== '0' || $gaji->jumlah_bonus1 !== '0' || $gaji->bonus_luar1 !== '0' || $gaji->jumlah_bonus_luar1 !== '0')
             <div class="row bonus-field1">
               <div class="col-md-3">
                 <div class="form-group">
@@ -1207,74 +1140,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 1 -->
 
             <!-- bonus field 2 -->
-            @if($gaji->bonus2 == null || $gaji->jumlah_bonus2 == null || $gaji->bonus_luar2 == null || $gaji->jumlah_bonus_luar2 == null || $gaji->bonus2 == '0' || $gaji->jumlah_bonus2 == '0' || $gaji->bonus_luar2 == '0' || $gaji->jumlah_bonus_luar2 == '0')
-            <div class="row bonus-field2" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus2" value="{{ $gaji->bonus2 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus2">
-                  </div>
-                  @error('bonus2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus2" value="{{ $gaji->jumlah_bonus2 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar2" value="{{ $gaji->bonus_luar2 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar2">
-                  </div>
-                  @error('bonus_luar2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar2" value="{{ $gaji->jumlah_bonus_luar2 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus2"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus2 !== '0' || $gaji->jumlah_bonus2 !== '0' || $gaji->bonus_luar2 !== '0' || $gaji->jumlah_bonus_luar2 !== '0')
             <div class="row bonus-field2">
               <div class="col-md-3">
                 <div class="form-group">
@@ -1345,74 +1211,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 2 -->
 
             <!-- bonus field 3 -->
-            @if($gaji->bonus3 == null || $gaji->jumlah_bonus3 == null || $gaji->bonus_luar3 == null || $gaji->jumlah_bonus_luar3 == null || $gaji->bonus3 == '0' || $gaji->jumlah_bonus3 == '0' || $gaji->bonus_luar3 == '0' || $gaji->jumlah_bonus_luar3 == '0')
-            <div class="row bonus-field3" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus3" value="{{ $gaji->bonus3 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus3">
-                  </div>
-                  @error('bonus3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus3" value="{{ $gaji->jumlah_bonus3 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar3" value="{{ $gaji->bonus_luar3 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar3">
-                  </div>
-                  @error('bonus_luar3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar3" value="{{ $gaji->jumlah_bonus_luar3 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus3"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus3 !== '0' || $gaji->jumlah_bonus3 !== '0' || $gaji->bonus_luar3 !== '0' || $gaji->jumlah_bonus_luar3 !== '0')
             <div class="row bonus-field3">
               <div class="col-md-3">
                 <div class="form-group">
@@ -1462,7 +1261,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-2">
                 <div class="form-group">
-                  <label>Total Hariv (Luar Kota)</label>
+                  <label>Total Hari (Luar Kota)</label>
                   <input type="text" name="jumlah_bonus_luar3" value="{{ $gaji->jumlah_bonus_luar3 }}" placeholder="Masukkan Total Hari" class="form-control">
                   @error('jumlah_bonus_luar3')
                   <div class="invalid-feedback" style="display: block">
@@ -1483,74 +1282,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 3 -->
 
             <!-- bonus field 4 -->
-            @if($gaji->bonus4 == null || $gaji->jumlah_bonus4 == null || $gaji->bonus_luar4 == null || $gaji->jumlah_bonus_luar4 == null || $gaji->bonus4 == '0' || $gaji->jumlah_bonus4 == '0' || $gaji->bonus_luar4 == '0' || $gaji->jumlah_bonus_luar4 == '0')
-            <div class="row bonus-field4" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus4" value="{{ $gaji->bonus4 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus4">
-                  </div>
-                  @error('bonus4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus4" value="{{ $gaji->jumlah_bonus4 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar4" value="{{ $gaji->bonus_luar4 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar4">
-                  </div>
-                  @error('bonus_luar4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar4" value="{{ $gaji->jumlah_bonus_luar4 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus4"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus4 !== '0' || $gaji->jumlah_bonus4 !== '0' || $gaji->bonus_luar4 !== '0' || $gaji->jumlah_bonus_luar4 !== '0')
             <div class="row bonus-field4">
               <div class="col-md-3">
                 <div class="form-group">
@@ -1621,8 +1353,8 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 4 -->
 
             <!-- bonus field 5 -->
-            @if($gaji->bonus5 == null || $gaji->jumlah_bonus5 == null || $gaji->bonus_luar5 == null || $gaji->jumlah_bonus_luar5 == null || $gaji->bonus5 == '0' || $gaji->jumlah_bonus5 == '0' || $gaji->bonus_luar5 == '0' || $gaji->jumlah_bonus_luar5 == '0')
-            <div class="row bonus-field5" style="display: none;">
+            @if($gaji->bonus5 !== '0' || $gaji->jumlah_bonus5 !== '0' || $gaji->bonus_luar5 !== '0' || $gaji->jumlah_bonus_luar5 !== '0')
+            <div class="row bonus-field5">
               <div class="col-md-3">
                 <div class="form-group">
                   <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1688,145 +1420,11 @@ Update Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
-            @else
-            <div class="row bonus-field5">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus5" value="{{ $gaji->bonus5 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus5">
-                  </div>
-                  @error('bonus5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus5" value="{{ $gaji->jumlah_bonus5 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar5" value="{{ $gaji->bonus_luar5 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar5">
-                  </div>
-                  @error('bonus_luar5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar5" value="{{ $gaji->jumlah_bonus_luar5}}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus5"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
             @endif
             <!-- end bonus field 5 -->
 
             <!-- bonus field 6 -->
-            @if($gaji->bonus6 == null || $gaji->jumlah_bonus6 == null || $gaji->bonus_luar6 == null || $gaji->jumlah_bonus_luar6 == null || $gaji->bonus6 == '0' || $gaji->jumlah_bonus6 == '0' || $gaji->bonus_luar6 == '0' || $gaji->jumlah_bonus_luar6 == '0')
-            <div class="row bonus-field6" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus6" value="{{ $gaji->bonus6 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus6">
-                  </div>
-                  @error('bonus6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus6" value="{{ $gaji->jumlah_bonus6 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar6" value="{{ $gaji->bonus_luar6 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar6">
-                  </div>
-                  @error('bonus_luar6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar6" value="{{ $gaji->jumlah_bonus_luar6 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus6"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus6 !== '0' || $gaji->jumlah_bonus6 !== '0' || $gaji->bonus_luar6 !== '0' || $gaji->jumlah_bonus_luar6 !== '0')
             <div class="row bonus-field6">
               <div class="col-md-3">
                 <div class="form-group">
@@ -1897,74 +1495,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 6 -->
 
             <!-- bonus field 7 -->
-            @if($gaji->bonus7 == null || $gaji->jumlah_bonus7 == null || $gaji->bonus_luar7 == null || $gaji->jumlah_bonus_luar7 == null || $gaji->bonus7 == '0' || $gaji->jumlah_bonus7 == '0' || $gaji->bonus_luar7 == '0' || $gaji->jumlah_bonus_luar7 == '0')
-            <div class="row bonus-field7" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus7" value="{{ $gaji->bonus7 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus7">
-                  </div>
-                  @error('bonus7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus7" value="{{ $gaji->jumlah_bonus7 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar7" value="{{ $gaji->bonus_luar7 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar7">
-                  </div>
-                  @error('bonus_luar7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar7" value="{{ $gaji->jumlah_bonus_luar7 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus7"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus7 !== '0' || $gaji->jumlah_bonus7 !== '0' || $gaji->bonus_luar7 !== '0' || $gaji->jumlah_bonus_luar7 !== '0')
             <div class="row bonus-field7">
               <div class="col-md-3">
                 <div class="form-group">
@@ -2035,74 +1566,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 7 -->
 
             <!-- bonus field 8 -->
-            @if($gaji->bonus8 == null || $gaji->jumlah_bonus8 == null || $gaji->bonus_luar8 == null || $gaji->jumlah_bonus_luar8 == null || $gaji->bonus8 == '0' || $gaji->jumlah_bonus8 == '0' || $gaji->bonus_luar8 == '0' || $gaji->jumlah_bonus_luar8 == '0')
-            <div class="row bonus-field8" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus8" value="{{ $gaji->bonus8 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus8">
-                  </div>
-                  @error('bonus8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus8" value="{{ $gaji->jumlah_bonus8 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar8" value="{{ $gaji->bonus_luar8 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar8">
-                  </div>
-                  @error('bonus_luar8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar8" value="{{ $gaji->jumlah_bonus_luar8 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus8"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus8 !== '0' || $gaji->jumlah_bonus8 !== '0' || $gaji->bonus_luar8 !== '0' || $gaji->jumlah_bonus_luar8 !== '0')
             <div class="row bonus-field8">
               <div class="col-md-3">
                 <div class="form-group">
@@ -2173,74 +1637,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 8 -->
 
             <!-- bonus field 9 -->
-            @if($gaji->bonus9 == null || $gaji->jumlah_bonus9 == null || $gaji->bonus_luar9 == null || $gaji->jumlah_bonus_luar9 == null || $gaji->bonus9 == '0' || $gaji->jumlah_bonus9 == '0' || $gaji->bonus_luar9 == '0' || $gaji->jumlah_bonus_luar9 == '0')
-            <div class="row bonus-field9" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus9" value="{{ $gaji->bonus9 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus9">
-                  </div>
-                  @error('bonus9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus9" value="{{ $gaji->jumlah_bonus9 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar9" value="{{ $gaji->bonus_luar9 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar9">
-                  </div>
-                  @error('bonus_luar9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar9" value="{{ $gaji->jumlah_bonus_luar9 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus9"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus9 !== '0' || $gaji->jumlah_bonus9 !== '0' || $gaji->bonus_luar9 !== '0' || $gaji->jumlah_bonus_luar9 !== '0')
             <div class="row bonus-field9">
               <div class="col-md-3">
                 <div class="form-group">
@@ -2273,7 +1670,7 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-3">
                 <div class="form-group">
-                  <label>BBonus Luar Kota (Per Hari)</label>
+                  <label>Bonus Luar Kota (Per Hari)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
@@ -2311,74 +1708,7 @@ Update Gaji Karyawan | MANAGEMENT
             <!-- end bonus field 9 -->
 
             <!-- bonus field 10 -->
-            @if($gaji->bonus10 == null || $gaji->jumlah_bonus10 == null || $gaji->bonus_luar10 == null || $gaji->jumlah_bonus_luar10 == null || $gaji->bonus10 == '0' || $gaji->jumlah_bonus10 == '0' || $gaji->bonus_luar10 == '0' || $gaji->jumlah_bonus_luar10 == '0')
-            <div class="row bonus-field10" style="display: none;">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Dalam Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus10" value="{{ $gaji->bonus10 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus10">
-                  </div>
-                  @error('bonus10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Dalam Kota)</label>
-                  <input type="text" name="jumlah_bonus10" value="{{ $gaji->jumlah_bonus10 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Luar Kota (Per Hari)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus_luar10" value="{{ $gaji->bonus_luar10 }}" placeholder="Bonus Per Hari" class="form-control currency_bonus_luar10">
-                  </div>
-                  @error('bonus_luar10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>Total Hari (Luar Kota)</label>
-                  <input type="text" name="jumlah_bonus_luar10" value="{{ $gaji->jumlah_bonus_luar10 }}" placeholder="Masukkan Total Hari" class="form-control">
-                  @error('jumlah_bonus_luar10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus10"><i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
+            @if($gaji->bonus10 !== '0' || $gaji->jumlah_bonus10 !== '0' || $gaji->bonus_luar10 !== '0' || $gaji->jumlah_bonus_luar10 !== '0')
             <div class="row bonus-field10">
               <div class="col-md-3">
                 <div class="form-group">
