@@ -150,7 +150,7 @@ Profil | MANAGEMENT
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>NOMOR REKENING</label>
-                    <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                    <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)" required>
                     @error('norek')
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
@@ -285,6 +285,21 @@ Profil | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!--================== format nomor rekening ==================-->
+<script>
+  function formatNoRek(input) {
+    // Menghapus semua karakter non-digit
+    var NoRek = input.value.replace(/\D/g, '');
+
+    // Menggunakan ekspresi reguler untuk memformat nomor telepon
+    NoRek = NoRek.replace(/(\d{4})(\d{2})(\d{6})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5');
+
+    // Mengatur nilai input dengan nomor telepon yang diformat
+    input.value = NoRek;
+  }
+</script>
+<!--================== end ==================-->
 
 <!--================== format telp ==================-->
 <script>

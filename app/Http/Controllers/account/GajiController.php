@@ -56,7 +56,7 @@ class GajiController extends Controller
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(20);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
@@ -64,14 +64,14 @@ class GajiController extends Controller
         ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(20);
     } else {
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(20);
     }
 
     $maintenances = DB::table('maintenance')
@@ -271,6 +271,8 @@ class GajiController extends Controller
     $tunjangan_bpjs = empty($tunjangan_bpjs) ? 0 : str_replace(",", "", $tunjangan_bpjs);
     $tunjangan_thr = $request->input('tunjangan_thr');
     $tunjangan_thr = empty($tunjangan_thr) ? 0 : str_replace(",", "", $tunjangan_thr);
+    $tunjangan_pulsa = $request->input('tunjangan_pulsa');
+    $tunjangan_pulsa = empty($tunjangan_pulsa) ? 0 : str_replace(",", "", $tunjangan_pulsa);
 
     //jumlah lembur
     $jumlah_lembur = $request->input('jumlah_lembur') ?? 0;
@@ -331,7 +333,7 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr - $potongan - $pph;
+    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     //menyinpan image di path
@@ -398,6 +400,7 @@ class GajiController extends Controller
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
+      'tunjangan_pulsa' => $tunjangan_pulsa,
       'jumlah_bonus' => $jumlah_bonus,
       'jumlah_bonus1' => $jumlah_bonus1,
       'jumlah_bonus2' => $jumlah_bonus2,
@@ -597,6 +600,9 @@ class GajiController extends Controller
     $tunjangan_bpjs = empty($tunjangan_bpjs) ? 0 : str_replace(",", "", $tunjangan_bpjs);
     $tunjangan_thr = $request->input('tunjangan_thr');
     $tunjangan_thr = empty($tunjangan_thr) ? 0 : str_replace(",", "", $tunjangan_thr);
+    $tunjangan_pulsa = $request->input('tunjangan_pulsa');
+    $tunjangan_pulsa = empty($tunjangan_pulsa) ? 0 : str_replace(",", "", $tunjangan_pulsa);
+
 
     //jumlah lembur
     $jumlah_lembur = $request->input('jumlah_lembur') ?? 0;
@@ -656,7 +662,7 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr - $potongan - $pph;
+    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     $existingUserId = $gaji->user_id;
@@ -726,6 +732,7 @@ class GajiController extends Controller
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
+      'tunjangan_pulsa' => $tunjangan_pulsa,
       'jumlah_bonus' => $jumlah_bonus,
       'jumlah_bonus1' => $jumlah_bonus1,
       'jumlah_bonus2' => $jumlah_bonus2,
