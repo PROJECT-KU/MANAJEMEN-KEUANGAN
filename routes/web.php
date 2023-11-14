@@ -155,4 +155,6 @@ Route::prefix('account')->group(function () {
     Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
     Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
     Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
+
+    Route::get('/account/presensi/filter-by-company', 'PresensiController@filterByCompany')->name('account.presensi.filter-by-company');
 });

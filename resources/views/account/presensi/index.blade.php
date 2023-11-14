@@ -167,167 +167,368 @@ List Presensi Karyawan | MANAGEMENT
             </form>
           </div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-header">
-        <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
-      </div>
-      <div class="card-header">
-        <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-            @if ($startDate && $endDate)
-            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-            @else
-            {{ date('F Y') }}
-            @endif
-          </strong>
-        </p>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
-                <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
-                <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
-                <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
-              </tr>
-              <tr>
-                <th scope="col" style="text-align: center;">HADIR</th>
-                <th scope="col" style="text-align: center;">PULANG</th>
-              </tr>
-            </thead>
-            <tbody>
-              @php
-              $no = 1;
-              @endphp
-              @foreach ($presensi as $hasil)
-              <tr>
-                <th scope="row" style="text-align: center">{{ $no }}</th>
-                <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                <td class="column-width" style="text-align: center;">
-                  <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
-                  {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
-                </td>
-                <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
-                @if($hasil->time_pulang == null)
-                <td class="column-width" style="text-align: center;"></td>
-                @else
-                <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
-                @endif
-                @if($hasil->time_pulang == null)
-                <td class="column-width" style="text-align: center;"></td>
-                @else
-                <td class="column-width" style="text-align: center;">
-                  <?php
-                  $created_at = strtotime($hasil->created_at);
-                  $time_pulang = strtotime($hasil->time_pulang);
-
-                  // Menghitung selisih waktu dalam detik
-                  $selisih_detik = $time_pulang - $created_at;
-
-                  // Menghitung jumlah jam dan menit
-                  $jam = floor($selisih_detik / 3600);
-                  $menit = floor(($selisih_detik % 3600) / 60);
-
-                  // Menampilkan lama kerja dalam format "jam jam menit menit"
-                  echo sprintf('%02d jam %02d menit', $jam, $menit);
-                  ?>
-                </td>
-                @endif
-                <td class="column-width" style="text-align: center;">
-                  @if ($hasil->status == 'hadir')
-                  <span class="badge badge-success">HADIR</span>
-                  @elseif ($hasil->status == 'remote')
-                  <span class="badge badge-info">REMOTE</span>
-                  @elseif ($hasil->status == 'izin')
-                  <span class="badge badge-warning">IZIN</span>
-                  @elseif ($hasil->status == 'dinas luar kota')
-                  <span class="badge badge-info">DINAS LUAR KOTA</span>
-                  @elseif ($hasil->status == 'lembur')
-                  <span class="badge badge-primary">LEMBUR</span>
-                  @elseif ($hasil->status == 'cuti')
-                  <span class="badge badge-warning">CUTI</span>
-                  @elseif ($hasil->status == 'terlambat')
-                  <span class="badge badge-danger">TERLAMBAT</span>
-                  @elseif ($hasil->status == 'pulang')
-                  <span class="badge badge-danger">PULANG</span>
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
+        </div>
+        <div class="card-header">
+          <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+              @if ($startDate && $endDate)
+              {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+              @else
+              {{ date('F Y') }}
+              @endif
+            </strong>
+          </p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
+                  <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                </tr>
+                <tr>
+                  <th scope="col" style="text-align: center;">HADIR</th>
+                  <th scope="col" style="text-align: center;">PULANG</th>
+                </tr>
+              </thead>
+              <tbody>
+                @php
+                $no = 1;
+                @endphp
+                @foreach ($presensi as $hasil)
+                <tr>
+                  <th scope="row" style="text-align: center">{{ $no }}</th>
+                  <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                  <td class="column-width" style="text-align: center;">
+                    <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
+                    {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
+                  </td>
+                  <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
+                  @if($hasil->time_pulang == null)
+                  <td class="column-width" style="text-align: center;"></td>
+                  @else
+                  <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
                   @endif
-                  <br>
-                  @if ($hasil->status_pulang == 'hadir')
-                  <span class="badge badge-success mt-2">HADIR</span>
-                  @elseif ($hasil->status_pulang == 'remote')
-                  <span class="badge badge-info mt-2">REMOTE</span>
-                  @elseif ($hasil->status_pulang == 'izin')
-                  <span class="badge badge-warning mt-2">IZIN</span>
-                  @elseif ($hasil->status_pulang == 'dinas luar kota')
-                  <span class="badge badge-info mt-2">DINAS LUAR KOTA</span>
-                  @elseif ($hasil->status_pulang == 'lembur')
-                  <span class="badge badge-primary mt-2">LEMBUR</span>
-                  @elseif ($hasil->status_pulang == 'cuti')
-                  <span class="badge badge-warning mt-2">CUTI</span>
-                  @elseif ($hasil->status_pulang == 'terlambat')
-                  <span class="badge badge-danger mt-2">TERLAMBAT</span>
-                  @elseif ($hasil->status_pulang == 'pulang')
-                  <span class="badge badge-danger mt-2">PULANG</span>
+                  @if($hasil->time_pulang == null)
+                  <td class="column-width" style="text-align: center;"></td>
+                  @else
+                  <td class="column-width" style="text-align: center;">
+                    <?php
+                    $created_at = strtotime($hasil->created_at);
+                    $time_pulang = strtotime($hasil->time_pulang);
+
+                    // Menghitung selisih waktu dalam detik
+                    $selisih_detik = $time_pulang - $created_at;
+
+                    // Menghitung jumlah jam dan menit
+                    $jam = floor($selisih_detik / 3600);
+                    $menit = floor(($selisih_detik % 3600) / 60);
+
+                    // Menampilkan lama kerja dalam format "jam jam menit menit"
+                    echo sprintf('%02d jam %02d menit', $jam, $menit);
+                    ?>
+                  </td>
                   @endif
-                </td>
-                <td class="column-width" style="text-align: center;">
-                  <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
-                    <div class="thumbnail-circle">
-                      <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
-                    </div>
-                  </a>
-                </td>
-                <td class="column-width" style="text-align: center;">
-                  <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
-                    Lihat di Google Maps
-                  </a>
-                </td>
-                @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
-                <td class="text-center">
-                  <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                    <i class="fa fa-eye"></i>
-                  </a>
-                </td>
-                @else
-                <td class="text-center">
-                  <!-- <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                  <td class="column-width" style="text-align: center;">
+                    @if ($hasil->status == 'hadir')
+                    <span class="badge badge-success">HADIR</span>
+                    @elseif ($hasil->status == 'remote')
+                    <span class="badge badge-info">REMOTE</span>
+                    @elseif ($hasil->status == 'izin')
+                    <span class="badge badge-warning">IZIN</span>
+                    @elseif ($hasil->status == 'dinas luar kota')
+                    <span class="badge badge-info">DINAS LUAR KOTA</span>
+                    @elseif ($hasil->status == 'lembur')
+                    <span class="badge badge-primary">LEMBUR</span>
+                    @elseif ($hasil->status == 'cuti')
+                    <span class="badge badge-warning">CUTI</span>
+                    @elseif ($hasil->status == 'terlambat')
+                    <span class="badge badge-danger">TERLAMBAT</span>
+                    @elseif ($hasil->status == 'pulang')
+                    <span class="badge badge-danger">PULANG</span>
+                    @endif
+                    <br>
+                    @if ($hasil->status_pulang == 'hadir')
+                    <span class="badge badge-success mt-2">HADIR</span>
+                    @elseif ($hasil->status_pulang == 'remote')
+                    <span class="badge badge-info mt-2">REMOTE</span>
+                    @elseif ($hasil->status_pulang == 'izin')
+                    <span class="badge badge-warning mt-2">IZIN</span>
+                    @elseif ($hasil->status_pulang == 'dinas luar kota')
+                    <span class="badge badge-info mt-2">DINAS LUAR KOTA</span>
+                    @elseif ($hasil->status_pulang == 'lembur')
+                    <span class="badge badge-primary mt-2">LEMBUR</span>
+                    @elseif ($hasil->status_pulang == 'cuti')
+                    <span class="badge badge-warning mt-2">CUTI</span>
+                    @elseif ($hasil->status_pulang == 'terlambat')
+                    <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                    @elseif ($hasil->status_pulang == 'pulang')
+                    <span class="badge badge-danger mt-2">PULANG</span>
+                    @endif
+                  </td>
+                  <td class="column-width" style="text-align: center;">
+                    <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                      <div class="thumbnail-circle">
+                        <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                      </div>
+                    </a>
+                  </td>
+                  <td class="column-width" style="text-align: center;">
+                    <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
+                      Lihat di Google Maps
+                    </a>
+                  </td>
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                  <td class="text-center">
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                  @elseif (Auth::user()->level == 'admin')
+                  <td class="text-center">
+                    <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                      <i class="fa fa-pencil-alt"></i>
+                    </a>
+                    <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+
+                    @php
+                    $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
+                    $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
+                    @endphp
+                    @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="javascript:sendSeninHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
+                      <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
+                      </a>
+                      @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninWarning('{{ $hasil->full_name }}'">
+                        <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
+                        </a>
+                        @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}','{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
+                          <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
+                          </a>
+                          @elseif (in_array($currentDay, [2, 3]))
+                          <a href="javascript:sendSelasaLibur('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                          @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="javascript:sendKamisHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
+                            <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
+                            </a>
+                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisWarning('{{ $hasil->full_name }}'">
+                              <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
+                              </a>
+                              @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisPulang('{{ $hasil->full_name }}'">
+                                <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
+                                </a>
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="javascript:sendJumatHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
+                                  <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
+                                  </a>
+                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatWarning('{{ $hasil->full_name }}'">
+                                    <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
+                                    </a>
+                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatPulang('{{ $hasil->full_name }}'">
+                                      <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
+                                      </a>
+                                      @endif
+
+
+                  </td>
+                  @else
+                  <td class="text-center">
+                    <!-- <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                     <i class="fa fa-pencil-alt"></i>
                   </a> -->
-                  <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                    <i class="fa fa-trash"></i>
-                  </button>
-                  <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                    <i class="fa fa-eye"></i>
-                  </a>
-                </td>
-                @endif
-              </tr>
-              @php
-              $no++;
-              @endphp
-              @endforeach
-            </tbody>
-          </table>
-          <div style="text-align: center">
-            {{$presensi->links("vendor.pagination.bootstrap-4")}}
+                    <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                  @endif
+                </tr>
+                @php
+                $no++;
+                @endphp
+                @endforeach
+              </tbody>
+            </table>
+            <div style="text-align: center">
+              {{$presensi->links("vendor.pagination.bootstrap-4")}}
+            </div>
+
           </div>
 
         </div>
-
       </div>
     </div>
 </div>
-</div>
 </section>
 </div>
+
+<!--================== mengirim pesan ke wa ==================-->
+<script>
+  // SENIN HADIR
+  function sendSeninHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // SENIN WARNING
+  function sendSeninWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 15.00 - 17.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // SENIN PULANG
+  function sendSeninPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}";
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`;
+
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+    } else {
+      alert("Nomor telepon tidak tersedia");
+    }
+  }
+  // END
+
+  // SELASA LIBUR
+  function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // KAMIS HADIR
+  function sendKamisHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // KAMIS WARNING
+  function sendKamisWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // KAMIS PULANG
+  function sendKamisPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU HADIR
+  function sendJumatHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU WARNING
+  function sendJumatWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU PULANG
+  function sendJumatPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+</script>
+<!--================== end ==================-->
 
 <!-- reload data ketika success -->
 <script>
