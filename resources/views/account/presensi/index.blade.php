@@ -210,6 +210,7 @@ List Presensi Karyawan | MANAGEMENT
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                  <td class="column-width" style="text-align: center;" hidden>{{ $hasil->telp }}</td>
                   <td class="column-width" style="text-align: center;">
                     <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
                     {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
@@ -311,17 +312,17 @@ List Presensi Karyawan | MANAGEMENT
                     $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
                     $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
                     @endphp
-                    @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="javascript:sendSeninHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                      @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                        @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                    @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                      @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 15.00 - 17.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                        @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
                           @elseif (in_array($currentDay, [2, 3]))
-                          <a href="javascript:sendSelasaLibur('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                          @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="javascript:sendKamisHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                              @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="javascript:sendJumatHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                          <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{$hasil->full_name}}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                          @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                              @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
                                       @endif
 
 
@@ -406,18 +407,50 @@ List Presensi Karyawan | MANAGEMENT
   // END
 
   // SELASA LIBUR
-  function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
-    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
-    const message = `Hi, ${employeeName}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!`; // The message content
+  // function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
+  //   const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+  //   const message = `Hi, ${employeeName}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!`; // The message content
 
-    // Checking if the phone number exists
-    if (userPhoneNumber) {
-      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
-    } else {
-      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
-    }
+  //   // Checking if the phone number exists
+  //   if (userPhoneNumber) {
+  //     const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+  //     window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+  //   } else {
+  //     alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+  //   }
+  // }
+  function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
+    // Get the user ID from the row data attribute
+    const userId = $('#row-' + {
+      {
+        $hasil - > id
+      }
+    }).data('user-id');
+
+    // Make an AJAX request to fetch the user's phone number
+    $.ajax({
+      url: `/account/get-user-phone/${userId}`,
+      method: 'GET',
+      success: function(response) {
+        const userPhoneNumber = response.phone_number;
+
+        // Now you have the user's phone number, proceed with your existing code
+        const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`;
+
+        // Checking if the phone number exists
+        if (userPhoneNumber) {
+          const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+        } else {
+          alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+        }
+      },
+      error: function(error) {
+        console.error('Error fetching user phone number:', error);
+      }
+    });
   }
+
   // END
 
   // KAMIS HADIR
