@@ -311,35 +311,17 @@ List Presensi Karyawan | MANAGEMENT
                     $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
                     $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
                     @endphp
-                    @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="javascript:sendSeninHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
-                      <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
-                      </a>
-                      @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninWarning('{{ $hasil->full_name }}'">
-                        <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
-                        </a>
-                        @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}','{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
-                          <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
-                          </a>
+                    @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="javascript:sendSeninHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                      @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                        @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendSeninPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
                           @elseif (in_array($currentDay, [2, 3]))
                           <a href="javascript:sendSelasaLibur('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                          @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="javascript:sendKamisHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
-                            <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
-                            </a>
-                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisWarning('{{ $hasil->full_name }}'">
-                              <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
-                              </a>
-                              @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisPulang('{{ $hasil->full_name }}'">
-                                <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
-                                </a>
-                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="javascript:sendJumatHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}'">
-                                  <button class="btn btn-sm btn-success mt-1"><i class="fab fa-whatsapp"></i></button>
-                                  </a>
-                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatWarning('{{ $hasil->full_name }}'">
-                                    <button class="btn btn-sm btn-warning mt-1"><i class="fab fa-whatsapp"></i></button>
-                                    </a>
-                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatPulang('{{ $hasil->full_name }}'">
-                                      <button class="btn btn-sm btn-danger mt-1"><i class="fab fa-whatsapp"></i></button>
-                                      </a>
+                          @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="javascript:sendKamisHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                            @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                              @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendKamisPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="javascript:sendJumatHadir('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                  @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatWarning('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
+                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '22:00:00' )) <a href="javascript:sendJumatPulang('{{ $hasil->full_name }}', '{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}', '{{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}')" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
                                       @endif
 
 
