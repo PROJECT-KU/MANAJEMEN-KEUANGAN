@@ -952,19 +952,14 @@ class GajiController extends Controller
     // Render the PDF
     $dompdf->render();
 
-    // Set the PDF filename
-    $fileName = 'List-Gaji-Karyawan_' . date('d-m-Y') . '.pdf';
+    // Get the output as a string
+    $output = $dompdf->output();
 
-    // Check if the request is from a mobile device
-    $isMobile = $request->isMobile() || $request->is('android') || $request->is('ios');
-
-    // Set appropriate headers
+    // Set the response headers
     $headers = [
       'Content-Type' => 'application/pdf',
-      'Content-Disposition' => $isMobile ? 'attachment; filename="' . $fileName . '"' : 'inline; filename="' . $fileName . '"',
+      'Content-Disposition' => 'inline; filename="List-Gaji-Karyawan_' . date('d-m-Y') . '.pdf"',
     ];
-
-    // Output the generated PDF to the browser
     return Response::make($dompdf->output(), 200, $headers);
   }
 
