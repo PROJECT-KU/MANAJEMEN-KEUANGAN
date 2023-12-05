@@ -114,7 +114,7 @@ class PresensiController extends Controller
       $request,
       [
         'status' => 'required',
-        'gambar' => 'required|max:5120',
+        'gambar' => 'max:5120',
       ],
       [
         'status.required' => 'Masukkan Status Presensi Karyawan!',
