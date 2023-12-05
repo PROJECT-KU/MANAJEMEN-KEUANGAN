@@ -82,7 +82,7 @@ Update Presensi Karyawan | MANAGEMENT
       <div class="col-md-6">
         <div class="form-group">
           <label>Status Presensi Pulang</label>
-          <select class="form-control" name="status_pulang" id="status_pulang">
+          <select class="form-control" name="status_pulang" id="status_pulang" required>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
           </select>
@@ -149,7 +149,7 @@ Update Presensi Karyawan | MANAGEMENT
       <div class="col-md-6">
         <div class="form-group">
           <label>Status Presensi Pulang</label>
-          <select class="form-control" name="status_pulang" id="status_pulang">
+          <select class="form-control" name="status_pulang" id="status_pulang" required>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
           </select>
@@ -158,11 +158,12 @@ Update Presensi Karyawan | MANAGEMENT
     </div>
     @endif
 
-    <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Bukti Presensi Masuk</label>
-          <!-- <div class="input-group">
+    <div id="image-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Bukti Presensi Masuk</label>
+            <!-- <div class="input-group">
             <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
           </div>
           @error('gambar')
@@ -170,68 +171,71 @@ Update Presensi Karyawan | MANAGEMENT
             {{ $message }}
           </div>
           @enderror -->
-          <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-            <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
-              <div class="cardgambar" style="width: 200px;">
-                <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
-              </div>
-            </a>
+            <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+              <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
+                <div class="cardgambar" style="width: 200px;">
+                  <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+                </div>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-      @if ($presensi->gambar_pulang == null)
-      <div class="col-md-6">
-        <div class="form-group">
-          <label for="gambar_pulang">Bukti Presensi</label>
-          <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control custom-file-upload" accept="image/*" capture="camera" required>
-        </div>
-        @error('gambar_pulang')
-        <div class="invalid-feedback" style="display: block">
-          {{ $message }}
-        </div>
-        @enderror
-        <div class="mb-3">
-          <div class="cardgambar_pulang" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-            <img id="image-preview-pulang" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: 200px; height: 200px;">
-          </div>
-        </div>
-      </div>
-      @else
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Bukti Presensi Pulang</label>
-          <div class="input-group">
-            <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control" accept="image/*" capture="camera" disabled>
+        @if ($presensi->gambar_pulang == null)
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="gambar_pulang">Bukti Presensi</label>
+            <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control custom-file-upload" accept="image/*" capture="camera">
           </div>
           @error('gambar_pulang')
           <div class="invalid-feedback" style="display: block">
             {{ $message }}
           </div>
           @enderror
-        </div>
-        <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-          <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
-            <div class="cardgambar" style="width: 200px;">
-              <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+          <div class="mb-3">
+            <div class="cardgambar_pulang" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+              <img id="image-preview-pulang" class="card-img-top" src="#" alt="Preview Image" style="display: none; width: 200px; height: 200px;">
             </div>
-          </a>
+          </div>
         </div>
+        @else
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Bukti Presensi Pulang</label>
+            <div class="input-group">
+              <input type="file" name="gambar_pulang" id="gambar_pulang" class="form-control" accept="image/*" capture="camera" disabled>
+            </div>
+            @error('gambar_pulang')
+            <div class="invalid-feedback" style="display: block">
+              {{ $message }}
+            </div>
+            @enderror
+          </div>
+          <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+            <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
+              <div class="cardgambar" style="width: 200px;">
+                <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Preview Image">
+              </div>
+            </a>
+          </div>
+        </div>
+        @endif
       </div>
-      @endif
     </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group">
-          <label>Catatan</label>
-          <div class="input-group">
-            <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
+    <div id="catatan-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label>Catatan</label>
+            <div class="input-group">
+              <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control">{{ $presensi->note }}</textarea>
+            </div>
+            @error('note')
+            <div class="invalid-feedback" style="display: block">
+              {{ $message }}
+            </div>
+            @enderror
           </div>
-          @error('note')
-          <div class="invalid-feedback" style="display: block">
-            {{ $message }}
-          </div>
-          @enderror
         </div>
       </div>
     </div>
@@ -254,6 +258,33 @@ Update Presensi Karyawan | MANAGEMENT
 </div>
 </section>
 </div>
+
+<!--================== jika status remote atau izin wajib upload image ==================-->
+<script>
+  // Function to toggle visibility of catatan and gambar based on selected status
+  function toggleSections() {
+    var statusSelect = document.getElementById('status');
+    var catatanSection = document.getElementById('catatan-section');
+    var imageSection = document.getElementById('image-section');
+    var GambarUpload = document.getElementById('gambar_pulang');
+
+    if (statusSelect.value === 'remote' || statusSelect.value === 'izin') {
+      catatanSection.style.display = 'block';
+      imageSection.style.display = 'block';
+      GambarUpload.setAttribute('required', 'required');
+    } else {
+      catatanSection.style.display = 'none';
+      imageSection.style.display = 'none';
+    }
+  }
+
+  // Call the function initially
+  toggleSections();
+
+  // Add an event listener to the status dropdown
+  document.getElementById('status').addEventListener('change', toggleSections);
+</script>
+<!--================== end ==================-->
 
 <!--================== maksimal upload gambar & jenis file yang di perbolehkan ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -387,7 +418,7 @@ Update Presensi Karyawan | MANAGEMENT
     timeoutHandler = setTimeout(function() {
       $(".btn-submit").removeClass('btn-progress');
 
-    }, 1000);
+    }, 10);
   });
 
   /**
