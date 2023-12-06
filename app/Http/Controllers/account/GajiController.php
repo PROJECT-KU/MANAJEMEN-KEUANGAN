@@ -62,7 +62,7 @@ class GajiController extends Controller
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        // ->whereBetween('gaji.tanggal', [$startDate, $endDate])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     }

@@ -53,6 +53,8 @@ List Gaji Karyawan | MANAGEMENT
         @endif
         <!-- end -->
 
+        @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+        @else
         <div class="card">
           <div class="card-header  text-right">
             <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
@@ -68,12 +70,9 @@ List Gaji Karyawan | MANAGEMENT
             <form action="{{ route('account.gaji.search') }}" method="GET">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
-                  @else
                   <div class="input-group-prepend">
                     <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                   </div>
-                  @endif
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
@@ -123,6 +122,7 @@ List Gaji Karyawan | MANAGEMENT
           </form>
         </div>
     </div>
+    @endif
 
     <div class="card">
       <div class="card-header">
