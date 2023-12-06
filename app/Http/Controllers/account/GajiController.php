@@ -57,14 +57,21 @@ class GajiController extends Controller
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(20);
-    } else {
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)
-        // ->whereBetween('gaji.tanggal', [$startDate, $endDate])
+        ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(20);
+    } else {
+      $gaji = Gaji::select('gaji.*', 'users.name as full_name')
+        ->join('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        ->orderBy('gaji.created_at', 'DESC')
+        ->paginate(20);
     }
 
     $maintenances = DB::table('maintenance')
