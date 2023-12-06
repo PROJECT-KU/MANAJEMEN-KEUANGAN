@@ -58,92 +58,6 @@ List Presensi Karyawan | MANAGEMENT
           @endforeach
           <!-- end -->
 
-          <!--================== filter ==================-->
-          <div class="card">
-            <div class="card-header  text-right">
-              <h4><i class="fas fa-filter"></i> FILTER PRESENSI KARYAWAN</h4>
-            </div>
-
-            <div class="card-body">
-              <!-- <form action="{{ route('account.presensi.search') }}" method="GET">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
-                    @php
-                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                    ->whereDate('created_at', now()->toDateString())
-                    ->first();
-                    @endphp
-                    <td class="text-center">
-                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
-                        <i class="fa fa-pencil-alt"></i> PULANG
-                      </a>
-                      @elseif (!$todayPresensi)
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                        <i class="fa fa-plus-circle"></i> MASUK
-                      </a>
-                      @else
-                      @endif
-                    </td>
-                    @endif
-
-                    @if (Auth::user()->level == 'manager')
-                    <div class="input-group-prepend">
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                    </div>
-                    @endif
-                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                    <div class="input-group-append">
-                      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                      </button>
-                    </div>
-                    @if(request()->has('q'))
-                    <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
-                      <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                    </a>
-                    @endif
-                  </div>
-                </div>
-              </form> -->
-
-              <form action="{{ route('account.presensi.index') }}" method="GET">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TANGGAL AWAL</label>
-                      <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
-                    </div>
-                  </div>
-                  <div class="col-md-2" style="text-align: center">
-                    <label style="margin-top: 38px;">S/D</label>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TANGGAL AKHIR</label>
-                      <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                    <div class="btn-group" style="width: 100%;">
-                      <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                      <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                        <i class="fa fa-times-circle mt-2"></i> HAPUS
-                      </a>
-                    </div>
-                    @else
-                    <button class="btn btn-primary mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                    @endif
-                  </div>
-
-                </div>
-              </form>
-            </div>
-          </div>
-          <!--================== end ==================-->
-
-
           <!--================== presensi ==================-->
           <div class="card">
             <div class="card-header  text-right">
@@ -250,6 +164,92 @@ List Presensi Karyawan | MANAGEMENT
           </div>
           <!--================== end ==================-->
 
+          <!--================== filter ==================-->
+          <div class="card">
+            <div class="card-header  text-right">
+              <h4><i class="fas fa-filter"></i> FILTER PRESENSI KARYAWAN</h4>
+            </div>
+
+            <div class="card-body">
+              <!-- <form action="{{ route('account.presensi.search') }}" method="GET">
+                <div class="form-group">
+                  <div class="input-group mb-3">
+                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                    @php
+                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                    ->whereDate('created_at', now()->toDateString())
+                    ->first();
+                    @endphp
+                    <td class="text-center">
+                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
+                        <i class="fa fa-pencil-alt"></i> PULANG
+                      </a>
+                      @elseif (!$todayPresensi)
+                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                        <i class="fa fa-plus-circle"></i> MASUK
+                      </a>
+                      @else
+                      @endif
+                    </td>
+                    @endif
+
+                    @if (Auth::user()->level == 'manager')
+                    <div class="input-group-prepend">
+                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                    </div>
+                    @endif
+                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
+                      </button>
+                    </div>
+                    @if(request()->has('q'))
+                    <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
+                      <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                    </a>
+                    @endif
+                  </div>
+                </div>
+              </form> -->
+
+              <form action="{{ route('account.presensi.index') }}" method="GET">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TANGGAL AWAL</label>
+                      <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                    </div>
+                  </div>
+                  <div class="col-md-2" style="text-align: center">
+                    <label style="margin-top: 38px;">S/D</label>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TANGGAL AKHIR</label>
+                      <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                    <div class="btn-group" style="width: 100%;">
+                      <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                      <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                        <i class="fa fa-times-circle mt-2"></i> HAPUS
+                      </a>
+                    </div>
+                    @else
+                    <button class="btn btn-primary mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    @endif
+                  </div>
+
+                </div>
+              </form>
+            </div>
+          </div>
+          <!--================== end ==================-->
+
+          <!--================== content ==================-->
           <div class="card">
             <div class="card-header">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
@@ -435,6 +435,9 @@ List Presensi Karyawan | MANAGEMENT
 
             </div>
           </div>
+          <!--================== end ==================-->
+
+
       </div>
     </div>
   </section>
