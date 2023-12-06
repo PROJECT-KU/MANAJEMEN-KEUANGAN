@@ -816,71 +816,36 @@ class GajiController extends Controller
 
   public function downloadPdf(Request $request)
   {
-    // $user = Auth::user();
-    // $startDate = $request->input('tanggal_awal');
-    // $endDate = $request->input('tanggal_akhir');
-
-    // if (!$startDate || !$endDate) {
-    //   // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
-    //   $currentMonth = date('Y-m-01 00:00:00');
-    //   $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
-    // } else {
-    //   // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
-    //   $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-    //   $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
-    // }
-
-    // if ($user->level == 'manager' || $user->level == 'staff') {
-    //   $gaji = DB::table('gaji')
-    //     ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-    //     ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-    //     ->where('users.company', $user->company)
-    //     ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-    //     ->orderBy('gaji.created_at', 'DESC')
-    //     ->get();
-    // } else {
-    //   $gaji = DB::table('gaji')
-    //     ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-    //     ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-    //     ->where('gaji.user_id', $user->id)
-    //     ->orderBy('gaji.created_at', 'DESC')
-    //     ->get();
-    // }
-
     $user = Auth::user();
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
-    // Parse date inputs
     if (!$startDate || !$endDate) {
-      $currentMonth = now()->startOfMonth();
-      $nextMonth = now()->addMonth()->startOfMonth();
+      // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
     } else {
-      $currentMonth = now()->parse($startDate)->startOfDay();
-      $nextMonth = now()->parse($endDate)->addDay()->startOfDay();
+      // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    // Create a query builder instance for gaji
-    $query = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
-
-    // Check user level
-    if (!in_array($user->level, ['manager', 'staff'])) {
-      // If user is not manager or staff, show all data and allow filtering by start and end date
-      if ($startDate && $endDate) {
-        $query->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
-      }
+    if ($user->level == 'manager' || $user->level == 'staff') {
+      $gaji = DB::table('gaji')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
     } else {
-      // If user is manager or staff, filter by company and date range
-      $query->where('users.company', $user->company)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
+      $gaji = DB::table('gaji')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
     }
-
-    // Finalize the query by ordering and paginating the results
-    $gaji = $query
-      ->orderBy('gaji.created_at', 'DESC')
-      ->get();
 
     // Additional data retrieval for 'maintenance'
     $maintenances = DB::table('maintenance')
