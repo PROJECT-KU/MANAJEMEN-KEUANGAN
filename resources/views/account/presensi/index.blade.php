@@ -58,6 +58,112 @@ List Presensi Karyawan | MANAGEMENT
           @endforeach
           <!-- end -->
 
+          <!--================== presensi ==================-->
+          <div class="card">
+            <div class="card-header  text-right">
+              <h4><i class="fas fa-user-clock"></i> PRESENSI KARYAWAN</h4>
+            </div>
+
+            <div class="card-body">
+              <div class="form-group">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+
+                  </div>
+                </div>
+                @php
+                $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->first();
+                @endphp
+
+                @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                @php
+                // Check if there are items in the paginator
+                if ($presensi->count() > 0) {
+                // Access the first item in the paginator
+                $firstItem = $presensi->first();
+                // Convert created_at to Carbon instance
+                $createdAt = \Carbon\Carbon::parse($firstItem->created_at);
+                // Check if created_at is today
+                $isToday = $createdAt->isToday();
+                } else {
+                // Handle the case where there are no items in the paginator
+                $isToday = false;
+                }
+                @endphp
+
+                @if($isToday)
+                <div class="d-flex align-items-center">
+                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
+                  <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
+                    Masuk Pukul {{ $createdAt->format('H:i') }}
+                  </span>
+                </div>
+                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
+                @else
+                {{-- Handle case where created_at is not today --}}
+                @endif
+
+                @elseif (!$todayPresensi)
+                <div class="d-flex align-items-center">
+                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
+                  <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
+                    Anda Belum Melakukan Presensi Masuk Pada Hari Ini!
+                  </span>
+                </div>
+                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
+                @else
+                <div class="d-flex align-items-center">
+                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
+                  <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                    Selesai Bekerja!
+                  </span>
+                </div>
+                @endif
+              </div>
+            </div>
+
+            <div class="card-body">
+              <form action="{{ route('account.presensi.search') }}" method="GET">
+                <div class="form-group">
+                  <div class="input-group mb-3">
+                    @php
+                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                    ->whereDate('created_at', now()->toDateString())
+                    ->first();
+                    @endphp
+                    <td class="text-center">
+                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        MASUK
+                      </button>
+                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                        PULANG
+                      </a>
+                      @elseif (!$todayPresensi)
+                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                        MASUK
+                      </a>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        PULANG
+                      </button>
+                      @else
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        MASUK
+                      </button>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        PULANG
+                      </button>
+                      @endif
+                    </td>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!--================== end ==================-->
+
           <!--================== filter ==================-->
           <div class="card">
             <div class="card-header  text-right">
@@ -143,113 +249,7 @@ List Presensi Karyawan | MANAGEMENT
           </div>
           <!--================== end ==================-->
 
-
-          <!--================== presensi ==================-->
-          <div class="card">
-            <div class="card-header  text-right">
-              <h4><i class="fas fa-user-clock"></i> PRESENSI KARYAWAN</h4>
-            </div>
-
-            <div class="card-body">
-              <div class="form-group">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-
-                  </div>
-                </div>
-                @php
-                $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                ->whereDate('created_at', now()->toDateString())
-                ->first();
-                @endphp
-
-                @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                @php
-                // Check if there are items in the paginator
-                if ($presensi->count() > 0) {
-                // Access the first item in the paginator
-                $firstItem = $presensi->first();
-                // Convert created_at to Carbon instance
-                $createdAt = \Carbon\Carbon::parse($firstItem->created_at);
-                // Check if created_at is today
-                $isToday = $createdAt->isToday();
-                } else {
-                // Handle the case where there are no items in the paginator
-                $isToday = false;
-                }
-                @endphp
-
-                @if($isToday)
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                    Masuk Pukul {{ $createdAt->format('H:i') }}
-                  </span>
-                </div>
-                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
-                @else
-                {{-- Handle case where created_at is not today --}}
-                @endif
-
-                @elseif (!$todayPresensi)
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                    Anda Belum Melakukan Presensi Masuk Pada Hari Ini!
-                  </span>
-                </div>
-                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
-                @else
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                    Selesai Bekerja!
-                  </span>
-                </div>
-                @endif
-              </div>
-            </div>
-
-            <div class="card-body">
-              <form action="{{ route('account.presensi.search') }}" method="GET">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    @php
-                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                    ->whereDate('created_at', now()->toDateString())
-                    ->first();
-                    @endphp
-                    <td class="text-center">
-                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        MASUK
-                      </button>
-                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                        PULANG
-                      </a>
-                      @elseif (!$todayPresensi)
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                        MASUK
-                      </a>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        PULANG
-                      </button>
-                      @else
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        MASUK
-                      </button>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        PULANG
-                      </button>
-                      @endif
-                    </td>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-          <!--================== end ==================-->
-
+          <!--================== content ==================-->
           <div class="card">
             <div class="card-header">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
@@ -326,12 +326,16 @@ List Presensi Karyawan | MANAGEMENT
                       <td class="column-width" style="text-align: center;">
                         @if ($hasil->status == 'hadir')
                         <span class="badge badge-success">HADIR</span>
+                        @elseif ($hasil->status == 'camp jogja')
+                        <span class="badge badge-success">CAMP JOGJA</span>
+                        @elseif ($hasil->status == 'perjalanan luar kota')
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA</span>
+                        @elseif ($hasil->status == 'camp luar kota')
+                        <span class="badge badge-success">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status == 'remote')
                         <span class="badge badge-info">REMOTE</span>
                         @elseif ($hasil->status == 'izin')
                         <span class="badge badge-warning">IZIN</span>
-                        @elseif ($hasil->status == 'dinas luar kota')
-                        <span class="badge badge-info">DINAS LUAR KOTA</span>
                         @elseif ($hasil->status == 'lembur')
                         <span class="badge badge-primary">LEMBUR</span>
                         @elseif ($hasil->status == 'cuti')
@@ -435,6 +439,9 @@ List Presensi Karyawan | MANAGEMENT
 
             </div>
           </div>
+          <!--================== end ==================-->
+
+
       </div>
     </div>
   </section>

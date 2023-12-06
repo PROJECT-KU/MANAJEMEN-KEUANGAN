@@ -35,45 +35,85 @@ class GajiController extends Controller
     return $id;
   }
 
+  // public function index(Request $request)
+  // {
+  //   $user = Auth::user();
+  //   $startDate = $request->input('tanggal_awal');
+  //   $endDate = $request->input('tanggal_akhir');
+
+  //   if (!$startDate || !$endDate) {
+  //     $currentMonth = date('Y-m-01 00:00:00');
+  //     $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+  //   } else {
+  //     $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+  //     $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+  //   }
+
+  //   if ($user->level == 'manager' || $user->level == 'staff') {
+  //     $gaji = DB::table('gaji')
+  //       ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+  //       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+  //       ->where('users.company', $user->company)
+  //       ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+  //       ->orderBy('gaji.created_at', 'DESC')
+  //       ->paginate(20);
+  //   } else {
+  //     $gaji = DB::table('gaji')
+  //       ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+  //       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+  //       ->where('gaji.user_id', $user->id)
+  //       ->orderBy('gaji.created_at', 'DESC')
+  //       ->paginate(10);
+  //   }
+
+  //   $maintenances = DB::table('maintenance')
+  //     ->orderBy('created_at', 'DESC')
+  //     ->get();
+
+  //   // Calculate total gaji
+  //   $totalGaji = $gaji->sum('total');
+
+  //   return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
+  // }
+
   public function index(Request $request)
   {
     $user = Auth::user();
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
+    // Parse date inputs
     if (!$startDate || !$endDate) {
-      $currentMonth = date('Y-m-01 00:00:00');
-      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+      $currentMonth = now()->startOfMonth();
+      $nextMonth = now()->addMonth()->startOfMonth();
     } else {
-      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+      $currentMonth = now()->parse($startDate)->startOfDay();
+      $nextMonth = now()->parse($endDate)->addDay()->startOfDay();
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(20);
-    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
-      $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(20);
+    // Create a query builder instance for gaji
+    $query = DB::table('gaji')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
+
+    // Check user level
+    if (!in_array($user->level, ['manager', 'staff'])) {
+      // If user is not manager or staff, show all data and allow filtering by start and end date
+      if ($startDate && $endDate) {
+        $query->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
+      }
     } else {
-      $gaji = Gaji::select('gaji.*', 'users.name as full_name')
-        ->join('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->paginate(20);
+      // If user is manager or staff, filter by company and date range
+      $query->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
     }
 
+    // Finalize the query by ordering and paginating the results
+    $gaji = $query
+      ->orderBy('gaji.created_at', 'DESC')
+      ->paginate(10);
+
+    // Additional data retrieval for 'maintenance'
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
       ->get();
@@ -83,6 +123,7 @@ class GajiController extends Controller
 
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
   }
+
 
   public function search(Request $request)
   {
@@ -196,72 +237,72 @@ class GajiController extends Controller
 
     //fee bonus dalam kota
     $bonus = $request->input('bonus');
-    $bonus = empty($bonus) ? 0 : str_replace(",", "", $bonus);
+    $bonus = empty($bonus) ? null : str_replace(",", "", $bonus);
 
     $bonus1 = $request->input('bonus1');
-    $bonus1 = empty($bonus1) ? 0 : str_replace(",", "", $bonus1);
+    $bonus1 = empty($bonus1) ? null : str_replace(",", "", $bonus1);
 
     $bonus2 = $request->input('bonus2');
-    $bonus2 = empty($bonus2) ? 0 : str_replace(",", "", $bonus2);
+    $bonus2 = empty($bonus2) ? null : str_replace(",", "", $bonus2);
 
     $bonus3 = $request->input('bonus3');
-    $bonus3 = empty($bonus3) ? 0 : str_replace(",", "", $bonus3);
+    $bonus3 = empty($bonus3) ? null : str_replace(",", "", $bonus3);
 
     $bonus4 = $request->input('bonus4');
-    $bonus4 = empty($bonus4) ? 0 : str_replace(",", "", $bonus4);
+    $bonus4 = empty($bonus4) ? null : str_replace(",", "", $bonus4);
 
     $bonus5 = $request->input('bonus5');
-    $bonus5 = empty($bonus5) ? 0 : str_replace(",", "", $bonus5);
+    $bonus5 = empty($bonus5) ? null : str_replace(",", "", $bonus5);
 
     $bonus6 = $request->input('bonus6');
-    $bonus6 = empty($bonus6) ? 0 : str_replace(",", "", $bonus6);
+    $bonus6 = empty($bonus6) ? null : str_replace(",", "", $bonus6);
 
     $bonus7 = $request->input('bonus7');
-    $bonus7 = empty($bonus7) ? 0 : str_replace(",", "", $bonus7);
+    $bonus7 = empty($bonus7) ? null : str_replace(",", "", $bonus7);
 
     $bonus8 = $request->input('bonus8');
-    $bonus8 = empty($bonus8) ? 0 : str_replace(",", "", $bonus8);
+    $bonus8 = empty($bonus8) ? null : str_replace(",", "", $bonus8);
 
     $bonus9 = $request->input('bonus9');
-    $bonus9 = empty($bonus9) ? 0 : str_replace(",", "", $bonus9);
+    $bonus9 = empty($bonus9) ? null : str_replace(",", "", $bonus9);
 
     $bonus10 = $request->input('bonus10');
-    $bonus10 = empty($bonus10) ? 0 : str_replace(",", "", $bonus10);
+    $bonus10 = empty($bonus10) ? null : str_replace(",", "", $bonus10);
     //end fee bonus dalam kota
 
     //fee bonus luar kota
     $bonus_luar = $request->input('bonus_luar');
-    $bonus_luar = empty($bonus_luar) ? 0 : str_replace(",", "", $bonus_luar);
+    $bonus_luar = empty($bonus_luar) ? null : str_replace(",", "", $bonus_luar);
 
     $bonus_luar1 = $request->input('bonus_luar1');
-    $bonus_luar1 = empty($bonus_luar1) ? 0 : str_replace(",", "", $bonus_luar1);
+    $bonus_luar1 = empty($bonus_luar1) ? null : str_replace(",", "", $bonus_luar1);
 
     $bonus_luar2 = $request->input('bonus_luar2');
-    $bonus_luar2 = empty($bonus_luar2) ? 0 : str_replace(",", "", $bonus_luar2);
+    $bonus_luar2 = empty($bonus_luar2) ? null : str_replace(",", "", $bonus_luar2);
 
     $bonus_luar3 = $request->input('bonus_luar3');
-    $bonus_luar3 = empty($bonus_luar3) ? 0 : str_replace(",", "", $bonus_luar3);
+    $bonus_luar3 = empty($bonus_luar3) ? null : str_replace(",", "", $bonus_luar3);
 
     $bonus_luar4 = $request->input('bonus_luar4');
-    $bonus_luar4 = empty($bonus_luar4) ? 0 : str_replace(",", "", $bonus_luar4);
+    $bonus_luar4 = empty($bonus_luar4) ? null : str_replace(",", "", $bonus_luar4);
 
     $bonus_luar5 = $request->input('bonus_luar5');
-    $bonus_luar5 = empty($bonus_luar5) ? 0 : str_replace(",", "", $bonus_luar5);
+    $bonus_luar5 = empty($bonus_luar5) ? null : str_replace(",", "", $bonus_luar5);
 
     $bonus_luar6 = $request->input('bonus_luar6');
-    $bonus_luar6 = empty($bonus_luar6) ? 0 : str_replace(",", "", $bonus_luar6);
+    $bonus_luar6 = empty($bonus_luar6) ? null : str_replace(",", "", $bonus_luar6);
 
     $bonus_luar7 = $request->input('bonus_luar7');
-    $bonus_luar7 = empty($bonus_luar7) ? 0 : str_replace(",", "", $bonus_luar7);
+    $bonus_luar7 = empty($bonus_luar7) ? null : str_replace(",", "", $bonus_luar7);
 
     $bonus_luar8 = $request->input('bonus_luar8');
-    $bonus_luar8 = empty($bonus_luar8) ? 0 : str_replace(",", "", $bonus_luar8);
+    $bonus_luar8 = empty($bonus_luar8) ? null : str_replace(",", "", $bonus_luar8);
 
     $bonus_luar9 = $request->input('bonus_luar9');
-    $bonus_luar9 = empty($bonus_luar9) ? 0 : str_replace(",", "", $bonus_luar9);
+    $bonus_luar9 = empty($bonus_luar9) ? null : str_replace(",", "", $bonus_luar9);
 
     $bonus_luar10 = $request->input('bonus_luar10');
-    $bonus_luar10 = empty($bonus_luar10) ? 0 : str_replace(",", "", $bonus_luar10);
+    $bonus_luar10 = empty($bonus_luar10) ? null : str_replace(",", "", $bonus_luar10);
     //end fee bonus luar kota
 
     $operasional = $request->input('operasional');
@@ -291,31 +332,31 @@ class GajiController extends Controller
     //end jumlah lembur
 
     //jumlah bonus dalam kota
-    $jumlah_bonus = $request->input('jumlah_bonus') ?? 0;
-    $jumlah_bonus1 = $request->input('jumlah_bonus1') ?? 0;
-    $jumlah_bonus2 = $request->input('jumlah_bonus2') ?? 0;
-    $jumlah_bonus3 = $request->input('jumlah_bonus3') ?? 0;
-    $jumlah_bonus4 = $request->input('jumlah_bonus4') ?? 0;
-    $jumlah_bonus5 = $request->input('jumlah_bonus5') ?? 0;
-    $jumlah_bonus6 = $request->input('jumlah_bonus6') ?? 0;
-    $jumlah_bonus7 = $request->input('jumlah_bonus7') ?? 0;
-    $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? 0;
-    $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? 0;
-    $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? 0;
+    $jumlah_bonus = $request->input('jumlah_bonus') ?? null;
+    $jumlah_bonus1 = $request->input('jumlah_bonus1') ?? null;
+    $jumlah_bonus2 = $request->input('jumlah_bonus2') ?? null;
+    $jumlah_bonus3 = $request->input('jumlah_bonus3') ?? null;
+    $jumlah_bonus4 = $request->input('jumlah_bonus4') ?? null;
+    $jumlah_bonus5 = $request->input('jumlah_bonus5') ?? null;
+    $jumlah_bonus6 = $request->input('jumlah_bonus6') ?? null;
+    $jumlah_bonus7 = $request->input('jumlah_bonus7') ?? null;
+    $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? null;
+    $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? null;
+    $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? null;
     //end jumlah bonus dalam kota
 
     //jumlah bonus luar kota
-    $jumlah_bonus_luar = $request->input('jumlah_bonus_luar') ?? 0;
-    $jumlah_bonus_luar1 = $request->input('jumlah_bonus_luar1') ?? 0;
-    $jumlah_bonus_luar2 = $request->input('jumlah_bonus_luar2') ?? 0;
-    $jumlah_bonus_luar3 = $request->input('jumlah_bonus_luar3') ?? 0;
-    $jumlah_bonus_luar4 = $request->input('jumlah_bonus_luar4') ?? 0;
-    $jumlah_bonus_luar5 = $request->input('jumlah_bonus_luar5') ?? 0;
-    $jumlah_bonus_luar6 = $request->input('jumlah_bonus_luar6') ?? 0;
-    $jumlah_bonus_luar7 = $request->input('jumlah_bonus_luar7') ?? 0;
-    $jumlah_bonus_luar8 = $request->input('jumlah_bonus_luar8') ?? 0;
-    $jumlah_bonus_luar9 = $request->input('jumlah_bonus_luar9') ?? 0;
-    $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? 0;
+    $jumlah_bonus_luar = $request->input('jumlah_bonus_luar') ?? null;
+    $jumlah_bonus_luar1 = $request->input('jumlah_bonus_luar1') ?? null;
+    $jumlah_bonus_luar2 = $request->input('jumlah_bonus_luar2') ?? null;
+    $jumlah_bonus_luar3 = $request->input('jumlah_bonus_luar3') ?? null;
+    $jumlah_bonus_luar4 = $request->input('jumlah_bonus_luar4') ?? null;
+    $jumlah_bonus_luar5 = $request->input('jumlah_bonus_luar5') ?? null;
+    $jumlah_bonus_luar6 = $request->input('jumlah_bonus_luar6') ?? null;
+    $jumlah_bonus_luar7 = $request->input('jumlah_bonus_luar7') ?? null;
+    $jumlah_bonus_luar8 = $request->input('jumlah_bonus_luar8') ?? null;
+    $jumlah_bonus_luar9 = $request->input('jumlah_bonus_luar9') ?? null;
+    $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? null;
     //end jumlah bonus luar kota
 
     $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) +
@@ -525,72 +566,72 @@ class GajiController extends Controller
 
     //fee bonus dalam kota
     $bonus = $request->input('bonus');
-    $bonus = empty($bonus) ? 0 : str_replace(",", "", $bonus);
+    $bonus = empty($bonus) ? null : str_replace(",", "", $bonus);
 
     $bonus1 = $request->input('bonus1');
-    $bonus1 = empty($bonus1) ? 0 : str_replace(",", "", $bonus1);
+    $bonus1 = empty($bonus1) ? null : str_replace(",", "", $bonus1);
 
     $bonus2 = $request->input('bonus2');
-    $bonus2 = empty($bonus2) ? 0 : str_replace(",", "", $bonus2);
+    $bonus2 = empty($bonus2) ? null : str_replace(",", "", $bonus2);
 
     $bonus3 = $request->input('bonus3');
-    $bonus3 = empty($bonus3) ? 0 : str_replace(",", "", $bonus3);
+    $bonus3 = empty($bonus3) ? null : str_replace(",", "", $bonus3);
 
     $bonus4 = $request->input('bonus4');
-    $bonus4 = empty($bonus4) ? 0 : str_replace(",", "", $bonus4);
+    $bonus4 = empty($bonus4) ? null : str_replace(",", "", $bonus4);
 
     $bonus5 = $request->input('bonus5');
-    $bonus5 = empty($bonus5) ? 0 : str_replace(",", "", $bonus5);
+    $bonus5 = empty($bonus5) ? null : str_replace(",", "", $bonus5);
 
     $bonus6 = $request->input('bonus6');
-    $bonus6 = empty($bonus6) ? 0 : str_replace(",", "", $bonus6);
+    $bonus6 = empty($bonus6) ? null : str_replace(",", "", $bonus6);
 
     $bonus7 = $request->input('bonus7');
-    $bonus7 = empty($bonus7) ? 0 : str_replace(",", "", $bonus7);
+    $bonus7 = empty($bonus7) ? null : str_replace(",", "", $bonus7);
 
     $bonus8 = $request->input('bonus8');
-    $bonus8 = empty($bonus8) ? 0 : str_replace(",", "", $bonus8);
+    $bonus8 = empty($bonus8) ? null : str_replace(",", "", $bonus8);
 
     $bonus9 = $request->input('bonus9');
-    $bonus9 = empty($bonus9) ? 0 : str_replace(",", "", $bonus9);
+    $bonus9 = empty($bonus9) ? null : str_replace(",", "", $bonus9);
 
     $bonus10 = $request->input('bonus10');
-    $bonus10 = empty($bonus10) ? 0 : str_replace(",", "", $bonus10);
+    $bonus10 = empty($bonus10) ? null : str_replace(",", "", $bonus10);
     //end fee bonus dalam kota
 
     //fee bonus luar kota
     $bonus_luar = $request->input('bonus_luar');
-    $bonus_luar = empty($bonus_luar) ? 0 : str_replace(",", "", $bonus_luar);
+    $bonus_luar = empty($bonus_luar) ? null : str_replace(",", "", $bonus_luar);
 
     $bonus_luar1 = $request->input('bonus_luar1');
-    $bonus_luar1 = empty($bonus_luar1) ? 0 : str_replace(",", "", $bonus_luar1);
+    $bonus_luar1 = empty($bonus_luar1) ? null : str_replace(",", "", $bonus_luar1);
 
     $bonus_luar2 = $request->input('bonus_luar2');
-    $bonus_luar2 = empty($bonus_luar2) ? 0 : str_replace(",", "", $bonus_luar2);
+    $bonus_luar2 = empty($bonus_luar2) ? null : str_replace(",", "", $bonus_luar2);
 
     $bonus_luar3 = $request->input('bonus_luar3');
-    $bonus_luar3 = empty($bonus_luar3) ? 0 : str_replace(",", "", $bonus_luar3);
+    $bonus_luar3 = empty($bonus_luar3) ? null : str_replace(",", "", $bonus_luar3);
 
     $bonus_luar4 = $request->input('bonus_luar4');
-    $bonus_luar4 = empty($bonus_luar4) ? 0 : str_replace(",", "", $bonus_luar4);
+    $bonus_luar4 = empty($bonus_luar4) ? null : str_replace(",", "", $bonus_luar4);
 
     $bonus_luar5 = $request->input('bonus_luar5');
-    $bonus_luar5 = empty($bonus_luar5) ? 0 : str_replace(",", "", $bonus_luar5);
+    $bonus_luar5 = empty($bonus_luar5) ? null : str_replace(",", "", $bonus_luar5);
 
     $bonus_luar6 = $request->input('bonus_luar6');
-    $bonus_luar6 = empty($bonus_luar6) ? 0 : str_replace(",", "", $bonus_luar6);
+    $bonus_luar6 = empty($bonus_luar6) ? null : str_replace(",", "", $bonus_luar6);
 
     $bonus_luar7 = $request->input('bonus_luar7');
-    $bonus_luar7 = empty($bonus_luar7) ? 0 : str_replace(",", "", $bonus_luar7);
+    $bonus_luar7 = empty($bonus_luar7) ? null : str_replace(",", "", $bonus_luar7);
 
     $bonus_luar8 = $request->input('bonus_luar8');
-    $bonus_luar8 = empty($bonus_luar8) ? 0 : str_replace(",", "", $bonus_luar8);
+    $bonus_luar8 = empty($bonus_luar8) ? null : str_replace(",", "", $bonus_luar8);
 
     $bonus_luar9 = $request->input('bonus_luar9');
-    $bonus_luar9 = empty($bonus_luar9) ? 0 : str_replace(",", "", $bonus_luar9);
+    $bonus_luar9 = empty($bonus_luar9) ? null : str_replace(",", "", $bonus_luar9);
 
     $bonus_luar10 = $request->input('bonus_luar10');
-    $bonus_luar10 = empty($bonus_luar10) ? 0 : str_replace(",", "", $bonus_luar10);
+    $bonus_luar10 = empty($bonus_luar10) ? null : str_replace(",", "", $bonus_luar10);
     //end fee bonus luar kota
 
     $operasional = $request->input('operasional');
@@ -621,31 +662,31 @@ class GajiController extends Controller
     //end jumlah lembur
 
     //jumlah bonus dalam kota
-    $jumlah_bonus = $request->input('jumlah_bonus') ?? 0;
-    $jumlah_bonus1 = $request->input('jumlah_bonus1') ?? 0;
-    $jumlah_bonus2 = $request->input('jumlah_bonus2') ?? 0;
-    $jumlah_bonus3 = $request->input('jumlah_bonus3') ?? 0;
-    $jumlah_bonus4 = $request->input('jumlah_bonus4') ?? 0;
-    $jumlah_bonus5 = $request->input('jumlah_bonus5') ?? 0;
-    $jumlah_bonus6 = $request->input('jumlah_bonus6') ?? 0;
-    $jumlah_bonus7 = $request->input('jumlah_bonus7') ?? 0;
-    $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? 0;
-    $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? 0;
-    $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? 0;
+    $jumlah_bonus = $request->input('jumlah_bonus') ?? null;
+    $jumlah_bonus1 = $request->input('jumlah_bonus1') ?? null;
+    $jumlah_bonus2 = $request->input('jumlah_bonus2') ?? null;
+    $jumlah_bonus3 = $request->input('jumlah_bonus3') ?? null;
+    $jumlah_bonus4 = $request->input('jumlah_bonus4') ?? null;
+    $jumlah_bonus5 = $request->input('jumlah_bonus5') ?? null;
+    $jumlah_bonus6 = $request->input('jumlah_bonus6') ?? null;
+    $jumlah_bonus7 = $request->input('jumlah_bonus7') ?? null;
+    $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? null;
+    $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? null;
+    $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? null;
     //end jumlah bonus dalam kota
 
     //jumlah bonus luar kota
-    $jumlah_bonus_luar = $request->input('jumlah_bonus_luar') ?? 0;
-    $jumlah_bonus_luar1 = $request->input('jumlah_bonus_luar1') ?? 0;
-    $jumlah_bonus_luar2 = $request->input('jumlah_bonus_luar2') ?? 0;
-    $jumlah_bonus_luar3 = $request->input('jumlah_bonus_luar3') ?? 0;
-    $jumlah_bonus_luar4 = $request->input('jumlah_bonus_luar4') ?? 0;
-    $jumlah_bonus_luar5 = $request->input('jumlah_bonus_luar5') ?? 0;
-    $jumlah_bonus_luar6 = $request->input('jumlah_bonus_luar6') ?? 0;
-    $jumlah_bonus_luar7 = $request->input('jumlah_bonus_luar7') ?? 0;
-    $jumlah_bonus_luar8 = $request->input('jumlah_bonus_luar8') ?? 0;
-    $jumlah_bonus_luar9 = $request->input('jumlah_bonus_luar9') ?? 0;
-    $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? 0;
+    $jumlah_bonus_luar = $request->input('jumlah_bonus_luar') ?? null;
+    $jumlah_bonus_luar1 = $request->input('jumlah_bonus_luar1') ?? null;
+    $jumlah_bonus_luar2 = $request->input('jumlah_bonus_luar2') ?? null;
+    $jumlah_bonus_luar3 = $request->input('jumlah_bonus_luar3') ?? null;
+    $jumlah_bonus_luar4 = $request->input('jumlah_bonus_luar4') ?? null;
+    $jumlah_bonus_luar5 = $request->input('jumlah_bonus_luar5') ?? null;
+    $jumlah_bonus_luar6 = $request->input('jumlah_bonus_luar6') ?? null;
+    $jumlah_bonus_luar7 = $request->input('jumlah_bonus_luar7') ?? null;
+    $jumlah_bonus_luar8 = $request->input('jumlah_bonus_luar8') ?? null;
+    $jumlah_bonus_luar9 = $request->input('jumlah_bonus_luar9') ?? null;
+    $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? null;
     //end jumlah bonus luar kota
 
     $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
@@ -816,44 +857,77 @@ class GajiController extends Controller
 
   public function downloadPdf(Request $request)
   {
+    // $user = Auth::user();
+    // $startDate = $request->input('tanggal_awal');
+    // $endDate = $request->input('tanggal_akhir');
+
+    // if (!$startDate || !$endDate) {
+    //   // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
+    //   $currentMonth = date('Y-m-01 00:00:00');
+    //   $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    // } else {
+    //   // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
+    //   $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+    //   $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    // }
+
+    // if ($user->level == 'manager' || $user->level == 'staff') {
+    //   $gaji = DB::table('gaji')
+    //     ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+    //     ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+    //     ->where('users.company', $user->company)
+    //     ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+    //     ->orderBy('gaji.created_at', 'DESC')
+    //     ->get();
+    // } else {
+    //   $gaji = DB::table('gaji')
+    //     ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+    //     ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+    //     ->where('gaji.user_id', $user->id)
+    //     ->orderBy('gaji.created_at', 'DESC')
+    //     ->get();
+    // }
+
     $user = Auth::user();
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
+    // Parse date inputs
     if (!$startDate || !$endDate) {
-      // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
-      $currentMonth = date('Y-m-01 00:00:00');
-      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+      $currentMonth = now()->startOfMonth();
+      $nextMonth = now()->addMonth()->startOfMonth();
     } else {
-      // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
-      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+      $currentMonth = now()->parse($startDate)->startOfDay();
+      $nextMonth = now()->parse($endDate)->addDay()->startOfDay();
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->get();
-    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
-      $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->get();
+    // Create a query builder instance for gaji
+    $query = DB::table('gaji')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
+
+    // Check user level
+    if (!in_array($user->level, ['manager', 'staff'])) {
+      // If user is not manager or staff, show all data and allow filtering by start and end date
+      if ($startDate && $endDate) {
+        $query->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
+      }
     } else {
-      $gaji = Gaji::select('gaji.*', 'users.name as full_name')
-        ->join('users', 'gaji.user_id', '=', 'users.id')
-        ->where('gaji.user_id', $user->id)
-        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
-        ->orderBy('gaji.created_at', 'DESC')
-        ->get();
+      // If user is manager or staff, filter by company and date range
+      $query->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth]);
     }
+
+    // Finalize the query by ordering and paginating the results
+    $gaji = $query
+      ->orderBy('gaji.created_at', 'DESC')
+      ->get();
+
+    // Additional data retrieval for 'maintenance'
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
 
     // Calculate total gaji
     $totalGaji = $gaji->sum('total');
