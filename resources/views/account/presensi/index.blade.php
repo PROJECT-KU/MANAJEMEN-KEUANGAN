@@ -135,24 +135,24 @@ List Presensi Karyawan | MANAGEMENT
                     @endphp
                     <td class="text-center">
                       @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                         MASUK
                       </button>
-                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                         PULANG
                       </a>
                       @elseif (!$todayPresensi)
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                         MASUK
                       </a>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                         PULANG
                       </button>
                       @else
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                         MASUK
                       </button>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px;font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                         PULANG
                       </button>
                       @endif
@@ -326,12 +326,16 @@ List Presensi Karyawan | MANAGEMENT
                       <td class="column-width" style="text-align: center;">
                         @if ($hasil->status == 'hadir')
                         <span class="badge badge-success">HADIR</span>
+                        @elseif ($hasil->status == 'camp jogja')
+                        <span class="badge badge-success">CAMP JOGJA</span>
+                        @elseif ($hasil->status == 'perjalanan luar kota')
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA</span>
+                        @elseif ($hasil->status == 'camp luar kota')
+                        <span class="badge badge-success">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status == 'remote')
                         <span class="badge badge-info">REMOTE</span>
                         @elseif ($hasil->status == 'izin')
                         <span class="badge badge-warning">IZIN</span>
-                        @elseif ($hasil->status == 'dinas luar kota')
-                        <span class="badge badge-info">DINAS LUAR KOTA</span>
                         @elseif ($hasil->status == 'lembur')
                         <span class="badge badge-primary">LEMBUR</span>
                         @elseif ($hasil->status == 'cuti')

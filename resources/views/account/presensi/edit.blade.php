@@ -68,9 +68,11 @@ Update Presensi Karyawan | MANAGEMENT
           <select class="form-control" name="status" id="status" disabled>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
+            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
             <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
             <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
             <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
@@ -108,9 +110,11 @@ Update Presensi Karyawan | MANAGEMENT
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
+            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
             <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
             <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
             <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
@@ -136,9 +140,11 @@ Update Presensi Karyawan | MANAGEMENT
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
+            <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
+            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="dinas luar kota" {{ $presensi->status == 'dinas luar kota' ? 'selected' : '' }}>DINAS LUAR KOTA</option>
             <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
             <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
             <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
