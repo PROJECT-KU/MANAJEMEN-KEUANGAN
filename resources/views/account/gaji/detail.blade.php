@@ -139,15 +139,23 @@ Detail Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+        </div>
+      </div>
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>Gaji Pokok</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" style="border-color: red;">Rp.</span>
+      <div class="section-body">
+        <div class="card">
+          <div class="card-body">
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Gaji Pokok</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" style="border-color: red;">Rp.</span>
+                    </div>
+                    <input type="text" name="gaji_pokok" style="border-color: red;" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" readonly>
                   </div>
-                  <input type="text" name="gaji_pokok" style="border-color: red;" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" readonly>
                 </div>
               </div>
             </div>
@@ -435,19 +443,19 @@ Detail Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end lembur field 10 -->
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>Total Lembur</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" style="border-color: red;">Rp.</span>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Total Lembur</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" style="border-color: red;">Rp.</span>
+                    </div>
+                    <input type="text" name="total_lembur" style="border-color: red;" value="{{ $gaji->total_lembur }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency8" readonly>
                   </div>
-                  <input type="text" name="total_lembur" style="border-color: red;" value="{{ $gaji->total_lembur }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency8" readonly>
                 </div>
               </div>
             </div>
-
-
 
             <!-- bonus field default -->
             <div class="row">
@@ -952,16 +960,16 @@ Detail Gaji Karyawan | MANAGEMENT
             @endif
             <!-- end field bonus 10 -->
 
-
-
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>Total Bonus</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" style="border-color: red;">Rp.</span>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Total Bonus</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" style="border-color: red;">Rp.</span>
+                    </div>
+                    <input type="text" name="total_bonus" style="border-color: red;" value="{{ $gaji->total_bonus }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
                   </div>
-                  <input type="text" name="total_bonus" style="border-color: red;" value="{{ $gaji->total_bonus }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
                 </div>
               </div>
             </div>
@@ -1112,14 +1120,16 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label style="font-weight: bold;">Total Gaji</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" style="border-color: black; font-weight: bold;">Rp.</span>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label style="font-weight: bold;">Total Gaji</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" style="border-color: black; font-weight: bold;">Rp.</span>
+                    </div>
+                    <input type="text" name="total" style="border-color: black; font-weight: bold;" id="total" value="{{ $gaji->total }}" placeholder="Masukkan Total Potongan" class="form-control currency5" readonly>
                   </div>
-                  <input type="text" name="total" style="border-color: black; font-weight: bold;" id="total" value="{{ $gaji->total }}" placeholder="Masukkan Total Potongan" class="form-control currency5" readonly>
                 </div>
               </div>
             </div>
@@ -1128,11 +1138,11 @@ Detail Gaji Karyawan | MANAGEMENT
               <i class="fa fa-list"></i> LIST GAJI KARYAWAN
             </a>
 
-          </form>
+            </form>
 
+          </div>
         </div>
       </div>
-    </div>
   </section>
 </div>
 <!-- upload image -->
