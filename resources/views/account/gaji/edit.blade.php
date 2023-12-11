@@ -4,6 +4,166 @@
 Update Gaji Karyawan | MANAGEMENT
 @stop
 
+<!--================== button lembur responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addLembur,
+  #removeAddedLembur0,
+  #removeAddedLembur2,
+  #removeAddedLembur3,
+  #removeAddedLembur4,
+  #removeAddedLembur5,
+  #removeAddedLembur6,
+  #removeAddedLembur7,
+  #removeAddedLembur8,
+  #removeAddedLembur9,
+  #removeAddedLembur10 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addLembur,
+    #removeAddedLembur0,
+    #removeAddedLembur2,
+    #removeAddedLembur3,
+    #removeAddedLembur4,
+    #removeAddedLembur5,
+    #removeAddedLembur6,
+    #removeAddedLembur7,
+    #removeAddedLembur8,
+    #removeAddedLembur9,
+    #removeAddedLembur10 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addLembur,
+    #removeAddedLembur0,
+    #removeAddedLembur2,
+    #removeAddedLembur3,
+    #removeAddedLembur4,
+    #removeAddedLembur5,
+    #removeAddedLembur6,
+    #removeAddedLembur7,
+    #removeAddedLembur8,
+    #removeAddedLembur9,
+    #removeAddedLembur10 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addLembur,
+    #removeAddedLembur0,
+    #removeAddedLembur2,
+    #removeAddedLembur3,
+    #removeAddedLembur4,
+    #removeAddedLembur5,
+    #removeAddedLembur6,
+    #removeAddedLembur7,
+    #removeAddedLembur8,
+    #removeAddedLembur9,
+    #removeAddedLembur10 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
+<!--================== end ==================-->
+
+<!--================== button bonus responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addBonus,
+  #removeAddedBonus1,
+  #removeAddedBonus2,
+  #removeAddedBonus3,
+  #removeAddedBonus4,
+  #removeAddedBonus5,
+  #removeAddedBonus6,
+  #removeAddedBonus7,
+  #removeAddedBonus8,
+  #removeAddedBonus9,
+  #removeAddedBonus10 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  #label {
+    margin-bottom: 20px;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addBonus,
+    #removeAddedBonus1,
+    #removeAddedBonus2,
+    #removeAddedBonus3,
+    #removeAddedBonus4,
+    #removeAddedBonus5,
+    #removeAddedBonus6,
+    #removeAddedBonus7,
+    #removeAddedBonus8,
+    #removeAddedBonus9,
+    #removeAddedBonus10 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addBonus,
+    #removeAddedBonus1,
+    #removeAddedBonus2,
+    #removeAddedBonus3,
+    #removeAddedBonus4,
+    #removeAddedBonus5,
+    #removeAddedBonus6,
+    #removeAddedBonus7,
+    #removeAddedBonus8,
+    #removeAddedBonus9,
+    #removeAddedBonus10 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+
+    #label {
+      margin-bottom: 35px;
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addBonus,
+    #removeAddedBonus1,
+    #removeAddedBonus2,
+    #removeAddedBonus3,
+    #removeAddedBonus4,
+    #removeAddedBonus5,
+    #removeAddedBonus6,
+    #removeAddedBonus7,
+    #removeAddedBonus8,
+    #removeAddedBonus9,
+    #removeAddedBonus10 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
+<!--================== end ==================-->
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -138,22 +298,37 @@ Update Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </div>
+        </div>
+      </div>
 
+      <div class="section-body">
+        <div class="card">
+          @if(session('status') === 'error')
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <b>{{ session('message') }}</b>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          @endif
+          <div class="card-body">
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label>Gaji Pokok</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Gaji Pokok</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="gaji_pokok" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency">
                   </div>
-                  <input type="text" name="gaji_pokok" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency">
+                  @error('gaji_pokok')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @error('gaji_pokok')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
             </div>
 
@@ -190,8 +365,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-info mt-2" id="addLembur"><i class="fas fa-plus"></i> INPUT</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-info mt-2" id="addLembur" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-plus"></i> INPUT</button>
                 </div>
               </div>
             </div>
@@ -231,8 +407,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -269,8 +446,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -311,8 +489,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -349,8 +528,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -391,8 +571,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -429,8 +610,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -471,8 +653,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -509,8 +692,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -551,8 +735,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -589,8 +774,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -631,8 +817,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -669,8 +856,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -711,8 +899,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -749,8 +938,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -791,8 +981,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -829,8 +1020,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -871,8 +1063,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -909,8 +1102,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -951,8 +1145,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -989,8 +1184,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10"><i class="fas fa-times"></i> HAPUS</button>
+                  <label class="mb-3"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1061,8 +1257,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-info mt-2" id="addBonus"><i class="fas fa-plus"></i> INPUT</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-info mt-2" id="addBonus" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-plus"></i> INPUT</button>
                 </div>
               </div>
             </div>
@@ -1131,8 +1328,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus1"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus1" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1198,8 +1396,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus1"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus1" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1269,8 +1468,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus2"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus2" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1336,8 +1536,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus2"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus2" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1407,8 +1608,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus3"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus3" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1474,8 +1676,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus3"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus3" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1545,8 +1748,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus4"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus4" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1612,8 +1816,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus4"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus4" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1683,8 +1888,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus5"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus5" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1750,8 +1956,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus5"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus5" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1821,8 +2028,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus6"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus6" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1888,8 +2096,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus6"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus6" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -1959,8 +2168,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus7"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus7" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2026,8 +2236,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus7"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus7" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2097,8 +2308,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus8"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus8" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2164,8 +2376,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus8"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus8" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2235,8 +2448,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus9"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus9" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2302,8 +2516,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus9"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus9" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2373,8 +2588,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus10"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus10" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2440,8 +2656,9 @@ Update Gaji Karyawan | MANAGEMENT
 
               <div class="col-md-1">
                 <div class="form-group">
-                  <label></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus10"><i class="fas fa-times"></i> HAPUS</button>
+                  <label id="label"></label>
+                  <button type="button" class="btn btn-danger mt-2" id="removeAddedBonus10" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-times"></i> HAPUS</button>
                 </div>
               </div>
             </div>
@@ -2481,7 +2698,7 @@ Update Gaji Karyawan | MANAGEMENT
 
 
             <div class="row">
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan BPJS</label>
                   <div class="input-group">
@@ -2493,7 +2710,7 @@ Update Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan THR</label>
                   <div class="input-group">
@@ -2504,8 +2721,21 @@ Update Gaji Karyawan | MANAGEMENT
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-4">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan Pulsa</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ $gaji->tunjangan_pulsa }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Tunjangan Lainnya</label>
                   <div class="input-group">
@@ -2629,11 +2859,11 @@ Update Gaji Karyawan | MANAGEMENT
               <i class="fa fa-list"></i> LIST GAJI KARYAWAN
             </a>
 
-          </form>
+            </form>
 
+          </div>
         </div>
       </div>
-    </div>
   </section>
 </div>
 
@@ -3081,6 +3311,11 @@ Update Gaji Karyawan | MANAGEMENT
   });
 
   var cleaveC = new Cleave('.currency_tunjanganTHR', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_tunjanganPulsa', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
