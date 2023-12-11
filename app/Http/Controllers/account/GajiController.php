@@ -108,13 +108,15 @@ class GajiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
+    $totalGaji = $gaji->sum('total');
+
     $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
     $endDate = $request->get('end_date');
 
     if ($gaji->isEmpty()) {
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji tidak ditemukan.');
     }
-    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
   }
 
   public function create()
