@@ -55,8 +55,7 @@
                       Phone: {{ $user->telp_company }}<br>
                       Email: {{ $user->email_company }}
                     </td>
-                    <td> <strong>{{ $employee->full_name }}</strong><br>
-                      <br><br>
+                    <td style="margin-top: -50px;"><strong>{{ $employee->full_name }}</strong><br>
                       Jabatan: {{ $employee->level }}<br>
                       Phone: {{ $employee->telp }}<br>
                       Email: {{ $employee->email }}
