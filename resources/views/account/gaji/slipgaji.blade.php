@@ -44,26 +44,26 @@
                 <tr>
                   <th scope="col" style="text-align: left; width:260px">Dari</th>
                   <th scope="col" style="text-align: left; width:200px">Untuk</th>
-                  <th scope="col" style="text-align: left; font-size:15px"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
+                  <th scope="col" style="text-align: left;"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><strong style="text-transform:uppercase; font-size:15px">{{ $user->company }} FOUNDATION</strong><br>
-                    <p style="font-size: 12px;">{{ $user->alamat_company }}<br></p>
-                    <p style="font-size: 12px;">Phone: {{ $user->telp_company }}<br></p>
-                    <p style="font-size: 12px;">Email: {{ $user->email_company }}</p>
+                  <td> <strong style="text-transform:uppercase">{{ $user->company }}</strong><br>
+                    <!-- {{ $user->alamat_company }}<br> -->
+                    Phone: {{ $user->telp_company }}<br>
+                    Email: {{ $user->email_company }}
                   </td>
-                  <td><strong style="text-transform:uppercase; font-size:15px">{{ $employee->full_name }}</strong><br>
-                    <!-- {{ $user->alamat }}<br> -->
-                    <p style="font-size: 12px;">Jabatan: {{ $employee->level }}<br></p>
-                    <p style="font-size: 12px;">Phone: {{ $employee->telp }}<br></p>
-                    <p style="font-size: 12px;">Email: {{ $employee->email }}</p>
+                  <td> <strong>{{ $employee->full_name }}</strong><br>
+                    {{ $user->alamat }}<br>
+                    Jabatan: {{ $employee->level }}<br>
+                    Phone: {{ $employee->telp }}<br>
+                    Email: {{ $employee->email }}
                   </td>
                   <td>
-                    <b style="font-size: 15px;">No Rekening :</b> {{ $userWithNorekBank->norek }}<br>
-                    <b style="font-size: 15px;">Bank&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b>
+                    <b>No Rekening :</b> {{ $userWithNorekBank->norek }}<br>
+                    <b>Bank&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b>
                     @php
                     $bankNames = [
                     '002' => 'BRI',
@@ -133,9 +133,9 @@
                     Bank Name Not Found
                     @endif
                     <br>
-                    <b style="font-size: 15px;">Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
-                    <b style="font-size: 15px;">Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
-                    <b style="font-size: 15px;">Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
+                    <b>Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
+                    <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
+                    <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
                   </td>
                 </tr>
               </tbody>
