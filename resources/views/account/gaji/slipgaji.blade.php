@@ -50,13 +50,13 @@
               </thead>
               <tbody>
                 <tr>
-                  <td> <strong style="text-transform:uppercase">{{ $user->company }}</strong><br>
+                  <td> <strong style="text-transform:uppercase">{{ $user->company }} FOUNDATION</strong><br>
                     {{ $user->alamat_company }}<br>
                     Phone: {{ $user->telp_company }}<br>
                     Email: {{ $user->email_company }}
                   </td>
                   <td> <strong>{{ $employee->full_name }}</strong><br>
-                    {{ $user->alamat }}<br>
+                    <!-- {{ $user->alamat }}<br> -->
                     Jabatan: {{ $employee->level }}<br>
                     Phone: {{ $employee->telp }}<br>
                     Email: {{ $employee->email }}
