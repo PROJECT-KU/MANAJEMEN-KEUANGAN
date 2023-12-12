@@ -2776,7 +2776,7 @@ Update Gaji Karyawan | MANAGEMENT
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Tanggal Dibayarkan</label>
-                  <input type="text" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
+                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
                 </div>
               </div>
             </div>
@@ -2935,16 +2935,37 @@ Update Gaji Karyawan | MANAGEMENT
 <!-- end ckeditor -->
 
 <script>
+  // date picker
+
+  // if ($(".datetimepicker").length) {
+  //   $('.datetimepicker').daterangepicker({
+  //     locale: {
+  //       format: 'DD-MM-YYYY hh:mm'
+  //     },
+  //     singleDatePicker: true,
+  //     timePicker: true,
+  //     timePicker24Hour: true,
+  //   });
+  // }
+
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({
       locale: {
-        format: 'DD-MM-YYYY hh:mm'
+        format: 'YYYY-MM-DD hh:mm'
       },
       singleDatePicker: true,
       timePicker: true,
       timePicker24Hour: true,
     });
   }
+
+  var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var timeoutHandler = null;
+  // end
 
 
   $(document).ready(function() {

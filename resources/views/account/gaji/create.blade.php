@@ -1696,7 +1696,7 @@ Tambah Gaji Karyawan | MANAGEMENT
             <div class="col-md-4">
               <div class="form-group">
                 <label>Tanggal Dibayarkan</label>
-                <input type="text" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control datetimepicker" required>
+                <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
               </div>
               @error('tanggal')
               <div class="invalid-feedback" style="display: block">
@@ -2130,6 +2130,19 @@ Tambah Gaji Karyawan | MANAGEMENT
 <!-- end add dan remove field bonus -->
 
 <script>
+  // datepicker
+
+  // if ($(".datetimepicker").length) {
+  //   $('.datetimepicker').daterangepicker({
+  //     locale: {
+  //       format: 'YYYY-MM-DD hh:mm'
+  //     },
+  //     singleDatePicker: true,
+  //     timePicker: true,
+  //     timePicker24Hour: true,
+  //   });
+  // }
+
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({
       locale: {
@@ -2140,6 +2153,14 @@ Tambah Gaji Karyawan | MANAGEMENT
       timePicker24Hour: true,
     });
   }
+
+  var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var timeoutHandler = null;
+  // end
 
 
 
