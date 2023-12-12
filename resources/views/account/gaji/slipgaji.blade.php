@@ -44,22 +44,22 @@
                 <tr>
                   <th scope="col" style="text-align: left; width:260px">Dari</th>
                   <th scope="col" style="text-align: left; width:200px">Untuk</th>
-                  <th scope="col" style="text-align: left;"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
+                  <th scope="col" style="text-align: left; font-size:12px"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td> <strong style="text-transform:uppercase">{{ $user->company }} FOUNDATION</strong><br>
-                    {{ $user->alamat_company }}<br>
-                    Phone: {{ $user->telp_company }}<br>
-                    Email: {{ $user->email_company }}
+                  <td><strong style="text-transform:uppercase; font-size:12px">{{ $user->company }} FOUNDATION</strong><br>
+                    <p style="font-size: 10px;">{{ $user->alamat_company }}<br></p>
+                    <p style="font-size: 10px;">Phone: {{ $user->telp_company }}<br></p>
+                    <p style="font-size: 10px;">Email: {{ $user->email_company }}</p>
                   </td>
-                  <td> <strong>{{ $employee->full_name }}</strong><br>
+                  <td><strong style="text-transform:uppercase; font-size:12px">{{ $employee->full_name }}</strong><br>
                     <!-- {{ $user->alamat }}<br> -->
-                    Jabatan: {{ $employee->level }}<br>
-                    Phone: {{ $employee->telp }}<br>
-                    Email: {{ $employee->email }}
+                    <p style="font-size: 10px;">Jabatan: {{ $employee->level }}<br></p>
+                    <p style="font-size: 10px;">Phone: {{ $employee->telp }}<br></p>
+                    <p style="font-size: 10px;">Email: {{ $employee->email }}</p>
                   </td>
                   <td>
                     <b>No Rekening :</b> {{ $userWithNorekBank->norek }}<br>
