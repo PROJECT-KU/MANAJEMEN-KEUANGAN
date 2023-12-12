@@ -56,7 +56,7 @@
                     Email: {{ $user->email_company }}
                   </td>
                   <td> <strong>{{ $employee->full_name }}</strong><br>
-                    <!-- {{ $user->alamat }}<br> -->
+                    <br>
                     Jabatan: {{ $employee->level }}<br>
                     Phone: {{ $employee->telp }}<br>
                     Email: {{ $employee->email }}
