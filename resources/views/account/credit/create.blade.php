@@ -179,6 +179,7 @@ Tambah Uang Keluar | MANAGEMENT
 <!-- end upload image -->
 
 <script>
+    // date picker
     if ($(".datetimepicker").length) {
         $('.datetimepicker').daterangepicker({
             locale: {
@@ -196,6 +197,7 @@ Tambah Uang Keluar | MANAGEMENT
     });
 
     var timeoutHandler = null;
+    // end
 
     /**
      * btn submit loader
