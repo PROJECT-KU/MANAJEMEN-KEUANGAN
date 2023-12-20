@@ -69,14 +69,15 @@ Update Presensi Karyawan | MANAGEMENT
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
             <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
-            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="perjalanan luar kota jawa" {{ $presensi->status == 'perjalanan luar kota jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di dalam Jawa)</option>
+            <option value="perjalanan luar kota luar jawa" {{ $presensi->status == 'perjalanan luar kota luar jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di luar Jawa)</option>
             <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
+            <!-- <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
             <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
             <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option> -->
           </select>
         </div>
       </div>
@@ -111,14 +112,11 @@ Update Presensi Karyawan | MANAGEMENT
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
             <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
-            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="perjalanan luar kota jawa" {{ $presensi->status == 'perjalanan luar kota jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di dalam Jawa)</option>
+            <option value="perjalanan luar kota luar jawa" {{ $presensi->status == 'perjalanan luar kota luar jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di luar Jawa)</option>
             <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
-            <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
           </select>
         </div>
       </div>
@@ -139,16 +137,16 @@ Update Presensi Karyawan | MANAGEMENT
           <label>Status Presensi Kehadiran</label>
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="alpha" {{ $presensi->status == 'alpha' ? 'selected' : '' }}>ALPHA</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
             <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
-            <option value="perjalanan luar kota" {{ $presensi->status == 'perjalanan luar kota' ? 'selected' : '' }}>PERJALANAN LUAR KOTA</option>
+            <option value="perjalanan luar kota jawa" {{ $presensi->status == 'perjalanan luar kota jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di dalam Jawa)</option>
+            <option value="perjalanan luar kota luar jawa" {{ $presensi->status == 'perjalanan luar kota luar jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA (Di luar Jawa)</option>
             <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="lembur" {{ $presensi->status == 'lembur' ? 'selected' : '' }}>LEMBUR</option>
             <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }} hidden>TERLAMBAT</option>
-            <option value="pulang" {{ $presensi->status == 'pulang' ? 'selected' : '' }}>PULANG</option>
+            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }}>TERLAMBAT</option>
           </select>
         </div>
       </div>

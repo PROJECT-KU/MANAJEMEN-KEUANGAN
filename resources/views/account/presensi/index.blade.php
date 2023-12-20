@@ -253,6 +253,11 @@ List Presensi Karyawan | MANAGEMENT
           <div class="card">
             <div class="card-header">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
+              <div class="card-header-action">
+                <a href="{{ route('account.laporan_presensi.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+                  <i class="fas fa-file-pdf"></i> Download PDF
+                </a>
+              </div>
             </div>
             <div class="card-header">
               <p style="margin-top: -3px; font-size: 15px"><strong>Periode
@@ -325,41 +330,53 @@ List Presensi Karyawan | MANAGEMENT
                       @endif
                       <td class="column-width" style="text-align: center;">
                         @if ($hasil->status == 'hadir')
-                        <span class="badge badge-success">HADIR</span>
+                        <span class="badge badge-success mt-2">HADIR</span>
                         @elseif ($hasil->status == 'camp jogja')
-                        <span class="badge badge-success">CAMP JOGJA</span>
-                        @elseif ($hasil->status == 'perjalanan luar kota')
-                        <span class="badge badge-info">PERJALANAN LUAR KOTA</span>
+                        <span class="badge badge-success mt-2">CAMP JOGJA</span>
+                        @elseif ($hasil->status == 'perjalanan luar kota jawa')
+                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA (Di dalam Jawa)</span>
+                        @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
+                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA (Di luar Jawa)</span>
                         @elseif ($hasil->status == 'camp luar kota')
-                        <span class="badge badge-success">CAMP LUAR KOTA</span>
+                        <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status == 'remote')
-                        <span class="badge badge-info">REMOTE</span>
+                        <span class="badge badge-info mt-2">REMOTE</span>
                         @elseif ($hasil->status == 'izin')
-                        <span class="badge badge-warning">IZIN</span>
+                        <span class="badge badge-warning mt-2">IZIN</span>
                         @elseif ($hasil->status == 'lembur')
-                        <span class="badge badge-primary">LEMBUR</span>
+                        <span class="badge badge-primary mt-2">LEMBUR</span>
                         @elseif ($hasil->status == 'cuti')
-                        <span class="badge badge-warning">CUTI</span>
+                        <span class="badge badge-warning mt-2">CUTI</span>
                         @elseif ($hasil->status == 'terlambat')
-                        <span class="badge badge-danger">TERLAMBAT</span>
+                        <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                        @elseif ($hasil->status == 'alpha')
+                        <span class="badge badge-danger mt-2">ALPHA</span>
                         @elseif ($hasil->status == 'pulang')
-                        <span class="badge badge-danger">PULANG</span>
+                        <span class="badge badge-danger mt-2">PULANG</span>
                         @endif
                         <br>
                         @if ($hasil->status_pulang == 'hadir')
                         <span class="badge badge-success mt-2">HADIR</span>
+                        @elseif ($hasil->status_pulang == 'camp jogja')
+                        <span class="badge badge-success">CAMP JOGJA</span>
+                        @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA (Di dalam Jawa)</span>
+                        @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA (Di luar Jawa)</span>
+                        @elseif ($hasil->status_pulang == 'camp luar kota')
+                        <span class="badge badge-success">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status_pulang == 'remote')
                         <span class="badge badge-info mt-2">REMOTE</span>
                         @elseif ($hasil->status_pulang == 'izin')
                         <span class="badge badge-warning mt-2">IZIN</span>
-                        @elseif ($hasil->status_pulang == 'dinas luar kota')
-                        <span class="badge badge-info mt-2">DINAS LUAR KOTA</span>
                         @elseif ($hasil->status_pulang == 'lembur')
                         <span class="badge badge-primary mt-2">LEMBUR</span>
                         @elseif ($hasil->status_pulang == 'cuti')
                         <span class="badge badge-warning mt-2">CUTI</span>
                         @elseif ($hasil->status_pulang == 'terlambat')
                         <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                        @elseif ($hasil->status_pulang == 'alpha')
+                        <span class="badge badge-danger">ALPHA</span>
                         @elseif ($hasil->status_pulang == 'pulang')
                         <span class="badge badge-danger mt-2">PULANG</span>
                         @endif
@@ -448,7 +465,6 @@ List Presensi Karyawan | MANAGEMENT
 </div>
 
 <!--================== time saat ini ==================-->
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
   // Function to update the current time

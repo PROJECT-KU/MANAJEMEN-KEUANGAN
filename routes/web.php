@@ -128,6 +128,7 @@ Route::prefix('account')->group(function () {
     Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
     Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
     Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
+    Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
 
     //email
     Route::get('/email', 'account\EmailController@index')->name('account.email.index');
