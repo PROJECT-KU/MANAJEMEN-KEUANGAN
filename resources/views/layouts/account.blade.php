@@ -119,7 +119,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endphp
 
 
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->jenis === 'penyewaan' )
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>PENGGUNA</span>
@@ -128,6 +128,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
                                         <i class="fas fa-building"></i> <span>COMPANY</span>
+                                    </a>
+                                </li>
+                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.camp.index') }}">
+                                        <i class="fas fa-campground"></i> <span>LAPORAN CAMP</span>
                                     </a>
                                 </li>
                                 @endif
@@ -171,7 +176,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     </ul>
                                 </li>
 
-                                @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
+                                <!-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
                                     <ul class="dropdown-menu">
@@ -180,7 +185,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-list"></i>PENYEWAAN</a></li>
                                     </ul>
                                 </li>
-                                @endif
+                                @endif -->
 
                                 <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>

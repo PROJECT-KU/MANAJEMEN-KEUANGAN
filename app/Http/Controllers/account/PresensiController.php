@@ -65,20 +65,20 @@ class PresensiController extends Controller
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->get();
     } else if ($user->level == 'admin') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->get();
     } else {
       $presensi = Presensi::select('presensi.*', 'users.name as full_name')
         ->join('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->get();
     }
 
     $maintenances = DB::table('maintenance')
@@ -325,5 +325,59 @@ class PresensiController extends Controller
     $user = User::find($userId);
 
     return response()->json(['phone_number' => $user->telp]);
+  }
+
+  public function downloadPdf(Request $request)
+  {
+    $user = Auth::user();
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
+
+    $presensi = DB::table('presensi')
+      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+      ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
+      ->orderBy('presensi.created_at', 'DESC')
+      ->get();
+
+    // Additional data retrieval for 'maintenance'
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    $html = view('account.presensi.pdf', compact('presensi', 'user', 'startDate', 'endDate'))->render();
+
+    // Instantiate Dompdf with the default configuration
+    $dompdf = new Dompdf();
+
+    // Load the HTML content into Dompdf
+    $dompdf->loadHtml($html);
+
+    // (Optional) Set paper size and orientation
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Render the PDF
+    $dompdf->render();
+
+    // Get the output as a string
+    $output = $dompdf->output();
+
+    // Set the response headers
+    $headers = [
+      'Content-Type' => 'application/pdf',
+      'Content-Disposition' => 'inline; filename="Laporan-Presensi_' . date('d-m-Y') . '.pdf"',
+    ];
+    return Response::make($dompdf->output(), 200, $headers);
   }
 }
