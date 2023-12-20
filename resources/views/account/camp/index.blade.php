@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-List Gaji Karyawan | MANAGEMENT
+List aporan Camp | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>GAJI KARYAWAN</h1>
+      <h1>LAPORAN CAMP</h1>
     </div>
 
     <div class="section-body">
@@ -28,54 +28,21 @@ List Gaji Karyawan | MANAGEMENT
         @endif
         <!--================== end ==================-->
 
-        <!-- jika gaji masih ada yang status pending -->
-        @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager'))
-        @php
-        $totalPendingSalaries = 0;
-        @endphp
-
-        @foreach ($gaji as $item)
-        @if ($item->status === 'pending')
-        @php
-        $totalPendingSalaries++;
-        @endphp
-        @endif
-        @endforeach
-
-        @if ($totalPendingSalaries > 0)
-        <div class="alert alert-warning" role="alert" style="text-align: center;">
-          <p style="font-size: 16px;">
-            <i class="fas fa-exclamation-circle mr-1"></i>
-            Ada <b>{{ $totalPendingSalaries }}</b> gaji karyawan dengan status pending yang belum terbayarkan, segara bayarkan dan ubah status menjadi terbayar
-          </p>
-        </div>
-        @endif
-        @endif
-        <!-- end -->
-
-        @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
-        @else
         <div class="card">
           <div class="card-header  text-right">
-            <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
-            <!-- @if (Auth::user()->level == 'karyawan')
-            @else
-            <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
-            </div>
-            @endif -->
+            <h4><i class="fas fa-list"></i> LIST LAPORAN CAMP</h4>
           </div>
 
           <div class="card-body">
-            <!-- <form action="{{ route('account.gaji.search') }}" method="GET">
+            <!-- <form action="{{ route('account.camp.search') }}" method="GET">
               <div class="form-group">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
-                    <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
+                    <a href="{{ route('account.camp.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
                   </div>
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
-                    <button type="submit" class="btn btn-secondary" disabled><i class="fa fa-search"></i> CARI</button>
+                    <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> CARI</button>
                   </div>
                   @if(request()->has('q'))
                   <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
@@ -86,7 +53,7 @@ List Gaji Karyawan | MANAGEMENT
               </div>
             </form> -->
 
-            <form action="{{ route('account.gaji.index') }}" method="GET">
+            <form action="{{ route('account.camp.index') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
@@ -106,8 +73,8 @@ List Gaji Karyawan | MANAGEMENT
                 <div class="col-md-2">
                   @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                   <div class="btn-group" style="width: 100%;">
-                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                    <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <a href="{{ route('account.camp.index') }}" class="btn btn-danger" style="margin-top: 30px;">
                       <i class="fa fa-times-circle mt-2"></i> HAPUS
                     </a>
                   </div>
@@ -122,7 +89,7 @@ List Gaji Karyawan | MANAGEMENT
               <div class="col-12 mt-3">
                 <div class="form-group text-center">
                   <div class="input-group mb-3">
-                    <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH GAJI</a>
+                    <a href="{{ route('account.camp.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH LAPORAN CAMP</a>
                   </div>
                 </div>
               </div>
@@ -130,13 +97,12 @@ List Gaji Karyawan | MANAGEMENT
 
           </div>
         </div>
-        @endif
 
         <div class="card">
           <div class="card-header">
-            <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
+            <h4><i class="fas fa-list"></i> LIST LAPORAN CAMP</h4>
             <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+              <a href="{{ route('account.laporan_camp.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Download PDF
               </a>
             </div>
@@ -158,14 +124,13 @@ List Gaji Karyawan | MANAGEMENT
                   <thead>
                     <tr>
                       <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                      <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
-                      <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                      <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
-                      <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
-                      <th scope="col" class="column-width" style="text-align: center;">BANK</th>
-                      <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
-                      <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMBAYARAN</th>
-                      <th scope="col" class="column-width" style="text-align: center;">STATUS PEMBAYARAN</th>
+                      <th scope="col" class="column-width" style="text-align: center;">NAMA CAMP</th>
+                      <th scope="col" class="column-width" style="text-align: center;">TOTAL UANG MASUK</th>
+                      <th scope="col" class="column-width" style="text-align: center;">TOTAL PENGELUARAN</th>
+                      <th scope="col" class="column-width" style="text-align: center;">KEUNTUNGAN</th>
+                      <th scope="col" class="column-width" style="text-align: center;">PERSENTASE KEUNTUNGAN</th>
+                      <th scope="col" class="column-width" style="text-align: center;">TANGGAL CAMP</th>
+                      <th scope="col" class="column-width" style="text-align: center;">STATUS</th>
                       <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                     </tr>
                   </thead>
@@ -174,91 +139,20 @@ List Gaji Karyawan | MANAGEMENT
                     $no = 1;
                     $terbayarCount = 0; // Count of terbayar records
                     @endphp
-                    @foreach ($gaji as $hasil)
-                    @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
-                    <!-- Skip displaying records where user is karyawan and status is pending -->
-                    @else
+                    @foreach ($camp as $hasil)
+
                     <tr>
                       <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                      <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
-                      <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
-                      <td class="column-width" style="text-align: center; width:100px">
-                        @php
-                        $bankNames = [
-                        '002' => 'BRI',
-                        '008' => 'BANK MANDIRI',
-                        '009' => 'BNI',
-                        '200' => 'BANK TABUNGAN NEGARA',
-                        '011' => 'BANK DANAMON',
-                        '013' => 'BANK PERMATA',
-                        '014' => 'BCA',
-                        '016' => 'MAYBANK',
-                        '019' => 'PANINBANK',
-                        '022' => 'CIMB NIAGA',
-                        '023' => 'BANK UOB INDONESIA',
-                        '028' => 'BANK OCBC NISP',
-                        '087' => 'BANK HSBC INDONESIA',
-                        '147' => 'BANK MUAMALAT',
-                        '153' => 'BANK SINARMAS',
-                        '426' => 'BANK MEGA',
-                        '441' => 'BANK BUKOPIN',
-                        '451' => 'BSI',
-                        '484' => 'BANK KEB HANA INDONESIA',
-                        '494' => 'BANK RAYA INDONESIA',
-                        '506' => 'BANK MEGA SYARIAH',
-                        '046' => 'BANK DBS INDONESIA',
-                        '947' => 'BANK ALADIN SYARIAH',
-                        '950' => 'BANK COMMONWEALTH',
-                        '213' => 'BANK BTPN',
-                        '490' => 'BANK NEO COMMERCE',
-                        '501' => 'BANK DIGITAL BCA',
-                        '521' => 'BANK BUKOPIN SYARIAH',
-                        '535' => 'SEABANK INDONESIA',
-                        '542' => 'BANK JAGO',
-                        '567' => 'ALLO BANK',
-                        '110' => 'BPD JAWA BARAT',
-                        '111' => 'BPD DKI',
-                        '112' => 'BPD DAERAH ISTIMEWA YOGYAKARTA',
-                        '113' => 'BPD JAWA TENGAH',
-                        '114' => 'BPD JAWA TIMUR',
-                        '115' => 'BPD JAMBI',
-                        '116' => 'BANK ACEH SYARIAH',
-                        '117' => 'BPD SUMATERA UTARA',
-                        '118' => 'BANK NAGARI',
-                        '119' => 'BPD RIAU KEPRI SYARIAH',
-                        '120' => 'BPD SUMATERA SELATAN DAN BANGKA BELITUNG',
-                        '121' => 'BPD LAMPUNG',
-                        '122' => 'BPD KALIMANTAN SELATAN',
-                        '123' => 'BPD KALIMANTAN BARAT',
-                        '124' => 'BPD KALIMANTAN TIMUR DAN KALIMANTAN UTARA',
-                        '125' => 'BPD KALIMANTAN TENGAH',
-                        '126' => 'BPD SULAWESI SELATAN DAN SULAWESI BARAT',
-                        '127' => 'BPD SULAWESI UTARA DAN GORONTALO',
-                        '128' => 'BANK NTB SYARIAH',
-                        '129' => 'BPD BALI',
-                        '130' => 'BPD NUSA TENGGARA TIMUR',
-                        '131' => 'BPD MALUKU DAN MALUKU UTARA',
-                        '132' => 'BPD PAPUA',
-                        '133' => 'BPD BENGKULU',
-                        '134' => 'BPD SULAWESI TENGAH',
-                        '135' => 'BPD SULAWESI TENGGARA',
-                        '137' => 'BPD BANTEN'
-                        // Add more bank names here...
-                        ];
-                        @endphp
-                        @if (array_key_exists($hasil->bank, $bankNames))
-                        {{ $bankNames[$hasil->bank] }}
-                        @else
-                        Bank Name Not Found
-                        @endif
-                      </td>
-                      <td class="column-width" style="text-align: center; width:150px">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center; text-transform:uppercase;"">{{ $hasil->title }} #{{ $hasil->camp_ke }}</td>
+                      <td class=" column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->keuntungan, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">{{ number_format($hasil->persentase_keuntungan, 0, ',', '.') }}%</td>
                       <td class="column-width" style="text-align: center; width:200px">
-                        {{ strftime('%d %B %Y %H:%M', strtotime($hasil->tanggal)) }}
+                        {{ strftime('%d %B %Y', strtotime($hasil->tanggal)) }} <br>
+                        s/d<br>
+                        {{ strftime('%d %B %Y', strtotime($hasil->tanggal_akhir)) }}
                       </td>
-
                       <td class="column-width" style="text-align: center;">
                         @if($hasil->status == 'pending')
                         <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i></span>
@@ -266,64 +160,38 @@ List Gaji Karyawan | MANAGEMENT
                         <span class="badge badge-success"><i class="fas fa-check-circle"></i></span>
                         @endif
                       </td>
-                      @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                       <td class="text-center">
-                        <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
-                        </a>
-                        <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
-                          <i class="fa fa-download"></i> Slip Gaji
-                        </a>
-                      </td>
-                      @else
-                      <td class="text-center">
-                        <a href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('account.camp.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
+                        </a>
+                        <a href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                          <i class="fa fa-eye"></i>
                         </a>
                         <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
+                        <a href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">
+                          <i class="fa fa-download"></i>
                         </a>
-                        <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
-                          <i class="fa fa-download"></i> Slip Gaji
-                        </a>
+
                       </td>
-                      @endif
                     </tr>
                     @php
                     $no++;
                     $terbayarCount++;
                     @endphp
-                    @endif
                     @endforeach
                   </tbody>
                 </table>
                 <div style="text-align: center">
-                  {{$gaji->links("vendor.pagination.bootstrap-4")}}
+                  {{$camp->links("vendor.pagination.bootstrap-4")}}
                 </div>
 
               </div>
             </div>
           </div>
-
         </div>
 
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
-        <table class="table table-bordered mt-5" style="border: 2px solid red;">
-          <thead>
-            <tr>
-              <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;"><b>TOTAL GAJI</b></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="text-align: center; font-weight: bold;">
-              <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
-            </tr>
-          </tbody>
-        </table>
-        @endif
     </div>
   </section>
 </div>
@@ -419,7 +287,7 @@ List Gaji Karyawan | MANAGEMENT
       if (isConfirm) {
         // ajax delete
         $.ajax({
-          url: "/account/gaji/" + id,
+          url: "/account/camp/" + id,
           data: {
             "_token": token,
             "_method": "DELETE"

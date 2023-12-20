@@ -157,4 +157,16 @@ Route::prefix('account')->group(function () {
     Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
 
     Route::get('/get-user-phone/{userId}', 'account\PresensiController@getUserPhone')->name('account.getUserPhone');
+
+    // laporan camp
+    Route::get('/camp', 'account\CampController@index')->name('account.camp.index');
+    Route::get('/camp/create', 'account\CampController@create')->name('account.camp.create');
+    Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
+    Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
+    Route::get('/camp/{id}/detail', 'account\CampController@detail')->name('account.camp.detail');
+    Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
+    Route::get('/camp/{id}/edit', 'account\CampController@edit')->name('account.camp.edit');
+    Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
+    Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
+    Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 });

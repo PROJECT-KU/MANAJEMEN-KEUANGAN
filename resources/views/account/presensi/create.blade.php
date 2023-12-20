@@ -118,7 +118,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                       <!-- <option value="lembur">LEMBUR</option>
                   <option value="cuti">CUTI</option>
                   <option value="pulang" disabled>PULANG</option> -->
-                      @elseif (date('H:i') >= '12:00:00' && date('H:i:s') <= '19:59:59' ) <option value="terlambat">HADIR</option>
+                      @elseif (date('H:i') >= '12:00:00' && date('H:i:s') <= '22:59:59' ) <option value="terlambat">HADIR</option>
                         <option value="perjalanan luar kota">PERJALANAN LUAR KOTA</option>
                         <option value="terlambat">CAMP JOGJA</option>
                         <option value="remote">REMOTE</option>
@@ -127,9 +127,8 @@ Tambah Presensi Karyawan | MANAGEMENT
                         <!-- <option value="lembur">LEMBUR</option>
                     <option value="cuti">CUTI</option>
                     <option value="pulang">PULANG</option> -->
-                        @elseif (date('H:i:s') >= '22:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '08:00:00' ) <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 08:00.</option>
-                            @else
-                            <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 08:00.</option>
+                        @elseif (date('H:i:s') >= '23:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '08:00:00' ) <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 08:00.</option>
+
                             @endif
                   </select>
 
