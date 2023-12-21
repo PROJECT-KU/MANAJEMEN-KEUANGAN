@@ -421,7 +421,7 @@ Update Pengguna | MANAGEMENT
         var phoneNumber = input.value.replace(/\D/g, '');
 
         // Menggunakan ekspresi reguler untuk memformat nomor telepon
-        phoneNumber = phoneNumber.replace(/(\d{4})(\d{3})(\d{3})(\d{3})/, '$1-$2-$3');
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{3})(\d{3})(\d{3})/, '$1-$2-$3-$4');
 
         // Mengatur nilai input dengan nomor telepon yang diformat
         input.value = phoneNumber;
