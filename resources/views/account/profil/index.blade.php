@@ -77,8 +77,7 @@ Profil | MANAGEMENT
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>No Telp</label>
-                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
-
+                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
                     @error('telp')
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
@@ -132,8 +131,6 @@ Profil | MANAGEMENT
                   </div>
                 </div>
               </div>
-
-
 
               <div class="row">
                 <div class="col-md-4">
@@ -264,7 +261,7 @@ Profil | MANAGEMENT
                   <div class="form-group">
                     <label>JOBDESK</label>
                     <div class="input-group">
-                      <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required>{{ old('jobdesk', $user->jobdesk) }}</textarea>
+                      <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
                     </div>
                     @error('jobdesk')
                     <div class="invalid-feedback" style="display: block">
