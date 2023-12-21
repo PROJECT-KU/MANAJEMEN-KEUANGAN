@@ -77,7 +77,7 @@ Profil | MANAGEMENT
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>No Telp</label>
-                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
                     @error('telp')
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
@@ -304,20 +304,8 @@ Profil | MANAGEMENT
     // Menghapus semua karakter non-digit
     var phoneNumber = input.value.replace(/\D/g, '');
 
-    // Menentukan panjang nomor telepon
-    var len = phoneNumber.length;
-
     // Menggunakan ekspresi reguler untuk memformat nomor telepon
-    if (len === 11) {
-      phoneNumber = phoneNumber.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
-    } else if (len === 12) {
-      phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
-    } else if (len === 13) {
-      phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{5})/, '$1-$2-$3');
-    } else {
-      // Jika panjang nomor telepon tidak sesuai, biarkan seperti itu
-      console.log("Panjang nomor telepon tidak valid");
-    }
+    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
 
     // Mengatur nilai input dengan nomor telepon yang diformat
     input.value = phoneNumber;
