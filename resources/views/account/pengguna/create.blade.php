@@ -79,7 +79,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="tel" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                                    <input type="tel" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -352,28 +352,16 @@ Tambah Pengguna | MANAGEMENT
 
 <!--================== format telp ==================-->
 <script>
-    function formatPhoneNumber(input) {
-        // Menghapus semua karakter non-digit
-        var phoneNumber = input.value.replace(/\D/g, '');
+  function formatPhoneNumber(input) {
+    // Menghapus semua karakter non-digit
+    var phoneNumber = input.value.replace(/\D/g, '');
 
-        // Menentukan panjang nomor telepon
-        var len = phoneNumber.length;
+    // Menggunakan ekspresi reguler untuk memformat nomor telepon
+    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
 
-        // Menggunakan ekspresi reguler untuk memformat nomor telepon
-        if (len === 11) {
-            phoneNumber = phoneNumber.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
-        } else if (len === 12) {
-            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
-        } else if (len === 13) {
-            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{5})/, '$1-$2-$3');
-        } else {
-            // Jika panjang nomor telepon tidak sesuai, biarkan seperti itu
-            console.log("Panjang nomor telepon tidak valid");
-        }
-
-        // Mengatur nilai input dengan nomor telepon yang diformat
-        input.value = phoneNumber;
-    }
+    // Mengatur nilai input dengan nomor telepon yang diformat
+    input.value = phoneNumber;
+  }
 </script>
 <!--================== end ==================-->
 
