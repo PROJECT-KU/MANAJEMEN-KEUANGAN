@@ -356,8 +356,20 @@ Tambah Pengguna | MANAGEMENT
         // Menghapus semua karakter non-digit
         var phoneNumber = input.value.replace(/\D/g, '');
 
+        // Menentukan panjang nomor telepon
+        var len = phoneNumber.length;
+
         // Menggunakan ekspresi reguler untuk memformat nomor telepon
-        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        if (len === 11) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
+        } else if (len === 12) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (len === 13) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{5})/, '$1-$2-$3');
+        } else {
+            // Jika panjang nomor telepon tidak sesuai, biarkan seperti itu
+            console.log("Panjang nomor telepon tidak valid");
+        }
 
         // Mengatur nilai input dengan nomor telepon yang diformat
         input.value = phoneNumber;
