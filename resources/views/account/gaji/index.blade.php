@@ -301,7 +301,7 @@ List Gaji Karyawan | MANAGEMENT
                   </tbody>
                 </table>
                 <div style="text-align: center">
-                  {{$gaji->links("vendor.pagination.bootstrap-4")}}
+                  {{ $gaji->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
                 </div>
 
               </div>
