@@ -145,15 +145,15 @@ Update Presensi Karyawan | MANAGEMENT
             <option value="camp luar kota" {{ $presensi->status == 'camp luar kota' ? 'selected' : '' }}>CAMP LUAR KOTA</option>
             <option value="remote" {{ $presensi->status == 'remote' ? 'selected' : '' }}>REMOTE</option>
             <option value="izin" {{ $presensi->status == 'izin' ? 'selected' : '' }}>IZIN</option>
-            <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
-            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }}>TERLAMBAT</option>
+            <!-- <option value="cuti" {{ $presensi->status == 'cuti' ? 'selected' : '' }}>CUTI</option>
+            <option value="terlambat" {{ $presensi->status == 'terlambat' ? 'selected' : '' }}>TERLAMBAT</option> -->
           </select>
         </div>
       </div>
       <div class="col-md-6">
         <div class="form-group">
           <label>Status Presensi Pulang</label>
-          <select class="form-control" name="status_pulang" id="status_pulang" required>
+          <select class="form-control" name="status_pulang" id="status_pulang">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
           </select>

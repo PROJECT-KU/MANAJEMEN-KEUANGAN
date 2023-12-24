@@ -242,7 +242,6 @@ List Presensi Karyawan | MANAGEMENT
                     <button class="btn btn-primary mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                     @endif
                   </div>
-
                 </div>
               </form>
             </div>
@@ -280,7 +279,7 @@ List Presensi Karyawan | MANAGEMENT
                       <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th>
+                      <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th> -->
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
                       <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
                     </tr>
@@ -381,13 +380,13 @@ List Presensi Karyawan | MANAGEMENT
                         <span class="badge badge-danger mt-2">PULANG</span>
                         @endif
                       </td>
-                      <td class="column-width" style="text-align: center;">
+                      <!-- <td class="column-width" style="text-align: center;">
                         <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
                           <div class="thumbnail-circle">
                             <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
                           </div>
                         </a>
-                      </td>
+                      </td> -->
                       <td class="column-width" style="text-align: center;">
                         <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
                           Lihat di Google Maps
