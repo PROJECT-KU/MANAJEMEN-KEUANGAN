@@ -333,9 +333,9 @@ List Presensi Karyawan | MANAGEMENT
                         @elseif ($hasil->status == 'camp jogja')
                         <span class="badge badge-success mt-2">CAMP JOGJA</span>
                         @elseif ($hasil->status == 'perjalanan luar kota jawa')
-                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA (Di dalam Jawa)</span>
+                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA DALAM JAWA</span>
                         @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
-                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA (Di luar Jawa)</span>
+                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA LUAR JAWA</span>
                         @elseif ($hasil->status == 'camp luar kota')
                         <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status == 'remote')
@@ -359,9 +359,9 @@ List Presensi Karyawan | MANAGEMENT
                         @elseif ($hasil->status_pulang == 'camp jogja')
                         <span class="badge badge-success">CAMP JOGJA</span>
                         @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
-                        <span class="badge badge-info">PERJALANAN LUAR KOTA (Di dalam Jawa)</span>
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA DALAM JAWA</span>
                         @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
-                        <span class="badge badge-info">PERJALANAN LUAR KOTA (Di luar Jawa)</span>
+                        <span class="badge badge-info">PERJALANAN LUAR KOTA LUAR JAWA</span>
                         @elseif ($hasil->status_pulang == 'camp luar kota')
                         <span class="badge badge-success">CAMP LUAR KOTA</span>
                         @elseif ($hasil->status_pulang == 'remote')
@@ -398,44 +398,15 @@ List Presensi Karyawan | MANAGEMENT
                           <i class="fa fa-eye"></i>
                         </a>
                       </td>
-                      @elseif (Auth::user()->level == 'admin')
-                      <td class="text-center">
-                        <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                          <i class="fa fa-pencil-alt"></i>
-                        </a>
-                        <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                        <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
-                        </a>
-
-                        @php
-                        $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
-                        $currentTime = date('H:i:s'); // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
-                        @endphp
-                        @if ($currentDay == 1 && ($currentTime >= '06:00:00' && $currentTime <= '10:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                          @elseif ($currentDay == 1 && ($currentTime >= '18:00:00' && $currentTime <= '19:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 15.00 - 17.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                            @elseif ($currentDay == 1 && ($currentTime >= '19:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                              @elseif (in_array($currentDay, [2, 3]))
-                              <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{$hasil->full_name}}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                              @elseif ($currentDay == 4 && ($currentTime >= '10:00:00' && $currentTime <= '14:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                @elseif ($currentDay == 4 && ($currentTime >= '14:00:00' && $currentTime <= '15:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                  @elseif ($currentDay == 4 && ($currentTime >= '15:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                    @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '06:00:00' && $currentTime <= '08:30:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }} . Anda telah melakukan presensi kehadiran pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                      @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '08:30:00' && $currentTime <= '19:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                        @elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '19:00:00' && $currentTime <= '22:00:00' )) <a href="https://wa.me/{{$hasil->telp}}?text=Hi,{{ $hasil->full_name }}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }} dan pulang pada pukul {{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }} pada tanggal {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}" class="btn btn-primary mt-1"><i class="fab fa-whatsapp"></i></a>
-                                          @endif
-                      </td>
                       @else
                       <td class="text-center">
-                        <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
                       </td>

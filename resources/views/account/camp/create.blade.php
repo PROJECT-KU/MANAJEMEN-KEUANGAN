@@ -138,6 +138,261 @@ Tambah Gaji Karyawan | MANAGEMENT
     }
   }
 </style>
+
+<!--================== button tiket trainer berangkat responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addTiketTrainerBerangkat,
+  #removeTiketTrainerBerangkat1,
+  #removeTiketTrainerBerangkat2,
+  #removeTiketTrainerBerangkat3,
+  #removeTiketTrainerBerangkat4,
+  #removeTiketTrainerBerangkat5,
+  #removeTiketTrainerBerangkat6,
+  #removeTiketTrainerBerangkat7 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addTiketTrainerBerangkat,
+    #removeTiketTrainerBerangkat1,
+    #removeTiketTrainerBerangkat2,
+    #removeTiketTrainerBerangkat3,
+    #removeTiketTrainerBerangkat4,
+    #removeTiketTrainerBerangkat5,
+    #removeTiketTrainerBerangkat6,
+    #removeTiketTrainerBerangkat7 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addTiketTrainerBerangkat,
+    #removeTiketTrainerBerangkat1,
+    #removeTiketTrainerBerangkat2,
+    #removeTiketTrainerBerangkat3,
+    #removeTiketTrainerBerangkat4,
+    #removeTiketTrainerBerangkat5,
+    #removeTiketTrainerBerangkat6,
+    #removeTiketTrainerBerangkat7 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addTiketTrainerBerangkat,
+    #removeTiketTrainerBerangkat1,
+    #removeTiketTrainerBerangkat2,
+    #removeTiketTrainerBerangkat3,
+    #removeTiketTrainerBerangkat4,
+    #removeTiketTrainerBerangkat5,
+    #removeTiketTrainerBerangkat6,
+    #removeTiketTrainerBerangkat7 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
+<!--================== end ==================-->
+
+<!--================== button tiket trainer pulang responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addTiketTrainerPulang,
+  #removeTiketTrainerPulang1,
+  #removeTiketTrainerPulang2,
+  #removeTiketTrainerPulang3,
+  #removeTiketTrainerPulang4,
+  #removeTiketTrainerPulang5,
+  #removeTiketTrainerPulang6,
+  #removeTiketTrainerPulang7 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addTiketTrainerPulang,
+    #removeTiketTrainerPulang1,
+    #removeTiketTrainerPulang2,
+    #removeTiketTrainerPulang3,
+    #removeTiketTrainerPulang4,
+    #removeTiketTrainerPulang5,
+    #removeTiketTrainerPulang6,
+    #removeTiketTrainerPulang7 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addTiketTrainerPulang,
+    #removeTiketTrainerPulang1,
+    #removeTiketTrainerPulang2,
+    #removeTiketTrainerPulang3,
+    #removeTiketTrainerPulang4,
+    #removeTiketTrainerPulang5,
+    #removeTiketTrainerPulang6,
+    #removeTiketTrainerPulang7 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addTiketTrainerPulang,
+    #removeTiketTrainerPulang1,
+    #removeTiketTrainerPulang2,
+    #removeTiketTrainerPulang3,
+    #removeTiketTrainerPulang4,
+    #removeTiketTrainerPulang5,
+    #removeTiketTrainerPulang6,
+    #removeTiketTrainerPulang7 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
+<!--================== end ==================-->
+
+<!--================== button tiket team berangkat responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addTiketTeamBerangkat,
+  #removeTiketTeamBerangkat1,
+  #removeTiketTeamBerangkat2,
+  #removeTiketTeamBerangkat3,
+  #removeTiketTeamBerangkat4,
+  #removeTiketTeamBerangkat5,
+  #removeTiketTeamBerangkat6,
+  #removeTiketTeamBerangkat7 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addTiketTeamBerangkat,
+    #removeTiketTeamBerangkat1,
+    #removeTiketTeamBerangkat2,
+    #removeTiketTeamBerangkat3,
+    #removeTiketTeamBerangkat4,
+    #removeTiketTeamBerangkat5,
+    #removeTiketTeamBerangkat6,
+    #removeTiketTeamBerangkat7 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addTiketTeamBerangkat,
+    #removeTiketTeamBerangkat1,
+    #removeTiketTeamBerangkat2,
+    #removeTiketTeamBerangkat3,
+    #removeTiketTeamBerangkat4,
+    #removeTiketTeamBerangkat5,
+    #removeTiketTeamBerangkat6,
+    #removeTiketTeamBerangkat7 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addTiketTeamBerangkat,
+    #removeTiketTeamBerangkat1,
+    #removeTiketTeamBerangkat2,
+    #removeTiketTeamBerangkat3,
+    #removeTiketTeamBerangkat4,
+    #removeTiketTeamBerangkat5,
+    #removeTiketTeamBerangkat6,
+    #removeTiketTeamBerangkat7 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
+<!--================== end ==================-->
+
+<!--================== button tiket team pulang responsive ==================-->
+<style>
+  /* Default styling for the button */
+  #addTiketTeamPulang,
+  #removeTiketTeamPulang1,
+  #removeTiketTeamPulang2,
+  #removeTiketTeamPulang3,
+  #removeTiketTeamPulang4,
+  #removeTiketTeamPulang5,
+  #removeTiketTeamPulang6,
+  #removeTiketTeamPulang7 {
+    height: 40px;
+    white-space: nowrap;
+  }
+
+  /* Media query for handphones (width 767px or less) */
+  @media (max-width: 767px) {
+
+    #addTiketTeamPulang,
+    #removeTiketTeamPulang1,
+    #removeTiketTeamPulang2,
+    #removeTiketTeamPulang3,
+    #removeTiketTeamPulang4,
+    #removeTiketTeamPulang5,
+    #removeTiketTeamPulang6,
+    #removeTiketTeamPulang7 {
+      width: 100%;
+    }
+  }
+
+  /* Media query for tablets (width between 768px and 991px) */
+  @media (min-width: 768px) and (max-width: 991px) {
+
+    #addTiketTeamPulang,
+    #removeTiketTeamPulang1,
+    #removeTiketTeamPulang2,
+    #removeTiketTeamPulang3,
+    #removeTiketTeamPulang4,
+    #removeTiketTeamPulang5,
+    #removeTiketTeamPulang6,
+    #removeTiketTeamPulang7 {
+      width: auto;
+      /* atau atur sesuai kebutuhan pada tablet */
+    }
+  }
+
+  /* Styling for larger screens (laptops, monitors) */
+  @media (min-width: 992px) {
+
+    #addTiketTeamPulang,
+    #removeTiketTeamPulang1,
+    #removeTiketTeamPulang2,
+    #removeTiketTeamPulang3,
+    #removeTiketTeamPulang4,
+    #removeTiketTeamPulang5,
+    #removeTiketTeamPulang6,
+    #removeTiketTeamPulang7 {
+      width: auto;
+      /* Atur sesuai kebutuhan pada laptop atau monitor */
+    }
+  }
+</style>
 <!--================== end ==================-->
 
 @section('content')
@@ -204,7 +459,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Tanggal Mulai Camp</label>
-                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
+                  <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
                 </div>
                 @error('tanggal')
                 <div class="invalid-feedback" style="display: block">
@@ -216,7 +471,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Tanggal Berakhir Camp</label>
-                  <input type="datetime-local" name="tanggal_akhir" id="tanggal_akhir" value="{{ old('tanggal_akhir') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
+                  <input type="date" name="tanggal_akhir" id="tanggal_akhir" value="{{ old('tanggal_akhir') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
                 </div>
                 @error('tanggal_akhir')
                 <div class="invalid-feedback" style="display: block">
@@ -243,7 +498,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="uang_masuk" value="{{ old('uang_masuk') }}" placeholder="Masukkan Total Uang Masuk" class="form-control currency" required>
+                  <input type="text" name="uang_masuk" value="{{ old('uang_masuk') }}" placeholder="Total Uang Masuk" class="form-control currency" required>
                 </div>
                 @error('uang_masuk')
                 <div class="invalid-feedback" style="display: block">
@@ -260,7 +515,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="lain_lain" value="{{ old('lain_lain') }}" placeholder="Masukkan Total Uang Masuk Lainnya" class="form-control currency1">
+                  <input type="text" name="lain_lain" value="{{ old('lain_lain') }}" placeholder="Total Uang Masuk Lainnya" class="form-control currency1">
                 </div>
                 @error('lain_lain')
                 <div class="invalid-feedback" style="display: block">
@@ -281,7 +536,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer" value="{{ old('gaji_trainer') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer">
+                  <input type="text" name="gaji_trainer" value="{{ old('gaji_trainer') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer">
                 </div>
                 @error('gaji_trainer')
                 <div class="invalid-feedback" style="display: block">
@@ -325,7 +580,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer1" value="{{ old('gaji_trainer1') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer1">
+                  <input type="text" name="gaji_trainer1" value="{{ old('gaji_trainer1') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer1">
                 </div>
                 @error('gaji_trainer1')
                 <div class="invalid-feedback" style="display: block">
@@ -368,7 +623,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer2" value="{{ old('gaji_trainer2') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer2">
+                  <input type="text" name="gaji_trainer2" value="{{ old('gaji_trainer2') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer2">
                 </div>
                 @error('gaji_trainer2')
                 <div class="invalid-feedback" style="display: block">
@@ -411,7 +666,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer3" value="{{ old('gaji_trainer3') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer3">
+                  <input type="text" name="gaji_trainer3" value="{{ old('gaji_trainer3') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer3">
                 </div>
                 @error('gaji_trainer3')
                 <div class="invalid-feedback" style="display: block">
@@ -454,7 +709,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer4" value="{{ old('gaji_trainer4') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer4">
+                  <input type="text" name="gaji_trainer4" value="{{ old('gaji_trainer4') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer4">
                 </div>
                 @error('gaji_trainer4')
                 <div class="invalid-feedback" style="display: block">
@@ -497,7 +752,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer5" value="{{ old('gaji_trainer5') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer5">
+                  <input type="text" name="gaji_trainer5" value="{{ old('gaji_trainer5') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer5">
                 </div>
                 @error('gaji_trainer5')
                 <div class="invalid-feedback" style="display: block">
@@ -540,7 +795,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_trainer6" value="{{ old('gaji_trainer6') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer6">
+                  <input type="text" name="gaji_trainer6" value="{{ old('gaji_trainer6') }}" placeholder="Total Uang Keluar Gaji Trainer" class="form-control currency_gaji_trainer6">
                 </div>
                 @error('gaji_trainer6')
                 <div class="invalid-feedback" style="display: block">
@@ -585,7 +840,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team" value="{{ old('gaji_team') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team">
+                  <input type="text" name="gaji_team" value="{{ old('gaji_team') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team">
                 </div>
                 @error('gaji_team')
                 <div class="invalid-feedback" style="display: block">
@@ -599,7 +854,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama" value="{{ old('gaji_team_nama') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama" value="{{ old('gaji_team_nama') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama')
                 <div class="invalid-feedback" style="display: block">
@@ -629,7 +884,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team1" value="{{ old('gaji_team1') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team1">
+                  <input type="text" name="gaji_team1" value="{{ old('gaji_team1') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team1">
                 </div>
                 @error('gaji_team1')
                 <div class="invalid-feedback" style="display: block">
@@ -643,7 +898,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama1" value="{{ old('gaji_team_nama1') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama1" value="{{ old('gaji_team_nama1') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama1')
                 <div class="invalid-feedback" style="display: block">
@@ -672,7 +927,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team2" value="{{ old('gaji_team2') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team2">
+                  <input type="text" name="gaji_team2" value="{{ old('gaji_team2') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team2">
                 </div>
                 @error('gaji_team2')
                 <div class="invalid-feedback" style="display: block">
@@ -686,7 +941,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama2" value="{{ old('gaji_team_nama2') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama2" value="{{ old('gaji_team_nama2') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama2')
                 <div class="invalid-feedback" style="display: block">
@@ -715,7 +970,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team3" value="{{ old('gaji_team3') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team3">
+                  <input type="text" name="gaji_team3" value="{{ old('gaji_team3') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team3">
                 </div>
                 @error('gaji_team3')
                 <div class="invalid-feedback" style="display: block">
@@ -729,7 +984,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama3" value="{{ old('gaji_team_nama3') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama3" value="{{ old('gaji_team_nama3') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama3')
                 <div class="invalid-feedback" style="display: block">
@@ -758,7 +1013,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team4" value="{{ old('gaji_team4') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team4">
+                  <input type="text" name="gaji_team4" value="{{ old('gaji_team4') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team4">
                 </div>
                 @error('gaji_team4')
                 <div class="invalid-feedback" style="display: block">
@@ -772,7 +1027,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama4" value="{{ old('gaji_team_nama4') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama4" value="{{ old('gaji_team_nama4') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama4')
                 <div class="invalid-feedback" style="display: block">
@@ -801,7 +1056,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team5" value="{{ old('gaji_team5') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team5">
+                  <input type="text" name="gaji_team5" value="{{ old('gaji_team5') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team5">
                 </div>
                 @error('gaji_team5')
                 <div class="invalid-feedback" style="display: block">
@@ -815,7 +1070,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama5" value="{{ old('gaji_team_nama5') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama5" value="{{ old('gaji_team_nama5') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama5')
                 <div class="invalid-feedback" style="display: block">
@@ -844,7 +1099,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team6" value="{{ old('gaji_team6') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team6">
+                  <input type="text" name="gaji_team6" value="{{ old('gaji_team6') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team6">
                 </div>
                 @error('gaji_team6')
                 <div class="invalid-feedback" style="display: block">
@@ -858,7 +1113,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama6" value="{{ old('gaji_team_nama6') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama6" value="{{ old('gaji_team_nama6') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama6')
                 <div class="invalid-feedback" style="display: block">
@@ -887,7 +1142,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team7" value="{{ old('gaji_team7') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team7">
+                  <input type="text" name="gaji_team7" value="{{ old('gaji_team7') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team7">
                 </div>
                 @error('gaji_team7')
                 <div class="invalid-feedback" style="display: block">
@@ -901,7 +1156,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama7" value="{{ old('gaji_team_nama7') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama7" value="{{ old('gaji_team_nama7') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama7')
                 <div class="invalid-feedback" style="display: block">
@@ -930,7 +1185,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team8" value="{{ old('gaji_team8') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team8">
+                  <input type="text" name="gaji_team8" value="{{ old('gaji_team8') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team8">
                 </div>
                 @error('gaji_team8')
                 <div class="invalid-feedback" style="display: block">
@@ -944,7 +1199,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama8" value="{{ old('gaji_team_nama8') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama8" value="{{ old('gaji_team_nama8') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama8')
                 <div class="invalid-feedback" style="display: block">
@@ -973,7 +1228,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team9" value="{{ old('gaji_team9') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team9">
+                  <input type="text" name="gaji_team9" value="{{ old('gaji_team9') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team9">
                 </div>
                 @error('gaji_team9')
                 <div class="invalid-feedback" style="display: block">
@@ -987,7 +1242,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama9" value="{{ old('gaji_team_nama9') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama9" value="{{ old('gaji_team_nama9') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama9')
                 <div class="invalid-feedback" style="display: block">
@@ -1016,7 +1271,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_team10" value="{{ old('gaji_team10') }}" placeholder="Masukkan Uang Keluar Gaji Team" class="form-control currency_gaji_team10">
+                  <input type="text" name="gaji_team10" value="{{ old('gaji_team10') }}" placeholder="Total Uang Keluar Gaji Team" class="form-control currency_gaji_team10">
                 </div>
                 @error('gaji_team10')
                 <div class="invalid-feedback" style="display: block">
@@ -1030,7 +1285,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama10" value="{{ old('gaji_team_nama10') }}" placeholder="Masukkan Uang Keluar Gaji Trainer" class="form-control">
+                  <input type="text" name="gaji_team_nama10" value="{{ old('gaji_team_nama10') }}" placeholder="Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama10')
                 <div class="invalid-feedback" style="display: block">
@@ -1059,7 +1314,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="team_cabang" value="{{ old('team_cabang') }}" placeholder="Masukkan Uang Keluar Team Cabang" class="form-control currency_team_cabang">
+                  <input type="text" name="team_cabang" value="{{ old('team_cabang') }}" placeholder="Total Uang Keluar Team Cabang" class="form-control currency_team_cabang">
                 </div>
                 @error('team_cabang')
                 <div class="invalid-feedback" style="display: block">
@@ -1076,7 +1331,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="booknote" value="{{ old('booknote') }}" placeholder="Masukkan Uang Keluar Booknote" class="form-control currency_booknote">
+                  <input type="text" name="booknote" value="{{ old('booknote') }}" placeholder="Total Uang Keluar Booknote" class="form-control currency_booknote">
                 </div>
                 @error('booknote')
                 <div class="invalid-feedback" style="display: block">
@@ -1095,7 +1350,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="grammarly" value="{{ old('grammarly') }}" placeholder="Masukkan Uang Keluar Grammarly" class="form-control currency_grammarly">
+                  <input type="text" name="grammarly" value="{{ old('grammarly') }}" placeholder="Total Uang Keluar Grammarly" class="form-control currency_grammarly">
                 </div>
                 @error('grammarly')
                 <div class="invalid-feedback" style="display: block">
@@ -1104,17 +1359,13 @@ Tambah Gaji Karyawan | MANAGEMENT
                 @enderror
               </div>
             </div>
-
             <div class="col-md-6">
               <div class="form-group">
-                <label>Tiket Trainer</label>
+                <label>Jumlah Peserta</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer" value="{{ old('tiket_trainer') }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control currency_tiket_trainer">
+                  <input type="text" name="peserta" value="{{ old('peserta') }}" placeholder="Masukkan Jumlah peserta" class="form-control currency_peserta">
                 </div>
-                @error('tiket_trainer')
+                @error('peserta')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1123,15 +1374,711 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
           </div>
 
+          <!--================== TIKET TRAINER BERANGKAT ==================-->
+          <!-- default -->
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5">
               <div class="form-group">
-                <label>Tiket Team</label>
+                <label>Tiket Trainer Berangkat</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="tiket_team" value="{{ old('tiket_team') }}" placeholder="Masukkan Uang Keluar Tiket Team" class="form-control currency_tiket_team">
+                  <input type="text" name="tiket_trainer" value="{{ old('tiket_trainer') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer">
+                </div>
+                @error('tiket_trainer')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama" value="{{ old('tiket_trainer_nama') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-info mt-2" id="addTiketTrainerBerangkat" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-plus"></i> INPUT
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 1 -->
+          <div class="row TiketTrainerBerangkat-field1" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer1" value="{{ old('tiket_trainer1') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer1">
+                </div>
+                @error('tiket_trainer1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama1" value="{{ old('tiket_trainer_nama1') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat1" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 2 -->
+          <div class="row TiketTrainerBerangkat-field2" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer2" value="{{ old('tiket_trainer2') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer2">
+                </div>
+                @error('tiket_trainer2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama2" value="{{ old('tiket_trainer_nama2') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 3 -->
+          <div class="row TiketTrainerBerangkat-field3" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer3" value="{{ old('tiket_trainer3') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer3">
+                </div>
+                @error('tiket_trainer3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama3" value="{{ old('tiket_trainer_nama3') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 4 -->
+          <div class="row TiketTrainerBerangkat-field4" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer4" value="{{ old('tiket_trainer4') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer4">
+                </div>
+                @error('tiket_trainer4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama4" value="{{ old('tiket_trainer_nama4') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 5 -->
+          <div class="row TiketTrainerBerangkat-field5" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer5" value="{{ old('tiket_trainer5') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer5">
+                </div>
+                @error('tiket_trainer5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama5" value="{{ old('tiket_trainer_nama5') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 6 -->
+          <div class="row TiketTrainerBerangkat-field6" style="display: none;">
+            <div class=" col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer6" value="{{ old('tiket_trainer6') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer6">
+                </div>
+                @error('tiket_trainer6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama6" value="{{ old('tiket_trainer_nama6') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 7 -->
+          <div class="row TiketTrainerBerangkat-field7" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer7" value="{{ old('tiket_trainer7') }}" placeholder="Total Uang Tiket Trainer Berangkat" class="form-control tiket_trainer7">
+                </div>
+                @error('tiket_trainer7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama7" value="{{ old('tiket_trainer_nama7') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerBerangkat7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+          <!--================== end ==================-->
+
+          <!--================== TIKET TRAINER PULANG ==================-->
+          <!-- default -->
+          <div class="row">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang" value="{{ old('tiket_trainer_pulang') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang">
+                </div>
+                @error('tiket_trainer_pulang')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama" value="{{ old('tiket_trainer_pulang_nama') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-info mt-2" id="addTiketTrainerPulang" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-plus"></i> INPUT
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 1 -->
+          <div class="row TiketTrainerPulang-field1" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang1" value="{{ old('tiket_trainer_pulang1') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
+                </div>
+                @error('tiket_trainer_pulang1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama1" value="{{ old('tiket_trainer_pulang_nama1') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang1" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 2 -->
+          <div class="row TiketTrainerPulang-field2" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang2" value="{{ old('tiket_trainer_pulang2') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
+                </div>
+                @error('tiket_trainer_pulang2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama2" value="{{ old('tiket_trainer_pulang_nama2') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 3 -->
+          <div class="row TiketTrainerPulang-field3" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang3" value="{{ old('tiket_trainer_pulang3') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
+                </div>
+                @error('tiket_trainer_pulang3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama3" value="{{ old('tiket_trainer_pulang_nama3') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 4 -->
+          <div class="row TiketTrainerPulang-field4" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang4" value="{{ old('tiket_trainer_pulang4') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
+                </div>
+                @error('tiket_trainer_pulang4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama4" value="{{ old('tiket_trainer_pulang_nama4') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 5 -->
+          <div class="row TiketTrainerPulang-field5" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang5" value="{{ old('tiket_trainer_pulang5') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
+                </div>
+                @error('tiket_trainer_pulang5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama5" value="{{ old('tiket_trainer_pulang_nama5') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 6 -->
+          <div class="row TiketTrainerPulang-field6" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang6" value="{{ old('tiket_trainer_pulang6') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
+                </div>
+                @error('tiket_trainer_pulang6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama6" value="{{ old('tiket_trainer_pulang_nama6') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 7 -->
+          <div class="row TiketTrainerPulang-field7" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Trainer Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang7" value="{{ old('tiket_trainer_pulang7') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
+                </div>
+                @error('tiket_trainer_pulang7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_pulang_nama7" value="{{ old('tiket_trainer_pulang_nama7') }}" placeholder="Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_pulang_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+          <!--================== end ==================-->
+
+          <!--================== TIKET TEAM BERANGKAT ==================-->
+          <!-- default -->
+          <div class="row">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team" value="{{ old('tiket_team') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team">
                 </div>
                 @error('tiket_team')
                 <div class="invalid-feedback" style="display: block">
@@ -1141,7 +2088,682 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama" value="{{ old('tiket_team_nama') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-info mt-2" id="addTiketTeamBerangkat" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-plus"></i> INPUT
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 1 -->
+          <div class="row TiketTeamBerangkat-field1" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team1" value="{{ old('tiket_team1') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team1">
+                </div>
+                @error('tiket_team1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama1" value="{{ old('tiket_team_nama1') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat1" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 2 -->
+          <div class="row TiketTeamBerangkat-field2" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team2" value="{{ old('tiket_team2') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team2">
+                </div>
+                @error('tiket_team2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama2" value="{{ old('tiket_team_nama2') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 3 -->
+          <div class="row TiketTeamBerangkat-field3" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team3" value="{{ old('tiket_team3') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team3">
+                </div>
+                @error('tiket_team3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama3" value="{{ old('tiket_team_nama3') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 4 -->
+          <div class="row TiketTeamBerangkat-field4" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team4" value="{{ old('tiket_team4') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team4">
+                </div>
+                @error('tiket_team4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama4" value="{{ old('tiket_team_nama4') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 5 -->
+          <div class="row TiketTeamBerangkat-field5" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team5" value="{{ old('tiket_team5') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team5">
+                </div>
+                @error('tiket_team5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama5" value="{{ old('tiket_team_nama5') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 6 -->
+          <div class="row TiketTeamBerangkat-field6" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team6" value="{{ old('tiket_team6') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team6">
+                </div>
+                @error('tiket_team6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama6" value="{{ old('tiket_team_nama6') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 7 -->
+          <div class="row TiketTeamBerangkat-field7" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Berangkat</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team7" value="{{ old('tiket_team7') }}" placeholder="Total Uang Tiket Team Berangkat" class="form-control tiket_team7">
+                </div>
+                @error('tiket_team7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama7" value="{{ old('tiket_team_nama7') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamBerangkat7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+          <!--================== end ==================-->
+
+          <!--================== TIKET TEAM PULANG ==================-->
+          <!-- default -->
+          <div class="row">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang" value="{{ old('tiket_team_pulang') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang">
+                </div>
+                @error('tiket_team_pulang')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama" value="{{ old('tiket_team_pulang_nama') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-info mt-2" id="addTiketTeamPulang" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-plus"></i> INPUT
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 1 -->
+          <div class="row TiketTeamPulang-field1" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang1" value="{{ old('tiket_team_pulang1') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
+                </div>
+                @error('tiket_team_pulang1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama1" value="{{ old('tiket_team_pulang_nama1') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang1" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 2 -->
+          <div class="row TiketTeamPulang-field2" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang2" value="{{ old('tiket_team_pulang2') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
+                </div>
+                @error('tiket_team_pulang2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama2" value="{{ old('tiket_team_pulang_nama2') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 3 -->
+          <div class="row TiketTeamPulang-field3" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang3" value="{{ old('tiket_team_pulang3') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
+                </div>
+                @error('tiket_team_pulang3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama3" value="{{ old('tiket_team_pulang_nama3') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 4 -->
+          <div class="row TiketTeamPulang-field4" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang4" value="{{ old('tiket_team_pulang4') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
+                </div>
+                @error('tiket_team_pulang4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama4" value="{{ old('tiket_team_pulang_nama4') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 5 -->
+          <div class="row TiketTeamPulang-field5" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang5" value="{{ old('tiket_team_pulang5') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
+                </div>
+                @error('tiket_team_pulang5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama5" value="{{ old('tiket_team_pulang_nama5') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 6 -->
+          <div class="row TiketTeamPulang-field6" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang6" value="{{ old('tiket_team_pulang6') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
+                </div>
+                @error('tiket_team_pulang6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama6" value="{{ old('tiket_team_pulang_nama6') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+
+          <!-- 7 -->
+          <div class="row TiketTeamPulang-field7" style="display: none;">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Tiket Team Pulang</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang7" value="{{ old('tiket_team_pulang7') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
+                </div>
+                @error('tiket_team_pulang7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_pulang_nama7" value="{{ old('tiket_team_pulang_nama7') }}" placeholder="Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_pulang_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-1 col-12">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div>
+          </div>
+          <!-- end -->
+          <!--================== end ==================-->
+
+          <div class="row">
+            <div class="col-md-4">
               <div class="form-group">
                 <label>Hotel</label>
                 <div class="input-group">
@@ -1157,10 +2779,8 @@ Tambah Gaji Karyawan | MANAGEMENT
                 @enderror
               </div>
             </div>
-          </div>
 
-          <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label>Konsumsi Tambahan</label>
                 <div class="input-group">
@@ -1177,7 +2797,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label>Lain-Lain</label>
                 <div class="input-group">
@@ -1458,6 +3078,658 @@ Tambah Gaji Karyawan | MANAGEMENT
       $('.currency_gaji_team10').val('');
       $('[name="gaji_team_nama10"]').val('');
     });
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== add dan remove field tiket trainer berangkat ==================-->
+<script>
+  $(document).ready(function() {
+
+    var TiketTrainerBerangkatCounter = 0;
+
+    $('#addTiketTrainerBerangkat').on('click', function() {
+      if (TiketTrainerBerangkatCounter === 0) {
+        $('.TiketTrainerBerangkat-field1').show();
+        $('#removeTiketTrainerBerangkat1').show();
+        $('#removeTiketTrainerBerangkat2').show();
+        $('#removeTiketTrainerBerangkat3').show();
+        $('#removeTiketTrainerBerangkat4').show();
+        $('#removeTiketTrainerBerangkat5').show();
+        $('#removeTiketTrainerBerangkat6').show();
+        $('#removeTiketTrainerBerangkat7').show();
+        $('#removeTiketTrainerBerangkat8').show();
+        $('#removeTiketTrainerBerangkat9').show();
+        $('#removeTiketTrainerBerangkat10').show();
+      } else if (TiketTrainerBerangkatCounter === 1) {
+        $('.TiketTrainerBerangkat-field2').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat2').show();
+      } else if (TiketTrainerBerangkatCounter === 2) {
+        $('.TiketTrainerBerangkat-field3').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat3').show();
+      } else if (TiketTrainerBerangkatCounter === 3) {
+        $('.TiketTrainerBerangkat-field4').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat4').show();
+      } else if (TiketTrainerBerangkatCounter === 4) {
+        $('.TiketTrainerBerangkat-field5').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat5').show();
+      } else if (TiketTrainerBerangkatCounter === 5) {
+        $('.TiketTrainerBerangkat-field6').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat6').show();
+      } else if (TiketTrainerBerangkatCounter === 6) {
+        $('.TiketTrainerBerangkat-field7').show();
+        $('#addTiketTrainerBerangkat').hide();
+        $('#removeTiketTrainerBerangkat7').show();
+      } else if (TiketTrainerBerangkatCounter === 7) {
+        $('.TiketTrainerBerangkat-field8').show();
+        $('#addTiketTrainerBerangkat').show();
+        $('#removeTiketTrainerBerangkat8').show();
+      }
+      TiketTrainerBerangkatCounter++;
+    });
+
+    // Remove additional team fields
+    $('#removeTiketTrainerBerangkat1').on('click', function() {
+      $('.TiketTrainerBerangkat-field1').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer').val('');
+      $('[name="tiket_trainer"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat2').on('click', function() {
+      $('.TiketTrainerBerangkat-field2').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer1').val('');
+      $('[name="tiket_trainer1"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat3').on('click', function() {
+      $('.TiketTrainerBerangkat-field3').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer2').val('');
+      $('[name="tiket_trainer2"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat4').on('click', function() {
+      $('.TiketTrainerBerangkat-field4').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer3').val('');
+      $('[name="tiket_trainer3"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat5').on('click', function() {
+      $('.TiketTrainerBerangkat-field5').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer4').val('');
+      $('[name="tiket_trainer4"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat6').on('click', function() {
+      $('.TiketTrainerBerangkat-field6').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer5').val('');
+      $('[name="tiket_trainer5"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat7').on('click', function() {
+      $('.TiketTrainerBerangkat-field7').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer6').val('');
+      $('[name="tiket_trainer6"]').val('');
+    });
+
+    $('#removeTiketTrainerBerangkat8').on('click', function() {
+      $('.TiketTrainerBerangkat-field8').hide();
+      $('#addTiketTrainerBerangkat').show();
+      TiketTrainerBerangkatCounter--;
+      $('.currency_tiket_trainer7').val('');
+      $('[name="tiket_trainer7"]').val('');
+    });
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== format rupiah tiket trainer berangkat ==================-->
+<script>
+  var cleaveC = new Cleave('.tiket_trainer', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer2', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer4', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer6', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer7', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== add dan remove field tiket trainer pulang ==================-->
+<script>
+  $(document).ready(function() {
+
+    var TiketTrainerPulangCounter = 0;
+
+    $('#addTiketTrainerPulang').on('click', function() {
+      if (TiketTrainerPulangCounter === 0) {
+        $('.TiketTrainerPulang-field1').show();
+        $('#removeTiketTrainerPulang1').show();
+        $('#removeTiketTrainerPulang2').show();
+        $('#removeTiketTrainerPulang3').show();
+        $('#removeTiketTrainerPulang4').show();
+        $('#removeTiketTrainerPulang5').show();
+        $('#removeTiketTrainerPulang6').show();
+        $('#removeTiketTrainerPulang7').show();
+        $('#removeTiketTrainerPulang8').show();
+        $('#removeTiketTrainerPulang9').show();
+        $('#removeTiketTrainerPulang10').show();
+      } else if (TiketTrainerPulangCounter === 1) {
+        $('.TiketTrainerPulang-field2').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang2').show();
+      } else if (TiketTrainerPulangCounter === 2) {
+        $('.TiketTrainerPulang-field3').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang3').show();
+      } else if (TiketTrainerPulangCounter === 3) {
+        $('.TiketTrainerPulang-field4').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang4').show();
+      } else if (TiketTrainerPulangCounter === 4) {
+        $('.TiketTrainerPulang-field5').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang5').show();
+      } else if (TiketTrainerPulangCounter === 5) {
+        $('.TiketTrainerPulang-field6').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang6').show();
+      } else if (TiketTrainerPulangCounter === 6) {
+        $('.TiketTrainerPulang-field7').show();
+        $('#addTiketTrainerPulang').hide();
+        $('#removeTiketTrainerPulang7').show();
+      } else if (TiketTrainerPulangCounter === 7) {
+        $('.TiketTrainerPulang-field8').show();
+        $('#addTiketTrainerPulang').show();
+        $('#removeTiketTrainerPulang8').show();
+      }
+      TiketTrainerPulangCounter++;
+    });
+
+    // Remove additional team fields
+    $('#removeTiketTrainerPulang1').on('click', function() {
+      $('.TiketTrainerPulang-field1').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer').val('');
+      $('[name="tiket_trainer"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang2').on('click', function() {
+      $('.TiketTrainerPulang-field2').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer1').val('');
+      $('[name="tiket_trainer1"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang3').on('click', function() {
+      $('.TiketTrainerPulang-field3').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer2').val('');
+      $('[name="tiket_trainer2"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang4').on('click', function() {
+      $('.TiketTrainerPulang-field4').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer3').val('');
+      $('[name="tiket_trainer3"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang5').on('click', function() {
+      $('.TiketTrainerPulang-field5').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer4').val('');
+      $('[name="tiket_trainer4"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang6').on('click', function() {
+      $('.TiketTrainerPulang-field6').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer5').val('');
+      $('[name="tiket_trainer5"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang7').on('click', function() {
+      $('.TiketTrainerPulang-field7').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer6').val('');
+      $('[name="tiket_trainer6"]').val('');
+    });
+
+    $('#removeTiketTrainerPulang8').on('click', function() {
+      $('.TiketTrainerPulang-field8').hide();
+      $('#addTiketTrainerPulang').show();
+      TiketTrainerPulangCounter--;
+      $('.currency_tiket_trainer7').val('');
+      $('[name="tiket_trainer7"]').val('');
+    });
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== format rupiah tiket trainer pulang ==================-->
+<script>
+  var cleaveC = new Cleave('.tiket_trainer_pulang', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang2', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang4', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang6', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_trainer_pulang7', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== add dan remove field tiket team berangkat ==================-->
+<script>
+  $(document).ready(function() {
+
+    var TiketTeamBerangkatCounter = 0;
+
+    $('#addTiketTeamBerangkat').on('click', function() {
+      if (TiketTeamBerangkatCounter === 0) {
+        $('.TiketTeamBerangkat-field1').show();
+        $('#removeTiketTeamBerangkat1').show();
+        $('#removeTiketTeamBerangkat2').show();
+        $('#removeTiketTeamBerangkat3').show();
+        $('#removeTiketTeamBerangkat4').show();
+        $('#removeTiketTeamBerangkat5').show();
+        $('#removeTiketTeamBerangkat6').show();
+        $('#removeTiketTeamBerangkat7').show();
+        $('#removeTiketTeamBerangkat8').show();
+        $('#removeTiketTeamBerangkat9').show();
+        $('#removeTiketTeamBerangkat10').show();
+      } else if (TiketTeamBerangkatCounter === 1) {
+        $('.TiketTeamBerangkat-field2').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat2').show();
+      } else if (TiketTeamBerangkatCounter === 2) {
+        $('.TiketTeamBerangkat-field3').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat3').show();
+      } else if (TiketTeamBerangkatCounter === 3) {
+        $('.TiketTeamBerangkat-field4').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat4').show();
+      } else if (TiketTeamBerangkatCounter === 4) {
+        $('.TiketTeamBerangkat-field5').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat5').show();
+      } else if (TiketTeamBerangkatCounter === 5) {
+        $('.TiketTeamBerangkat-field6').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat6').show();
+      } else if (TiketTeamBerangkatCounter === 6) {
+        $('.TiketTeamBerangkat-field7').show();
+        $('#addTiketTeamBerangkat').hide();
+        $('#removeTiketTeamBerangkat7').show();
+      } else if (TiketTeamBerangkatCounter === 7) {
+        $('.TiketTeamBerangkat-field8').show();
+        $('#addTiketTeamBerangkat').show();
+        $('#removeTiketTeamBerangkat8').show();
+      }
+      TiketTeamBerangkatCounter++;
+    });
+
+    // Remove additional team fields
+    $('#removeTiketTeamBerangkat1').on('click', function() {
+      $('.TiketTeamBerangkat-field1').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer').val('');
+      $('[name="tiket_trainer"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat2').on('click', function() {
+      $('.TiketTeamBerangkat-field2').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer1').val('');
+      $('[name="tiket_trainer1"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat3').on('click', function() {
+      $('.TiketTeamBerangkat-field3').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer2').val('');
+      $('[name="tiket_trainer2"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat4').on('click', function() {
+      $('.TiketTeamBerangkat-field4').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer3').val('');
+      $('[name="tiket_trainer3"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat5').on('click', function() {
+      $('.TiketTeamBerangkat-field5').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer4').val('');
+      $('[name="tiket_trainer4"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat6').on('click', function() {
+      $('.TiketTeamBerangkat-field6').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer5').val('');
+      $('[name="tiket_trainer5"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat7').on('click', function() {
+      $('.TiketTeamBerangkat-field7').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer6').val('');
+      $('[name="tiket_trainer6"]').val('');
+    });
+
+    $('#removeTiketTeamBerangkat8').on('click', function() {
+      $('.TiketTeamBerangkat-field8').hide();
+      $('#addTiketTeamBerangkat').show();
+      TiketTeamBerangkatCounter--;
+      $('.currency_tiket_trainer7').val('');
+      $('[name="tiket_trainer7"]').val('');
+    });
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== format rupiah tiket team berangkat ==================-->
+<script>
+  var cleaveC = new Cleave('.tiket_team', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team2', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team4', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team6', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team7', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== add dan remove field tiket team pulang ==================-->
+<script>
+  $(document).ready(function() {
+
+    var TiketTeamPulangCounter = 0;
+
+    $('#addTiketTeamPulang').on('click', function() {
+      if (TiketTeamPulangCounter === 0) {
+        $('.TiketTeamPulang-field1').show();
+        $('#removeTiketTeamPulang1').show();
+        $('#removeTiketTeamPulang2').show();
+        $('#removeTiketTeamPulang3').show();
+        $('#removeTiketTeamPulang4').show();
+        $('#removeTiketTeamPulang5').show();
+        $('#removeTiketTeamPulang6').show();
+        $('#removeTiketTeamPulang7').show();
+        $('#removeTiketTeamPulang8').show();
+        $('#removeTiketTeamPulang9').show();
+        $('#removeTiketTeamPulang10').show();
+      } else if (TiketTeamPulangCounter === 1) {
+        $('.TiketTeamPulang-field2').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang2').show();
+      } else if (TiketTeamPulangCounter === 2) {
+        $('.TiketTeamPulang-field3').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang3').show();
+      } else if (TiketTeamPulangCounter === 3) {
+        $('.TiketTeamPulang-field4').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang4').show();
+      } else if (TiketTeamPulangCounter === 4) {
+        $('.TiketTeamPulang-field5').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang5').show();
+      } else if (TiketTeamPulangCounter === 5) {
+        $('.TiketTeamPulang-field6').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang6').show();
+      } else if (TiketTeamPulangCounter === 6) {
+        $('.TiketTeamPulang-field7').show();
+        $('#addTiketTeamPulang').hide();
+        $('#removeTiketTeamPulang7').show();
+      } else if (TiketTeamPulangCounter === 7) {
+        $('.TiketTeamPulang-field8').show();
+        $('#addTiketTeamPulang').show();
+        $('#removeTiketTeamPulang8').show();
+      }
+      TiketTeamPulangCounter++;
+    });
+
+    // Remove additional team fields
+    $('#removeTiketTeamPulang1').on('click', function() {
+      $('.TiketTeamPulang-field1').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer').val('');
+      $('[name="tiket_trainer"]').val('');
+    });
+
+    $('#removeTiketTeamPulang2').on('click', function() {
+      $('.TiketTeamPulang-field2').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer1').val('');
+      $('[name="tiket_trainer1"]').val('');
+    });
+
+    $('#removeTiketTeamPulang3').on('click', function() {
+      $('.TiketTeamPulang-field3').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer2').val('');
+      $('[name="tiket_trainer2"]').val('');
+    });
+
+    $('#removeTiketTeamPulang4').on('click', function() {
+      $('.TiketTeamPulang-field4').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer3').val('');
+      $('[name="tiket_trainer3"]').val('');
+    });
+
+    $('#removeTiketTeamPulang5').on('click', function() {
+      $('.TiketTeamPulang-field5').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer4').val('');
+      $('[name="tiket_trainer4"]').val('');
+    });
+
+    $('#removeTiketTeamPulang6').on('click', function() {
+      $('.TiketTeamPulang-field6').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer5').val('');
+      $('[name="tiket_trainer5"]').val('');
+    });
+
+    $('#removeTiketTeamPulang7').on('click', function() {
+      $('.TiketTeamPulang-field7').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer6').val('');
+      $('[name="tiket_trainer6"]').val('');
+    });
+
+    $('#removeTiketTeamPulang8').on('click', function() {
+      $('.TiketTeamPulang-field8').hide();
+      $('#addTiketTeamPulang').show();
+      TiketTeamPulangCounter--;
+      $('.currency_tiket_trainer7').val('');
+      $('[name="tiket_trainer7"]').val('');
+    });
+  });
+</script>
+<!--================== end ==================-->
+
+<!--================== format rupiah tiket team pulang ==================-->
+<script>
+  var cleaveC = new Cleave('.tiket_team_pulang', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang2', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang3', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang4', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang5', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang6', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.tiket_team_pulang7', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
   });
 </script>
 <!--================== end ==================-->

@@ -16,7 +16,7 @@ List aporan Camp | MANAGEMENT
       <!--================== jika maintenace aktif ==================-->
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
-      @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+      @if ($maintenance->status === 'aktif' && ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
         <div class="alert alert-danger" role="alert" style="text-align: center;">
           <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
           <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
@@ -161,16 +161,16 @@ List aporan Camp | MANAGEMENT
                         @endif
                       </td>
                       <td class="text-center">
-                        <a href="{{ route('account.camp.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <a href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
-                        <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">
                           <i class="fa fa-download"></i>
                         </a>
 

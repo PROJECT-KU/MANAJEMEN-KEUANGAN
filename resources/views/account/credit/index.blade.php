@@ -94,10 +94,10 @@ List Uang Keluar | MANAGEMENT
                                     </a>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('account.credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                         <i class="fa fa-pencil-alt"></i>
                                     </a>
-                                    <button onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
+                                    <button style="margin-right: 5px; margin-bottom:5px;" onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
