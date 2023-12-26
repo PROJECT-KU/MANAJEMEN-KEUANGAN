@@ -141,21 +141,20 @@ List Presensi Karyawan | MANAGEMENT
                       <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                         PULANG
                       </a>
-                      @elseif (!$todayPresensi)
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                      @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '22:00:00' ) <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                         MASUK
-                      </a>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        PULANG
-                      </button>
-                      @else
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        MASUK
-                      </button>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        PULANG
-                      </button>
-                      @endif
+                        </a>
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                          PULANG
+                        </button>
+                        @else
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                          MASUK
+                        </button>
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                          PULANG
+                        </button>
+                        @endif
                     </td>
                   </div>
                 </div>

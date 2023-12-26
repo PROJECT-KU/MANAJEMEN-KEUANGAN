@@ -473,6 +473,7 @@ class GajiController extends Controller
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
+      'alpha' => $subhasil,
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
@@ -839,6 +840,7 @@ class GajiController extends Controller
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
+      'alpha' => $subhasil,
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'gambar' => $imagePath, // Store the image path

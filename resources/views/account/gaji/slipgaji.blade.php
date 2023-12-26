@@ -195,6 +195,9 @@
                 <tr>
                   <td style="text-align: left; width:145px">Bonus</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_bonus, 0, ',', '.') }}</td>
+
+                  <td style="text-align: left; width:145px">Alpha</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->alpha, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px">Tunjangan BPJS</td>
