@@ -57,9 +57,10 @@
                   </td>
                   <td style="margin-top: -200px;"><strong>{{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
                     Mulai: {{ $camp->tanggal }}<br>
-                    Sampai : {{ $camp->tanggal_akhir }}<br>
-                    Peserta : {{ $camp->peserta }}<br>
-                    <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
+                    Sampai : {{ date('d F Y', strtotime($camp->tanggal_akhir)) }}<br>
+                    Peserta : {{ date('d F Y', strtotime($camp->peserta)) }}<br>
+                    Keuntungan : {{ $camp->persentase_keuntungan }}<br>
+                    Tanggal : {{ date('d F Y') }}
                   </td>
                   <td>
 
