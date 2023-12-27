@@ -56,12 +56,13 @@
                     Email: {{ $user->email_company }}
                   </td>
                   <td style="margin-top: -200px;"><strong>{{ $employee->full_name }}</strong><br>
-                    <br><br>
                     Jabatan: {{ $employee->level }}<br>
                     Phone: {{ $employee->telp }}<br>
                     Email: {{ $employee->email }}
+                    <b>Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
+                    <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
                   </td>
-                  <td>
+                  <!-- <td>
                     <b>No Rekening :</b> {{ $userWithNorekBank->norek }}<br>
                     <b>Bank&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b>
                     @php
@@ -136,7 +137,7 @@
                     <b>Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
                     <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
                     <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
-                  </td>
+                  </td> -->
                 </tr>
               </tbody>
             </table>
