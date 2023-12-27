@@ -1010,7 +1010,9 @@ class GajiController extends Controller
       return response('Image not found', 404);
     }
 
-    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank', 'userLogoPath'))->render();
+    $userLogoUrl = url('images/' . $user->logo_company);
+
+    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank', 'userLogoUrl'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();
