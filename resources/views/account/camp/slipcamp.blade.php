@@ -180,8 +180,10 @@
             </table>
             <br>
             <hr>
-            <h3><b>Total Keuntungan </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($camp->keuntungan, 0, ',', '.') }}</h3>
-            <p><i>{{ $terbilang }}</i></p>
+            <center>
+              <h3><b>Total Keuntungan </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($camp->keuntungan, 0, ',', '.') }}</h3>
+              <p><i>{{ $terbilang }}</i></p>
+            </center>
             <hr>
           </div>
         </div>
