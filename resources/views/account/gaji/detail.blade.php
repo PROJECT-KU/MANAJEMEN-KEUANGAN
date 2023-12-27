@@ -37,8 +37,8 @@ Detail Gaji Karyawan | MANAGEMENT
                   <label>Nama Karyawan</label>
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" disabled="true">
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
-                    @foreach ($users as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}" {{ $user->id == $gaji->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
+                    @foreach ($datas as $user)
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}" {{ $user->id == $gaji->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
                     @endforeach
                   </select>
 
@@ -451,14 +451,192 @@ Detail Gaji Karyawan | MANAGEMENT
                     <div class="input-group-prepend">
                       <span class="input-group-text" style="border-color: red;">Rp.</span>
                     </div>
-                    <input type="text" name="total_lembur" style="border-color: red;" value="{{ $gaji->total_lembur }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency8" readonly>
+                    <input type="text" name="total_lembur" style="border-color: red;" value="{{ number_format($gaji->total_lembur, 0, ',', ',') }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency8" readonly>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- bonus field default -->
+            <!--================== BONUS DARI PRESENSI ==================-->
             <div class="row">
+              <!-- ALPHA -->
+              <!-- <div class="col-md-3">
+                <div class="form-group">
+                  <label>Alpha</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus5" value="{{ number_format($gaji->bonus5, 0, ',', ',') }}" placeholder="Tanpa Kehadiran" class="form-control currency5" readonly>
+                  </div>
+                </div>
+              </div> -->
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Total Alpha</label>
+                  <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+
+              <!-- BONUS KEHADIRAN -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Kehadiran</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus" value="{{ number_format($gaji->bonus, 0, ',', ',') }}" placeholder="Bonus Kehadiran" class="form-control currency2" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Kehadiran</label>
+                  <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+            </div>
+
+            <div class="row">
+              <!-- BONUS CAMP JOGJA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Camp Jogja</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus1" value="{{ number_format($gaji->bonus1, 0, ',', ',') }}" placeholder="Bonus Camp Jogja" class="form-control currency_bonus1" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Camp Jogja</label>
+                  <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+
+              <!-- BONUS CAMP LUAR KOTA-->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Camp Luar Kota</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus4" value="{{ number_format($gaji->bonus4, 0, ',', ',') }}" placeholder="Bonus Camp Luar Kota" class="form-control currency4" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Camp Luar Kota</label>
+                  <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+            </div>
+
+            <div class="row">
+              <!-- PERJALANAN JAWA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Perjalanan Dalam Jawa</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus2" value="{{ number_format($gaji->bonus2, 0, ',', ',') }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_bonus2" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Perjalanan Dalam Jawa</label>
+                  <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+
+              <!-- PERJALANAN LUAR JAWA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Perjalanan Luar Jawa</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus3" value="{{ number_format($gaji->bonus3, 0, ',', ',') }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_bonus3" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Perjalanan Dalam Jawa</label>
+                  <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+            </div>
+
+            <div class="row">
+              <!-- REMOTE -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Remote</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus6" value="{{ number_format($gaji->bonus6, 0, ',', ',') }}" placeholder="Bonus Remote" class="form-control currency_bonus6" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Remote</label>
+                  <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+
+              <!-- IZIN -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Izin</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="bonus7" value="{{ number_format($gaji->bonus7, 0, ',', ',') }}" placeholder="Bonus Izin" class="form-control currency_bonus7" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Izin</label>
+                  <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
+                </div>
+              </div>
+              <!-- END -->
+            </div>
+            <!--================== end ==================-->
+
+            <!-- bonus field default -->
+            <!-- <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
                   <label>Bonus Dalam Kota (Per Hari)</label>
@@ -497,11 +675,11 @@ Detail Gaji Karyawan | MANAGEMENT
                   <input type="text" name="jumlah_bonus_luar" value="{{ $gaji->jumlah_bonus_luar }}" placeholder="Masukkan Total Hari" class="form-control" readonly>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!-- end filed bonus default -->
 
             <!-- filed bonus 1 -->
-            @if($gaji->bonus1 !== null || $gaji->jumlah_bonus1 !== null || $gaji->bonus_luar1 !== null || $gaji->jumlah_bonus_luar1 !== null)
+            <!-- @if($gaji->bonus1 !== null || $gaji->jumlah_bonus1 !== null || $gaji->bonus_luar1 !== null || $gaji->jumlah_bonus_luar1 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -543,11 +721,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 1 -->
 
             <!-- filed bonus 2 -->
-            @if($gaji->bonus2 !== null || $gaji->jumlah_bonus2 !== null || $gaji->bonus_luar2 !== null || $gaji->jumlah_bonus_luar2 !== null)
+            <!-- @if($gaji->bonus2 !== null || $gaji->jumlah_bonus2 !== null || $gaji->bonus_luar2 !== null || $gaji->jumlah_bonus_luar2 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -589,11 +767,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 2 -->
 
             <!-- filed bonus 3 -->
-            @if($gaji->bonus3 !== null || $gaji->jumlah_bonus3 !== null || $gaji->bonus_luar3 !== null || $gaji->jumlah_bonus_luar3 !== null)
+            <!-- @if($gaji->bonus3 !== null || $gaji->jumlah_bonus3 !== null || $gaji->bonus_luar3 !== null || $gaji->jumlah_bonus_luar3 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -635,11 +813,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 3 -->
 
             <!-- filed bonus 4 -->
-            @if( $gaji->bonus4 !== null || $gaji->jumlah_bonus4 !== null || $gaji->bonus_luar4 !== null || $gaji->jumlah_bonus_luar4 !== null)
+            <!-- @if( $gaji->bonus4 !== null || $gaji->jumlah_bonus4 !== null || $gaji->bonus_luar4 !== null || $gaji->jumlah_bonus_luar4 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -681,11 +859,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 4 -->
 
             <!-- filed bonus 5 -->
-            @if($gaji->bonus5 !== null || $gaji->jumlah_bonus5 !== null || $gaji->bonus_luar5 !== null || $gaji->jumlah_bonus_luar5 !== null)
+            <!-- @if($gaji->bonus5 !== null || $gaji->jumlah_bonus5 !== null || $gaji->bonus_luar5 !== null || $gaji->jumlah_bonus_luar5 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -727,11 +905,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 5 -->
 
             <!-- filed bonus 6 -->
-            @if($gaji->bonus6 !== null || $gaji->jumlah_bonus6 !== null || $gaji->bonus_luar6 !== null || $gaji->jumlah_bonus_luar6 !== null)
+            <!-- @if($gaji->bonus6 !== null || $gaji->jumlah_bonus6 !== null || $gaji->bonus_luar6 !== null || $gaji->jumlah_bonus_luar6 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -773,11 +951,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 6 -->
 
             <!-- filed bonus 7 -->
-            @if($gaji->bonus7 !== null || $gaji->jumlah_bonus7 !== null || $gaji->bonus_luar7 !== null || $gaji->jumlah_bonus_luar7 !== null)
+            <!-- @if($gaji->bonus7 !== null || $gaji->jumlah_bonus7 !== null || $gaji->bonus_luar7 !== null || $gaji->jumlah_bonus_luar7 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -819,11 +997,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 7 -->
 
             <!-- filed bonus 8 -->
-            @if($gaji->bonus8 !== null || $gaji->jumlah_bonus8 !== null || $gaji->bonus_luar8 !== null || $gaji->jumlah_bonus_luar8 !== null)
+            <!-- @if($gaji->bonus8 !== null || $gaji->jumlah_bonus8 !== null || $gaji->bonus_luar8 !== null || $gaji->jumlah_bonus_luar8 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -865,11 +1043,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 8 -->
 
             <!-- filed bonus 9 -->
-            @if($gaji->bonus9 !== null || $gaji->jumlah_bonus9 !== null || $gaji->bonus_luar9 !== null || $gaji->jumlah_bonus_luar9 !== null)
+            <!-- @if($gaji->bonus9 !== null || $gaji->jumlah_bonus9 !== null || $gaji->bonus_luar9 !== null || $gaji->jumlah_bonus_luar9 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -911,11 +1089,11 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 9 -->
 
             <!-- filed bonus 10 -->
-            @if($gaji->bonus10 !== null || $gaji->jumlah_bonus10 !== null || $gaji->bonus_luar10 !== null || $gaji->jumlah_bonus_luar10 !== null)
+            <!-- @if($gaji->bonus10 !== null || $gaji->jumlah_bonus10 !== null || $gaji->bonus_luar10 !== null || $gaji->jumlah_bonus_luar10 !== null)
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -957,7 +1135,7 @@ Detail Gaji Karyawan | MANAGEMENT
               </div>
             </div>
             @else
-            @endif
+            @endif -->
             <!-- end field bonus 10 -->
 
             <div class="row">
@@ -968,7 +1146,7 @@ Detail Gaji Karyawan | MANAGEMENT
                     <div class="input-group-prepend">
                       <span class="input-group-text" style="border-color: red;">Rp.</span>
                     </div>
-                    <input type="text" name="total_bonus" style="border-color: red;" value="{{ $gaji->total_bonus }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
+                    <input type="text" name="total_bonus" style="border-color: red;" value="{{ number_format($gaji->total_bonus, 0, ',', ',') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
                   </div>
                 </div>
               </div>
@@ -1128,7 +1306,7 @@ Detail Gaji Karyawan | MANAGEMENT
                     <div class="input-group-prepend">
                       <span class="input-group-text" style="border-color: black; font-weight: bold;">Rp.</span>
                     </div>
-                    <input type="text" name="total" style="border-color: black; font-weight: bold;" id="total" value="{{ $gaji->total }}" placeholder="Masukkan Total Potongan" class="form-control currency5" readonly>
+                    <input type="text" name="total" style="border-color: black; font-weight: bold;" id="total" value="{{ number_format($gaji->total, 0, ',', ',') }}" placeholder="Masukkan Total Potongan" class="form-control currency5" readonly>
                   </div>
                 </div>
               </div>
@@ -1196,16 +1374,40 @@ Detail Gaji Karyawan | MANAGEMENT
         var norek = selectedKaryawanOption.data('norek');
         var bank = selectedKaryawanOption.data('bank');
         var telp = selectedKaryawanOption.data('telp');
+        var alpha = selectedKaryawanOption.data('alpha');
+        var hadir = selectedKaryawanOption.data('hadir');
+        var camp_jogja = selectedKaryawanOption.data('camp_jogja');
+        var camp_luar_kota = selectedKaryawanOption.data('camp_luar_kota');
+        var perjalanan_jawa = selectedKaryawanOption.data('perjalanan_jawa');
+        var perjalanan_luar_jawa = selectedKaryawanOption.data('perjalanan_luar_jawa');
+        var remote = selectedKaryawanOption.data('remote');
+        var izin = selectedKaryawanOption.data('izin');
 
         $('#nik').val(nik);
         $('#norek').val(norek);
         $('#bank').val(bank);
         $('#telp').val(telp);
+        $('#alpha').val(alpha);
+        $('#hadir').val(hadir);
+        $('#camp_jogja').val(camp_jogja);
+        $('#camp_luar_kota').val(camp_luar_kota);
+        $('#perjalanan_jawa').val(perjalanan_jawa);
+        $('#perjalanan_luar_jawa').val(perjalanan_luar_jawa);
+        $('#remote').val(remote);
+        $('#izin').val(izin);
       } else {
         $('#nik').val('');
         $('#norek').val('');
         $('#bank').val('');
         $('#telp').val('');
+        $('#alpha').val('');
+        $('#hadir').val('');
+        $('#camp_jogja').val('');
+        $('#camp_luar_kota').val('');
+        $('#perjalanan_jawa').val('');
+        $('#perjalanan_luar_jawa').val('');
+        $('#remote').val('');
+        $('#izin').val('');
       }
     }
 

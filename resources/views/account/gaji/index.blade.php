@@ -268,25 +268,25 @@ List Gaji Karyawan | MANAGEMENT
                       </td>
                       @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                       <td class="text-center">
-                        <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
-                        <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
                       </td>
                       @else
                       <td class="text-center">
-                        <a href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
-                        <a href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
                       </td>

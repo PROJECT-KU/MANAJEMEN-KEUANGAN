@@ -134,46 +134,44 @@ class PresensiController extends Controller
     }
     //end
 
-    // ... (validasi gambar dan lainnya)
+    // Mengkonvert ke angka dari status
+    $alpha = $request->input('status') === 'alpha' ? 1 : null;
+    $Hadir = $request->input('status') === 'hadir' ? 1 : null;
+    $campjogja = $request->input('status') === 'camp jogja' ? 1 : null;
+    $perjalananjawa = $request->input('status') === 'perjalanan luar kota jawa' ? 0.25 : null;
+    $perjalananluarjawa = $request->input('status') === 'perjalanan luar kota luar jawa' ? 0.5 : null;
+    $campluarkota = $request->input('status') === 'camp luar kota' ? 1 : null;
+    $remote = $request->input('status') === 'remote' ? 1 : null;
+    $izin = $request->input('status') === 'izin' ? 1 : null;
+    // End
 
     $clientDateTime = Carbon::parse($request->input('client_date_time'));
 
-    // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
-    $currentDay = $clientDateTime->dayOfWeek;
-
     // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
     $currentTime = now()->format('H:i:s');
-
-    // Inisialisasi status default
-    $status = 'terlambat';
-
-    // Logika berdasarkan hari dan waktu
-    if ($currentDay == 1 && ($currentTime >= '08:00:00' && $currentTime <= '10:00:00')) {
-      $status = 'hadir';
-    } elseif (in_array($currentDay, [2, 3])) {
-      $status = 'libur';
-    } elseif ($currentDay == 4 && ($currentTime >= '12:00:00' && $currentTime <= '14:00:00')) {
-      $status = 'hadir';
-    } elseif (in_array($currentDay, [5, 6, 7]) && ($currentTime >= '07:00:00' && $currentTime <= '08:30:00')) {
-      $status = 'hadir';
-    }
 
     // Get the user's location from the request
     $latitude = $request->input('latitude');
     $longitude = $request->input('longitude');
 
-    //$clientDateTime = Carbon::parse($request->input('client_date_time'));
     $save = Presensi::create([
       'user_id' => $request->input('user_id'),
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
-      'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data
-      'gambar' => $imagePath ?? null, // Store the image path
+      'lokasi' => $ipinfoData['city'] ?? 'Unknown',
+      'gambar' => $imagePath ?? null,
       'latitude' => $latitude,
       'longitude' => $longitude,
       'created_at' => $clientDateTime,
-
+      'alpha' => $alpha,
+      'hadir' => $Hadir,
+      'camp_jogja' => $campjogja,
+      'perjalanan_jawa' => $perjalananjawa,
+      'perjalanan_luar_jawa' => $perjalananluarjawa,
+      'camp_luar_kota' => $campluarkota,
+      'remote' => $remote,
+      'izin' => $izin,
     ]);
 
     // Redirect with success or error message
@@ -225,18 +223,16 @@ class PresensiController extends Controller
   {
     $user = Auth::user();
     $presensi = Presensi::findOrFail($id);
-    //$this->validate(
-    //  $request,
-    //  [
-    //    'status' => 'required',
-    //    'gambar' => 'required|max:5120',
-    //  ],
-    //  [
-    //    'status.required' => 'Masukkan Status Presensi Karyawan!',
-    //    'gambar.required' => 'Masukkan Gambar Untuk Bukti Presensi!',
-    //    'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
-    //  ]
-    //);
+
+    // Mengkonvert ke angka dari status
+    $alpha = $request->input('status') === 'alpha' ? 1 : null;
+    $Hadir = $request->input('status') === 'hadir' ? 1 : null;
+    $campjogja = $request->input('status') === 'camp jogja' ? 1 : null;
+    $perjalananjawa = $request->input('status') === 'perjalanan luar kota jawa' ? 0.25 : null;
+    $perjalananluarjawa = $request->input('status') === 'perjalanan luar kota luar jawa' ? 0.5 : null;
+    $campluarkota = $request->input('status') === 'camp luar kota' ? 1 : null;
+    $remote = $request->input('status') === 'remote' ? 1 : null;
+    $izin = $request->input('status') === 'izin' ? 1 : null;
 
     //save image to path
     $imagePath = null;
@@ -244,31 +240,39 @@ class PresensiController extends Controller
     if ($request->hasFile('gambar_pulang')) {
       $image = $request->file('gambar_pulang');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image->move(public_path('images'), $imageName); // Pindahkan gambar_pulang ke direktori public/images
+      $imagePath = $imageName;
+      $image->move(public_path('images'), $imageName);
     } else {
       $imagePath = $presensi->gambar_pulang;
     }
     //end
 
     $presensi->update([
-      'status' => $presensi->status ?? $request->input('status'),
+      'status' => $request->input('status'),
       'status_pulang' => $request->input('status_pulang'),
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
-      'lokasi' => $ipinfoData['city'] ?? 'Unknown', // City is just an example; you can use other location data
-      'gambar_pulang' => $imagePath ?? null, // Store the image path
-      'time_pulang' => now(),
+      'lokasi' => $ipinfoData['city'] ?? 'Unknown',
+      'gambar_pulang' => $imagePath ?? null,
+      'time_pulang' => $request->has('status_pulang') ? now() : null,
+      'alpha' => $request->input('status') === 'alpha' ? 1 : $alpha,
+      'hadir' => $request->input('status') === 'hadir' ? 1 : $Hadir,
+      'camp_jogja' => $request->input('status') === 'camp jogja' ? 1 : $campjogja,
+      'perjalanan_jawa' => $request->input('status') === 'perjalanan luar kota jawa' ? 0.25 : $perjalananjawa,
+      'perjalanan_luar_jawa' => $request->input('status') === 'perjalanan luar kota luar jawa' ? 0.5 : $perjalananluarjawa,
+      'camp_luar_kota' => $request->input('status') === 'camp luar kota' ? 1 : $campluarkota,
+      'remote' => $request->input('status') === 'remote' ? 1 : $remote,
+      'izin' => $request->input('status') === 'izin' ? 1 : $izin,
     ]);
 
     // Redirect with success or error message
     if ($presensi) {
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
-      // Redirect with an error message if data creation fails
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
     }
   }
+
 
   public function destroy($id)
   {

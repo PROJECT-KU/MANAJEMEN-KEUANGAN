@@ -62,7 +62,7 @@ class CampController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        // Calculate total gaji
+        // <!-- Calculate total gaji -->
         $totalCamp = $camp->sum('total');
 
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
@@ -125,7 +125,7 @@ class CampController extends Controller
         $lain_lain = $request->input('lain_lain');
         $lain_lain = empty($lain_lain) ? 0 : str_replace(",", "", $lain_lain);
 
-        // gaji trainer
+        // <!-- gaji trainer -->
         $gaji_trainer = $request->input('gaji_trainer');
         $gaji_trainer = empty($gaji_trainer) ? 0 : str_replace(",", "", $gaji_trainer);
 
@@ -146,9 +146,9 @@ class CampController extends Controller
 
         $gaji_trainer6 = $request->input('gaji_trainer6');
         $gaji_trainer6 = empty($gaji_trainer6) ? 0 : str_replace(",", "", $gaji_trainer6);
-        // end
+        // <!-- end -->
 
-        // gaji team
+        // <!-- gaji team -->
         $gaji_team = $request->input('gaji_team');
         $gaji_team = empty($gaji_team) ? 0 : str_replace(",", "", $gaji_team);
 
@@ -181,7 +181,7 @@ class CampController extends Controller
 
         $gaji_team10 = $request->input('gaji_team10');
         $gaji_team10 = empty($gaji_team10) ? 0 : str_replace(",", "", $gaji_team10);
-        // end
+        // <!-- end -->
 
         $team_cabang = $request->input('team_cabang');
         $team_cabang = empty($team_cabang) ? 0 : str_replace(",", "", $team_cabang);
@@ -192,11 +192,81 @@ class CampController extends Controller
         $grammarly = $request->input('grammarly');
         $grammarly = empty($grammarly) ? 0 : str_replace(",", "", $grammarly);
 
+        // <!-- tiket trainer berangkat -->
         $tiket_trainer = $request->input('tiket_trainer');
         $tiket_trainer = empty($tiket_trainer) ? 0 : str_replace(",", "", $tiket_trainer);
+        $tiket_trainer1 = $request->input('tiket_trainer1');
+        $tiket_trainer1 = empty($tiket_trainer1) ? 0 : str_replace(",", "", $tiket_trainer1);
+        $tiket_trainer2 = $request->input('tiket_trainer2');
+        $tiket_trainer2 = empty($tiket_trainer2) ? 0 : str_replace(",", "", $tiket_trainer2);
+        $tiket_trainer3 = $request->input('tiket_trainer3');
+        $tiket_trainer3 = empty($tiket_trainer3) ? 0 : str_replace(",", "", $tiket_trainer3);
+        $tiket_trainer4 = $request->input('tiket_trainer4');
+        $tiket_trainer4 = empty($tiket_trainer4) ? 0 : str_replace(",", "", $tiket_trainer4);
+        $tiket_trainer5 = $request->input('tiket_trainer5');
+        $tiket_trainer5 = empty($tiket_trainer5) ? 0 : str_replace(",", "", $tiket_trainer5);
+        $tiket_trainer6 = $request->input('tiket_trainer6');
+        $tiket_trainer6 = empty($tiket_trainer6) ? 0 : str_replace(",", "", $tiket_trainer6);
+        $tiket_trainer7 = $request->input('tiket_trainer7');
+        $tiket_trainer7 = empty($tiket_trainer7) ? 0 : str_replace(",", "", $tiket_trainer7);
+        // <!-- end -->
 
+        // <!-- tiket trainer pulang -->
+        $tiket_trainer_pulang = $request->input('tiket_trainer_pulang');
+        $tiket_trainer_pulang = empty($tiket_trainer_pulang) ? 0 : str_replace(",", "", $tiket_trainer_pulang);
+        $tiket_trainer_pulang1 = $request->input('tiket_trainer_pulang1');
+        $tiket_trainer_pulang1 = empty($tiket_trainer_pulang1) ? 0 : str_replace(",", "", $tiket_trainer_pulang1);
+        $tiket_trainer_pulang2 = $request->input('tiket_trainer_pulang2');
+        $tiket_trainer_pulang2 = empty($tiket_trainer_pulang2) ? 0 : str_replace(",", "", $tiket_trainer_pulang2);
+        $tiket_trainer_pulang3 = $request->input('tiket_trainer_pulang3');
+        $tiket_trainer_pulang3 = empty($tiket_trainer_pulang3) ? 0 : str_replace(",", "", $tiket_trainer_pulang3);
+        $tiket_trainer_pulang4 = $request->input('tiket_trainer_pulang4');
+        $tiket_trainer_pulang4 = empty($tiket_trainer_pulang4) ? 0 : str_replace(",", "", $tiket_trainer_pulang4);
+        $tiket_trainer_pulang5 = $request->input('tiket_trainer_pulang5');
+        $tiket_trainer_pulang5 = empty($tiket_trainer_pulang5) ? 0 : str_replace(",", "", $tiket_trainer_pulang5);
+        $tiket_trainer_pulang6 = $request->input('tiket_trainer_pulang6');
+        $tiket_trainer_pulang6 = empty($tiket_trainer_pulang6) ? 0 : str_replace(",", "", $tiket_trainer_pulang6);
+        $tiket_trainer_pulang7 = $request->input('tiket_trainer_pulang7');
+        $tiket_trainer_pulang7 = empty($tiket_trainer_pulang7) ? 0 : str_replace(",", "", $tiket_trainer_pulang7);
+        // <!-- end -->
+
+        // <!-- tiket team berangkat -->
         $tiket_team = $request->input('tiket_team');
         $tiket_team = empty($tiket_team) ? 0 : str_replace(",", "", $tiket_team);
+        $tiket_team1 = $request->input('tiket_team1');
+        $tiket_team1 = empty($tiket_team1) ? 0 : str_replace(",", "", $tiket_team1);
+        $tiket_team2 = $request->input('tiket_team2');
+        $tiket_team2 = empty($tiket_team2) ? 0 : str_replace(",", "", $tiket_team2);
+        $tiket_team3 = $request->input('tiket_team3');
+        $tiket_team3 = empty($tiket_team3) ? 0 : str_replace(",", "", $tiket_team3);
+        $tiket_team4 = $request->input('tiket_team4');
+        $tiket_team4 = empty($tiket_team4) ? 0 : str_replace(",", "", $tiket_team4);
+        $tiket_team5 = $request->input('tiket_team5');
+        $tiket_team5 = empty($tiket_team5) ? 0 : str_replace(",", "", $tiket_team5);
+        $tiket_team6 = $request->input('tiket_team6');
+        $tiket_team6 = empty($tiket_team6) ? 0 : str_replace(",", "", $tiket_team6);
+        $tiket_team7 = $request->input('tiket_team7');
+        $tiket_team7 = empty($tiket_team7) ? 0 : str_replace(",", "", $tiket_team7);
+        // <!-- end -->
+
+        // <!-- tiket team pulang -->
+        $tiket_team_pulang = $request->input('tiket_team_pulang');
+        $tiket_team_pulang = empty($tiket_team_pulang) ? 0 : str_replace(",", "", $tiket_team_pulang);
+        $tiket_team_pulang1 = $request->input('tiket_team_pulang1');
+        $tiket_team_pulang1 = empty($tiket_team_pulang1) ? 0 : str_replace(",", "", $tiket_team_pulang1);
+        $tiket_team_pulang2 = $request->input('tiket_team_pulang2');
+        $tiket_team_pulang2 = empty($tiket_team_pulang2) ? 0 : str_replace(",", "", $tiket_team_pulang2);
+        $tiket_team_pulang3 = $request->input('tiket_team_pulang3');
+        $tiket_team_pulang3 = empty($tiket_team_pulang3) ? 0 : str_replace(",", "", $tiket_team_pulang3);
+        $tiket_team_pulang4 = $request->input('tiket_team_pulang4');
+        $tiket_team_pulang4 = empty($tiket_team_pulang4) ? 0 : str_replace(",", "", $tiket_team_pulang4);
+        $tiket_team_pulang5 = $request->input('tiket_team_pulang5');
+        $tiket_team_pulang5 = empty($tiket_team_pulang5) ? 0 : str_replace(",", "", $tiket_team_pulang5);
+        $tiket_team_pulang6 = $request->input('tiket_team_pulang6');
+        $tiket_team_pulang6 = empty($tiket_team_pulang6) ? 0 : str_replace(",", "", $tiket_team_pulang6);
+        $tiket_team_pulang7 = $request->input('tiket_team_pulang7');
+        $tiket_team_pulang7 = empty($tiket_team_pulang7) ? 0 : str_replace(",", "", $tiket_team_pulang7);
+        // <!-- end -->
 
         $hotel = $request->input('hotel');
         $hotel = empty($hotel) ? 0 : str_replace(",", "", $hotel);
@@ -207,7 +277,14 @@ class CampController extends Controller
         $lainnya = $request->input('lainnya');
         $lainnya = empty($lainnya) ? 0 : str_replace(",", "", $lainnya);
 
-        $total = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6 + $gaji_team + $gaji_team1 + $gaji_team2 + $gaji_team3 + $gaji_team4 + $gaji_team5 + $gaji_team6 + $gaji_team7 + $gaji_team8 + $gaji_team9 + $gaji_team10 + $team_cabang + $booknote + $grammarly + $tiket_trainer + $tiket_team + $hotel + $konsumsi_tambahan + $lainnya;
+        $total = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6 +
+            $gaji_team + $gaji_team1 + $gaji_team2 + $gaji_team3 + $gaji_team4 + $gaji_team5 + $gaji_team6 + $gaji_team7 + $gaji_team8 + $gaji_team9 + $gaji_team10 +
+            $team_cabang + $booknote + $grammarly +
+            $tiket_trainer + $tiket_trainer1 + $tiket_trainer2 + $tiket_trainer3 + $tiket_trainer4 + $tiket_trainer5 + $tiket_trainer6 + $tiket_trainer7 +
+            $tiket_trainer_pulang + $tiket_trainer_pulang1 + $tiket_trainer_pulang2 + $tiket_trainer_pulang3 + $tiket_trainer_pulang4 + $tiket_trainer_pulang5 + $tiket_trainer_pulang6 + $tiket_trainer_pulang7 +
+            $tiket_team + $tiket_team1 + $tiket_team2 + $tiket_team3 + $tiket_team4 + $tiket_team5 + $tiket_team6 + $tiket_team7 +
+            $tiket_team_pulang + $tiket_team_pulang1 + $tiket_team_pulang2 + $tiket_team_pulang3 + $tiket_team_pulang4 + $tiket_team_pulang5 + $tiket_team_pulang6 + $tiket_team_pulang7 +
+            $hotel + $konsumsi_tambahan + $lainnya;
         $total = empty($total) ? 0 : str_replace(",", "", $total);
 
         $total_gaji_trainer = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6;
@@ -218,6 +295,18 @@ class CampController extends Controller
 
         $total_uang_masuk = $uang_masuk + $lain_lain;
         $total_uang_masuk = empty($total_uang_masuk) ? 0 : str_replace(",", "", $total_uang_masuk);
+
+        $total_tiket_trainer_berangkat = $tiket_trainer + $tiket_trainer1 + $tiket_trainer2 + $tiket_trainer3 + $tiket_trainer4 + $tiket_trainer5 + $tiket_trainer6 + $tiket_trainer7;
+        $total_tiket_trainer_berangkat = empty($total_tiket_trainer_berangkat) ? 0 : str_replace(",", "", $total_tiket_trainer_berangkat);
+
+        $total_tiket_trainer_pulang = $tiket_trainer_pulang + $tiket_trainer_pulang1 + $tiket_trainer_pulang2 + $tiket_trainer_pulang3 + $tiket_trainer_pulang4 + $tiket_trainer_pulang5 + $tiket_trainer_pulang6 + $tiket_trainer_pulang7;
+        $total_tiket_trainer_pulang = empty($total_tiket_trainer_pulang) ? 0 : str_replace(",", "", $total_tiket_trainer_pulang);
+
+        $total_tiket_team_berangkat = $tiket_team + $tiket_team1 + $tiket_team2 + $tiket_team3 + $tiket_team4 + $tiket_team5 + $tiket_team6 + $tiket_team7;
+        $total_tiket_team_berangkat = empty($total_tiket_team_berangkat) ? 0 : str_replace(",", "", $total_tiket_team_berangkat);
+
+        $total_tiket_team_pulang = $tiket_team_pulang + $tiket_team_pulang1 + $tiket_team_pulang2 + $tiket_team_pulang3 + $tiket_team_pulang4 + $tiket_team_pulang5 + $tiket_team_pulang6 + $tiket_team_pulang7;
+        $total_tiket_team_pulang = empty($total_tiket_team_pulang) ? 0 : str_replace(",", "", $total_tiket_team_pulang);
 
         $keuntungan = $total_uang_masuk - $total;
         $keuntungan = empty($keuntungan) ? 0 : str_replace(",", "", $keuntungan);
@@ -234,6 +323,8 @@ class CampController extends Controller
             'camp_ke' => $camp_ke,
             'uang_masuk' => $uang_masuk,
             'lain_lain' => $lain_lain,
+
+            // <!-- gaji trainer -->
             'gaji_trainer' => $gaji_trainer,
             'gaji_trainer1' => $gaji_trainer1,
             'gaji_trainer2' => $gaji_trainer2,
@@ -249,6 +340,9 @@ class CampController extends Controller
             'gaji_trainer_nama5' => $request->input('gaji_trainer_nama5'),
             'gaji_trainer_nama6' => $request->input('gaji_trainer_nama6'),
             'total_gaji_trainer' => $total_gaji_trainer,
+            // <!-- end -->
+
+            // <!-- gaji team -->
             'gaji_team' => $gaji_team,
             'gaji_team1' => $gaji_team1,
             'gaji_team2' => $gaji_team2,
@@ -272,11 +366,96 @@ class CampController extends Controller
             'gaji_team_nama9' => $request->input('gaji_team_nama9'),
             'gaji_team_nama10' => $request->input('gaji_team_nama10'),
             'total_gaji_team' => $total_gaji_team,
+            // <!-- end -->
+
             'team_cabang' => $team_cabang,
             'booknote' => $booknote,
             'grammarly' => $grammarly,
+            'peserta' => $request->input('peserta'),
+
+            // <!-- tiket trainer berangkat -->
             'tiket_trainer' => $tiket_trainer,
+            'tiket_trainer1' => $tiket_trainer1,
+            'tiket_trainer2' => $tiket_trainer2,
+            'tiket_trainer3' => $tiket_trainer3,
+            'tiket_trainer4' => $tiket_trainer4,
+            'tiket_trainer5' => $tiket_trainer5,
+            'tiket_trainer6' => $tiket_trainer6,
+            'tiket_trainer7' => $tiket_trainer7,
+            'tiket_trainer_nama' => $request->input('tiket_trainer_nama'),
+            'tiket_trainer_nama1' => $request->input('tiket_trainer_nama1'),
+            'tiket_trainer_nama2' => $request->input('tiket_trainer_nama2'),
+            'tiket_trainer_nama3' => $request->input('tiket_trainer_nama3'),
+            'tiket_trainer_nama4' => $request->input('tiket_trainer_nama4'),
+            'tiket_trainer_nama5' => $request->input('tiket_trainer_nama5'),
+            'tiket_trainer_nama6' => $request->input('tiket_trainer_nama6'),
+            'tiket_trainer_nama7' => $request->input('tiket_trainer_nama7'),
+            // <!-- end -->
+
+            'total_tiket_trainer_berangkat' => $total_tiket_trainer_berangkat,
+
+            // <!-- tiket trainer pulang -->
+            'tiket_trainer_pulang' => $tiket_trainer_pulang,
+            'tiket_trainer_pulang1' => $tiket_trainer_pulang1,
+            'tiket_trainer_pulang2' => $tiket_trainer_pulang2,
+            'tiket_trainer_pulang3' => $tiket_trainer_pulang3,
+            'tiket_trainer_pulang4' => $tiket_trainer_pulang4,
+            'tiket_trainer_pulang5' => $tiket_trainer_pulang5,
+            'tiket_trainer_pulang6' => $tiket_trainer_pulang6,
+            'tiket_trainer_pulang7' => $tiket_trainer_pulang7,
+            'tiket_trainer_pulang_nama' => $request->input('tiket_trainer_pulang_nama'),
+            'tiket_trainer_pulang_nama1' => $request->input('tiket_trainer_pulang_nama1'),
+            'tiket_trainer_pulang_nama2' => $request->input('tiket_trainer_pulang_nama2'),
+            'tiket_trainer_pulang_nama3' => $request->input('tiket_trainer_pulang_nama3'),
+            'tiket_trainer_pulang_nama4' => $request->input('tiket_trainer_pulang_nama4'),
+            'tiket_trainer_pulang_nama5' => $request->input('tiket_trainer_pulang_nama5'),
+            'tiket_trainer_pulang_nama6' => $request->input('tiket_trainer_pulang_nama6'),
+            'tiket_trainer_pulang_nama7' => $request->input('tiket_trainer_pulang_nama7'),
+            // <!-- end -->
+
+            'total_tiket_trainer_pulang' => $total_tiket_trainer_pulang,
+
+            // <!-- tiket team berangkat -->
             'tiket_team' => $tiket_team,
+            'tiket_team1' => $tiket_team1,
+            'tiket_team2' => $tiket_team2,
+            'tiket_team3' => $tiket_team3,
+            'tiket_team4' => $tiket_team4,
+            'tiket_team5' => $tiket_team5,
+            'tiket_team6' => $tiket_team6,
+            'tiket_team7' => $tiket_team7,
+            'tiket_team_nama' => $request->input('tiket_team_nama'),
+            'tiket_team_nama1' => $request->input('tiket_team_nama1'),
+            'tiket_team_nama2' => $request->input('tiket_team_nama2'),
+            'tiket_team_nama3' => $request->input('tiket_team_nama3'),
+            'tiket_team_nama4' => $request->input('tiket_team_nama4'),
+            'tiket_team_nama5' => $request->input('tiket_team_nama5'),
+            'tiket_team_nama6' => $request->input('tiket_team_nama6'),
+            'tiket_team_nama7' => $request->input('tiket_team_nama7'),
+            // <!-- end -->
+
+            'total_tiket_team_berangkat' => $total_tiket_team_berangkat,
+
+            // <!-- tiket team pulang -->
+            'tiket_team_pulang' => $tiket_team_pulang,
+            'tiket_team_pulang1' => $tiket_team_pulang1,
+            'tiket_team_pulang2' => $tiket_team_pulang2,
+            'tiket_team_pulang3' => $tiket_team_pulang3,
+            'tiket_team_pulang4' => $tiket_team_pulang4,
+            'tiket_team_pulang5' => $tiket_team_pulang5,
+            'tiket_team_pulang6' => $tiket_team_pulang6,
+            'tiket_team_pulang7' => $tiket_team_pulang7,
+            'tiket_team_pulang_nama' => $request->input('tiket_team_pulang_nama'),
+            'tiket_team_pulang_nama1' => $request->input('tiket_team_pulang_nama1'),
+            'tiket_team_pulang_nama2' => $request->input('tiket_team_pulang_nama2'),
+            'tiket_team_pulang_nama3' => $request->input('tiket_team_pulang_nama3'),
+            'tiket_team_pulang_nama4' => $request->input('tiket_team_pulang_nama4'),
+            'tiket_team_pulang_nama5' => $request->input('tiket_team_pulang_nama5'),
+            'tiket_team_pulang_nama6' => $request->input('tiket_team_pulang_nama6'),
+            'tiket_team_pulang_nama7' => $request->input('tiket_team_pulang_nama7'),
+            // <!-- end -->
+
+            'total_tiket_team_pulang' => $total_tiket_team_pulang,
             'hotel' => $hotel,
             'konsumsi_tambahan' => $konsumsi_tambahan,
             'lainnya' => $lainnya,
@@ -358,7 +537,7 @@ class CampController extends Controller
         $lain_lain = $request->input('lain_lain');
         $lain_lain = empty($lain_lain) ? 0 : str_replace(",", "", $lain_lain);
 
-        // gaji trainer
+        // <!-- gaji trainer -->
         $gaji_trainer = $request->input('gaji_trainer');
         $gaji_trainer = empty($gaji_trainer) ? 0 : str_replace(",", "", $gaji_trainer);
 
@@ -379,9 +558,9 @@ class CampController extends Controller
 
         $gaji_trainer6 = $request->input('gaji_trainer6');
         $gaji_trainer6 = empty($gaji_trainer6) ? 0 : str_replace(",", "", $gaji_trainer6);
-        // end
+        // <!-- end -->
 
-        // gaji team
+        // <!-- gaji team -->
         $gaji_team = $request->input('gaji_team');
         $gaji_team = empty($gaji_team) ? 0 : str_replace(",", "", $gaji_team);
 
@@ -414,7 +593,7 @@ class CampController extends Controller
 
         $gaji_team10 = $request->input('gaji_team10');
         $gaji_team10 = empty($gaji_team10) ? 0 : str_replace(",", "", $gaji_team10);
-        // end
+        // <!-- end -->
 
         $team_cabang = $request->input('team_cabang');
         $team_cabang = empty($team_cabang) ? 0 : str_replace(",", "", $team_cabang);
@@ -425,11 +604,81 @@ class CampController extends Controller
         $grammarly = $request->input('grammarly');
         $grammarly = empty($grammarly) ? 0 : str_replace(",", "", $grammarly);
 
+        // <!-- tiket trainer berangkat -->
         $tiket_trainer = $request->input('tiket_trainer');
         $tiket_trainer = empty($tiket_trainer) ? 0 : str_replace(",", "", $tiket_trainer);
+        $tiket_trainer1 = $request->input('tiket_trainer1');
+        $tiket_trainer1 = empty($tiket_trainer1) ? 0 : str_replace(",", "", $tiket_trainer1);
+        $tiket_trainer2 = $request->input('tiket_trainer2');
+        $tiket_trainer2 = empty($tiket_trainer2) ? 0 : str_replace(",", "", $tiket_trainer2);
+        $tiket_trainer3 = $request->input('tiket_trainer3');
+        $tiket_trainer3 = empty($tiket_trainer3) ? 0 : str_replace(",", "", $tiket_trainer3);
+        $tiket_trainer4 = $request->input('tiket_trainer4');
+        $tiket_trainer4 = empty($tiket_trainer4) ? 0 : str_replace(",", "", $tiket_trainer4);
+        $tiket_trainer5 = $request->input('tiket_trainer5');
+        $tiket_trainer5 = empty($tiket_trainer5) ? 0 : str_replace(",", "", $tiket_trainer5);
+        $tiket_trainer6 = $request->input('tiket_trainer6');
+        $tiket_trainer6 = empty($tiket_trainer6) ? 0 : str_replace(",", "", $tiket_trainer6);
+        $tiket_trainer7 = $request->input('tiket_trainer7');
+        $tiket_trainer7 = empty($tiket_trainer7) ? 0 : str_replace(",", "", $tiket_trainer7);
+        // <!-- end -->
 
+        // <!-- tiket trainer pulang -->
+        $tiket_trainer_pulang = $request->input('tiket_trainer_pulang');
+        $tiket_trainer_pulang = empty($tiket_trainer_pulang) ? 0 : str_replace(",", "", $tiket_trainer_pulang);
+        $tiket_trainer_pulang1 = $request->input('tiket_trainer_pulang1');
+        $tiket_trainer_pulang1 = empty($tiket_trainer_pulang1) ? 0 : str_replace(",", "", $tiket_trainer_pulang1);
+        $tiket_trainer_pulang2 = $request->input('tiket_trainer_pulang2');
+        $tiket_trainer_pulang2 = empty($tiket_trainer_pulang2) ? 0 : str_replace(",", "", $tiket_trainer_pulang2);
+        $tiket_trainer_pulang3 = $request->input('tiket_trainer_pulang3');
+        $tiket_trainer_pulang3 = empty($tiket_trainer_pulang3) ? 0 : str_replace(",", "", $tiket_trainer_pulang3);
+        $tiket_trainer_pulang4 = $request->input('tiket_trainer_pulang4');
+        $tiket_trainer_pulang4 = empty($tiket_trainer_pulang4) ? 0 : str_replace(",", "", $tiket_trainer_pulang4);
+        $tiket_trainer_pulang5 = $request->input('tiket_trainer_pulang5');
+        $tiket_trainer_pulang5 = empty($tiket_trainer_pulang5) ? 0 : str_replace(",", "", $tiket_trainer_pulang5);
+        $tiket_trainer_pulang6 = $request->input('tiket_trainer_pulang6');
+        $tiket_trainer_pulang6 = empty($tiket_trainer_pulang6) ? 0 : str_replace(",", "", $tiket_trainer_pulang6);
+        $tiket_trainer_pulang7 = $request->input('tiket_trainer_pulang7');
+        $tiket_trainer_pulang7 = empty($tiket_trainer_pulang7) ? 0 : str_replace(",", "", $tiket_trainer_pulang7);
+        // <!-- end -->
+
+        // <!-- tiket team berangkat -->
         $tiket_team = $request->input('tiket_team');
         $tiket_team = empty($tiket_team) ? 0 : str_replace(",", "", $tiket_team);
+        $tiket_team1 = $request->input('tiket_team1');
+        $tiket_team1 = empty($tiket_team1) ? 0 : str_replace(",", "", $tiket_team1);
+        $tiket_team2 = $request->input('tiket_team2');
+        $tiket_team2 = empty($tiket_team2) ? 0 : str_replace(",", "", $tiket_team2);
+        $tiket_team3 = $request->input('tiket_team3');
+        $tiket_team3 = empty($tiket_team3) ? 0 : str_replace(",", "", $tiket_team3);
+        $tiket_team4 = $request->input('tiket_team4');
+        $tiket_team4 = empty($tiket_team4) ? 0 : str_replace(",", "", $tiket_team4);
+        $tiket_team5 = $request->input('tiket_team5');
+        $tiket_team5 = empty($tiket_team5) ? 0 : str_replace(",", "", $tiket_team5);
+        $tiket_team6 = $request->input('tiket_team6');
+        $tiket_team6 = empty($tiket_team6) ? 0 : str_replace(",", "", $tiket_team6);
+        $tiket_team7 = $request->input('tiket_team7');
+        $tiket_team7 = empty($tiket_team7) ? 0 : str_replace(",", "", $tiket_team7);
+        // <!-- end -->
+
+        // <!-- tiket team pulang -->
+        $tiket_team_pulang = $request->input('tiket_team_pulang');
+        $tiket_team_pulang = empty($tiket_team_pulang) ? 0 : str_replace(",", "", $tiket_team_pulang);
+        $tiket_team_pulang1 = $request->input('tiket_team_pulang1');
+        $tiket_team_pulang1 = empty($tiket_team_pulang1) ? 0 : str_replace(",", "", $tiket_team_pulang1);
+        $tiket_team_pulang2 = $request->input('tiket_team_pulang2');
+        $tiket_team_pulang2 = empty($tiket_team_pulang2) ? 0 : str_replace(",", "", $tiket_team_pulang2);
+        $tiket_team_pulang3 = $request->input('tiket_team_pulang3');
+        $tiket_team_pulang3 = empty($tiket_team_pulang3) ? 0 : str_replace(",", "", $tiket_team_pulang3);
+        $tiket_team_pulang4 = $request->input('tiket_team_pulang4');
+        $tiket_team_pulang4 = empty($tiket_team_pulang4) ? 0 : str_replace(",", "", $tiket_team_pulang4);
+        $tiket_team_pulang5 = $request->input('tiket_team_pulang5');
+        $tiket_team_pulang5 = empty($tiket_team_pulang5) ? 0 : str_replace(",", "", $tiket_team_pulang5);
+        $tiket_team_pulang6 = $request->input('tiket_team_pulang6');
+        $tiket_team_pulang6 = empty($tiket_team_pulang6) ? 0 : str_replace(",", "", $tiket_team_pulang6);
+        $tiket_team_pulang7 = $request->input('tiket_team_pulang7');
+        $tiket_team_pulang7 = empty($tiket_team_pulang7) ? 0 : str_replace(",", "", $tiket_team_pulang7);
+        // <!-- end -->
 
         $hotel = $request->input('hotel');
         $hotel = empty($hotel) ? 0 : str_replace(",", "", $hotel);
@@ -440,7 +689,14 @@ class CampController extends Controller
         $lainnya = $request->input('lainnya');
         $lainnya = empty($lainnya) ? 0 : str_replace(",", "", $lainnya);
 
-        $total = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6 + $gaji_team + $gaji_team1 + $gaji_team2 + $gaji_team3 + $gaji_team4 + $gaji_team5 + $gaji_team6 + $gaji_team7 + $gaji_team8 + $gaji_team9 + $gaji_team10 + $team_cabang + $booknote + $grammarly + $tiket_trainer + $tiket_team + $hotel + $konsumsi_tambahan + $lainnya;
+        $total = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6 +
+            $gaji_team + $gaji_team1 + $gaji_team2 + $gaji_team3 + $gaji_team4 + $gaji_team5 + $gaji_team6 + $gaji_team7 + $gaji_team8 + $gaji_team9 + $gaji_team10 +
+            $team_cabang + $booknote + $grammarly +
+            $tiket_trainer + $tiket_trainer1 + $tiket_trainer2 + $tiket_trainer3 + $tiket_trainer4 + $tiket_trainer5 + $tiket_trainer6 + $tiket_trainer7 +
+            $tiket_trainer_pulang + $tiket_trainer_pulang1 + $tiket_trainer_pulang2 + $tiket_trainer_pulang3 + $tiket_trainer_pulang4 + $tiket_trainer_pulang5 + $tiket_trainer_pulang6 + $tiket_trainer_pulang7 +
+            $tiket_team + $tiket_team1 + $tiket_team2 + $tiket_team3 + $tiket_team4 + $tiket_team5 + $tiket_team6 + $tiket_team7 +
+            $tiket_team_pulang + $tiket_team_pulang1 + $tiket_team_pulang2 + $tiket_team_pulang3 + $tiket_team_pulang4 + $tiket_team_pulang5 + $tiket_team_pulang6 + $tiket_team_pulang7 +
+            $hotel + $konsumsi_tambahan + $lainnya;
         $total = empty($total) ? 0 : str_replace(",", "", $total);
 
         $total_gaji_trainer = $gaji_trainer + $gaji_trainer1 + $gaji_trainer2 + $gaji_trainer3 + $gaji_trainer4 + $gaji_trainer5 + $gaji_trainer6;
@@ -451,6 +707,18 @@ class CampController extends Controller
 
         $total_uang_masuk = $uang_masuk + $lain_lain;
         $total_uang_masuk = empty($total_uang_masuk) ? 0 : str_replace(",", "", $total_uang_masuk);
+
+        $total_tiket_trainer_berangkat = $tiket_trainer + $tiket_trainer1 + $tiket_trainer2 + $tiket_trainer3 + $tiket_trainer4 + $tiket_trainer5 + $tiket_trainer6 + $tiket_trainer7;
+        $total_tiket_trainer_berangkat = empty($total_tiket_trainer_berangkat) ? 0 : str_replace(",", "", $total_tiket_trainer_berangkat);
+
+        $total_tiket_trainer_pulang = $tiket_trainer_pulang + $tiket_trainer_pulang1 + $tiket_trainer_pulang2 + $tiket_trainer_pulang3 + $tiket_trainer_pulang4 + $tiket_trainer_pulang5 + $tiket_trainer_pulang6 + $tiket_trainer_pulang7;
+        $total_tiket_trainer_pulang = empty($total_tiket_trainer_pulang) ? 0 : str_replace(",", "", $total_tiket_trainer_pulang);
+
+        $total_tiket_team_berangkat = $tiket_team + $tiket_team1 + $tiket_team2 + $tiket_team3 + $tiket_team4 + $tiket_team5 + $tiket_team6 + $tiket_team7;
+        $total_tiket_team_berangkat = empty($total_tiket_team_berangkat) ? 0 : str_replace(",", "", $total_tiket_team_berangkat);
+
+        $total_tiket_team_pulang = $tiket_team_pulang + $tiket_team_pulang1 + $tiket_team_pulang2 + $tiket_team_pulang3 + $tiket_team_pulang4 + $tiket_team_pulang5 + $tiket_team_pulang6 + $tiket_team_pulang7;
+        $total_tiket_team_pulang = empty($total_tiket_team_pulang) ? 0 : str_replace(",", "", $total_tiket_team_pulang);
 
         $keuntungan = $total_uang_masuk - $total;
         $keuntungan = empty($keuntungan) ? 0 : str_replace(",", "", $keuntungan);
@@ -468,6 +736,8 @@ class CampController extends Controller
             'camp_ke' => $camp_ke,
             'uang_masuk' => $uang_masuk,
             'lain_lain' => $lain_lain,
+
+            // <!-- gaji trainer -->
             'gaji_trainer' => $gaji_trainer,
             'gaji_trainer1' => $gaji_trainer1,
             'gaji_trainer2' => $gaji_trainer2,
@@ -483,6 +753,9 @@ class CampController extends Controller
             'gaji_trainer_nama5' => $request->input('gaji_trainer_nama5'),
             'gaji_trainer_nama6' => $request->input('gaji_trainer_nama6'),
             'total_gaji_trainer' => $total_gaji_trainer,
+            // <!-- end -->
+
+            // <!-- gaji team -->
             'gaji_team' => $gaji_team,
             'gaji_team1' => $gaji_team1,
             'gaji_team2' => $gaji_team2,
@@ -506,11 +779,96 @@ class CampController extends Controller
             'gaji_team_nama9' => $request->input('gaji_team_nama9'),
             'gaji_team_nama10' => $request->input('gaji_team_nama10'),
             'total_gaji_team' => $total_gaji_team,
+            // <!-- end -->
+
             'team_cabang' => $team_cabang,
             'booknote' => $booknote,
             'grammarly' => $grammarly,
+            'peserta' => $request->input('peserta'),
+
+            // <!-- tiket trainer berangkat -->
             'tiket_trainer' => $tiket_trainer,
+            'tiket_trainer1' => $tiket_trainer1,
+            'tiket_trainer2' => $tiket_trainer2,
+            'tiket_trainer3' => $tiket_trainer3,
+            'tiket_trainer4' => $tiket_trainer4,
+            'tiket_trainer5' => $tiket_trainer5,
+            'tiket_trainer6' => $tiket_trainer6,
+            'tiket_trainer7' => $tiket_trainer7,
+            'tiket_trainer_nama' => $request->input('tiket_trainer_nama'),
+            'tiket_trainer_nama1' => $request->input('tiket_trainer_nama1'),
+            'tiket_trainer_nama2' => $request->input('tiket_trainer_nama2'),
+            'tiket_trainer_nama3' => $request->input('tiket_trainer_nama3'),
+            'tiket_trainer_nama4' => $request->input('tiket_trainer_nama4'),
+            'tiket_trainer_nama5' => $request->input('tiket_trainer_nama5'),
+            'tiket_trainer_nama6' => $request->input('tiket_trainer_nama6'),
+            'tiket_trainer_nama7' => $request->input('tiket_trainer_nama7'),
+            // <!-- end -->
+
+            'total_tiket_trainer_berangkat' => $total_tiket_trainer_berangkat,
+
+            // <!-- tiket trainer pulang -->
+            'tiket_trainer_pulang' => $tiket_trainer_pulang,
+            'tiket_trainer_pulang1' => $tiket_trainer_pulang1,
+            'tiket_trainer_pulang2' => $tiket_trainer_pulang2,
+            'tiket_trainer_pulang3' => $tiket_trainer_pulang3,
+            'tiket_trainer_pulang4' => $tiket_trainer_pulang4,
+            'tiket_trainer_pulang5' => $tiket_trainer_pulang5,
+            'tiket_trainer_pulang6' => $tiket_trainer_pulang6,
+            'tiket_trainer_pulang7' => $tiket_trainer_pulang7,
+            'tiket_trainer_pulang_nama' => $request->input('tiket_trainer_pulang_nama'),
+            'tiket_trainer_pulang_nama1' => $request->input('tiket_trainer_pulang_nama1'),
+            'tiket_trainer_pulang_nama2' => $request->input('tiket_trainer_pulang_nama2'),
+            'tiket_trainer_pulang_nama3' => $request->input('tiket_trainer_pulang_nama3'),
+            'tiket_trainer_pulang_nama4' => $request->input('tiket_trainer_pulang_nama4'),
+            'tiket_trainer_pulang_nama5' => $request->input('tiket_trainer_pulang_nama5'),
+            'tiket_trainer_pulang_nama6' => $request->input('tiket_trainer_pulang_nama6'),
+            'tiket_trainer_pulang_nama7' => $request->input('tiket_trainer_pulang_nama7'),
+            // <!-- end -->
+
+            'total_tiket_trainer_pulang' => $total_tiket_trainer_pulang,
+
+            // <!-- tiket team berangkat -->
             'tiket_team' => $tiket_team,
+            'tiket_team1' => $tiket_team1,
+            'tiket_team2' => $tiket_team2,
+            'tiket_team3' => $tiket_team3,
+            'tiket_team4' => $tiket_team4,
+            'tiket_team5' => $tiket_team5,
+            'tiket_team6' => $tiket_team6,
+            'tiket_team7' => $tiket_team7,
+            'tiket_team_nama' => $request->input('tiket_team_nama'),
+            'tiket_team_nama1' => $request->input('tiket_team_nama1'),
+            'tiket_team_nama2' => $request->input('tiket_team_nama2'),
+            'tiket_team_nama3' => $request->input('tiket_team_nama3'),
+            'tiket_team_nama4' => $request->input('tiket_team_nama4'),
+            'tiket_team_nama5' => $request->input('tiket_team_nama5'),
+            'tiket_team_nama6' => $request->input('tiket_team_nama6'),
+            'tiket_team_nama7' => $request->input('tiket_team_nama7'),
+            // <!-- end -->
+
+            'total_tiket_team_berangkat' => $total_tiket_team_berangkat,
+
+            // <!-- tiket team pulang -->
+            'tiket_team_pulang' => $tiket_team_pulang,
+            'tiket_team_pulang1' => $tiket_team_pulang1,
+            'tiket_team_pulang2' => $tiket_team_pulang2,
+            'tiket_team_pulang3' => $tiket_team_pulang3,
+            'tiket_team_pulang4' => $tiket_team_pulang4,
+            'tiket_team_pulang5' => $tiket_team_pulang5,
+            'tiket_team_pulang6' => $tiket_team_pulang6,
+            'tiket_team_pulang7' => $tiket_team_pulang7,
+            'tiket_team_pulang_nama' => $request->input('tiket_team_pulang_nama'),
+            'tiket_team_pulang_nama1' => $request->input('tiket_team_pulang_nama1'),
+            'tiket_team_pulang_nama2' => $request->input('tiket_team_pulang_nama2'),
+            'tiket_team_pulang_nama3' => $request->input('tiket_team_pulang_nama3'),
+            'tiket_team_pulang_nama4' => $request->input('tiket_team_pulang_nama4'),
+            'tiket_team_pulang_nama5' => $request->input('tiket_team_pulang_nama5'),
+            'tiket_team_pulang_nama6' => $request->input('tiket_team_pulang_nama6'),
+            'tiket_team_pulang_nama7' => $request->input('tiket_team_pulang_nama7'),
+            // <!-- end -->
+
+            'total_tiket_team_pulang' => $total_tiket_team_pulang,
             'hotel' => $hotel,
             'konsumsi_tambahan' => $konsumsi_tambahan,
             'lainnya' => $lainnya,

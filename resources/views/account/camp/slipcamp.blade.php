@@ -13,7 +13,7 @@
 </head>
 
 <body>
-  <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
+  <form action="{{ route('account.camp.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
       <!-- <img src="{{ asset('images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;"> -->
@@ -24,7 +24,7 @@
               <center><i class="fas fa-globe"></i> SLIP LAPORAN PERCAMP<br>
                 <p style="margin-top: -3px; font-size: 15px"><strong>Periode</strong>
                   <?php
-                  $tanggalPembayaran = strtotime($gaji->tanggal);
+                  $tanggalPembayaran = strtotime($camp->tanggal);
                   $awalBulan = date('j F, Y', strtotime('first day of this month', $tanggalPembayaran));
                   $akhirBulan = date('j F, Y', strtotime('last day of this month', $tanggalPembayaran));
                   echo $awalBulan . ' - ' . $akhirBulan;
@@ -123,15 +123,29 @@
                   <td style="text-align: left; width:145px"></td>
                   <td style="text-align: left; width:145px"></td>
 
-                  <td style="text-align: left; width:145px">Tiket Trainer</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->tiket_trainer, 0, ',', '.') }}</td>
+                  <td style="text-align: left; width:145px">Total Tiket Trainer Berangkat</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_tiket_trainer_berangkat, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"></td>
                   <td style="text-align: left; width:145px"></td>
 
-                  <td style="text-align: left; width:145px">Tiket Team</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->tiket_team, 0, ',', '.') }}</td>
+                  <td style="text-align: left; width:145px">Total Tiket Trainer Pulang</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_tiket_trainer_pulang, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"></td>
+                  <td style="text-align: left; width:145px"></td>
+
+                  <td style="text-align: left; width:145px">total Tiket Team Berangkat</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_tiket_team_berangkat, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"></td>
+                  <td style="text-align: left; width:145px"></td>
+
+                  <td style="text-align: left; width:145px">total Tiket Team Pulang</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_tiket_team_pulang, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"></td>

@@ -197,8 +197,8 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <label>Nama Karyawan</label>
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
-                    @foreach ($users as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}">{{ $user->full_name }}</option>
+                    @foreach ($datas as $user)
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
                     @endforeach
                   </select>
 
@@ -781,10 +781,188 @@ Tambah Gaji Karyawan | MANAGEMENT
           </div>
           <!-- end lembur field 10 -->
 
+          <!--================== BONUS DARI PRESENSI ==================-->
+          <div class="row">
+            <!-- ALPHA -->
+            <!-- <div class="col-md-3">
+              <div class="form-group">
+                <label>Alpha</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus5" value="{{ old('bonus5') }}" placeholder="Tanpa Kehadiran" class="form-control currency5">
+                </div>
+              </div>
+            </div> -->
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Total Alpha</label>
+                <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+
+            <!-- BONUS KEHADIRAN -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Kehadiran</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus" value="{{ old('bonus') }}" placeholder="Bonus Kehadiran" class="form-control currency2">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Kehadiran</label>
+                <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+          </div>
+
+          <div class="row">
+            <!-- BONUS CAMP JOGJA -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Camp Jogja</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus1" value="{{ old('bonus1') }}" placeholder="Bonus Camp Jogja" class="form-control currency_bonus1 ">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Camp Jogja</label>
+                <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+
+            <!-- BONUS CAMP LUAR KOTA-->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Camp Luar Kota</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus4" value="{{ old('bonus4') }}" placeholder="Bonus Camp Luar Kota" class="form-control currency4">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Camp Luar Kota</label>
+                <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+          </div>
+
+          <div class="row">
+            <!-- PERJALANAN JAWA -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Perjalanan Dalam Jawa</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus2" value="{{ old('bonus2') }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_dalam_jawa">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Perjalanan Dalam Jawa</label>
+                <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+
+            <!-- PERJALANAN LUAR JAWA -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Perjalanan Luar Jawa</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus3" value="{{ old('bonus3') }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Perjalanan Dalam Jawa</label>
+                <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+          </div>
+
+          <div class="row">
+            <!-- REMOTE -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Remote</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus6" value="{{ old('bonus6') }}" placeholder="Bonus Remote" class="form-control currency_remote">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Remote</label>
+                <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+
+            <!-- IZIN -->
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Bonus Izin</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="bonus7" value="{{ old('bonus7') }}" placeholder="Bonus Izin" class="form-control currency_izin">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Total Izin</label>
+                <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
+              </div>
+            </div>
+            <!-- END -->
+          </div>
+          <!--================== end ==================-->
+
           <!-- (Auth::user()->company === 'rumahscopus') -->
 
           <!-- bonus default -->
-          <div class="row">
+          <!-- <div class="row">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -851,11 +1029,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-plus"></i> INPUT</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus default -->
 
           <!-- bonus field 1 -->
-          <div class="row bonus-field1" style="display: none;">
+          <!-- <div class="row bonus-field1" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -921,11 +1099,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 1 -->
 
           <!-- bonus field 2 -->
-          <div class="row bonus-field2" style="display: none;">
+          <!-- <div class="row bonus-field2" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -991,11 +1169,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 2 -->
 
           <!-- bonus field 3 -->
-          <div class="row bonus-field3" style="display: none;">
+          <!-- <div class="row bonus-field3" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1061,11 +1239,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 3 -->
 
           <!-- bonus field 4 -->
-          <div class="row bonus-field4" style="display: none;">
+          <!-- <div class="row bonus-field4" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1131,11 +1309,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 4 -->
 
           <!-- bonus field 5 -->
-          <div class="row bonus-field5" style="display: none;">
+          <!-- <div class="row bonus-field5" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1201,11 +1379,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 5 -->
 
           <!-- bonus field 6 -->
-          <div class="row bonus-field6" style="display: none;">
+          <!-- <div class="row bonus-field6" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1271,11 +1449,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 6 -->
 
           <!-- bonus field 7 -->
-          <div class="row bonus-field7" style="display: none;">
+          <!-- <div class="row bonus-field7" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1341,11 +1519,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 7 -->
 
           <!-- bonus field 8 -->
-          <div class="row bonus-field8" style="display: none;">
+          <!-- <div class="row bonus-field8" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1411,11 +1589,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 8 -->
 
           <!-- bonus field 9 -->
-          <div class="row bonus-field9" style="display: none;">
+          <!-- <div class="row bonus-field9" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1481,11 +1659,11 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 9 -->
 
           <!-- bonus field 10 -->
-          <div class="row bonus-field10" style="display: none;">
+          <!-- <div class="row bonus-field10" style="display: none;">
             <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Dalam Kota (Per Hari)</label>
@@ -1551,7 +1729,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <i class="fas fa-times"></i> HAPUS</button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- end bonus field 10 -->
 
           <!-- <div class="row">
@@ -2176,16 +2354,40 @@ Tambah Gaji Karyawan | MANAGEMENT
         var norek = selectedKaryawanOption.data('norek');
         var bank = selectedKaryawanOption.data('bank');
         var telp = selectedKaryawanOption.data('telp');
+        var alpha = selectedKaryawanOption.data('alpha');
+        var hadir = selectedKaryawanOption.data('hadir');
+        var camp_jogja = selectedKaryawanOption.data('camp_jogja');
+        var camp_luar_kota = selectedKaryawanOption.data('camp_luar_kota');
+        var perjalanan_jawa = selectedKaryawanOption.data('perjalanan_jawa');
+        var perjalanan_luar_jawa = selectedKaryawanOption.data('perjalanan_luar_jawa');
+        var remote = selectedKaryawanOption.data('remote');
+        var izin = selectedKaryawanOption.data('izin');
 
         $('#nik').val(nik);
         $('#norek').val(norek);
         $('#bank').val(bank);
         $('#telp').val(telp);
+        $('#alpha').val(alpha);
+        $('#hadir').val(hadir);
+        $('#camp_jogja').val(camp_jogja);
+        $('#camp_luar_kota').val(camp_luar_kota);
+        $('#perjalanan_jawa').val(perjalanan_jawa);
+        $('#perjalanan_luar_jawa').val(perjalanan_luar_jawa);
+        $('#remote').val(remote);
+        $('#izin').val(izin);
       } else {
         $('#nik').val('');
         $('#norek').val('');
         $('#bank').val('');
         $('#telp').val('');
+        $('#alpha').val('');
+        $('#hadir').val('');
+        $('#camp_jogja').val('');
+        $('#camp_luar_kota').val('');
+        $('#perjalanan_jawa').val('');
+        $('#perjalanan_luar_jawa').val('');
+        $('#remote').val('');
+        $('#izin').val('');
       }
     }
 
@@ -2198,7 +2400,18 @@ Tambah Gaji Karyawan | MANAGEMENT
     });
   });
 </script>
+<script>
+  $(document).ready(function() {
+    // Menangani perubahan pada elemen select
+    $('#userSelect').change(function() {
+      // Mengambil data total_hadir dari atribut data-total-hadir pada option yang dipilih
+      var hadir = $(this).find(':selected').data('hadir');
 
+      // Menampilkan nilai total_hadir
+      $('#hadir span').text(hadir);
+    });
+  });
+</script>
 
 
 <script>
@@ -2244,6 +2457,23 @@ Tambah Gaji Karyawan | MANAGEMENT
     numeralThousandsGroupStyle: 'thousand'
   });
   var cleaveC = new Cleave('.currency_pph', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
+  var cleaveC = new Cleave('.currency_perjalanan_luar_jawa', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_perjalanan_dalam_jawa', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_remote', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_izin', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

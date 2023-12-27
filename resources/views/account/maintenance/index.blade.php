@@ -77,13 +77,13 @@ List Pengguna | MANAGEMENT
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('account.maintenance.edit', $item->id) }}" class="btn btn-sm btn-primary">
+                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.maintenance.edit', $item->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fa fa-pencil-alt"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
+                                        <button style="margin-right: 5px; margin-bottom:5px;" class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
                                             <i class="fa fa-trash"></i>
                                         </button>
-                                        <a href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
+                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
                                             <i class="fa fa-eye"></i>
                                         </a>
                                     </td>

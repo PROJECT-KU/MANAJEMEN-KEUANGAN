@@ -4,6 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\User;
 use App\Gaji;
+use App\Presensi;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -124,10 +125,43 @@ class GajiController extends Controller
     $user = Auth::user();
 
     if ($user->level == 'manager' || $user->level == 'staff') {
-      $users = User::where('company', $user->company)
-        ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
+      // $users = User::where('company', $user->company)
+      //   ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
+      //   ->get();
+      // $presensi = DB::table('presensi')
+      //   ->get();
+
+      // $datas = [
+      //   'users' => $users,
+      //   'presensi' => $presensi,
+      // ];
+
+      $datas = DB::table('users')
+        ->select(
+          'users.id',
+          'users.full_name',
+          'users.nik',
+          'users.norek',
+          'users.bank',
+          'users.telp',
+          DB::raw('SUM(presensi.alpha) as alpha'),
+          DB::raw('SUM(presensi.hadir) as hadir'),
+          DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+          DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+          DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+          DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+          DB::raw('SUM(presensi.remote) as remote'),
+          DB::raw('SUM(presensi.izin) as izin')
+        )
+        ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
+        ->orderBy('users.created_at', 'DESC')
         ->get();
-      return view('account.gaji.create', compact('users'));
+
+      // dd($datas);
+      return view('account.gaji.create', compact('datas'));
     } else {
       $users = User::where('id', $user->id)
         ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
@@ -304,6 +338,7 @@ class GajiController extends Controller
     $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? null;
     $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? null;
     $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? null;
+    $alpha = $request->input('alpha') ?? null;
     //end jumlah bonus dalam kota
 
     //jumlah bonus luar kota
@@ -324,11 +359,15 @@ class GajiController extends Controller
       ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
     $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
 
+    // $total_bonus =
+    //   ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
+    //   ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
+    //   ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
+    //   ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+    // $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
+
     $total_bonus =
-      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
-      ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
-      ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
-      ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7);
     $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
 
     $potongan = $request->input('potongan');
@@ -337,7 +376,10 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subalpha = $jumlah_bonus5 * 0.005;
+    $subhasil = $subtotal * $subalpha;
+    $total = $subtotal - $subhasil;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     //menyinpan image di path
@@ -427,23 +469,24 @@ class GajiController extends Controller
       'jumlah_bonus_luar8' => $jumlah_bonus_luar8,
       'jumlah_bonus_luar9' => $jumlah_bonus_luar9,
       'jumlah_bonus_luar10' => $jumlah_bonus_luar10,
+      'alpha' => $alpha,
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
+      'alpha' => $subhasil,
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'gambar' => $imagePath ?? null,
-
     ]);
 
     // Redirect with success or error message
     if ($save) {
       // Get the ID of the newly created data
       $gajiId = $save->id;
-
+      // dd($save);
       // Redirect to the detail page for the newly created data with SweetAlert notification
       return Redirect::route(
         'account.gaji.detail',
@@ -464,11 +507,34 @@ class GajiController extends Controller
       $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
         ->where('users.company', $user->company)
         ->get(['users.*']);
+      $datas = DB::table('users')
+        ->select(
+          'users.id',
+          'users.full_name',
+          'users.nik',
+          'users.norek',
+          'users.bank',
+          'users.telp',
+          DB::raw('SUM(presensi.alpha) as alpha'),
+          DB::raw('SUM(presensi.hadir) as hadir'),
+          DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+          DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+          DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+          DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+          DB::raw('SUM(presensi.remote) as remote'),
+          DB::raw('SUM(presensi.izin) as izin')
+        )
+        ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
+        ->orderBy('users.created_at', 'DESC')
+        ->get();
     } else {
       $users = User::where('id', $gaji->user_id)->get();
     }
 
-    return view('account.gaji.edit', compact('gaji', 'users')); // Sesuaikan path template dengan benar
+    return view('account.gaji.edit', compact('gaji', 'users', 'datas')); // Sesuaikan path template dengan benar
   }
 
   public function update(Request $request, $id)
@@ -634,6 +700,7 @@ class GajiController extends Controller
     $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? null;
     $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? null;
     $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? null;
+    $alpha = $request->input('alpha') ?? null;
     //end jumlah bonus dalam kota
 
     //jumlah bonus luar kota
@@ -653,11 +720,15 @@ class GajiController extends Controller
     $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
     $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
 
+    // $total_bonus =
+    //   ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
+    //   ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
+    //   ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
+    //   ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+    // $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
+
     $total_bonus =
-      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
-      ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
-      ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
-      ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
+      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7);
     $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
 
     $potongan = $request->input('potongan');
@@ -666,7 +737,10 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $total = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subalpha = $jumlah_bonus5 * 0.005;
+    $subhasil = $subtotal * $subalpha;
+    $total = $subtotal - $subhasil;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     $existingUserId = $gaji->user_id;
@@ -759,12 +833,14 @@ class GajiController extends Controller
       'jumlah_bonus_luar8' => $jumlah_bonus_luar8,
       'jumlah_bonus_luar9' => $jumlah_bonus_luar9,
       'jumlah_bonus_luar10' => $jumlah_bonus_luar10,
+      'alpha' => $alpha,
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
+      'alpha' => $subhasil,
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'gambar' => $imagePath, // Store the image path
@@ -793,10 +869,33 @@ class GajiController extends Controller
       $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
         ->where('users.company', $user->company)
         ->get(['users.*']);
+      $datas = DB::table('users')
+        ->select(
+          'users.id',
+          'users.full_name',
+          'users.nik',
+          'users.norek',
+          'users.bank',
+          'users.telp',
+          DB::raw('SUM(presensi.alpha) as alpha'),
+          DB::raw('SUM(presensi.hadir) as hadir'),
+          DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+          DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+          DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+          DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+          DB::raw('SUM(presensi.remote) as remote'),
+          DB::raw('SUM(presensi.izin) as izin')
+        )
+        ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
+        ->orderBy('users.created_at', 'DESC')
+        ->get();
     } else {
       $users = User::where('id', $gaji->user_id)->get();
     }
-    return view('account.gaji.detail', compact('gaji', 'users')); // Sesuaikan path template dengan benar
+    return view('account.gaji.detail', compact('gaji', 'users', 'datas')); // Sesuaikan path template dengan benar
   }
 
 
