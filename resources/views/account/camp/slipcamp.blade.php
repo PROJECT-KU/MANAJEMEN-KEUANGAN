@@ -56,10 +56,10 @@
                     Email: {{ $user->email_company }}
                   </td>
                   <td style="margin-top: -200px;"><strong>{{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
-                    Mulai: {{ $camp->tanggal }}<br>
+                    Mulai: {{ date('d F Y', strtotime($camp->tanggal)) }}<br>
                     Sampai : {{ date('d F Y', strtotime($camp->tanggal_akhir)) }}<br>
-                    Peserta : {{ date('d F Y', strtotime($camp->peserta)) }}<br>
-                    Keuntungan : {{ $camp->persentase_keuntungan }}<br>
+                    Peserta : {{ $camp->peserta }}<br>
+                    Keuntungan : {{ number_format($camp->persentase_keuntungan, 0, ',', '.') }}%<br>
                     Tanggal : {{ date('d F Y') }}
                   </td>
                   <td>
