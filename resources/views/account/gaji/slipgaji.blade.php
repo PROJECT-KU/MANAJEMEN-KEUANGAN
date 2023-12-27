@@ -42,9 +42,9 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th scope="col" style="text-align: left; width:260px">Dari</th>
-                  <th scope="col" style="text-align: left; width:200px">Untuk</th>
-                  <th scope="col" style="text-align: left;  width:260px"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
+                  <th scope="col" style="text-align: left; width:300px">Dari</th>
+                  <th scope="col" style="text-align: left; width:250px">Untuk</th>
+                  <th scope="col" style="text-align: left;  width:250px"><b>ID Transaksi : {{ $gaji->id_transaksi }}</b>
                   </th>
                 </tr>
               </thead>
@@ -58,7 +58,7 @@
                   <td style="margin-top: -200px;"><strong>{{ $employee->full_name }}</strong><br>
                     Jabatan: {{ $employee->level }}<br>
                     Phone: {{ $employee->telp }}<br>
-                    Email: {{ $employee->email }}
+                    Email: {{ $employee->email }}<br>
                     <b>Pembayaran : </b>{{ date('j F Y', strtotime($gaji->tanggal)) }}<br>
                     <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($gaji->tanggal)) }}<br>
                   </td>

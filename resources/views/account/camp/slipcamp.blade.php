@@ -42,9 +42,9 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th scope="col" style="text-align: left; width:260px">Dari</th>
-                  <th scope="col" style="text-align: left; width:200px">Untuk</th>
-                  <th scope="col" style="text-align: left;  width:260px"><b>ID Transaksi : {{ $camp->id_transaksi }}</b>
+                  <th scope="col" style="text-align: left; width:300px">Dari</th>
+                  <th scope="col" style="text-align: left; width:250px">Untuk</th>
+                  <th scope="col" style="text-align: left;  width:250px"><b>ID Transaksi : {{ $camp->id_transaksi }}</b>
                   </th>
                 </tr>
               </thead>
@@ -59,9 +59,10 @@
                     <br><br>
                     Mulai: {{ $camp->tanggal }}<br>
                     Sampai : {{ $camp->tanggal_akhir }}
+                    <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
                   </td>
                   <td>
-                    <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
+
                   </td>
                 </tr>
               </tbody>
