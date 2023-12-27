@@ -55,12 +55,9 @@
                     Phone: {{ $user->telp_company }}<br>
                     Email: {{ $user->email_company }}
                   </td>
-                  <td style="margin-top: -200px;"><strong>Camp {{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
-                    <br><br>
-                    Tanggal: <br>
-                    {{ $camp->tanggal }}<br>
-                    s/d<br>
-                    {{ $camp->tanggal_akhir }}
+                  <td style="margin-top: -200px;"><strong>{{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
+                    Mulai: {{ $camp->tanggal }}<br>
+                    Sampai : {{ $camp->tanggal_akhir }}
                   </td>
                   <td>
                     <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
@@ -168,15 +165,18 @@
                   <td style="text-align: left; width:145px">Lain-Lain</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($camp->lainnya, 0, ',', '.') }}</td>
                 </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"><b>Total Uang Masuk</b></td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_uang_masuk, 0, ',', '.') }}</td>
+
+                  <td style="text-align: left; width:145px"><b>Total Uang Keluar</b></td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total, 0, ',', '.') }}</td>
+                </tr>
               </tbody>
 
             </table>
             <br>
             <hr>
-            <h3><b>Total Uang Masuk </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($camp->total_uang_masuk, 0, ',', '.') }}</h3>
-            <p><i>{{ $terbilang }}</i></p>
-            <h3><b>Total Uang Keluar </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($camp->total, 0, ',', '.') }}</h3>
-            <p><i>{{ $terbilang }}</i></p>
             <h3><b>Total Keuntungan </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($camp->keuntungan, 0, ',', '.') }}</h3>
             <p><i>{{ $terbilang }}</i></p>
             <hr>
