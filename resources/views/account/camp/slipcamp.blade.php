@@ -56,9 +56,9 @@
                     Email: {{ $user->email_company }}
                   </td>
                   <td style="margin-top: -200px;"><strong>{{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
-                    <br><br>
                     Mulai: {{ $camp->tanggal }}<br>
-                    Sampai : {{ $camp->tanggal_akhir }}
+                    Sampai : {{ $camp->tanggal_akhir }}<br>
+                    Peserta : {{ $camp->peserta }}<br>
                     <b>Tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{ date('d F Y') }}
                   </td>
                   <td>
