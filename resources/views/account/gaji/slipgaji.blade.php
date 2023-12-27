@@ -16,7 +16,7 @@
   <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <!-- <img src="{{ $userLogoPath }}" alt="Company Logo" style="max-width: 100px;"> -->
+      <img src="{{ asset('assets/img/logonew.png') }}" alt="Company Logo" style="max-width: 100px;">
       <section class="invoice">
         <div class="row">
           <div class="col-12">
