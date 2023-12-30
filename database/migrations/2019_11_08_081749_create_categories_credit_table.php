@@ -16,18 +16,15 @@ class CreateCategoriesCreditTable extends Migration
         Schema::create('categories_credit', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
-            $table->string('name');
+            $table->string('kode', 300)->nullable();
+            $table->string('name', 255);
             $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')->on('users')
                 ->onDelete('RESTRICT')
                 ->onUpdate('CASCADE');
-
         });
-
-
-
     }
 
     /**

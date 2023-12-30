@@ -17,9 +17,11 @@ class CreateCreditTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
+            $table->string('d_transaksi', 300)->nullable();
             $table->bigInteger('nominal');
             $table->text('description');
             $table->dateTime('credit_date');
+            $table->string('gambar', 300)->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')
@@ -31,7 +33,6 @@ class CreateCreditTable extends Migration
                 ->references('id')->on('categories_credit')
                 ->onDelete('RESTRICT')
                 ->onUpdate('CASCADE');
-
         });
     }
 
