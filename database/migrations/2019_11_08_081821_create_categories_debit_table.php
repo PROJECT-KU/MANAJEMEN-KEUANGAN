@@ -16,6 +16,7 @@ class CreateCategoriesDebitTable extends Migration
         Schema::create('categories_debit', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
+            $table->string('kode', 300)->nullable();
             $table->string('name');
             $table->timestamps();
 
@@ -23,7 +24,6 @@ class CreateCategoriesDebitTable extends Migration
                 ->references('id')->on('users')
                 ->onDelete('RESTRICT')
                 ->onUpdate('CASCADE');
-
         });
     }
 
