@@ -4093,7 +4093,7 @@ Update Laporan Camp | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-                    </div>b n
+                    </div>
 
                     <!--================== TIKET TEAM PULANG ==================-->
                     <!-- default -->
@@ -4765,7 +4765,7 @@ Update Laporan Camp | MANAGEMENT
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rp.</span>
                                     </div>
-                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency_hotel">
+                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
                                 </div>
                                 @error('hotel')
                                 <div class="invalid-feedback" style="display: block">
@@ -5788,29 +5788,12 @@ Update Laporan Camp | MANAGEMENT
             timePicker24Hour: true,
         });
     }
-
-    var cleaveC = new Cleave('.currency', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
-    var timeoutHandler = null;
     // end
 </script>
 
 
 
 <script>
-    var cleaveC = new Cleave('.currency', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
-    var cleaveC = new Cleave('.currency1', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
     // gaji trainer
     var cleaveC = new Cleave('.currency_gaji_trainer', {
         numeral: true,
@@ -5894,6 +5877,44 @@ Update Laporan Camp | MANAGEMENT
         numeralThousandsGroupStyle: 'thousand'
     });
     // end
+    var timeoutHandler = null;
+</script>
+
+<script>
+    // <!-- UANG MASUK -->
+    var cleaveC = new Cleave('.currency', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+    // <!-- END -->
+
+    // <!-- UANG MASUK LAINNYA -->
+    var cleaveC = new Cleave('.currency1', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+    // <!-- END -->
+
+    // <!-- HOTEL -->
+    var cleaveC = new Cleave('.currency-hotel', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+    // <!-- END -->
+
+    // <!-- KONSUMSI TAMBAHAN -->
+    var cleaveC = new Cleave('.currency_konsumsi_tambahan', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+    // <!-- END -->
+
+    // <!-- PENGELUARAN LAINNYA -->
+    var cleaveC = new Cleave('.currency_lainnya', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+    // <!-- END -->
 
     var cleaveC = new Cleave('.currency_team_cabang', {
         numeral: true,
@@ -5908,23 +5929,6 @@ Update Laporan Camp | MANAGEMENT
         numeral: true,
         numeralThousandsGroupStyle: 'thousand'
     });
-    var cleaveC = new Cleave('.currency_tiket_team', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-    var cleaveC = new Cleave('.currency_hotel', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-    var cleaveC = new Cleave('.currency_konsumsi_tambahan', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-    var cleaveC = new Cleave('.currency_lainnya', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
     var timeoutHandler = null;
 </script>
 
