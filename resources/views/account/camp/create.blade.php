@@ -1363,7 +1363,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Jumlah Peserta</label>
                 <div class="input-group">
-                  <input type="text" name="peserta" value="{{ old('peserta') }}" placeholder="Masukkan Jumlah peserta" class="form-control currency_peserta">
+                  <input type="number" name="peserta" value="{{ old('peserta') }}" placeholder="Masukkan Jumlah peserta" class="form-control currency_peserta">
                 </div>
                 @error('peserta')
                 <div class="invalid-feedback" style="display: block">
@@ -2770,7 +2770,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="hotel" value="{{ old('hotel') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency_hotel">
+                  <input type="text" name="hotel" value="{{ old('hotel') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
                 </div>
                 @error('hotel')
                 <div class="invalid-feedback" style="display: block">
@@ -3753,29 +3753,10 @@ Tambah Gaji Karyawan | MANAGEMENT
       timePicker24Hour: true,
     });
   }
-
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-
-  var timeoutHandler = null;
   // end
 </script>
 
-
-
 <script>
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-
-  var cleaveC = new Cleave('.currency1', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-
   // gaji trainer
   var cleaveC = new Cleave('.currency_gaji_trainer', {
     numeral: true,
@@ -3859,6 +3840,44 @@ Tambah Gaji Karyawan | MANAGEMENT
     numeralThousandsGroupStyle: 'thousand'
   });
   // end
+  var timeoutHandler = null;
+</script>
+
+<script>
+  // <!-- UANG MASUK -->
+  var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  // <!-- END -->
+
+  // <!-- UANG MASUK LAINNYA -->
+  var cleaveC = new Cleave('.currency1', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  // <!-- END -->
+
+  // <!-- HOTEL -->
+  var cleaveC = new Cleave('.currency-hotel', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  // <!-- END -->
+
+  // <!-- KONSUMSI TAMBAHAN -->
+  var cleaveC = new Cleave('.currency_konsumsi_tambahan', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  // <!-- END -->
+
+  // <!-- PENGELUARAN LAINNYA -->
+  var cleaveC = new Cleave('.currency_lainnya', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  // <!-- END -->
 
   var cleaveC = new Cleave('.currency_team_cabang', {
     numeral: true,
@@ -3873,27 +3892,6 @@ Tambah Gaji Karyawan | MANAGEMENT
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
-  var cleaveC = new Cleave('.currency_tiket_trainer', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tiket_team', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_hotel', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_konsumsi_tambahan', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lainnya', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-
   var timeoutHandler = null;
 </script>
 

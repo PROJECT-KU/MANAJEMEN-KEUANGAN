@@ -67,14 +67,14 @@ Detail Gaji Karyawan | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Tanggal Mulai Camp</label>
-                                    <input type="text" name="tanggal" id="tanggal" value="{{ date('d F Y H:i', strtotime($camp->tanggal)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
+                                    <input type="text" name="tanggal" id="tanggal" value="{{ date('d F Y', strtotime($camp->tanggal)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Tanggal Berakhir Camp</label>
-                                    <input type="text" name="tanggal_akhir" id="tanggal_akhir" value="{{ date('d F Y H:i', strtotime($camp->tanggal_akhir)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
+                                    <input type="text" name="tanggal_akhir" id="tanggal_akhir" value="{{ date('d F Y', strtotime($camp->tanggal_akhir)) }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
