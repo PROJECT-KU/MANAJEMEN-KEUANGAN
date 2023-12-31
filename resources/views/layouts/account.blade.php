@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+    <!-- cdn sweet alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- end -->
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>@yield('title')</title>
@@ -45,6 +48,7 @@
             font-weight: bold;
         }
     </style>
+
 </head>
 @php
 $isStatusOff = (Auth::user()->status === 'off');
@@ -130,7 +134,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <i class="fas fa-building"></i> <span>COMPANY</span>
                                     </a>
                                 </li>
-                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/pengguna/search') }}">
+                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.camp.index') }}">
                                         <i class="fas fa-campground"></i> <span>LAPORAN CAMP</span>
                                     </a>

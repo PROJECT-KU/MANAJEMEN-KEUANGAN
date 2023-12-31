@@ -127,7 +127,6 @@ class PenggunaController extends Controller
             'telp' => 'required',
             'nik' => 'required',
             'norek' => 'required',
-            'jobdesk' => 'required',
             'bank' => 'required',
         ], [
             'full_name.required'   => 'Masukkan Nama Lengkap!',

@@ -300,7 +300,7 @@ Tambah Pengguna | MANAGEMENT
                                 <div class="form-group">
                                     <label>Jobdesk</label>
                                     <div class="input-group">
-                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" required></textarea>
+                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
                                     </div>
                                     @error('jobdesk')
                                     <div class="invalid-feedback" style="display: block">
@@ -312,11 +312,26 @@ Tambah Pengguna | MANAGEMENT
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-2 col-4">
                                 <div class="form-group">
-                                    <input type="checkbox" id="email_verified_at" name="email_verified_at" style="margin-top: 5px;">
-                                    <label>Verifikasi</label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="emailVerifiedSwitch" name="email_verified_at">
+                                        <label class="custom-control-label" for="emailVerifiedSwitch">Verifikasi</label>
+                                    </div>
                                     @error('email_verified_at')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-4">
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="statusSwitch" name="status">
+                                        <label class="custom-control-label" for="statusSwitch">Status</label>
+                                    </div>
+                                    @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -352,16 +367,16 @@ Tambah Pengguna | MANAGEMENT
 
 <!--================== format telp ==================-->
 <script>
-  function formatPhoneNumber(input) {
-    // Menghapus semua karakter non-digit
-    var phoneNumber = input.value.replace(/\D/g, '');
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
 
-    // Menggunakan ekspresi reguler untuk memformat nomor telepon
-    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
 
-    // Mengatur nilai input dengan nomor telepon yang diformat
-    input.value = phoneNumber;
-  }
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
 </script>
 <!--================== end ==================-->
 

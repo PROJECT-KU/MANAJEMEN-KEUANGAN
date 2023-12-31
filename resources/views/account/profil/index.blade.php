@@ -272,6 +272,40 @@ Profil | MANAGEMENT
                 </div>
               </div>
 
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Akun Dibikin Pada Tanggal</label>
+                    <input class="form-control" name="notif" placeholder="" value="{{ strftime('%d %B %Y %H:%M', strtotime($user->created_at)) }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Lama Bekerja</label>
+                    <?php
+                    $now = now();
+                    $diff = $user->created_at->diff($now);
+
+                    $years = $diff->y;
+                    $months = $diff->m;
+
+                    $result = '';
+
+                    if ($years > 0) {
+                      $result .= $years . ($years > 1 ? ' tahun ' : ' tahun ');
+                    }
+
+                    if ($months > 0) {
+                      $result .= $months . ($months > 1 ? ' bulan' : ' bulan');
+                    } else {
+                      $result .= '1 bulan';
+                    }
+                    ?>
+                    <input class="form-control" name="lama_bekerja" placeholder="" value="{{ $result }}" readonly>
+                  </div>
+                </div>
+              </div>
+
               <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
               <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
 
