@@ -306,20 +306,42 @@ Update Pengguna | MANAGEMENT
                             </div>
                         </div>
 
-                        @if(Auth::user()->level === 'admin')
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Akun Dibikin Pada Tanggal</label>
-                                <input class="form-control" name="notif" placeholder="" value="{{ old('created_at', $user->created_at->format('d-m-Y h:i')) }}" readonly>
-                                @error('created_at')
-                                <div class=" invalid-feedback" style="display: block">
-                                    {{ $message }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Akun Dibikin Pada Tanggal</label>
+                                    <input class="form-control" name="notif" placeholder="" value="{{ strftime('%d %B %Y %H:%M', strtotime($user->created_at)) }}" readonly>
                                 </div>
-                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Lama Bekerja</label>
+                                    <?php
+                                    $now = now();
+                                    $diff = $user->created_at->diff($now);
+
+                                    $years = $diff->y;
+                                    $months = $diff->m;
+
+                                    $result = '';
+
+                                    if ($years > 0) {
+                                        $result .= $years . ($years > 1 ? ' tahun ' : ' tahun ');
+                                    }
+
+                                    if ($months > 0) {
+                                        $result .= $months . ($months > 1 ? ' bulan' : ' bulan');
+                                    } else {
+                                        $result .= '1 bulan';
+                                    }
+                                    ?>
+                                    <input class="form-control" name="lama_bekerja" placeholder="" value="{{ $result }}" readonly>
+                                </div>
                             </div>
                         </div>
 
 
+                        @if(Auth::user()->level === 'admin')
                         <hr style="border-radius: 2px; border-width: 3px;">
                         <div style="text-align: center;">
                             <p><span style="color: red;">*</span>Notifikasi Untuk Masa Sewa Yang Akan Habis Untuk Akun Perorangan<span style="color: red;">*</span></p>
@@ -362,11 +384,14 @@ Update Pengguna | MANAGEMENT
                             </div>
                         </div>
                         @endif
+
                         <div class="row">
-                            <div class="col-2">
+                            <div class="col-md-2 col-4">
                                 <div class="form-group">
-                                    <input type="checkbox" value="1" name="email_verified_at" style="margin-top: 5px;" {{ $user->email_verified_at ? 'checked' : '' }}>
-                                    <label>Verifikasi</label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="emailVerifiedSwitch" name="email_verified_at" {{ $user->email_verified_at ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="emailVerifiedSwitch">Verifikasi</label>
+                                    </div>
                                     @error('email_verified_at')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -374,10 +399,12 @@ Update Pengguna | MANAGEMENT
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="col-md-2 col-4">
                                 <div class="form-group">
-                                    <input type="checkbox" value="1" name="status" style="margin-top: 5px;" {{ $user->status == 'on' ? 'checked' : '' }}>
-                                    <label>Status</label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="statusSwitch" name="status" {{ $user->status == 'on' ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="statusSwitch">Status</label>
+                                    </div>
                                     @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}

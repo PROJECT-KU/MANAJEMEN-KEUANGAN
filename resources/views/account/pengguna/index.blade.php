@@ -13,7 +13,7 @@ List Pengguna | MANAGEMENT
 
     <div class="section-body">
 
-      <!--================== jika maintenace aktif ==================-->
+      <!--================== MAINTENANCE ==================-->
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' && ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
@@ -26,7 +26,7 @@ List Pengguna | MANAGEMENT
         @endif
         @endforeach
         @endif
-        <!--================== end ==================-->
+        <!--================== END ==================-->
 
         <div class="card">
           <div class="card-header">
@@ -34,7 +34,7 @@ List Pengguna | MANAGEMENT
           </div>
 
           <div class="card-body">
-            <form action="{{ route('account.pengguna.search') }}" method="GET">
+            <form action="{{ route('account.pengguna.search') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
@@ -44,8 +44,7 @@ List Pengguna | MANAGEMENT
                   </div>
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                    </button>
+                    <button type="button" class="btn btn-primary" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                   </div>
                   @if(request()->has('q'))
                   <a href="{{ route('account.pengguna.index') }}" class="btn btn-danger ml-1">
@@ -118,7 +117,7 @@ List Pengguna | MANAGEMENT
                   <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary">
                     <i class="fa fa-pencil-alt"></i>
                   </a>
-                  <button style="margin-right: 5px; margin-bottom:5px;" class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
+                  <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger">
                     <i class="fa fa-trash"></i>
                   </button>
                   <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
@@ -142,6 +141,7 @@ List Pengguna | MANAGEMENT
 </section>
 </div>
 
+
 <!-- reload data ketika success -->
 <script>
   @if(Session::has('success'))
@@ -153,9 +153,9 @@ List Pengguna | MANAGEMENT
 </script>
 <!-- end -->
 
+<!--==================  SWEET ALERT DELETE  ==================-->
 <script>
-  // delete
-  function handleDelete(id) {
+  function Delete(id) {
     var token = $("meta[name='csrf-token']").attr("content");
 
     swal({
@@ -194,84 +194,30 @@ List Pengguna | MANAGEMENT
     });
   }
 </script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
 
 <script>
-  //@if($message = Session::get('success'))
-  //swal({
-  //  type: "success",
-  //  icon: "success",
-  //  title: "BERHASIL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@elseif($message = Session::get('error'))
-  //swal({
-  //  type: "error",
-  //  icon: "error",
-  //  title: "GAGAL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@endif
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("searchButton").addEventListener("click", function() {
+      var searchInputValue = document.querySelector("input[name='q']").value.trim();
 
-  // delete
-  function Delete(id) {
-    var token = $("meta[name='csrf-token']").attr("content");
-
-    swal({
-      title: "APAKAH KAMU YAKIN ?",
-      text: "INGIN MENGHAPUS DATA INI!",
-      icon: "warning",
-      buttons: ['TIDAK', 'YA'],
-      dangerMode: true,
-    }).then(function(isConfirm) {
-      if (isConfirm) {
-        // Ajax delete
-        $.ajax({
-          url: "{{ route('account.pengguna.destroy', '') }}/" + id,
-          data: {
-            "_token": token,
-            "_method": "DELETE"
-          },
-          type: 'POST',
-          success: function(response) {
-            if (response.status === "success") {
-              swal({
-                title: 'BERHASIL!',
-                text: 'DATA BERHASIL DIHAPUS!',
-                icon: 'success',
-                timer: 1000,
-                showConfirmButton: false,
-                showCancelButton: false,
-                buttons: false,
-              }).then(function() {
-                location.reload();
-              });
-            } else {
-              swal({
-                title: 'GAGAL!',
-                text: 'DATA GAGAL DIHAPUS!',
-                icon: 'error',
-                timer: 1000,
-                showConfirmButton: false,
-                showCancelButton: false,
-                buttons: false,
-              }).then(function() {
-                location.reload();
-              });
-            }
-          }
+      if (searchInputValue === "") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Peringatan',
+          text: 'Harap isi field pencarian terlebih dahulu!',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
         });
       } else {
-        return true;
+        // If not empty, submit the form
+        document.getElementById("searchForm").submit();
       }
     });
-  }
+  });
 </script>
+<!--================== END ==================-->
+
 @stop
