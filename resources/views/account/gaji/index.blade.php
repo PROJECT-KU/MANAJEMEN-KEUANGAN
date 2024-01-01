@@ -66,7 +66,8 @@ List Gaji Karyawan | MANAGEMENT
           </div>
 
           <div class="card-body">
-            <form action="{{ route('account.gaji.search') }}" method="GET" id="searchForm">
+            @if (Auth::user()->level == 'manager')
+            <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
                   <!-- <div class="input-group-prepend">
@@ -86,6 +87,28 @@ List Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </form>
+            @else
+            <form action="{{ route('account.gaji.searchkaryawan') }}" method="GET" id="searchForm">
+              <div class="form-group">
+                <div class="input-group mb-3">
+                  <!-- <div class="input-group-prepend">
+                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH
+                    </a>
+                  </div> -->
+                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                  <div class="input-group-append">
+                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                  </div>
+                  @if(request()->has('q'))
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
+                    <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                  </a>
+                  @endif
+                </div>
+              </div>
+            </form>
+            @endif
 
             <form action="{{ route('account.gaji.filter') }}" method="GET">
               <div class="row">

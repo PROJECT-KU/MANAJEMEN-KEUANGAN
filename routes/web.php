@@ -115,7 +115,8 @@ Route::prefix('account')->group(function () {
     Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
-    Route::get('/gaji/search', 'account\GajiController@search')->name('account.gaji.search');
+    Route::get('/gaji/searchmanager', 'account\GajiController@searchmanager')->name('account.gaji.searchmanager');
+    Route::get('/gaji/searchkaryawan', 'account\GajiController@searchkaryawan')->name('account.gaji.searchkaryawan');
     Route::get('/gaji/filter', 'account\GajiController@filter')->name('account.gaji.filter');
     Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
     Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
