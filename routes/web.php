@@ -130,8 +130,7 @@ Route::prefix('account')->group(function () {
     Route::get('/presensi/{id}/edit', 'account\PresensiController@edit')->name('account.presensi.edit');
     Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
     Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
-    Route::get('/presensi/searchmanager', 'account\PresensiController@searchmanager')->name('account.presensi.searchmanager');
-    Route::get('/presensi/searchkaryawan', 'account\PresensiController@searchkaryawan')->name('account.presensi.searchkaryawan');
+    Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
     Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
     Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
 
