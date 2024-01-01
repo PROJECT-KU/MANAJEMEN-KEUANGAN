@@ -132,6 +132,17 @@ class GajiController extends Controller
     $search = $request->get('q');
     $user = Auth::user();
 
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
+
     $gaji = DB::table('gaji')
       ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -156,10 +167,14 @@ class GajiController extends Controller
     $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
     $endDate = $request->get('end_date');
 
+    $presensiExist = Presensi::where('status', '<>', null)
+      ->whereBetween('created_at', [$currentMonth, $nextMonth])
+      ->exists();
+
     if ($gaji->isEmpty()) {
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji tidak ditemukan.');
     }
-    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
 
   public function searchkaryawan(Request $request)
