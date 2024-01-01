@@ -110,7 +110,7 @@ class GajiController extends Controller
       ->where('users.company', $user->company)
       ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
       ->orderBy('gaji.created_at', 'DESC')
-      ->paginate(20);
+      ->paginate(10);
 
 
     $maintenances = DB::table('maintenance')
@@ -148,7 +148,7 @@ class GajiController extends Controller
       ->where('gaji.user_id', $user->id)
       ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
       ->orderBy('gaji.created_at', 'DESC')
-      ->paginate(20);
+      ->paginate(10);
 
 
     $maintenances = DB::table('maintenance')
