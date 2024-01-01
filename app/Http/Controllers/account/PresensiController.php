@@ -127,62 +127,44 @@ class PresensiController extends Controller
     return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
   }
 
-  public function searchmanager(Request $request)
+  public function search(Request $request)
   {
     $search = $request->get('q');
     $user = Auth::user();
 
-    $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
-      ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
-      ->where(function ($query) use ($search) {
-        $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-          ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
-          ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
-          ->orWhere(function ($subquery) use ($search) {
-            // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
-            $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
-          });
-      })
-      ->orderBy('presensi.created_at', 'DESC')
-      ->paginate(10);
-
-    $presensi->appends(['q' => $search]);
-
-    $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
-    $endDate = $request->get('end_date');
-
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
-    if ($presensi->isEmpty()) {
-      return redirect()->route('account.presensi.index')->with('error', 'Data Presensi tidak ditemukan.');
+    if (Auth::user()->level == 'manager') {
+      $presensi = DB::table('presensi')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->where(function ($query) use ($search) {
+          $query->where('users.full_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
+            ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
+            ->orWhere(function ($subquery) use ($search) {
+              // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
+              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+            });
+        })
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    } else {
+      $presensi = DB::table('presensi')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('presensi.user_id', $user->id)
+        ->where(function ($query) use ($search) {
+          $query->where('users.full_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
+            ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
+            ->orWhere(function ($subquery) use ($search) {
+              // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
+              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+            });
+        })
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
     }
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
-  }
-
-  public function searchkaryawan(Request $request)
-  {
-    $search = $request->get('q');
-    $user = Auth::user();
-
-    $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
-      ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
-      ->where('presensi.user_id', $user->id)
-      ->where(function ($query) use ($search) {
-        $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-          ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
-          ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
-          ->orWhere(function ($subquery) use ($search) {
-            // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
-            $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
-          });
-      })
-      ->orderBy('presensi.created_at', 'DESC')
-      ->paginate(10);
 
     $presensi->appends(['q' => $search]);
 

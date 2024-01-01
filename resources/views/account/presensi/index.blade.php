@@ -170,8 +170,7 @@ List Presensi Karyawan | MANAGEMENT
             </div>
 
             <div class="card-body">
-              @if (Auth::user()->level == 'manager')
-              <form action="{{ route('account.presensi.searchmanager') }}" method="GET" id="searchForm">
+              <form action="{{ route('account.presensi.search') }}" method="GET" id="searchForm">
                 <div class="form-group">
                   <div class="input-group mb-3">
                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
@@ -186,23 +185,6 @@ List Presensi Karyawan | MANAGEMENT
                   </div>
                 </div>
               </form>
-              @else
-              <form action="{{ route('account.presensi.searchkaryawan') }}" method="GET" id="searchForm">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                    <div class="input-group-append">
-                      <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                    </div>
-                    @if(request()->has('q'))
-                    <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
-                      <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                    </a>
-                    @endif
-                  </div>
-                </div>
-              </form>
-              @endif
 
               <form action="{{ route('account.presensi.filter') }}" method="GET">
                 <div class="row">
