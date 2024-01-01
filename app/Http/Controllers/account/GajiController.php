@@ -79,10 +79,14 @@ class GajiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
+    $presensiExist = Presensi::where('status', '<>', null)
+      ->whereBetween('created_at', [$currentMonth, $nextMonth])
+      ->exists();
+
     // Calculate total gaji
     $totalGaji = $gaji->sum('total');
 
-    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
 
   public function search(Request $request)
@@ -169,8 +173,6 @@ class GajiController extends Controller
       return view('account.gaji.create', compact('users'));
     }
   }
-
-
 
   public function store(Request $request)
   {

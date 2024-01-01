@@ -170,38 +170,17 @@ List Presensi Karyawan | MANAGEMENT
             </div>
 
             <div class="card-body">
-              <!-- <form action="{{ route('account.presensi.search') }}" method="GET">
+              <form action="{{ route('account.presensi.search') }}" method="GET" id="searchForm">
                 <div class="form-group">
                   <div class="input-group mb-3">
-                    @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
-                    @php
-                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                    ->whereDate('created_at', now()->toDateString())
-                    ->first();
-                    @endphp
-                    <td class="text-center">
-                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px;">
-                        <i class="fa fa-pencil-alt"></i> PULANG
-                      </a>
-                      @elseif (!$todayPresensi)
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                        <i class="fa fa-plus-circle"></i> MASUK
-                      </a>
-                      @else
-                      @endif
-                    </td>
-                    @endif
-
-                    @if (Auth::user()->level == 'manager')
-                    <div class="input-group-prepend">
-                      <a href="{{ route('account.presensi.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                    </div>
-                    @endif
+                    <!-- <div class="input-group-prepend">
+                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH
+                    </a>
+                  </div> -->
                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                     <div class="input-group-append">
-                      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI
-                      </button>
+                      <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                     </div>
                     @if(request()->has('q'))
                     <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
@@ -210,7 +189,7 @@ List Presensi Karyawan | MANAGEMENT
                     @endif
                   </div>
                 </div>
-              </form> -->
+              </form>
 
               <form action="{{ route('account.presensi.index') }}" method="GET">
                 <div class="row">
@@ -232,13 +211,13 @@ List Presensi Karyawan | MANAGEMENT
                   <div class="col-md-2">
                     @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                     <div class="btn-group" style="width: 100%;">
-                      <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                      <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                       <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
                         <i class="fa fa-times-circle mt-2"></i> HAPUS
                       </a>
                     </div>
                     @else
-                    <button class="btn btn-primary mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                     @endif
                   </div>
                 </div>
@@ -247,7 +226,6 @@ List Presensi Karyawan | MANAGEMENT
           </div>
           <!--================== end ==================-->
 
-          <!--================== content ==================-->
           <div class="card">
             <div class="card-header">
               <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
@@ -426,16 +404,37 @@ List Presensi Karyawan | MANAGEMENT
 
             </div>
           </div>
-          <!--================== end ==================-->
-
 
       </div>
     </div>
   </section>
 </div>
 
-<!--================== time saat ini ==================-->
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("searchButton").addEventListener("click", function() {
+      var searchInputValue = document.querySelector("input[name='q']").value.trim();
 
+      if (searchInputValue === "") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Peringatan',
+          text: 'Harap isi field pencarian terlebih dahulu!',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        // If not empty, submit the form
+        document.getElementById("searchForm").submit();
+      }
+    });
+  });
+</script>
+<!--================== END ==================-->
+
+
+<!--================== TIME SAAT INI ==================-->
 <script>
   // Function to update the current time
   function updateCurrentTime() {
@@ -456,7 +455,7 @@ List Presensi Karyawan | MANAGEMENT
   // Call the function once to initialize the time
   updateCurrentTime();
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
 
 <!--================== mengirim pesan ke wa ==================-->
@@ -644,7 +643,7 @@ List Presensi Karyawan | MANAGEMENT
 </script>
 <!--================== end ==================-->
 
-<!-- reload data ketika success -->
+<!--================== RELOAD DATA KETIKA SUKSES ==================-->
 <script>
   @if(Session::has('success'))
   // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
@@ -653,35 +652,10 @@ List Presensi Karyawan | MANAGEMENT
   }, 1000); // Refresh halaman setelah 2 detik
   @endif
 </script>
-<!-- end -->
+<!--================== END ==================-->
 
+<!--================== SWEET ALERT DELETE ==================-->
 <script>
-  //@if($message = Session::get('success'))
-  //swal({
-  //  type: "success",
-  //  icon: "success",
-  //  title: "BERHASIL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@elseif($message = Session::get('error'))
-  //swal({
-  //  type: "error",
-  //  icon: "error",
-  //  title: "GAGAL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@endif
-
-  // delete
-  // delete
   function Delete(id) {
     var token = $("meta[name='csrf-token']").attr("content");
 
@@ -744,5 +718,5 @@ List Presensi Karyawan | MANAGEMENT
     });
   }
 </script>
-
+<!--================== END ==================-->
 @stop

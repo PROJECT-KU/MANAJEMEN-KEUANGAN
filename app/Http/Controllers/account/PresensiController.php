@@ -296,12 +296,13 @@ class PresensiController extends Controller
     $user = Auth::user();
 
     $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.note', 'presensi.gambar', 'presensi.created_at', 'presensi.time_pulang', 'presensi.status_pulang', 'users.id as user_id', 'users.full_name as full_name', 'presensi.time_pulang')
+      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->where(function ($query) use ($search) {
         $query->where('users.full_name', 'LIKE', '%' . $search . '%')
           ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
+          ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
           ->orWhere(function ($subquery) use ($search) {
             // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
             $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
@@ -312,16 +313,17 @@ class PresensiController extends Controller
 
     $presensi->appends(['q' => $search]);
 
-    if ($presensi->isEmpty()) {
-      return redirect()->route('account.presensi.index')->with('error', 'Data presensi Karyawan tidak ditemukan.');
-    }
+    $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
+    $endDate = $request->get('end_date');
 
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
       ->get();
 
-
-    return view('account.presensi.index', compact('presensi', 'maintenances'));
+    if ($presensi->isEmpty()) {
+      return redirect()->route('account.presensi.index')->with('error', 'Data Presensi tidak ditemukan.');
+    }
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
   }
 
   public function getUserPhone($userId)
