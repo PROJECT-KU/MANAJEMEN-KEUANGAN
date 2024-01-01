@@ -13,7 +13,7 @@ List Gaji Karyawan | MANAGEMENT
 
     <div class="section-body">
 
-      <!--================== jika maintenace aktif ==================-->
+      <!--================== MAINTENACE ==================-->
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
@@ -26,9 +26,9 @@ List Gaji Karyawan | MANAGEMENT
         @endif
         @endforeach
         @endif
-        <!--================== end ==================-->
+        <!--================== END ==================-->
 
-        <!-- jika gaji masih ada yang status pending -->
+        <!--================== NOTIF JIKA GAJI MASIH ADA YANG PENDING ==================-->
         @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager'))
         @php
         $totalPendingSalaries = 0;
@@ -51,13 +51,12 @@ List Gaji Karyawan | MANAGEMENT
         </div>
         @endif
         @endif
-        <!-- end -->
+        <!--================== END ==================-->
 
-        @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
-        @else
+        <!--================== FILTER ==================-->
         <div class="card">
           <div class="card-header  text-right">
-            <h4><i class="fas fa-list"></i> LIST GAJI KARYAWAN</h4>
+            <h4><i class="fas fa-filter"></i> FILTER GAJI KARYAWAN</h4>
             <!-- @if (Auth::user()->level == 'karyawan')
             @else
             <div class="card-header-action">
@@ -67,15 +66,17 @@ List Gaji Karyawan | MANAGEMENT
           </div>
 
           <div class="card-body">
-            <!-- <form action="{{ route('account.gaji.search') }}" method="GET">
+            <form action="{{ route('account.gaji.search') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <a href="{{ route('account.gaji.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                  </div>
+                  <!-- <div class="input-group-prepend">
+                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH
+                    </a>
+                  </div> -->
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
-                    <button type="submit" class="btn btn-secondary" disabled><i class="fa fa-search"></i> CARI</button>
+                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                   </div>
                   @if(request()->has('q'))
                   <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
@@ -84,9 +85,9 @@ List Gaji Karyawan | MANAGEMENT
                   @endif
                 </div>
               </div>
-            </form> -->
+            </form>
 
-            <form action="{{ route('account.gaji.index') }}" method="GET">
+            <form action="{{ route('account.gaji.filter') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
@@ -118,19 +119,30 @@ List Gaji Karyawan | MANAGEMENT
               </div>
             </form>
 
+            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+            @else
             <div class="row">
               <div class="col-12 mt-3">
                 <div class="form-group text-center">
                   <div class="input-group mb-3">
-                    <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH GAJI</a>
+                    @if ($presensiExist)
+                    <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH GAJI
+                    </a>
+                    @else
+                    <a href="#" class="btn btn-primary btn-block" style="padding-top: 10px;" id="tambahGajiBtn">
+                      <i class="fa fa-plus-circle"></i> TAMBAH GAJI
+                    </a>
+                    @endif
                   </div>
                 </div>
               </div>
             </div>
+            @endif
 
           </div>
         </div>
-        @endif
+        <!--================== END ==================-->
 
         <div class="card">
           <div class="card-header">
@@ -328,32 +340,50 @@ List Gaji Karyawan | MANAGEMENT
   </section>
 </div>
 
-<!--================== jika input p[encarian kosong button cari disabeld, jika inputan terisi button cari aktif ==================-->
-<!-- <script>
-  $(document).ready(function() {
-    // Fungsi untuk mengatur status disabled pada tombol cari
-    function toggleCariButton() {
-      var inputVal = $('input[name="q"]').val();
-      var cariButton = $('button[type="submit"]');
+<!--================== SWEET ALERT JIKA BELUM ADA KARYAWAN YANG PRESENSI PADA BULAN INI ==================-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener to the button
+    document.getElementById('tambahGajiBtn').addEventListener('click', function(e) {
+      e.preventDefault();
 
-      if (inputVal.trim() === '') {
-        cariButton.prop('disabled', true).removeClass('btn-info').addClass('btn-secondary');
-      } else {
-        cariButton.prop('disabled', false).removeClass('btn-secondary').addClass('btn-info');
-      }
-    }
+      // Display SweetAlert based on the condition
 
-    // Panggil fungsi saat halaman dimuat dan saat nilai input berubah
-    toggleCariButton(); // Panggil saat halaman dimuat
+      Swal.fire({
+        icon: 'warning',
+        title: 'Peringatan',
+        text: 'Belum Ada Karyawan Yang Presensi!',
+      });
 
-    $('input[name="q"]').on('input', function() {
-      toggleCariButton(); // Panggil saat nilai input berubah
     });
   });
-</script> -->
-<!--================== end ==================-->
+</script>
+<!--================== END ==================-->
 
-<!-- reload data ketika success -->
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("searchButton").addEventListener("click", function() {
+      var searchInputValue = document.querySelector("input[name='q']").value.trim();
+
+      if (searchInputValue === "") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Peringatan',
+          text: 'Harap isi field pencarian terlebih dahulu!',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        // If not empty, submit the form
+        document.getElementById("searchForm").submit();
+      }
+    });
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
 <script>
   @if(Session::has('success'))
   // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
@@ -362,35 +392,10 @@ List Gaji Karyawan | MANAGEMENT
   }, 1000); // Refresh halaman setelah 2 detik
   @endif
 </script>
-<!-- end -->
+<!--================== END ==================-->
 
+<!--================== SWEET ALERT DELETE ==================-->
 <script>
-  //@if($message = Session::get('success'))
-  //swal({
-  //  type: "success",
-  //  icon: "success",
-  //  title: "BERHASIL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@elseif($message = Session::get('error'))
-  //swal({
-  //  type: "error",
-  //  icon: "error",
-  //  title: "GAGAL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@endif
-
-  // delete
-  // delete
   function Delete(id) {
     var token = $("meta[name='csrf-token']").attr("content");
 
@@ -453,44 +458,5 @@ List Gaji Karyawan | MANAGEMENT
     });
   }
 </script>
-
-<!-- tabel in pdf -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
-<script>
-  document.getElementById("generate-pdf-btn").addEventListener("click", function() {
-    const doc = new jsPDF();
-
-    // Add a title to the PDF
-    doc.text("List Gaji Karyawan", 105, 15, {
-      align: "center"
-    });
-
-    // Define the table's headers and data
-    const headers = ["NO.", "ID TRANSAKSI", "NAMA KARYAWAN", "NO REKENING", "TOTAL GAJI", "TANGGAL PEMBAYARAN", "STATUS PEMBAYARAN"];
-    const data = [];
-
-    // Loop through the table rows and add data to the data array
-    const tableRows = document.querySelectorAll(".table tbody tr");
-    tableRows.forEach((row) => {
-      const rowData = [];
-      row.querySelectorAll("td").forEach((cell) => {
-        rowData.push(cell.textContent.trim());
-      });
-      data.push(rowData);
-    });
-
-    // Add the table to the PDF
-    doc.autoTable({
-      head: [headers],
-      body: data,
-      startY: 25,
-    });
-
-    // Save the PDF
-    doc.save("gaji_karyawan.pdf");
-  });
-</script>
-<!-- end -->
+<!--================== END ==================-->
 @stop

@@ -13,7 +13,7 @@ List aporan Camp | MANAGEMENT
 
     <div class="section-body">
 
-      <!--================== jika maintenace aktif ==================-->
+      <!--================== MAINTENANCE ==================-->
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
       @if ($maintenance->status === 'aktif' && ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
@@ -26,34 +26,37 @@ List aporan Camp | MANAGEMENT
         @endif
         @endforeach
         @endif
-        <!--================== end ==================-->
+        <!--================== END ==================-->
 
+        <!--================== FILTER ==================-->
         <div class="card">
           <div class="card-header  text-right">
-            <h4><i class="fas fa-list"></i> LIST LAPORAN CAMP</h4>
+            <h4><i class="fas fa-filter"></i> FILTER LAPORAN CAMP</h4>
           </div>
 
           <div class="card-body">
-            <!-- <form action="{{ route('account.camp.search') }}" method="GET">
+            <form action="{{ route('account.camp.search') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <a href="{{ route('account.camp.create') }}" class="btn btn-primary" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH</a>
-                  </div>
+                  <!-- <div class="input-group-prepend">
+                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
+                      <i class="fa fa-plus-circle"></i> TAMBAH
+                    </a>
+                  </div> -->
                   <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                   <div class="input-group-append">
-                    <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> CARI</button>
+                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                   </div>
                   @if(request()->has('q'))
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
+                  <a href="{{ route('account.camp.index') }}" class="btn btn-danger ml-1">
                     <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                   </a>
                   @endif
                 </div>
               </div>
-            </form> -->
+            </form>
 
-            <form action="{{ route('account.camp.index') }}" method="GET">
+            <form action="{{ route('account.camp.filter') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
@@ -73,7 +76,7 @@ List aporan Camp | MANAGEMENT
                 <div class="col-md-2">
                   @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                   <div class="btn-group" style="width: 100%;">
-                    <button class="btn btn-primary mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                     <a href="{{ route('account.camp.index') }}" class="btn btn-danger" style="margin-top: 30px;">
                       <i class="fa fa-times-circle mt-2"></i> HAPUS
                     </a>
@@ -97,6 +100,7 @@ List aporan Camp | MANAGEMENT
 
           </div>
         </div>
+        <!--================== END ==================-->
 
         <div class="card">
           <div class="card-header">
@@ -184,7 +188,7 @@ List aporan Camp | MANAGEMENT
                   </tbody>
                 </table>
                 <div style="text-align: center">
-                  {{$camp->links("vendor.pagination.bootstrap-4")}}
+                  {{ $camp->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
                 </div>
 
               </div>
@@ -196,32 +200,30 @@ List aporan Camp | MANAGEMENT
   </section>
 </div>
 
-<!--================== jika input p[encarian kosong button cari disabeld, jika inputan terisi button cari aktif ==================-->
-<!-- <script>
-  $(document).ready(function() {
-    // Fungsi untuk mengatur status disabled pada tombol cari
-    function toggleCariButton() {
-      var inputVal = $('input[name="q"]').val();
-      var cariButton = $('button[type="submit"]');
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("searchButton").addEventListener("click", function() {
+      var searchInputValue = document.querySelector("input[name='q']").value.trim();
 
-      if (inputVal.trim() === '') {
-        cariButton.prop('disabled', true).removeClass('btn-info').addClass('btn-secondary');
+      if (searchInputValue === "") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Peringatan',
+          text: 'Harap isi field pencarian terlebih dahulu!',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
       } else {
-        cariButton.prop('disabled', false).removeClass('btn-secondary').addClass('btn-info');
+        // If not empty, submit the form
+        document.getElementById("searchForm").submit();
       }
-    }
-
-    // Panggil fungsi saat halaman dimuat dan saat nilai input berubah
-    toggleCariButton(); // Panggil saat halaman dimuat
-
-    $('input[name="q"]').on('input', function() {
-      toggleCariButton(); // Panggil saat nilai input berubah
     });
   });
-</script> -->
-<!--================== end ==================-->
+</script>
+<!--================== END ==================-->
 
-<!-- reload data ketika success -->
+<!--================== RELOAD DATA KETIKA SUKSES ==================-->
 <script>
   @if(Session::has('success'))
   // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
@@ -230,35 +232,10 @@ List aporan Camp | MANAGEMENT
   }, 1000); // Refresh halaman setelah 2 detik
   @endif
 </script>
-<!-- end -->
+<!--================== END ==================-->
 
+<!--================== SWEET ALERT DELETE ==================-->
 <script>
-  //@if($message = Session::get('success'))
-  //swal({
-  //  type: "success",
-  //  icon: "success",
-  //  title: "BERHASIL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@elseif($message = Session::get('error'))
-  //swal({
-  //  type: "error",
-  //  icon: "error",
-  //  title: "GAGAL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@endif
-
-  // delete
-  // delete
   function Delete(id) {
     var token = $("meta[name='csrf-token']").attr("content");
 
@@ -321,44 +298,5 @@ List aporan Camp | MANAGEMENT
     });
   }
 </script>
-
-<!-- tabel in pdf -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
-<script>
-  document.getElementById("generate-pdf-btn").addEventListener("click", function() {
-    const doc = new jsPDF();
-
-    // Add a title to the PDF
-    doc.text("List Gaji Karyawan", 105, 15, {
-      align: "center"
-    });
-
-    // Define the table's headers and data
-    const headers = ["NO.", "ID TRANSAKSI", "NAMA KARYAWAN", "NO REKENING", "TOTAL GAJI", "TANGGAL PEMBAYARAN", "STATUS PEMBAYARAN"];
-    const data = [];
-
-    // Loop through the table rows and add data to the data array
-    const tableRows = document.querySelectorAll(".table tbody tr");
-    tableRows.forEach((row) => {
-      const rowData = [];
-      row.querySelectorAll("td").forEach((cell) => {
-        rowData.push(cell.textContent.trim());
-      });
-      data.push(rowData);
-    });
-
-    // Add the table to the PDF
-    doc.autoTable({
-      head: [headers],
-      body: data,
-      startY: 25,
-    });
-
-    // Save the PDF
-    doc.save("gaji_karyawan.pdf");
-  });
-</script>
-<!-- end -->
+<!--================== END ==================-->
 @stop
