@@ -88,6 +88,45 @@ class PresensiController extends Controller
     return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
   }
 
+  public function filter(Request $request)
+  {
+    $user = Auth::user();
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
+
+    if ($user->level == 'manager' || $user->level == 'staff') {
+      $presensi = DB::table('presensi')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+      $presensi = DB::table('presensi')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
+        ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    }
+
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
+  }
+
   public function create()
   {
     $user = Auth::user();

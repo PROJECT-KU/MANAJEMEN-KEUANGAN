@@ -87,7 +87,7 @@ List Gaji Karyawan | MANAGEMENT
               </div>
             </form>
 
-            <form action="{{ route('account.gaji.index') }}" method="GET">
+            <form action="{{ route('account.gaji.filter') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">

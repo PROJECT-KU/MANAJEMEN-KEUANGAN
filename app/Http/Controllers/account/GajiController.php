@@ -89,6 +89,44 @@ class GajiController extends Controller
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
 
+  public function filter(Request $request)
+  {
+    $user = Auth::user();
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
+
+
+    $gaji = DB::table('gaji')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+      ->orderBy('gaji.created_at', 'DESC')
+      ->paginate(20);
+
+
+    $maintenances = DB::table('maintenance')
+      ->orderBy('created_at', 'DESC')
+      ->get();
+
+    $presensiExist = Presensi::where('status', '<>', null)
+      ->whereBetween('created_at', [$currentMonth, $nextMonth])
+      ->exists();
+
+    // Calculate total gaji
+    $totalGaji = $gaji->sum('total');
+
+    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
+  }
+
   public function search(Request $request)
   {
     $search = $request->get('q');

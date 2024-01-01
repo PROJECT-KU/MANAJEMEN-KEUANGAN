@@ -116,6 +116,7 @@ Route::prefix('account')->group(function () {
     Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
     Route::get('/gaji/search', 'account\GajiController@search')->name('account.gaji.search');
+    Route::get('/gaji/filter', 'account\GajiController@filter')->name('account.gaji.filter');
     Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
     Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
 
@@ -128,6 +129,7 @@ Route::prefix('account')->group(function () {
     Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
     Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
     Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
+    Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
     Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
 
     //email
