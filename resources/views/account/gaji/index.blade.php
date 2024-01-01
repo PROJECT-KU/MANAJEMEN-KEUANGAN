@@ -110,7 +110,8 @@ List Gaji Karyawan | MANAGEMENT
             </form>
             @endif
 
-            <form action="{{ route('account.gaji.filter') }}" method="GET">
+            @if (Auth::user()->level == 'manager')
+            <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
@@ -141,6 +142,39 @@ List Gaji Karyawan | MANAGEMENT
                 </div>
               </div>
             </form>
+            @else
+            <form action="{{ route('account.gaji.filterkaryawan') }}" method="GET">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>TANGGAL AWAL</label>
+                    <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                  </div>
+                </div>
+                <div class="col-md-2" style="text-align: center">
+                  <label style="margin-top: 38px;">S/D</label>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>TANGGAL AKHIR</label>
+                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                  <div class="btn-group" style="width: 100%;">
+                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                      <i class="fa fa-times-circle mt-2"></i> HAPUS
+                    </a>
+                  </div>
+                  @else
+                  <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                  @endif
+                </div>
+              </div>
+            </form>
+            @endif
 
             @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
             @else
