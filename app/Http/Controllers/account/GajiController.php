@@ -132,19 +132,27 @@ class GajiController extends Controller
     $search = $request->get('q');
     $user = Auth::user();
 
-    $gaji = DB::table('gaji')
+    $query = DB::table('gaji')
       ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
-      ->where(function ($query) use ($search) {
-        $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
-          ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
-          ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
-          ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
-          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
-      })
-      ->orderBy('gaji.created_at', 'DESC')
-      ->paginate(10);
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
+
+    // Apply search filters based on user role
+    if ($user->role == 'karyawan') {
+      $query->where('gaji.user_id', $user->id);
+    } elseif ($user->role == 'manager') {
+      $query->where('users.company', $user->company);
+    }
+
+    $query->where(function ($q) use ($search) {
+      $q->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
+        ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
+        ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
+        ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
+        ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
+    });
+
+    $query->orderBy('gaji.created_at', 'DESC');
+    $gaji = $query->paginate(10);
     $gaji->appends(['q' => $search]);
 
     $maintenances = DB::table('maintenance')
@@ -159,6 +167,7 @@ class GajiController extends Controller
     if ($gaji->isEmpty()) {
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji tidak ditemukan.');
     }
+
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji'));
   }
 
