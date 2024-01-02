@@ -109,11 +109,12 @@ class CampController extends Controller
             ->where(function ($query) use ($search) {
                 $query->where('camp.title', 'LIKE', '%' . $search . '%')
                     ->orWhere('camp.camp_ke', 'LIKE', '%' . $search . '%')
-                    ->orWhere(DB::raw("DATE_FORMAT(camp.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)))
-                    ->orWhere(DB::raw("DATE_FORMAT(camp.tanggal_akhir, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
+                    ->orWhere(DB::raw("DATE_FORMAT(camp.tanggal, '%d %M %Y')"), 'LIKE', '%' . $search . '%')
+                    ->orWhere(DB::raw("DATE_FORMAT(camp.tanggal_akhir, '%d %M %Y')"), 'LIKE', '%' . $search . '%');
             })
             ->orderBy('camp.created_at', 'DESC')
             ->paginate(10);
+
         $camp->appends(['q' => $search]);
 
         $maintenances = DB::table('maintenance')
