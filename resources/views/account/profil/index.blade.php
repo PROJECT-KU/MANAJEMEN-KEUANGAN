@@ -77,7 +77,7 @@ Profil | MANAGEMENT
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>No Telp</label>
-                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
                     @error('telp')
                     <div class="invalid-feedback" style="display: block">
                       {{ $message }}
@@ -317,7 +317,7 @@ Profil | MANAGEMENT
   </section>
 </div>
 
-<!--================== format nomor rekening ==================-->
+<!--================== DORMAT NO REKENING ==================-->
 <script>
   function formatNoRek(input) {
     // Menghapus semua karakter non-digit
@@ -330,24 +330,34 @@ Profil | MANAGEMENT
     input.value = NoRek;
   }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== format telp ==================-->
+<!--================== FORMAT NO TELP ==================-->
 <script>
   function formatPhoneNumber(input) {
     // Menghapus semua karakter non-digit
     var phoneNumber = input.value.replace(/\D/g, '');
 
-    // Menggunakan ekspresi reguler untuk memformat nomor telepon
-    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+    // Menentukan panjang nomor telepon
+    var phoneNumberLength = phoneNumber.length;
+
+    // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+    if (phoneNumberLength === 11) {
+      phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    } else if (phoneNumberLength === 12) {
+      phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+    } else if (phoneNumberLength === 13) {
+      phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
 
     // Mengatur nilai input dengan nomor telepon yang diformat
     input.value = phoneNumber;
   }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+
+<!--================== MAKSIMAL UPLOAD GAMBAR & FILE YANG DI PERBOLEHKAN ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.getElementById('gambar').addEventListener('change', function() {
@@ -386,9 +396,9 @@ Profil | MANAGEMENT
     }
   });
 </script>
-<!-- end -->
+<!--================== END ==================-->
 
-<!-- upload image -->
+<!--================== PREVIEW IMAGE ==================-->
 <script>
   const imageInput = document.getElementById('gambar');
   const imagePreview = document.getElementById('image-preview');
@@ -405,9 +415,9 @@ Profil | MANAGEMENT
     }
   });
 </script>
-<!-- end upload image -->
+<!--================== END ==================-->
 
-<!-- Include CKEditor JS -->
+<!--================== CKEDITOR ==================-->
 <style>
   .ckeditor-container {
     width: 100%;
@@ -422,43 +432,11 @@ Profil | MANAGEMENT
     height: '300px' // You can adjust the height as needed
   });
 </script>
-<!-- end ckeditor -->
+<!--================== END ==================-->
 
-<!-- waktu untuk menampilkan alerts -->
-<!--<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var successAlert = document.getElementById('successAlert');
-    if (successAlert) {
-      setTimeout(function() {
-        successAlert.style.display = 'none';
-      }, 3000);
-    }
-  });
-</script>-->
-<!-- end -->
-
+<!--================== LOADER BUTTON ==================-->
 <script>
-  if ($(".datetimepicker").length) {
-    $('.datetimepicker').daterangepicker({
-      locale: {
-        format: 'YYYY-MM-DD hh:mm'
-      },
-      singleDatePicker: true,
-      timePicker: true,
-      timePicker24Hour: true,
-    });
-  }
-
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-
-  var timeoutHandler = null;
-
-  /**
-   * btn submit loader
-   */
+  // <!-- BUTTON SUBMIT -->
   $(".btn-submit").click(function() {
     $(".btn-submit").addClass('btn-progress');
     if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -468,10 +446,9 @@ Profil | MANAGEMENT
 
     }, 1000);
   });
+  // <!-- END -->
 
-  /**
-   * btn reset loader
-   */
+  // <!-- BUTTON RESET -->
   $(".btn-reset").click(function() {
     $(".btn-reset").addClass('btn-progress');
     if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -481,5 +458,7 @@ Profil | MANAGEMENT
 
     }, 500);
   })
+  // <!-- END -->
 </script>
+<!--================== END ==================-->
 @stop
