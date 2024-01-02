@@ -56,7 +56,7 @@ List aporan Camp | MANAGEMENT
               </div>
             </form>
 
-            <form action="{{ route('account.camp.index') }}" method="GET">
+            <form action="{{ route('account.camp.filter') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
