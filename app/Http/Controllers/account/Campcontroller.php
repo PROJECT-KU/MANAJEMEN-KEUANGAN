@@ -107,14 +107,13 @@ class CampController extends Controller
         $user = Auth::user();
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.total_uang_masuk', 'camp.total', 'camp.keuntungan', 'camp.persentase_keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status')->leftJoin('users', 'camp.user_id', '=', 'users.id')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.total_uang_masuk', 'camp.total', 'camp.keuntungan', 'camp.persentase_keuntungan', 'camp.status')
+            ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
                 $query->where('camp.title', 'LIKE', '%' . $search . '%')
                     ->orWhere('camp.camp_ke', 'LIKE', '%' . $search . '%')
-                    ->orWhere('camp.status', 'LIKE', '%' . $search . '%')
-                    ->orWhere('camp.tanggal', 'LIKE', '%' . $search . '%')
-                    ->orWhere('camp.tanggal_akhir', 'LIKE', '%' . $search . '%');
+                    ->orWhere('camp.status', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('camp.created_at', 'DESC')
             ->paginate(10);
