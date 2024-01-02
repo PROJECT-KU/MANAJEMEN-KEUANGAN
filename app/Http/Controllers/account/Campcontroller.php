@@ -53,38 +53,6 @@ class CampController extends Controller
             ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
-            ->orderBy('camp.created_at', 'DESC')
-            ->paginate(10);
-
-
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        // <!-- Calculate total gaji -->
-        $totalCamp = $camp->sum('total');
-
-        return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
-    }
-
-    public function filtercamp(Request $request)
-    {
-        $user = Auth::user();
-        $startDate = $request->input('tanggal_awal');
-        $endDate = $request->input('tanggal_akhir');
-
-        if (!$startDate || !$endDate) {
-            $currentMonth = date('Y-m-01 00:00:00');
-            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
-        } else {
-            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
-        }
-
-        $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
-            ->leftJoin('users', 'camp.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
             ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth])
             ->orderBy('camp.created_at', 'DESC')
             ->paginate(10);
@@ -106,17 +74,15 @@ class CampController extends Controller
         $user = Auth::user();
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.total_uang_masuk', 'camp.total', 'camp.keuntungan', 'camp.persentase_keuntungan', 'camp.status')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
                 $query->where('camp.title', 'LIKE', '%' . $search . '%')
-                    ->orWhere('camp.camp_ke', 'LIKE', '%' . $search . '%')
-                    ->orWhere('camp.status', 'LIKE', '%' . $search . '%');
+                    ->orWhere('camp.camp_ke', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('camp.created_at', 'DESC')
             ->paginate(10);
-
         $camp->appends(['q' => $search]);
 
         $maintenances = DB::table('maintenance')
