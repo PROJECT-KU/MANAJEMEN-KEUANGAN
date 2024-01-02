@@ -80,7 +80,7 @@ Update Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
+                                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
