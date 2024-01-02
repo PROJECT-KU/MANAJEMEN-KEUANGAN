@@ -27,7 +27,7 @@ class PenggunaController extends Controller
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
-                ->whereIn('level', ['staff', 'karyawan', 'trainer'])
+                ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         } else {
@@ -49,40 +49,23 @@ class PenggunaController extends Controller
         $search = $request->get('q');
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
-            $users = DB::table('users')
-                ->where('company', $user->company)
-                ->whereIn('level', ['staff', 'karyawan', 'trainer'])
-                ->orderBy('created_at', 'DESC')
-                ->where(function ($query) use ($search) {
-                    $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.email', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.username', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.level', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.status', 'LIKE', '%' . $search . '%');
-                })
-                ->orderBy('users.created_at', 'DESC')
-                ->paginate(10);
-            $users->appends(['q' => $search]);
-        } else {
-            $users = DB::table('users')
-                ->orderBy('created_at', 'DESC')
-                ->where(function ($query) use ($search) {
-                    $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.email', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.username', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.level', 'LIKE', '%' . $search . '%')
-                        ->orWhere('users.status', 'LIKE', '%' . $search . '%');
-                })
-                ->orderBy('users.created_at', 'DESC')
-                ->paginate(10);
-            $users->appends(['q' => $search]);
-        }
+        $users = DB::table('users')
+            ->where('company', $user->company)
+            ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager'])
+            ->orderBy('created_at', 'DESC')
+            ->where(function ($query) use ($search) {
+                $query->where('users.full_name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.email', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.username', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.level', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.status', 'LIKE', '%' . $search . '%');
+            })
+            ->orderBy('users.created_at', 'DESC')
+            ->paginate(10);
+        $users->appends(['q' => $search]);
+
 
         if ($users->isEmpty()) {
             return redirect()->route('account.pengguna.index')->with('error', 'Data Pengguna tidak ditemukan.');
