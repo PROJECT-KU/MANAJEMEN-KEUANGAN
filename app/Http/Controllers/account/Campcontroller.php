@@ -53,6 +53,7 @@ class CampController extends Controller
             ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
+            ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth])
             ->orderBy('camp.created_at', 'DESC')
             ->paginate(10);
 
