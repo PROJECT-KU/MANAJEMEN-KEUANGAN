@@ -80,7 +80,7 @@ Update Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
+                                    <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -426,7 +426,7 @@ Update Pengguna | MANAGEMENT
         </div>
     </section>
 </div>
-<!--================== format nomor rekening ==================-->
+<!--================== FORMAT NO REKENING ==================-->
 <script>
     function formatNoRek(input) {
         // Menghapus semua karakter non-digit
@@ -439,24 +439,34 @@ Update Pengguna | MANAGEMENT
         input.value = NoRek;
     }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== format telp ==================-->
+<!--================== FORMAT NO TELP ==================-->
 <script>
     function formatPhoneNumber(input) {
         // Menghapus semua karakter non-digit
         var phoneNumber = input.value.replace(/\D/g, '');
 
-        // Menggunakan ekspresi reguler untuk memformat nomor telepon
-        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        // Menentukan panjang nomor telepon
+        var phoneNumberLength = phoneNumber.length;
+
+        // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+        if (phoneNumberLength === 11) {
+            phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 12) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 13) {
+            phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
 
         // Mengatur nilai input dengan nomor telepon yang diformat
         input.value = phoneNumber;
     }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== show and hide password ==================-->
+
+<!--================== SHOW & HIDE PASSWORD ==================-->
 <script>
     const passwordInput = document.getElementById('password');
     const passwordToggle = document.getElementById('password-toggle');
@@ -487,9 +497,9 @@ Update Pengguna | MANAGEMENT
         }
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== masa tenggat jika nama company sama ==================-->
+<!--================== MASA TENGGAT JIKA MASA COMPANY SAMA ==================-->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Mengambil elemen input
@@ -516,9 +526,9 @@ Update Pengguna | MANAGEMENT
         }
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== Include CKEditor JS ==================-->
+<!--================== CKEDITOR ==================-->
 <style>
     .ckeditor-container {
         width: 100%;
@@ -533,9 +543,9 @@ Update Pengguna | MANAGEMENT
         height: '300px' // You can adjust the height as needed
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-
+<!--================== PREVIEW IMAGE ==================-->
 <script>
     function previewImage(event) {
         var reader = new FileReader();
@@ -546,28 +556,11 @@ Update Pengguna | MANAGEMENT
         reader.readAsDataURL(event.target.files[0]);
     }
 </script>
+<!--================== END ==================-->
+
+<!--================== LOADER BUTTON ==================-->
 <script>
-    if ($(".datetimepicker").length) {
-        $('.datetimepicker').daterangepicker({
-            locale: {
-                format: 'YYYY-MM-DD hh:mm'
-            },
-            singleDatePicker: true,
-            timePicker: true,
-            timePicker24Hour: true,
-        });
-    }
-
-    var cleaveC = new Cleave('.currency', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
-    var timeoutHandler = null;
-
-    /**
-     * btn submit loader
-     */
+    // <!-- BUTTON SUBMIT -->
     $(".btn-submit").click(function() {
         $(".btn-submit").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -577,10 +570,9 @@ Update Pengguna | MANAGEMENT
 
         }, 1000);
     });
+    // <!-- END -->
 
-    /**
-     * btn reset loader
-     */
+    // <!-- BUTTON RESET -->
     $(".btn-reset").click(function() {
         $(".btn-reset").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -590,5 +582,7 @@ Update Pengguna | MANAGEMENT
 
         }, 500);
     })
+    // <!-- END -->
 </script>
+<!--================== END ==================-->
 @stop
