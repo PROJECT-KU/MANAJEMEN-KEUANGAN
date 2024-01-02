@@ -190,7 +190,7 @@ class GajiController extends Controller
           ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
           ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
           ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
-          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
+          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%d %M %Y')"), 'LIKE', '%' . $search . '%');
       })
       ->orderBy('gaji.created_at', 'DESC')
       ->paginate(10);
@@ -229,7 +229,7 @@ class GajiController extends Controller
           ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
           ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
           ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
-          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%Y-%m-%d')"), '=', date('Y-m-d', strtotime($search)));
+          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%d %M %Y')"), 'LIKE', '%' . $search . '%');
       })
       ->orderBy('gaji.created_at', 'DESC')
       ->paginate(10);
