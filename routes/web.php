@@ -168,7 +168,7 @@ Route::prefix('account')->group(function () {
     Route::get('/camp/create', 'account\CampController@create')->name('account.camp.create');
     Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
     Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
-    Route::get('/camp/filter', 'account\CampController@filter')->name('account.camp.filter');
+    Route::post('/camp/filtercamp', 'account\CampController@filtercamp')->name('account.camp.filtercamp');
     Route::get('/camp/{id}/detail', 'account\CampController@detail')->name('account.camp.detail');
     Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
     Route::get('/camp/{id}/edit', 'account\CampController@edit')->name('account.camp.edit');
