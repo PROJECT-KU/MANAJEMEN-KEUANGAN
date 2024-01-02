@@ -67,7 +67,7 @@ class CampController extends Controller
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
     }
 
-    public function filter(Request $request)
+    public function filtercamp(Request $request)
     {
         $user = Auth::user();
         $startDate = $request->input('tanggal_awal');
@@ -99,7 +99,6 @@ class CampController extends Controller
 
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
     }
-
 
     public function search(Request $request)
     {
