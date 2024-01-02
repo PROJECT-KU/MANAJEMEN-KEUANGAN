@@ -181,8 +181,6 @@
                                             </div>
                                             @enderror
                                         </div> -->
-
-
                                     </div>
 
                                     <div class="row">
@@ -250,7 +248,7 @@
             </div>
         </section>
 
-        <!-- bacground -->
+        <!--================== BACKGROUND ==================-->
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" style="position: fixed; top: 0; left: 0; z-index: -1;">
             <defs>
                 <linearGradient id="bg">
@@ -273,25 +271,35 @@
                 </use>
             </g>
         </svg>
-        <!-- end -->
+        <!--================== END ==================-->
     </div>
 
-    <!--================== format telp ==================-->
+    <!--================== FORMAT NO TELP ==================-->
     <script>
         function formatPhoneNumber(input) {
             // Menghapus semua karakter non-digit
             var phoneNumber = input.value.replace(/\D/g, '');
 
-            // Menggunakan ekspresi reguler untuk memformat nomor telepon
-            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+            // Menentukan panjang nomor telepon
+            var phoneNumberLength = phoneNumber.length;
+
+            // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+            if (phoneNumberLength === 11) {
+                phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (phoneNumberLength === 12) {
+                phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (phoneNumberLength === 13) {
+                phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+            }
 
             // Mengatur nilai input dengan nomor telepon yang diformat
             input.value = phoneNumber;
         }
     </script>
-    <!--================== end ==================-->
+    <!--================== END ==================-->
 
-    <!--================== change jenis akun ==================-->
+
+    <!--================== CHANGE JENIS AKUN ==================-->
     <script>
         // Get the elements
         const jenisDropdown = document.getElementById('jenis');
@@ -338,9 +346,9 @@
         // Call the function once on page load to initialize the visibility
         handleVisibility();
     </script>
-    <!--================== end ==================-->
+    <!--================== END ==================-->
 
-    <!--================== show and hide password ==================-->
+    <!--================== SHOW & HIDE PASSWORD ==================-->
     <script>
         const passwordInput = document.getElementById('password');
         const passwordToggle = document.getElementById('password-toggle');
@@ -371,9 +379,9 @@
             }
         });
     </script>
-    <!--================== end ==================-->
+    <!--================== END ==================-->
 
-    <!-- General JS Scripts -->
+    <!--================== GENERAL JS ==================-->
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
     <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
@@ -383,6 +391,7 @@
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <!--================== END ==================-->
 </body>
 
 </html>
