@@ -40,7 +40,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" id="full_name" name="full_name" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
+                                    <input type="text" id="full_name" name="full_name" style="text-transform:uppercase;" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
 
                                     @error('full_name')
                                     <div class="invalid-feedback" style="display: block">

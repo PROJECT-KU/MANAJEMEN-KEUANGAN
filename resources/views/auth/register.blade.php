@@ -95,7 +95,7 @@
                                     <div class="row">
                                         <div class="form-group col-6">
                                             <label for="frist_name">Nama Lengkap</label>
-                                            <input id="frist_name" type="text" class="form-control" name="full_name" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
+                                            <input id="frist_name" type="text" style="text-transform:uppercase;" class="form-control" name="full_name" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
                                             @error('full_name')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -185,15 +185,16 @@
 
                                     </div>
 
-
-                                    <div class="form-group col-12">
-                                        <label for="email">Alamat Email</label>
-                                        <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                        @error('email')
-                                        <div class="invalid-feedback" style="display: block">
-                                            {{ $message }}
+                                    <div class="row">
+                                        <div class="form-group col-12">
+                                            <label for="email">Alamat Email</label>
+                                            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                            @error('email')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
                                         </div>
-                                        @enderror
                                     </div>
 
                                     <div class="row" style="margin-top: 30px">
