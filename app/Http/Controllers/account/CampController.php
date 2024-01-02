@@ -94,10 +94,7 @@ class CampController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        // <!-- Calculate total gaji -->
-        $totalCamp = $camp->sum('total');
-
-        return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
+        return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate'));
     }
 
     public function search(Request $request)
@@ -123,15 +120,13 @@ class CampController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        $totalCamp = $camp->sum('total');
-
         $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
         $endDate = $request->get('end_date');
 
         if ($camp->isEmpty()) {
             return redirect()->route('account.camp.index')->with('error', 'Data Camp tidak ditemukan.');
         }
-        return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
+        return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate'));
     }
 
     public function create()
