@@ -79,7 +79,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>No Telp</label>
-                                    <input type="tel" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
+                                    <input type="tel" id="telp" name="telp" placeholder="Masukkan No Telp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
 
                                     @error('telp')
                                     <div class="invalid-feedback" style="display: block">
@@ -350,7 +350,7 @@ Tambah Pengguna | MANAGEMENT
     </section>
 </div>
 
-<!--================== format nomor rekening ==================-->
+<!--================== FORMAT NO REKENING ==================-->
 <script>
     function formatNoRek(input) {
         // Menghapus semua karakter non-digit
@@ -363,24 +363,33 @@ Tambah Pengguna | MANAGEMENT
         input.value = NoRek;
     }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== format telp ==================-->
+<!--================== FORMAT NO TELP ==================-->
 <script>
     function formatPhoneNumber(input) {
         // Menghapus semua karakter non-digit
         var phoneNumber = input.value.replace(/\D/g, '');
 
-        // Menggunakan ekspresi reguler untuk memformat nomor telepon
-        phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        // Menentukan panjang nomor telepon
+        var phoneNumberLength = phoneNumber.length;
+
+        // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+        if (phoneNumberLength === 11) {
+            phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 12) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 13) {
+            phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
 
         // Mengatur nilai input dengan nomor telepon yang diformat
         input.value = phoneNumber;
     }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== show and hide password ==================-->
+<!--================== SHOW & HIDE PASSWORD ==================-->
 <script>
     const passwordInput = document.getElementById('password');
     const passwordToggle = document.getElementById('password-toggle');
@@ -411,9 +420,9 @@ Tambah Pengguna | MANAGEMENT
         }
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== Include CKEditor JS ==================-->
+<!--================== CKEDITOR ==================-->
 <style>
     .ckeditor-container {
         width: 100%;
@@ -428,40 +437,9 @@ Tambah Pengguna | MANAGEMENT
         height: '300px' // You can adjust the height as needed
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!-- show and hide password -->
-<script>
-    const passwordInput = document.getElementById('password');
-    const passwordToggle = document.getElementById('password-toggle');
-
-    passwordToggle.addEventListener('click', function() {
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            passwordToggle.classList.remove('fa-eye');
-            passwordToggle.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            passwordToggle.classList.remove('fa-eye-slash');
-            passwordToggle.classList.add('fa-eye');
-        }
-    });
-    const passwordInput2 = document.getElementById('password2');
-    const passwordToggle2 = document.getElementById('password-toggle2');
-
-    passwordToggle2.addEventListener('click', function() {
-        if (passwordInput2.type === 'password') {
-            passwordInput2.type = 'text';
-            passwordToggle2.classList.remove('fa-eye');
-            passwordToggle2.classList.add('fa-eye-slash');
-        } else {
-            passwordInput2.type = 'password';
-            passwordToggle2.classList.remove('fa-eye-slash');
-            passwordToggle2.classList.add('fa-eye');
-        }
-    });
-</script>
-
+<!--================== PREVIEW IMAGE ==================-->
 <script>
     function previewImage(event) {
         var reader = new FileReader();
@@ -472,29 +450,11 @@ Tambah Pengguna | MANAGEMENT
         reader.readAsDataURL(event.target.files[0]);
     }
 </script>
+<!--================== END ==================-->
+
+<!--================== LOADER BUTTON ==================-->
 <script>
-    if ($(".datetimepicker").length) {
-        $('.datetimepicker').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm',
-            defaultDate: new Date(),
-            useCurrent: true,
-            autoclose: true,
-            todayButton: true,
-            todayHighlight: true,
-            showMeridian: false
-        });
-    }
-
-    var cleaveC = new Cleave('.currency', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
-    var timeoutHandler = null;
-
-    /**
-     * btn submit loader
-     */
+    // <!-- BUTTON SUBMIT -->
     $(".btn-submit").click(function() {
         $(".btn-submit").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -504,10 +464,9 @@ Tambah Pengguna | MANAGEMENT
 
         }, 1000);
     });
+    // <!-- END -->
 
-    /**
-     * btn reset loader
-     */
+    // <!-- BUTTON RESET -->
     $(".btn-reset").click(function() {
         $(".btn-reset").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -526,5 +485,7 @@ Tambah Pengguna | MANAGEMENT
             $("#bank").val('');
         }, 500);
     })
+    // <!-- END -->
 </script>
+<!--================== END ==================-->
 @stop
