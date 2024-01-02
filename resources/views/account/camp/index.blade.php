@@ -147,7 +147,7 @@ List aporan Camp | MANAGEMENT
 
                     <tr>
                       <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center; text-transform:uppercase;"">{{ $hasil->title }} #{{ $hasil->camp_ke }}</td>
+                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->title }} #{{ $hasil->camp_ke }}</td>
                       <td class=" column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
                       <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                       <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->keuntungan, 0, ',', '.') }}</td>
