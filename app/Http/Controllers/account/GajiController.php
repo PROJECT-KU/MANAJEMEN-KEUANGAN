@@ -504,13 +504,17 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
+    // <!-- POTONGAN JIKA ALPHA -->
     $subalpha = $jumlah_bonus5 * 0.005;
     $subhasil = $gaji_pokok * $subalpha;
     $totalalpha = $gaji_pokok - $subhasil;
+    // <!-- END -->
 
+    // <!-- TOTAL -->
     $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
+    // <!-- END -->
 
     //menyinpan image di path
     $imagePath = null;
@@ -603,7 +607,7 @@ class GajiController extends Controller
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
-      'alpha' => $totalalpha,
+      'alpha' => $subhasil,
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
@@ -867,11 +871,17 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $subtotal = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    // <!-- POTONGAN JIKA ALPHA -->
     $subalpha = $jumlah_bonus5 * 0.005;
-    $subhasil = $subtotal * $subalpha;
-    $total = $subtotal - $subhasil;
+    $subhasil = $gaji_pokok * $subalpha;
+    $totalalpha = $gaji_pokok - $subhasil;
+    // <!-- END -->
+
+    // <!-- TOTAL -->
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
+    // <!-- END -->
 
     $existingUserId = $gaji->user_id;
 
