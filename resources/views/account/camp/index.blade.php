@@ -200,7 +200,7 @@ List aporan Camp | MANAGEMENT
   </section>
 </div>
 
-<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<!--================== SWEET ALERT JIKA FIELDS PENCARIAN KOSONG ==================-->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("searchButton").addEventListener("click", function() {
