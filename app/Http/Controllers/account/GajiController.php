@@ -504,10 +504,12 @@ class GajiController extends Controller
     $pph = $request->input('pph');
     $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
 
-    $subtotal = $gaji_pokok + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $subalpha = $jumlah_bonus5 * 0.005;
-    $subhasil = $subtotal * $subalpha;
-    $total = $subtotal - $subhasil;
+    $subhasil = $gaji_pokok * $subalpha;
+    $totalalpha = $gaji_pokok - $subhasil;
+
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
 
     //menyinpan image di path
@@ -601,7 +603,7 @@ class GajiController extends Controller
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
-      'alpha' => $subhasil,
+      'alpha' => $totalalpha,
       'total_lembur' => $total_lembur,
       'total_bonus' => $total_bonus,
       'total' => $total,
