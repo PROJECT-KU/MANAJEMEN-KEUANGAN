@@ -65,8 +65,9 @@ Update Presensi Karyawan | MANAGEMENT
       <div class="col-md-6">
         <div class="form-group">
           <label>Status Presensi Kehadiran</label>
-          <select class="form-control" name="status" id="status" disabled>
+          <select class="form-control" name="status" id="status" readonly>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="alpha" {{ $presensi->status == 'alpha' ? 'selected' : '' }}>ALPHA</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
             <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
             <option value="perjalanan luar kota jawa" {{ $presensi->status == 'perjalanan luar kota jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA DALAM JAWA</option>
@@ -95,7 +96,7 @@ Update Presensi Karyawan | MANAGEMENT
       <div class="col-md-6">
         <div class="form-group">
           <label>Status Presensi Pulang</label>
-          <select class="form-control" name="status_pulang" id="status_pulang" disabled>
+          <select class="form-control" name="status_pulang" id="status_pulang" readonly>
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
             <option value="pulang" {{ $presensi->status_pulang == 'pulang' ? 'selected' : '' }}>PULANG</option>
           </select>
@@ -110,6 +111,7 @@ Update Presensi Karyawan | MANAGEMENT
           <label>Status Presensi Kehadiran</label>
           <select class="form-control" name="status" id="status">
             <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
+            <option value="alpha" {{ $presensi->status == 'alpha' ? 'selected' : '' }}>ALPHA</option>
             <option value="hadir" {{ $presensi->status == 'hadir' ? 'selected' : '' }}>HADIR</option>
             <option value="camp jogja" {{ $presensi->status == 'camp jogja' ? 'selected' : '' }}>CAMP JOGJA</option>
             <option value="perjalanan luar kota jawa" {{ $presensi->status == 'perjalanan luar kota jawa' ? 'selected' : '' }}>PERJALANAN LUAR KOTA DALAM JAWA</option>
