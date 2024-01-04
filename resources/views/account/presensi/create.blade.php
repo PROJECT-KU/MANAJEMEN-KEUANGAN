@@ -109,7 +109,7 @@ Tambah Presensi Karyawan | MANAGEMENT
                                   @endif -->
                     <!-- end jumat, sabtu & minggu -->
 
-                    @if (date('H:i:s') >= '08:00:00' && date('H:i:s') <= '22:00:00' ) <option value="hadir">HADIR</option>
+                    @if (date('H:i:s') >= '06:00:00' && date('H:i:s') <= '22:00:00' ) <option value="hadir">HADIR</option>
                       <option value="camp jogja">CAMP JOGJA</option>
                       <option value="perjalanan luar kota jawa">PERJALANAN LUAR KOTA DALAM JAWA</option>
                       <option value="perjalanan luar kota luar jawa">PERJALANAN LUAR KOTA LUAR JAWA</option>
@@ -189,7 +189,7 @@ Tambah Presensi Karyawan | MANAGEMENT
     var catatanSection = document.getElementById('catatan-section');
     var GambarUpload = document.getElementById('gambar');
 
-    if (statusSelect.value === 'remote' || statusSelect.value === 'izin') {
+    if (statusSelect.value === 'izin') {
       catatanSection.style.display = 'block';
       GambarUpload.setAttribute('required', 'required');
     } else {

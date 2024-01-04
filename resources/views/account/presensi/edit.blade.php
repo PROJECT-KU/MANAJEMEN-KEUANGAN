@@ -274,7 +274,7 @@ Update Presensi Karyawan | MANAGEMENT
     var imageSection = document.getElementById('image-section');
     var GambarUpload = document.getElementById('gambar_pulang');
 
-    if (statusSelect.value === 'remote' || statusSelect.value === 'izin') {
+    if (statusSelect.value === 'izin') {
       catatanSection.style.display = 'block';
       imageSection.style.display = 'block';
       GambarUpload.setAttribute('required', 'required');
