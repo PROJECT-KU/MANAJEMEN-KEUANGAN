@@ -30,7 +30,7 @@ List Presensi Karyawan | MANAGEMENT
           <!--================== end ==================-->
 
 
-          <!-- jika belum melakukan presensi pulang -->
+          <!--================== JIKA BELUM MELAKUKAN PRESESNI PULANG ==================-->
           @php
           $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
           ->whereDate('created_at', now()->toDateString())
@@ -56,9 +56,9 @@ List Presensi Karyawan | MANAGEMENT
           @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
           @endif
           @endforeach
-          <!-- end -->
+          <!--================== END ==================-->
 
-          <!--================== presensi ==================-->
+          <!--================== PRESENSI ==================-->
           <div class="card">
             <div class="card-header  text-right">
               <h4><i class="fas fa-user-clock"></i> PRESENSI KARYAWAN</h4>
@@ -133,276 +133,283 @@ List Presensi Karyawan | MANAGEMENT
                     ->whereDate('created_at', now()->toDateString())
                     ->first();
                     @endphp
-                    <td class="text-center">
+                    <div class="text-center">
                       @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        MASUK
-                      </button>
-                      <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                        PULANG
-                      </a>
-                      @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '22:00:00' ) <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                        MASUK
-                        </a>
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                          PULANG
-                        </button>
-                        @else
+                      <div class="d-flex justify-content-center align-items-center mx-1">
                         <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                           MASUK
                         </button>
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary ml-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                          PULANG
+                        </a>
+                      </div>
+                      @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex justify-content-center align-items-center mx-1">
+                        <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                          MASUK
+                        </a>
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
                           PULANG
                         </button>
-                        @endif
-                    </td>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-          <!--================== end ==================-->
-
-          <!--================== filter ==================-->
-          <div class="card">
-            <div class="card-header  text-right">
-              <h4><i class="fas fa-filter"></i> FILTER PRESENSI KARYAWAN</h4>
-            </div>
-
-            <div class="card-body">
-              <form action="{{ route('account.presensi.search') }}" method="GET" id="searchForm">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                    <div class="input-group-append">
-                      <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                    </div>
-                    @if(request()->has('q'))
-                    <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
-                      <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                    </a>
-                    @endif
-                  </div>
-                </div>
-              </form>
-
-              <form action="{{ route('account.presensi.filter') }}" method="GET">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TANGGAL AWAL</label>
-                      <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
-                    </div>
-                  </div>
-                  <div class="col-md-2" style="text-align: center">
-                    <label style="margin-top: 38px;">S/D</label>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TANGGAL AKHIR</label>
-                      <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                    <div class="btn-group" style="width: 100%;">
-                      <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                      <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                        <i class="fa fa-times-circle mt-2"></i> HAPUS
-                      </a>
                     </div>
                     @else
-                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <div class="d-flex justify-content-center align-items-center mx-1">
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        MASUK
+                      </button>
+                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
+                        PULANG
+                      </button>
+                    </div>
                     @endif
                   </div>
                 </div>
-              </form>
             </div>
+            </form>
           </div>
-          <!--================== end ==================-->
+      </div>
 
-          <div class="card">
-            <div class="card-header">
-              <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
-              <div class="card-header-action">
-                <a href="{{ route('account.laporan_presensi.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-                  <i class="fas fa-file-pdf"></i> Download PDF
+      <!--================== end ==================-->
+
+      <!--================== filter ==================-->
+      <div class="card">
+        <div class="card-header  text-right">
+          <h4><i class="fas fa-filter"></i> FILTER PRESENSI KARYAWAN</h4>
+        </div>
+
+        <div class="card-body">
+          <form action="{{ route('account.presensi.search') }}" method="GET" id="searchForm">
+            <div class="form-group">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                </div>
+                @if(request()->has('q'))
+                <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
+                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                 </a>
+                @endif
               </div>
             </div>
-            <div class="card-header">
-              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                  @if ($startDate && $endDate)
-                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                  @else
-                  {{ date('F Y') }}
-                  @endif
-                </strong>
-              </p>
+          </form>
+
+          <form action="{{ route('account.presensi.filter') }}" method="GET">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TANGGAL AWAL</label>
+                  <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                </div>
+              </div>
+              <div class="col-md-2" style="text-align: center">
+                <label style="margin-top: 38px;">S/D</label>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>TANGGAL AKHIR</label>
+                  <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                </div>
+              </div>
+              <div class="col-md-2">
+                @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                <div class="btn-group" style="width: 100%;">
+                  <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                  <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                    <i class="fa fa-times-circle mt-2"></i> HAPUS
+                  </a>
+                </div>
+                @else
+                <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                @endif
+              </div>
             </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
-                      <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
-                      <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th> -->
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
-                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
-                    </tr>
-                    <tr>
-                      <th scope="col" style="text-align: center;">HADIR</th>
-                      <th scope="col" style="text-align: center;">PULANG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @php
-                    $no = 1;
-                    @endphp
-                    @foreach ($presensi as $hasil)
-                    <tr>
-                      <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                      <td class="column-width" style="text-align: center;" hidden>{{ $hasil->telp }}</td>
-                      <td class="column-width" style="text-align: center;">
-                        <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
-                        {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
-                      </td>
-                      <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
-                      @if($hasil->time_pulang == null)
-                      <td class="column-width" style="text-align: center;"></td>
-                      @else
-                      <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
-                      @endif
-                      @if($hasil->time_pulang == null)
-                      <td class="column-width" style="text-align: center;"></td>
-                      @else
-                      <td class="column-width" style="text-align: center;">
-                        <?php
-                        $created_at = strtotime($hasil->created_at);
-                        $time_pulang = strtotime($hasil->time_pulang);
+          </form>
+        </div>
+      </div>
+      <!--================== end ==================-->
 
-                        // Menghitung selisih waktu dalam detik
-                        $selisih_detik = $time_pulang - $created_at;
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
+          <div class="card-header-action">
+            <a href="{{ route('account.laporan_presensi.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+              <i class="fas fa-file-pdf"></i> Download PDF
+            </a>
+          </div>
+        </div>
+        <div class="card-header">
+          <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+              @if ($startDate && $endDate)
+              {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+              @else
+              {{ date('F Y') }}
+              @endif
+            </strong>
+          </p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
+                  <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
+                  <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th> -->
+                  <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                </tr>
+                <tr>
+                  <th scope="col" style="text-align: center;">HADIR</th>
+                  <th scope="col" style="text-align: center;">PULANG</th>
+                </tr>
+              </thead>
+              <tbody>
+                @php
+                $no = 1;
+                @endphp
+                @foreach ($presensi as $hasil)
+                <tr>
+                  <th scope="row" style="text-align: center">{{ $no }}</th>
+                  <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                  <td class="column-width" style="text-align: center;" hidden>{{ $hasil->telp }}</td>
+                  <td class="column-width" style="text-align: center;">
+                    <!-- {{ date('d-m-Y H:i', strtotime($hasil->created_at)) }} <br> -->
+                    {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
+                  </td>
+                  <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
+                  @if($hasil->time_pulang == null)
+                  <td class="column-width" style="text-align: center;"></td>
+                  @else
+                  <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
+                  @endif
+                  @if($hasil->time_pulang == null)
+                  <td class="column-width" style="text-align: center;"></td>
+                  @else
+                  <td class="column-width" style="text-align: center;">
+                    <?php
+                    $created_at = strtotime($hasil->created_at);
+                    $time_pulang = strtotime($hasil->time_pulang);
 
-                        // Menghitung jumlah jam dan menit
-                        $jam = floor($selisih_detik / 3600);
-                        $menit = floor(($selisih_detik % 3600) / 60);
+                    // Menghitung selisih waktu dalam detik
+                    $selisih_detik = $time_pulang - $created_at;
 
-                        // Menampilkan lama kerja dalam format "jam jam menit menit"
-                        echo sprintf('%02d jam %02d menit', $jam, $menit);
-                        ?>
-                      </td>
-                      @endif
-                      <td class="column-width" style="text-align: center;">
-                        @if ($hasil->status == 'hadir')
-                        <span class="badge badge-success mt-2">HADIR</span>
-                        @elseif ($hasil->status == 'camp jogja')
-                        <span class="badge badge-success mt-2">CAMP JOGJA</span>
-                        @elseif ($hasil->status == 'perjalanan luar kota jawa')
-                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA DALAM JAWA</span>
-                        @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
-                        <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA LUAR JAWA</span>
-                        @elseif ($hasil->status == 'camp luar kota')
-                        <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
-                        @elseif ($hasil->status == 'remote')
-                        <span class="badge badge-info mt-2">REMOTE</span>
-                        @elseif ($hasil->status == 'izin')
-                        <span class="badge badge-warning mt-2">IZIN</span>
-                        @elseif ($hasil->status == 'lembur')
-                        <span class="badge badge-primary mt-2">LEMBUR</span>
-                        @elseif ($hasil->status == 'cuti')
-                        <span class="badge badge-warning mt-2">CUTI</span>
-                        @elseif ($hasil->status == 'terlambat')
-                        <span class="badge badge-danger mt-2">TERLAMBAT</span>
-                        @elseif ($hasil->status == 'alpha')
-                        <span class="badge badge-danger mt-2">ALPHA</span>
-                        @elseif ($hasil->status == 'pulang')
-                        <span class="badge badge-danger mt-2">PULANG</span>
-                        @endif
-                        <br>
-                        @if ($hasil->status_pulang == 'hadir')
-                        <span class="badge badge-success mt-2">HADIR</span>
-                        @elseif ($hasil->status_pulang == 'camp jogja')
-                        <span class="badge badge-success">CAMP JOGJA</span>
-                        @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
-                        <span class="badge badge-info">PERJALANAN LUAR KOTA DALAM JAWA</span>
-                        @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
-                        <span class="badge badge-info">PERJALANAN LUAR KOTA LUAR JAWA</span>
-                        @elseif ($hasil->status_pulang == 'camp luar kota')
-                        <span class="badge badge-success">CAMP LUAR KOTA</span>
-                        @elseif ($hasil->status_pulang == 'remote')
-                        <span class="badge badge-info mt-2">REMOTE</span>
-                        @elseif ($hasil->status_pulang == 'izin')
-                        <span class="badge badge-warning mt-2">IZIN</span>
-                        @elseif ($hasil->status_pulang == 'lembur')
-                        <span class="badge badge-primary mt-2">LEMBUR</span>
-                        @elseif ($hasil->status_pulang == 'cuti')
-                        <span class="badge badge-warning mt-2">CUTI</span>
-                        @elseif ($hasil->status_pulang == 'terlambat')
-                        <span class="badge badge-danger mt-2">TERLAMBAT</span>
-                        @elseif ($hasil->status_pulang == 'alpha')
-                        <span class="badge badge-danger">ALPHA</span>
-                        @elseif ($hasil->status_pulang == 'pulang')
-                        <span class="badge badge-danger mt-2">PULANG</span>
-                        @endif
-                      </td>
-                      <!-- <td class="column-width" style="text-align: center;">
+                    // Menghitung jumlah jam dan menit
+                    $jam = floor($selisih_detik / 3600);
+                    $menit = floor(($selisih_detik % 3600) / 60);
+
+                    // Menampilkan lama kerja dalam format "jam jam menit menit"
+                    echo sprintf('%02d jam %02d menit', $jam, $menit);
+                    ?>
+                  </td>
+                  @endif
+                  <td class="column-width" style="text-align: center;">
+                    @if ($hasil->status == 'hadir')
+                    <span class="badge badge-success mt-2">HADIR</span>
+                    @elseif ($hasil->status == 'camp jogja')
+                    <span class="badge badge-success mt-2">CAMP JOGJA</span>
+                    @elseif ($hasil->status == 'perjalanan luar kota jawa')
+                    <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                    @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
+                    <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                    @elseif ($hasil->status == 'camp luar kota')
+                    <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
+                    @elseif ($hasil->status == 'remote')
+                    <span class="badge badge-info mt-2">REMOTE</span>
+                    @elseif ($hasil->status == 'izin')
+                    <span class="badge badge-warning mt-2">IZIN</span>
+                    @elseif ($hasil->status == 'lembur')
+                    <span class="badge badge-primary mt-2">LEMBUR</span>
+                    @elseif ($hasil->status == 'cuti')
+                    <span class="badge badge-warning mt-2">CUTI</span>
+                    @elseif ($hasil->status == 'terlambat')
+                    <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                    @elseif ($hasil->status == 'alpha')
+                    <span class="badge badge-danger mt-2">ALPHA</span>
+                    @elseif ($hasil->status == 'pulang')
+                    <span class="badge badge-danger mt-2">PULANG</span>
+                    @endif
+                    <br>
+                    @if ($hasil->status_pulang == 'hadir')
+                    <span class="badge badge-success mt-2">HADIR</span>
+                    @elseif ($hasil->status_pulang == 'camp jogja')
+                    <span class="badge badge-success">CAMP JOGJA</span>
+                    @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
+                    <span class="badge badge-info">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                    @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
+                    <span class="badge badge-info">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                    @elseif ($hasil->status_pulang == 'camp luar kota')
+                    <span class="badge badge-success">CAMP LUAR KOTA</span>
+                    @elseif ($hasil->status_pulang == 'remote')
+                    <span class="badge badge-info mt-2">REMOTE</span>
+                    @elseif ($hasil->status_pulang == 'izin')
+                    <span class="badge badge-warning mt-2">IZIN</span>
+                    @elseif ($hasil->status_pulang == 'lembur')
+                    <span class="badge badge-primary mt-2">LEMBUR</span>
+                    @elseif ($hasil->status_pulang == 'cuti')
+                    <span class="badge badge-warning mt-2">CUTI</span>
+                    @elseif ($hasil->status_pulang == 'terlambat')
+                    <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                    @elseif ($hasil->status_pulang == 'alpha')
+                    <span class="badge badge-danger">ALPHA</span>
+                    @elseif ($hasil->status_pulang == 'pulang')
+                    <span class="badge badge-danger mt-2">PULANG</span>
+                    @endif
+                  </td>
+                  <!-- <td class="column-width" style="text-align: center;">
                         <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
                           <div class="thumbnail-circle">
                             <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
                           </div>
                         </a>
                       </td> -->
-                      <td class="column-width" style="text-align: center;">
-                        <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
-                          Lihat di Google Maps
-                        </a>
-                      </td>
-                      @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
-                      <td class="text-center">
-                        <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
-                        </a>
-                      </td>
-                      @else
-                      <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                          <i class="fa fa-pencil-alt"></i>
-                        </a>
-                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
-                        </a>
-                      </td>
-                      @endif
-                    </tr>
-                    @php
-                    $no++;
-                    @endphp
-                    @endforeach
-                  </tbody>
-                </table>
-                <div style="text-align: center">
-                  {{ $presensi->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
-                </div>
-
-
-              </div>
-
+                  <td class="column-width" style="text-align: center;">
+                    <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
+                      Lihat di Google Maps
+                    </a>
+                  </td>
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                  <td class="text-center">
+                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                  @else
+                  <td class="text-center">
+                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                      <i class="fa fa-pencil-alt"></i>
+                    </a>
+                    <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                  @endif
+                </tr>
+                @php
+                $no++;
+                @endphp
+                @endforeach
+              </tbody>
+            </table>
+            <div style="text-align: center">
+              {{ $presensi->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
             </div>
+
+
           </div>
 
+        </div>
       </div>
+
     </div>
-  </section>
+</div>
+</section>
 </div>
 
 <!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
