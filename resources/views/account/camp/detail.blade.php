@@ -1729,7 +1729,7 @@ Detail Gaji Karyawan | MANAGEMENT
                     </div>
 
                     <a href="{{ route('account.camp.index') }}" class="btn btn-info mr-1">
-                        <i class="fa fa-list"></i> LIST LAPORAN CAMP
+                        <i class="fa fa-list"></i> KEMBALI
                     </a>
 
                     </form>

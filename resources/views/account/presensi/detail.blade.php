@@ -207,7 +207,7 @@ Detail Presensi Karyawan | MANAGEMENT
             </div>
 
             <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> LIST PRESENSI KARYAWAN
+              <i class="fa fa-list"></i> KEMBALI
             </a>
 
           </form>

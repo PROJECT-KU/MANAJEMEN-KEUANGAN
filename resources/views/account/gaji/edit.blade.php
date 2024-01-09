@@ -1534,7 +1534,7 @@ Update Gaji Karyawan | MANAGEMENT
 
             <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
             <a href="{{ route('account.gaji.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> LIST GAJI KARYAWAN
+              <i class="fa fa-list"></i> KEMBALI
             </a>
 
             </form>

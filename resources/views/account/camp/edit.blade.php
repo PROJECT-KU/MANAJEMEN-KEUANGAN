@@ -4882,10 +4882,10 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
 
-
-
                     <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                    <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                    <a href="{{ route('account.camp.index') }}" class="btn btn-info mr-1">
+                        <i class="fa fa-list"></i> KEMBALI
+                    </a>
 
                     </form>
 
