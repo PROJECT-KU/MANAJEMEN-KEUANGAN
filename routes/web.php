@@ -22,7 +22,10 @@ Auth::routes();
 Route::prefix('account')->group(function () {
 
     //reset password
-    Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+    Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
+    Route::get('newpassword/reset', 'Auth\ResetPasswordController@formpassword')->name('newpassword.reset');
+    Route::post('cekemail/reset', 'Auth\ResetPasswordController@resetPassword')->name('cekemail.reset');
+
     //dashboard account
     Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
 

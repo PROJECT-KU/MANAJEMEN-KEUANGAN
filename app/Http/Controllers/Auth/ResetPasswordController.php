@@ -1,50 +1,65 @@
 <?php
 
-
 namespace App\Http\Controllers\Auth;
 
+use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\MyTestMail;
-use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class ResetPasswordController extends Controller
 {
     use SendsPasswordResetEmails;
 
-    protected $redirectTo = '/home';
-
-    public function __construct()
+    public function showResetForm()
     {
-        $this->middleware('guest');
+        return view('auth.lupapassword');
     }
 
-    // Override function to show the password reset email form
-    public function showLinkRequestForm(Request $request)
+    public function formpassword()
     {
-        return view('auth.passwords.email');
+        return view('auth.newpassword');
     }
 
-    // Check if email is registered and redirect to password reset form if registered
-    public function sendResetLinkEmail(Request $request)
+    public function resetPassword(Request $request)
     {
-        $this->validateEmail($request);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => ['We can\'t find a user with that email address.'],
-            ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => ['required', 'email'],
+                'password' => ['required', 'min:8', 'confirmed'],
+            ],
+            [
+                'email.required' => 'Masukkan Alamat Email Anda!',
+                'password.required' => 'Masukkan Password Baru Anda!',
+                'password.confirmed'    => 'Konfirmasi Password Salah !',
+            ]
+        );
+        if ($validator->fails()) {
+            return redirect()->route('formemail.reset')->withErrors($validator)->withInput();
         }
 
-        $this->broker()->sendResetLink(
-            $request->only('email')
-        );
+        // Check if the email exists in the users table
+        $user = DB::table('users')->where('email', $request->email)->first();
 
-        return back()->with(['status' => 'We have e-mailed your password reset link!']);
+        if ($user) {
+            // Update the user's password with the new one
+            DB::table('users')->where('id', $user->id)->update([
+                'password' => Hash::make($request->input('password')),
+            ]);
+
+            // Redirect to the login page
+            return redirect()->route('login')->with('reset', 'Password Anda Berhasil Diperbarui!');
+        } else {
+            // Email doesn't exist, display error message and redirect back
+            return Redirect::back()->withInput()->with('error', 'Alamat Email Tidak Terdaftar!');
+        }
     }
 }
