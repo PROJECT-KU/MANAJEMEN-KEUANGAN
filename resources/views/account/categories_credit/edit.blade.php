@@ -77,7 +77,7 @@ Update Kategori Uang keluar | MANAGEMENT
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
                         <a href="{{ route('account.categories_credit.index') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> LIST KATEGORI UANG KELUAR
+                            <i class="fa fa-list"></i> KEMBALI
                         </a>
 
                     </form>

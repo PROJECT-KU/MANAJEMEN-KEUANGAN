@@ -168,12 +168,12 @@ List aporan Camp | MANAGEMENT
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
-                          <i class="fa fa-eye"></i>
-                        </a>
                         <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                          <i class="fa fa-eye"></i>
+                        </a>
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">
                           <i class="fa fa-download"></i>
                         </a>

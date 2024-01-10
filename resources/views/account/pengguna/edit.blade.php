@@ -416,7 +416,7 @@ Update Pengguna | MANAGEMENT
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
                         <a href="{{ route('account.pengguna.index') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> LIST PENGGUNA
+                            <i class="fa fa-list"></i> KEMBALI
                         </a>
 
                     </form>

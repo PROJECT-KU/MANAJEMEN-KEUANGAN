@@ -115,7 +115,7 @@ Update Uang Masuk | MANAGEMENT
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
                         <a href="{{ route('account.debit.index') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> LIST UANG MASUK
+                            <i class="fa fa-list"></i> KEMBALI
                         </a>
                     </form>
 

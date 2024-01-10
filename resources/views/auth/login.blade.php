@@ -112,7 +112,7 @@
                                         </button>
                                     </div>
                                     <!-- <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a> -->
-                                    <a href="{{ route('account.page-maintenance.blank') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a>
+                                    <a href="{{ route('formemail.reset') }}" class="float-right" style="font-weight: normal;">Lupa Password?</a>
                                     Belum punya akun? <br> <a href="{{ route('register') }}">Buat Sekarang!</a>
                                 </form>
 
@@ -168,6 +168,19 @@
             icon: 'success',
             title: 'Berhasil Log Out',
             text: 'Anda telah berhasil keluar.',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!-- end -->
+
+    @if (session('reset'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Ganti Password',
+            text: 'Anda telah berhasil Mengganti Password.',
             confirmButtonText: 'OK'
         });
     </script>
