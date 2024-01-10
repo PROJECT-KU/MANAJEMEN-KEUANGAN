@@ -81,7 +81,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <div class="login-brand">
-                            <img src="{{ asset('assets/img/logonew.png') }}" alt="logo" width="350">
+                            <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="350">
                         </div>
 
                         <div class="card card-primary">
