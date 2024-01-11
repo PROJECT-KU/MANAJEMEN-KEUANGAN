@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
+    <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
+</head>
+
+<body>
+    <div id="app">
+        <section class="section">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+                        <div class="login-brand">
+                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/img/logoterbaru.png'))) }}" alt="logo" style="width: 100px; display: block; margin: 0 auto;">
+                        </div>
+                        <p style="font-weight: bold; font-size: 25px;">Halo, {{ $user->full_name }}</p>
+                        <p>Anda telah mengganti password akun pada <b>{{ $user->updated_at->format('d M Y, H:i:s') }}</b>.</p>
+                        <p>Jika anda tidak merasa mengganti password, segera hubungi admin kami.</p>
+
+                        <p>Salam,<br>
+
+                            Admin Rumah Scopus Foundation<br>
+                            Rumah Scopus Foundation (RSC) <br>
+                            Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi,<br>
+                            Sleman Regency, Special Region of Yogyakarta 55551 <br>
+                            Telp: 0812-2688-3280</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>

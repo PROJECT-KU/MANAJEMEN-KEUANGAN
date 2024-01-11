@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\PasswordResetSuccessMail;
+use Illuminate\Support\Facades\Mail;
 
 class ResetPasswordController extends Controller
 {
@@ -54,6 +56,11 @@ class ResetPasswordController extends Controller
             DB::table('users')->where('id', $user->id)->update([
                 'password' => Hash::make($request->input('password')),
             ]);
+
+            $updatedUser = User::find($user->id);
+            $appName = 'Rumah Scopus Foundation';
+
+            Mail::to($request->email)->send(new PasswordResetSuccessMail($updatedUser, $appName));
 
             // Redirect to the login page
             return redirect()->route('login')->with('reset', 'Password Anda Berhasil Diperbarui!');
