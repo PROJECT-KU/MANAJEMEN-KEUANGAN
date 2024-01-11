@@ -35,8 +35,11 @@ class PasswordResetSuccessMail extends Mailable
      */
     public function build()
     {
+        $logoPath = public_path('assets/img/logoterbaru.png');
+
         return $this->view('auth.email_lupa_password')
             ->subject('Reset Password Berhasil')
-            ->from('info@rumahscopusfoundation.com', $this->appName);
+            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->attach($logoPath, ['as' => 'logo.png', 'mime' => 'image/png']);
     }
 }
