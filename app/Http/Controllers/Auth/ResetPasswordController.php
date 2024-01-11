@@ -29,7 +29,6 @@ class ResetPasswordController extends Controller
     {
         return view('auth.newpassword');
     }
-
     public function resetPassword(Request $request)
     {
         $validator = Validator::make(
@@ -41,32 +40,36 @@ class ResetPasswordController extends Controller
             [
                 'email.required' => 'Masukkan Alamat Email Anda!',
                 'password.required' => 'Masukkan Password Baru Anda!',
-                'password.confirmed'    => 'Konfirmasi Password Salah !',
+                'password.confirmed' => 'Konfirmasi Password Salah!',
             ]
         );
+
         if ($validator->fails()) {
             return redirect()->route('formemail.reset')->withErrors($validator)->withInput();
         }
 
         // Check if the email exists in the users table
-        $user = DB::table('users')->where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         if ($user) {
-            // Update the user's password with the new one
-            DB::table('users')->where('id', $user->id)->update([
-                'password' => Hash::make($request->input('password')),
-            ]);
+            // Generate a random reset token
+            $resetToken = Str::random(32);
 
-            $updatedUser = User::find($user->id);
+            // Update the user's password and save the reset token to the database
+            $user->password = Hash::make($request->input('password'));
+            $user->reset_token = $resetToken;
+            $user->save();  // Save the updated user model
+
             $appName = 'Rumah Scopus Foundation';
 
-            Mail::to($request->email)->send(new PasswordResetSuccessMail($updatedUser, $appName));
+            // Include the reset token in the email
+            Mail::to($request->email)->send(new PasswordResetSuccessMail($user, $appName, $resetToken));
 
             // Redirect to the login page
             return redirect()->route('login')->with('reset', 'Password Anda Berhasil Diperbarui!');
         } else {
             // Email doesn't exist, display error message and redirect back
-            return Redirect::back()->withInput()->with('error', 'Alamat Email Tidak Terdaftar!');
+            return redirect()->back()->withInput()->with('error', 'Alamat Email Tidak Terdaftar!');
         }
     }
 }
