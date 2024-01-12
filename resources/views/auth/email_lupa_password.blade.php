@@ -19,12 +19,12 @@
             <div class="container mt-5">
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-                        <div style="text-align: center;">
-                            <img src="{{ $message->embed(public_path('assets/img/logoterbaru.png')) }}" alt="banner" style="width: 100%; max-width: 100%; height: auto;">
+                        <div style="text-align: center;" class="login-brand">
+                            <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/logoterbaru.png')) }}" alt="logo" width="250"></a>
                         </div>
                         <p style="font-weight: bold; font-size: 25px;">Halo, {{ $user->full_name }}</p>
                         <p>Anda telah mengganti password akun pada <b>{{ $user->updated_at->format('d M Y, H:i:s') }}</b>.</p>
-                        <p>Jika anda tidak merasa mengganti password, segera hubungi admin kami.</p>
+                        <p>Jika anda tidak merasa mengganti password, segera hubungi kami.</p>
 
                         <p>Salam,<br>
 
