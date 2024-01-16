@@ -408,7 +408,7 @@ List Presensi Karyawan | MANAGEMENT
 
                 @media (min-width: 768px) and (max-width: 991px) {
                   .pagination {
-                    margin-left: 350px;
+                    margin-left: 300px;
                     /* Adjust the margin value as needed for iPads */
                   }
                 }
