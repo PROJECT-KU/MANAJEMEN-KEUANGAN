@@ -15,6 +15,9 @@ use PDF;
 use Illuminate\Support\Facades\DB;
 use Riskihajar\Terbilang\Facades\Terbilang;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GajiSuccessMail;
+
 
 class GajiController extends Controller
 {
@@ -274,6 +277,7 @@ class GajiController extends Controller
           'users.norek',
           'users.bank',
           'users.telp',
+          'users.email',
           DB::raw('SUM(presensi.alpha) as alpha'),
           DB::raw('SUM(presensi.hadir) as hadir'),
           DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
@@ -286,7 +290,7 @@ class GajiController extends Controller
         ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
+        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
         ->orderBy('users.created_at', 'DESC')
         ->get();
 
@@ -614,18 +618,24 @@ class GajiController extends Controller
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'gambar' => $imagePath ?? null,
+      'email' => $request->input('email'),
     ]);
 
     // Redirect with success or error message
     if ($save) {
-      // Get the ID of the newly created data
-      $gajiId = $save->id;
-      // dd($save);
-      // Redirect to the detail page for the newly created data with SweetAlert notification
-      return Redirect::route(
-        'account.gaji.detail',
-        ['id' => $gajiId]
-      )->with('success', 'Data Gaji Karyawan Berhasil Disimpan!');
+      $user = Auth::user();
+      $appName = 'Rumah Scopus Foundation';
+      $isTerbayar = $request->input('status') == 'terbayar';
+      if ($isTerbayar) {
+        Mail::to($request->email)->send(new GajiSuccessMail($user, $save, $appName, $isTerbayar));
+      }
+
+      return redirect()->route('account.gaji.index')->with('success', 'Data Gaji Karyawan Berhasil Disimpan!');
+      // $gajiId = $save->id;
+      // return Redirect::route(
+      //   'account.gaji.detail',
+      //   ['id' => $gajiId]
+      // )->with('success', 'Data Gaji Karyawan Berhasil Disimpan!');
     } else {
       // Redirect with an error message if data creation fails
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji Karyawan Gagal Disimpan!');
@@ -649,6 +659,7 @@ class GajiController extends Controller
           'users.norek',
           'users.bank',
           'users.telp',
+          'users.email',
           DB::raw('SUM(presensi.alpha) as alpha'),
           DB::raw('SUM(presensi.hadir) as hadir'),
           DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
@@ -661,7 +672,7 @@ class GajiController extends Controller
         ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
+        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
         ->orderBy('users.created_at', 'DESC')
         ->get();
     } else {
@@ -984,16 +995,25 @@ class GajiController extends Controller
       'status' => $request->input('status'),
       'note' => $request->input('note'),
       'gambar' => $imagePath, // Store the image path
+      'email' => $request->input('email'),
     ]);
 
     // Redirect with success or error message
     if ($gaji) {
-      return redirect()->route(
-        'account.gaji.detail',
-        ['id' => $id]
-      )->with(
-        ['success' => 'Data Gaji Karyawan Berhasil Diperbarui!']
-      );
+      $user = Auth::user();
+      $appName = 'Rumah Scopus Foundation';
+      $isTerbayar = $request->input('status') == 'terbayar';
+      if ($isTerbayar) {
+        Mail::to($request->email)->send(new GajiSuccessMail($user, $gaji, $appName, $isTerbayar));
+      }
+
+      return redirect()->route('account.gaji.index')->with('success', 'Data Gaji Karyawan Berhasil Diperbarui!');
+      // return redirect()->route(
+      //   'account.gaji.detail',
+      //   ['id' => $id]
+      // )->with(
+      //   ['success' => 'Data Gaji Karyawan Berhasil Diperbarui!']
+      // );
     } else {
       // Redirect with an error message if data creation fails
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji Karyawan Gagal Diperbarui!');
@@ -1172,5 +1192,21 @@ class GajiController extends Controller
 
     // Output the generated PDF to the browser
     return Response::make($dompdf->output(), 200, $headers);
+  }
+
+  public function updateStatusToTerbayar($gajiId)
+  {
+    $gaji = Gaji::find($gajiId);
+
+    if ($gaji) {
+      $gaji->update(['status' => 'terbayar']);
+
+      // Dispatch the event
+      event(new GajiStatusUpdated($gaji));
+
+      return redirect()->route('your.success.route')->with('success', 'Status updated successfully.');
+    } else {
+      return redirect()->route('your.error.route')->with('error', 'Gaji not found.');
+    }
   }
 }

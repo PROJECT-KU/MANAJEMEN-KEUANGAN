@@ -88,11 +88,6 @@
                             <div class="card-body">
                                 <form id="resetPasswordForm" method="POST" action="{{ route('cekemail.reset') }}" class="needs-validation" novalidate="">
                                     @csrf
-                                    @if(session('error'))
-                                    <div class="alert alert-danger">
-                                        {{ session('error') }}
-                                    </div>
-                                    @endif
 
                                     <div class="row">
                                         <div class="form-group col-12">

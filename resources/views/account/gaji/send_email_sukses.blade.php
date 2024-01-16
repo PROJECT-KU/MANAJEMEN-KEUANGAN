@@ -23,8 +23,8 @@
                             <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/logoterbaru.png')) }}" alt="logo" width="250"></a>
                         </div>
                         <p style="font-weight: bold; font-size: 25px;">Halo, {{ $user->full_name }}</p>
-                        <p>Kamu telah mengganti password akun pada <b>{{ $user->updated_at->format('d M Y, H:i:s') }}</b>.</p>
-                        <p>Jika kamu tidak merasa mengganti password, segera hubungi kami.</p>
+                        <p>Yeay, Kamu telah menerima pembayaran gaji pada <b>{{ strftime('%d %B %Y', strtotime($gaji->tanggal)) }}</b> sebesar <b>Rp. {{ number_format($gaji->total, 0, ',', ',') }}</b>.</p>
+                        <p>Kamu bisa melihat riwayat pembayaran gaji di Rincian Gaji melalui sistem MIS.</p>
 
                         <p>Salam,<br>
 
