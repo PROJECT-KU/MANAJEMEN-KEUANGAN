@@ -401,7 +401,7 @@ List Presensi Karyawan | MANAGEMENT
               <style>
                 @media (max-width: 767px) {
                   .pagination {
-                    margin-left: 600px;
+                    margin-left: 450px;
                     /* Adjust the margin value as needed */
                   }
                 }
