@@ -399,34 +399,15 @@ List Presensi Karyawan | MANAGEMENT
             </table>
             <div style="text-align: center; overflow-x: auto; white-space: nowrap;">
               <style>
-                .pagination {
-                  display: inline-block;
-                  padding-left: 0;
-                  margin: 20px 0;
-                  border-radius: 4px;
-                }
-
-                .pagination>li {
-                  display: inline;
-                  margin-right: 10px;
-                }
-
-                .pagination>li>a,
-                .pagination>li>span {
-                  position: relative;
-                  float: left;
-                  padding: 6px 12px;
-                  margin-left: -1px;
-                  line-height: 1.42857143;
-                  color: #428bca;
-                  text-decoration: none;
-                  background-color: #fff;
-                  border: 1px solid #ddd;
+                @media (max-width: 767px) {
+                  .pagination {
+                    margin-left: 100px;
+                    /* Adjust the margin value as needed */
+                  }
                 }
               </style>
               {{ $presensi->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
             </div>
-
           </div>
 
         </div>
