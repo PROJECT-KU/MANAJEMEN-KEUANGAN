@@ -397,11 +397,11 @@ List Presensi Karyawan | MANAGEMENT
                 @endforeach
               </tbody>
             </table>
-            <div style="text-align: center; overflow-x: auto; white-space: nowrap;">
+            <div style="text-align: center;">
               <style>
                 @media (max-width: 767px) {
                   .pagination {
-                    margin-left: 300px;
+                    margin-left: 600px;
                     /* Adjust the margin value as needed */
                   }
                 }
