@@ -404,7 +404,13 @@ List Presensi Karyawan | MANAGEMENT
                     margin-left: 480px;
                     /* Adjust the margin value as needed */
                   }
-                }
+
+                  @media (max-width: 991px) {
+                    .pagination {
+                      margin-left: 480px;
+                      /* Adjust the margin value as needed */
+                    }
+                  }
               </style>
               {{ $presensi->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
             </div>
