@@ -623,7 +623,7 @@ class GajiController extends Controller
 
     // Redirect with success or error message
     if ($save) {
-      $user = Auth::user();
+      $user = User::findOrFail($request->input('user_id'));
       $appName = 'Rumah Scopus Foundation';
       $isTerbayar = $request->input('status') == 'terbayar';
       if ($isTerbayar) {
@@ -1000,7 +1000,7 @@ class GajiController extends Controller
 
     // Redirect with success or error message
     if ($gaji) {
-      $user = Auth::user();
+      $user = User::findOrFail($existingUserId);
       $appName = 'Rumah Scopus Foundation';
       $isTerbayar = $request->input('status') == 'terbayar';
       if ($isTerbayar) {
