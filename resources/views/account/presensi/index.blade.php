@@ -397,11 +397,9 @@ List Presensi Karyawan | MANAGEMENT
                 @endforeach
               </tbody>
             </table>
-            <div style="text-align: center">
+            <div style="text-align: center; overflow-x: auto; white-space: nowrap;">
               {{ $presensi->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
             </div>
-
-
           </div>
 
         </div>
