@@ -198,7 +198,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-telp="{{ $user->telp }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
                     @endforeach
                   </select>
 
@@ -293,10 +293,11 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <label>No Telp</label>
-                  <input type="text" class="form-control" id="telp" disabled>
+                  <label>Email</label>
+                  <input type="text" name="email" class="form-control" id="email" readonly>
                 </div>
               </div>
+
             </div>
         </div>
       </div>
@@ -1086,7 +1087,7 @@ Tambah Gaji Karyawan | MANAGEMENT
                 <select class="form-control" name="status" required>
                   <option value="" disabled selected>Silahkan Pilih</option>
                   <option value="pending">PENDING</option>
-                  <option value="terbauar">TERBAYAR</option>
+                  <option value="terbayar">TERBAYAR</option>
                 </select>
                 @error('status')
                 <div class="invalid-feedback" style="display: block">
@@ -1548,7 +1549,7 @@ Tambah Gaji Karyawan | MANAGEMENT
         var nik = selectedKaryawanOption.data('nik');
         var norek = selectedKaryawanOption.data('norek');
         var bank = selectedKaryawanOption.data('bank');
-        var telp = selectedKaryawanOption.data('telp');
+        var email = selectedKaryawanOption.data('email');
         var alpha = selectedKaryawanOption.data('alpha');
         var hadir = selectedKaryawanOption.data('hadir');
         var camp_jogja = selectedKaryawanOption.data('camp_jogja');
@@ -1561,7 +1562,7 @@ Tambah Gaji Karyawan | MANAGEMENT
         $('#nik').val(nik);
         $('#norek').val(norek);
         $('#bank').val(bank);
-        $('#telp').val(telp);
+        $('#email').val(email);
         $('#alpha').val(alpha);
         $('#hadir').val(hadir);
         $('#camp_jogja').val(camp_jogja);
@@ -1574,7 +1575,7 @@ Tambah Gaji Karyawan | MANAGEMENT
         $('#nik').val('');
         $('#norek').val('');
         $('#bank').val('');
-        $('#telp').val('');
+        $('#email').val('');
         $('#alpha').val('');
         $('#hadir').val('');
         $('#camp_jogja').val('');

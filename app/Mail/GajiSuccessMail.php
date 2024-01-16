@@ -3,29 +3,36 @@
 namespace App\Mail;
 
 use App\User;
+use App\Gaji;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class PasswordResetSuccessMail extends Mailable
+class GajiSuccessMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $user;
+    public $gaji;
     public $appName;
+    public $isTerbayar;
 
     /**
      * Create a new message instance.
      *
      * @param User $user
+     * @param Gaji $gaji
      * @param string $appName
+     * @param bool $isTerbayar
      * @return void
      */
-    public function __construct(User $user, $appName)
+    public function __construct(User $user, Gaji $gaji, $appName, $isTerbayar)
     {
         $this->user = $user;
+        $this->gaji = $gaji;
         $this->appName = $appName;
+        $this->isTerbayar = $isTerbayar;
     }
 
     /**
@@ -37,8 +44,8 @@ class PasswordResetSuccessMail extends Mailable
     {
         $logoPath = public_path('assets/img/logoterbaru.png');
 
-        return $this->view('auth.email_lupa_password')
-            ->subject('Reset Password Berhasil')
+        $mail = $this->view('account.gaji.send_email_sukses')
+            ->subject('Pembayaran Gaji Berhasil')
             ->from('info@rumahscopusfoundation.com', $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
