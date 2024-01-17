@@ -364,15 +364,6 @@ class PresensiController extends Controller
       $appName = 'Rumah Scopus Foundation';
       Mail::to($user->email)->send(new UpdatePresensiMail($user, $presensi, $appName));
 
-      $presensi_masuk = $request->input('status') !== null;
-      $presensi_pulang = $request->input('status_pulang') == null;
-      $isAfterNotificationTime = now()->greaterThanOrEqualTo(now()->format('Y-m-d') . ' 09:46:00');
-
-      if ($presensi_masuk && $presensi_pulang && $isAfterNotificationTime) {
-        // Send notification email
-        Mail::to($user->email)->send(new NotifPresensiMail($user, $presensi, $appName));
-      }
-
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
