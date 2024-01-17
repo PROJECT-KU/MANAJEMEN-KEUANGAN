@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\Response;
 use PDF;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Mail\CreatePresensiMail;
+use App\Mail\UpdatePresensiMail;
+use App\Mail\NotifPresensiMail;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\PresensiNotification;
 
 class PresensiController extends Controller
 {
@@ -269,11 +271,9 @@ class PresensiController extends Controller
 
     // Redirect with success or error message
     if ($save) {
-      $employee = User::find($request->input('user_id'));
-
-      //if ($employee && $employee->email) {
-      //  Mail::to($employee->email)->send(new PresensiNotification($employee->full_name));
-      //}
+      $user = User::findOrFail($request->input('user_id'));
+      $appName = 'Rumah Scopus Foundation';
+      Mail::to($user->email)->send(new CreatePresensiMail($user, $save, $appName));
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       // Redirect with an error message if data creation fails
@@ -359,7 +359,20 @@ class PresensiController extends Controller
     ]);
 
     // Redirect with success or error message
+    $user = User::findOrFail($presensi->user_id);
     if ($presensi) {
+      $appName = 'Rumah Scopus Foundation';
+      Mail::to($user->email)->send(new UpdatePresensiMail($user, $presensi, $appName));
+
+      $presensi_masuk = $request->input('status') !== null;
+      $presensi_pulang = $request->input('status_pulang') == null;
+      $isAfterNotificationTime = now()->greaterThanOrEqualTo(now()->format('Y-m-d') . ' 09:46:00');
+
+      if ($presensi_masuk && $presensi_pulang && $isAfterNotificationTime) {
+        // Send notification email
+        Mail::to($user->email)->send(new NotifPresensiMail($user, $presensi, $appName));
+      }
+
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
