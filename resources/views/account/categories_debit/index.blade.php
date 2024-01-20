@@ -104,8 +104,23 @@ List Kategori Uang Masuk | MANAGEMENT
                                     @endforeach
                                 </tbody>
                             </table>
-                            <div style="text-align: center">
-                                {{$categories->links("vendor.pagination.bootstrap-4")}}
+                            <div style="text-align: center;">
+                                <style>
+                                    @media (max-width: 767px) {
+                                        .pagination {
+                                            margin-left: 480px;
+                                            /* Adjust the margin value as needed for mobile devices */
+                                        }
+                                    }
+
+                                    @media (min-width: 768px) and (max-width: 991px) {
+                                        .pagination {
+                                            margin-left: 300px;
+                                            /* Adjust the margin value as needed for iPads */
+                                        }
+                                    }
+                                </style>
+                                {{$categories->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4")}}
                             </div>
                         </div>
                     </div>
