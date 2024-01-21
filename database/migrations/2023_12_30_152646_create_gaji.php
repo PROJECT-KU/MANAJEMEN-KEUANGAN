@@ -17,6 +17,7 @@ class CreateGaji extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('presensi_id')->nullable();
+            $table->string('email', 300)->nullable();
             $table->string('id_transaksi', 300)->nullable();
             $table->string('gaji_pokok', 300)->nullable();
 

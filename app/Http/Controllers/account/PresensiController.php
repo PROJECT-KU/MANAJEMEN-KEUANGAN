@@ -134,17 +134,21 @@ class PresensiController extends Controller
     $search = $request->get('q');
     $user = Auth::user();
 
+    // Default date range to the current month if not provided
+    $startDate = $request->get('start_date') ?? date('Y-m-01');
+    $endDate = $request->get('end_date') ?? date('Y-m-t');
+
     if (Auth::user()->level == 'manager') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [$startDate, $endDate])
         ->where(function ($query) use ($search) {
           $query->where('users.full_name', 'LIKE', '%' . $search . '%')
             ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
             ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
             ->orWhere(function ($subquery) use ($search) {
-              // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
               $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         })
@@ -155,12 +159,12 @@ class PresensiController extends Controller
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)
+        ->whereBetween('presensi.created_at', [$startDate, $endDate])
         ->where(function ($query) use ($search) {
           $query->where('users.full_name', 'LIKE', '%' . $search . '%')
             ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
             ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
             ->orWhere(function ($subquery) use ($search) {
-              // Menggunakan DATE_FORMAT untuk mendapatkan nama hari, tanggal, nama bulan, tahun, dan waktu
               $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         })
@@ -168,10 +172,7 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
-    $presensi->appends(['q' => $search]);
-
-    $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
-    $endDate = $request->get('end_date');
+    $presensi->appends(['q' => $search, 'start_date' => $startDate, 'end_date' => $endDate]);
 
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
@@ -399,6 +400,7 @@ class PresensiController extends Controller
     $user = Auth::user();
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
+    $searchQuery = $request->input('q');
 
     if (!$startDate || !$endDate) {
       // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
@@ -415,6 +417,17 @@ class PresensiController extends Controller
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
+      ->when($searchQuery, function ($query) use ($searchQuery) {
+        $query->where(function ($subquery) use ($searchQuery) {
+          // Adjust this part based on your search requirements
+          $subquery->where('users.full_name', 'LIKE', '%' . $searchQuery . '%')
+            ->orWhere('presensi.status', 'LIKE', '%' . $searchQuery . '%')
+            ->orWhere('presensi.status_pulang', 'LIKE', '%' . $searchQuery . '%')
+            ->orWhere(function ($dateSubquery) use ($searchQuery) {
+              $dateSubquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($searchQuery) . '%']);
+            });
+        });
+      })
       ->orderBy('presensi.created_at', 'DESC')
       ->get();
 

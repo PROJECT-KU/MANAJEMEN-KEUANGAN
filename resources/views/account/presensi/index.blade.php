@@ -232,7 +232,11 @@ List Presensi Karyawan | MANAGEMENT
         <div class="card-header">
           <h4><i class="fas fa-list"></i> LIST PRESENSI KARYAWAN</h4>
           <div class="card-header-action">
-            <a href="{{ route('account.laporan_presensi.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+            <a href="{{ route('account.laporan_presensi.download-pdf', [
+        'tanggal_awal' => $startDate,
+        'tanggal_akhir' => $endDate,
+        'q' => app('request')->input('q') // include search query in the PDF link
+    ]) }}" class="btn btn-primary">
               <i class="fas fa-file-pdf"></i> Download PDF
             </a>
           </div>
