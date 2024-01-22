@@ -132,7 +132,7 @@ List Uang Masuk | MANAGEMENT
                                         }
                                     }
                                 </style>
-                                {{$debit->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4")}}
+                                {{$debit->links("vendor.pagination.bootstrap-4")}}
                             </div>
                         </div>
                     </div>
