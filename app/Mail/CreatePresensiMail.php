@@ -39,7 +39,7 @@ class CreatePresensiMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/logoterbaru.png');
+        $logoPath = public_path('assets/img/LogoRSC.png');
 
         return $this->view('account.presensi.create_send_mail')
             ->subject('Presensi Masuk Berhasil')

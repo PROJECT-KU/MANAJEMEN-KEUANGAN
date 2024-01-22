@@ -39,7 +39,7 @@ class UpdatePresensiMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/logoterbaru.png');
+        $logoPath = public_path('assets/img/LogoRSC.png');
 
         return $this->view('account.presensi.update_send_mail')
             ->subject('Presensi Hari Ini Selesai')

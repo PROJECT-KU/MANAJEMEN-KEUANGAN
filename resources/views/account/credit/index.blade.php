@@ -132,7 +132,7 @@ List Uang Keluar | MANAGEMENT
                                         }
                                     }
                                 </style>
-                                {{$credit->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4")}}
+                                {{$credit->links("vendor.pagination.bootstrap-4")}}
                             </div>
                         </div>
                     </div>

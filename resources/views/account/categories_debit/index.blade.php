@@ -120,7 +120,7 @@ List Kategori Uang Masuk | MANAGEMENT
                                         }
                                     }
                                 </style>
-                                {{$categories->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4")}}
+                                {{$categories->links("vendor.pagination.bootstrap-4")}}
                             </div>
                         </div>
                     </div>

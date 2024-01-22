@@ -42,7 +42,7 @@ class GajiSuccessMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/logoterbaru.png');
+        $logoPath = public_path('assets/img/LogoRSC.png');
 
         $mail = $this->view('account.gaji.send_email_sukses')
             ->subject('Pembayaran Gaji Berhasil')

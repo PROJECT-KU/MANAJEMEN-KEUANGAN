@@ -15,15 +15,13 @@ class Recrutment extends Migration
     {
         Schema::create('recrutment', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
             $table->string('nama', 300)->nullable();
             $table->string('email', 300)->nullable();
-            $table->text('deskripsi')->nullable();
-
-            $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onDelete('RESTRICT')
-                ->onUpdate('CASCADE');
+            $table->string('cv', 300)->nullable();
+            $table->string('lamaran', 300)->nullable();
+            $table->string('lainnya', 300)->nullable();
+            $table->string('pendidikan', 300)->nullable();
+            $table->string('info')->nullable();
         });
     }
 

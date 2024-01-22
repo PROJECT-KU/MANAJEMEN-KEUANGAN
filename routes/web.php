@@ -13,6 +13,8 @@ use\Http\Controller\EmailController;
 */
 
 Route::get('/', 'Auth\LoginController@showLoginForm');
+// Recrutment
+Route::get('karir', 'recruitment\RecruitmentController@index')->name('recruitment.index');
 
 Auth::routes();
 
