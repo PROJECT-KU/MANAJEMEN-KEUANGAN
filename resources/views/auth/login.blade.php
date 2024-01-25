@@ -114,7 +114,7 @@
                                     <!-- <a href="{{ route('password.request') }}" <button type="button" class="btn btn-info float-right" style="font-weight: normal;">Lupa Password?</button></a> -->
                                     <a href="{{ route('formemail.reset') }}" class="float-right" style="font-weight: normal;">Lupa Password?</a>
                                     Belum punya akun? <br> <a href="{{ route('register') }}">Buat Sekarang!</a>
-                                    <a href="{{ route('karir.index') }}">recrutment</a>
+                                    <!-- <a href="{{ route('karir.index') }}">recrutment</a> -->
                                 </form>
                             </div>
                         </div>
