@@ -139,6 +139,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <i class="fas fa-campground"></i> <span>LAPORAN CAMP</span>
                                     </a>
                                 </li>
+                                <li class="{{ setActive('account/karir') }} . {{ setActive('account/camp/search') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
+                                        <i class="fas fa-user-tie"></i> <span>KARIR</span>
+                                    </a>
+                                </li>
                                 @endif
 
                                 @if ($isStatusOff || $isTenggatExpired)

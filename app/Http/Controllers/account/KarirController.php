@@ -1,0 +1,226 @@
+<?php
+
+namespace App\Http\Controllers\account;
+
+use App\Karir;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\KarirCreateMail;
+use App\Mail\KarirUpdateMail;
+
+class KarirController extends Controller
+{
+    /**
+     * PenyewaanController constructor.
+     */
+
+    public function index(Request $request)
+    {
+
+        return view('karir.index');
+    }
+
+    public function list(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $karir = DB::table('karir')
+            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->whereBetween('karir.created_at', [$currentMonth, $nextMonth])
+            ->orderBy('karir.created_at', 'DESC')
+            ->paginate(10);
+
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate'));
+    }
+
+    public function detail(Request $request, $id)
+    {
+        $karir = DB::table('karir')
+            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.created_at', 'karir.updated_at')
+            ->where('karir.id', $id)
+            ->first();
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('karir.detail', compact('karir', 'maintenances'));
+    }
+
+    public function store(Request $request)
+    {
+        // PATH UNTUK MENYIMPAN CV
+        $cvPath = null;
+        if ($request->hasFile('cv')) {
+            $filecv = $request->file('cv');
+            $cvName = time() . '_cv.' . $filecv->getClientOriginalExtension();
+            $cvPath = $cvName;
+            $filecv->move(public_path('karir'), $cvName);
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAMARAN
+        $lamaranPath = null;
+        if ($request->hasFile('lamaran')) {
+            $filelamaran = $request->file('lamaran');
+            $lamaranName = time() . '_lamaran.' . $filelamaran->getClientOriginalExtension();
+            $lamaranPath = $lamaranName;
+            $filelamaran->move(public_path('karir'), $lamaranName);
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAINNYA
+        $lainnyaPath = null;
+        if ($request->hasFile('lainnya')) {
+            $filelainnya = $request->file('lainnya');
+            $lainnyaName = time() . '_lainnya.' . $filelainnya->getClientOriginalExtension();
+            $lainnyaPath = $lainnyaName;
+            $filelainnya->move(public_path('karir'), $lainnyaName);
+        }
+        // END
+
+        $save = Karir::create([
+            'nama'          => $request->input('nama'),
+            'telp'          => $request->input('telp'),
+            'email'         => $request->input('email'),
+            'tanggal'       => $request->input('tanggal'),
+            'cv'            => $cvPath ?? null,
+            'lamaran'       => $lamaranPath ?? null,
+            'lainnya'       => $lainnyaPath ?? null,
+            'pendidikan'    => $request->input('pendidikan'),
+            'posisi'        => $request->input('posisi'),
+            'desc'          => $request->input('desc'),
+        ]);
+
+        // Redirect with success or error message
+        if ($save) {
+            // dd($save);
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+
+            Mail::to($emailTo)->send(new KarirCreateMail($save, $appName));
+
+            return redirect()->route('karir.index')->with('success', 'Data Laporan Camp Berhasil Disimpan!');
+        } else {
+            // Redirect with an error message if data creation fails
+            return redirect()->route('karir.index')->with('error', 'Gagal menyimpan data laporan camp.');
+        }
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $karir = DB::table('karir')
+            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->where('karir.id', $id)
+            ->first();
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('karir.edit', compact('karir', 'maintenances'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $karir = Karir::findOrFail($id);
+
+        // PATH UNTUK MENYIMPAN CV
+        $cvPath = $karir->cv; // Default value is the existing value in the database
+        if ($request->hasFile('cv')) {
+            // Only update if a new file is uploaded
+            $filecv = $request->file('cv');
+            $cvName = time() . '_cv.' . $filecv->getClientOriginalExtension();
+            $cvPath = $cvName;
+            $filecv->move(public_path('karir'), $cvName);
+
+            // If there was an existing file, delete it
+            if ($karir->cv) {
+                unlink(public_path('karir/' . $karir->cv));
+            }
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAMARAN
+        $lamaranPath = $karir->lamaran; // Default value is the existing value in the database
+        if ($request->hasFile('lamaran')) {
+            // Only update if a new file is uploaded
+            $filelamaran = $request->file('lamaran');
+            $lamaranName = time() . '_lamaran.' . $filelamaran->getClientOriginalExtension();
+            $lamaranPath = $lamaranName;
+            $filelamaran->move(public_path('karir'), $lamaranName);
+
+            // If there was an existing file, delete it
+            if ($karir->lamaran) {
+                unlink(public_path('karir/' . $karir->lamaran));
+            }
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAINNYA
+        $lainnyaPath = $karir->lainnya; // Default value is the existing value in the database
+        if ($request->hasFile('lainnya')) {
+            // Only update if a new file is uploaded
+            $filelainnya = $request->file('lainnya');
+            $lainnyaName = time() . '_lainnya.' . $filelainnya->getClientOriginalExtension();
+            $lainnyaPath = $lainnyaName;
+            $filelainnya->move(public_path('karir'), $lainnyaName);
+
+            // If there was an existing file, delete it
+            if ($karir->lainnya) {
+                unlink(public_path('karir/' . $karir->lainnya));
+            }
+        }
+        // END
+
+        $karir->update([
+            'nama'              => $request->input('nama'),
+            'telp'              => $request->input('telp'),
+            'email'             => $request->input('email'),
+            'tanggal'           => $request->input('tanggal'),
+            'cv'                => $cvPath,
+            'lamaran'           => $lamaranPath,
+            'lainnya'           => $lainnyaPath,
+            'pendidikan'        => $request->input('pendidikan'),
+            'posisi'            => $request->input('posisi'),
+            'status'            => $request->input('status'),
+            'tanggal_interview' => $request->input('tanggal_interview'),
+            'lokasi_interview'  => $request->input('lokasi_interview'),
+            'desc'              => $request->input('desc'),
+        ]);
+
+        // Redirect with success or error message
+        if ($karir) {
+            // Send email or perform other actions if needed
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+            $isStatus = $request->input('status') == 'Interview';
+            if ($isStatus) {
+                Mail::to($emailTo)->send(new KarirUpdateMail($karir, $appName, $isStatus));
+            }
+            return redirect()->route('karir.list')->with('success', 'Data Karir Berhasil Disimpan!');
+        } else {
+            // Redirect with an error message if data update fails
+            return redirect()->route('karir.list')->with('error', 'Gagal Menyimpan Data Karir!');
+        }
+    }
+}

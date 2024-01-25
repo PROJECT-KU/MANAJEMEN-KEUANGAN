@@ -1,5 +1,4 @@
 <?php
-use\Http\Controller\EmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +12,8 @@ use\Http\Controller\EmailController;
 */
 
 Route::get('/', 'Auth\LoginController@showLoginForm');
+
 // Recrutment
-Route::get('karir', 'recruitment\RecruitmentController@index')->name('recruitment.index');
 
 Auth::routes();
 
@@ -22,6 +21,13 @@ Auth::routes();
  * account
  */
 Route::prefix('account')->group(function () {
+    // karir
+    Route::get('/karir', 'account\KarirController@index')->name('karir.index');
+    Route::get('/karir/list', 'account\KarirController@list')->name('karir.list');
+    Route::get('/karir/detail/{id}', 'account\KarirController@detail')->name('karir.detail');
+    Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
+    Route::get('/karir/{id}/edit', 'account\KarirController@edit')->name('karir.edit');
+    Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
 
     //reset password
     Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');

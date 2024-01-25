@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <title>Recruitment | RUMAH SCOPUS</title>
+    <title>Karir | RUMAH SCOPUS</title>
     <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
@@ -70,6 +70,14 @@
         }
     </style>
     <!-- end -->
+
+    <style>
+        @media (max-width: 767px) {
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
 </head>
 
 <!-- <body style="background: #f3f3f3"> -->
@@ -79,7 +87,7 @@
         <section class="section">
             <div class="container mt-5">
                 <div class="row">
-                    <div class="col-12 col-sm-10 offset-sm-1 col-md-12 offset-md-4 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
+                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <div class="login-brand">
                             <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="350">
                         </div>
@@ -90,21 +98,21 @@
                             </div>
 
                             <div class="card-body">
-                                <form action="{{ route('register') }}" method="POST">
+                                <form action="{{ route('karir.store') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateform()">
                                     @csrf
                                     <div class="row">
-                                        <div class="form-group col-6">
-                                            <label for="frist_name">Nama Lengkap</label>
-                                            <input id="frist_name" type="text" style="text-transform:uppercase;" class="form-control" name="full_name" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
-                                            @error('full_name')
+                                        <div class="form-group col-md-6">
+                                            <label for="nama">Nama Lengkap</label>
+                                            <input id="nama" type="text" style="text-transform:uppercase;" class="form-control" name="nama" value="{{ old('nama') }}" autofocus maxlength="30" minlength="5" onkeypress="return /[a-zA-Z0-9 ]/i.test(event.key)" required>
+                                            @error('nama')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>
                                             @enderror
                                         </div>
-                                        <div class="form-group col-6">
+                                        <div class="form-group col-md-6">
                                             <label for="telp">No Telp</label>
-                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="15 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)" required>
+                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)" required>
                                             @error('telp')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -114,9 +122,9 @@
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-12">
+                                        <div class="form-group col-md-12">
                                             <label for="email">Alamat Email</label>
-                                            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return /[a-zA-Z0-9@.]/i.test(event.key)" required>
                                             @error('email')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -126,13 +134,41 @@
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-12">
+                                        <div class="form-group col-md-6">
                                             <label for="pendidikan">Pendidikan Terakhir</label>
-                                            <select class="form-control pendidikan" name="pendidikan" id="pendidikan">
-                                                <option value="002">BRI</option>
+                                            <select class="form-control pendidikan" name="pendidikan" id="pendidikan" required>
+                                                <option value="" disabled selected>PILIH PENDIDIKAN TERAKHIR</option>
+                                                <option value="sma">SMA/Sederajat</option>
+                                                <option value="s1">S1</option>
+                                                <option value="s2">S2</option>
                                             </select>
-                                            <input id="pendidikan" type="pendidikan" class="form-control" name="pendidikan" value="{{ old('pendidikan') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
                                             @error('pendidikan')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="posisi">Posisi yang Kamu Lamar</label>
+                                            <select class="form-control posisi" name="posisi" id="posisi" required>
+                                                <option value="" disabled selected>PILIH POSISI</option>
+                                                <option value="co trainer">CO Trainer</option>
+                                                <option value="satpam">satpam</option>
+                                            </select>
+                                            @error('posisi')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="desc">Jelaskan Tentang Diri Kamu</label>
+                                            <textarea name="desc" id="desc" placeholder="Jelaskan diri kamu" class="form-control"></textarea>
+                                            @error('desc')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>
@@ -143,7 +179,7 @@
                                     <div class="row">
                                         <div class="form-group col-12">
                                             <label for="cv">Berkas CV</label>
-                                            <input type="file" name="cv" id="cv" class="form-control" accept="application/pdf" required>
+                                            <input type="file" name="cv" id="cv" class="form-control" required>
                                             @error('cv')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -154,7 +190,7 @@
                                     <div class="row">
                                         <div class="form-group col-12">
                                             <label for="lamaran">Berkas Surat Lamaran</label>
-                                            <input type="file" name="lamaran" id="lamaran" class="form-control" accept="application/pdf" required>
+                                            <input type="file" name="lamaran" id="lamaran" class="form-control" required>
                                             @error('lamaran')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -162,10 +198,11 @@
                                             @enderror
                                         </div>
                                     </div>
+
                                     <div class="row">
                                         <div class="form-group col-12">
                                             <label for="lainnya">Berkas Lainnya</label>
-                                            <input type="file" name="lainnya" id="lainnya" class="form-control" accept="application/pdf" required>
+                                            <input type="file" name="lainnya" id="lainnya" class="form-control">
                                             @error('lainnya')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -190,9 +227,6 @@
                                         <button type="submit" class="btn btn-primary btn-lg btn-block">
                                             DAFTAR
                                         </button>
-                                    </div>
-                                    <div class="form-group">
-                                        Sudah Punya Akun? <a href="{{ route('login') }}">Login Sekarang!</a>
                                     </div>
                                 </form>
                             </div>
@@ -231,6 +265,64 @@
         <!--================== END ==================-->
     </div>
 
+    <!--================== FORMAT FILE YANG DI PERBOLEHKAN ==================-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('cv').addEventListener('change', validateFileExtension);
+        document.getElementById('lamaran').addEventListener('change', validateFileExtension);
+        document.getElementById('lainnya').addEventListener('change', validateFileExtension);
+
+        function validateFileExtension() {
+            const allowedExtensions = ['pdf'];
+            const fileInput = this;
+
+            if (fileInput.files.length > 0) {
+                const selectedFile = fileInput.files[0];
+                const fileName = selectedFile.name.toLowerCase();
+
+                // Check file extension
+                const fileExtension = fileName.split('.').pop();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    // Display a SweetAlert error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Jenis File Tidak Valid',
+                        text: 'Hanya File PDF Yang Diperbolehkan.',
+                    });
+                    fileInput.value = ''; // Clear the file input
+                }
+            }
+        }
+    </script>
+    <!-- Add this script before the closing </body> tag -->
+    <script>
+        document.getElementById('cv').addEventListener('change', validateFileSize);
+        document.getElementById('lamaran').addEventListener('change', validateFileSize);
+        document.getElementById('lainnya').addEventListener('change', validateFileSize);
+
+        function validateFileSize() {
+            const maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+            const fileInput = this;
+
+            if (fileInput.files.length > 0) {
+                const selectedFile = fileInput.files[0];
+                const fileSize = selectedFile.size;
+
+                if (fileSize > maxFileSize) {
+                    // Display a SweetAlert error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Terlalu Besar',
+                        text: 'Ukuran file tidak boleh melebihi 10 MB.',
+                    });
+                    fileInput.value = ''; // Clear the file input
+                }
+            }
+        }
+    </script>
+
+    <!--================== END ==================-->
+
     <!--================== FORMAT NO TELP ==================-->
     <script>
         function formatPhoneNumber(input) {
@@ -255,87 +347,55 @@
     </script>
     <!--================== END ==================-->
 
-
-    <!--================== CHANGE JENIS AKUN ==================-->
+    <!--================== CKEDITOR ==================-->
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
-        // Get the elements
-        const jenisDropdown = document.getElementById('jenis');
-        const namaPerusahaanContainer = document.getElementById('namaPerusahaanContainer');
-        const levelDropdown = document.getElementById('levelDropdown');
-        const telpContainer = document.getElementById('telpContainer');
-        const levelSelect = document.querySelector('[name="level"]');
+        CKEDITOR.replace('desc');
 
-        // Function to handle the visibility of "Nama Perusahaan", "Level", and "No Telp" fields
-        function handleVisibility() {
-            const selectedValue = jenisDropdown.value;
-            if (selectedValue === 'bisnis' || selectedValue === 'penyewaan' || selectedValue === 'kasir') {
-                namaPerusahaanContainer.style.display = 'block';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'block';
-                // If "bisnis" is selected, set the width of "Level" to col-md-6
-                levelDropdown.classList.remove('col-md-4');
-                levelDropdown.classList.add('col-md-6');
-            } else if (selectedValue === 'perorangan') {
-                namaPerusahaanContainer.style.display = 'none';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'block';
-                // If "perorangan" is selected, set the width of "Level" to col-md-4
-                telpContainer.classList.remove('col-6');
-                telpContainer.classList.add('col-6');
-            } else {
-                // In case "Silahkan Pilih" or an unexpected value is selected, hide all extra fields
-                namaPerusahaanContainer.style.display = 'none';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'none';
+        function validateform() {
+            var editorContent = CKEDITOR.instances.desc.getData();
+            if (editorContent.trim() === '') {
+                // Use SweetAlert for a more visually appealing alert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Jelaskan Tentang Diri Kamu harus diisi.',
+                    confirmButtonText: 'OK'
+                });
+                return false;
             }
-
-            // When "Perorangan" is selected, show only "Users" in the level dropdown
-            if (selectedValue === 'perorangan') {
-                levelSelect.innerHTML = '<option value="users">Users</option>';
-            } else if (selectedValue === 'bisnis') {
-                levelSelect.innerHTML = '<option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
-            }
+            return true;
         }
-
-        // Attach the event listener to the dropdown
-        jenisDropdown.addEventListener('change', handleVisibility);
-
-        // Call the function once on page load to initialize the visibility
-        handleVisibility();
     </script>
     <!--================== END ==================-->
 
-    <!--================== SHOW & HIDE PASSWORD ==================-->
+    <!--================== DATA BERHASIL DI SIMPAN ==================-->
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const passwordInput = document.getElementById('password');
-        const passwordToggle = document.getElementById('password-toggle');
-
-        passwordToggle.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordToggle.classList.remove('fa-eye');
-                passwordToggle.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordToggle.classList.remove('fa-eye-slash');
-                passwordToggle.classList.add('fa-eye');
-            }
-        });
-        const passwordInput2 = document.getElementById('password2');
-        const passwordToggle2 = document.getElementById('password-toggle2');
-
-        passwordToggle2.addEventListener('click', function() {
-            if (passwordInput2.type === 'password') {
-                passwordInput2.type = 'text';
-                passwordToggle2.classList.remove('fa-eye');
-                passwordToggle2.classList.add('fa-eye-slash');
-            } else {
-                passwordInput2.type = 'password';
-                passwordToggle2.classList.remove('fa-eye-slash');
-                passwordToggle2.classList.add('fa-eye');
-            }
+        Swal.fire({
+            icon: 'success',
+            title: 'Lamaran Terkirim',
+            text: 'Lamaran Kamu Sudah Terkirim, Silahkan Tunggu Panggilan Selanjutnya Melalui Email!',
+            confirmButtonText: 'OK'
         });
     </script>
+    @endif
+    <!--================== END ==================-->
+
+    <!--================== DATA BERHASIL DI GAGAL SIMPAN ==================-->
+    @if (session('error'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Lamaran Gagal Terkirim',
+            text: 'Lamaran Kamu Gagal Terkirim, Silahkan Coba Lamar Kembali!',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
     <!--================== END ==================-->
 
     <!--================== GENERAL JS ==================-->
