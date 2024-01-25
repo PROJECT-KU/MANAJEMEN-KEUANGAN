@@ -1,5 +1,5 @@
  <?php
-  $version = "1.18.6";
+  $version = "1.19.0";
   ?>
 
  <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px">
