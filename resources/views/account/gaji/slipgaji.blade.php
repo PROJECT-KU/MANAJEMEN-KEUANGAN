@@ -17,8 +17,7 @@
     @csrf
     <div class="wrapper">
       <!-- Assuming $userLogoPath contains the path to your logo -->
-      <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo">
-
+      <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo" height="100px">
       <section class="invoice">
         <div class="row">
           <div class="col-12">
