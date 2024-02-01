@@ -19,8 +19,8 @@
       <section class="invoice">
         <div class="row">
           <div class="col-12">
-            <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo" height="35px">
             <h2 class="page-header">
+              <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo" height="35px">
               <center><i class="fas fa-globe"></i> SLIP GAJI KARYAWAN<br>
                 <p style="margin-top: -3px; font-size: 15px"><strong>Periode</strong>
                   <?php
