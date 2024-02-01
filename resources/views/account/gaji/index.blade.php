@@ -335,31 +335,34 @@ List Gaji Karyawan | MANAGEMENT
                         <span class="badge badge-success"><i class="fas fa-check-circle"></i></span>
                         @endif
                       </td>
-                      @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                       <td class="text-center">
+                        @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+                        @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
+                        @endif
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
-                      </td>
-                      @else
-                      <td class="text-center">
+                        @else
+                        @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                          <i class="fa fa-trash"></i>
-                        </button>
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
+                        @endif
+                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                          <i class="fa fa-trash"></i>
+                        </button>
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
+                        @endif
                       </td>
-                      @endif
+
                     </tr>
                     @php
                     $no++;

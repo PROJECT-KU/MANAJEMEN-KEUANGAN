@@ -28,6 +28,7 @@ Route::prefix('account')->group(function () {
     Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
     Route::get('/karir/{id}/edit', 'account\KarirController@edit')->name('karir.edit');
     Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
+    Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
 
     //reset password
     Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
@@ -124,7 +125,7 @@ Route::prefix('account')->group(function () {
     Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
     Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
     Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
-    Route::get('gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
+    Route::get('/gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
     Route::get('/gaji/searchmanager', 'account\GajiController@searchmanager')->name('account.gaji.searchmanager');
     Route::get('/gaji/searchkaryawan', 'account\GajiController@searchkaryawan')->name('account.gaji.searchkaryawan');

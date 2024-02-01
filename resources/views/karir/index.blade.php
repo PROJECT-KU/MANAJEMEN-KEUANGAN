@@ -136,12 +136,7 @@
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="pendidikan">Pendidikan Terakhir</label>
-                                            <select class="form-control pendidikan" name="pendidikan" id="pendidikan" required>
-                                                <option value="" disabled selected>PILIH PENDIDIKAN TERAKHIR</option>
-                                                <option value="sma">SMA/Sederajat</option>
-                                                <option value="s1">S1</option>
-                                                <option value="s2">S2</option>
-                                            </select>
+                                            <input id="pendidikan" type="text" class="form-control" name="pendidikan" value="{{ old('pendidikan') }}" maxlength="10" minlength="2" required>
                                             @error('pendidikan')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -151,11 +146,7 @@
 
                                         <div class="form-group col-md-6">
                                             <label for="posisi">Posisi yang Kamu Lamar</label>
-                                            <select class="form-control posisi" name="posisi" id="posisi" required>
-                                                <option value="" disabled selected>PILIH POSISI</option>
-                                                <option value="co trainer">CO Trainer</option>
-                                                <option value="satpam">satpam</option>
-                                            </select>
+                                            <input id="posisi" type="text" class="form-control" name="posisi" value="{{ old('posisi') }}" maxlength="30" minlength="5" required>
                                             @error('posisi')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}

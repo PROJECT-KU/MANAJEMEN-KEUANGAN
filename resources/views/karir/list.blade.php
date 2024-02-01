@@ -35,7 +35,7 @@ List Karir | MANAGEMENT
                     </div>
 
                     <div class="card-body">
-                        <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
+                        <form action="{{ route('karir.search') }}" method="GET" id="searchForm">
                             <div class="form-group">
                                 <div class="input-group mb-3">
                                     <!-- <div class="input-group-prepend">
@@ -48,7 +48,7 @@ List Karir | MANAGEMENT
                                         <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                                     </div>
                                     @if(request()->has('q'))
-                                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
+                                    <a href="{{ route('karir.list') }}" class="btn btn-danger ml-1">
                                         <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                                     </a>
                                     @endif
@@ -145,11 +145,11 @@ List Karir | MANAGEMENT
                                                 @if ($hasil->status == 'Interview')
                                                 <span class="badge badge-warning mt-2">Interview</span>
                                                 @elseif ($hasil->status == 'Diterima')
-                                                <span class="badge badge-success">Diterima</span>
+                                                <span class="badge badge-success">DiTerima</span>
                                                 @elseif ($hasil->status == 'Ditolak')
-                                                <span class="badge badge-danger">Ditolak</span>
+                                                <span class="badge badge-danger">DiTolak</span>
                                                 @else
-                                                <span class="badge badge-info">Diproses</span>
+                                                <span class="badge badge-info">DiProses</span>
                                                 @endif
                                             </td>
 

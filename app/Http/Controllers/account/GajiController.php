@@ -647,37 +647,33 @@ class GajiController extends Controller
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
-        ->where('users.company', $user->company)
-        ->get(['users.*']);
-      $datas = DB::table('users')
-        ->select(
-          'users.id',
-          'users.full_name',
-          'users.nik',
-          'users.norek',
-          'users.bank',
-          'users.telp',
-          'users.email',
-          DB::raw('SUM(presensi.alpha) as alpha'),
-          DB::raw('SUM(presensi.hadir) as hadir'),
-          DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
-          DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
-          DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
-          DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
-          DB::raw('SUM(presensi.remote) as remote'),
-          DB::raw('SUM(presensi.izin) as izin')
-        )
-        ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
-        ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
-        ->orderBy('users.created_at', 'DESC')
-        ->get();
-    } else {
-      $users = User::where('id', $gaji->user_id)->get();
-    }
+    $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
+      ->where('users.company', $user->company)
+      ->get(['users.*']);
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name',
+        'users.nik',
+        'users.norek',
+        'users.bank',
+        'users.telp',
+        'users.email',
+        DB::raw('SUM(presensi.alpha) as alpha'),
+        DB::raw('SUM(presensi.hadir) as hadir'),
+        DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+        DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+        DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+        DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+        DB::raw('SUM(presensi.remote) as remote'),
+        DB::raw('SUM(presensi.izin) as izin')
+      )
+      ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+      ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
 
     return view('account.gaji.edit', compact('gaji', 'users', 'datas')); // Sesuaikan path template dengan benar
   }
@@ -1025,39 +1021,36 @@ class GajiController extends Controller
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
-        ->where('users.company', $user->company)
-        ->get(['users.*']);
-      $datas = DB::table('users')
-        ->select(
-          'users.id',
-          'users.full_name',
-          'users.nik',
-          'users.norek',
-          'users.bank',
-          'users.telp',
-          DB::raw('SUM(presensi.alpha) as alpha'),
-          DB::raw('SUM(presensi.hadir) as hadir'),
-          DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
-          DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
-          DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
-          DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
-          DB::raw('SUM(presensi.remote) as remote'),
-          DB::raw('SUM(presensi.izin) as izin')
-        )
-        ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
-        ->where('users.company', $user->company)
-        ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp')
-        ->orderBy('users.created_at', 'DESC')
-        ->get();
-    } else {
-      $users = User::where('id', $gaji->user_id)->get();
-    }
-    return view('account.gaji.detail', compact('gaji', 'users', 'datas')); // Sesuaikan path template dengan benar
-  }
+    $users = User::join('gaji', 'users.id', '=', 'gaji.user_id')
+      ->where('users.company', $user->company)
+      ->get(['users.*']);
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name',
+        'users.nik',
+        'users.norek',
+        'users.bank',
+        'users.telp',
+        'users.email',
+        DB::raw('SUM(presensi.alpha) as alpha'),
+        DB::raw('SUM(presensi.hadir) as hadir'),
+        DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+        DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+        DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+        DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+        DB::raw('SUM(presensi.remote) as remote'),
+        DB::raw('SUM(presensi.izin) as izin')
+      )
+      ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+      ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
 
+    return view('account.gaji.detail', compact('gaji', 'users', 'datas')); // Pass 'user' to the view
+  }
 
   public function destroy($id)
   {

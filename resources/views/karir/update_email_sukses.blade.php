@@ -27,7 +27,8 @@
                         <p>Selanjutnya, kamu kami panggil untuk melakukan seleksi Interview pada <b>{{ strftime('%d %B %Y', strtotime($karir->tanggal_interview)) }}</b> pukul <b>{{ strftime('%H:%M', strtotime($karir->tanggal_interview)) }}</b> yang berlokasi di <b>{{ $karir->lokasi_interview }}</b></p>
                         <p>Dimohon untuk datang 15 menit sebelum dimulai</p>
 
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($karir->lokasi_interview) }}" class="btn btn-primary" target="_blank">Lihat Google Maps</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($karir->lokasi_interview) }}" target="_blank">
+                            <button type="button" class="btn btn-info">Lihat Google Maps</button></a>
 
                         <p>Salam,<br>
 
