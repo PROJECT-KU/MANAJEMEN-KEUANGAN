@@ -223,4 +223,48 @@ class KarirController extends Controller
             return redirect()->route('karir.list')->with('error', 'Gagal Menyimpan Data Karir!');
         }
     }
+
+    public function search(Request $request)
+    {
+        $search = $request->get('q');
+        $user = Auth::user();
+
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $karir = DB::table('karir')
+            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->where(function ($query) use ($search) {
+                $query->where('karir.nama', 'LIKE', '%' . $search . '%')
+                    ->orWhere('karir.posisi', 'LIKE', '%' . $search . '%')
+                    ->orWhere('karir.status', 'LIKE', '%' . $search . '%');
+            })
+            ->orderBy('karir.created_at', 'DESC')
+            ->paginate(10);
+        $karir->appends(['q' => $search]);
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
+        $endDate = $request->get('end_date');
+
+        $karirExist = Karir::where('status', '<>', null)
+            ->whereBetween('created_at', [$currentMonth, $nextMonth])
+            ->exists();
+
+        if ($karir->isEmpty()) {
+            return redirect()->route('gaji.list')->with('error', 'Data Karir tidak ditemukan.');
+        }
+        return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate', 'karirExist'));
+    }
 }
