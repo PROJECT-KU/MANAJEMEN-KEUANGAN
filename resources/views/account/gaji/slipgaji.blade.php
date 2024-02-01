@@ -16,7 +16,9 @@
   <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
+      <!-- Assuming $userLogoPath contains the path to your logo -->
+      <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo">
+
       <section class="invoice">
         <div class="row">
           <div class="col-12">
