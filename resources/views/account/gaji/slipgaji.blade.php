@@ -16,7 +16,7 @@
   <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <!-- <img src="{{ asset('assets/img/logonew.png') }}" alt="Company Logo" style="max-width: 100px;"> -->
+      <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
       <section class="invoice">
         <div class="row">
           <div class="col-12">
