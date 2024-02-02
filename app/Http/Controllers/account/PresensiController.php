@@ -189,17 +189,11 @@ class PresensiController extends Controller
     $user = Auth::user();
     $currentTime = now()->format('H:i:s');
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
-      $users = User::where('company', $user->company)
-        ->select('id', 'full_name')
-        ->get();
-      return view('account.presensi.create', compact('users', 'currentTime'));
-    } else {
-      $users = User::where('id', $user->id)
-        ->select('id', 'full_name')
-        ->get();
-      return view('account.presensi.create', compact('users', 'currentTime'));
-    }
+    $users = User::where('company', $user->company)
+      ->select('id', 'full_name')
+      ->get();
+
+    return view('account.presensi.create', compact('users', 'currentTime'));
   }
 
   public function store(Request $request)
@@ -241,6 +235,15 @@ class PresensiController extends Controller
     $izin = $request->input('status') === 'izin' ? 1 : null;
     // End
 
+    $userRole = $user->level;
+    $timePulang = null;
+    $statusPulang = null;
+
+    if ($userRole === 'manager' && $request->input('status_pulang') === 'pulang') {
+      $timePulang = now(); // Use Carbon to get the current time
+      $statusPulang = $request->input('status_pulang');
+    }
+
     $clientDateTime = Carbon::parse($request->input('client_date_time'));
 
     // Mendapatkan waktu saat ini dalam format "HH:MM:SS"
@@ -253,6 +256,8 @@ class PresensiController extends Controller
     $save = Presensi::create([
       'user_id' => $request->input('user_id'),
       'status' => $request->input('status'),
+      'status_pulang' => $statusPulang,
+      'time_pulang' => $timePulang,
       'note' => $request->input('note'),
       'lokasi' => $request->input('lokasi'),
       'lokasi' => $ipinfoData['city'] ?? 'Unknown',
