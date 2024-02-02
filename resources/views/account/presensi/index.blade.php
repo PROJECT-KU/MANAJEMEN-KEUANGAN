@@ -224,6 +224,11 @@ List Presensi Karyawan | MANAGEMENT
               </div>
             </div>
           </form>
+          @if (Auth::user()->level == 'manager')
+          <a href="{{ route('account.presensi.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;">
+            <i class="fa fa-plus-circle"></i> TAMBAH PRESENSI
+          </a>
+          @endif
         </div>
       </div>
       <!--================== end ==================-->
