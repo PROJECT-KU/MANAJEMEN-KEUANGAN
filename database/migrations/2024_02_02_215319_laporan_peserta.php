@@ -16,6 +16,7 @@ class LaporanPeserta extends Migration
         Schema::create('peserta', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('token', 300)->nullable();
+            $table->string('token_update', 300)->nullable();
             $table->string('email', 300)->nullable();
             $table->string('nama', 300)->nullable();
             $table->string('afiliasi', 300)->nullable();

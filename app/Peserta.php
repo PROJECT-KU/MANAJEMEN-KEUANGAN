@@ -16,6 +16,7 @@ class Peserta extends Model
      */
     protected $fillable = [
         'token',
+        'token_update',
         'email',
         'nama',
         'afiliasi',
