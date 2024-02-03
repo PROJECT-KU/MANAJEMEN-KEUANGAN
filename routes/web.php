@@ -11,6 +11,8 @@
 |
 */
 
+use App\Http\Middleware\CheckTestimoniToken;
+
 Route::get('/', 'Auth\LoginController@showLoginForm');
 
 // Recrutment
@@ -188,12 +190,9 @@ Route::prefix('account')->group(function () {
     Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
     Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 
-    //Laporan peserta
+    // Laporan peserta
     Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
-    Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')
-        ->middleware('check.update.success')
-        ->name('account.peserta.testimoni');
-
+    Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
     Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
     Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 });

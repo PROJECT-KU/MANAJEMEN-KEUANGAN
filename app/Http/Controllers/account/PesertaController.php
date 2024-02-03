@@ -33,11 +33,18 @@ class PesertaController extends Controller
         return view('account.peserta.form');
     }
 
-    // Add this method to your PesertaController class
-    public function testimoni($id)
+    public function testimoni(Request $request, $id, $token_update)
     {
         // Retrieve the Peserta data based on the provided ID
         $peserta = Peserta::findOrFail($id);
+
+        // Check if the provided token already exists in the database
+        $existingPeserta = Peserta::where('token_update', $token_update)->first();
+
+        // Check if the token_update is already filled and is not the same as the current peserta
+        if ($existingPeserta && $existingPeserta->token_update !== null) {
+            return redirect()->route('account.peserta.form')->with('error', 'Duplicate Token');
+        }
 
         // Pass the Peserta data to the view
         return view('account.peserta.testimoni', compact('peserta'));
@@ -75,6 +82,7 @@ class PesertaController extends Controller
     public function update(Request $request, $id)
     {
         $peserta = Peserta::findOrFail($id);
+        $token_update = $this->generateRandomToken(30);
         $peserta->update([
             'scopus_camp'       => $request->input('scopus_camp'),
             'materi'            => $request->input('materi'),
@@ -85,11 +93,11 @@ class PesertaController extends Controller
             'terbaik'           => $request->input('terbaik'),
             'menyebalkan'       => $request->input('menyebalkan'),
             'kritik'            => $request->input('kritik'),
+            'token_update'      => $token_update,
         ]);
 
         // Redirect with success or error message
         if ($peserta) {
-            $request->session()->flash('updateSuccess', true);
             return redirect()->route('account.peserta.form')->with('success', 'Lembar Kerja & Evaluasi Scopus Camp Berhasil Disimpan!');
         } else {
             // Redirect with an error message if data creation fails

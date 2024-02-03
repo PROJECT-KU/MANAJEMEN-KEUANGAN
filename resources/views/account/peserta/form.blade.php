@@ -307,87 +307,6 @@
         <!--================== END ==================-->
     </div>
 
-    <!--================== FORMAT FILE YANG DI PERBOLEHKAN ==================-->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.getElementById('cv').addEventListener('change', validateFileExtension);
-        document.getElementById('lamaran').addEventListener('change', validateFileExtension);
-        document.getElementById('lainnya').addEventListener('change', validateFileExtension);
-
-        function validateFileExtension() {
-            const allowedExtensions = ['pdf'];
-            const fileInput = this;
-
-            if (fileInput.files.length > 0) {
-                const selectedFile = fileInput.files[0];
-                const fileName = selectedFile.name.toLowerCase();
-
-                // Check file extension
-                const fileExtension = fileName.split('.').pop();
-                if (!allowedExtensions.includes(fileExtension)) {
-                    // Display a SweetAlert error message
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Jenis File Tidak Valid',
-                        text: 'Hanya File PDF Yang Diperbolehkan.',
-                    });
-                    fileInput.value = ''; // Clear the file input
-                }
-            }
-        }
-    </script>
-    <!-- Add this script before the closing </body> tag -->
-    <script>
-        document.getElementById('cv').addEventListener('change', validateFileSize);
-        document.getElementById('lamaran').addEventListener('change', validateFileSize);
-        document.getElementById('lainnya').addEventListener('change', validateFileSize);
-
-        function validateFileSize() {
-            const maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
-            const fileInput = this;
-
-            if (fileInput.files.length > 0) {
-                const selectedFile = fileInput.files[0];
-                const fileSize = selectedFile.size;
-
-                if (fileSize > maxFileSize) {
-                    // Display a SweetAlert error message
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'File Terlalu Besar',
-                        text: 'Ukuran file tidak boleh melebihi 10 MB.',
-                    });
-                    fileInput.value = ''; // Clear the file input
-                }
-            }
-        }
-    </script>
-
-    <!--================== END ==================-->
-
-    <!--================== CKEDITOR ==================-->
-    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script>
-        CKEDITOR.replace('desc');
-
-        function validateform() {
-            var editorContent = CKEDITOR.instances.desc.getData();
-            if (editorContent.trim() === '') {
-                // Use SweetAlert for a more visually appealing alert
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Jelaskan Tentang Diri Kamu harus diisi.',
-                    confirmButtonText: 'OK'
-                });
-                return false;
-            }
-            return true;
-        }
-    </script>
-    <!--================== END ==================-->
-
     <!--================== DATA BERHASIL DI SIMPAN ==================-->
     @if (session('success'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -402,7 +321,7 @@
     @endif
     <!--================== END ==================-->
 
-    <!--================== DATA BERHASIL DI GAGAL SIMPAN ==================-->
+    <!--================== DATA GAGAL DI SIMPAN ==================-->
     @if (session('error'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -410,6 +329,20 @@
             icon: 'success',
             title: 'Lembar Kerja & Evaluasi Gagal Terkirim',
             text: 'Lembar Kerja & Evaluasi Bapak/Ibu Sudah Kami Belum Kami Terima!',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!--================== END ==================-->
+
+    <!--================== TOKEN DUPLICATE ==================-->
+    @if (session('token'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Token Sudah Terdaftar',
+            text: 'Token yang Anda gunakan sudah terdaftar. Silakan mengisi ulang.',
             confirmButtonText: 'OK'
         });
     </script>
