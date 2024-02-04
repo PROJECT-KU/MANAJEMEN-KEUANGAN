@@ -252,7 +252,7 @@
                                     <div class="row">
                                         <div class="form-group col-md-12">
                                             <label for="terfavorit" style="font-size: 15px;">Siapa terfavorit Terfavorit Menurut Bapak/Ibu ?</label>
-                                            <input id="terfavorit" type="text" class="form-control" name="terfavorit" required>
+                                            <input id="terfavorit" type="text" class="form-control" name="terfavorit">
                                             @error('terfavorit')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -264,7 +264,7 @@
                                     <div class="row">
                                         <div class="form-group col-md-12">
                                             <label for="terbaik" style="font-size: 15px;">Siapa Trainer Terbaik Menurut Bapak/Ibu ?</label>
-                                            <input id="terbaik" type="text" class="form-control" name="terbaik" required>
+                                            <input id="terbaik" type="text" class="form-control" name="terbaik">
                                             @error('terbaik')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -275,8 +275,8 @@
 
                                     <div class="row">
                                         <div class="form-group col-md-12">
-                                            <label for="menyebalkan" style="font-size: 15px;">Siapa Trainer Menyebalkan Menurut Bapak/Ibu ?</label>
-                                            <input id="menyebalkan" type="text" class="form-control" name="menyebalkan" required>
+                                            <label for="menyebalkan" style="font-size: 15px;">Siapa Trainer Terlucu Menurut Bapak/Ibu ?</label>
+                                            <input id="menyebalkan" type="text" class="form-control" name="menyebalkan">
                                             @error('menyebalkan')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
