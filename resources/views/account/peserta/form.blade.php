@@ -268,7 +268,7 @@
                                     <div class="row" id="targetRow" style="display: none;">
                                         <div class="form-group col-md-12">
                                             <label for="target" style="font-size: 15px;">Target Submit</label>
-                                            <input id="target" type="datephp" class="form-control" name="target" value="{{ old('target') }}" required>
+                                            <input id="target" type="date" class="form-control" name="target" value="{{ old('target') }}" required>
                                             @error('target')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
