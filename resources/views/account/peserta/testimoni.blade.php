@@ -275,9 +275,9 @@
 
                                     <div class="row">
                                         <div class="form-group col-md-12">
-                                            <label for="menyebalkan" style="font-size: 15px;">Siapa Trainer Terlucu Menurut Bapak/Ibu ?</label>
-                                            <input id="menyebalkan" type="text" class="form-control" name="menyebalkan">
-                                            @error('menyebalkan')
+                                            <label for="terlucu" style="font-size: 15px;">Siapa Trainer Terlucu Menurut Bapak/Ibu ?</label>
+                                            <input id="terlucu" type="text" class="form-control" name="terlucu">
+                                            @error('terlucu')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>

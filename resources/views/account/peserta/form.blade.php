@@ -250,14 +250,26 @@
                                         <div class="form-group col-md-12">
                                             <label for="submit" style="font-size: 15px;">Apakah Bapak/Ibu sudah Submit ?</label>
                                             <div class="form-check">
-                                                <input type="radio" id="sudah" name="submit" class="form-check-input" value="Sudah" required>
+                                                <input type="radio" id="sudah" name="submit" class="form-check-input" value="Sudah" required onclick="toggleTargetInput(this)">
                                                 <label class="form-check-label" for="sudah" style="font-size: 15px;">Sudah</label>
                                             </div>
                                             <div class="form-check">
-                                                <input type="radio" id="belum" name="submit" class="form-check-input" value="Belum" required>
+                                                <input type="radio" id="belum" name="submit" class="form-check-input" value="Belum" required onclick="toggleTargetInput(this)">
                                                 <label class="form-check-label" for="belum" style="font-size: 15px;">Belum</label>
                                             </div>
                                             @error('submit')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row" id="targetRow" style="display: none;">
+                                        <div class="form-group col-md-12">
+                                            <label for="target" style="font-size: 15px;">Target Submit</label>
+                                            <input id="target" type="datephp" class="form-control" name="target" value="{{ old('target') }}" required>
+                                            @error('target')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>
@@ -280,6 +292,21 @@
                 </div>
             </div>
         </section>
+
+        <script>
+            function toggleTargetInput(radio) {
+                const targetRow = document.getElementById('targetRow');
+                const targetInput = document.getElementById('target');
+                if (radio.value === 'Sudah') {
+                    targetRow.style.display = 'none';
+                    targetInput.value = ''; // Reset the value if 'Sudah' is selected
+                } else {
+                    targetRow.style.display = 'block';
+                    targetInput.focus(); // Optional: Focus on the input when 'Belum' is selected
+                }
+                targetInput.required = radio.value === 'Belum';
+            }
+        </script>
 
         <!--================== BACKGROUND ==================-->
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" style="position: fixed; top: 0; left: 0; z-index: -1;">
