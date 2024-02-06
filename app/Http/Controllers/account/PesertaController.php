@@ -65,6 +65,7 @@ class PesertaController extends Controller
             'mendeley'                  => $request->input('mendeley'),
             'persentase_penyelesaian'   => $request->input('persentase_penyelesaian'),
             'submit'                    => $request->input('submit'),
+            'target'                    => $request->input('target'),
             'token'                     => $token,
         ]);
 
@@ -91,7 +92,7 @@ class PesertaController extends Controller
             'tempat'            => $request->input('tempat'),
             'terfavorit'        => $request->input('terfavorit'),
             'terbaik'           => $request->input('terbaik'),
-            'menyebalkan'       => $request->input('menyebalkan'),
+            'terlucu'           => $request->input('terlucu'),
             'kritik'            => $request->input('kritik'),
             'token_update'      => $token_update,
         ]);

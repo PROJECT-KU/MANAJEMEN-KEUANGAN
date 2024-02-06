@@ -27,6 +27,7 @@ class LaporanPeserta extends Migration
             $table->string('mendeley', 300)->nullable();
             $table->string('persentase_penyelesaian', 300)->nullable();
             $table->string('submit', 300)->nullable();
+            $table->dateTime('target')->nullable();
             $table->string('scopus_camp', 300)->nullable();
             $table->string('materi', 300)->nullable();
             $table->string('makanan', 300)->nullable();
@@ -34,7 +35,7 @@ class LaporanPeserta extends Migration
             $table->string('tempat', 300)->nullable();
             $table->string('terfavorit', 300)->nullable();
             $table->string('terbaik', 300)->nullable();
-            $table->string('menyebalkan', 300)->nullable();
+            $table->string('terlucu', 300)->nullable();
             $table->text('kritik')->nullable();
             $table->timestamps();
         });
