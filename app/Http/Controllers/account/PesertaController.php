@@ -26,6 +26,31 @@ class PesertaController extends Controller
         return $token;
     }
 
+    public function list(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $peserta = DB::table('peserta')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->orderBy('peserta.created_at', 'DESC')
+            ->paginate(10);
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
+    }
 
     public function index(Request $request)
     {
