@@ -52,6 +52,13 @@ class PesertaController extends Controller
         return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
     }
 
+    public function edit($id)
+    {
+        $peserta = Peserta::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
+
+        return view('account.peserta.edit', compact('peserta')); // Sesuaikan path template dengan benar
+    }
+
     public function index(Request $request)
     {
 
