@@ -169,11 +169,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                     </ul>
                                 </li>
-                                <li class="dropdown {{ setActive('account/list/Laporan-Peserta'). setActive('account/peserta') }}">
+                                <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/peserta') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-cog"></i><span>PESERTA</span></a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/gaji') }}"><a class="nav-link" href="{{ route('account.gaji.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN</a></li>
-                                        <li class="{{ setActive('account/list/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI</a></li>
+                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI</a></li>
 
                                     </ul>
                                 </li>

@@ -201,6 +201,13 @@ List Laporan Peserta | MANAGEMENT
                                             <td class="column-width" style="text-align: center;">{{ $hasil->afiliasi }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
+                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-pencil-alt"></i>
+                                                </a>
+                                                <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                         @php
                                         $no++;

@@ -191,7 +191,8 @@ Route::prefix('account')->group(function () {
     Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 
     // Laporan peserta
-    Route::get('/list/Laporan-Peserta', 'account\PesertaController@list')->name('account.peserta.list');
+    Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
+    Route::get('/Laporan-Peserta/edit/{id}', 'account\PesertaController@edit')->name('account.peserta.edit');
     Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
     Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
     Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
