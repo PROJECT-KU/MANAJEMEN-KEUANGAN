@@ -192,9 +192,13 @@ Route::prefix('account')->group(function () {
 
     // Laporan peserta
     Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
-    Route::get('/Laporan-Peserta/edit/{id}', 'account\PesertaController@edit')->name('account.peserta.edit');
+    Route::get('/Laporan-Peserta/detail/{id}', 'account\PesertaController@detail')->name('account.peserta.detail');
+    Route::delete('/Laporan-Peserta/{id}', 'account\PesertaController@destroy')->name('account.peserta.destroy');
+    Route::get('/Laporan-Peserta/search', 'account\PesertaController@search')->name('account.peserta.search');
+    Route::get('/Laporan-Peserta/filter', 'account\PesertaController@filter')->name('account.peserta.filter');
     Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
-    Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
+    // Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
+    Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
     Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
     Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 });

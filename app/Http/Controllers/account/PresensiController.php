@@ -275,11 +275,11 @@ class PresensiController extends Controller
       'izin' => $izin,
     ]);
 
-    // Redirect with success or error message
+
     if ($save) {
-      $user = User::findOrFail($request->input('user_id'));
-      $appName = 'Rumah Scopus Foundation';
-      Mail::to($user->email)->send(new CreatePresensiMail($user, $save, $appName));
+      // $user = User::findOrFail($request->input('user_id'));
+      // $appName = 'Rumah Scopus Foundation';
+      // Mail::to($user->email)->send(new CreatePresensiMail($user, $save, $appName));
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       // Redirect with an error message if data creation fails
