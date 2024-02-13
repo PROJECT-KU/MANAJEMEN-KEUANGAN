@@ -41,52 +41,23 @@ List Laporan Peserta | MANAGEMENT
                     </div>
 
                     <div class="card-body">
-                        @if (Auth::user()->level == 'manager')
-                        <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
+                        <form action="{{ route('account.peserta.search') }}" method="GET" id="searchForm">
                             <div class="form-group">
                                 <div class="input-group mb-3">
-                                    <!-- <div class="input-group-prepend">
-                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a>
-                  </div> -->
                                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                                     <div class="input-group-append">
                                         <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                                     </div>
                                     @if(request()->has('q'))
-                                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
+                                    <a href="{{ route('account.peserta.list') }}" class="btn btn-danger ml-1">
                                         <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                                     </a>
                                     @endif
                                 </div>
                             </div>
                         </form>
-                        @else
-                        <form action="{{ route('account.gaji.searchkaryawan') }}" method="GET" id="searchForm">
-                            <div class="form-group">
-                                <div class="input-group mb-3">
-                                    <!-- <div class="input-group-prepend">
-                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a>
-                  </div> -->
-                                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                                    </div>
-                                    @if(request()->has('q'))
-                                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
-                                        <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                                    </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </form>
-                        @endif
 
-                        @if (Auth::user()->level == 'manager')
-                        <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
+                        <form action="{{ route('account.peserta.filter') }}" method="GET">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -107,7 +78,7 @@ List Laporan Peserta | MANAGEMENT
                                     @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                                     <div class="btn-group" style="width: 100%;">
                                         <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                                        <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                                        <a href="{{ route('account.peserta.list') }}" class="btn btn-danger" style="margin-top: 30px;">
                                             <i class="fa fa-times-circle mt-2"></i> HAPUS
                                         </a>
                                     </div>
@@ -117,40 +88,6 @@ List Laporan Peserta | MANAGEMENT
                                 </div>
                             </div>
                         </form>
-                        @else
-                        <form action="{{ route('account.gaji.filterkaryawan') }}" method="GET">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>TANGGAL AWAL</label>
-                                        <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
-                                    </div>
-                                </div>
-                                <div class="col-md-2" style="text-align: center">
-                                    <label style="margin-top: 38px;">S/D</label>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>TANGGAL AKHIR</label>
-                                        <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                                    <div class="btn-group" style="width: 100%;">
-                                        <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                                        <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                                            <i class="fa fa-times-circle mt-2"></i> HAPUS
-                                        </a>
-                                    </div>
-                                    @else
-                                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                                    @endif
-                                </div>
-                            </div>
-                        </form>
-                        @endif
-
                     </div>
                 </div>
                 <!--================== END ==================-->
@@ -201,8 +138,8 @@ List Laporan Peserta | MANAGEMENT
                                             <td class="column-width" style="text-align: center;">{{ $hasil->afiliasi }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
-                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-pencil-alt"></i>
+                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                                                    <i class="fa fa-eye"></i>
                                                 </a>
                                                 <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                                                     <i class="fa fa-trash"></i>
@@ -245,23 +182,14 @@ List Laporan Peserta | MANAGEMENT
     </section>
 </div>
 
-<!--================== SWEET ALERT JIKA BELUM ADA KARYAWAN YANG PRESENSI PADA BULAN INI ==================-->
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add event listener to the button
-        document.getElementById('tambahGajiBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-
-            // Display SweetAlert based on the condition
-
-            Swal.fire({
-                icon: 'warning',
-                title: 'Peringatan',
-                text: 'Belum Ada Karyawan Yang Presensi!',
-            });
-
-        });
-    });
+    @if(Session::has('success'))
+    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000); // Refresh halaman setelah 2 detik
+    @endif
 </script>
 <!--================== END ==================-->
 
@@ -285,17 +213,6 @@ List Laporan Peserta | MANAGEMENT
             }
         });
     });
-</script>
-<!--================== END ==================-->
-
-<!--================== RELOAD KETIKA DATA SUKSES ==================-->
-<script>
-    @if(Session::has('success'))
-    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
-    setTimeout(function() {
-        window.location.reload();
-    }, 1000); // Refresh halaman setelah 2 detik
-    @endif
 </script>
 <!--================== END ==================-->
 
@@ -329,7 +246,7 @@ List Laporan Peserta | MANAGEMENT
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/gaji/" + id,
+                    url: "/account/Laporan-Peserta/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

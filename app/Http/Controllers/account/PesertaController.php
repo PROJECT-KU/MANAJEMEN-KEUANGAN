@@ -52,11 +52,94 @@ class PesertaController extends Controller
         return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
     }
 
-    public function edit($id)
+    public function detail($id)
     {
         $peserta = Peserta::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
 
-        return view('account.peserta.edit', compact('peserta')); // Sesuaikan path template dengan benar
+        return view('account.peserta.detail', compact('peserta')); // Sesuaikan path template dengan benar
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $peserta = Peserta::find($id);
+
+            if ($peserta) {
+                $peserta->delete();
+                return response()->json(['status' => 'success', 'message' => 'Data Berhasil Dihapus!']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Data Tidak Ditemukan!'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->get('q');
+        $user = Auth::user();
+
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $peserta = DB::table('peserta')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->where(function ($query) use ($search) {
+                $query->where('peserta.nama', 'LIKE', '%' . $search . '%')
+                    ->orWhere('peserta.afiliasi', 'LIKE', '%' . $search . '%');
+            })
+            ->orderBy('peserta.created_at', 'DESC')
+            ->paginate(10);
+        $peserta->appends(['q' => $search]);
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+
+        $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
+        $endDate = $request->get('end_date');
+
+        if ($peserta->isEmpty()) {
+            return redirect()->route('account.peserta.list')->with('error', 'Data Laporan Peserta tidak ditemukan.');
+        }
+        return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
+    }
+
+    public function filter(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $peserta = DB::table('peserta')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->whereBetween('peserta.created_at', [$currentMonth, $nextMonth])
+            ->orderBy('peserta.created_at', 'DESC')
+            ->paginate(10);
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
     }
 
     public function index(Request $request)
