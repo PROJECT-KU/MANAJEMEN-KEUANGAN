@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Pendaftaran | RUMAH SCOPUS</title>
+    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    <!-- General CSS Files -->
+    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
+
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    <!-- show and hide password -->
+    <style>
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 65%;
+            transform: translateY(-50%);
+            z-index: 1;
+            vertical-align: middle;
+            display: flex;
+            justify-content: center;
+        }
+
+
+
+        .password-toggle2 {
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 65%;
+            transform: translateY(-50%);
+            z-index: 1;
+            vertical-align: middle;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <!-- end -->
+
+    <!-- background -->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: block;
+            background-color: #0e4166;
+            background-image: linear-gradient(to bottom, rgba(14, 65, 102, 0.86), #0e4166);
+        }
+    </style>
+    <!-- end -->
+
+    <style>
+        @media (max-width: 767px) {
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+
+        .label-font {
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<!-- <body style="background: #f3f3f3"> -->
+
+<body>
+    <div id="app">
+        <section class="section">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+                        <div class="login-brand">
+                            <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="350">
+                        </div>
+
+                        <div class="card card-primary">
+                            <div class="text-center mt-5">
+                                <h4>PENDAFTARAN SCOPUS CAMP</h4>
+                            </div>
+
+                            <div class="card-body">
+                                <form action="{{ route('account.scopuscamp.store') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateform()">
+                                    @csrf
+                                    <input id="status" type="text" class="form-control" name="status" value="Dalam Proses Pengecekan" hidden>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="email" style="font-size: 15px;">Alamat Email</label>
+                                            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="50" minlength="5" onkeypress="return /[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                            @error('email')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="nama" style="font-size: 15px;">Nama Lengkap (Beserta Gelar)</label>
+                                            <input id="nama" type="text" style="text-transform:uppercase;" class="form-control" name="nama" value="{{ old('nama') }}" minlength="5" onkeypress="return /[a-zA-Z0-9., ]/i.test(event.key)" required>
+                                            @error('nama')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="judul" style="font-size: 15px;">Judul Artikel/Paper yang Digunakan</label>
+                                            <input id="judul" type="text" class="form-control" name="judul" value="{{ old('judul') }}" required>
+                                            @error('judul')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="telp" style="font-size: 15px;">Nomor WA</label>
+                                            <input id="telp" type="tel" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                                            @error('telp')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="afiliasi" style="font-size: 15px;">Afiliasi (Perguruan Tinggi/Instansi)</label>
+                                            <input id="afiliasi" type="text" class="form-control" name="afiliasi" value="{{ old('afiliasi') }}" required>
+                                            @error('afiliasi')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label>Scopus Camp</label>
+                                            <select class="form-control select2" name="categories_scopuscamp_id" id="campSelect" style="width: 100%" required>
+                                                <option value="">-- PILIH SCOPUS CAMP --</option>
+                                                @foreach($categories_scopuscamp as $data)
+                                                <option value="{{ $data->id }}" data-kuota="{{ $data->kuota }}" data-mulai="{{ $data->mulai }}" data-selesai="{{ $data->selesai }}" data-tempat="{{ $data->tempat }}">{{ strtoupper($data->camp) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('camp')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="kuota" style="font-size: 15px;">Sisa Kuota</label>
+                                            <input id="kuota" type="text" class="form-control" name="kuota" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-4">
+                                            <label for="mulai" style="font-size: 15px;">Mulai Pelaksanaan</label>
+                                            <input id="mulai" type="text" class="form-control" name="mulai" readonly>
+                                        </div>
+                                        <div class="form-group col-md-4 mt-4" style="text-align: center;">
+                                            <label for="mulai" style="font-size: 15px;">S/D</label>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label for="selesai" style="font-size: 15px;">Selesai Pelaksanaan</label>
+                                            <input id="selesai" type="text" class="form-control" name="selesai" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="tempat" style="font-size: 15px;">Tempat Pelaksanaan</label>
+                                            <input id="tempat" type="text" class="form-control" name="tempat" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label>Pembayaran</label>
+                                            <select class="form-control" name="pembayaran" style="width: 100%" required onchange="showHidePaymentCard(this.value)">
+                                                <option value="">-- PILIH PEMBAYARAN --</option>
+                                                <option value="BRI">BRI</option>
+                                            </select>
+                                            @error('pembayaran')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row" id="paymentCard" style="display: none;">
+                                        <div class="form-group col-md-12">
+                                            <div class="card" style="height: 10rem;">
+                                                <div class="card-body">
+                                                    <h5 class="card-title"> <img src="{{ asset('assets/img/bri.png') }}" width="50" height="40"> Pembayaran BRI</h5>
+                                                    <p class="card-text">Nomor Rekening : <b><span id="nomor-rekening">1381 0100 0107 564</span></b>
+                                                        <button onclick="copyToClipboard('nomor-rekening')" class="btn btn-primary"><i class="fas fa-copy"></i></button>
+                                                        <br>
+                                                        Atas Nama : <b>Rumah Scopus Indonesia</b>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Upload Bukti Pembayaran</label>
+                                                <div class="input-group">
+                                                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" required>
+                                                </div>
+                                                @error('gambar')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <div class="card" style="width: 18rem;">
+                                                    <img id="image-preview" class="card-img-top" src="#" alt="Preview Image">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                            SIMPAN
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="simple-footer">
+                            © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.getElementById('gambar').addEventListener('change', function() {
+                const maxFileSizeInBytes = 5024 * 5024; // 5MB
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                const fileInput = this;
+
+                if (fileInput.files.length > 0) {
+                    const selectedFile = fileInput.files[0];
+                    const fileSize = selectedFile.size; // Get the file size in bytes
+                    const fileName = selectedFile.name.toLowerCase();
+
+                    // Check file size
+                    if (fileSize > maxFileSizeInBytes) {
+                        // Display a SweetAlert error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ukuran File Melebihi Batas',
+                            text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
+                        });
+                        fileInput.value = ''; // Clear the file input
+                        return;
+                    }
+
+                    // Check file extension
+                    const fileExtension = fileName.split('.').pop();
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        // Display a SweetAlert error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Jenis File Tidak Valid',
+                            text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+                        });
+                        fileInput.value = ''; // Clear the file input
+                    }
+                }
+            });
+        </script>
+        <!-- end -->
+
+        <!-- upload image -->
+        <script>
+            const imageInput = document.getElementById('gambar');
+            const imagePreview = document.getElementById('image-preview');
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block'; // Show the preview
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+        <!-- end upload image -->
+
+
+        <!--================== BACKGROUND ==================-->
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" style="position: fixed; top: 0; left: 0; z-index: -1;">
+            <defs>
+                <linearGradient id="bg">
+                    <stop offset="0%" style="stop-color:rgba(130, 158, 249, 0.06)"></stop>
+                    <stop offset="50%" style="stop-color:rgba(76, 190, 255, 0.6)"></stop>
+                    <stop offset="100%" style="stop-color:rgba(115, 209, 72, 0.2)"></stop>
+                </linearGradient>
+                <path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0
+        s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
+            </defs>
+            <g>
+                <use xlink:href='#wave' opacity=".3">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="10s" calcMode="spline" values="270 230; -334 180; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+                <use xlink:href='#wave' opacity=".6">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calcMode="spline" values="-270 230;243 220;-270 230" keyTimes="0; .6; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+                <use xlink:href='#wave' opacty=".9">
+                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="6s" calcMode="spline" values="0 230;-140 200;0 230" keyTimes="0; .4; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                </use>
+            </g>
+        </svg>
+        <!--================== END ==================-->
+    </div>
+
+    <!--================== FORMAT NO TELP ==================-->
+    <script>
+        function formatPhoneNumber(input) {
+            // Menghapus semua karakter non-digit
+            var phoneNumber = input.value.replace(/\D/g, '');
+
+            // Menentukan panjang nomor telepon
+            var phoneNumberLength = phoneNumber.length;
+
+            // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+            if (phoneNumberLength === 11) {
+                phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (phoneNumberLength === 12) {
+                phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (phoneNumberLength === 13) {
+                phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+            }
+
+            // Mengatur nilai input dengan nomor telepon yang diformat
+            input.value = phoneNumber;
+        }
+    </script>
+    <!--================== END ==================-->
+
+    <!--================== MENAMPILKAN NOMOR REKENING BERDASARKAN VALUE PEMBAYARAN ==================-->
+    <script>
+        function showHidePaymentCard(selectedPayment) {
+            var paymentCard = document.getElementById('paymentCard');
+            if (selectedPayment === 'BRI') {
+                paymentCard.style.display = 'block';
+            } else {
+                paymentCard.style.display = 'none';
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            var tempInput = document.createElement("textarea");
+            tempInput.value = document.getElementById(elementId).innerText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert("Nomor rekening berhasil disalin: " + tempInput.value);
+        }
+    </script>
+    <!--================== END ==================-->
+
+    <!--================== MENYALIN NOMOR REKENING ==================-->
+    <script>
+        function copyToClipboard(elementId) {
+            /* Create a temporary textarea element */
+            var tempInput = document.createElement("textarea");
+
+            /* Set the value of the temporary textarea to the text content of the element */
+            tempInput.value = document.getElementById(elementId).innerText;
+
+            /* Append the temporary textarea to the document body */
+            document.body.appendChild(tempInput);
+
+            /* Select the text inside the textarea */
+            tempInput.select();
+
+            /* Copy the selected text */
+            document.execCommand("copy");
+
+            /* Remove the temporary textarea */
+            document.body.removeChild(tempInput);
+
+            /* Alert the user */
+            alert("Nomor rekening berhasil disalin: " + tempInput.value);
+        }
+    </script>
+    <!--================== END ==================-->
+
+    <!--================== MENAMPILKAN DATA KATEGORI SCOPUS CAMP ==================-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to format date in "dd MMMM yyyy" format
+            function formatDate(date) {
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                return new Date(date).toLocaleDateString('id-ID', options);
+            }
+
+            // Function to update the input fields based on selected camp
+            // Function to update the input fields based on selected camp
+            function updateFields() {
+                var selectedCampOption = $('#campSelect option:selected');
+
+                if (selectedCampOption.length) {
+                    var kuota = selectedCampOption.data('kuota');
+                    var mulai = selectedCampOption.data('mulai');
+                    var selesai = selectedCampOption.data('selesai');
+                    var tempat = selectedCampOption.data('tempat');
+
+                    // Update kuota field
+                    if (kuota > 10) {
+                        $('#kuota').val('KUOTA TERSEDIA');
+                        // Enable submit button
+                        $('button[type="submit"]').prop('disabled', false);
+                    } else if (kuota > 0) {
+                        $('#kuota').val(kuota);
+                        // Enable submit button
+                        $('button[type="submit"]').prop('disabled', false);
+                    } else if (kuota === 0) {
+                        $('#kuota').val('KUOTA HABIS');
+                        // Disable submit button
+                        $('button[type="submit"]').prop('disabled', true);
+                        // Show Sweet Alert
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Kuota Camp Habis',
+                            text: 'Kuota untuk camp ini sudah habis. Silakan pilih camp lainnya.',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        $('#kuota').val('');
+                        // Enable submit button
+                        $('button[type="submit"]').prop('disabled', false);
+                    }
+
+                    $('#mulai').val(mulai);
+                    $('#selesai').val(selesai);
+                    $('#tempat').val(tempat);
+                } else {
+                    $('#kuota').val('');
+                    $('#mulai').val('');
+                    $('#selesai').val('');
+                    $('#tempat').val('');
+                    // Enable submit button
+                    $('button[type="submit"]').prop('disabled', false);
+                }
+            }
+
+            // Call the function when the page loads to initialize the values
+            updateFields();
+            $('#campSelect').on('change', function() {
+                updateFields();
+            });
+        });
+    </script>
+    <!--================== END ==================-->
+
+    <!--================== DATA BERHASIL DI SIMPAN ==================-->
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Pendaftaran Terkirim',
+            text: 'Pendaftaran Scopus Camp Terikirim, Terimakasih!',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!--================== END ==================-->
+
+    <!--================== DATA GAGAL DI SIMPAN ==================-->
+    @if (session('error'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Pendaftaran Gagal Terkirim',
+            text: 'Pendaftaran Scopus Camp Gagal Terkirm!',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!--================== END ==================-->
+
+    <!--================== TOKEN DUPLICATE ==================-->
+    @if (session('token'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Token Sudah Terdaftar',
+            text: 'Token yang Anda gunakan sudah terdaftar. Silakan mengisi ulang.',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    <!--================== END ==================-->
+
+    <!--================== GENERAL JS ==================-->
+    <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/popper.js') }}"></script>
+    <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
+    <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/js/stisla.js') }}"></script>
+    <script src="{{ asset('assets/js/scripts.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <!--================== END ==================-->
+</body>
+
+</html>
