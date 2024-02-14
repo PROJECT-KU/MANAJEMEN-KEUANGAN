@@ -201,4 +201,18 @@ Route::prefix('account')->group(function () {
     Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
     Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
     Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
+
+    // Pendaftaran Scopus Camp
+    Route::get('/Scopus-Camp', 'account\ScopusCampController@form')->name('account.scopuscamp.form');
+    Route::post('/Scopus-Camp/store', 'account\ScopusCampController@store')->name('account.scopuscamp.store');
+
+    // Kategori Pendaftaran Scopus Camp
+    Route::get('/kategori/ScopusCamp', 'account\CategoriesScopusCampController@index')->name('account.kategori.index');
+    Route::get('/kategori/ScopusCamp/create', 'account\CategoriesScopusCampController@create')->name('account.kategori.create');
+    Route::post('/kategori/ScopusCamp/store', 'account\CategoriesScopusCampController@store')->name('account.kategori.store');
+    Route::get('/kategori/ScopusCamp/edit/{id}', 'account\CategoriesScopusCampController@edit')->name('account.kategori.edit');
+    Route::post('/kategori/ScopusCamp/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategori.update');
+    Route::delete('/kategori/ScopusCamp/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategori.destroy');
+    Route::get('/kategori/ScopusCamp/search', 'account\CategoriesScopusCampController@search')->name('account.ketegori.search');
+    Route::get('/kategori/ScopusCamp/filter', 'account\CategoriesScopusCampController@filter')->name('account.ketegori.filter');
 });
