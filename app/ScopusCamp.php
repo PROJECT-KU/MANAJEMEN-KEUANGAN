@@ -26,6 +26,7 @@ class ScopusCamp extends Model
         'pembayaran',
         'gambar',
         'status',
+        'camp',
         'mulai',
         'selesai',
         'tempat',

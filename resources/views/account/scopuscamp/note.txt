@@ -186,6 +186,62 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    <!-- <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label>Scopus Camp</label>
+                                            <select class="form-control select2" name="categories_scopuscamp_id" id="campSelect" style="width: 100%" required>
+                                                <option value="">-- PILIH SCOPUS CAMP --</option>
+                                                @foreach($categories_scopuscamp as $data)
+                                                <option value="{{ $data->id }}" data-kuota="{{ $data->kuota }}" data-mulai="{{ $data->mulai }}" data-selesai="{{ $data->selesai }}" data-tempat="{{ $data->tempat }}">{{ strtoupper($data->camp) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('camp')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="kuota" style="font-size: 15px;">Sisa Kuota</label>
+                                            <input id="kuota" type="text" class="form-control" name="kuota" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-4">
+                                            <label for="mulai" style="font-size: 15px;">Mulai Pelaksanaan</label>
+                                            <input id="mulai" type="text" class="form-control" name="mulai" readonly>
+                                        </div>
+                                        <div class="form-group col-md-4 mt-4" style="text-align: center;">
+                                            <label for="mulai" style="font-size: 15px;">S/D</label>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label for="selesai" style="font-size: 15px;">Selesai Pelaksanaan</label>
+                                            <input id="selesai" type="text" class="form-control" name="selesai" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="tempat" style="font-size: 15px;">Tempat Pelaksanaan</label>
+                                            <input id="tempat" type="text" class="form-control" name="tempat" readonly>
+                                        </div>
+                                    </div> -->
+
+                                    <!-- <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label>Pembayaran</label>
+                                            <select class="form-control" name="pembayaran" style="width: 100%" required onchange="showHidePaymentCard(this.value)">
+                                                <option value="">-- PILIH PEMBAYARAN --</option>
+                                                <option value="BRI">BRI</option>
+                                            </select>
+                                            @error('pembayaran')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                    </div> -->
 
                                     <div class="row" id="paymentCard" style="display: none;">
                                         <div class="form-group col-md-12">
