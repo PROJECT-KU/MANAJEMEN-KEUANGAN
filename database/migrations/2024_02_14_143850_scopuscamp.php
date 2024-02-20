@@ -26,6 +26,7 @@ class Scopuscamp extends Migration
             $table->string('pembayaran', 300)->nullable();
             $table->string('gambar', 300)->nullable();
             $table->string('status', 300)->nullable();
+            $table->string('camp', 300)->nullable();
             $table->dateTime('mulai')->nullable();
             $table->dateTime('selesai')->nullable();
             $table->string('tempat', 300)->nullable();

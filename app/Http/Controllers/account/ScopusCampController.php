@@ -43,10 +43,11 @@ class ScopusCampController extends Controller
     public function form(Request $request)
     {
         // Fetch categories from the database
-        $categories_scopuscamp = CategoriesScopusCamp::where('status', 'AKTIF')->get(['categories_scopuscamp.*']);
+        // $categories_scopuscamp = CategoriesScopusCamp::where('status', 'AKTIF')->get(['categories_scopuscamp.*']);
 
         // Pass the categories to the view
-        return view('account.scopuscamp.form', ['categories_scopuscamp' => $categories_scopuscamp]);
+        // return view('account.scopuscamp.form', ['categories_scopuscamp' => $categories_scopuscamp]);
+        return view('account.scopuscamp.form');
     }
 
     public function store(Request $request)
@@ -77,6 +78,7 @@ class ScopusCampController extends Controller
             'afiliasi'                  => $request->input('afiliasi'),
             'pembayaran'                => $request->input('pembayaran'),
             'categories_scopuscamp_id'  => $request->input('categories_scopuscamp_id'),
+            'camp'                     => $request->input('camp'),
             'mulai'                     => $request->input('mulai'),
             'selesai'                   => $request->input('selesai'),
             'tempat'                    => $request->input('tempat'),
@@ -88,10 +90,10 @@ class ScopusCampController extends Controller
             $appName = 'Rumah Scopus Foundation';
             $emailTo = $request->input('email');
             // Kurangi jumlah kuota di kategori yang sesuai
-            $kategori = CategoriesScopusCamp::find($request->input('categories_scopuscamp_id'));
-            if ($kategori) {
-                $kategori->decrement('kuota');
-            }
+            // $kategori = CategoriesScopusCamp::find($request->input('categories_scopuscamp_id'));
+            // if ($kategori) {
+            //     $kategori->decrement('kuota');
+            // }
 
             Mail::to($emailTo)->send(new ScopusCampMail($save, $appName));
             // Redirect ke rute testimoni dengan ID peserta

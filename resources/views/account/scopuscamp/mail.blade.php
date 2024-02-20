@@ -73,10 +73,11 @@
                                         <div class="card-body" style="color: black; text-align: left;">
                                             <p>Kode Transaksi <b style="margin-left: 65px;">: {{ strtoupper($scopuscamp->id_transaksi) }}</b></p>
                                             <p>Tanggal <b style="margin-left: 105px;">: {{ strftime('%d %B %Y', strtotime($scopuscamp->created_at)) }}</b></p>
-                                            <p>Scopus Camp <b style="margin-left: 70px;">: {{ strtoupper($campName) }}</b></p>
-                                            <p>Mulai Pelaksanaan <b style="margin-left: 43px;">: {{ date('d F Y', strtotime($scopuscamp->mulai)) }}</b></p>
+                                            <!-- <p>Scopus Camp <b style="margin-left: 70px;">: {{ strtoupper($campName) }}</b></p> -->
+                                            <p>Scopus Camp <b style="margin-left: 70px;">: {{ strtoupper($scopuscamp->camp) }}</b></p>
+                                            <!-- <p>Mulai Pelaksanaan <b style="margin-left: 43px;">: {{ date('d F Y', strtotime($scopuscamp->mulai)) }}</b></p>
                                             <p>Selesai Pelaksanaan <b style="margin-left: 31px;">: {{ date('d F Y', strtotime($scopuscamp->selesai)) }}</b></p>
-                                            <p>Tempat Pelaksanaan <b style="margin-left: 32px;">: {{ strtoupper($scopuscamp->tempat) }}</b></p>
+                                            <p>Tempat Pelaksanaan <b style="margin-left: 32px;">: {{ strtoupper($scopuscamp->tempat) }}</b></p> -->
                                         </div>
                                     </div>
                                     <p>Status pendaftaran Scopus Camp anda saat ini masih tahap <b>{{ $status }}</b>. Silahkan Tunggu 1x24 jam.</p>

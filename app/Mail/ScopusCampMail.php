@@ -31,13 +31,12 @@ class ScopusCampMail extends Mailable
         $this->appName = $appName;
 
         // Mengambil informasi tambahan
-        $camp = CategoriesScopusCamp::find($scopuscamp->categories_scopuscamp_id);
-        if ($camp) {
-            $this->campName = $camp->camp;
-        } else {
-            // Jika tidak ada data camp yang ditemukan, atur nilai default
-            $this->campName = 'Nama Camp Tidak Ditemukan';
-        }
+        // $camp = CategoriesScopusCamp::find($scopuscamp->categories_scopuscamp_id);
+        // if ($camp) {
+        //     $this->campName = $camp->camp;
+        // } else {
+        //     $this->campName = 'Nama Camp Tidak Ditemukan';
+        // }
 
         // Menyimpan status dari model ScopusCamp
         $this->status = $scopuscamp->status;
