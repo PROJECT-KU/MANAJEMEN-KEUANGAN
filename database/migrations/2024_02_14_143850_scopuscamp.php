@@ -30,6 +30,7 @@ class Scopuscamp extends Migration
             $table->dateTime('mulai')->nullable();
             $table->dateTime('selesai')->nullable();
             $table->string('tempat', 300)->nullable();
+            $table->text('note')->nullable();
             $table->timestamps();
 
             $table->foreign('categories_scopuscamp_id')

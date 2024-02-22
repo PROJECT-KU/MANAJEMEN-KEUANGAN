@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ScopusCampMail;
+use App\Mail\ScopusCampUpdateDiterimaMail;
+use App\Mail\ScopusCampUpdateDitolakMail;
 
 class ScopusCampController extends Controller
 {
@@ -38,6 +40,89 @@ class ScopusCampController extends Controller
             $id .= $characters[rand(0, strlen($characters) - 1)];
         }
         return $id;
+    }
+
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $scopuscamp = DB::table('scopuscamp')
+            ->select('scopuscamp.id', 'scopuscamp.token', 'scopuscamp.id_transaksi', 'scopuscamp.email', 'scopuscamp.nama', 'scopuscamp.judul', 'scopuscamp.telp', 'scopuscamp.afiliasi', 'scopuscamp.pembayaran', 'scopuscamp.gambar', 'scopuscamp.status', 'scopuscamp.camp', 'scopuscamp.mulai', 'scopuscamp.selesai', 'scopuscamp.tempat', 'scopuscamp.created_at')
+            ->orderBy('scopuscamp.created_at', 'DESC')
+            ->paginate(10);
+
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('account.scopuscamp.index', compact('scopuscamp', 'maintenances', 'startDate', 'endDate'));
+    }
+
+    public function edit($id, $token)
+    {
+        $user = Auth::user();
+        $scopuscamp = ScopusCamp::findOrFail($id);
+
+        return view('account.scopuscamp.edit', compact('scopuscamp')); // Sesuaikan path template dengan benar
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        $scopuscamp = ScopusCamp::findOrFail($id);
+
+        //save image to path
+        if ($request->hasFile('gambar')) {
+            $image = $request->file('gambar');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $imageName;
+            $image->move(public_path('scopuscamp'), $imageName); // Store the image
+        } else {
+            // If no new image uploaded, keep using the old image path
+            $imagePath = $scopuscamp->gambar;
+        }
+        //end
+
+        $scopuscamp->update([
+            'email'                     => $request->input('email'),
+            'nama'                      => $request->input('nama'),
+            'judul'                     => $request->input('judul'),
+            'telp'                      => $request->input('telp'),
+            'afiliasi'                  => $request->input('afiliasi'),
+            'pembayaran'                => $request->input('pembayaran'),
+            'categories_scopuscamp_id'  => $request->input('categories_scopuscamp_id'),
+            'camp'                     => $request->input('camp'),
+            'mulai'                     => $request->input('mulai'),
+            'selesai'                   => $request->input('selesai'),
+            'tempat'                    => $request->input('tempat'),
+            'status'                    => $request->input('status'),
+            'note' => !empty($request->input('note')) ? strip_tags($request->input('note')) : null,
+            'gambar'                    => $imagePath,
+        ]);
+
+        if ($scopuscamp) {
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+            if ($scopuscamp->status == 'Pendaftaran Diterima') {
+                Mail::to($emailTo)->send(new ScopusCampUpdateDiterimaMail($scopuscamp, $appName));
+            } else {
+                Mail::to($emailTo)->send(new ScopusCampUpdateDitolakMail($scopuscamp, $appName));
+            }
+            return redirect()->route('account.scopuscamp.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
+        } else {
+            return redirect()->route('account.scopuscamp.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
+        }
     }
 
     public function form(Request $request)

@@ -30,6 +30,7 @@ class ScopusCamp extends Model
         'mulai',
         'selesai',
         'tempat',
+        'note',
         'created_at',
         'updated_at',
     ];

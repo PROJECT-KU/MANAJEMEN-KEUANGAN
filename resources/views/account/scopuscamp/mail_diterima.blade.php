@@ -78,22 +78,36 @@
                                 </div>
                                 <div class="card-body">
                                     <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $scopuscamp->nama }}</p>
-                                    <p style="font-size: 15px;">Terima kasih sudah melakukan pendaftaran Scopus Camp! Kamu baru saja mendaftar Scopus Camp, berikut rinciannya:</p>
+                                    <p style="font-size: 15px;">Selamat Pendaftaran Scopus Camp anda <b>DITERIMA</b>, berikut rinciannya:</p>
                                     <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
                                         <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
                                             <p>Kode Transaksi </p>
                                             <p>Tanggal </p>
+                                            <!-- <p>Scopus Camp: </p> -->
                                             <p>Scopus Camp </p>
+                                            <p>Mulai Pelaksanaan </p>
+                                            <p>Selesai Pelaksanaan </p>
+                                            <p>Tempat Pelaksanaan </p>
+                                            @if ($scopuscamp->note !== null)
+                                            <p>Catatan </p>
+                                            @endif
                                         </div>
-                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:80px;">
+                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:50px;">
                                             <div style="text-align: right;">
                                                 <p>{{ strtoupper($scopuscamp->id_transaksi) }}</p>
                                                 <p>{{ strftime('%d %B %Y', strtotime($scopuscamp->created_at)) }}</p>
+                                                <!-- <p>{{ strtoupper($campName) }}</p> -->
                                                 <p>{{ strtoupper($scopuscamp->camp) }}</p>
+                                                <p>{{ date('d F Y', strtotime($scopuscamp->mulai)) }}</p>
+                                                <p>{{ date('d F Y', strtotime($scopuscamp->selesai)) }}</p>
+                                                <p>{{ strtoupper($scopuscamp->tempat) }}</p>
+                                                @if ($scopuscamp->note !== null)
+                                                <p>{{ $scopuscamp->note }}</p>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
-                                    <p style="font-size: 15px;">Status pendaftaran Scopus Camp anda saat ini masih tahap <b>{{ $status }}</b>. Silahkan Tunggu 1x24 jam.</p>
+
                                     <p style="font-size:15px">Salam Q1!</p>
 
                                     <p>Salam,<br>
