@@ -72,7 +72,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <center>
-                            <div class="card mt-5 mb-5" style="width: 30rem;">
+                            <div class="card mt-5 mb-5" style="width: 35rem;">
                                 <div style="text-align: center;" class="login-brand">
                                     <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
                                 </div>
@@ -82,7 +82,7 @@
                                     <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
                                         <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
                                             <p>Kode Transaksi </p>
-                                            <p>Tanggal </p>
+                                            <!-- <p>Tanggal </p> -->
                                             <!-- <p>Scopus Camp: </p> -->
                                             <p>Scopus Camp </p>
                                             <p>Mulai Pelaksanaan </p>
@@ -92,10 +92,10 @@
                                             <p>Catatan </p>
                                             @endif
                                         </div>
-                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:50px;">
+                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:70px;">
                                             <div style="text-align: right;">
                                                 <p>{{ strtoupper($scopuscamp->id_transaksi) }}</p>
-                                                <p>{{ strftime('%d %B %Y', strtotime($scopuscamp->created_at)) }}</p>
+                                                <!-- <p>{{ strftime('%d %B %Y', strtotime($scopuscamp->created_at)) }}</p> -->
                                                 <!-- <p>{{ strtoupper($campName) }}</p> -->
                                                 <p>{{ strtoupper($scopuscamp->camp) }}</p>
                                                 <p>{{ date('d F Y', strtotime($scopuscamp->mulai)) }}</p>

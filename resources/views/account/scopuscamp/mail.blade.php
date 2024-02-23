@@ -72,7 +72,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <center>
-                            <div class="card mt-5 mb-5" style="width: 30rem;">
+                            <div class="card mt-5 mb-5" style="width: 35rem;">
                                 <div style="text-align: center;" class="login-brand">
                                     <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
                                 </div>
@@ -85,7 +85,7 @@
                                             <p>Tanggal </p>
                                             <p>Scopus Camp </p>
                                         </div>
-                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:80px;">
+                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:180px;">
                                             <div style="text-align: right;">
                                                 <p>{{ strtoupper($scopuscamp->id_transaksi) }}</p>
                                                 <p>{{ strftime('%d %B %Y', strtotime($scopuscamp->created_at)) }}</p>
