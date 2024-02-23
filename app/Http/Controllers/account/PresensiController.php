@@ -367,8 +367,8 @@ class PresensiController extends Controller
     // Redirect with success or error message
     $user = User::findOrFail($presensi->user_id);
     if ($presensi) {
-      $appName = 'Rumah Scopus Foundation';
-      Mail::to($user->email)->send(new UpdatePresensiMail($user, $presensi, $appName));
+      // $appName = 'Rumah Scopus Foundation';
+      // Mail::to($user->email)->send(new UpdatePresensiMail($user, $presensi, $appName));
 
       return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
