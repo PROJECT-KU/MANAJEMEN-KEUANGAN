@@ -255,7 +255,7 @@ Data Pendaftaran Scopus Camp | MANAGEMENT
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/kategori/ScopusCamp/delete/" + id,
+                    url: "/account/Scopus-Camp/delete/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

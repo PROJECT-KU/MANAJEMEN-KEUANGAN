@@ -188,4 +188,20 @@ class ScopusCampController extends Controller
             return redirect()->route('account.scopuscamp.form')->with('error', 'Pendaftaran Scopus Camp Gagal Terkirim!');
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $scopuscamp = ScopusCamp::find($id);
+
+            if ($scopuscamp) {
+                $scopuscamp->delete();
+                return response()->json(['status' => 'success', 'message' => 'Data Berhasil Dihapus!']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Data Tidak Ditemukan!'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
 }

@@ -208,6 +208,7 @@ Route::prefix('account')->group(function () {
     Route::get('/Scopus-Camp/Data-Pendaftaran', 'account\ScopusCampController@index')->name('account.scopuscamp.index');
     Route::get('/Scopus-Camp/Edit/{id}/{token}', 'account\ScopusCampController@edit')->name('account.scopuscamp.edit');
     Route::post('/Scopus-Camp/update/{id}', 'account\ScopusCampController@update')->name('account.scopuscamp.update');
+    Route::delete('/Scopus-Camp/delete/{id}', 'account\ScopusCampController@destroy')->name('account.scopuscamp.delete');
 
 
     // Kategori Pendaftaran Scopus Camp
