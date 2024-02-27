@@ -8,7 +8,7 @@ Detail Gaji Karyawan | MANAGEMENT
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>LAPORAN CAMP</h1>
+            <h1>DETAIL LAPORAN CAMP</h1>
         </div>
 
         <div class="section-body">
@@ -23,7 +23,7 @@ Detail Gaji Karyawan | MANAGEMENT
                 </style>
 
                 <div class="card-header custom-card-header">
-                    <h4><i class="fas fa-hand-holding-usd"></i> DETAIL LAPORAN CAMP</h4>
+                    <h4>DETAIL CAMP</h4>
                     <h4><i class="fas fa-receipt"></i> ID TRANSAKSI: {{ $camp->id_transaksi }}</h4>
                 </div>
 
@@ -40,6 +40,8 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <form action="{{ route('account.camp.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+
+                        <!--================== DETAIL CAMP ==================-->
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -79,15 +81,34 @@ Detail Gaji Karyawan | MANAGEMENT
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Jumlah Peserta</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Rp.</span>
+                                        </div>
+                                        <input type="text" name="tiket_trainer" value="{{ $camp->peserta }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control currency_tiket_trainer" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                 </div>
             </div>
+            <!--================== END ==================-->
 
 
             <div class="card">
+                <div class="card-header">
+                    <h4>DETAIL UANG MASUK</h4>
+                </div>
                 <div class="card-body">
                     <div class="row">
                     </div>
 
+                    <!--================== UANG MASUK ==================-->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -126,6 +147,17 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <!--================== END ==================-->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>DETAIL GAJI</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
                     </div>
 
                     <!--================== gaji trainer ==================-->
@@ -642,6 +674,18 @@ Detail Gaji Karyawan | MANAGEMENT
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>DETAIL UANG KELUAR</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                    </div>
+
+                    <!--================== UANG KELUAR ==================-->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -683,19 +727,67 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Jumlah Peserta</label>
+                                <label>Hotel</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rp.</span>
                                     </div>
-                                    <input type="text" name="tiket_trainer" value="{{ $camp->peserta }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control currency_tiket_trainer" readonly>
+                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency_hotel" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!--================== TIKET TRAINER BERANGKAT ==================-->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Konsumsi Tambahan</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="konsumsi_tambahan" value="{{ number_format($camp->konsumsi_tambahan, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Lain-Lain</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="lainnya" value="{{ number_format($camp->lainnya, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--================== END ==================-->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>DETAIL TIKET</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                    </div>
+
+                    <!--================== TIKET TRAINER ==================-->
                     <!-- default -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama" value="{{ $camp->tiket_trainer_nama }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -708,12 +800,14 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama" value="{{ $camp->tiket_trainer_nama }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang" value="{{ number_format($camp->tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -722,6 +816,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 1 -->
                     @if($camp->tiket_trainer1 != null && $camp->tiket_trainer1 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -734,12 +839,14 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -749,6 +856,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 2 -->
                     @if($camp->tiket_trainer2 != null && $camp->tiket_trainer2 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -761,12 +879,14 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -776,6 +896,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 3 -->
                     @if($camp->tiket_trainer3 != null && $camp->tiket_trainer3 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -788,12 +919,14 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -803,6 +936,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 4 -->
                     @if($camp->tiket_trainer4 != null && $camp->tiket_trainer4 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -815,12 +959,14 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -830,6 +976,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 5 -->
                     @if($camp->tiket_trainer5 != null && $camp->tiket_trainer5 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -845,9 +1002,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -857,6 +1017,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 6 -->
                     @if($camp->tiket_trainer6 != null && $camp->tiket_trainer6 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class=" col-md-6">
                             <div class="form-group">
@@ -872,9 +1043,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -884,6 +1058,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 7 -->
                     @if($camp->tiket_trainer7 != null && $camp->tiket_trainer7 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Nama Trainer" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -899,224 +1084,6 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-                    <!--================== end ==================-->
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Total Tiket Trainer Berangkat</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" style="border-color: red;">Rp.</span>
-                                    </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_berangkat" value="{{ number_format($camp->total_tiket_trainer_berangkat, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Berangkat" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--================== TIKET TRAINER PULANG ==================-->
-                    <!-- default -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang" value="{{ number_format($camp->tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama" value="{{ $camp->tiket_trainer_pulang_nama }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end -->
-
-                    <!-- 1 -->
-                    @if($camp->tiket_trainer_pulang1 != null && $camp->tiket_trainer_pulang1 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama1" value="{{ $camp->tiket_trainer_pulang_nama1 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 2 -->
-                    @if($camp->tiket_trainer_pulang2 != null && $camp->tiket_trainer_pulang2 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama2" value="{{ $camp->tiket_trainer_pulang_nama2 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 3 -->
-                    @if($camp->tiket_trainer_pulang3 != null && $camp->tiket_trainer_pulang3 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama3" value="{{ $camp->tiket_trainer_pulang_nama3 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 4 -->
-                    @if($camp->tiket_trainer_pulang4 != null && $camp->tiket_trainer_pulang4 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama4" value="{{ $camp->tiket_trainer_pulang_nama4 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 5 -->
-                    @if($camp->tiket_trainer_pulang5 != null && $camp->tiket_trainer_pulang5 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama5" value="{{ $camp->tiket_trainer_pulang_nama5 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 6 -->
-                    @if($camp->tiket_trainer_pulang6 != null && $camp->tiket_trainer_pulang6 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama6" value="{{ $camp->tiket_trainer_pulang_nama6 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 7 -->
-                    @if($camp->tiket_trainer_pulang7 != null && $camp->tiket_trainer_pulang7 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -1126,36 +1093,44 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama7" value="{{ $camp->tiket_trainer_pulang_nama7 }}" placeholder="Nama Trainer" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     @endif
                     <!-- end -->
                     <!--================== end ==================-->
 
+                    <?php
+                    $value_berangkat = $camp->total_tiket_trainer_berangkat;
+                    $value_pulang = $camp->total_tiket_trainer_pulang;
+                    $value = $value_berangkat + $value_pulang;
+                    ?>
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Total Tiket Trainer Pulang</label>
+                                <label>Total Tiket Trainer</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" style="border-color: red;">Rp.</span>
                                     </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_pulang" value="{{ number_format($camp->total_tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Pulang" class="form-control" readonly>
+                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_berangkat" value="{{ number_format($value, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Berangkat" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!--================== TIKET TEAM BERANGKAT ==================-->
+                    <!--================== TIKET TEAM ==================-->
                     <!-- default -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama" value="{{ $camp->tiket_team_nama }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1171,9 +1146,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama" value="{{ $camp->tiket_team_nama }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang" value="{{ number_format($camp->tiket_team_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1182,6 +1160,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 1 -->
                     @if($camp->tiket_team1 != null && $camp->tiket_team1 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1197,9 +1186,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1209,6 +1201,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 2 -->
                     @if($camp->tiket_team2 != null && $camp->tiket_team2 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1224,9 +1227,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1236,6 +1242,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 3 -->
                     @if($camp->tiket_team3 != null && $camp->tiket_team3 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1251,9 +1268,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1263,6 +1283,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 4 -->
                     @if($camp->tiket_team4 != null && $camp->tiket_team4 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1278,9 +1309,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1290,6 +1324,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 5 -->
                     @if($camp->tiket_team5 != null && $camp->tiket_team5 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1305,9 +1350,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1317,6 +1365,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 6 -->
                     @if($camp->tiket_team6 != null && $camp->tiket_team6 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1332,9 +1391,12 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Nama Team" class="form-control" readonly>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1344,6 +1406,17 @@ Detail Gaji Karyawan | MANAGEMENT
 
                     <!-- 7 -->
                     @if($camp->tiket_team7 != null && $camp->tiket_team7 != 0)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Nama Team" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1359,224 +1432,6 @@ Detail Gaji Karyawan | MANAGEMENT
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-                    <!--================== end ==================-->
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Total Tiket Team Berangkat</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" style="border-color: red;">Rp.</span>
-                                    </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_team_berangkat" value="{{ number_format($camp->total_tiket_team_berangkat, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Berangkat" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--================== TIKET TEAM PULANG ==================-->
-                    <!-- default -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang" value="{{ number_format($camp->tiket_team_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama" value="{{ $camp->tiket_team_pulang_nama }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end -->
-
-                    <!-- 1 -->
-                    @if($camp->tiket_team_pulang1 != null && $camp->tiket_team_pulang1 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama1" value="{{ $camp->tiket_team_pulang_nama1 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 2 -->
-                    @if($camp->tiket_team_pulang2 != null && $camp->tiket_team_pulang2 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama2" value="{{ $camp->tiket_team_pulang_nama2 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 3 -->
-                    @if($camp->tiket_team_pulang3 != null && $camp->tiket_team_pulang3 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama3" value="{{ $camp->tiket_team_pulang_nama3 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 4 -->
-                    @if($camp->tiket_team_pulang4 != null && $camp->tiket_team_pulang4 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama4" value="{{ $camp->tiket_team_pulang_nama4 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 5 -->
-                    @if($camp->tiket_team_pulang5 != null && $camp->tiket_team_pulang5 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama5" value="{{ $camp->tiket_team_pulang_nama5 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 6 -->
-                    @if($camp->tiket_team_pulang6 != null && $camp->tiket_team_pulang6 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama6" value="{{ $camp->tiket_team_pulang_nama6 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 7 -->
-                    @if($camp->tiket_team_pulang7 != null && $camp->tiket_team_pulang7 != 0)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label>Tiket Team Pulang</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -1586,72 +1441,41 @@ Detail Gaji Karyawan | MANAGEMENT
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama7" value="{{ $camp->tiket_team_pulang_nama7 }}" placeholder="Nama Team" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     @endif
                     <!-- end -->
                     <!--================== end ==================-->
 
+                    <?php
+                    $value_team_berangkat = $camp->total_tiket_team_berangkat;
+                    $value_team_pulang = $camp->total_tiket_team_pulang;
+                    $value_team = $value_team_berangkat + $value_team_pulang;
+                    ?>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Total Tiket Team Pulang</label>
+                                <label>Total Tiket Team</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" style="border-color: red;">Rp.</span>
                                     </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_team_pulang" value="{{ number_format($camp->total_tiket_team_pulang, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Pulang" class="form-control" readonly>
+                                    <input type="text" style="border-color: red;" name="total_tiket_team_berangkat" value="{{ number_format($value_team, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Berangkat" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
+            <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE LAINNYA</h4>
+                </div>
+                <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Hotel</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency_hotel" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Konsumsi Tambahan</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="konsumsi_tambahan" value="{{ number_format($camp->konsumsi_tambahan, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Lain-Lain</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="lainnya" value="{{ number_format($camp->lainnya, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya" readonly>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
+                    <!--================== LAINNYA ==================-->
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
