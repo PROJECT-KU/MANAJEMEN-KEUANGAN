@@ -400,14 +400,14 @@ Update Laporan Camp | MANAGEMENT
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>LAPORAN CAMP</h1>
+            <h1>UPDATE LAPORAN CAMP</h1>
         </div>
 
         <div class="section-body">
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-hand-holding-usd"></i> UPDATE LAPORAN CAMP</h4>
+                    <h4>UPDATE DETAIL CAMP</h4>
                 </div>
 
                 @if(session('status') === 'error')
@@ -423,6 +423,8 @@ Update Laporan Camp | MANAGEMENT
 
                     <form action="{{ route('account.camp.update', $camp->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
+
+                        <!--================== DETAIL CAMP ==================-->
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -482,15 +484,39 @@ Update Laporan Camp | MANAGEMENT
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Jumlah Peserta</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Rp.</span>
+                                        </div>
+                                        <input type="text" name="peserta" value="{{ number_format($camp->peserta, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control">
+                                    </div>
+                                    @error('peserta')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                 </div>
             </div>
+            <!--================== END ==================-->
 
 
             <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE UANG MASUK</h4>
+                </div>
                 <div class="card-body">
                     <div class="row">
                     </div>
 
+                    <!--================== UANG MASUK ==================-->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -539,6 +565,17 @@ Update Laporan Camp | MANAGEMENT
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <!--================== END ==================-->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE GAJI</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
                     </div>
 
                     <!--================== GAJI TRAINER ==================-->
@@ -2036,7 +2073,18 @@ Update Laporan Camp | MANAGEMENT
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
+            <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE UANG KELUAR</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                    </div>
+
+                    <!--================== UANG KELUAR ==================-->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -2090,17 +2138,16 @@ Update Laporan Camp | MANAGEMENT
                                 @enderror
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Jumlah Peserta</label>
+                                <label>Hotel</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rp.</span>
                                     </div>
-                                    <input type="text" name="peserta" value="{{ number_format($camp->peserta, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control">
+                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
                                 </div>
-                                @error('peserta')
+                                @error('hotel')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2109,8 +2156,71 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
 
-                    <!--================== TIKET TRAINER BERANGKAT ==================-->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Konsumsi Tambahan</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="konsumsi_tambahan" value="{{ number_format($camp->konsumsi_tambahan, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan">
+                                </div>
+                                @error('konsumsi_tambahan')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Lain-Lain</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="lainnya" value="{{ number_format($camp->lainnya, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya">
+                                </div>
+                                @error('lainnya')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <!--================== END ==================-->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE TIKET</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                    </div>
+
+                    <!--================== TIKET TRAINER ==================-->
                     <!-- default -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama" value="{{ $camp->tiket_trainer_nama }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2131,11 +2241,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama" value="{{ $camp->tiket_trainer_nama }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang" value="{{ number_format($camp->tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang">
                                 </div>
-                                @error('tiket_trainer_nama')
+                                @error('tiket_trainer_pulang')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2157,6 +2270,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 1 -->
                     @if($camp->tiket_trainer1 == null || $camp->tiket_trainer1 == 0)
                     <div class="row TiketTrainerBerangkat-field1" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama1')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2176,11 +2304,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
                                 </div>
-                                @error('tiket_trainer_nama1')
+                                @error('tiket_trainer_pulang1')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2197,6 +2328,21 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama1')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2217,11 +2363,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama1" value="{{ $camp->tiket_trainer_nama1 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
                                 </div>
-                                @error('tiket_trainer_nama1')
+                                @error('tiket_trainer_pulang1')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2243,6 +2392,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 2 -->
                     @if($camp->tiket_trainer2 == null || $camp->tiket_trainer2 == 0)
                     <div class="row TiketTrainerBerangkat-field2" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama2')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2262,11 +2426,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
                                 </div>
-                                @error('tiket_trainer_nama2')
+                                @error('tiket_trainer_pulang2')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2283,6 +2450,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama2')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2303,11 +2486,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama2" value="{{ $camp->tiket_trainer_nama2 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
                                 </div>
-                                @error('tiket_trainer_nama2')
+                                @error('tiket_trainer_pulang2')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2329,6 +2515,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 3 -->
                     @if($camp->tiket_trainer3 == null || $camp->tiket_trainer3 == 0)
                     <div class="row TiketTrainerBerangkat-field3" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama3')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2348,11 +2549,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
                                 </div>
-                                @error('tiket_trainer_nama3')
+                                @error('tiket_trainer_pulang3')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2369,6 +2573,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama3')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2389,11 +2609,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama3" value="{{ $camp->tiket_trainer_nama3 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
                                 </div>
-                                @error('tiket_trainer_nama3')
+                                @error('tiket_trainer_pulang3')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2415,6 +2638,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 4 -->
                     @if($camp->tiket_trainer4 == null || $camp->tiket_trainer4 == 0)
                     <div class="row TiketTrainerBerangkat-field4" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama4')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2434,11 +2672,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
                                 </div>
-                                @error('tiket_trainer_nama4')
+                                @error('tiket_trainer_pulang4')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2455,6 +2696,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama4')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2475,11 +2732,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama4" value="{{ $camp->tiket_trainer_nama4 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
                                 </div>
-                                @error('tiket_trainer_nama4')
+                                @error('tiket_trainer_pulang4')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2501,6 +2761,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 5 -->
                     @if($camp->tiket_trainer5 == null || $camp->tiket_trainer5 == 0)
                     <div class="row TiketTrainerBerangkat-field5" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama5')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2520,11 +2795,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
                                 </div>
-                                @error('tiket_trainer_nama5')
+                                @error('tiket_trainer_pulang5')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2541,6 +2819,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama5')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2561,11 +2855,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama5" value="{{ $camp->tiket_trainer_nama5 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
                                 </div>
-                                @error('tiket_trainer_nama5')
+                                @error('tiket_trainer_pulang5')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2587,6 +2884,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 6 -->
                     @if($camp->tiket_trainer6 == null || $camp->tiket_trainer6 == 0)
                     <div class="row TiketTrainerBerangkat-field6" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama6')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class=" col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2606,11 +2918,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
                                 </div>
-                                @error('tiket_trainer_nama6')
+                                @error('tiket_trainer_pulang6')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2627,6 +2942,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama6')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class=" col-md-5">
                             <div class="form-group">
@@ -2647,11 +2978,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama6" value="{{ $camp->tiket_trainer_nama6 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
                                 </div>
-                                @error('tiket_trainer_nama6')
+                                @error('tiket_trainer_pulang6')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2673,6 +3007,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 7 -->
                     @if($camp->tiket_trainer7 == null || $camp->tiket_trainer7 == 0)
                     <div class="row TiketTrainerBerangkat-field7" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama7')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Trainer Berangkat</label>
@@ -2692,11 +3041,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang7" value="{{ number_format($camp->tiket_trainer_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
                                 </div>
-                                @error('tiket_trainer_nama7')
+                                @error('tiket_trainer_pulang7')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2713,6 +3065,21 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Trainer</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                                </div>
+                                @error('tiket_trainer_nama7')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -2733,11 +3100,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Trainer</label>
+                                <label>Tiket Trainer Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_trainer_nama7" value="{{ $camp->tiket_trainer_nama7 }}" placeholder="Nama Trainer" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_trainer_pulang7" value="{{ number_format($camp->tiket_trainer_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
                                 </div>
-                                @error('tiket_trainer_nama7')
+                                @error('tiket_trainer_pulang7')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -2757,684 +3127,45 @@ Update Laporan Camp | MANAGEMENT
                     <!-- end -->
                     <!--================== end ==================-->
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Total Tiket Trainer Berangkat</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" style="border-color: red;">Rp.</span>
-                                    </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_berangkat" value="{{ number_format($camp->total_tiket_trainer_berangkat, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Berangkat" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--================== TIKET TRAINER PULANG ==================-->
-                    <!-- default -->
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang" value="{{ number_format($camp->tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang">
-                                </div>
-                                @error('tiket_trainer_pulang')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama" value="{{ $camp->tiket_trainer_pulang_nama }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-info mt-2" id="addTiketTrainerPulang" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-plus"></i> INPUT
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end -->
-
-                    <!-- 1 -->
-                    @if($camp->tiket_trainer_pulang1 == null || $camp->tiket_trainer_pulang1 == 0)
-                    <div class="row TiketTrainerPulang-field1" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
-                                </div>
-                                @error('tiket_trainer_pulang1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama1" value="{{ $camp->tiket_trainer_pulang_nama1 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang1" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang1" value="{{ number_format($camp->tiket_trainer_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
-                                </div>
-                                @error('tiket_trainer_pulang1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama1" value="{{ $camp->tiket_trainer_pulang_nama1 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang1" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 2 -->
-                    @if($camp->tiket_trainer_pulang2 == null || $camp->tiket_trainer_pulang2 == 0)
-                    <div class="row TiketTrainerPulang-field2" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
-                                </div>
-                                @error('tiket_trainer_pulang2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama2" value="{{ $camp->tiket_trainer_pulang_nama2 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang2" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang2" value="{{ number_format($camp->tiket_trainer_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
-                                </div>
-                                @error('tiket_trainer_pulang2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama2" value="{{ $camp->tiket_trainer_pulang_nama2 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang2" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 3 -->
-                    @if($camp->tiket_trainer_pulang3 == null || $camp->tiket_trainer_pulang3 == 0)
-                    <div class="row TiketTrainerPulang-field3" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
-                                </div>
-                                @error('tiket_trainer_pulang3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama3" value="{{ $camp->tiket_trainer_pulang_nama3 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang3" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang3" value="{{ number_format($camp->tiket_trainer_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
-                                </div>
-                                @error('tiket_trainer_pulang3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama3" value="{{ $camp->tiket_trainer_pulang_nama3 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang3" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 4 -->
-                    @if($camp->tiket_trainer_pulang4 == null || $camp->tiket_trainer_pulang4 == 0)
-                    <div class="row TiketTrainerPulang-field4" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
-                                </div>
-                                @error('tiket_trainer_pulang4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama4" value="{{ $camp->tiket_trainer_pulang_nama4 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang4" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang4" value="{{ number_format($camp->tiket_trainer_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
-                                </div>
-                                @error('tiket_trainer_pulang4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama4" value="{{ $camp->tiket_trainer_pulang_nama4 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang4" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 5 -->
-                    @if($camp->tiket_trainer_pulang5 == null || $camp->tiket_trainer_pulang5 == 0)
-                    <div class="row TiketTrainerPulang-field5" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
-                                </div>
-                                @error('tiket_trainer_pulang5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama5" value="{{ $camp->tiket_trainer_pulang_nama5 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang5" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang5" value="{{ number_format($camp->tiket_trainer_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
-                                </div>
-                                @error('tiket_trainer_pulang5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama5" value="{{ $camp->tiket_trainer_pulang_nama5 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang5" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 6 -->
-                    @if($camp->tiket_trainer_pulang6 == null || $camp->tiket_trainer_pulang6 == 0)
-                    <div class="row TiketTrainerPulang-field6" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
-                                </div>
-                                @error('tiket_trainer_pulang6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama6" value="{{ $camp->tiket_trainer_pulang_nama6 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang6" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang6" value="{{ number_format($camp->tiket_trainer_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
-                                </div>
-                                @error('tiket_trainer_pulang6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama6" value="{{ $camp->tiket_trainer_pulang_nama6 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang6" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 7 -->
-                    @if($camp->tiket_trainer_pulang7 == null || $camp->tiket_trainer_pulang7 == 0)
-                    <div class="row TiketTrainerPulang-field7" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang7" value="{{ number_format($camp->tiket_trainer_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
-                                </div>
-                                @error('tiket_trainer_pulang7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama7" value="{{ $camp->tiket_trainer_pulang_nama7 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang7" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Trainer Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_trainer_pulang7" value="{{ number_format($camp->tiket_trainer_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
-                                </div>
-                                @error('tiket_trainer_pulang7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Trainer</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_trainer_pulang_nama7" value="{{ $camp->tiket_trainer_pulang_nama7 }}" placeholder="Nama Trainer" class="form-control">
-                                </div>
-                                @error('tiket_trainer_pulang_nama7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang7" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-                    <!--================== end ==================-->
+                    <?php
+                    $value_berangkat = $camp->total_tiket_trainer_berangkat;
+                    $value_pulang = $camp->total_tiket_trainer_pulang;
+                    $value = $value_berangkat + $value_pulang;
+                    ?>
 
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Total Tiket Trainer Pulang</label>
+                                <label>Total Tiket Trainer</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" style="border-color: red;">Rp.</span>
                                     </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_pulang" value="{{ number_format($camp->total_tiket_trainer_pulang, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Pulang" class="form-control" readonly>
+                                    <input type="text" style="border-color: red;" name="total_tiket_trainer_berangkat" value="{{ number_format($value, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Trainer Berangkat" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!--================== TIKET TEAM BERANGKAT ==================-->
+
+                    <!--================== TIKET TEAM ==================-->
                     <!-- default -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama" value="{{ $camp->tiket_team_nama }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3455,11 +3186,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama" value="{{ $camp->tiket_team_nama }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang" value="{{ number_format($camp->tiket_team_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang">
                                 </div>
-                                @error('tiket_team_nama')
+                                @error('tiket_team_pulang')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3481,6 +3215,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 1 -->
                     @if($camp->tiket_team1 == null || $camp->tiket_team1 == 0)
                     <div class="row TiketTeamBerangkat-field1" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama1')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3500,11 +3249,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
                                 </div>
-                                @error('tiket_team_nama1')
+                                @error('tiket_team_pulang1')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3521,6 +3273,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama1')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3541,11 +3309,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama1" value="{{ $camp->tiket_team_nama1 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
                                 </div>
-                                @error('tiket_team_nama1')
+                                @error('tiket_team_pulang1')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3567,6 +3338,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 2 -->
                     @if($camp->tiket_team2 == null || $camp->tiket_team2 == 0)
                     <div class="row TiketTeamBerangkat-field2" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama2')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3586,11 +3372,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
                                 </div>
-                                @error('tiket_team_nama2')
+                                @error('tiket_team_pulang2')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3607,6 +3396,21 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama2')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3627,11 +3431,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama2" value="{{ $camp->tiket_team_nama2 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
                                 </div>
-                                @error('tiket_team_nama2')
+                                @error('tiket_team_pulang2')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3653,6 +3460,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 3 -->
                     @if($camp->tiket_team3 == null || $camp->tiket_team3 == 0)
                     <div class="row TiketTeamBerangkat-field3" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama3')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3672,11 +3494,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
                                 </div>
-                                @error('tiket_team_nama3')
+                                @error('tiket_team_pulang3')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3693,6 +3518,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama3')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3713,11 +3554,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama3" value="{{ $camp->tiket_team_nama3 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
                                 </div>
-                                @error('tiket_team_nama3')
+                                @error('tiket_team_pulang3')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3739,6 +3583,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 4 -->
                     @if($camp->tiket_team4 == null || $camp->tiket_team4 == 0)
                     <div class="row TiketTeamBerangkat-field4" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama4')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3758,11 +3617,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
                                 </div>
-                                @error('tiket_team_nama4')
+                                @error('tiket_team_pulang4')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3779,6 +3641,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama4')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3799,11 +3677,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama4" value="{{ $camp->tiket_team_nama4 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
                                 </div>
-                                @error('tiket_team_nama4')
+                                @error('tiket_team_pulang4')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3825,6 +3706,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 5 -->
                     @if($camp->tiket_team5 == null || $camp->tiket_team5 == 0)
                     <div class="row TiketTeamBerangkat-field5" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama5')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3844,11 +3740,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
                                 </div>
-                                @error('tiket_team_nama5')
+                                @error('tiket_team_pulang5')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3865,6 +3764,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama5')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3885,11 +3800,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama5" value="{{ $camp->tiket_team_nama5 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
                                 </div>
-                                @error('tiket_team_nama5')
+                                @error('tiket_team_pulang5')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3911,6 +3829,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 6 -->
                     @if($camp->tiket_team6 == null || $camp->tiket_team6 == 0)
                     <div class="row TiketTeamBerangkat-field6" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama6')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -3930,11 +3863,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
                                 </div>
-                                @error('tiket_team_nama6')
+                                @error('tiket_team_pulang6')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3951,6 +3887,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama6')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -3971,11 +3923,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama6" value="{{ $camp->tiket_team_nama6 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
                                 </div>
-                                @error('tiket_team_nama6')
+                                @error('tiket_team_pulang6')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -3997,6 +3952,21 @@ Update Laporan Camp | MANAGEMENT
                     <!-- 7 -->
                     @if($camp->tiket_team7 == null || $camp->tiket_team7 == 0)
                     <div class="row TiketTeamBerangkat-field7" style="display: none;">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama7')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label>Tiket Team Berangkat</label>
@@ -4016,11 +3986,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang7" value="{{ number_format($camp->tiket_team_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
                                 </div>
-                                @error('tiket_team_nama7')
+                                @error('tiket_team_pulang7')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -4037,6 +4010,22 @@ Update Laporan Camp | MANAGEMENT
                         </div>
                     </div>
                     @else
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nama Team</label>
+                                <div class="input-group">
+                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Masukkan Nama Team" class="form-control">
+                                </div>
+                                @error('tiket_team_nama7')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -4057,11 +4046,14 @@ Update Laporan Camp | MANAGEMENT
 
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Nama Team</label>
+                                <label>Tiket Team Pulang</label>
                                 <div class="input-group">
-                                    <input type="text" name="tiket_team_nama7" value="{{ $camp->tiket_team_nama7 }}" placeholder="Nama Team" class="form-control">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
+                                    <input type="text" name="tiket_team_pulang7" value="{{ number_format($camp->tiket_team_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
                                 </div>
-                                @error('tiket_team_nama7')
+                                @error('tiket_team_pulang7')
                                 <div class="invalid-feedback" style="display: block">
                                     {{ $message }}
                                 </div>
@@ -4081,735 +4073,38 @@ Update Laporan Camp | MANAGEMENT
                     <!-- end -->
                     <!--================== end ==================-->
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Total Tiket Team Berangkat</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" style="border-color: red;">Rp.</span>
-                                    </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_team_berangkat" value="{{ number_format($camp->total_tiket_team_berangkat, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Berangkat" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--================== TIKET TEAM PULANG ==================-->
-                    <!-- default -->
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang" value="{{ number_format($camp->tiket_team_pulang, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang">
-                                </div>
-                                @error('tiket_team_pulang')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama" value="{{ $camp->tiket_team_pulang_nama }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-info mt-2" id="addTiketTeamPulang" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-plus"></i> INPUT
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end -->
-
-                    <!-- 1 -->
-                    @if($camp->tiket_team_pulang1 == null || $camp->tiket_team_pulang1 == 0)
-                    <div class="row TiketTeamPulang-field1" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
-                                </div>
-                                @error('tiket_team_pulang1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama1" value="{{ $camp->tiket_team_pulang_nama1 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang1" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang1" value="{{ number_format($camp->tiket_team_pulang1, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
-                                </div>
-                                @error('tiket_team_pulang1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama1" value="{{ $camp->tiket_team_pulang_nama1 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama1')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang1" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 2 -->
-                    @if($camp->tiket_team_pulang2 == null || $camp->tiket_team_pulang2 == 0)
-                    <div class="row TiketTeamPulang-field2" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
-                                </div>
-                                @error('tiket_team_pulang2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama2" value="{{ $camp->tiket_team_pulang_nama2 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang2" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang2" value="{{ number_format($camp->tiket_team_pulang2, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
-                                </div>
-                                @error('tiket_team_pulang2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama2" value="{{ $camp->tiket_team_pulang_nama2 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama2')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang2" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 3 -->
-                    @if($camp->tiket_team_pulang3 == null || $camp->tiket_team_pulang3 == 0)
-                    <div class="row TiketTeamPulang-field3" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
-                                </div>
-                                @error('tiket_team_pulang3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama3" value="{{ $camp->tiket_team_pulang_nama3 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang3" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang3" value="{{ number_format($camp->tiket_team_pulang3, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
-                                </div>
-                                @error('tiket_team_pulang3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama3" value="{{ $camp->tiket_team_pulang_nama3 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama3')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang3" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 4 -->
-                    @if($camp->tiket_team_pulang4 == null || $camp->tiket_team_pulang4 == 0)
-                    <div class="row TiketTeamPulang-field4" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
-                                </div>
-                                @error('tiket_team_pulang4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama4" value="{{ $camp->tiket_team_pulang_nama4 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang4" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang4" value="{{ number_format($camp->tiket_team_pulang4, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
-                                </div>
-                                @error('tiket_team_pulang4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama4" value="{{ $camp->tiket_team_pulang_nama4 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama4')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang4" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 5 -->
-                    @if($camp->tiket_team_pulang5 == null || $camp->tiket_team_pulang5 == 0)
-                    <div class="row TiketTeamPulang-field5" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
-                                </div>
-                                @error('tiket_team_pulang5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama5" value="{{ $camp->tiket_team_pulang_nama5 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang5" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang5" value="{{ number_format($camp->tiket_team_pulang5, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
-                                </div>
-                                @error('tiket_team_pulang5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama5" value="{{ $camp->tiket_team_pulang_nama5 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama5')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang5" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 6 -->
-                    @if($camp->tiket_team_pulang6 == null || $camp->tiket_team_pulang6 == 0)
-                    <div class="row TiketTeamPulang-field6" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
-                                </div>
-                                @error('tiket_team_pulang6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama6" value="{{ $camp->tiket_team_pulang_nama6 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang6" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang6" value="{{ number_format($camp->tiket_team_pulang6, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
-                                </div>
-                                @error('tiket_team_pulang6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama6" value="{{ $camp->tiket_team_pulang_nama6 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama6')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang6" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-
-                    <!-- 7 -->
-                    @if($camp->tiket_team_pulang7 == null || $camp->tiket_team_pulang7 == 0)
-                    <div class="row TiketTeamPulang-field7" style="display: none;">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang7" value="{{ number_format($camp->tiket_team_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
-                                </div>
-                                @error('tiket_team_pulang7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama7" value="{{ $camp->tiket_team_pulang_nama7 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang7" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Tiket Team Pulang</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="tiket_team_pulang7" value="{{ number_format($camp->tiket_team_pulang7, 0, ',', ',') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
-                                </div>
-                                @error('tiket_team_pulang7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Nama Team</label>
-                                <div class="input-group">
-                                    <input type="text" name="tiket_team_pulang_nama7" value="{{ $camp->tiket_team_pulang_nama7 }}" placeholder="Nama Team" class="form-control">
-                                </div>
-                                @error('tiket_team_pulang_nama7')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-1 col-12">
-                            <div class="form-group">
-                                <label class="mb-3"></label>
-                                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang7" style="height: 40px; white-space: nowrap;">
-                                    <i class="fas fa-times"></i> HAPUS</button>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    <!-- end -->
-                    <!--================== end ==================-->
+                    <?php
+                    $value_team_berangkat = $camp->total_tiket_team_berangkat;
+                    $value_team_pulang = $camp->total_tiket_team_pulang;
+                    $value_team = $value_team_berangkat + $value_team_pulang;
+                    ?>
 
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Total Tiket Team Pulang</label>
+                                <label>Total Tiket Team</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" style="border-color: red;">Rp.</span>
                                     </div>
-                                    <input type="text" style="border-color: red;" name="total_tiket_team_pulang" value="{{ number_format($camp->total_tiket_team_pulang, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Pulang" class="form-control" readonly>
+                                    <input type="text" style="border-color: red;" name="total_tiket_team_berangkat" value="{{ number_format($value_team, 0, ',', ',') }}" placeholder="Masukkan Uang Total Tiket Team Berangkat" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>UPDATE LAINNYA</h4>
+                </div>
+                <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Hotel</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="hotel" value="{{ number_format($camp->hotel, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
-                                </div>
-                                @error('hotel')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Konsumsi Tambahan</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="konsumsi_tambahan" value="{{ number_format($camp->konsumsi_tambahan, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan">
-                                </div>
-                                @error('konsumsi_tambahan')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Lain-Lain</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" name="lainnya" value="{{ number_format($camp->lainnya, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya">
-                                </div>
-                                @error('lainnya')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
                     </div>
 
+                    <!--================== LAINNYA ==================-->
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">

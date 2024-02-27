@@ -399,15 +399,16 @@ Tambah Gaji Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>LAPORAN CAMP</h1>
+      <h1>TAMBAH LAPORAN CAMP</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-hand-holding-usd"></i> TAMBAH LAPORAN CAMP</h4>
+          <h4>TAMBAH DETAIL CAMP</h4>
         </div>
+
 
         @if(session('status') === 'error')
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -422,6 +423,8 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <form action="{{ route('account.camp.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <!--================== DETAIL CAMP ==================-->
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -481,15 +484,36 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Jumlah Peserta</label>
+                  <div class="input-group">
+                    <input type="number" name="peserta" value="{{ old('peserta') }}" placeholder="Masukkan Jumlah peserta" class="form-control currency_peserta">
+                  </div>
+                  @error('peserta')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
         </div>
       </div>
+      <!--================== END ==================-->
 
 
       <div class="card">
+        <div class="card-header">
+          <h4>TAMBAH UANG MASUK</h4>
+        </div>
         <div class="card-body">
           <div class="row">
           </div>
 
+          <!--================== UANG MASUK ==================-->
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -525,6 +549,15 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
             </div>
           </div>
+          <!--================== END ==================-->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h4>TAMBAH GAJI</h4>
+        </div>
+        <div class="card-body">
 
           <!--================== GAJI TRAINER ==================-->
           <!-- default -->
@@ -854,7 +887,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama" value="{{ old('gaji_team_nama') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama" value="{{ old('gaji_team_nama') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama')
                 <div class="invalid-feedback" style="display: block">
@@ -898,7 +931,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama1" value="{{ old('gaji_team_nama1') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama1" value="{{ old('gaji_team_nama1') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama1')
                 <div class="invalid-feedback" style="display: block">
@@ -941,7 +974,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama2" value="{{ old('gaji_team_nama2') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama2" value="{{ old('gaji_team_nama2') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama2')
                 <div class="invalid-feedback" style="display: block">
@@ -984,7 +1017,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama3" value="{{ old('gaji_team_nama3') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama3" value="{{ old('gaji_team_nama3') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama3')
                 <div class="invalid-feedback" style="display: block">
@@ -1027,7 +1060,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama4" value="{{ old('gaji_team_nama4') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama4" value="{{ old('gaji_team_nama4') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama4')
                 <div class="invalid-feedback" style="display: block">
@@ -1070,7 +1103,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama5" value="{{ old('gaji_team_nama5') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama5" value="{{ old('gaji_team_nama5') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama5')
                 <div class="invalid-feedback" style="display: block">
@@ -1113,7 +1146,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama6" value="{{ old('gaji_team_nama6') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama6" value="{{ old('gaji_team_nama6') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama6')
                 <div class="invalid-feedback" style="display: block">
@@ -1156,7 +1189,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama7" value="{{ old('gaji_team_nama7') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama7" value="{{ old('gaji_team_nama7') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama7')
                 <div class="invalid-feedback" style="display: block">
@@ -1199,7 +1232,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama8" value="{{ old('gaji_team_nama8') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama8" value="{{ old('gaji_team_nama8') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama8')
                 <div class="invalid-feedback" style="display: block">
@@ -1242,7 +1275,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama9" value="{{ old('gaji_team_nama9') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama9" value="{{ old('gaji_team_nama9') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama9')
                 <div class="invalid-feedback" style="display: block">
@@ -1285,7 +1318,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               <div class="form-group">
                 <label>Nama Team</label>
                 <div class="input-group">
-                  <input type="text" name="gaji_team_nama10" value="{{ old('gaji_team_nama10') }}" placeholder="Nama Team" class="form-control">
+                  <input type="text" name="gaji_team_nama10" value="{{ old('gaji_team_nama10') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
                 @error('gaji_team_nama10')
                 <div class="invalid-feedback" style="display: block">
@@ -1305,7 +1338,16 @@ Tambah Gaji Karyawan | MANAGEMENT
           </div>
           <!-- end -->
           <!--================== end ==================-->
+        </div>
+      </div>
 
+      <div class="card">
+        <div class="card-header">
+          <h4>TAMBAH UANG KELUAR</h4>
+        </div>
+        <div class="card-body">
+
+          <!--================== UANG KELUAR ==================-->
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -1361,11 +1403,14 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label>Jumlah Peserta</label>
+                <label>Hotel</label>
                 <div class="input-group">
-                  <input type="number" name="peserta" value="{{ old('peserta') }}" placeholder="Masukkan Jumlah peserta" class="form-control currency_peserta">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="hotel" value="{{ old('hotel') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
                 </div>
-                @error('peserta')
+                @error('hotel')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1374,8 +1419,69 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
           </div>
 
-          <!--================== TIKET TRAINER BERANGKAT ==================-->
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Konsumsi Tambahan</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="konsumsi_tambahan" value="{{ old('konsumsi_tambahan') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan">
+                </div>
+                @error('konsumsi_tambahan')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Lain-Lain</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="lainnya" value="{{ old('lainnya') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya">
+                </div>
+                @error('lainnya')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+          <!--================== END ==================-->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h4>TAMBAH TIKET</h4>
+        </div>
+        <div class="card-body">
+          <!--================== TIKET TRAINER ==================-->
           <!-- default -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama" value="{{ old('tiket_trainer_nama') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-md-5">
               <div class="form-group">
@@ -1393,21 +1499,22 @@ Tambah Gaji Karyawan | MANAGEMENT
                 @enderror
               </div>
             </div>
-
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama" value="{{ old('tiket_trainer_nama') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang" value="{{ old('tiket_trainer_pulang') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang">
                 </div>
-                @error('tiket_trainer_nama')
+                @error('tiket_trainer_pulang')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
                 @enderror
               </div>
             </div>
-
             <div class="col-md-1 col-12">
               <div class="form-group">
                 <label class="mb-3"></label>
@@ -1421,6 +1528,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 1 -->
           <div class="row TiketTrainerBerangkat-field1" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama1" value="{{ old('tiket_trainer_nama1') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1440,11 +1562,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama1" value="{{ old('tiket_trainer_nama1') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang1" value="{{ old('tiket_trainer_pulang1') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
                 </div>
-                @error('tiket_trainer_nama1')
+                @error('tiket_trainer_pulang1')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1464,6 +1589,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 2 -->
           <div class="row TiketTrainerBerangkat-field2" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama2" value="{{ old('tiket_trainer_nama2') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1483,11 +1623,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama2" value="{{ old('tiket_trainer_nama2') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang2" value="{{ old('tiket_trainer_pulang2') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
                 </div>
-                @error('tiket_trainer_nama2')
+                @error('tiket_trainer_pulang2')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1507,6 +1650,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 3 -->
           <div class="row TiketTrainerBerangkat-field3" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama3" value="{{ old('tiket_trainer_nama3') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1526,11 +1684,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama3" value="{{ old('tiket_trainer_nama3') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang3" value="{{ old('tiket_trainer_pulang3') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
                 </div>
-                @error('tiket_trainer_nama3')
+                @error('tiket_trainer_pulang3')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1550,6 +1711,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 4 -->
           <div class="row TiketTrainerBerangkat-field4" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama4" value="{{ old('tiket_trainer_nama4') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1569,11 +1745,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama4" value="{{ old('tiket_trainer_nama4') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang4" value="{{ old('tiket_trainer_pulang4') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
                 </div>
-                @error('tiket_trainer_nama4')
+                @error('tiket_trainer_pulang4')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1593,6 +1772,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 5 -->
           <div class="row TiketTrainerBerangkat-field5" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama5" value="{{ old('tiket_trainer_nama5') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1612,11 +1806,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama5" value="{{ old('tiket_trainer_nama5') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang5" value="{{ old('tiket_trainer_pulang5') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
                 </div>
-                @error('tiket_trainer_nama5')
+                @error('tiket_trainer_pulang5')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1636,6 +1833,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 6 -->
           <div class="row TiketTrainerBerangkat-field6" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama6" value="{{ old('tiket_trainer_nama6') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class=" col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1655,11 +1867,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama6" value="{{ old('tiket_trainer_nama6') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang6" value="{{ old('tiket_trainer_pulang6') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
                 </div>
-                @error('tiket_trainer_nama6')
+                @error('tiket_trainer_pulang6')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1679,6 +1894,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 7 -->
           <div class="row TiketTrainerBerangkat-field7" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Trainer</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_trainer_nama7" value="{{ old('tiket_trainer_nama7') }}" placeholder="Masukkan Nama Trainer" class="form-control">
+                </div>
+                @error('tiket_trainer_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Trainer Berangkat</label>
@@ -1698,11 +1928,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Trainer</label>
+                <label>Tiket Trainer Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_trainer_nama7" value="{{ old('tiket_trainer_nama7') }}" placeholder="Nama Trainer" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_trainer_pulang7" value="{{ old('tiket_trainer_pulang7') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
                 </div>
-                @error('tiket_trainer_nama7')
+                @error('tiket_trainer_pulang7')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1721,355 +1954,24 @@ Tambah Gaji Karyawan | MANAGEMENT
           <!-- end -->
           <!--================== end ==================-->
 
-          <!--================== TIKET TRAINER PULANG ==================-->
+          <!--================== TIKET TEAM ==================-->
           <!-- default -->
           <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-12">
               <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
+                <label>Nama Team</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang" value="{{ old('tiket_trainer_pulang') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang">
+                  <input type="text" name="tiket_team_nama" value="{{ old('tiket_team_nama') }}" placeholder="Masukkan Nama Team" class="form-control">
                 </div>
-                @error('tiket_trainer_pulang')
+                @error('tiket_team_nama')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
                 @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama" value="{{ old('tiket_trainer_pulang_nama') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-info mt-2" id="addTiketTrainerPulang" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-plus"></i> INPUT
-                </button>
               </div>
             </div>
           </div>
-          <!-- end -->
 
-          <!-- 1 -->
-          <div class="row TiketTrainerPulang-field1" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang1" value="{{ old('tiket_trainer_pulang1') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang1">
-                </div>
-                @error('tiket_trainer_pulang1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama1" value="{{ old('tiket_trainer_pulang_nama1') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang1" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 2 -->
-          <div class="row TiketTrainerPulang-field2" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang2" value="{{ old('tiket_trainer_pulang2') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang2">
-                </div>
-                @error('tiket_trainer_pulang2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama2" value="{{ old('tiket_trainer_pulang_nama2') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang2" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 3 -->
-          <div class="row TiketTrainerPulang-field3" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang3" value="{{ old('tiket_trainer_pulang3') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang3">
-                </div>
-                @error('tiket_trainer_pulang3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama3" value="{{ old('tiket_trainer_pulang_nama3') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang3" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 4 -->
-          <div class="row TiketTrainerPulang-field4" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang4" value="{{ old('tiket_trainer_pulang4') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang4">
-                </div>
-                @error('tiket_trainer_pulang4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama4" value="{{ old('tiket_trainer_pulang_nama4') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang4" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 5 -->
-          <div class="row TiketTrainerPulang-field5" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang5" value="{{ old('tiket_trainer_pulang5') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang5">
-                </div>
-                @error('tiket_trainer_pulang5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama5" value="{{ old('tiket_trainer_pulang_nama5') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang5" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 6 -->
-          <div class="row TiketTrainerPulang-field6" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang6" value="{{ old('tiket_trainer_pulang6') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang6">
-                </div>
-                @error('tiket_trainer_pulang6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama6" value="{{ old('tiket_trainer_pulang_nama6') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang6" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 7 -->
-          <div class="row TiketTrainerPulang-field7" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Trainer Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_trainer_pulang7" value="{{ old('tiket_trainer_pulang7') }}" placeholder="Total Uang Tiket Trainer Pulang" class="form-control tiket_trainer_pulang7">
-                </div>
-                @error('tiket_trainer_pulang7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Trainer</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_trainer_pulang_nama7" value="{{ old('tiket_trainer_pulang_nama7') }}" placeholder="Nama Trainer" class="form-control">
-                </div>
-                @error('tiket_trainer_pulang_nama7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTrainerPulang7" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-          <!--================== end ==================-->
-
-          <!--================== TIKET TEAM BERANGKAT ==================-->
-          <!-- default -->
           <div class="row">
             <div class="col-md-5">
               <div class="form-group">
@@ -2090,11 +1992,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama" value="{{ old('tiket_team_nama') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang" value="{{ old('tiket_team_pulang') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang">
                 </div>
-                @error('tiket_team_nama')
+                @error('tiket_team_pulang')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2115,6 +2020,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 1 -->
           <div class="row TiketTeamBerangkat-field1" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama1" value="{{ old('tiket_team_nama1') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama1')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2134,11 +2054,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama1" value="{{ old('tiket_team_nama1') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang1" value="{{ old('tiket_team_pulang1') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
                 </div>
-                @error('tiket_team_nama1')
+                @error('tiket_team_pulang1')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2158,6 +2081,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 2 -->
           <div class="row TiketTeamBerangkat-field2" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama2" value="{{ old('tiket_team_nama2') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama2')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2177,11 +2115,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama2" value="{{ old('tiket_team_nama2') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang2" value="{{ old('tiket_team_pulang2') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
                 </div>
-                @error('tiket_team_nama2')
+                @error('tiket_team_pulang2')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2201,6 +2142,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 3 -->
           <div class="row TiketTeamBerangkat-field3" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama3" value="{{ old('tiket_team_nama3') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama3')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2220,11 +2176,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama3" value="{{ old('tiket_team_nama3') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang3" value="{{ old('tiket_team_pulang3') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
                 </div>
-                @error('tiket_team_nama3')
+                @error('tiket_team_pulang3')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2244,6 +2203,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 4 -->
           <div class="row TiketTeamBerangkat-field4" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama4" value="{{ old('tiket_team_nama4') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama4')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2263,11 +2237,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama4" value="{{ old('tiket_team_nama4') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang4" value="{{ old('tiket_team_pulang4') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
                 </div>
-                @error('tiket_team_nama4')
+                @error('tiket_team_pulang4')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2287,6 +2264,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 5 -->
           <div class="row TiketTeamBerangkat-field5" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama5" value="{{ old('tiket_team_nama5') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama5')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2306,11 +2298,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama5" value="{{ old('tiket_team_nama5') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang5" value="{{ old('tiket_team_pulang5') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
                 </div>
-                @error('tiket_team_nama5')
+                @error('tiket_team_pulang5')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2330,6 +2325,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 6 -->
           <div class="row TiketTeamBerangkat-field6" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama6" value="{{ old('tiket_team_nama6') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama6')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2349,11 +2359,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama6" value="{{ old('tiket_team_nama6') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang6" value="{{ old('tiket_team_pulang6') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
                 </div>
-                @error('tiket_team_nama6')
+                @error('tiket_team_pulang6')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2373,6 +2386,21 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <!-- 7 -->
           <div class="row TiketTeamBerangkat-field7" style="display: none;">
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Nama Team</label>
+                <div class="input-group">
+                  <input type="text" name="tiket_team_nama7" value="{{ old('tiket_team_nama7') }}" placeholder="Masukkan Nama Team" class="form-control">
+                </div>
+                @error('tiket_team_nama7')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
             <div class="col-md-5">
               <div class="form-group">
                 <label>Tiket Team Berangkat</label>
@@ -2392,11 +2420,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 
             <div class="col-md-5">
               <div class="form-group">
-                <label>Nama Team</label>
+                <label>Tiket Team Pulang</label>
                 <div class="input-group">
-                  <input type="text" name="tiket_team_nama7" value="{{ old('tiket_team_nama7') }}" placeholder="Nama Team" class="form-control">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="tiket_team_pulang7" value="{{ old('tiket_team_pulang7') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
                 </div>
-                @error('tiket_team_nama7')
+                @error('tiket_team_pulang7')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -2414,407 +2445,15 @@ Tambah Gaji Karyawan | MANAGEMENT
           </div>
           <!-- end -->
           <!--================== end ==================-->
+        </div>
+      </div>
 
-          <!--================== TIKET TEAM PULANG ==================-->
-          <!-- default -->
-          <div class="row">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang" value="{{ old('tiket_team_pulang') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang">
-                </div>
-                @error('tiket_team_pulang')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama" value="{{ old('tiket_team_pulang_nama') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-info mt-2" id="addTiketTeamPulang" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-plus"></i> INPUT
-                </button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 1 -->
-          <div class="row TiketTeamPulang-field1" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang1" value="{{ old('tiket_team_pulang1') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang1">
-                </div>
-                @error('tiket_team_pulang1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama1" value="{{ old('tiket_team_pulang_nama1') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang1" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 2 -->
-          <div class="row TiketTeamPulang-field2" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang2" value="{{ old('tiket_team_pulang2') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang2">
-                </div>
-                @error('tiket_team_pulang2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama2" value="{{ old('tiket_team_pulang_nama2') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang2" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 3 -->
-          <div class="row TiketTeamPulang-field3" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang3" value="{{ old('tiket_team_pulang3') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang3">
-                </div>
-                @error('tiket_team_pulang3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama3" value="{{ old('tiket_team_pulang_nama3') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang3" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 4 -->
-          <div class="row TiketTeamPulang-field4" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang4" value="{{ old('tiket_team_pulang4') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang4">
-                </div>
-                @error('tiket_team_pulang4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama4" value="{{ old('tiket_team_pulang_nama4') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang4" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 5 -->
-          <div class="row TiketTeamPulang-field5" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang5" value="{{ old('tiket_team_pulang5') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang5">
-                </div>
-                @error('tiket_team_pulang5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama5" value="{{ old('tiket_team_pulang_nama5') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang5" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 6 -->
-          <div class="row TiketTeamPulang-field6" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang6" value="{{ old('tiket_team_pulang6') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang6">
-                </div>
-                @error('tiket_team_pulang6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama6" value="{{ old('tiket_team_pulang_nama6') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang6" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-
-          <!-- 7 -->
-          <div class="row TiketTeamPulang-field7" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Tiket Team Pulang</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tiket_team_pulang7" value="{{ old('tiket_team_pulang7') }}" placeholder="Total Uang Tiket Team Pulang" class="form-control tiket_team_pulang7">
-                </div>
-                @error('tiket_team_pulang7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Nama Team</label>
-                <div class="input-group">
-                  <input type="text" name="tiket_team_pulang_nama7" value="{{ old('tiket_team_pulang_nama7') }}" placeholder="Nama Team" class="form-control">
-                </div>
-                @error('tiket_team_pulang_nama7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeTiketTeamPulang7" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end -->
-          <!--================== end ==================-->
-
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Hotel</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="hotel" value="{{ old('hotel') }}" placeholder="Masukkan Uang Keluar Hotel" class="form-control currency-hotel">
-                </div>
-                @error('hotel')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Konsumsi Tambahan</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="konsumsi_tambahan" value="{{ old('konsumsi_tambahan') }}" placeholder="Masukkan Uang Keluar Konsumsi Tambahan" class="form-control currency_konsumsi_tambahan">
-                </div>
-                @error('konsumsi_tambahan')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Lain-Lain</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="lainnya" value="{{ old('lainnya') }}" placeholder="Masukkan Uang Keluar Lain-Lain" class="form-control currency_lainnya">
-                </div>
-                @error('lainnya')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-          </div>
-
+      <div class="card">
+        <div class="card-header">
+          <h4>TAMBAH LAINNYA</h4>
+        </div>
+        <div class="card-body">
+          <!--================== LAINNYA ==================-->
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -2846,8 +2485,7 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
             </div>
           </div>
-
-
+          <!--================== END ==================-->
 
           <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
           <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
