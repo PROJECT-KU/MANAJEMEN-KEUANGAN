@@ -17,6 +17,7 @@ class CreateCamp extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->string('id_transaksi', 300)->nullable();
+            $table->text('token')->nullable();
             $table->string('title', 300)->nullable();
             $table->string('camp_ke', 300)->nullable();
             $table->string('uang_masuk', 300)->nullable();

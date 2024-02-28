@@ -183,9 +183,9 @@ Route::prefix('account')->group(function () {
     Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
     Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
     Route::get('/camp/filter', 'account\CampController@filter')->name('account.camp.filter');
-    Route::get('/camp/{id}/detail', 'account\CampController@detail')->name('account.camp.detail');
+    Route::get('/camp/detail/{id}{token}', 'account\CampController@detail')->name('account.camp.detail');
     Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
-    Route::get('/camp/{id}/edit', 'account\CampController@edit')->name('account.camp.edit');
+    Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
     Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
     Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
     Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');

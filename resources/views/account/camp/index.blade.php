@@ -165,13 +165,13 @@ List aporan Camp | MANAGEMENT
                         @endif
                       </td>
                       <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
                         <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">

@@ -35,6 +35,18 @@ class CampController extends Controller
         return $id;
     }
 
+    function generateRandomToken($length)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+        $token = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $token;
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -50,7 +62,7 @@ class CampController extends Controller
         }
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.token', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->orderBy('camp.created_at', 'DESC')
@@ -82,7 +94,7 @@ class CampController extends Controller
         }
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.token',  'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth])
@@ -103,7 +115,7 @@ class CampController extends Controller
         $user = Auth::user();
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.token',  'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
@@ -121,7 +133,7 @@ class CampController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
+        $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
         if ($camp->isEmpty()) {
@@ -145,6 +157,7 @@ class CampController extends Controller
         $user = Auth::user()->id;
 
         $id_transaksi = $this->generateRandomId(5);
+        $token = $this->generateRandomToken(100);
 
         $title = $request->input('title');
         $camp_ke = $request->input('camp_ke');
@@ -347,157 +360,158 @@ class CampController extends Controller
         $marketing = empty($marketing) ? 0 : str_replace(",", "", number_format($marketing));
 
         $save = Camp::create([
-            'id_transaksi' => $id_transaksi,
-            'user_id' => Auth::user()->id,
-            'title' => $title,
-            'camp_ke' => $camp_ke,
-            'uang_masuk' => $uang_masuk,
-            'lain_lain' => $lain_lain,
+            'token'                     => $token,
+            'id_transaksi'              => $id_transaksi,
+            'user_id'                   => Auth::user()->id,
+            'title'                     => $title,
+            'camp_ke'                   => $camp_ke,
+            'uang_masuk'                => $uang_masuk,
+            'lain_lain'                 => $lain_lain,
 
             // <!-- gaji trainer -->
-            'gaji_trainer' => $gaji_trainer,
-            'gaji_trainer1' => $gaji_trainer1,
-            'gaji_trainer2' => $gaji_trainer2,
-            'gaji_trainer3' => $gaji_trainer3,
-            'gaji_trainer4' => $gaji_trainer4,
-            'gaji_trainer5' => $gaji_trainer5,
-            'gaji_trainer6' => $gaji_trainer6,
-            'gaji_trainer_nama' => $request->input('gaji_trainer_nama'),
-            'gaji_trainer_nama1' => $request->input('gaji_trainer_nama1'),
-            'gaji_trainer_nama2' => $request->input('gaji_trainer_nama2'),
-            'gaji_trainer_nama3' => $request->input('gaji_trainer_nama3'),
-            'gaji_trainer_nama4' => $request->input('gaji_trainer_nama4'),
-            'gaji_trainer_nama5' => $request->input('gaji_trainer_nama5'),
-            'gaji_trainer_nama6' => $request->input('gaji_trainer_nama6'),
-            'total_gaji_trainer' => $total_gaji_trainer,
+            'gaji_trainer'              => $gaji_trainer,
+            'gaji_trainer1'             => $gaji_trainer1,
+            'gaji_trainer2'             => $gaji_trainer2,
+            'gaji_trainer3'             => $gaji_trainer3,
+            'gaji_trainer4'             => $gaji_trainer4,
+            'gaji_trainer5'             => $gaji_trainer5,
+            'gaji_trainer6'             => $gaji_trainer6,
+            'gaji_trainer_nama'         => $request->input('gaji_trainer_nama'),
+            'gaji_trainer_nama1'        => $request->input('gaji_trainer_nama1'),
+            'gaji_trainer_nama2'        => $request->input('gaji_trainer_nama2'),
+            'gaji_trainer_nama3'        => $request->input('gaji_trainer_nama3'),
+            'gaji_trainer_nama4'        => $request->input('gaji_trainer_nama4'),
+            'gaji_trainer_nama5'        => $request->input('gaji_trainer_nama5'),
+            'gaji_trainer_nama6'        => $request->input('gaji_trainer_nama6'),
+            'total_gaji_trainer'        => $total_gaji_trainer,
             // <!-- end -->
 
             // <!-- gaji team -->
-            'gaji_team' => $gaji_team,
-            'gaji_team1' => $gaji_team1,
-            'gaji_team2' => $gaji_team2,
-            'gaji_team3' => $gaji_team3,
-            'gaji_team4' => $gaji_team4,
-            'gaji_team5' => $gaji_team5,
-            'gaji_team6' => $gaji_team6,
-            'gaji_team7' => $gaji_team7,
-            'gaji_team8' => $gaji_team8,
-            'gaji_team9' => $gaji_team9,
-            'gaji_team10' => $gaji_team10,
-            'gaji_team_nama' => $request->input('gaji_team_nama'),
-            'gaji_team_nama1' => $request->input('gaji_team_nama1'),
-            'gaji_team_nama2' => $request->input('gaji_team_nama2'),
-            'gaji_team_nama3' => $request->input('gaji_team_nama3'),
-            'gaji_team_nama4' => $request->input('gaji_team_nama4'),
-            'gaji_team_nama5' => $request->input('gaji_team_nama5'),
-            'gaji_team_nama6' => $request->input('gaji_team_nama6'),
-            'gaji_team_nama7' => $request->input('gaji_team_nama7'),
-            'gaji_team_nama8' => $request->input('gaji_team_nama8'),
-            'gaji_team_nama9' => $request->input('gaji_team_nama9'),
-            'gaji_team_nama10' => $request->input('gaji_team_nama10'),
-            'total_gaji_team' => $total_gaji_team,
+            'gaji_team'                 => $gaji_team,
+            'gaji_team1'                => $gaji_team1,
+            'gaji_team2'                => $gaji_team2,
+            'gaji_team3'                => $gaji_team3,
+            'gaji_team4'                => $gaji_team4,
+            'gaji_team5'                => $gaji_team5,
+            'gaji_team6'                => $gaji_team6,
+            'gaji_team7'                => $gaji_team7,
+            'gaji_team8'                => $gaji_team8,
+            'gaji_team9'                => $gaji_team9,
+            'gaji_team10'               => $gaji_team10,
+            'gaji_team_nama'            => $request->input('gaji_team_nama'),
+            'gaji_team_nama1'           => $request->input('gaji_team_nama1'),
+            'gaji_team_nama2'           => $request->input('gaji_team_nama2'),
+            'gaji_team_nama3'           => $request->input('gaji_team_nama3'),
+            'gaji_team_nama4'           => $request->input('gaji_team_nama4'),
+            'gaji_team_nama5'           => $request->input('gaji_team_nama5'),
+            'gaji_team_nama6'           => $request->input('gaji_team_nama6'),
+            'gaji_team_nama7'           => $request->input('gaji_team_nama7'),
+            'gaji_team_nama8'           => $request->input('gaji_team_nama8'),
+            'gaji_team_nama9'           => $request->input('gaji_team_nama9'),
+            'gaji_team_nama10'          => $request->input('gaji_team_nama10'),
+            'total_gaji_team'           => $total_gaji_team,
             // <!-- end -->
 
-            'team_cabang' => $team_cabang,
-            'booknote' => $booknote,
-            'grammarly' => $grammarly,
-            'peserta' => $request->input('peserta'),
+            'team_cabang'               => $team_cabang,
+            'booknote'                  => $booknote,
+            'grammarly'                 => $grammarly,
+            'peserta'                   => $request->input('peserta'),
 
             // <!-- tiket trainer berangkat -->
-            'tiket_trainer' => $tiket_trainer,
-            'tiket_trainer1' => $tiket_trainer1,
-            'tiket_trainer2' => $tiket_trainer2,
-            'tiket_trainer3' => $tiket_trainer3,
-            'tiket_trainer4' => $tiket_trainer4,
-            'tiket_trainer5' => $tiket_trainer5,
-            'tiket_trainer6' => $tiket_trainer6,
-            'tiket_trainer7' => $tiket_trainer7,
-            'tiket_trainer_nama' => $request->input('tiket_trainer_nama'),
-            'tiket_trainer_nama1' => $request->input('tiket_trainer_nama1'),
-            'tiket_trainer_nama2' => $request->input('tiket_trainer_nama2'),
-            'tiket_trainer_nama3' => $request->input('tiket_trainer_nama3'),
-            'tiket_trainer_nama4' => $request->input('tiket_trainer_nama4'),
-            'tiket_trainer_nama5' => $request->input('tiket_trainer_nama5'),
-            'tiket_trainer_nama6' => $request->input('tiket_trainer_nama6'),
-            'tiket_trainer_nama7' => $request->input('tiket_trainer_nama7'),
+            'tiket_trainer'             => $tiket_trainer,
+            'tiket_trainer1'            => $tiket_trainer1,
+            'tiket_trainer2'            => $tiket_trainer2,
+            'tiket_trainer3'            => $tiket_trainer3,
+            'tiket_trainer4'            => $tiket_trainer4,
+            'tiket_trainer5'            => $tiket_trainer5,
+            'tiket_trainer6'            => $tiket_trainer6,
+            'tiket_trainer7'            => $tiket_trainer7,
+            'tiket_trainer_nama'        => $request->input('tiket_trainer_nama'),
+            'tiket_trainer_nama1'       => $request->input('tiket_trainer_nama1'),
+            'tiket_trainer_nama2'       => $request->input('tiket_trainer_nama2'),
+            'tiket_trainer_nama3'       => $request->input('tiket_trainer_nama3'),
+            'tiket_trainer_nama4'       => $request->input('tiket_trainer_nama4'),
+            'tiket_trainer_nama5'       => $request->input('tiket_trainer_nama5'),
+            'tiket_trainer_nama6'       => $request->input('tiket_trainer_nama6'),
+            'tiket_trainer_nama7'       => $request->input('tiket_trainer_nama7'),
             // <!-- end -->
 
             'total_tiket_trainer_berangkat' => $total_tiket_trainer_berangkat,
 
             // <!-- tiket trainer pulang -->
-            'tiket_trainer_pulang' => $tiket_trainer_pulang,
-            'tiket_trainer_pulang1' => $tiket_trainer_pulang1,
-            'tiket_trainer_pulang2' => $tiket_trainer_pulang2,
-            'tiket_trainer_pulang3' => $tiket_trainer_pulang3,
-            'tiket_trainer_pulang4' => $tiket_trainer_pulang4,
-            'tiket_trainer_pulang5' => $tiket_trainer_pulang5,
-            'tiket_trainer_pulang6' => $tiket_trainer_pulang6,
-            'tiket_trainer_pulang7' => $tiket_trainer_pulang7,
-            'tiket_trainer_pulang_nama' => $request->input('tiket_trainer_pulang_nama'),
-            'tiket_trainer_pulang_nama1' => $request->input('tiket_trainer_pulang_nama1'),
-            'tiket_trainer_pulang_nama2' => $request->input('tiket_trainer_pulang_nama2'),
-            'tiket_trainer_pulang_nama3' => $request->input('tiket_trainer_pulang_nama3'),
-            'tiket_trainer_pulang_nama4' => $request->input('tiket_trainer_pulang_nama4'),
-            'tiket_trainer_pulang_nama5' => $request->input('tiket_trainer_pulang_nama5'),
-            'tiket_trainer_pulang_nama6' => $request->input('tiket_trainer_pulang_nama6'),
-            'tiket_trainer_pulang_nama7' => $request->input('tiket_trainer_pulang_nama7'),
+            'tiket_trainer_pulang'      => $tiket_trainer_pulang,
+            'tiket_trainer_pulang1'     => $tiket_trainer_pulang1,
+            'tiket_trainer_pulang2'     => $tiket_trainer_pulang2,
+            'tiket_trainer_pulang3'     => $tiket_trainer_pulang3,
+            'tiket_trainer_pulang4'     => $tiket_trainer_pulang4,
+            'tiket_trainer_pulang5'     => $tiket_trainer_pulang5,
+            'tiket_trainer_pulang6'     => $tiket_trainer_pulang6,
+            'tiket_trainer_pulang7'     => $tiket_trainer_pulang7,
+            'tiket_trainer_pulang_nama'     => $request->input('tiket_trainer_pulang_nama'),
+            'tiket_trainer_pulang_nama1'    => $request->input('tiket_trainer_pulang_nama1'),
+            'tiket_trainer_pulang_nama2'    => $request->input('tiket_trainer_pulang_nama2'),
+            'tiket_trainer_pulang_nama3'    => $request->input('tiket_trainer_pulang_nama3'),
+            'tiket_trainer_pulang_nama4'    => $request->input('tiket_trainer_pulang_nama4'),
+            'tiket_trainer_pulang_nama5'    => $request->input('tiket_trainer_pulang_nama5'),
+            'tiket_trainer_pulang_nama6'    => $request->input('tiket_trainer_pulang_nama6'),
+            'tiket_trainer_pulang_nama7'    => $request->input('tiket_trainer_pulang_nama7'),
             // <!-- end -->
 
             'total_tiket_trainer_pulang' => $total_tiket_trainer_pulang,
 
             // <!-- tiket team berangkat -->
-            'tiket_team' => $tiket_team,
-            'tiket_team1' => $tiket_team1,
-            'tiket_team2' => $tiket_team2,
-            'tiket_team3' => $tiket_team3,
-            'tiket_team4' => $tiket_team4,
-            'tiket_team5' => $tiket_team5,
-            'tiket_team6' => $tiket_team6,
-            'tiket_team7' => $tiket_team7,
-            'tiket_team_nama' => $request->input('tiket_team_nama'),
-            'tiket_team_nama1' => $request->input('tiket_team_nama1'),
-            'tiket_team_nama2' => $request->input('tiket_team_nama2'),
-            'tiket_team_nama3' => $request->input('tiket_team_nama3'),
-            'tiket_team_nama4' => $request->input('tiket_team_nama4'),
-            'tiket_team_nama5' => $request->input('tiket_team_nama5'),
-            'tiket_team_nama6' => $request->input('tiket_team_nama6'),
-            'tiket_team_nama7' => $request->input('tiket_team_nama7'),
+            'tiket_team'                => $tiket_team,
+            'tiket_team1'               => $tiket_team1,
+            'tiket_team2'               => $tiket_team2,
+            'tiket_team3'               => $tiket_team3,
+            'tiket_team4'               => $tiket_team4,
+            'tiket_team5'               => $tiket_team5,
+            'tiket_team6'               => $tiket_team6,
+            'tiket_team7'               => $tiket_team7,
+            'tiket_team_nama'           => $request->input('tiket_team_nama'),
+            'tiket_team_nama1'          => $request->input('tiket_team_nama1'),
+            'tiket_team_nama2'          => $request->input('tiket_team_nama2'),
+            'tiket_team_nama3'          => $request->input('tiket_team_nama3'),
+            'tiket_team_nama4'          => $request->input('tiket_team_nama4'),
+            'tiket_team_nama5'          => $request->input('tiket_team_nama5'),
+            'tiket_team_nama6'          => $request->input('tiket_team_nama6'),
+            'tiket_team_nama7'          => $request->input('tiket_team_nama7'),
             // <!-- end -->
 
             'total_tiket_team_berangkat' => $total_tiket_team_berangkat,
 
             // <!-- tiket team pulang -->
-            'tiket_team_pulang' => $tiket_team_pulang,
-            'tiket_team_pulang1' => $tiket_team_pulang1,
-            'tiket_team_pulang2' => $tiket_team_pulang2,
-            'tiket_team_pulang3' => $tiket_team_pulang3,
-            'tiket_team_pulang4' => $tiket_team_pulang4,
-            'tiket_team_pulang5' => $tiket_team_pulang5,
-            'tiket_team_pulang6' => $tiket_team_pulang6,
-            'tiket_team_pulang7' => $tiket_team_pulang7,
-            'tiket_team_pulang_nama' => $request->input('tiket_team_pulang_nama'),
-            'tiket_team_pulang_nama1' => $request->input('tiket_team_pulang_nama1'),
-            'tiket_team_pulang_nama2' => $request->input('tiket_team_pulang_nama2'),
-            'tiket_team_pulang_nama3' => $request->input('tiket_team_pulang_nama3'),
-            'tiket_team_pulang_nama4' => $request->input('tiket_team_pulang_nama4'),
-            'tiket_team_pulang_nama5' => $request->input('tiket_team_pulang_nama5'),
-            'tiket_team_pulang_nama6' => $request->input('tiket_team_pulang_nama6'),
-            'tiket_team_pulang_nama7' => $request->input('tiket_team_pulang_nama7'),
+            'tiket_team_pulang'         => $tiket_team_pulang,
+            'tiket_team_pulang1'        => $tiket_team_pulang1,
+            'tiket_team_pulang2'        => $tiket_team_pulang2,
+            'tiket_team_pulang3'        => $tiket_team_pulang3,
+            'tiket_team_pulang4'        => $tiket_team_pulang4,
+            'tiket_team_pulang5'        => $tiket_team_pulang5,
+            'tiket_team_pulang6'        => $tiket_team_pulang6,
+            'tiket_team_pulang7'        => $tiket_team_pulang7,
+            'tiket_team_pulang_nama'    => $request->input('tiket_team_pulang_nama'),
+            'tiket_team_pulang_nama1'   => $request->input('tiket_team_pulang_nama1'),
+            'tiket_team_pulang_nama2'   => $request->input('tiket_team_pulang_nama2'),
+            'tiket_team_pulang_nama3'   => $request->input('tiket_team_pulang_nama3'),
+            'tiket_team_pulang_nama4'   => $request->input('tiket_team_pulang_nama4'),
+            'tiket_team_pulang_nama5'   => $request->input('tiket_team_pulang_nama5'),
+            'tiket_team_pulang_nama6'   => $request->input('tiket_team_pulang_nama6'),
+            'tiket_team_pulang_nama7'   => $request->input('tiket_team_pulang_nama7'),
             // <!-- end -->
 
-            'total_tiket_team_pulang' => $total_tiket_team_pulang,
-            'hotel' => $hotel,
-            'konsumsi_tambahan' => $konsumsi_tambahan,
-            'lainnya' => $lainnya,
-            'tanggal' => $request->input('tanggal'),
-            'tanggal_akhir' => $request->input('tanggal_akhir'),
-            'status' => $request->input('status'),
-            'note' => $request->input('note'),
-            'total' => $total,
-            'total_uang_masuk' => $total_uang_masuk,
-            'keuntungan' => $keuntungan,
-            'persentase_keuntungan' => $persentase_keuntungan,
-            'marketing' => $marketing,
+            'total_tiket_team_pulang'   => $total_tiket_team_pulang,
+            'hotel'                     => $hotel,
+            'konsumsi_tambahan'         => $konsumsi_tambahan,
+            'lainnya'                   => $lainnya,
+            'tanggal'                   => $request->input('tanggal'),
+            'tanggal_akhir'             => $request->input('tanggal_akhir'),
+            'status'                    => $request->input('status'),
+            'note'                      => $request->input('note'),
+            'total'                     => $total,
+            'total_uang_masuk'          => $total_uang_masuk,
+            'keuntungan'                => $keuntungan,
+            'persentase_keuntungan'     => $persentase_keuntungan,
+            'marketing'                 => $marketing,
         ]);
 
         // Redirect with success or error message
@@ -512,7 +526,7 @@ class CampController extends Controller
         }
     }
 
-    public function detail($id)
+    public function detail($id, $token)
     {
         $user = Auth::user();
         $camp = Camp::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -541,7 +555,7 @@ class CampController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit($id, $token)
     {
         $user = Auth::user();
         $camp = Camp::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -941,7 +955,7 @@ class CampController extends Controller
         }
 
         $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
+            ->select('camp.id', 'camp.id_transaksi', 'camp.token',  'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
             ->leftJoin('users', 'camp.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
             ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth])
