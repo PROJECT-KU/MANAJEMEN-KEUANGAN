@@ -17,6 +17,7 @@ class Camp extends Model
     protected $fillable = [
         'user_id',
         'id_transaksi',
+        'token',
         'title',
         'camp_ke',
         'uang_masuk',
