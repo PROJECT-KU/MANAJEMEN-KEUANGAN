@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Presensi Karyawan | MANAGEMENT
+Tambah Presensi Karyawan | MIS
 @stop
 
 <!--================== animasi image ==================-->
@@ -20,15 +20,15 @@ Tambah Presensi Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PRESENSI KARYAWAN</h1>
+      <h1>TAMBAH PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
-        <div class="card-header">
+        <!-- <div class="card-header">
           <h4><i class="fas fa-user-clock"></i> TAMBAH PRESENSI KARYAWAN</h4>
-        </div>
+        </div> -->
 
         <div class="card-body">
 

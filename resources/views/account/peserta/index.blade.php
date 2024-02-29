@@ -1,27 +1,29 @@
 @extends('layouts.account')
 
 @section('title')
-List Laporan Peserta | MANAGEMENT
+Data Laporan Peserta | MANAGEMENT
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>LAPORAN PESERTA</h1>
+            <h1>DATA LAPORAN PESERTA</h1>
         </div>
 
         <div class="section-body">
 
-            <!--================== MAINTENACE ==================-->
+            <!--================== MAINTENANCE ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    @if ($maintenance->start_date !== null)
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+                    @endif
                 </div>
                 @endif
                 @endforeach
@@ -31,7 +33,7 @@ List Laporan Peserta | MANAGEMENT
                 <!--================== FILTER ==================-->
                 <div class="card">
                     <div class="card-header  text-right">
-                        <h4><i class="fas fa-filter"></i> FILTER LAPORAN PESERTA</h4>
+                        <h4><i class="fas fa-filter"></i> FILTER</h4>
                         <!-- @if (Auth::user()->level == 'karyawan')
             @else
             <div class="card-header-action">
@@ -94,7 +96,7 @@ List Laporan Peserta | MANAGEMENT
 
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-list"></i> LIST LAPORAN PESERTA</h4>
+                        <h4><i class="fas fa-list"></i> DATA LAPORAN PESERTA</h4>
                         <div class="card-header-action">
                             <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
                                 <i class="fas fa-file-pdf"></i> Download PDF

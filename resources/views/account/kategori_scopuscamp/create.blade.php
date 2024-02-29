@@ -1,22 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Kategori | MANAGEMENT
+Tambah Kategori | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI SCOPUS CAMP</h1>
+            <h1>TAMBAH KATEGORI</h1>
         </div>
 
         <div class="section-body">
 
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-hand-holding-usd"></i> TAMBAH KATEGORI</h4>
-                </div>
+                </div> -->
 
                 <div class="card-body">
 

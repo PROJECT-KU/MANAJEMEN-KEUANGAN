@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Gaji Karyawan | MANAGEMENT
+Detail Laporan Camp | MIS
 @stop
 
 @section('content')
@@ -14,17 +14,11 @@ Detail Gaji Karyawan | MANAGEMENT
         <div class="section-body">
 
             <div class="card">
-                <style>
-                    .custom-card-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                </style>
-
-                <div class="card-header custom-card-header">
+                <div class="card-header">
                     <h4>DETAIL CAMP</h4>
-                    <h4><i class="fas fa-receipt"></i> ID TRANSAKSI: {{ $camp->id_transaksi }}</h4>
+                    <div class="card-header-action">
+                        <h4 class="float-right"><i class="fas fa-receipt"></i> ID TRANSAKSI: {{ $camp->id_transaksi }}</h4>
+                    </div>
                 </div>
 
                 @if(session('status') === 'error')
@@ -86,9 +80,6 @@ Detail Gaji Karyawan | MANAGEMENT
                                 <div class="form-group">
                                     <label>Jumlah Peserta</label>
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
-                                        </div>
                                         <input type="text" name="tiket_trainer" value="{{ $camp->peserta }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control currency_tiket_trainer" readonly>
                                     </div>
                                 </div>
@@ -1552,8 +1543,8 @@ Detail Gaji Karyawan | MANAGEMENT
                         </div>
                     </div>
 
-                    <a href="{{ route('account.camp.index') }}" class="btn btn-info mr-1">
-                        <i class="fa fa-list"></i> KEMBALI
+                    <a href="{{ route('account.camp.index') }}" class="btn btn-info">
+                        <i class="fa fa-undo"></i> KEMBALI
                     </a>
 
                     </form>

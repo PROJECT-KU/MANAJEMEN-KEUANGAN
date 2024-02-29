@@ -42,7 +42,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>START MAINTENANCE</label>
-                                    <input type="datetime-local" id="start_date" name="start_date" value="{{ $maintenance->start_date }}" placeholder="Masukkan Mulai Maintenance" class="form-control" required>
+                                    <input type="datetime-local" id="start_date" name="start_date" value="{{ $maintenance->start_date }}" placeholder="Masukkan Mulai Maintenance" class="form-control">
 
                                     @error('start_date')
                                     <div class="invalid-feedback" style="display: block">
@@ -54,7 +54,7 @@ Tambah Pengguna | MANAGEMENT
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>END MAINTENANCE</label>
-                                    <input type="datetime-local" id="end_date" name="end_date" value="{{ $maintenance->end_date }}" placeholder="Masukkan Berakhir Maintenance" class="form-control" required>
+                                    <input type="datetime-local" id="end_date" name="end_date" value="{{ $maintenance->end_date }}" placeholder="Masukkan Berakhir Maintenance" class="form-control">
 
                                     @error('end_date')
                                     <div class="invalid-feedback" style="display: block">

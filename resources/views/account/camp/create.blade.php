@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Gaji Karyawan | MANAGEMENT
+Tambah laporan Camp | MIS
 @stop
 
 <!--================== button trainer responsive ==================-->

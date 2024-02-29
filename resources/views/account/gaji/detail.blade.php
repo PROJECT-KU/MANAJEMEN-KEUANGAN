@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Update Gaji Karyawan | MANAGEMENT
+Detail Gaji Karyawan | MIS
 @stop
 
 <!--================== button lembur responsive ==================-->
@@ -168,14 +168,14 @@ Update Gaji Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>GAJI KARYAWAN</h1>
+      <h1>DETAIL GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-dollar-sign"></i> UPDATE GAJI KARYAWAN</h4>
+          <h4>DETAIL KARYAWAN</h4>
         </div>
 
         @if(session('status') === 'error')
@@ -189,8 +189,10 @@ Update Gaji Karyawan | MANAGEMENT
 
         <div class="card-body">
 
-          <form action="{{ route('account.gaji.update', $gaji->id) }}" method="POST" enctype="multipart/form-data">
+          <form action="" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <!--================== DETAIL KARYAWAN ==================-->
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -300,1249 +302,1293 @@ Update Gaji Karyawan | MANAGEMENT
             </div>
         </div>
       </div>
+      <!--================== END ==================-->
 
-      <div class="section-body">
-        <div class="card">
-          @if(session('status') === 'error')
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <b>{{ session('message') }}</b>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+      <!--================== GAJI POKOK ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>GAJI POKOK</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
           </div>
-          @endif
-          <div class="card-body">
 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Gaji Pokok</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="gaji_pokok" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency">
-                  </div>
-                  @error('gaji_pokok')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <!--================== INPUTAN UNTUK LEMBUR ==================-->
-            <!-- lembur default -->
-            <div class="row">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur" value="{{ $gaji->lembur }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_default">
-                  </div>
-                  @error('lembur')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Masukkan Total Jam" class="form-control">
-                  @error('jumlah_lembur')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-info mt-2" id="addLembur" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-plus"></i> INPUT</button>
-                </div>
-              </div>
-            </div>
-            <!-- end lembur default -->
-
-            <!-- lembur field 1 -->
-            @if($gaji->lembur1 == null || $gaji->jumlah_lembur1 == null || $gaji->lembur1 == '0' || $gaji->jumlah_lembur1 == '0')
-            <div class="row lembur-field0" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur1" value="{{ $gaji->lembur1 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_1">
-                  </div>
-                  @error('lembur1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control">
-                  @error('jumlah_lembur1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field0">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur1" value="{{ $gaji->lembur1 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_1">
-                  </div>
-                  @error('lembur1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control">
-                  @error('jumlah_lembur1')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 1 -->
-
-            <!-- lembur field 2 -->
-            @if($gaji->lembur2 == null || $gaji->jumlah_lembur2 == null || $gaji->lembur2 == '0' || $gaji->jumlah_lembur2 == '0')
-            <div class="row lembur-field2" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur2" value="{{ $gaji->lembur2 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_2" autofocus>
-                  </div>
-                  @error('lembur2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field2">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur2" value="{{ $gaji->lembur2 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_2" autofocus>
-                  </div>
-                  @error('lembur2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur2')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 2 -->
-
-            <!-- lembur field 3 -->
-            @if($gaji->lembur3 == null || $gaji->jumlah_lembur3 == null || $gaji->lembur3 == '0' || $gaji->jumlah_lembur3 == '0')
-            <div class="row lembur-field3" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur3" value="{{ $gaji->lembur3 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_3" autofocus>
-                  </div>
-                  @error('lembur3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field3">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur3" value="{{ $gaji->lembur3 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_3" autofocus>
-                  </div>
-                  @error('lembur3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur3')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 3 -->
-
-            <!-- lembur field 4 -->
-            @if($gaji->lembur4 == null || $gaji->jumlah_lembur4 == null || $gaji->lembur4 == '0' || $gaji->jumlah_lembur4 == '0')
-            <div class="row lembur-field4" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur4" value="{{ $gaji->lembur4 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_4" autofocus>
-                  </div>
-                  @error('lembur4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field4">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur4" value="{{ $gaji->lembur4 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_4" autofocus>
-                  </div>
-                  @error('lembur4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur4')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 4 -->
-
-            <!-- lembur field 5 -->
-            @if($gaji->lembur5 == null || $gaji->jumlah_lembur5 == null || $gaji->lembur5 == '0' || $gaji->jumlah_lembur5 == '0')
-            <div class="row lembur-field5" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur5" value="{{ $gaji->lembur5 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_5" autofocus>
-                  </div>
-                  @error('lembur5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field5">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur5" value="{{ $gaji->lembur5 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_5" autofocus>
-                  </div>
-                  @error('lembur5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur5')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 5 -->
-
-            <!-- lembur field 6 -->
-            @if($gaji->lembur6 == null || $gaji->jumlah_lembur6 == null || $gaji->lembur6 == '0' || $gaji->jumlah_lembur6 == '0')
-            <div class="row lembur-field6" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur6" value="{{ $gaji->lembur6 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_6" autofocus>
-                  </div>
-                  @error('lembur6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field6">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur6" value="{{ $gaji->lembur6 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_6" autofocus>
-                  </div>
-                  @error('lembur6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur6')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 6 -->
-
-            <!-- lembur field 7 -->
-            @if($gaji->lembur7 == null || $gaji->jumlah_lembur7 == null || $gaji->lembur7 == '0' || $gaji->jumlah_lembur7 == '0')
-            <div class="row lembur-field7" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur7" value="{{ $gaji->lembur7 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_7" autofocus>
-                  </div>
-                  @error('lembur7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field7">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur7" value="{{ $gaji->lembur7 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_7" autofocus>
-                  </div>
-                  @error('lembur7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur7')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 7 -->
-
-            <!-- lembur field 8 -->
-            @if($gaji->lembur8 == null || $gaji->jumlah_lembur8 == null || $gaji->lembur8 == '0' || $gaji->jumlah_lembur8 == '0')
-            <div class="row lembur-field8" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur8" value="{{ $gaji->lembur8 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_8" autofocus>
-                  </div>
-                  @error('lembur8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field8">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur8" value="{{ $gaji->lembur8 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_8" autofocus>
-                  </div>
-                  @error('lembur8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur8')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 8 -->
-
-            <!-- lembur field 9 -->
-            @if($gaji->lembur9 == null || $gaji->jumlah_lembur9 == null || $gaji->lembur9 == '0' || $gaji->jumlah_lembur9 == '0')
-            <div class="row lembur-field9" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur9" value="{{ $gaji->lembur9 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_9" autofocus>
-                  </div>
-                  @error('lembur9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field9">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur9" value="{{ $gaji->lembur9 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_9" autofocus>
-                  </div>
-                  @error('lembur9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur9')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 9 -->
-
-            <!-- lembur field 10 -->
-            @if($gaji->lembur10 == null || $gaji->jumlah_lembur10 == null || $gaji->lembur10 == '0' || $gaji->jumlah_lembur10 == '0')
-            <div class="row lembur-field10" style="display: none;">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur10" value="{{ $gaji->lembur10 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_10" autofocus>
-                  </div>
-                  @error('lembur10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @else
-            <div class="row lembur-field10">
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="lembur10" value="{{ $gaji->lembur10 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_10" autofocus>
-                  </div>
-                  @error('lembur10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                  @error('jumlah_lembur10')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div class="form-group">
-                  <label class="mb-3"></label>
-                  <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
-                    <i class="fas fa-times"></i> HAPUS</button>
-                </div>
-              </div>
-            </div>
-            @endif
-            <!-- end lembur field 10 -->
-            <!--================== end ==================-->
-
-            <!--================== INPUTAN BONUS DARI PRESENSI ==================-->
-            <div class="row">
-              <!-- ALPHA -->
-              <!-- <div class="col-md-3">
-                <div class="form-group">
-                  <label>Alpha</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus5" value="{{ $gaji->bonus5 }}" placeholder="Tanpa Kehadiran" class="form-control currency5" readonly>
-                  </div>
-                </div>
-              </div> -->
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Total Alpha</label>
-                  <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-
-              <!-- BONUS KEHADIRAN -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Kehadiran</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus" value="{{ $gaji->bonus }}" placeholder="Bonus Kehadiran" class="form-control currency_kehadiran">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Kehadiran</label>
-                  <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-            </div>
-
-            <div class="row">
-              <!-- BONUS CAMP JOGJA -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Camp Jogja</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus1" value="{{ $gaji->bonus1 }}" placeholder="Bonus Camp Jogja" class="form-control currency_camp_jogja">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Camp Jogja</label>
-                  <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-
-              <!-- BONUS CAMP LUAR KOTA-->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Camp Luar Kota</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus4" value="{{ $gaji->bonus4 }}" placeholder="Bonus Camp Luar Kota" class="form-control currency_camp_luar_kota">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Camp Luar Kota</label>
-                  <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-            </div>
-
-            <div class="row">
-              <!-- PERJALANAN JAWA -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Perjalanan Dalam Jawa</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus2" value="{{ $gaji->bonus2 }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_jawa">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Perjalanan Dalam Jawa</label>
-                  <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-
-              <!-- PERJALANAN LUAR JAWA -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Perjalanan Luar Jawa</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus3" value="{{ $gaji->bonus3 }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Perjalanan Luar Jawa</label>
-                  <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-            </div>
-
-            <div class="row">
-              <!-- REMOTE -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Remote</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus6" value="{{ $gaji->bonus6 }}" placeholder="Bonus Remote" class="form-control currency_remote">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Remote</label>
-                  <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-
-              <!-- IZIN -->
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Bonus Izin</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="bonus7" value="{{ $gaji->bonus7 }}" placeholder="Bonus Izin" class="form-control currency_izin">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Total Izin</label>
-                  <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
-                </div>
-              </div>
-              <!-- END -->
-            </div>
-            <!--================== end ==================-->
-
-            <!--================== INPUTAN UNTUK BONUS ==================-->
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Tunjangan BPJS</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Tunjangan THR</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ $gaji->tunjangan_thr }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Tunjangan Pulsa</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ $gaji->tunjangan_pulsa }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Tunjangan Lainnya</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="tunjangan" id="tunjangan" value="{{ $gaji->tunjangan }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Potongan</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="potongan" id="potongan" value="{{ $gaji->potongan }}" placeholder="Masukkan Total Potongan" class="form-control currency_potongan">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>PPH 21</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="pph" id="pph" value="{{ $gaji->pph }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph">
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Tanggal Dibayarkan</label>
-                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control ">
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Status Pembayaran</label>
-                  <select class="form-control" name="status">
-                    <option value="" disabled selected>Silahkan Pilih</option>
-                    <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
-                    <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
-                  </select>
-                  @error('status')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Catatan</label>
-                  <div class="input-group">
-                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;">{{ $gaji->note }}</textarea>
-                  </div>
-                  @error('note')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Bukti Pembayaran</label>
-                  <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-                  </div>
-                  @error('gambar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <a href="{{ asset('images/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
-                    <div class="card" style="width: 18rem;">
-                      @if ($gaji->gambar == null)
-                      <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
-                      @else
-                      <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
-                      @endif
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-
+          <div class="row">
             <div class="col-md-12">
               <div class="form-group">
-                <label>Total Gaji</label>
+                <label>Gaji Pokok</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="total" id="total" value="{{ number_format($gaji->total, 0, ',', ',') }}" placeholder="Masukkan Total Potongan" class="form-control currency6" readonly>
+                  <input type="text" name="gaji_pokok" value="{{ $gaji->gaji_pokok }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" readonly>
                 </div>
+                @error('gaji_pokok')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!--================== END ==================-->
+
+      <!--================== BONUS LEMBUR ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>BONUS LEMBUR</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+          </div>
+
+          <!-- lembur default -->
+          <div class="row">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Bonus Lembur (Per Jam)</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="lembur" value="{{ $gaji->lembur }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_default" readonly>
+                </div>
+                @error('lembur')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
               </div>
             </div>
 
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <a href="{{ route('account.gaji.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> KEMBALI
-            </a>
+            <div class="col-md-5">
+              <div class="form-group">
+                <label>Total Jam Lembur</label>
+                <input type="text" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+                @error('jumlah_lembur')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
 
-            </form>
-
+            <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-info mt-2" id="addLembur" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-plus"></i> INPUT</button>
+              </div> -->
           </div>
         </div>
+        <!-- end lembur default -->
+
+        <!-- lembur field 1 -->
+        @if($gaji->lembur1 == null || $gaji->jumlah_lembur1 == null || $gaji->lembur1 == '0' || $gaji->jumlah_lembur1 == '0')
+        <div class="row lembur-field0" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur1" value="{{ $gaji->lembur1 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_1" readonly>
+              </div>
+              @error('lembur1')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur1')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field0">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur1" value="{{ $gaji->lembur1 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_1" readonly>
+              </div>
+              @error('lembur1')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur1')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 1 -->
+
+        <!-- lembur field 2 -->
+        @if($gaji->lembur2 == null || $gaji->jumlah_lembur2 == null || $gaji->lembur2 == '0' || $gaji->jumlah_lembur2 == '0')
+        <div class="row lembur-field2" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur2" value="{{ $gaji->lembur2 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_2" readonly>
+              </div>
+              @error('lembur2')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur2')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field2">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur2" value="{{ $gaji->lembur2 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_2" readonly>
+              </div>
+              @error('lembur2')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur2')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 2 -->
+
+        <!-- lembur field 3 -->
+        @if($gaji->lembur3 == null || $gaji->jumlah_lembur3 == null || $gaji->lembur3 == '0' || $gaji->jumlah_lembur3 == '0')
+        <div class="row lembur-field3" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur3" value="{{ $gaji->lembur3 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_3" readonly>
+              </div>
+              @error('lembur3')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur3')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field3">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur3" value="{{ $gaji->lembur3 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_3" readonly>
+              </div>
+              @error('lembur3')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur3')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 3 -->
+
+        <!-- lembur field 4 -->
+        @if($gaji->lembur4 == null || $gaji->jumlah_lembur4 == null || $gaji->lembur4 == '0' || $gaji->jumlah_lembur4 == '0')
+        <div class="row lembur-field4" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur4" value="{{ $gaji->lembur4 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_4" readonly>
+              </div>
+              @error('lembur4')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur4')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field4">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur4" value="{{ $gaji->lembur4 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_4" readonly>
+              </div>
+              @error('lembur4')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur4')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 4 -->
+
+        <!-- lembur field 5 -->
+        @if($gaji->lembur5 == null || $gaji->jumlah_lembur5 == null || $gaji->lembur5 == '0' || $gaji->jumlah_lembur5 == '0')
+        <div class="row lembur-field5" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur5" value="{{ $gaji->lembur5 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_5" readonly>
+              </div>
+              @error('lembur5')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur5')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field5">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur5" value="{{ $gaji->lembur5 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_5" readonly>
+              </div>
+              @error('lembur5')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur5')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 5 -->
+
+        <!-- lembur field 6 -->
+        @if($gaji->lembur6 == null || $gaji->jumlah_lembur6 == null || $gaji->lembur6 == '0' || $gaji->jumlah_lembur6 == '0')
+        <div class="row lembur-field6" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur6" value="{{ $gaji->lembur6 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_6" readonly>
+              </div>
+              @error('lembur6')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur6')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field6">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur6" value="{{ $gaji->lembur6 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_6" readonly>
+              </div>
+              @error('lembur6')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur6')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 6 -->
+
+        <!-- lembur field 7 -->
+        @if($gaji->lembur7 == null || $gaji->jumlah_lembur7 == null || $gaji->lembur7 == '0' || $gaji->jumlah_lembur7 == '0')
+        <div class="row lembur-field7" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur7" value="{{ $gaji->lembur7 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_7" readonly>
+              </div>
+              @error('lembur7')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur7')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field7">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur7" value="{{ $gaji->lembur7 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_7" readonly>
+              </div>
+              @error('lembur7')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur7')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 7 -->
+
+        <!-- lembur field 8 -->
+        @if($gaji->lembur8 == null || $gaji->jumlah_lembur8 == null || $gaji->lembur8 == '0' || $gaji->jumlah_lembur8 == '0')
+        <div class="row lembur-field8" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur8" value="{{ $gaji->lembur8 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_8" readonly>
+              </div>
+              @error('lembur8')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur8')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field8">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur8" value="{{ $gaji->lembur8 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_8" readonly>
+              </div>
+              @error('lembur8')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur8')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 8 -->
+
+        <!-- lembur field 9 -->
+        @if($gaji->lembur9 == null || $gaji->jumlah_lembur9 == null || $gaji->lembur9 == '0' || $gaji->jumlah_lembur9 == '0')
+        <div class="row lembur-field9" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur9" value="{{ $gaji->lembur9 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_9" readonly>
+              </div>
+              @error('lembur9')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur9')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field9">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur9" value="{{ $gaji->lembur9 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_9" readonly>
+              </div>
+              @error('lembur9')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur9')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 9 -->
+
+        <!-- lembur field 10 -->
+        @if($gaji->lembur10 == null || $gaji->jumlah_lembur10 == null || $gaji->lembur10 == '0' || $gaji->jumlah_lembur10 == '0')
+        <div class="row lembur-field10" style="display: none;">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur10" value="{{ $gaji->lembur10 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_10" readonly>
+              </div>
+              @error('lembur10')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur10')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @else
+        <div class="row lembur-field10">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Bonus Lembur (Per Jam)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="lembur10" value="{{ $gaji->lembur10 }}" placeholder="Masukkan Bayaran Lembur Per Jam" class="form-control currency_lembur_10" readonly>
+              </div>
+              @error('lembur10')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Total Jam Lembur</label>
+              <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
+              @error('jumlah_lembur10')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <!-- <div class="col-md-1">
+              <div class="form-group">
+                <label class="mb-3"></label>
+                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
+                  <i class="fas fa-times"></i> HAPUS</button>
+              </div>
+            </div> -->
+        </div>
+        @endif
+        <!-- end lembur field 10 -->
+
       </div>
-  </section>
+    </div>
+    <!--================== END ==================-->
+
+    <!--================== BONUS PRESENSI ==================-->
+    <div class="card">
+      <div class="card-header">
+        <h4>BONUS PRESENSI</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Total Alpha</label>
+              <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+
+          <!-- BONUS KEHADIRAN -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Kehadiran</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus" value="{{ $gaji->bonus }}" placeholder="Bonus Kehadiran" class="form-control currency_kehadiran" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Kehadiran</label>
+              <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+        </div>
+
+        <div class="row">
+          <!-- BONUS CAMP JOGJA -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Camp Jogja</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus1" value="{{ $gaji->bonus1 }}" placeholder="Bonus Camp Jogja" class="form-control currency_camp_jogja" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Camp Jogja</label>
+              <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+
+          <!-- BONUS CAMP LUAR KOTA-->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Camp Luar Kota</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus4" value="{{ $gaji->bonus4 }}" placeholder="Bonus Camp Luar Kota" class="form-control currency_camp_luar_kota" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Camp Luar Kota</label>
+              <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+        </div>
+
+        <div class="row">
+          <!-- PERJALANAN JAWA -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Perjalanan Dalam Jawa</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus2" value="{{ $gaji->bonus2 }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_jawa" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Perjalanan Dalam Jawa</label>
+              <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+
+          <!-- PERJALANAN LUAR JAWA -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Perjalanan Luar Jawa</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus3" value="{{ $gaji->bonus3 }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Perjalanan Luar Jawa</label>
+              <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+        </div>
+
+        <div class="row">
+          <!-- REMOTE -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Remote</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus6" value="{{ $gaji->bonus6 }}" placeholder="Bonus Remote" class="form-control currency_remote" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Remote</label>
+              <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+
+          <!-- IZIN -->
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Bonus Izin</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="bonus7" value="{{ $gaji->bonus7 }}" placeholder="Bonus Izin" class="form-control currency_izin" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Total Izin</label>
+              <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
+            </div>
+          </div>
+          <!-- END -->
+        </div>
+
+      </div>
+    </div>
+    <!--================== END ==================-->
+
+    <!--================== BONUS LAINNYA ==================-->
+    <div class="card">
+      <div class="card-header">
+        <h4>BONUS LAINNYA</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Tunjangan BPJS</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Tunjangan THR</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ $gaji->tunjangan_thr }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Tunjangan Pulsa</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ $gaji->tunjangan_pulsa }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa" readonly>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Tunjangan Lainnya</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="tunjangan" id="tunjangan" value="{{ $gaji->tunjangan }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!--================== END ==================-->
+
+    <!--================== POTONGAN ==================-->
+    <div class="card">
+      <div class="card-header">
+        <h4>POTONGAN</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Potongan</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="potongan" id="potongan" value="{{ $gaji->potongan }}" placeholder="Masukkan Total Potongan" class="form-control currency_potongan" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>PPH 21</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="pph" id="pph" value="{{ $gaji->pph }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Tanggal Dibayarkan</label>
+              <input type="datetime-local" name="tanggal" id="tanggal" value="{{ $gaji->tanggal }}" placeholder="Masukkan Total Tunjangan" class="form-control" readonly>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!--================== END ==================-->
+
+    <!--================== LAINNYA ==================-->
+    <div class="card">
+      <div class="card-header">
+        <h4>LAINNYA</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Status Pembayaran</label>
+              <select class="form-control" name="status" disabled>
+                <option value="" disabled selected>Silahkan Pilih</option>
+                <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
+                <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
+              </select>
+              @error('status')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Catatan</label>
+              <div class="input-group">
+                <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" disabled>{{ $gaji->note }}</textarea>
+              </div>
+              @error('note')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Bukti Pembayaran</label>
+              <div class="input-group">
+                <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera" disabled>
+              </div>
+              @error('gambar')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <a href="{{ asset('images/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
+                <div class="card" style="width: 18rem;">
+                  @if ($gaji->gambar == null)
+                  <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
+                  @else
+                  <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
+                  @endif
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12">
+          <div class="form-group">
+            <label>Total Gaji</label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text" style="border-color: red;  font-weight: bold;">Rp.</span>
+              </div>
+              <input type="text" name="total" id="total" value="{{ number_format($gaji->total, 0, ',', ',') }}" placeholder="Masukkan Total Potongan" class="form-control currency6" style="border-color: red;  font-weight: bold;" readonly>
+            </div>
+          </div>
+        </div>
+
+
+        <a href="{{ route('account.gaji.index') }}" class="btn btn-info">
+          <i class="fa fa-undo"></i> KEMBALI
+        </a>
+
+        </form>
+
+      </div>
+    </div>
+</div>
+</section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

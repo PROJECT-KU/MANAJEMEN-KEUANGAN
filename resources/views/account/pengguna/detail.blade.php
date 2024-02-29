@@ -1,22 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Pengguna | MANAGEMENT
+Detail Pengguna | MIS
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PENGGUNA</h1>
+      <h1>DETAIL PENGGUNA</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
-        <div class="card-header">
+        <!-- <div class="card-header">
           <h4><i class="fas fa-users-cog"></i> DETAIL PENGGUNA</h4>
-        </div>
+        </div> -->
 
         <div class="card-body">
 
@@ -280,8 +280,8 @@ Detail Pengguna | MANAGEMENT
               </div>
             </div>
 
-            <a href="{{ route('account.pengguna.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> KEMBALI
+            <a href="{{ route('account.pengguna.index') }}" class="btn btn-info">
+              <i class="fa fa-undo"></i> KEMBALI
             </a>
 
           </form>

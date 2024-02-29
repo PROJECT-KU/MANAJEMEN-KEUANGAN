@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Dashboard | MANAGEMENT
+Dashboard | MIS
 @stop
 
 @section('content')
@@ -12,23 +12,23 @@ Dashboard | MANAGEMENT
     <section class="section">
         <div class=" col-lg-12 col-md-4 col-sm-4 col-xs-4">
 
-            <!-- akun belum di verifikasi -->
+            <!--================== AKUN BELUM DI VERIFIKASI ==================-->
             @if (!Auth::user()->email_verified_at)
             <div class="alert alert-danger" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
             </div>
             @endif
-            <!-- end -->
+            <!--================== END ==================-->
 
-            <!-- akun dinonaktifkan -->
+            <!--================== AKUN DINONAKTIFKAN ==================-->
             @if (Auth::user()->status === 'off')
             <div class="alert alert-danger" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">Akun Anda Di Nonaktifkan Sementara!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
             </div>
             @endif
-            <!-- end -->
+            <!--================== END ==================-->
 
-            <!-- masa sewa akun akan habis -->
+            <!--================== MASA SEWA AKUN AKAN HABIS ==================-->
             @if (Auth::user()->tenggat === null)
             @elseif (now() > Auth::user()->tenggat)
             <div class="alert alert-danger" role="alert" style="text-align: center;">
@@ -43,32 +43,34 @@ Dashboard | MANAGEMENT
                 HABIS PADA TANGGAL {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
             </div>
             @endif
-            <!-- end -->
+            <!--================== END ==================-->
 
-            <!-- jika data diri masih ada yang kosong -->
+            <!--================== JIKA DATA DIRI MASIH ADA YANG KOSONG ==================-->
             @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null || Auth::user()->gambar == null || Auth::user()->jobdesk == null)
             <div class="alert alert-warning" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">DATA DIRI</b><br>
                 <p style="font-size: 15px;">Data diri anda masih ada yang kosong! Silahkan Lengkapi data diri anda terlebih dahulu!</p>
             </div>
             @endif
-            <!-- end -->
+            <!--================== END ==================-->
 
-
-            <!--================== jika maintenace aktif ==================-->
+            <!--================== MAINTENANCE ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    @if ($maintenance->start_date !== null)
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+                    @endif
                 </div>
                 @endif
                 @endforeach
                 @endif
-                <!--================== end ==================-->
+                <!--================== END ==================-->
+
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <div class="card card-statistic-2">

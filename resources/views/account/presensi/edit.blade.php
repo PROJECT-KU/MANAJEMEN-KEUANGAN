@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Update Presensi Karyawan | MANAGEMENT
+Update Presensi Karyawan | MIS
 @stop
 
 <!--================== animasi image ==================-->
@@ -20,15 +20,15 @@ Update Presensi Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PRESENSI KARYAWAN</h1>
+      <h1>UPDATE PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
-        <div class="card-header">
+        <!-- <div class="card-header">
           <h4><i class="fas fa-user-clock"></i> UPDATE PRESENSI KARYAWAN</h4>
-        </div>
+        </div> -->
 
         <div class="card-body">
 
@@ -253,8 +253,8 @@ Update Presensi Karyawan | MANAGEMENT
     @else
     <button class="btn btn-primary mr-1 btn-secondary" type="submit" disabled><i class="fa fa-paper-plane"></i> SIMPAN</button>
     @endif
-    <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
-      <i class="fa fa-list"></i> KEMBALI
+    <a href="{{ route('account.presensi.index') }}" class="btn btn-info">
+      <i class="fa fa-undo"></i> KEMBALI
     </a>
 
     </form>

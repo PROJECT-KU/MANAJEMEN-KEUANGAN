@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-List aporan Camp | MANAGEMENT
+Data Laporan Camp | MIS
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>LAPORAN CAMP</h1>
+      <h1>DATA LAPORAN CAMP</h1>
     </div>
 
     <div class="section-body">
@@ -16,12 +16,14 @@ List aporan Camp | MANAGEMENT
       <!--================== MAINTENANCE ==================-->
       @if (!$maintenances->isEmpty())
       @foreach($maintenances as $maintenance)
-      @if ($maintenance->status === 'aktif' && ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+      @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
         <div class="alert alert-danger" role="alert" style="text-align: center;">
-          <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
+          <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
           <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
           <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+          @if ($maintenance->start_date !== null)
           <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+          @endif
         </div>
         @endif
         @endforeach
@@ -31,7 +33,7 @@ List aporan Camp | MANAGEMENT
         <!--================== FILTER ==================-->
         <div class="card">
           <div class="card-header  text-right">
-            <h4><i class="fas fa-filter"></i> FILTER LAPORAN CAMP</h4>
+            <h4><i class="fas fa-filter"></i> FILTER</h4>
           </div>
 
           <div class="card-body">
@@ -104,23 +106,23 @@ List aporan Camp | MANAGEMENT
 
         <div class="card">
           <div class="card-header">
-            <h4><i class="fas fa-list"></i> LIST LAPORAN CAMP</h4>
+            <h4><i class="fas fa-list"></i> DATA LAPORAN CAMP</h4>
             <div class="card-header-action">
               <a href="{{ route('account.laporan_camp.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Download PDF
               </a>
             </div>
           </div>
-          <div class="card-header">
-            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                @if ($startDate && $endDate)
-                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                @else
-                {{ date('F Y') }}
-                @endif
-              </strong>
-            </p>
-          </div>
+          <!-- <div class="card-header">
+              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                  @if ($startDate && $endDate)
+                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                  @else
+                  {{ date('F Y') }}
+                  @endif
+                </strong>
+              </p>
+            </div> -->
           <div class="card-body">
             <div class="table-responsive">
               <div class="table-responsive">
@@ -165,16 +167,16 @@ List aporan Camp | MANAGEMENT
                         @endif
                       </td>
                       <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
                           <i class="fa fa-eye"></i>
                         </a>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info">
+                        <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
                           <i class="fa fa-download"></i>
                         </a>
 

@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Gaji Karyawan | MANAGEMENT
+Tambah Gaji Karyawan | MIS
 @stop
 
 <!--================== button lembur responsive ==================-->
@@ -168,14 +168,14 @@ Tambah Gaji Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>GAJI KARYAWAN</h1>
+      <h1>TAMBAH GAJI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-hand-holding-usd"></i>TAMBAH GAJI KARYAWAN</h4>
+          <h4>DETAIL KARYAWAN</h4>
         </div>
 
         @if(session('status') === 'error')
@@ -191,6 +191,8 @@ Tambah Gaji Karyawan | MANAGEMENT
 
           <form action="{{ route('account.gaji.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <!--================== DETAIL KARYAWAN ==================-->
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -301,9 +303,13 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
         </div>
       </div>
+      <!--================== END ==================-->
 
-
+      <!--================== GAJI POKOK ==================-->
       <div class="card">
+        <div class="card-header">
+          <h4>GAJI POKOK</h4>
+        </div>
         <div class="card-body">
           <div class="row">
           </div>
@@ -325,6 +331,18 @@ Tambah Gaji Karyawan | MANAGEMENT
                 @enderror
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <!--================== END ==================-->
+
+      <!--================== BONUS LEMBUR ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>BONUS LEMBUR</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
           </div>
 
           <!-- lembur default -->
@@ -781,22 +799,21 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
           </div>
           <!-- end lembur field 10 -->
+        </div>
+      </div>
+      <!--================== END ==================-->
 
-          <!--================== BONUS DARI PRESENSI ==================-->
+
+      <!--================== BONUS DARI PRESENSI ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>BONUS PRESENSI</h4>
+        </div>
+        <div class="card-body">
           <div class="row">
-            <!-- ALPHA -->
-            <!-- <div class="col-md-3">
-              <div class="form-group">
-                <label>Alpha</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus5" value="{{ old('bonus5') }}" placeholder="Tanpa Kehadiran" class="form-control currency5">
-                </div>
-              </div>
-            </div> -->
+          </div>
 
+          <div class="row">
             <div class="col-md-6">
               <div class="form-group">
                 <label>Total Alpha</label>
@@ -958,7 +975,18 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
             <!-- END -->
           </div>
-          <!--================== end ==================-->
+        </div>
+      </div>
+      <!--================== end ==================-->
+
+      <!--================== BONUS LAINNYA ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>BONUS LAINNYA</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+          </div>
 
           <div class="row">
             <div class="col-md-6">
@@ -1032,6 +1060,19 @@ Tambah Gaji Karyawan | MANAGEMENT
             </div>
           </div>
 
+        </div>
+      </div>
+      <!--================== END ==================-->
+
+      <!--================== POTONGAN ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>POTONGAN</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+          </div>
+
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -1078,6 +1119,19 @@ Tambah Gaji Karyawan | MANAGEMENT
               </div>
               @enderror
             </div>
+          </div>
+
+        </div>
+      </div>
+      <!--================== END ==================-->
+
+      <!--================== LAINNYA ==================-->
+      <div class="card">
+        <div class="card-header">
+          <h4>LAINNYA</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
           </div>
 
           <div class="row">

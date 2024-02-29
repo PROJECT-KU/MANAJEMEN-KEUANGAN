@@ -1,27 +1,29 @@
 @extends('layouts.account')
 
 @section('title')
-Data Pendaftaran Scopus Camp | MANAGEMENT
+Data Scopus Camp | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>SCOPUS CAMP</h1>
+            <h1>DATA SCOPUS CAMP</h1>
         </div>
 
         <div class="section-body">
 
-            <!--================== MAINTENACE ==================-->
+            <!--================== MAINTENANCE ==================-->
             @if (!$maintenances->isEmpty())
             @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' || ($maintenance->end_date !== null && now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
                 <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">INFORMASI!</b><br>
+                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
                     <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
                     <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+                    @if ($maintenance->start_date !== null)
                     <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+                    @endif
                 </div>
                 @endif
                 @endforeach
@@ -88,9 +90,9 @@ Data Pendaftaran Scopus Camp | MANAGEMENT
                                 </div>
                             </div>
                         </form>
-                        <a href="{{ route('account.kategori.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
+                        <!-- <a href="{{ route('account.kategori.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
                             <i class="fa fa-plus-circle"></i> TAMBAH KATEGORI
-                        </a>
+                        </a> -->
                     </div>
                 </div>
                 <!--================== END ==================-->

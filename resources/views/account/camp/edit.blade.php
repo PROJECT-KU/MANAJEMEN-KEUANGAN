@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Update Laporan Camp | MANAGEMENT
+Update Laporan Camp | MIS
 @stop
 
 <!--================== button trainer responsive ==================-->
@@ -404,10 +404,12 @@ Update Laporan Camp | MANAGEMENT
         </div>
 
         <div class="section-body">
-
             <div class="card">
                 <div class="card-header">
                     <h4>UPDATE DETAIL CAMP</h4>
+                    <div class="card-header-action">
+                        <h4 class="float-right"><i class="fas fa-receipt"></i> ID TRANSAKSI: {{ $camp->id_transaksi }}</h4>
+                    </div>
                 </div>
 
                 @if(session('status') === 'error')
@@ -489,10 +491,7 @@ Update Laporan Camp | MANAGEMENT
                                 <div class="form-group">
                                     <label>Jumlah Peserta</label>
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
-                                        </div>
-                                        <input type="text" name="peserta" value="{{ number_format($camp->peserta, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control">
+                                        <input type="number" name="peserta" value="{{ number_format($camp->peserta, 0, ',', ',') }}" placeholder="Masukkan Uang Keluar Tiket Trainer" class="form-control">
                                     </div>
                                     @error('peserta')
                                     <div class="invalid-feedback" style="display: block">
@@ -4178,8 +4177,8 @@ Update Laporan Camp | MANAGEMENT
                     </div>
 
                     <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                    <a href="{{ route('account.camp.index') }}" class="btn btn-info mr-1">
-                        <i class="fa fa-list"></i> KEMBALI
+                    <a href="{{ route('account.camp.index') }}" class="btn btn-info">
+                        <i class="fa fa-undo"></i> KEMBALI
                     </a>
 
                     </form>
