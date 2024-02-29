@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MANAGEMENT
+Tambah Pengguna | MIS
 @stop
 
 <style>
@@ -21,15 +21,15 @@ Tambah Pengguna | MANAGEMENT
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>PENGGUNA</h1>
+            <h1>TAMBAH PENGGUNA</h1>
         </div>
 
         <div class="section-body">
 
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-user-plus"></i> TAMBAH PENGGUNA</h4>
-                </div>
+                </div> -->
 
                 <div class="card-body">
 

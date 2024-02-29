@@ -1,22 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Update Kategori | MANAGEMENT
+Update Kategori | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI SCOPUS CAMP</h1>
+            <h1>UPDATE KATEGORI</h1>
         </div>
 
         <div class="section-body">
 
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-hand-holding-usd"></i> UPDATE KATEGORI</h4>
-                </div>
+                </div> -->
 
                 <div class="card-body">
 
@@ -114,7 +114,9 @@ Update Kategori | MANAGEMENT
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                        <a href="{{ route('account.kategori.index') }}" class="btn btn-info">
+                            <i class="fa fa-undo"></i> KEMBALI
+                        </a>
 
                     </form>
 

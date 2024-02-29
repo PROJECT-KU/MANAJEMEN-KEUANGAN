@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Presensi Karyawan | MANAGEMENT
+Detail Presensi Karyawan | MIS
 @stop
 
 <!--================== animasi image ==================-->
@@ -21,15 +21,15 @@ Detail Presensi Karyawan | MANAGEMENT
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>PRESENSI KARYAWAN</h1>
+      <h1>DETAIL PRESENSI KARYAWAN</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
-        <div class="card-header">
+        <!-- <div class="card-header">
           <h4><i class="fas fa-user-clock"></i> DETAIL PRESENSI KARYAWAN</h4>
-        </div>
+        </div> -->
 
         <div class="card-body">
 
@@ -163,51 +163,55 @@ Detail Presensi Karyawan | MANAGEMENT
             </div>
             @endif
 
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Bukti Presensi Masuk</label>
-                  <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-                    <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
-                      <div class="cardgambar" style="width: 200px;">
-                        <img id="image-preview" style="width: 200px; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
-                      </div>
-                    </a>
+            <div id="image-section" style="display: none;">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Bukti Presensi Masuk</label>
+                    <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                      <a href="{{ asset('images/' . $presensi->gambar) }}" data-lightbox="{{ $presensi->id }}">
+                        <div class="cardgambar" style="width: 200px;">
+                          <img id="image-preview" style="width: 200px; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar) }}" alt="Preview Image">
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Bukti Presensi Pulang</label>
+                    <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
+                      <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
+                        <div class="cardgambar" style="width: 200px;">
+                          <img id="image-preview-pulang" style="width: 200px; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Belum Presensi Pulang">
+                        </div>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Bukti Presensi Pulang</label>
-                  <div class="mb-3" style="width: 200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);">
-                    <a href="{{ asset('images/' . $presensi->gambar_pulang) }}" data-lightbox="{{ $presensi->id }}">
-                      <div class="cardgambar" style="width: 200px;">
-                        <img id="image-preview-pulang" style="width: 200px; height: 200px;" class="card-img-top" src="{{ asset('images/' . $presensi->gambar_pulang) }}" alt="Belum Presensi Pulang">
-                      </div>
-                    </a>
+            </div>
+
+            <div id="catatan-section" style="display: none;">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Catatan</label>
+                    <div class="input-group">
+                      <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" disabled>{{ $presensi->note }}</textarea>
+                    </div>
+                    @error('note')
+                    <div class="invalid-feedback" style="display: block">
+                      {{ $message }}
+                    </div>
+                    @enderror
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Catatan</label>
-                  <div class="input-group">
-                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" disabled>{{ $presensi->note }}</textarea>
-                  </div>
-                  @error('note')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <a href="{{ route('account.presensi.index') }}" class="btn btn-info mr-1">
-              <i class="fa fa-list"></i> KEMBALI
+            <a href="{{ route('account.presensi.index') }}" class="btn btn-info">
+              <i class="fa fa-undo"></i> KEMBALI
             </a>
 
           </form>
@@ -217,6 +221,33 @@ Detail Presensi Karyawan | MANAGEMENT
     </div>
   </section>
 </div>
+
+<!--================== jika status remote atau izin wajib upload image ==================-->
+<script>
+  // Function to toggle visibility of catatan and gambar based on selected status
+  function toggleSections() {
+    var statusSelect = document.getElementById('status');
+    var catatanSection = document.getElementById('catatan-section');
+    var imageSection = document.getElementById('image-section');
+    var GambarUpload = document.getElementById('gambar_pulang');
+
+    if (statusSelect.value === 'izin') {
+      catatanSection.style.display = 'block';
+      imageSection.style.display = 'block';
+      GambarUpload.setAttribute('required', 'required');
+    } else {
+      catatanSection.style.display = 'none';
+      imageSection.style.display = 'none';
+    }
+  }
+
+  // Call the function initially
+  toggleSections();
+
+  // Add an event listener to the status dropdown
+  document.getElementById('status').addEventListener('change', toggleSections);
+</script>
+<!--================== end ==================-->
 
 <!--================== view upload image ==================-->
 <script>

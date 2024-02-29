@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-Update Pendaftaran Scopus Camp | MANAGEMENT
+Update Scopus Camp | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>SCOPUS CAMP</h1>
+            <h1>UPDATE SCOPUS CAMP</h1>
         </div>
 
         <div class="section-body">
@@ -17,9 +17,9 @@ Update Pendaftaran Scopus Camp | MANAGEMENT
                 <!--================== DETAIL DATA PENDAFTARAN ==================-->
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-list"></i> DATA PENDAFTAR SCOPUS CAMP</h4>
+                        <h4>DATA PENDAFTAR SCOPUS CAMP</h4>
                         <div class="card-header-action">
-                            <h4 class="float-right">ID TRANSAKSI : {{ $scopuscamp->id_transaksi }}</h4>
+                            <h4 class="float-right"><i class="fas fa-receipt"></i> ID TRANSAKSI : {{ $scopuscamp->id_transaksi }}</h4>
                         </div>
                     </div>
 
@@ -164,7 +164,7 @@ Update Pendaftaran Scopus Camp | MANAGEMENT
                 <!--================== UPDATE DATA PENDAFTARAN ==================-->
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-hand-holding-usd"></i> UPDATE DATA SCOPUS CAMP</h4>
+                        <h4>UPDATE PENDAFTAR SCOPUS CAMP</h4>
                     </div>
 
                     <div class="card-body">
@@ -250,7 +250,9 @@ Update Pendaftaran Scopus Camp | MANAGEMENT
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+                        <a href="{{ route('account.scopuscamp.index') }}" class="btn btn-info">
+                            <i class="fa fa-undo"></i> KEMBALI
+                        </a>
                     </div>
                 </div>
                 <!--================== END ==================-->
