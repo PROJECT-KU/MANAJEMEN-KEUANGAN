@@ -16,7 +16,6 @@ class Presensi extends Model
    */
   protected $fillable = [
     'user_id',
-    'token',
     'status',
     'status_pulang',
     'note',

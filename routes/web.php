@@ -140,8 +140,8 @@ Route::prefix('account')->group(function () {
     Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
     Route::get('/presensi/create', 'account\PresensiController@create')->name('account.presensi.create');
     Route::post('/account/presensi/store', 'account\PresensiController@store')->name('account.presensi.store');
-    Route::get('/presensi/detail/{id}{token}', 'account\PresensiController@detail')->name('account.presensi.detail');
-    Route::get('/presensi/edit/{id}{token}', 'account\PresensiController@edit')->name('account.presensi.edit');
+    Route::get('/presensi/detail/{id}', 'account\PresensiController@detail')->name('account.presensi.detail');
+    Route::get('/presensi/edit/{id}', 'account\PresensiController@edit')->name('account.presensi.edit');
     Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
     Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
     Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
