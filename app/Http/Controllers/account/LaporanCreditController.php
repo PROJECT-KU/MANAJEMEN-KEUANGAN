@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use PDF;
 use App\User;
 use Dompdf\Dompdf;
+use Illuminate\Support\Carbon;
 
 class LaporanCreditController extends Controller
 {
@@ -24,42 +25,26 @@ class LaporanCreditController extends Controller
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
-    {
-        return view('account.laporan_credit.index');
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function check(Request $request)
+    public function index(Request $request)
     {
         $user = Auth::user();
-        //set validasi required
-        $this->validate(
-            $request,
-            [
-                'tanggal_awal'     => 'required',
-                'tanggal_akhir'    => 'required',
-            ],
-            //set message validation
-            [
-                'tanggal_awal.required'  => 'Silahkan Pilih Tanggal Awal!',
-                'tanggal_akhir.required' => 'Silahkan Pilih Tanggal Akhir!',
-            ]
-        );
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
 
-        $tanggal_awal  = $request->input('tanggal_awal');
-        $tanggal_akhir = $request->input('tanggal_akhir');
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
         if ($user->level == 'manager' || $user->level == 'staff') {
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
                 ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->whereDate('credit.credit_date', '>=', $tanggal_awal)
-                ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
+                ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
                 ->where(function ($query) use ($user) {
                     $query->where('users.company', $user->company)
                         ->orWhere('credit.user_id', $user->id);
@@ -74,15 +59,63 @@ class LaporanCreditController extends Controller
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-                ->whereDate('credit.credit_date', '>=', $tanggal_awal)
-                ->whereDate('credit.credit_date', '<=', $tanggal_akhir)
+                ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
                 ->where('credit.user_id', $user->id)
                 ->paginate(10)
                 ->appends(request()->except('page'));
         }
 
         $totalCredit = $credit->sum('nominal');
-        return view('account.laporan_credit.index', compact('credit', 'tanggal_awal', 'tanggal_akhir', 'totalCredit'));
+        return view('account.laporan_credit.index', compact('credit', 'startDate', 'endDate', 'totalCredit'));
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function check(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        } else {
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->whereBetween('credit.credit_date', [$currentMonth, $nextMonth])
+                ->where('credit.user_id', $user->id)
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        }
+
+        $totalCredit = $credit->sum('nominal');
+        return view('account.laporan_credit.index', compact('credit', 'startDate', 'endDate', 'totalCredit'));
     }
 
     public function downloadPdf(Request $request)

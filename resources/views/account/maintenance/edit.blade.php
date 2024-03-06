@@ -1,23 +1,18 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MANAGEMENT
+Update Maintenance | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>MAINTENANCE</h1>
+            <h1>UPDATE MAINTENANCE</h1>
         </div>
 
         <div class="section-body">
-
             <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-user-plus"></i> UPDATE MAINTENANCE</h4>
-                </div>
-
                 <div class="card-body">
 
                     <form action="{{ route('account.maintenance.update', $maintenance->id) }}" method="POST" enctype="multipart/form-data">
@@ -68,35 +63,6 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>GAMBAR</label>
-                                    <div class="input-group">
-                                        <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-                                    </div>
-                                    @error('gambar')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <a href="{{ asset('images/' . $maintenance->gambar) }}" data-lightbox="{{ $maintenance->id }}">
-                                        <div class="card" style="width: 18rem;">
-                                            @if ($maintenance->gambar == null)
-                                            <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
-                                            @else
-                                            <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Preview Image">
-                                            @endif
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
                                     <label>NOTE</label>
                                     <input type="text" id="note" name="note" value="{{ $maintenance->note }}" class="form-control" style="height: 100px;" placeholder="Masukan Pesan Maintenance" required>
 
@@ -125,8 +91,8 @@ Tambah Pengguna | MANAGEMENT
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                        <a href="{{ route('account.maintenance.index') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> KEMBALI
+                        <a href="{{ route('account.maintenance.index') }}" class="btn btn-info">
+                            <i class="fa fa-undo"></i> KEMBALI
                         </a>
 
                     </form>

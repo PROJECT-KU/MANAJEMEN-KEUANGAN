@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-List Uang Masuk | MANAGEMENT
+Data Uang Masuk | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1> UANG MASUK</h1>
+            <h1>DATA UANG MASUK</h1>
         </div>
 
         <div class="section-body">
@@ -33,7 +33,7 @@ List Uang Masuk | MANAGEMENT
                 <!--================== FILTER ==================-->
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-filter"></i> FILTER UANG MASUK</h4>
+                        <h4><i class="fas fa-filter"></i> FILTER</h4>
                     </div>
 
                     <div class="card-body">
@@ -57,7 +57,7 @@ List Uang Masuk | MANAGEMENT
                             <div class="col-12 mt-3">
                                 <div class="form-group text-center">
                                     <div class="input-group mb-3">
-                                        <a href="{{ route('account.debit.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH LAPORAN CAMP</a>
+                                        <a href="{{ route('account.debit.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH UANG MASUK</a>
                                     </div>
                                 </div>
                             </div>
@@ -69,7 +69,7 @@ List Uang Masuk | MANAGEMENT
 
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-list"></i> LIST UANG MASUK</h4>
+                        <h4><i class="fas fa-list"></i> DATA UANG MASUK</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

@@ -19,7 +19,6 @@ class Maintenance extends Model
         'note',
         'start_date',
         'end_date',
-        'gambar',
         'title',
         'status',
         'created_at',

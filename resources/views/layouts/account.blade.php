@@ -232,7 +232,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @if (Auth::user()->level === 'admin')
                                 <li class="{{ setActive('account/maintenance') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
-                                        <i class="fas fa-user"></i> <span>MAINTENANCE</span>
+                                        <i class="fas fa-users-cog"></i> <span>MAINTENANCE</span>
                                     </a>
                                 </li>
                                 <li class="{{ setActive('account/sewa') }} . {{ setActive('account/pengguna/search') }}">

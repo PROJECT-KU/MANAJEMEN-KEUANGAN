@@ -29,14 +29,14 @@
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:100px">KODE</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:135px">NAMA KATEGORI</th>
-                  <th scope="col" colspan="3" style="text-align: center; width:150px">TOTAL</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:255px">KODE</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:255px">NAMA KATEGORI</th>
+                  <th scope="col" colspan="3" style="text-align: center; width:255px">TOTAL</th>
                 </tr>
                 <tr>
-                  <th scope="col" style="text-align: center; width:140px">MASUK</th>
-                  <th scope="col" style="text-align: center; width:140px">KELUAR</th>
-                  <th scope="col" style="text-align: center; width:140px">GAJI</th>
+                  <th scope="col" style="text-align: center; width:150px">MASUK</th>
+                  <th scope="col" style="text-align: center; width:150px">KELUAR</th>
+                  <th scope="col" style="text-align: center; width:150px">GAJI</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,10 +133,10 @@
             <br><br>
             @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
             <hr>
-            <table class="table table-bordered mt-5">
+            <table class="table table-bordered mt-5" style="text-align: center; font-weight: bold;">
               <thead>
                 <tr>
-                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:750px">KEUNTUNGAN</th>
+                  <th scope="col" rowspan="2" style="text-align: center; font-weight: bold; width:1100px">KEUNTUNGAN</th>
                 </tr>
               </thead>
               <br>

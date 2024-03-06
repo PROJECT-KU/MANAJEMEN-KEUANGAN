@@ -46,41 +46,25 @@ class MaintenanceController extends Controller
             $request,
             [
                 'title' => 'required',
-                'start_date' => 'required',
-                'end_date' => 'required',
                 'note' => 'required',
-                'gambar' => 'required', // Validasi gambar (opsional)
             ],
             [
                 'title.required' => 'Masukkan Judul Maintenance!',
-                'start_date.required' => 'Masukkan Tanggal Awal Maintenance!',
-                'end_date.required' => 'Masukkan Tanggal Berakhirnya Maintenance!',
                 'note.required' => 'Masukkan Pesan Maintenance!',
-                'gambar.required' => 'Masukkan Gambar Maintenance.',
             ]
         );
-
-        // Menyimpan gambar di path (jika ada)
-        $imagePath = null;
-
-        if ($request->hasFile('gambar')) {
-            $image = $request->file('gambar');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'images/' . $imageName; // Sesuaikan dengan path yang sesuai di konfigurasi
-            $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
-        }
 
         $maintenance = Maintenance::create([
             'title' => $request->input('title'),
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
             'note' => $request->input('note'),
-            'gambar' => $imagePath,
+            'status' => $request->input('status'),
         ]);
 
-        if ($maintenance && strtotime($request->input('end_date')) <= strtotime(now())) {
-            $maintenance->update(['status' => 'non-aktif']);
-        }
+        // if ($maintenance && strtotime($request->input('end_date')) <= strtotime(now())) {
+        //     $maintenance->update(['status' => 'non-aktif']);
+        // }
 
 
         // Redirect dengan pesan sukses atau gagal
@@ -115,17 +99,7 @@ class MaintenanceController extends Controller
         // Find the user by ID
         $maintenance = Maintenance::findOrFail($id);
 
-        //save image to path
-        if ($request->hasFile('gambar')) {
-            $image = $request->file('gambar');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = $imageName;
-            $image->move(public_path('images'), $imageName); // Store the image
-        } else {
-            // If no new image uploaded, keep using the old image path
-            $imagePath = $maintenance->gambar;
-        }
-        //end
+
 
         $title = $request->input('title');
         $start_date = $request->input('start_date');
@@ -140,7 +114,6 @@ class MaintenanceController extends Controller
             'end_date' => $end_date,
             'note' => $note,
             'status' => $status,
-            'gambar' => $imagePath, // Store the image path
         ]);
 
         // Save the updated user data

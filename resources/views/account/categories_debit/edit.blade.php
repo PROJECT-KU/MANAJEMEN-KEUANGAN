@@ -1,22 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Update Kategori Uang Masuk | MANAGEMENT
+Update Kategori Uang Masuk | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI UANG MASUK</h1>
+            <h1>UPDATE KATEGORI UANG MASUK</h1>
         </div>
 
         <div class="section-body">
 
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-hand-holding-usd"></i> UPDATE KATEGORI UANG MASUK</h4>
-                </div>
+                </div> -->
 
                 <div class="card-body">
 
@@ -77,8 +77,8 @@ Update Kategori Uang Masuk | MANAGEMENT
                         </div>
 
                         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <a href="{{ route('account.categories_debit.index') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> KEMBALI
+                        <a href="{{ route('account.categories_debit.index') }}" class="btn btn-info">
+                            <i class="fa fa-undo"></i> KEMBALI
                         </a>
 
                     </form>

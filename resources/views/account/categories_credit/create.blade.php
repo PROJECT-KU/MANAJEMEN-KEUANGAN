@@ -1,21 +1,21 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Kategori Uang keluar | MANAGEMENT
+Tambah Kategori Uang keluar | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI UANG KELUAR</h1>
+            <h1>TAMBAH KATEGORI UANG KELUAR</h1>
         </div>
 
         <div class="section-body">
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-hand-holding-usd"></i> TAMBAH KATEGORI UANG KELUAR</h4>
-                </div>
+                </div> -->
 
                 <div class="card-body">
                     <form action="{{ route('account.categories_credit.store') }}" method="POST">
