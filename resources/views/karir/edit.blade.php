@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Karir | MANAGEMENT
+Update Karir | MIS
 @stop
 
 <!-- Include jQuery -->
@@ -25,7 +25,7 @@ Detail Karir | MANAGEMENT
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-file-invoice-dollar"></i> UPDATE KARIR</h4>
+                    <h4>UPDATE KARIR</h4>
                 </div>
 
                 <div class="card-body">
@@ -63,6 +63,9 @@ Detail Karir | MANAGEMENT
 
 
             <div class="card">
+                <div class="card-header">
+                    <h4>DETAIL PENDAFTAR</h4>
+                </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -99,23 +102,18 @@ Detail Karir | MANAGEMENT
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Pendidikan Terakhir</label>
-                                <select class="form-control pendidikan" name="pendidikan" id="pendidikan">
-                                    <option value="" disabled selected>PILIH PENDIDIKAN TERAKHIR</option>
-                                    <option value="sma" {{ $karir->pendidikan == 'sma' ? 'selected' : '' }}>SMA/Sederajat</option>
-                                    <option value="s1" {{ $karir->pendidikan == 's1' ? 'selected' : '' }}>S1</option>
-                                    <option value="s2" {{ $karir->pendidikan == 's2' ? 'selected' : '' }}>S2</option>
-                                </select>
+                                <div class="input-group">
+                                    <input type="text" name="pendidikan" value="{{ $karir->pendidikan }}" class="form-control" readonly>
+                                </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Posisi yang Dilamar</label>
-                                <select class="form-control posisi" name="posisi" id="posisi">
-                                    <option value="" disabled selected>PILIH POSISI</option>
-                                    <option value="co trainer" {{ $karir->posisi == 'co trainer' ? 'selected' : '' }}>CO Trainer</option>
-                                    <option value="satpam" {{ $karir->posisi == 'satpam' ? 'selected' : '' }}>satpam</option>
-                                </select>
+                                <div class="input-group">
+                                    <input type="text" name="posisi" value="{{ $karir->posisi }}" class="form-control">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,8 +179,8 @@ Detail Karir | MANAGEMENT
                     </div>
 
                     <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                    <a href="{{ route('karir.list') }}" class="btn btn-info mr-1">
-                        <i class="fa fa-list"></i> KEMBALI
+                    <a href="{{ route('karir.list') }}" class="btn btn-info">
+                        <i class="fa fa-undo"></i> KEMBALI
                     </a>
 
                     </form>

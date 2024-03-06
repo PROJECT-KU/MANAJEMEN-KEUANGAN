@@ -15,6 +15,7 @@ class Karir extends Migration
     {
         Schema::create('karir', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('token', 300)->nullable();
             $table->string('nama', 300)->nullable();
             $table->string('telp', 300)->nullable();
             $table->string('email', 300)->nullable();

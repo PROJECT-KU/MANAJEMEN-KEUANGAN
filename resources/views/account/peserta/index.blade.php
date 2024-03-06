@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Data Laporan Peserta | MANAGEMENT
+Data Laporan Peserta | MIS
 @stop
 
 @section('content')
@@ -98,21 +98,17 @@ Data Laporan Peserta | MANAGEMENT
                     <div class="card-header">
                         <h4><i class="fas fa-list"></i> DATA LAPORAN PESERTA</h4>
                         <div class="card-header-action">
-                            <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-                                <i class="fas fa-file-pdf"></i> Download PDF
-                            </a>
+                            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                                    @if ($startDate && $endDate)
+                                    {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                                    @else
+                                    {{ date('F Y') }}
+                                    @endif
+                                </strong>
+                            </p>
                         </div>
                     </div>
-                    <div class="card-header">
-                        <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                                @if ($startDate && $endDate)
-                                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                                @else
-                                {{ date('F Y') }}
-                                @endif
-                            </strong>
-                        </p>
-                    </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
                             <div class="table-responsive">
@@ -140,7 +136,7 @@ Data Laporan Peserta | MANAGEMENT
                                             <td class="column-width" style="text-align: center;">{{ $hasil->afiliasi }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
-                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
                                                 <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">

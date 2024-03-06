@@ -137,7 +137,7 @@ class ScopusCampController extends Controller
 
     public function store(Request $request)
     {
-        $token = $this->generateRandomToken(50);
+        $token = $this->generateRandomToken(30);
         $id_transaksi = $this->generateRandomId(5);
 
         // menyimpan gambar di path

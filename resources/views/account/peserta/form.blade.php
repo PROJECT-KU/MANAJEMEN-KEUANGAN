@@ -151,10 +151,19 @@
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-md-12">
+                                        <div class="form-group col-md-6">
                                             <label for="jurnal" style="font-size: 15px;">Jurnal Tujuan</label>
                                             <input id="jurnal" type="jurnal" class="form-control" name="jurnal" value="{{ old('jurnal') }}" required>
                                             @error('jurnal')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="camp" style="font-size: 15px;">Nomor Batch Scopus Camp yang di ikuti</label>
+                                            <input id="camp" type="camp" class="form-control" name="camp" value="{{ old('camp') }}" required>
+                                            @error('camp')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
                                             </div>

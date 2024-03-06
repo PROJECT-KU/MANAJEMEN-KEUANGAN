@@ -14,7 +14,7 @@ class PesertaController extends Controller
     /**
      * PenyewaanController constructor.
      */
-    function generateRandomToken($length = 50)
+    function generateRandomToken($length)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
         $token = '';
@@ -41,7 +41,7 @@ class PesertaController extends Controller
         }
 
         $peserta = DB::table('peserta')
-            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.token', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
             ->orderBy('peserta.created_at', 'DESC')
             ->paginate(10);
 
@@ -52,7 +52,7 @@ class PesertaController extends Controller
         return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
     }
 
-    public function detail($id)
+    public function detail($id, $token)
     {
         $peserta = Peserta::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
 
@@ -92,7 +92,7 @@ class PesertaController extends Controller
         }
 
         $peserta = DB::table('peserta')
-            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.token',  'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
             ->where(function ($query) use ($search) {
                 $query->where('peserta.nama', 'LIKE', '%' . $search . '%')
                     ->orWhere('peserta.afiliasi', 'LIKE', '%' . $search . '%');
@@ -130,7 +130,7 @@ class PesertaController extends Controller
         }
 
         $peserta = DB::table('peserta')
-            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
+            ->select('peserta.id', 'peserta.email', 'peserta.nama', 'peserta.afiliasi', 'peserta.judul', 'peserta.jurnal', 'peserta.token',  'peserta.refrensi', 'peserta.digital_writing', 'peserta.mendeley', 'peserta.persentase_penyelesaian', 'peserta.submit', 'peserta.target', 'peserta.scopus_camp', 'peserta.materi', 'peserta.makanan', 'peserta.pelayanan', 'peserta.tempat', 'peserta.terfavorit', 'peserta.terbaik', 'peserta.terlucu', 'peserta.kritik')
             ->whereBetween('peserta.created_at', [$currentMonth, $nextMonth])
             ->orderBy('peserta.created_at', 'DESC')
             ->paginate(10);
@@ -175,6 +175,7 @@ class PesertaController extends Controller
             'afiliasi'                  => $request->input('afiliasi'),
             'judul'                     => $request->input('judul'),
             'jurnal'                    => $request->input('jurnal'),
+            'camp'                      => $request->input('camp'),
             'refrensi'                  => $request->input('refrensi'),
             'digital_writing'           => $request->input('digital_writing'),
             'mendeley'                  => $request->input('mendeley'),
@@ -198,7 +199,7 @@ class PesertaController extends Controller
     public function update(Request $request, $id)
     {
         $peserta = Peserta::findOrFail($id);
-        $token_update = $this->generateRandomToken(30);
+        $token_update = $this->generateRandomToken(100);
         $peserta->update([
             'scopus_camp'       => $request->input('scopus_camp'),
             'materi'            => $request->input('materi'),

@@ -26,9 +26,9 @@ Route::prefix('account')->group(function () {
     // karir
     Route::get('/karir', 'account\KarirController@index')->name('karir.index');
     Route::get('/karir/list', 'account\KarirController@list')->name('karir.list');
-    Route::get('/karir/detail/{id}', 'account\KarirController@detail')->name('karir.detail');
+    Route::get('/karir/detail/{id}{token}', 'account\KarirController@detail')->name('karir.detail');
     Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
-    Route::get('/karir/{id}/edit', 'account\KarirController@edit')->name('karir.edit');
+    Route::get('/karir/edit/{id}{token}', 'account\KarirController@edit')->name('karir.edit');
     Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
     Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
 
@@ -126,8 +126,8 @@ Route::prefix('account')->group(function () {
     Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
     Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
     Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
-    Route::get('/gaji/{id}/edit', 'account\GajiController@edit')->name('account.gaji.edit');
-    Route::get('/gaji/{id}/detail', 'account\GajiController@detail')->name('account.gaji.detail');
+    Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
+    Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
     Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
     Route::get('/gaji/searchmanager', 'account\GajiController@searchmanager')->name('account.gaji.searchmanager');
     Route::get('/gaji/searchkaryawan', 'account\GajiController@searchkaryawan')->name('account.gaji.searchkaryawan');
@@ -140,8 +140,8 @@ Route::prefix('account')->group(function () {
     Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
     Route::get('/presensi/create', 'account\PresensiController@create')->name('account.presensi.create');
     Route::post('/account/presensi/store', 'account\PresensiController@store')->name('account.presensi.store');
-    Route::get('/presensi/detail/{id}', 'account\PresensiController@detail')->name('account.presensi.detail');
-    Route::get('/presensi/{id}/edit', 'account\PresensiController@edit')->name('account.presensi.edit');
+    Route::get('/presensi/detail/{id}{token}', 'account\PresensiController@detail')->name('account.presensi.detail');
+    Route::get('/presensi/edit/{id}{token}', 'account\PresensiController@edit')->name('account.presensi.edit');
     Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
     Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
     Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
@@ -192,13 +192,13 @@ Route::prefix('account')->group(function () {
 
     // Laporan peserta
     Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
-    Route::get('/Laporan-Peserta/detail/{id}', 'account\PesertaController@detail')->name('account.peserta.detail');
+    Route::get('/Laporan-Peserta/detail/{id}{token}', 'account\PesertaController@detail')->name('account.peserta.detail');
     Route::delete('/Laporan-Peserta/{id}', 'account\PesertaController@destroy')->name('account.peserta.destroy');
     Route::get('/Laporan-Peserta/search', 'account\PesertaController@search')->name('account.peserta.search');
     Route::get('/Laporan-Peserta/filter', 'account\PesertaController@filter')->name('account.peserta.filter');
     Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
     // Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
-    Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
+    Route::get('/Laporan-Peserta/testimoni/{id}{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
     Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
     Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 
@@ -206,7 +206,7 @@ Route::prefix('account')->group(function () {
     Route::get('/Scopus-Camp', 'account\ScopusCampController@form')->name('account.scopuscamp.form');
     Route::post('/Scopus-Camp/store', 'account\ScopusCampController@store')->name('account.scopuscamp.store');
     Route::get('/Scopus-Camp/Data-Pendaftaran', 'account\ScopusCampController@index')->name('account.scopuscamp.index');
-    Route::get('/Scopus-Camp/Edit/{id}/{token}', 'account\ScopusCampController@edit')->name('account.scopuscamp.edit');
+    Route::get('/Scopus-Camp/Edit/{id}{token}', 'account\ScopusCampController@edit')->name('account.scopuscamp.edit');
     Route::post('/Scopus-Camp/update/{id}', 'account\ScopusCampController@update')->name('account.scopuscamp.update');
     Route::delete('/Scopus-Camp/delete/{id}', 'account\ScopusCampController@destroy')->name('account.scopuscamp.delete');
 
@@ -215,7 +215,7 @@ Route::prefix('account')->group(function () {
     Route::get('/kategori/ScopusCamp', 'account\CategoriesScopusCampController@index')->name('account.kategori.index');
     Route::get('/kategori/ScopusCamp/create', 'account\CategoriesScopusCampController@create')->name('account.kategori.create');
     Route::post('/kategori/ScopusCamp/store', 'account\CategoriesScopusCampController@store')->name('account.kategori.store');
-    Route::get('/kategori/ScopusCamp/edit/{id}', 'account\CategoriesScopusCampController@edit')->name('account.kategori.edit');
+    Route::get('/kategori/ScopusCamp/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategori.edit');
     Route::post('/kategori/ScopusCamp/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategori.update');
     Route::delete('/kategori/ScopusCamp/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategori.destroy');
     Route::get('/kategori/ScopusCamp/search', 'account\CategoriesScopusCampController@search')->name('account.ketegori.search');

@@ -22,6 +22,7 @@ class Peserta extends Model
         'afiliasi',
         'judul',
         'jurnal',
+        'camp',
         'refrensi',
         'digital_writing',
         'mendeley',

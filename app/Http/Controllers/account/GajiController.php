@@ -21,12 +21,23 @@ use App\Mail\GajiSuccessMail;
 
 class GajiController extends Controller
 {
-  /**
-   * PenyewaanController constructor.
-   */
+
+
   public function __construct()
   {
     $this->middleware('auth');
+  }
+
+  function generateRandomToken($length)
+  {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+    $token = '';
+
+    for ($i = 0; $i < $length; $i++) {
+      $token .= $characters[rand(0, strlen($characters) - 1)];
+    }
+
+    return $token;
   }
 
   public function generateRandomId($length)
@@ -55,7 +66,7 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -63,7 +74,7 @@ class GajiController extends Controller
         ->paginate(20);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
         // ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -108,7 +119,7 @@ class GajiController extends Controller
 
 
     $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -146,7 +157,7 @@ class GajiController extends Controller
 
 
     $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
       ->where('gaji.user_id', $user->id)
       ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -185,7 +196,7 @@ class GajiController extends Controller
     }
 
     $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->where(function ($query) use ($search) {
@@ -224,7 +235,7 @@ class GajiController extends Controller
     $user = Auth::user();
 
     $gaji = DB::table('gaji')
-      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+      ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
       ->where('gaji.user_id', $user->id)
       ->where(function ($query) use ($search) {
@@ -309,6 +320,7 @@ class GajiController extends Controller
     $user = Auth::user();
 
     $id_transaksi = $this->generateRandomId(5);
+    $token = $this->generateRandomToken(30);
 
     $this->validate(
       $request,
@@ -534,6 +546,7 @@ class GajiController extends Controller
 
     $save = Gaji::create([
       'id_transaksi' => $id_transaksi,
+      'token'             => $token,
       'user_id' => $request->input('user_id'),
       'gaji_pokok' => $gaji_pokok,
       'lembur' => $lembur,
@@ -642,7 +655,7 @@ class GajiController extends Controller
     }
   }
 
-  public function edit($id)
+  public function edit($id, $token)
   {
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -1016,7 +1029,7 @@ class GajiController extends Controller
     }
   }
 
-  public function detail($id)
+  public function detail($id, $token)
   {
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -1086,7 +1099,7 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -1094,7 +1107,7 @@ class GajiController extends Controller
         ->get();
     } else {
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
         ->orderBy('gaji.created_at', 'DESC')
