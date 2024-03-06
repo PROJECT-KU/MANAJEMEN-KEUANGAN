@@ -79,7 +79,7 @@ class KarirController extends Controller
 
     public function store(Request $request)
     {
-        $token = $this->generateRandomToken(100);
+        $token = $this->generateRandomToken(30);
 
         // PATH UNTUK MENYIMPAN CV
         $cvPath = null;
