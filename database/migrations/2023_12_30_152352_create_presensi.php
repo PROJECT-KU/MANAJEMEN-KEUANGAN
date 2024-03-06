@@ -16,7 +16,6 @@ class CreatePresensi extends Migration
         Schema::create('presensi', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
-            $table->string('token', 300)->nullable();
             $table->string('status', 300)->nullable();
             $table->string('status_pulang', 300)->nullable();
             $table->text('note')->nullable();

@@ -28,18 +28,6 @@ class PresensiController extends Controller
     $this->middleware('auth');
   }
 
-  function generateRandomToken($length)
-  {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
-    $token = '';
-
-    for ($i = 0; $i < $length; $i++) {
-      $token .= $characters[rand(0, strlen($characters) - 1)];
-    }
-
-    return $token;
-  }
-
   public function generateRandomId($length)
   {
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -66,7 +54,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -74,7 +62,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -82,7 +70,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'admin') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
@@ -118,7 +106,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -126,7 +114,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -152,7 +140,7 @@ class PresensiController extends Controller
 
     if (Auth::user()->level == 'manager') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$startDate, $endDate])
@@ -168,7 +156,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)
         ->whereBetween('presensi.created_at', [$startDate, $endDate])
@@ -211,7 +199,6 @@ class PresensiController extends Controller
   public function store(Request $request)
   {
     $user = Auth::user();
-    $token = $this->generateRandomToken(30);
 
     $this->validate(
       $request,
@@ -268,7 +255,6 @@ class PresensiController extends Controller
 
     $save = Presensi::create([
       'user_id' => $request->input('user_id'),
-      'token'             => $token,
       'status' => $request->input('status'),
       'status_pulang' => $statusPulang,
       'time_pulang' => $timePulang,
@@ -301,7 +287,7 @@ class PresensiController extends Controller
     }
   }
 
-  public function detail($id, $token)
+  public function detail($id)
   {
     $user = Auth::user();
     $presensi = Presensi::findOrFail($id);
@@ -316,7 +302,7 @@ class PresensiController extends Controller
     return view('account.presensi.detail', compact('presensi', 'users')); // Sesuaikan path template dengan benar
   }
 
-  public function edit($id, $token)
+  public function edit($id)
   {
     $user = Auth::user();
     $presensi = Presensi::findOrFail($id);
@@ -432,7 +418,7 @@ class PresensiController extends Controller
     }
 
     $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.token', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
