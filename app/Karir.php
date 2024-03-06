@@ -15,6 +15,7 @@ class Karir extends Model
      * @var array
      */
     protected $fillable = [
+        'token',
         'nama',
         'telp',
         'email',

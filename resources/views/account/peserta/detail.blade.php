@@ -1,21 +1,22 @@
 @extends('layouts.account')
 
 @section('title')
-Update Gaji Karyawan | MANAGEMENT
+Detail Laporan Peserta | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>LAPORAN PESERTA</h1>
+            <h1>DETAIL LAPORAN PESERTA</h1>
         </div>
 
         <div class="section-body">
             <div class="card">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <h4><i class="fas fa-user"></i> DETAIL LAPORAN PESERTA</h4>
-                </div>
+                </div> -->
+
                 <div class="card-body">
                     <form action="" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -213,8 +214,8 @@ Update Gaji Karyawan | MANAGEMENT
                             </div>
                         </div>
 
-                        <a href="{{ route('account.peserta.list') }}" class="btn btn-info mr-1">
-                            <i class="fa fa-list"></i> KEMBALI
+                        <a href="{{ route('account.peserta.list') }}" class="btn btn-info">
+                            <i class="fa fa-undo"></i> KEMBALI
                         </a>
 
                     </form>

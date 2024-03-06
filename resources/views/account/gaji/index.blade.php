@@ -340,26 +340,26 @@ Data Gaji Karyawan | MIS
                       <td class="text-center">
                         @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                         @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
                         @endif
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
                         @else
                         @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
                         @endif
                         <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
                           <i class="fa fa-trash"></i>
                         </button>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2 mb-2">
                           <i class="fa fa-download"></i> Slip Gaji
                         </a>
                         @endif

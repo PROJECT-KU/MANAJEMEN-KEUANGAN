@@ -382,16 +382,16 @@ Data Presensi Karyawan | MIS
                   </td>
                   @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
                   <td class="text-center">
-                    <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                    <a href="{{ route('account.presensi.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>
                     </a>
                   </td>
                   @else
                   <td class="text-center">
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
                       <i class="fa fa-pencil-alt"></i>
                     </a>
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
                       <i class="fa fa-eye"></i>
                     </a>
                     <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">

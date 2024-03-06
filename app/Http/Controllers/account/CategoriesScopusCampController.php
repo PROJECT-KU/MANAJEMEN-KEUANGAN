@@ -39,7 +39,7 @@ class CategoriesScopusCampController extends Controller
         }
 
         $categories_scopuscamp = DB::table('categories_scopuscamp')
-            ->select('categories_scopuscamp.id', 'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
+            ->select('categories_scopuscamp.id', 'categories_scopuscamp.token', 'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
             ->orderBy('categories_scopuscamp.created_at', 'DESC')
             ->paginate(10);
 
@@ -61,7 +61,7 @@ class CategoriesScopusCampController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $token = $this->generateRandomToken(50);
+        $token = $this->generateRandomToken(30);
 
         $save = CategoriesScopusCamp::create([
             'token'             => $token,
@@ -81,7 +81,7 @@ class CategoriesScopusCampController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit($id, $token)
     {
         $user = Auth::user();
         $categories_scopuscamp = CategoriesScopusCamp::findOrFail($id);
@@ -143,7 +143,7 @@ class CategoriesScopusCampController extends Controller
         }
 
         $categories_scopuscamp = DB::table('categories_scopuscamp')
-            ->select('categories_scopuscamp.id', 'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
+            ->select('categories_scopuscamp.id', 'categories_scopuscamp.token',  'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
             ->where(function ($query) use ($search) {
                 $query->where('categories_scopuscamp.camp', 'LIKE', '%' . $search . '%')
                     ->orWhere('categories_scopuscamp.tempat', 'LIKE', '%' . $search . '%')
@@ -182,7 +182,7 @@ class CategoriesScopusCampController extends Controller
         }
 
         $categories_scopuscamp = DB::table('categories_scopuscamp')
-            ->select('categories_scopuscamp.id', 'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
+            ->select('categories_scopuscamp.id', 'categories_scopuscamp.token',  'categories_scopuscamp.camp', 'categories_scopuscamp.tempat', 'categories_scopuscamp.mulai', 'categories_scopuscamp.selesai', 'categories_scopuscamp.kuota', 'categories_scopuscamp.status')
             ->whereBetween('categories_scopuscamp.mulai', [$currentMonth, $nextMonth])
             ->orderBy('categories_scopuscamp.mulai', 'DESC')
             ->paginate(10);

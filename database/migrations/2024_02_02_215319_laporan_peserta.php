@@ -22,6 +22,7 @@ class LaporanPeserta extends Migration
             $table->string('afiliasi', 300)->nullable();
             $table->string('judul', 300)->nullable();
             $table->string('jurnal', 300)->nullable();
+            $table->string('camp', 300)->nullable();
             $table->string('refrensi', 300)->nullable();
             $table->string('digital_writing', 300)->nullable();
             $table->string('mendeley', 300)->nullable();

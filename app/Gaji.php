@@ -18,6 +18,7 @@ class Gaji extends Model
     'user_id',
     'id_transaksi',
     'gaji_pokok',
+    'token',
     'lembur',
     'lembur1',
     'lembur2',

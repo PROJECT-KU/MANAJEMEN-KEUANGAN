@@ -156,12 +156,12 @@ Data Karir | MIS
                                             </td>
 
                                             <td class="text-center">
-                                                <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                                <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
                                                     <i class="fa fa-pencil-alt"></i>
                                                 </a>
-                                                <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
+                                                <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                                                     <i class="fa fa-eye"></i>
-                                                </a>
+                                                </a> -->
                                             </td>
                                         </tr>
                                         @php

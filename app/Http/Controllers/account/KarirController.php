@@ -17,6 +17,17 @@ class KarirController extends Controller
     /**
      * PenyewaanController constructor.
      */
+    function generateRandomToken($length)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+        $token = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $token;
+    }
 
     public function index(Request $request)
     {
@@ -39,7 +50,7 @@ class KarirController extends Controller
         }
 
         $karir = DB::table('karir')
-            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->select('karir.id', 'karir.token', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
             ->whereBetween('karir.created_at', [$currentMonth, $nextMonth])
             ->orderBy('karir.created_at', 'DESC')
             ->paginate(10);
@@ -52,10 +63,10 @@ class KarirController extends Controller
         return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate'));
     }
 
-    public function detail(Request $request, $id)
+    public function detail(Request $request, $id, $token)
     {
         $karir = DB::table('karir')
-            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.created_at', 'karir.updated_at')
+            ->select('karir.id', 'karir.token',  'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
             ->where('karir.id', $id)
             ->first();
 
@@ -68,6 +79,8 @@ class KarirController extends Controller
 
     public function store(Request $request)
     {
+        $token = $this->generateRandomToken(100);
+
         // PATH UNTUK MENYIMPAN CV
         $cvPath = null;
         if ($request->hasFile('cv')) {
@@ -99,6 +112,7 @@ class KarirController extends Controller
         // END
 
         $save = Karir::create([
+            'token'         => $token,
             'nama'          => $request->input('nama'),
             'telp'          => $request->input('telp'),
             'email'         => $request->input('email'),
@@ -126,10 +140,10 @@ class KarirController extends Controller
         }
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $token)
     {
         $karir = DB::table('karir')
-            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->select('karir.id', 'karir.token',  'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
             ->where('karir.id', $id)
             ->first();
 
@@ -241,7 +255,7 @@ class KarirController extends Controller
         }
 
         $karir = DB::table('karir')
-            ->select('karir.id', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
+            ->select('karir.id', 'karir.token',  'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
             ->where(function ($query) use ($search) {
                 $query->where('karir.nama', 'LIKE', '%' . $search . '%')
                     ->orWhere('karir.posisi', 'LIKE', '%' . $search . '%')
