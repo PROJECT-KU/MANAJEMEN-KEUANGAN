@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-List Pengguna | MANAGEMENT
+Maintenance | MIS
 @stop
 
 @section('content')
@@ -15,18 +15,13 @@ List Pengguna | MANAGEMENT
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-list"></i> LIST MAINTENANCE</h4>
+                    <h4><i class="fas fa-filter"></i> FILTER</h4>
                 </div>
 
                 <div class="card-body">
                     <form action="{{ route('account.pengguna.search') }}" method="GET">
                         <div class="form-group">
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <a href="{{ route('account.maintenance.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                                        <i class="fa fa-plus-circle"></i> TAMBAH
-                                    </a>
-                                </div>
                                 <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                                 <!-- Menggunakan app('request')->input('q') untuk mempertahankan nilai pencarian -->
                                 <div class="input-group-append">
@@ -42,9 +37,25 @@ List Pengguna | MANAGEMENT
                                 <!-- Menampilkan tombol "HAPUS PENCARIAN" hanya jika ada query parameter 'q' -->
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-12 mt-3">
+                                <div class="form-group text-center">
+                                    <div class="input-group mb-3">
+                                        <a href="{{ route('account.maintenance.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH MAINTENANCE</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
+                </div>
+            </div>
 
 
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-list"></i> DATA MAINTENANCE</h4>
+                </div>
+                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
@@ -77,15 +88,12 @@ List Pengguna | MANAGEMENT
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.maintenance.edit', $item->id) }}" class="btn btn-sm btn-primary">
+                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.maintenance.edit', $item->id) }}" class="btn btn-sm btn-primary mt-2">
                                             <i class="fa fa-pencil-alt"></i>
                                         </a>
-                                        <button style="margin-right: 5px; margin-bottom:5px;" class="btn btn-sm btn-danger" onclick="handleDelete({{ $item->id }})">
+                                        <button style="margin-right: 5px; margin-bottom:5px;" class="btn btn-sm btn-danger mt-2 mb-2" onclick="handleDelete({{ $item->id }})">
                                             <i class="fa fa-trash"></i>
                                         </button>
-                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
                                     </td>
                                 </tr>
                                 @php
@@ -163,86 +171,6 @@ List Pengguna | MANAGEMENT
                         }).then(function() {
                             location.reload();
                         });
-                    }
-                });
-            } else {
-                return true;
-            }
-        });
-    }
-</script>
-
-<script>
-    //@if($message = Session::get('success'))
-    //swal({
-    //  type: "success",
-    //  icon: "success",
-    //  title: "BERHASIL!",
-    //  text: "{{ $message }}",
-    //  timer: 1500,
-    //  showConfirmButton: false,
-    //  showCancelButton: false,
-    //  buttons: false,
-    //});
-    //@elseif($message = Session::get('error'))
-    //swal({
-    //  type: "error",
-    //  icon: "error",
-    //  title: "GAGAL!",
-    //  text: "{{ $message }}",
-    //  timer: 1500,
-    //  showConfirmButton: false,
-    //  showCancelButton: false,
-    //  buttons: false,
-    //});
-    //@endif
-
-    // delete
-    function Delete(id) {
-        var token = $("meta[name='csrf-token']").attr("content");
-
-        swal({
-            title: "APAKAH KAMU YAKIN ?",
-            text: "INGIN MENGHAPUS DATA INI!",
-            icon: "warning",
-            buttons: ['TIDAK', 'YA'],
-            dangerMode: true,
-        }).then(function(isConfirm) {
-            if (isConfirm) {
-                // Ajax delete
-                $.ajax({
-                    url: "{{ route('account.pengguna.destroy', '') }}/" + id,
-                    data: {
-                        "_token": token,
-                        "_method": "DELETE"
-                    },
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.status === "success") {
-                            swal({
-                                title: 'BERHASIL!',
-                                text: 'DATA BERHASIL DIHAPUS!',
-                                icon: 'success',
-                                timer: 1000,
-                                showConfirmButton: false,
-                                showCancelButton: false,
-                                buttons: false,
-                            }).then(function() {
-                                location.reload();
-                            });
-                        } else {
-                            swal({
-                                title: 'GAGAL!',
-                                text: 'DATA GAGAL DIHAPUS!',
-                                icon: 'error',
-                                timer: 1000,
-                                showConfirmButton: false,
-                                showCancelButton: false,
-                                buttons: false,
-                            }).then(function() {
-                                location.reload();
-                            });
-                        }
                     }
                 });
             } else {

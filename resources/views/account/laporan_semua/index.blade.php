@@ -1,7 +1,7 @@
   @extends('layouts.account')
 
   @section('title')
-  Laporan Transaksi Semua | MANAGEMENT
+  Laporan Transaksi Semua | MIS
   @stop
 
   @section('content')
@@ -15,7 +15,7 @@
 
         <div class="card">
           <div class="card-header text-right">
-            <h4><i class="fas fa-chart-pie"></i> LAPORAN TRANSAKSI SEMUA</h4>
+            <h4><i class="fas fa-filter"></i> FILTER</h4>
             <!-- <div class="card-header-action">
               <a href="{{ route('account.laporan_semua.download-pdf') }}" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
               <br>
@@ -38,7 +38,7 @@
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>TANGGAL AKHIR</label>
-                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker">
                   </div>
                 </div>
                 <div class="col-md-2">

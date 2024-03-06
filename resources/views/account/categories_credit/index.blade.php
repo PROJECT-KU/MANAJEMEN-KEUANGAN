@@ -1,14 +1,14 @@
 @extends('layouts.account')
 
 @section('title')
-List Kategori Uang keluar | MANAGEMENT
+Data Kategori Uang keluar | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI UANG KELUAR</h1>
+            <h1>DATA KATEGORI UANG KELUAR</h1>
         </div>
 
         <div class="section-body">
@@ -33,7 +33,7 @@ List Kategori Uang keluar | MANAGEMENT
                 <!--================== FILTER ==================-->
                 <div class="card">
                     <div class="card-header  text-right">
-                        <h4><i class="fas fa-filter"></i> FILTER KATEGORI UANG KELUAR</h4>
+                        <h4><i class="fas fa-filter"></i> FILTER</h4>
                     </div>
 
                     <div class="card-body">
@@ -70,7 +70,7 @@ List Kategori Uang keluar | MANAGEMENT
 
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-list"></i> LIST KATEGORI UANG MASUK</h4>
+                        <h4><i class="fas fa-list"></i> DATA KATEGORI UANG MASUK</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

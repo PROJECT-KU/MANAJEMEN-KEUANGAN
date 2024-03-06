@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-List Notif Sewa | MANAGEMENT
+List Notif Sewa | MIS
 @stop
 
 @section('content')

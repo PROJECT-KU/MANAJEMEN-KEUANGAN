@@ -1,23 +1,18 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MANAGEMENT
+Tambah Maintenance | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>MAINTENANCE</h1>
+            <h1>TAMBAH MAINTENANCE</h1>
         </div>
 
         <div class="section-body">
-
             <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-user-plus"></i> TAMBAH MAINTENANCE</h4>
-                </div>
-
                 <div class="card-body">
 
                     <form action="{{ route('account.maintenance.store') }}" method="POST" enctype="multipart/form-data">
@@ -26,7 +21,7 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>TITLE</label>
+                                    <label>Title</label>
                                     <input type="text" id="title" name="title" placeholder="Masukkan Judul Maintenance" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z !., ]/i.test(event.key)" required>
 
                                     @error('title')
@@ -41,8 +36,8 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>START MAINTENANCE</label>
-                                    <input type="text" id="start_date" name="start_date" placeholder="Masukkan Mulai Maintenance" class="form-control datetimepicker" required>
+                                    <label>Start Maintenance</label>
+                                    <input type="datetime-local" id="start_date" name="start_date" placeholder="Masukkan Mulai Maintenance" class="form-control">
 
                                     @error('start_date')
                                     <div class="invalid-feedback" style="display: block">
@@ -53,8 +48,8 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>END MAINTENANCE</label>
-                                    <input type="text" id="end_date" name="end_date" placeholder="Masukkan Berakhir Maintenance" class="form-control datetimepicker" required>
+                                    <label>End Maintenance</label>
+                                    <input type="datetime-local" id="end_date" name="end_date" placeholder="Masukkan Berakhir Maintenance" class="form-control">
 
                                     @error('end_date')
                                     <div class="invalid-feedback" style="display: block">
@@ -68,11 +63,10 @@ Tambah Pengguna | MANAGEMENT
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>GAMBAR</label>
-                                    <div class="input-group">
-                                        <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*" capture="camera">
-                                    </div>
-                                    @error('gambar')
+                                    <label>Note</label>
+                                    <input type="text" id="note" name="note" class="form-control" style="height: 100px;" placeholder="Masukan Pesan Maintenance">
+
+                                    @error('note')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -81,20 +75,13 @@ Tambah Pengguna | MANAGEMENT
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <div class="card" style="width: 18rem;">
-                                        <img id="image-preview" class="card-img-top" src="#" alt="Preview Image">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>NOTE</label>
-                                    <input type="text" id="note" name="note" class="form-control" style="height: 100px;" placeholder="Masukan Pesan Maintenance" required>
-
-                                    @error('note')
+                                    <label>Status</label>
+                                    <select class="form-control" name="status">
+                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                        <option value="aktif">ACTIVE</option>
+                                        <option value="non-aktif">NON-ACTIVE</option>
+                                    </select>
+                                    @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>

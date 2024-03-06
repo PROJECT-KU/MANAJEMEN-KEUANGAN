@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use PDF;
 use Dompdf\Dompdf;
 use App\User;
+use Illuminate\Support\Carbon;
 
 class LaporanDebitController extends Controller
 {
@@ -24,42 +25,25 @@ class LaporanDebitController extends Controller
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
-    {
-        return view('account.laporan_debit.index');
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function check(Request $request)
+    public function index(Request $request)
     {
         $user = Auth::user();
-        //set validasi required
-        $this->validate(
-            $request,
-            [
-                'tanggal_awal'     => 'required',
-                'tanggal_akhir'    => 'required',
-            ],
-            //set message validation
-            [
-                'tanggal_awal.required'  => 'Silahkan Pilih Tanggal Awal!',
-                'tanggal_akhir.required' => 'Silahkan Pilih Tanggal Akhir!',
-            ]
-        );
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
 
-        $tanggal_awal  = $request->input('tanggal_awal');
-        $tanggal_akhir = $request->input('tanggal_akhir');
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
 
         if ($user->level == 'manager' || $user->level == 'staff') {
             $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->whereDate('debit.debit_date', '>=', $tanggal_awal)
-                ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+                ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
                 ->where(function ($query) use ($user) {
                     $query->where('users.company', $user->company)
                         ->orWhere('debit.user_id', $user->id);
@@ -73,15 +57,60 @@ class LaporanDebitController extends Controller
         } else {
             $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
-                ->whereDate('debit.debit_date', '>=', $tanggal_awal)
-                ->whereDate('debit.debit_date', '<=', $tanggal_akhir)
+                ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
                 ->where('debit.user_id', $user->id)
                 ->paginate(10)
                 ->appends(request()->except('page'));
         }
 
         $totalDebit = $debit->sum('nominal');
-        return view('account.laporan_debit.index', compact('debit', 'tanggal_awal', 'tanggal_akhir', 'totalDebit'));
+        return view('account.laporan_debit.index', compact('debit', 'startDate', 'endDate', 'totalDebit'));
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function check(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+        if ($user->level == 'manager' || $user->level == 'staff') {
+            $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+                ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+                ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        } else {
+            $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
+                ->whereBetween('debit.debit_date', [$currentMonth, $nextMonth])
+                ->where('debit.user_id', $user->id)
+                ->paginate(10)
+                ->appends(request()->except('page'));
+        }
+
+        $totalDebit = $debit->sum('nominal');
+        return view('account.laporan_debit.index', compact('debit', 'startDate', 'endDate', 'totalDebit'));
     }
     public function downloadPdf(Request $request)
     {
