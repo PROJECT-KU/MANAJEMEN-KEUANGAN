@@ -171,6 +171,7 @@ Data Presensi Karyawan | MIS
       <!--================== END ==================-->
 
       <!--================== FILTER ==================-->
+      @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
       <div class="card">
         <div class="card-header  text-right">
           <h4><i class="fas fa-filter"></i> FILTER</h4>
@@ -231,6 +232,8 @@ Data Presensi Karyawan | MIS
           @endif
         </div>
       </div>
+      @else
+      @endif
       <!--================== end ==================-->
 
       <div class="card">

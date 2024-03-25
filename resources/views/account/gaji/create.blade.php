@@ -925,7 +925,7 @@ Tambah Gaji Karyawan | MIS
 
             <div class="col-md-3">
               <div class="form-group">
-                <label>Total Perjalanan Dalam Jawa</label>
+                <label>Total Perjalanan Luar Jawa</label>
                 <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
               </div>
             </div>
