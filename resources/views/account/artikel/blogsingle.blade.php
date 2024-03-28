@@ -524,6 +524,7 @@ Artikel | MIS
                             </ul>
                         </div>
                         <!--================== END ==================-->
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
                     </div>
                 </div>
             </div>
