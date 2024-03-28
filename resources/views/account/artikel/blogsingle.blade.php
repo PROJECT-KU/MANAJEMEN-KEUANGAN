@@ -470,7 +470,7 @@ Artikel | MIS
                     </div>
 
                 </div><!-- End blog entries list -->
-
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
                 <div class="col-lg-4">
 
                     <div class="sidebar">
