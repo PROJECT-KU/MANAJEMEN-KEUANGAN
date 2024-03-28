@@ -148,7 +148,7 @@ Profil | MANAGEMENT
                 </div>
                 <div class="col-md-4">
                   <div class="form-group">
-                    <label>NOMOR REKENING</label>
+                    <label>Nomor Rekening</label>
                     <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)" required>
                     @error('norek')
                     <div class="invalid-feedback" style="display: block">
@@ -159,7 +159,7 @@ Profil | MANAGEMENT
                 </div>
                 <div class="col-md-4">
                   <div class="form-group">
-                    <label>BANK</label>
+                    <label>Bank</label>
                     <select class="form-control bank" name="bank" required>
                       <option value="" disabled selected>Silahkan Pilih</option>
                       <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
@@ -233,7 +233,7 @@ Profil | MANAGEMENT
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>FOTO PROFIL</label>
+                    <label>Foto Profil</label>
                     <div class="input-group">
                       <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*">
                     </div>
@@ -261,7 +261,7 @@ Profil | MANAGEMENT
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label>JOBDESK</label>
+                    <label>Quotes</label>
                     <div class="input-group">
                       <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
                     </div>

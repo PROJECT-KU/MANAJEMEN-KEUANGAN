@@ -179,6 +179,19 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     </ul>
                                 </li>
                                 @endif
+
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
+                                <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-newspaper"></i><span>ARTIKEL</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/artikel-kategori') }}"><a class="nav-link" href="{{ route('account.Kategori-Artikel.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
+                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-file-signature"></i>DATA ARTIKEL</a></li>
+                                    </ul>
+                                </li>
+                                @endif
+
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
                                     <ul class="dropdown-menu">

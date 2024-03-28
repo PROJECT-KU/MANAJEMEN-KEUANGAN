@@ -268,7 +268,7 @@ class GajiController extends Controller
   {
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'admin') {
       // $users = User::where('company', $user->company)
       //   ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
       //   ->get();
