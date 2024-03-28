@@ -1139,7 +1139,7 @@ Tambah Gaji Karyawan | MIS
               <div class="form-group">
                 <label>Status Pembayaran</label>
                 <select class="form-control" name="status" required>
-                  <option value="" disabled selected>Silahkan Pilih</option>
+                  <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                   <option value="pending">PENDING</option>
                   <option value="terbayar">TERBAYAR</option>
                 </select>

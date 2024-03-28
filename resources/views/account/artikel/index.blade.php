@@ -37,7 +37,7 @@ Artikel | MIS
                     </div>
 
                     <div class="card-body">
-                        <form action="{{ route('account.Kategori-Artikel.search') }}" method="GET" id="searchForm">
+                        <form action="{{ route('account.Artikel.search') }}" method="GET" id="searchForm">
                             <div class="form-group">
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
@@ -45,7 +45,7 @@ Artikel | MIS
                                         <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                                     </div>
                                     @if(request()->has('q'))
-                                    <a href="{{ route('account.Kategori-Artikel.index') }}" class="btn btn-danger ml-1">
+                                    <a href="{{ route('account.Artikel.index') }}" class="btn btn-danger ml-1">
                                         <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
                                     </a>
                                     @endif
@@ -53,7 +53,7 @@ Artikel | MIS
                             </div>
                         </form>
 
-                        <form action="{{ route('account.Kategori-Artikel.filter') }}" method="GET">
+                        <form action="{{ route('account.Artikel.filter') }}" method="GET">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -74,7 +74,7 @@ Artikel | MIS
                                     @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                                     <div class="btn-group" style="width: 100%;">
                                         <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                                        <a href="{{ route('account.Kategori-Artikel.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                                        <a href="{{ route('account.Artikel.index') }}" class="btn btn-danger" style="margin-top: 30px;">
                                             <i class="fa fa-times-circle mt-2"></i> HAPUS
                                         </a>
                                     </div>
@@ -105,7 +105,9 @@ Artikel | MIS
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">KATEGORI</th>
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">JUDUL ARTIKEL</th>
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">PENULIS</th>
-                                            <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">DILIHAT SEBANYAK</th> -->
+                                            <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS ARTIKEL</th>
+                                            <th scope="col" rowspan="2" class="column-width" style="text-align: center;">DILIHAT SEBANYAK</th>
+                                            <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PEMBUATAN</th>
                                             <th scope="col" rowspan="2" style="width: 15%;text-align: center">AKSI</th>
                                         </tr>
                                     </thead>
@@ -123,10 +125,34 @@ Artikel | MIS
                                                 {{ strtoupper($hasil->kategori) }}
                                             </td>
                                             <td class="column-width" style="text-align: center;">
-                                                {{ strtoupper(substr($hasil->judul, 0, 10)) }}
+                                                <?php
+                                                $judul = $hasil->judul;
+                                                $kata = explode(' ', $judul);
+                                                $lima_kata = implode(' ', array_slice($kata, 0, 5));
+                                                echo strtoupper($lima_kata);
+                                                if (count($kata) > 5) {
+                                                    echo '...';
+                                                }
+                                                ?>
                                             </td>
+
                                             <td class="column-width" style="text-align: center;">
                                                 {{ strtoupper($hasil->full_name) }}
+                                            </td>
+
+                                            <td class="column-width" style="text-align: center;">
+                                                @if ($hasil->status == 'publish')
+                                                <span class="badge badge-success">PUBLISH</span>
+                                                @else
+                                                <span class="badge badge-warning">DRAFT</span>
+                                                @endif
+                                            </td>
+
+                                            <td style="text-align: center;">
+                                                @if($hasil->dilihat < 1) 0 kali @else {{ $hasil->dilihat }} Kali @endif </td>
+
+                                            <td style="text-align: center;">
+                                                {{ \Carbon\Carbon::parse($hasil->created_at)->format('l, j F Y H:i') }}
                                             </td>
 
                                             <td style="text-align: center;">
@@ -238,7 +264,7 @@ Artikel | MIS
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/artikel-kategori/delete/" + id,
+                    url: "/account/article/delete/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

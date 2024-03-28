@@ -24,6 +24,7 @@ class Artikel extends Model
         'gambar_cover',
         'isi',
         'dilihat',
+        'status',
         'created_at',
         'updated_at',
     ];

@@ -21,6 +21,7 @@ Route::get('/blog', 'account\ArtikelController@public')->name('blog.artikel.blog
 Route::get('/blog/topic/{categories_artikel_id}{token}', 'account\ArtikelController@publickategori')->name('blog.topic.kategori');
 Route::get('/blog/topic/blog-single/{id}{token}', 'account\ArtikelController@blogsingle')->name('blog.topic.blog-single');
 Route::post('/blog/store', 'account\ArtikelController@storekomentar')->name('blog.store.komentar');
+Route::get('/blog/contact', 'account\ArtikelController@contact')->name('blog.contact.kontak');
 
 Auth::routes();
 
@@ -243,6 +244,9 @@ Route::prefix('account')->group(
         Route::post('/article/store', 'account\ArtikelController@store')->name('account.Artikel.store');
         Route::get('/article/edit/{id}{token}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
         Route::put('/article/update/{id}', 'account\ArtikelController@update')->name('account.Artikel.update');
+        Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
+        Route::get('/article/search', 'account\ArtikelController@search')->name('account.Artikel.search');
+        Route::get('/article/filter', 'account\ArtikelController@filter')->name('account.Artikel.filter');
     }
 
 

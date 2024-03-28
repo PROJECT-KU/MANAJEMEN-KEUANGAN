@@ -26,6 +26,7 @@ class ArtikelController extends Controller
         return $token;
     }
 
+    // <!--================== PUBLIC ==================-->
     public function public(Request $request)
     {
         $user = Auth::user();
@@ -41,7 +42,7 @@ class ArtikelController extends Controller
         }
 
         $artikel = DB::table('artikel')
-            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
             ->orderBy('artikel.created_at', 'DESC')
@@ -78,12 +79,17 @@ class ArtikelController extends Controller
 
         // Mengambil artikel berdasarkan kategori
         $articlesQuery = DB::table('artikel')
-            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
             ->where('categories_artikel.id', $categories_artikel_id) // Menyaring artikel berdasarkan kategori yang diberikan
+            ->where('artikel.status', 'publish') // Hanya memperhitungkan artikel dengan status 'publish'
             ->orderBy('artikel.created_at', 'DESC');
 
+        // Hitung jumlah artikel yang memenuhi kriteria
+        $totalArticles = $articlesQuery->count();
+
+        // Pagination
         $articles = $articlesQuery->paginate(9); // Ubah nilai per halaman menjadi 9
 
         // Mengambil kategori artikel
@@ -99,7 +105,7 @@ class ArtikelController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        return view('account.artikel.publickategori', compact('articles', 'maintenances', 'startDate', 'endDate', 'categories_artikel'));
+        return view('account.artikel.publickategori', compact('articles', 'maintenances', 'startDate', 'endDate', 'categories_artikel', 'totalArticles'));
     }
 
     public function blogsingle($id, $token)
@@ -108,9 +114,10 @@ class ArtikelController extends Controller
         $artikel = Artikel::findOrFail($id);
 
         $datas = DB::table('artikel')
-            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            ->where('artikel.status', 'publish')
             ->orderBy('artikel.created_at', 'DESC')
             ->get();
 
@@ -132,6 +139,9 @@ class ArtikelController extends Controller
         $maintenances = DB::table('maintenance')
             ->orderBy('created_at', 'DESC')
             ->get();
+
+        $artikel->dilihat += 1;
+        $artikel->save();
 
         return view('account.artikel.blogsingle', compact('artikel', 'datas', 'maintenances', 'startDate', 'endDate', 'categories_artikel', 'artikel_komentar'));
     }
@@ -174,12 +184,19 @@ class ArtikelController extends Controller
 
 
         if ($save) {
-            return redirect()->route('blog.artikel.blog')->with('success', 'Komentar Anda Berhasil Disimpan!');
+            return redirect()->back()->with('success', 'Komentar Anda Berhasil Disimpan!');
         } else {
-            return redirect()->route('blog.artikel.blog')->with('error', 'Komentar Anda Gagal Disimpan!');
+            return redirect()->back()->with('error', 'Komentar Anda Gagal Disimpan!');
         }
     }
 
+    public function contact()
+    {
+        return view('account.artikel.contact');
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== ADMIN ==================-->
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -195,9 +212,10 @@ class ArtikelController extends Controller
         }
 
         $artikel = DB::table('artikel')
-            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            ->whereBetween('artikel.created_at', [$currentMonth, $nextMonth])
             ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
 
@@ -264,6 +282,7 @@ class ArtikelController extends Controller
             'gambar_depan'                   => $imagePath_depan, // Store the image path
             'gambar_cover'                   => $imagePath_cover, // Store the image path
             'isi'                            => $request->input('isi'),
+            'status'                         => $request->input('status'),
         ]);
 
 
@@ -321,11 +340,12 @@ class ArtikelController extends Controller
             'user_id'                        => $request->input('user_id'),
             'categories_artikel_id'          => $request->input('categories_artikel_id'),
             'judul'                          => $request->input('judul'),
-            'kata_kunci'                     => $request->input('kata_kunci'),
+            'kata_kunci'                     => $request->input('kata_kunci_tags'),
             'judul'                          => $request->input('judul'),
             'gambar_depan'                   => $imagePath_depan, // Store the image path
             'gambar_cover'                   => $imagePath_cover, // Store the image path
             'isi'                            => $request->input('isi'),
+            'status'                         => $request->input('status'),
         ]);
 
         if ($artikel) {
@@ -339,10 +359,10 @@ class ArtikelController extends Controller
     public function destroy($id)
     {
         try {
-            $categories_artikel = CategoriesArtikel::find($id);
+            $artikel = Artikel::find($id);
 
-            if ($categories_artikel) {
-                $categories_artikel->delete();
+            if ($artikel) {
+                $artikel->delete();
                 return response()->json(['status' => 'success', 'message' => 'Data Berhasil Dihapus!']);
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Data Tidak Ditemukan!'], 404);
@@ -368,27 +388,31 @@ class ArtikelController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        $categories_artikel = DB::table('categories_artikel')
-            ->select('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
+        $artikel = DB::table('artikel')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
+            ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
             ->where(function ($query) use ($search) {
-                $query->where('categories_artikel.kategori', 'LIKE', '%' . $search . '%');
+                $query->where('artikel.judul', 'LIKE', '%' . $search . '%')
+                    ->orWhere('categories_artikel.kategori', 'LIKE', '%' . $search . '%')
+                    ->orWhere('users.full_name', 'LIKE', '%' . $search . '%');
             })
-            ->orderBy('categories_artikel.created_at', 'DESC')
+            ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
-        $categories_artikel->appends(['q' => $search]);
+
+        $artikel->appends(['q' => $search, 'start_date' => $startDate, 'end_date' => $endDate]);
 
         $maintenances = DB::table('maintenance')
             ->orderBy('created_at', 'DESC')
             ->get();
 
-
         $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
         $endDate = $request->get('end_date');
 
-        if ($categories_artikel->isEmpty()) {
-            return redirect()->route('account.Kategori-Artikel.index')->with('error', 'Data Laporan Peserta tidak ditemukan.');
+        if ($artikel->isEmpty()) {
+            return redirect()->route('account.Artikel.index')->with('error', 'Data Laporan Peserta tidak ditemukan.');
         }
-        return view('account.kategori_artikel.index', compact('categories_artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('artikel', 'maintenances', 'startDate', 'endDate'));
     }
 
     public function filter(Request $request)
@@ -405,16 +429,20 @@ class ArtikelController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        $categories_artikel = DB::table('categories_artikel')
-            ->select('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
-            ->whereBetween('categories_artikel.created_at', [$currentMonth, $nextMonth])
-            ->orderBy('categories_artikel.created_at', 'DESC')
+        $artikel = DB::table('artikel')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
+            ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            ->whereBetween('artikel.created_at', [$currentMonth, $nextMonth])
+            ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
+
 
         $maintenances = DB::table('maintenance')
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        return view('account.kategori_artikel.index', compact('categories_artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('artikel', 'maintenances', 'startDate', 'endDate'));
     }
+    // <!--================== END ==================-->
 }

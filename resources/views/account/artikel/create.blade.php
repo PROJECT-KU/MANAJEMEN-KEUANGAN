@@ -27,7 +27,8 @@ Tambah Artikel | MIS
         color: red;
         display: none;
     }
-</style>============ END ==================-->
+</style>
+<!--================== END ==================-->
 
 @section('content')
 <div class="main-content">
@@ -37,7 +38,7 @@ Tambah Artikel | MIS
         </div>
 
         <div class="section-body">
-            <form action="{{ route('account.Artikel.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('account.Artikel.store') }}" method="POST" enctype="multipart/form-data" id="myForm">
                 @csrf
 
                 <div class="card">
@@ -70,11 +71,29 @@ Tambah Artikel | MIS
                                     <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                                         <option value="">-- PILIH NAMA PENULIS --</option>
                                         @foreach ($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->full_name }}</option>
+                                        <option value="{{ $user->id }}">{{ strtoupper($user->full_name) }}</option>
                                         @endforeach
                                     </select>
 
                                     @error('user_id')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select class="form-control" name="status" required>
+                                        <option value="" disabled selected>-- PILIH STATUS ARTIKEL --</option>
+                                        <option value="draft">DRAFT</option>
+                                        <option value="publish">PUBLISH</option>
+                                    </select>
+                                    @error('status')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
@@ -115,7 +134,8 @@ Tambah Artikel | MIS
                                     <div class="input-group" id="keyword-container">
                                         <!-- Tempat untuk menampilkan kata kunci -->
                                     </div>
-                                    <input id="kata_kunci_input" type="text" name="kata_kunci" placeholder="Masukkan Kata Kunci Artikel" class="form-control">
+                                    <input id="kata_kunci_input" type="text" name="kata_kunci" placeholder="Masukkan Kata Kunci Artikel" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan kata kunci</p>
                                     @error('kata_kunci')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -132,7 +152,7 @@ Tambah Artikel | MIS
                                 <div class="form-group">
                                     <label>Thumbnail</label>
                                     <div class="input-group">
-                                        <input type="file" name="gambar_depan" id="gambar_depan" class="form-control" accept="image/*">
+                                        <input type="file" name="gambar_depan" id="gambar_depan" class="form-control" accept="image/*" required>
                                     </div>
                                     <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload gambar_depan atau Gunakan Kamera -->
                                     @error('gambar_depan')
@@ -156,7 +176,7 @@ Tambah Artikel | MIS
                                 <div class="form-group">
                                     <label>Gambar Cover</label>
                                     <div class="input-group">
-                                        <input type="file" name="gambar_cover" id="gambar_cover" class="form-control" accept="image/*">
+                                        <input type="file" name="gambar_cover" id="gambar_cover" class="form-control" accept="image/*" required>
                                     </div>
                                     <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload gambar_cover atau Gunakan Kamera -->
                                     @error('gambar_cover')
@@ -178,9 +198,9 @@ Tambah Artikel | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Catatan</label>
+                                    <label>Isi Artikel</label>
                                     <div class="input-group">
-                                        <textarea name="isi" id="isi" placeholder="Masukkan Teks Artikel" class="form-control" style="width: 100%;"></textarea>
+                                        <textarea name="isi" id="isi" placeholder="Masukkan Teks Artikel" class="form-control" style="width: 100%;" required></textarea>
                                     </div>
                                     @error('note')
                                     <div class="invalid-feedback" style="display: block">
@@ -200,6 +220,36 @@ Tambah Artikel | MIS
 </div>
 </section>
 </div>
+
+<!--================== SWEET ALERT KATA KUNCI ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Event listener untuk tombol submit
+    document.querySelector('.btn-submit').addEventListener('click', function(e) {
+        e.preventDefault(); // Mencegah form untuk langsung di-submit
+
+        // Menampilkan Sweet Alert dengan pilihan
+        Swal.fire({
+            title: 'Apakah Kamu Sudah Menekan Enter Di Keyboard Pada Input Kata Kunci ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sudah',
+            cancelButtonText: 'Belum'
+        }).then((result) => {
+            // Jika opsi "Sudah" dipilih
+            if (result.isConfirmed) {
+                // Lakukan aksi penyimpanan di sini (misalnya, dengan menyubmit form)
+                document.getElementById('myForm').submit();
+            }
+            // Jika opsi "Belum" dipilih
+            else if (result.dismiss === Swal.DismissReason.cancel) {
+                // Tidak lakukan apa-apa
+            }
+        });
+    });
+</script>
+<!--================== END ==================-->
 
 <!--================== KATA KUNCI ==================-->
 <script>
@@ -428,7 +478,7 @@ Tambah Artikel | MIS
     // Replace 'jobdesk' textarea with CKEditor
     CKEDITOR.replace('isi', {
         width: '100%', // Set CKEditor width to 100%
-        height: '300px' // You can adjust the height as needed
+        height: '500px' // You can adjust the height as needed
     });
 </script>
 <!--================== END ==================-->

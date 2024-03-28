@@ -24,6 +24,7 @@ class Artikel extends Migration
             $table->string('gambar_cover', 300)->nullable();
             $table->text('isi')->nullable();
             $table->string('dilihat', 300)->nullable();
+            $table->string('status', 300)->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')

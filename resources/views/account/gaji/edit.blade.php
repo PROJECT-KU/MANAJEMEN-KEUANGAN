@@ -1509,7 +1509,7 @@ Update Gaji Karyawan | MIS
               <div class="form-group">
                 <label>Status Pembayaran</label>
                 <select class="form-control" name="status">
-                  <option value="" disabled selected>Silahkan Pilih</option>
+                  <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                   <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
                   <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
                 </select>
