@@ -35,6 +35,7 @@
     <!-- zoom image -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <meta name="google-adsense-account" content="ca-pub-4416930989633394">
     <!-- end -->
     <style>
         .fas,

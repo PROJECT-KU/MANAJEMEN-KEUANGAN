@@ -28,6 +28,7 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('assets/artikel/css/style.css') }}" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-4416930989633394">
 </head>
 
 <body>
