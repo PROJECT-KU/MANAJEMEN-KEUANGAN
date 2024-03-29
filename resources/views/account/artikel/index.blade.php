@@ -4,11 +4,6 @@
 Artikel | MIS
 @stop
 
-<!--================== IKLAN ==================-->
-<meta name="google-adsense-account" content="ca-pub-4416930989633394">
-<meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
-<!--================== END ==================-->
-
 @section('content')
 <div class="main-content">
     <section class="section">
