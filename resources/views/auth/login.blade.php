@@ -159,6 +159,7 @@
     </div>
 
     <!--================== IKLAN ==================-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
     <script type="text/javascript">
         (sc_adv_out = window.sc_adv_out || []).push({
             id: 883742,
