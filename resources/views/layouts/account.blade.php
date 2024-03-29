@@ -35,7 +35,10 @@
     <!-- zoom image -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <!--================== IKLAN ==================-->
     <meta name="google-adsense-account" content="ca-pub-4416930989633394">
+    <meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
+    <!--================== END ==================-->
     <!-- end -->
     <style>
         .fas,
