@@ -118,5 +118,4 @@ Blog | Rumah Scopus
     </div>
 </section>
 @endforeach
-
 @stop
