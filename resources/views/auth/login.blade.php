@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
     <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
+    <!--================== IKLAN ==================-->
+    <meta name="google-adsense-account" content="ca-pub-4416930989633394">
+    <meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
+    <!--================== END ==================-->
 
     <!-- show and hide password -->
     <style>
