@@ -129,7 +129,7 @@
 
         <!--================== IKLAN ==================-->
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
-        <div id="SC_TBlock_883742"></div>
+        <div id="SC_TBlock_883745"></div>
         <!--================== END ==================-->
 
         <!--================== BACKGROUND ==================-->
@@ -159,7 +159,11 @@
     </div>
 
     <!--================== IKLAN ==================-->
+
+    <!-- google ads -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
+    <!-- end -->
+
     <script type="text/javascript">
         (sc_adv_out = window.sc_adv_out || []).push({
             id: 883742,
@@ -168,13 +172,16 @@
     </script>
     <script type="text/javascript" src="//st-n.nnowa.com/js/a.js" async></script>
 
+    <!-- adnow ads -->
     <script type="text/javascript">
         (sc_adv_out = window.sc_adv_out || []).push({
-            id: "883742",
-            domain: "n.nnowa.com",
-            no_div: false
+            id: 883745,
+            domain: "n.ads1-adnow.com",
         });
     </script>
+    <script type="text/javascript" src="//st-n.ads1-adnow.com/js/a.js" async></script>
+    <!-- end -->
+
     <script async type="text/javascript" src="//st-n.nnowa.com/js/a.js"></script>
     <script data-cfasync="false" type="text/javascript">
         (function($, document) {
