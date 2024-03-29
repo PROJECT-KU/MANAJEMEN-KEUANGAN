@@ -28,7 +28,11 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('assets/artikel/css/style.css') }}" rel="stylesheet">
+
+    <!--================== IKLAN ==================-->
     <meta name="google-adsense-account" content="ca-pub-4416930989633394">
+    <meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
+    <!--================== END ==================-->
 </head>
 
 <body>
