@@ -135,6 +135,7 @@
 
         <!-- adnow ads -->
         <div id="SC_TBlock_883745"></div>
+        <div id="SC_TBlock_883745" class="SC_TBlock">loading...</div>
         <!-- end -->
         <!--================== END ==================-->
 
