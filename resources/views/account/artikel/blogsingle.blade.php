@@ -473,11 +473,6 @@ Artikel | MIS
                     </div>
                 </div><!-- End blog entries list -->
 
-                <!--================== IKLAN ==================-->
-                <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=120x600&ga=g"></script>
-<noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/120x600.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
-                <!--================== END ==================-->
-
                 <div class="col-lg-4">
                     <div class="sidebar">
 
@@ -542,6 +537,13 @@ Artikel | MIS
                 </div>
             </div>
         </div>
+        
+        <!--================== IKLAN ==================-->
+        <p style="text-align: center;">
+            <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=728x90&ga=g"></script>
+            <noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/728x90.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
+        </p>
+        <!--================== END ==================-->
     </section>
 
 </main>
