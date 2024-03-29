@@ -49,10 +49,6 @@ Artikel | MIS
 <!-- google ads -->
 <meta name="google-adsense-account" content="ca-pub-4416930989633394">
 <!-- end -->
-
-<!-- monetag ads -->
-<meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
-<!-- end -->
 <!--================== END ==================-->
 
 @section('konten')
@@ -538,6 +534,7 @@ Artikel | MIS
 
                         <!-- adnow ads -->
                         <div id="SC_TBlock_883745"></div>
+                        <div id="SC_TBlock_883745" class="SC_TBlock">loading...</div>
                         <!-- end -->
 
                         <!-- yllix ads -->
