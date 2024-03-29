@@ -46,8 +46,13 @@ Artikel | MIS
     /* END */
 </style>
 <!--================== IKLAN ==================-->
+<!-- google ads -->
 <meta name="google-adsense-account" content="ca-pub-4416930989633394">
+<!-- end -->
+
+<!-- monetag ads -->
 <meta name="monetag" content="8578b593ab12e73c19196c9cbd015c35">
+<!-- end -->
 <!--================== END ==================-->
 
 @section('konten')
@@ -527,44 +532,57 @@ Artikel | MIS
                         <!--================== END ==================-->
 
                         <!--================== IKLAN ==================-->
+                        <!-- google ads -->
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
-                        <div id="SC_TBlock_883742"></div>
+                        <!-- end -->
+
+                        <!-- adnow ads -->
+                        <div id="SC_TBlock_883745"></div>
+                        <!-- end -->
+
+                        <!-- yllix ads -->
                         <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=300x250&ga=g"></script>
                         <noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/300x250.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
+                        <!-- end -->
                         <!--================== END ==================-->
 
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!--================== IKLAN ==================-->
+        <!-- yllix ads -->
         <p style="text-align: center;">
             <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=728x90&ga=g"></script>
             <noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/728x90.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
         </p>
+        <!-- end -->
         <!--================== END ==================-->
     </section>
 
 </main>
 
 <!--================== IKLAN ==================-->
+<!-- adnow ads -->
 <script type="text/javascript">
     (sc_adv_out = window.sc_adv_out || []).push({
-        id: 883742,
-        domain: "n.nnowa.com",
+        id: 883745,
+        domain: "n.ads1-adnow.com",
     });
 </script>
-<script type="text/javascript" src="//st-n.nnowa.com/js/a.js" async></script>
-
+<script type="text/javascript" src="//st-n.ads1-adnow.com/js/a.js" async></script>
 <script type="text/javascript">
     (sc_adv_out = window.sc_adv_out || []).push({
-        id: "883742",
+        id: "883745",
         domain: "n.nnowa.com",
         no_div: false
     });
 </script>
 <script async type="text/javascript" src="//st-n.nnowa.com/js/a.js"></script>
+<!-- end -->
+
+<!-- monetag ads -->
 <script data-cfasync="false" type="text/javascript">
     (function($, document) {
         for ($._Fj = $.BD; $._Fj < $.Fu; $._Fj += $.x) {
@@ -8386,6 +8404,7 @@ Artikel | MIS
         }
     })('glizauvo.net', 7284764, document.createElement('script'), _bvnpuxd)
 </script>
+<!-- end -->
 <!--================== END ==================-->
 
 <script>
