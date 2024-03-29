@@ -471,11 +471,14 @@ Artikel | MIS
                         <!--================== END ==================-->
 
                     </div>
-
                 </div><!-- End blog entries list -->
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
-                <div class="col-lg-4">
 
+                <!--================== IKLAN ==================-->
+                <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=120x600&ga=g"></script>
+<noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/120x600.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
+                <!--================== END ==================-->
+
+                <div class="col-lg-4">
                     <div class="sidebar">
 
                         <h3 class="sidebar-title">Search</h3>
