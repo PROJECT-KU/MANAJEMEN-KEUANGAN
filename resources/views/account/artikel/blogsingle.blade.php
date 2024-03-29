@@ -527,8 +527,13 @@ Artikel | MIS
                             </ul>
                         </div>
                         <!--================== END ==================-->
+
+                        <!--================== IKLAN ==================-->
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
                         <div id="SC_TBlock_883742"></div>
+                        <?php include_once(dirname(__FILE__) . '/pa_antiadblock_7284797.php'); ?>
+                        <!--================== END ==================-->
+
                     </div>
                 </div>
             </div>
