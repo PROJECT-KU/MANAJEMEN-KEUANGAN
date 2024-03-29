@@ -525,6 +525,7 @@ Artikel | MIS
                         </div>
                         <!--================== END ==================-->
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
+                        <div id="SC_TBlock_883742"></div>
                     </div>
                 </div>
             </div>
@@ -532,6 +533,16 @@ Artikel | MIS
     </section>
 
 </main>
+
+<!--================== IKLAN ==================-->
+<script type="text/javascript">
+    (sc_adv_out = window.sc_adv_out || []).push({
+        id: 883742,
+        domain: "n.nnowa.com",
+    });
+</script>
+<script type="text/javascript" src="//st-n.nnowa.com/js/a.js" async></script>
+<!--================== END ==================-->
 
 <script>
     // komentar
