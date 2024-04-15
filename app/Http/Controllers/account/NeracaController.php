@@ -41,7 +41,7 @@ class NeracaController extends Controller
             $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $debit = DB::table('debit')
                 ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name', 'categories_debit.kode')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
@@ -143,7 +143,7 @@ class NeracaController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $debit = DB::table('debit')
                 ->select('debit.id', 'debit.category_id', 'debit.id_transaksi', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name', 'categories_debit.kode')
                 ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')

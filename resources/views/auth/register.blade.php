@@ -4,69 +4,142 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <title>Daftar Akun | MANAGEMENT</title>
+    <title>Daftar Akun | MIS</title>
     <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
-    <!-- General CSS Files -->
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
-
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
-
-    <!-- Template CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/login/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
     <!-- show and hide password -->
     <style>
         .password-group {
             position: relative;
+            display: flex;
+            align-items: center;
+            /* Untuk membuat ikon mata berada di tengah-tengah vertikal */
         }
 
         .password-toggle {
             cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 65%;
-            transform: translateY(-50%);
+            margin-left: auto;
             z-index: 1;
             vertical-align: middle;
             display: flex;
             justify-content: center;
+            position: absolute;
+            /* Menyesuaikan posisi ikon */
+            right: 10px;
+            /* Menyesuaikan posisi ikon */
+            top: 50%;
+            /* Menyesuaikan posisi ikon */
+            transform: translateY(-50%);
+            /* Menyesuaikan posisi ikon */
         }
 
-
+        .password-group2 {
+            position: relative;
+            display: flex;
+            align-items: center;
+            /* Untuk membuat ikon mata berada di tengah-tengah vertikal */
+        }
 
         .password-toggle2 {
             cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 65%;
-            transform: translateY(-50%);
             z-index: 1;
             vertical-align: middle;
             display: flex;
             justify-content: center;
-        }
-    </style>
-    <!-- end -->
-
-    <!-- background -->
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-        }
-
-        svg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
+            /* Menyesuaikan posisi ikon */
+            right: 20px;
+            /* Menyesuaikan posisi ikon */
+            top: 35%;
+            /* Menyesuaikan posisi ikon */
+            transform: translateY(-50%);
+            /* Menyesuaikan posisi ikon */
+        }
+
+
+        /* Gaya saat input dalam keadaan fokus */
+        .form-control:focus {
+            border-color: #007bff;
+            /* Warna biru */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+            /* Efek bayangan */
+        }
+
+        /* Transisi untuk perubahan warna */
+        .form-control {
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        /* image */
+        /* Tampilan desktop */
+        .signin-content {
+            display: flex;
+        }
+
+        .signup-form {
+            margin-right: 20px;
+            /* Untuk memberikan ruang antara form dan gambar */
+        }
+
+        .signup-image {
+            margin-left: 20px;
+            /* Untuk memberikan ruang antara form dan gambar */
+        }
+
+        /* Gaya saat input dalam keadaan fokus */
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+        }
+
+        .form-control {
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        /* end */
+
+        /* Tampilan perangkat seluler */
+        @media (max-width: 768px) {
+            .signin-content {
+                flex-direction: column;
+                /* Mengubah tata letak menjadi satu kolom */
+                align-items: center;
+                /* Pusatkan elemen secara horizontal */
+                text-align: center;
+                /* Pusatkan teks */
+            }
+
+            .signup-form,
+            .signup-image {
+                margin: 0;
+                /* Hapus margin di sekitar form dan gambar */
+            }
+
+            .signup-image {
+                order: -1;
+                /* Mengubah urutan gambar menjadi pertama */
+            }
+        }
+
+        /*end  */
+
+        .form-group label {
+            margin-bottom: 5px;
+            /* Add some space between label and input */
             display: block;
-            background-color: #0e4166;
-            background-image: linear-gradient(to bottom, rgba(14, 65, 102, 0.86), #0e4166);
+            /* Display labels as block elements */
+        }
+
+        /* Additional styles for smaller screens */
+        @media (max-width: 768px) {
+            .form-group label {
+                margin-bottom: 10px;
+                /* Adjust the space between label and input for smaller screens */
+            }
         }
     </style>
     <!-- end -->
@@ -76,86 +149,80 @@
 
 <body>
     <div id="app">
-        <section class="section">
-            <div class="container mt-5">
-                <div class="row">
-                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-                        <div class="login-brand">
-                            <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="350">
-                        </div>
+        <div class="main">
+            <section class="section">
 
-                        <div class="card card-primary">
-                            <div class="card-header">
-                                <h4>DAFTAR AKUN</h4>
-                            </div>
 
-                            <div class="card-body">
-                                <form action="{{ route('register') }}" method="POST">
-                                    @csrf
-                                    <div class="row">
-                                        <div class="form-group col-6">
-                                            <label for="frist_name">Nama Lengkap</label>
-                                            <input id="frist_name" type="text" style="text-transform:uppercase;" class="form-control" name="full_name" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
-                                            @error('full_name')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
+                <div class="card-body">
+                    <form action="{{ route('register') }}" method="POST">
+                        @csrf
+                        <section class="signup">
+                            <div class="container">
+                                <div class="signup-content">
+                                    <div class="signup-form">
+                                        <h2 class="form-title">Sign up</h2>
+
+
+                                        <div class="row">
+                                            <div class="form-group col-6 ">
+                                                <input type="text" name="full_name" id="first_name" class="form-control" placeholder="Nama Lengkap" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
+                                                @error('full_name')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
                                             </div>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group col-6">
-                                            <label for="last_name">Username</label>
-                                            <input id="last_name" type="text" class="form-control" name="username" value="{{ old('username') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
-                                            @error('username')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
-                                            </div>
-                                            @enderror
-                                        </div>
-                                    </div>
 
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Jenis Akun</label>
+                                            <div class="form-group col-6 ">
+                                                <input type="text" name="username" id="last_name" class="form-control" placeholder="Username" value="{{ old('username') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
+                                                @error('username')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="form-group col-md-6 ">
                                                 <select class="form-control" name="jenis" id="jenis" required>
-                                                    <option value="">Silahkan Pilih</option>
+                                                    <option value="" disabled selected>Silahkan Pilih</option>
                                                     <option value="bisnis">Bisnis</option>
-                                                    <!-- <option value="penyewaan">Penyewaan</option> -->
-                                                    <!-- <option value="kasir">Kasir</option> -->
                                                     <option value="perorangan">Perorangan</option>
                                                 </select>
-
                                                 @error('jenis')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}
                                                 </div>
                                                 @enderror
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6" id="levelDropdown" style="display: none;">
-                                            <div class="form-group">
-                                                <label>Role</label>
+                                            <div class="form-group col-md-6" id="levelDropdown" style="display: none;">
                                                 <select class="form-control" name="level">
-                                                    <option value="">Silahkan Pilih</option>
+                                                    <option value="" disabled selected>Silahkan Pilih</option>
                                                     <option value="staff">Staff</option>
                                                     <option value="karyawan">Karyawan</option>
                                                     <option value="trainer">Trainer</option>
                                                 </select>
-
                                                 @error('level')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}
                                                 </div>
                                                 @enderror
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6" id="namaPerusahaanContainer" style="display: none;">
-                                            <div class="form-group">
-                                                <label>Nama Perusahaan</label>
-                                                <input type="text" name="company" class="form-control" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)" style="text-transform:uppercase">
+                                            <div class="form-group col-md-6" id="namaPerusahaanContainer" style="display: none;">
+                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)" style="text-transform:uppercase">
                                                 @error('company')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group col-md-6" id="telpContainer" style="display: block;">
+                                                <input type="text" name="telp" id="telp" class="form-control" placeholder="No Telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)">
+                                                @error('telp')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}
                                                 </div>
@@ -163,115 +230,78 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group col-md-6" id="telpContainer" style="display: block;">
-                                            <label for="telp">No Telp</label>
-                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)">
-                                            @error('telp')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
+                                        <div class="row">
+                                            <div class="form-group col-12 mt-3">
+                                                <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                                @error('email')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
                                             </div>
-                                            @enderror
                                         </div>
-                                        <!-- <div class="form-group col-md-6" id="telpContainer" style="display: block;">
-                                            <label for="telp">No Telp</label>
-                                            <input id="telp" type="text" class="form-control" name="telp" value="{{ old('telp') }}" maxlength="14" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57">
-                                            @error('telp')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
+
+                                        <div class="row" style="margin-top: 20px">
+                                            <div class="form-group col-6">
+                                                <input type="password" name="password" id="password" placeholder="Password" class="form-control" pwstrength" data-indicator="pwindicator" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
+                                                <i class="fas fa-eye password-toggle" id="password-toggle" style="margin-right: 10px;"></i>
+                                                <div id="pwindicator" class="pwindicator">
+                                                    <div class="bar"></div>
+                                                    <div class="label"></div>
+                                                </div>
+                                                @error('password')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
                                             </div>
-                                            @enderror
-                                        </div> -->
+
+                                            <div class="form-group col-6">
+                                                <label for="password2"><i class="zmdi zmdi-lock-outline"></i></label>
+                                                <input type="password" name="password_confirmation" id="password2" class="form-control" placeholder="Konfirmasi Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
+                                                <i class="fas fa-eye password-toggle2" id="password-toggle2"></i>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox mt-5">
+                                                <input type="checkbox" name="agree" class="custom-control-input" id="agree" @if(old('agree')) checked @endif required>
+                                                <label class="custom-control-label" for="agree">Saya setuju dengan syarat dan ketentuan</label>
+                                                @error('agree')
+                                                <div class="invalid-feedback" style="display: block">
+                                                    {{ $message }}
+                                                </div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="form-group form-button col-md-6">
+                                                <input type="submit" name="signup" id="signup" class="form-submit" value="Register">
+                                            </div>
+                                            <div class="form-group col-md-6 mt-4">
+                                                <p style="text-align: center; margin-bottom: -2px;">Sudah Punya Akun?</p>
+                                                <a href="{{ route('login') }}" style="color: #6495ED; text-decoration: none;" class="signup-image-link">Login Sekarang!</a>
+                                            </div>
+                                        </div>
+
                                     </div>
 
-                                    <div class="row">
-                                        <div class="form-group col-12">
-                                            <label for="email">Alamat Email</label>
-                                            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                            @error('email')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
-                                            </div>
-                                            @enderror
-                                        </div>
+                                    <div class="signup-image">
+                                        <figure><img src="{{ asset('assets/login/images/signup-image.jpg') }}" alt="sing up image"></figure>
                                     </div>
 
-                                    <div class="row" style="margin-top: 30px">
-                                        <div class="form-group col-6">
-                                            <label for="password" class="d-block">Password</label>
-                                            <input id="password" type="password" class="form-control pwstrength" data-indicator="pwindicator" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
-                                            <i class="fas fa-eye password-toggle" id="password-toggle"></i>
-                                            <div id="pwindicator" class="pwindicator">
-                                                <div class="bar"></div>
-                                                <div class="label"></div>
-                                            </div>
-                                            @error('password')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
-                                            </div>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group col-6">
-                                            <label for="password2" class="d-block">Konfirmasi Password</label>
-                                            <input id="password2" type="password" class="form-control" name="password_confirmation" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
-                                            <i class="fas fa-eye password-toggle2" id="password-toggle2"></i>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" name="agree" class="custom-control-input" id="agree" @if(old('agree')) checked @endif required>
-                                            <label class="custom-control-label" for="agree">Saya setuju dengan syarat dan ketentuan</label>
-                                            @error('agree')
-                                            <div class="invalid-feedback" style="display: block">
-                                                {{ $message }}
-                                            </div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-primary btn-lg btn-block">
-                                            DAFTAR
-                                        </button>
-                                    </div>
-                                    <div class="form-group">
-                                        Sudah Punya Akun? <a href="{{ route('login') }}">Login Sekarang!</a>
-                                    </div>
-                                </form>
+                                </div>
                             </div>
-                        </div>
-                        <div class="simple-footer">
-                            © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                        </section>
 
-        <!--================== BACKGROUND ==================-->
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" style="position: fixed; top: 0; left: 0; z-index: -1;">
-            <defs>
-                <linearGradient id="bg">
-                    <stop offset="0%" style="stop-color:rgba(130, 158, 249, 0.06)"></stop>
-                    <stop offset="50%" style="stop-color:rgba(76, 190, 255, 0.6)"></stop>
-                    <stop offset="100%" style="stop-color:rgba(115, 209, 72, 0.2)"></stop>
-                </linearGradient>
-                <path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0
-        s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
-            </defs>
-            <g>
-                <use xlink:href='#wave' opacity=".3">
-                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="10s" calcMode="spline" values="270 230; -334 180; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
-                </use>
-                <use xlink:href='#wave' opacity=".6">
-                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calcMode="spline" values="-270 230;243 220;-270 230" keyTimes="0; .6; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
-                </use>
-                <use xlink:href='#wave' opacty=".9">
-                    <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="6s" calcMode="spline" values="0 230;-140 200;0 230" keyTimes="0; .4; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
-                </use>
-            </g>
-        </svg>
-        <!--================== END ==================-->
+
+                    </form>
+                </div>
+        </div>
+        </section>
+    </div>
+
     </div>
 
     <!--================== FORMAT NO TELP ==================-->
@@ -336,7 +366,7 @@
             if (selectedValue === 'perorangan') {
                 levelSelect.innerHTML = '<option value="users">Users</option>';
             } else if (selectedValue === 'bisnis') {
-                levelSelect.innerHTML = '<option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
+                levelSelect.innerHTML = '<option value="">Silahkan Pilih</option> <option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
             }
         }
 
@@ -382,6 +412,11 @@
     <!--================== END ==================-->
 
     <!--================== GENERAL JS ==================-->
+    <script src="{{ asset('assets/login/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/login/js/main.js') }}"></script>
+
+
+
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
     <script src="{{ asset('assets/modules/tooltip.js') }}"></script>

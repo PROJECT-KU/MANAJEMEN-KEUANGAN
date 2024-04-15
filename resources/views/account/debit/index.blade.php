@@ -53,6 +53,8 @@ Data Uang Masuk | MIS
                             </div>
                         </form>
 
+                        @if ( Auth::user()->level == 'ceo')
+                        @else
                         <div class="row">
                             <div class="col-12 mt-3">
                                 <div class="form-group text-center">
@@ -62,6 +64,7 @@ Data Uang Masuk | MIS
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                     </div>
                 </div>
@@ -82,7 +85,10 @@ Data Uang Masuk | MIS
                                         <th scope="col">KETERANGAN</th>
                                         <th scope="col">TANGGAL</th>
                                         <th scope="col">BUKTI UANG MASUK</th>
+                                        @if ( Auth::user()->level == 'ceo')
+                                        @else
                                         <th scope="col" style="width: 15%;text-align: center">AKSI</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -103,6 +109,8 @@ Data Uang Masuk | MIS
                                                 </div>
                                             </a>
                                         </td>
+                                        @if ( Auth::user()->level == 'ceo')
+                                        @else
                                         <td class="text-center">
                                             <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-pencil-alt"></i>
@@ -111,6 +119,7 @@ Data Uang Masuk | MIS
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </td>
+                                        @endif
                                     </tr>
                                     @php
                                     $no++;

@@ -90,6 +90,8 @@ Data Laporan Camp | MIS
               </div>
             </form>
 
+            @if ( Auth::user()->level == 'ceo')
+            @else
             <div class="row">
               <div class="col-12 mt-3">
                 <div class="form-group text-center">
@@ -99,6 +101,7 @@ Data Laporan Camp | MIS
                 </div>
               </div>
             </div>
+            @endif
 
           </div>
         </div>
@@ -166,6 +169,17 @@ Data Laporan Camp | MIS
                         <span class="badge badge-success"><i class="fas fa-check-circle"></i></span>
                         @endif
                       </td>
+
+                      @if ( Auth::user()->level == 'ceo')
+                      <td class="text-center">
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
+                          <i class="fa fa-eye"></i>
+                        </a>
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                          <i class="fa fa-download"></i>
+                        </a>
+                      </td>
+                      @else
                       <td class="text-center">
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
                           <i class="fa fa-pencil-alt"></i>
@@ -179,8 +193,8 @@ Data Laporan Camp | MIS
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
                           <i class="fa fa-download"></i>
                         </a>
-
                       </td>
+                      @endif
                     </tr>
                     @php
                     $no++;

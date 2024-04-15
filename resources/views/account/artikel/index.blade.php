@@ -84,9 +84,12 @@ Artikel | MIS
                                 </div>
                             </div>
                         </form>
+                        @if ( Auth::user()->level == 'ceo')
+                        @else
                         <a href="{{ route('account.Artikel.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
                             <i class="fa fa-plus-circle"></i> TAMBAH ARTIKEL
                         </a>
+                        @endif
                     </div>
                 </div>
                 <!--================== END ==================-->
@@ -108,7 +111,10 @@ Artikel | MIS
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS ARTIKEL</th>
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">DILIHAT SEBANYAK</th>
                                             <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PEMBUATAN</th>
+                                            @if ( Auth::user()->level == 'ceo')
+                                            @else
                                             <th scope="col" rowspan="2" style="width: 15%;text-align: center">AKSI</th>
+                                            @endif
                                         </tr>
                                     </thead>
 
@@ -155,6 +161,8 @@ Artikel | MIS
                                                 {{ \Carbon\Carbon::parse($hasil->created_at)->format('l, j F Y H:i') }}
                                             </td>
 
+                                            @if ( Auth::user()->level == 'ceo')
+                                            @else
                                             <td style="text-align: center;">
                                                 <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.Artikel.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
                                                     <i class="fa fa-pencil-alt"></i>
@@ -163,6 +171,7 @@ Artikel | MIS
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
+                                            @endif
                                         </tr>
                                         @php
                                         $no++;

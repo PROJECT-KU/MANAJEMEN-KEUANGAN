@@ -40,7 +40,7 @@ class CreditController extends Controller
 
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description',  'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
@@ -84,7 +84,7 @@ class CreditController extends Controller
         $search = $request->get('q');
         $user = Auth::user();
 
-        if ($user->level == 'staff') {
+        if ($user->level == 'staff' || $user->level == 'ceo') {
             $manager = User::where('level', 'manager')
                 ->where('company', $user->company)
                 ->first();

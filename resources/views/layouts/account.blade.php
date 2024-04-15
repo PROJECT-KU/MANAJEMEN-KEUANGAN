@@ -123,7 +123,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endphp
 
 
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>PENGGUNA</span>
@@ -170,7 +170,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
                                 </li>
                                 @else
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan' || Auth::user()->level === 'trainer')
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan' || Auth::user()->level === 'trainer' || Auth::user()->level === 'ceo')
                                 <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                     <ul class="dropdown-menu">
@@ -181,7 +181,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
+                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager'|| Auth::user()->level === 'ceo')
                                 <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-newspaper"></i><span>ARTIKEL</span>
@@ -189,6 +189,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/artikel-kategori') }}"><a class="nav-link" href="{{ route('account.Kategori-Artikel.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
                                         <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-file-signature"></i>DATA ARTIKEL</a></li>
+                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>DATA KOMENTAR</a></li>
                                     </ul>
                                 </li>
                                 @endif

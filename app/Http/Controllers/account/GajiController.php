@@ -64,7 +64,7 @@ class GajiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -1097,7 +1097,7 @@ class GajiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')

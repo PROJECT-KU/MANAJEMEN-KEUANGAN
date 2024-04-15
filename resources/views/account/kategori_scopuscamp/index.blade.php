@@ -90,9 +90,13 @@ Kategori Scopus Camp | MIS
                                 </div>
                             </div>
                         </form>
+
+                        @if ( Auth::user()->level == 'ceo')
+                        @else
                         <a href="{{ route('account.kategori.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
                             <i class="fa fa-plus-circle"></i> TAMBAH KATEGORI
                         </a>
+                        @endif
                     </div>
                 </div>
                 <!--================== END ==================-->

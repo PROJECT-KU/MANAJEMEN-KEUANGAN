@@ -23,6 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/v1/login', 'api\v1\Auth\LoginController@index')->name('api.login');
 Route::post('/v1/register', 'api\v1\Auth\RegisterController@index')->name('api.login');
 
+
 /**
  * Account
  */
@@ -48,5 +49,4 @@ Route::prefix('/v1/account')->group(function () {
         //laporan credit
         Route::get('/laporan_credit', 'api\v1\account\LaporanCreditController@index')->name('account.api.laporan_credit.index');
     });
-
 });

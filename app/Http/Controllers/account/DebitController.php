@@ -40,7 +40,7 @@ class DebitController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $debit = DB::table('debit')
                 ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
@@ -84,7 +84,7 @@ class DebitController extends Controller
         $search = $request->get('q');
         $user = Auth::user();
 
-        if ($user->level == 'staff') {
+        if ($user->level == 'staff' || $user->level == 'ceo') {
             $manager = User::where('level', 'manager')
                 ->where('company', $user->company)
                 ->first();

@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $categories = [];
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $uang_masuk_bulan_ini  = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
@@ -227,7 +227,7 @@ class DashboardController extends Controller
 
         //statistik pemasukan perkategori
         if (
-            $user->level == 'manager' || $user->level == 'staff'
+            $user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo'
         ) {
             $debit = DB::table('debit')
                 ->select('categories_debit.name', DB::raw('SUM(debit.nominal) as total_nominal'))
@@ -261,7 +261,7 @@ class DashboardController extends Controller
         //end
 
         //statistik pengeluaran perkategori
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')
                 ->select('categories_credit.name', DB::raw('SUM(credit.nominal) as total_nominal'))

@@ -95,6 +95,7 @@ Profil | MANAGEMENT
                     <label>Level</label>
                     <select class="form-control" name="level" disabled="true">
                       <option value="" disabled selected>Silahkan Pilih</option>
+                      <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
                       <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
                       <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
                       <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
