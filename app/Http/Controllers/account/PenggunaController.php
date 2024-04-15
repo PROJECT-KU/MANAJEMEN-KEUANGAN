@@ -23,7 +23,7 @@ class PenggunaController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->level == 'manager') {
+        if ($user->level == 'manager' || $user->level == 'ceo') {
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
@@ -51,7 +51,7 @@ class PenggunaController extends Controller
 
         $users = DB::table('users')
             ->where('company', $user->company)
-            ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager'])
+            ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager', 'ceo'])
             ->orderBy('created_at', 'DESC')
             ->where(function ($query) use ($search) {
                 $query->where('users.full_name', 'LIKE', '%' . $search . '%')

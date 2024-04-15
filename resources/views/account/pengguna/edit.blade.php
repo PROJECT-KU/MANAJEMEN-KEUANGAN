@@ -134,6 +134,7 @@ Update Pengguna | MIS
                                     <select class="form-control" name="level">
                                         <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
                                         <option value="users" {{ $user->level == 'users' ? 'selected' : '' }}>Users</option>
+                                        <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
                                         <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                                         <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
                                         <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
