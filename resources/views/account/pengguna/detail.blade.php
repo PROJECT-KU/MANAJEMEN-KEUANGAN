@@ -60,6 +60,7 @@ Detail Pengguna | MIS
                   <select class="form-control" name="level" disabled="true">
                     <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
                     <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
+                    <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
                     <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                     <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
                   </select>

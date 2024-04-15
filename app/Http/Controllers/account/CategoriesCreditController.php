@@ -69,7 +69,7 @@ class CategoriesCreditController extends Controller
         $user = Auth::user();
         $search = $request->get('q');
 
-        if ($user->level == 'manager') {
+        if ($user->level == 'manager' || $user->level == 'ceo') {
             $categories = CategoriesCredit::where('user_id', $user->id)
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%')
@@ -81,7 +81,7 @@ class CategoriesCreditController extends Controller
                 // Jika tidak ada hasil, tampilkan error
                 return redirect()->back()->with('error', 'Data tidak ditemukan.');
             }
-        } else if ($user->level == 'staff' || $user->level == 'ceo') {
+        } else if ($user->level == 'staff') {
             $manager = User::where('level', 'manager')
                 ->where('company', $user->company)
                 ->first();
