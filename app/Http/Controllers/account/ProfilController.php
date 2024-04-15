@@ -37,7 +37,7 @@ class ProfilController extends Controller
 
     // Jika user adalah 'manager' dan pengguna memiliki perusahaan yang sama, atau jika user bukan 'manager' dan ID pengguna sesuai dengan ID user saat ini
     if (
-      Auth::check() && Auth::user()->level == 'manager' && Auth::user()->company == $user->company ||
+      Auth::check() && Auth::user()->level == 'manager' && Auth::user()->level == 'ceo' && Auth::user()->company == $user->company ||
       Auth::check() && Auth::user()->id == $user->id
     ) {
       return view('account.profil.index', compact('user', 'maintenances'));
