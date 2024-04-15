@@ -39,7 +39,7 @@ class LaporanCreditController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
@@ -88,7 +88,7 @@ class LaporanCreditController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
@@ -125,7 +125,7 @@ class LaporanCreditController extends Controller
         $tanggal_awal  = $request->input('tanggal_awal');
         $tanggal_akhir = $request->input('tanggal_akhir');
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $credit = DB::table('credit')
                 ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'categories_credit.id as id_category', 'categories_credit.name')
                 ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')

@@ -15,11 +15,11 @@ class ArtikelKomentar extends Model
      * @var array
      */
     protected $fillable = [
+        'token',
         'user_id',
         'categories_artikel_id',
         'artikel_id',
         'reply',
-        'token',
         'nama',
         'email',
         'link_website',

@@ -136,6 +136,12 @@ Data Laporan Peserta | MIS
                                             <td class="column-width" style="text-align: center;">{{ $hasil->afiliasi }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                             <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
+                                            @if ( Auth::user()->level == 'ceo')
+                                            <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            </td>
+                                            @else
                                             <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
@@ -143,6 +149,7 @@ Data Laporan Peserta | MIS
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
+                                            @endif
                                         </tr>
                                         @php
                                         $no++;

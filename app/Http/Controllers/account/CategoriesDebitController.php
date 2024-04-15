@@ -24,7 +24,7 @@ class CategoriesDebitController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->level == 'staff' || $user->level == 'manager') {
+        if ($user->level == 'staff' || $user->level == 'manager' || $user->level == 'ceo') {
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->join('users', 'categories_debit.user_id', '=', 'users.id')
@@ -76,7 +76,7 @@ class CategoriesDebitController extends Controller
                 // Jika tidak ada hasil, tampilkan error
                 return redirect()->back()->with('error', 'Data tidak ditemukan.');
             }
-        } else if ($user->level == 'staff') {
+        } else if ($user->level == 'staff' || $user->level == 'ceo') {
             $manager = User::where('level', 'manager')
                 ->where('company', $user->company)
                 ->first();

@@ -15,11 +15,11 @@ class ArtikelKomentar extends Migration
     {
         Schema::create('artikel_komentar', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('token', 300)->nullable();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('categories_artikel_id');
             $table->unsignedBigInteger('artikel_id');
             $table->string('reply', 300)->nullable();
-            $table->string('token', 300)->nullable();
             $table->string('nama', 300)->nullable();
             $table->string('email', 300)->nullable();
             $table->string('link_website', 300)->nullable();

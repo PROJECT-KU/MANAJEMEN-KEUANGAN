@@ -383,7 +383,7 @@ Data Presensi Karyawan | MIS
                       Lihat di Google Maps
                     </a>
                   </td>
-                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+                  @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
                   <td class="text-center">
                     <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                       <i class="fa fa-eye"></i>

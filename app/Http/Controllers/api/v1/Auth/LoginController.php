@@ -13,13 +13,16 @@ class LoginController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
         //validate data from form
-        $validator = Validator::make($request->all(), [
-            'username' => 'required',
-            'password' => 'required',
-        ],
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'username' => 'required',
+                'password' => 'required',
+            ],
             [
                 'username.required' => 'Masukkan Username Anda !',
                 'password.required' => 'Masukkan Password Anda !',
@@ -32,13 +35,12 @@ class LoginController extends Controller
                 'data' => $validator->errors()
             ], 401);
         } else {
-            if (Auth::attempt(['username' => $request->username, 'password' => $request->password])){
+            if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
                 $user = Auth::user();
-                $apiToken =  $user->createToken('apiToken')->accessToken;
                 return response()->json([
                     'success' => true,
-                    'apiToken'=> $apiToken
-                ],200);
+                    'apiToken' => $user
+                ], 200);
             } else {
                 return response()->json([
                     'success' => false,

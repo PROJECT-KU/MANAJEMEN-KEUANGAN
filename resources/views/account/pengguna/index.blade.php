@@ -30,6 +30,7 @@ Data Pengguna | MIS
         @endif
         <!--================== END ==================-->
 
+        <!--================== FILTER ==================-->
         <div class="card">
           <div class="card-header">
             <h4><i class="fas fa-filter"></i> FILTER</h4>
@@ -71,6 +72,7 @@ Data Pengguna | MIS
 
           </div>
         </div>
+        <!--================== END ==================-->
 
         <div class="card">
           <div class="card-header">
@@ -127,6 +129,13 @@ Data Pengguna | MIS
                       <button class="btn btn-danger" disabled>OFF</button>
                       @endif
                     </td>
+                    @if ( Auth::user()->level == 'ceo')
+                    <td class="text-center">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                    </td>
+                    @else
                     <td class="text-center">
                       <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary mt-2">
                         <i class="fa fa-pencil-alt"></i>
@@ -138,6 +147,7 @@ Data Pengguna | MIS
                         <i class="fa fa-trash"></i>
                       </button>
                     </td>
+                    @endif
                   </tr>
                   @php
                   $no++;

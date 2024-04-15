@@ -11,34 +11,36 @@ class RegisterController extends Controller
 {
     public function index(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(
+            $request->all(),
+            [
 
-            'full_name'     => 'required',
-            'username'      => ['required', 'unique:users'],
-            'email'         => ['required', 'email','unique:users'],
-            'password'      => 'required',
+                'full_name'     => 'required',
+                'username'      => ['required', 'unique:users'],
+                'email'         => ['required', 'email', 'unique:users'],
+                'password'      => 'required',
                 'telp'          => '',
                 'jenis'         => 'required'
 
-        ],
+            ],
             [
-            'full_name.required'    => 'Masukkan Nama Lengkap Anda !',
-            'username.required'     => 'Masukkan Username Anda !',
-            'username.unique'       => 'Username Sudah Terdaftar !',
-            'email.required'        => 'Masukkan Alamat Email Anda !',
-            'email.unique'          => 'Alamat Email Sudah Terdaftar !',
-            'password.required'     => 'Masukkan Password Anda !',
+                'full_name.required'    => 'Masukkan Nama Lengkap Anda !',
+                'username.required'     => 'Masukkan Username Anda !',
+                'username.unique'       => 'Username Sudah Terdaftar !',
+                'email.required'        => 'Masukkan Alamat Email Anda !',
+                'email.unique'          => 'Alamat Email Sudah Terdaftar !',
+                'password.required'     => 'Masukkan Password Anda !',
                 'telp.required'         => 'Masukkan No Telp Anda !',
                 'jenis.required'        => 'Silahkan Pilih Jenis Akun Anda !',
-        ]);
+            ]
+        );
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
 
             return response()->json([
                 'success' => false,
                 'data'    => $validator->errors()
-            ],401);
-
+            ], 401);
         } else {
 
             $input = $request->all();
@@ -51,9 +53,7 @@ class RegisterController extends Controller
                 'success'   => true,
                 'data'      => $user,
                 'apiToken'  => $apiToken
-            ],200);
-
+            ], 200);
         }
-
     }
 }

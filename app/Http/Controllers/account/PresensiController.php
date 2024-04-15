@@ -52,7 +52,7 @@ class PresensiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -104,7 +104,7 @@ class PresensiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -292,7 +292,7 @@ class PresensiController extends Controller
     $user = Auth::user();
     $presensi = Presensi::findOrFail($id);
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $users = User::join('presensi', 'users.id', '=', 'presensi.user_id')
         ->where('users.company', $user->company)
         ->get(['users.*']);

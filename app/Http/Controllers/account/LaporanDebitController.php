@@ -39,7 +39,7 @@ class LaporanDebitController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
@@ -85,7 +85,7 @@ class LaporanDebitController extends Controller
             $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')
@@ -119,7 +119,7 @@ class LaporanDebitController extends Controller
         $tanggal_awal  = $request->input('tanggal_awal');
         $tanggal_akhir = $request->input('tanggal_akhir');
 
-        if ($user->level == 'manager' || $user->level == 'staff') {
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
             $debit = Debit::select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
                 ->join('categories_debit', 'debit.category_id', '=', 'categories_debit.id', 'LEFT')
                 ->leftJoin('users', 'debit.user_id', '=', 'users.id')

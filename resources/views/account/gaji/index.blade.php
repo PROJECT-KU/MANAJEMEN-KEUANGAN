@@ -178,7 +178,7 @@ Data Gaji Karyawan | MIS
             </form>
             @endif
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
             @else
             <div class="row">
               <div class="col-12 mt-3">
@@ -338,7 +338,7 @@ Data Gaji Karyawan | MIS
                         @endif
                       </td>
                       <td class="text-center">
-                        @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
+                        @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
                         @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
