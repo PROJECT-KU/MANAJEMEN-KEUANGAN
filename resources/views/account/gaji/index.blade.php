@@ -31,7 +31,7 @@ Data Gaji Karyawan | MIS
         <!--================== END ==================-->
 
         <!--================== NOTIF JIKA GAJI MASIH ADA YANG PENDING ==================-->
-        @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager'))
+        @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager' || Auth::user()->level == 'ceo'))
         @php
         $totalPendingSalaries = 0;
         @endphp
@@ -68,7 +68,7 @@ Data Gaji Karyawan | MIS
           </div>
 
           <div class="card-body">
-            @if (Auth::user()->level == 'manager')
+            @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
             <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
@@ -112,7 +112,7 @@ Data Gaji Karyawan | MIS
             </form>
             @endif
 
-            @if (Auth::user()->level == 'manager')
+            @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
             <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
               <div class="row">
                 <div class="col-md-4">
@@ -178,7 +178,7 @@ Data Gaji Karyawan | MIS
             </form>
             @endif
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
+            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
             @else
             <div class="row">
               <div class="col-12 mt-3">
@@ -399,7 +399,7 @@ Data Gaji Karyawan | MIS
 
         </div>
 
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff' || Auth::user()->level == 'ceo')
         <table class="table table-bordered mt-5" style="border: 2px solid red;">
           <thead>
             <tr>
