@@ -148,16 +148,32 @@ Dashboard | MIS
                         Rp. {{ number_format($totalGaji, 0, ',', ',') }}
                     </div>
                     <div class="d-flex" style="width: 100%;">
-                        @if ($gaji->status == 'terbayar')
-                        <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
+                        @if ($gaji->isEmpty())
+                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                            Belum ada data gaji untuk bulan ini. Mohon bersabar.
                         </div>
                         @else
+                        @php
+                        $belumTerbayarkan = false;
+                        foreach ($gaji as $item) {
+                        if ($item->status != 'terbayar') {
+                        $belumTerbayarkan = true;
+                        break;
+                        }
+                        }
+                        @endphp
+                        @if ($belumTerbayarkan)
                         <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
+                            Gaji pada bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
+                        </div>
+                        @else
+                        <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
+                            Gaji pada bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
                         </div>
                         @endif
+                        @endif
                     </div>
+
                 </div>
             </div>
         </div>
