@@ -280,10 +280,10 @@ class PresensiController extends Controller
       // $user = User::findOrFail($request->input('user_id'));
       // $appName = 'Rumah Scopus Foundation';
       // Mail::to($user->email)->send(new CreatePresensiMail($user, $save, $appName));
-      return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
+      return redirect()->route('account.dashboard.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
       // Redirect with an error message if data creation fails
-      return redirect()->route('account.presensi.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
+      return redirect()->route('account.dashboard.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
     }
   }
 
@@ -370,9 +370,9 @@ class PresensiController extends Controller
       // $appName = 'Rumah Scopus Foundation';
       // Mail::to($user->email)->send(new UpdatePresensiMail($user, $presensi, $appName));
 
-      return redirect()->route('account.presensi.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
+      return redirect()->route('account.dashboard.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
     } else {
-      return redirect()->route('account.presensi.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
+      return redirect()->route('account.dashboard.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
     }
   }
 

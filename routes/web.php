@@ -155,6 +155,7 @@ Route::prefix('account')->group(
         Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
         Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
 
+
         //email
         Route::get('/email', 'account\EmailController@index')->name('account.email.index');
 
