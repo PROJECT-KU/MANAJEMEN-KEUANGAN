@@ -148,7 +148,7 @@ Dashboard | MIS
                         Rp. {{ number_format($totalGaji, 0, ',', ',') }}
                     </div>
                     <div class="d-flex" style="width: 100%;">
-                        @if ($totalGaji > 0)
+                        @if ($gaji->status == 'terbayar')
                         <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
                             Gaji bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
                         </div>
