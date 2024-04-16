@@ -4,6 +4,8 @@ namespace App\Http\Controllers\account;
 
 use App\Debit;
 use App\User;
+use App\Presensi;
+use App\Gaji;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,7 +26,7 @@ class DashboardController extends Controller
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $categories = [];
@@ -346,10 +348,78 @@ class DashboardController extends Controller
         // Ambil data karyawan terbaru
         $latestUsers = User::orderBy('created_at', 'desc')->limit(6)->get();
 
-        /**
-         * chart
-         */
+        // <!--================== TOTAL GAJI ==================-->
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users', 'maintenances'));
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+
+        $totalGaji = 0;
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->join('users', 'gaji.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+                ->first()->total_gaji ?? 0;
+
+            $gaji = DB::table('gaji')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(20);
+        } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->where('user_id', $user->id)
+                ->where('status', 'terbayar')
+                ->whereBetween('tanggal', [$currentMonth, $nextMonth])
+                ->first()->total_gaji ?? 0;
+
+            $gaji = DB::table('gaji')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+                ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
+                // ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->where('user_id', $user->id)
+                ->whereBetween('tanggal', [$currentMonth, $nextMonth])
+                ->first()->total_gaji ?? 0;
+
+            $gaji = Gaji::select('gaji.*', 'users.name as full_name')
+                ->join('users', 'gaji.user_id', '=', 'users.id')
+                ->where('gaji.user_id', $user->id)
+                ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(10);
+        }
+
+        $maintenances = DB::table('maintenance')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        $presensiExist = Presensi::where('status', '<>', null)
+            ->whereBetween('created_at', [$currentMonth, $nextMonth])
+            ->exists();
+
+        //  <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji'));
     }
 }

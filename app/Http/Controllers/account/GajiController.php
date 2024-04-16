@@ -64,7 +64,16 @@ class GajiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
+    $totalGaji = 0;
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+
+      $totalGaji = DB::table('gaji')
+        ->selectRaw('SUM(total) as total_gaji')
+        ->join('users', 'gaji.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        ->first()->total_gaji ?? 0;
+
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -73,6 +82,14 @@ class GajiController extends Controller
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(20);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+
+      $totalGaji = DB::table('gaji')
+        ->selectRaw('SUM(total) as total_gaji')
+        ->where('user_id', $user->id)
+        ->where('status', 'terbayar')
+        ->whereBetween('tanggal', [$currentMonth, $nextMonth])
+        ->first()->total_gaji ?? 0;
+
       $gaji = DB::table('gaji')
         ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -81,6 +98,13 @@ class GajiController extends Controller
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     } else {
+
+      $totalGaji = DB::table('gaji')
+        ->selectRaw('SUM(total) as total_gaji')
+        ->where('user_id', $user->id)
+        ->whereBetween('tanggal', [$currentMonth, $nextMonth])
+        ->first()->total_gaji ?? 0;
+
       $gaji = Gaji::select('gaji.*', 'users.name as full_name')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)
@@ -97,8 +121,6 @@ class GajiController extends Controller
       ->whereBetween('created_at', [$currentMonth, $nextMonth])
       ->exists();
 
-    // Calculate total gaji
-    $totalGaji = $gaji->sum('total');
 
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
