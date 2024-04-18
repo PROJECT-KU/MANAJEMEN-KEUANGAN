@@ -272,7 +272,9 @@ Data Presensi Karyawan | MIS
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
                       <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th> -->
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
+                      @if(Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
                       <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                      @endif
                     </tr>
                     <tr>
                       <th scope="col" style="text-align: center;">HADIR</th>
@@ -383,12 +385,13 @@ Data Presensi Karyawan | MIS
                           Lihat di Google Maps
                         </a>
                       </td>
-                      @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
+                      @if (Auth::user()->level == 'staff' || Auth::user()->level == 'ceo')
                       <td class="text-center">
                         <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning">
                           <i class="fa fa-eye"></i>
                         </a>
                       </td>
+                      @elseif (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
                       @else
                       <td class="text-center">
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">

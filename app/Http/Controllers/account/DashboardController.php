@@ -368,7 +368,6 @@ class DashboardController extends Controller
                 ->selectRaw('SUM(total) as total_gaji')
                 ->join('users', 'gaji.user_id', '=', 'users.id')
                 ->where('users.company', $user->company)
-                ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
                 ->first()->total_gaji ?? 0;
 
             $gaji = DB::table('gaji')

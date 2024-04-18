@@ -399,7 +399,7 @@ Data Gaji Karyawan | MIS
 
         </div>
 
-
+        @if(Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
         <table class="table table-bordered mt-5" style="border: 2px solid red;">
           <thead>
             <tr>
@@ -412,6 +412,7 @@ Data Gaji Karyawan | MIS
             </tr>
           </tbody>
         </table>
+        @endif
 
     </div>
   </section>
