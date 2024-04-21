@@ -28,15 +28,17 @@ const checkResponse = function (request) {
 };
 
 const addToCache = function (request) {
-    // Menambahkan permintaan ke dalam cache
+    // Menambahkan permintaan ke dalam cache jika skema protokol adalah HTTP atau HTTPS
     if (request.url.startsWith('http')) {
         return caches.open("offline").then(function (cache) {
             return fetch(request).then(function (response) {
+                // Menyimpan respons ke dalam cache
                 return cache.put(request, response.clone());
             });
         });
     }
 };
+
 
 const returnFromCache = function (request) {
     return caches.open("offline").then(function (cache) {
