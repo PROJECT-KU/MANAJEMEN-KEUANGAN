@@ -177,6 +177,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        // PWA
+        Ladumor\LaravelPwa\PWAServiceProvider::class,
+
     ],
 
     /*
@@ -231,6 +234,9 @@ return [
         'Terbilang' => Riskihajar\Terbilang\Facades\Terbilang::class,
         'SnappyPdf' => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
+
+        // PWA
+        'LaravelPwa' => \Ladumor\LaravelPwa\LaravelPwa::class,
 
     ],
 
