@@ -1,7 +1,7 @@
 {
     "name": "MIS Rumah Scopus",
     "short_name": "LPT",
-    "start_url": "/",
+    "start_url": "{{ route('login') }}",
     "background_color": "#6777ef",
     "description": "Management Rumah Scopus",
     "display": "fullscreen",
