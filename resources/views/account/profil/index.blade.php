@@ -264,7 +264,7 @@ Profil | MANAGEMENT
                   <div class="form-group">
                     <label>Quotes</label>
                     <div class="input-group">
-                      <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan catatan" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
+                      <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
                     </div>
                     @error('jobdesk')
                     <div class="invalid-feedback" style="display: block">

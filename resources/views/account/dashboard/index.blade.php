@@ -140,13 +140,16 @@ Dashboard | MIS
                 <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <div class="card-wrap">
+                <div class="card-wrap flex-column">
                     <div class="card-header">
                         <h4>TOTAL GAJI TAHUN INI</h4>
                     </div>
-                    <div class="mt-2 card-body" style="margin-bottom: 15px;">
-                        Rp. {{ number_format($totalGaji, 0, ',', ',') }}
+
+                    <div class="card-body d-flex align-items-center" id="totalgaji">
+                        <span style="margin-left: -30px; font-size: 1em;">******</span>
+                        <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
                     </div>
+
                     <div class="d-flex" style="width: 100%;">
                         @if ($gaji->isEmpty())
                         <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
@@ -173,10 +176,10 @@ Dashboard | MIS
                         @endif
                         @endif
                     </div>
-
                 </div>
             </div>
         </div>
+
 </div>
 
 <div class="row">
@@ -542,6 +545,20 @@ Dashboard | MIS
 
 </section>
 </div>
+
+<!-- show and hide -->
+<script>
+    function toggleTotalGaji() {
+        const totalgajiToggle = document.getElementById('totalgaji-toggle');
+
+        if (totalgajiToggle.classList.contains('fa-eye')) {
+            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;">Rp. {{ number_format($totalGaji, 0, ', ', ', ') }}</span> <i class="fas fa-eye-slash totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>';
+        } else {
+            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;"> * </span> <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()" style="margin-left: -1em;"></i>';
+        }
+    }
+</script>
+<!-- end -->
 
 <script>
     function submitForm() {

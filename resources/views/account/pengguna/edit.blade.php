@@ -295,9 +295,9 @@ Update Pengguna | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Jobdesk</label>
+                                    <label>Quotes</label>
                                     <div class="input-group">
-                                        <textarea name="jobdesk" id="jobdesk" value="{{ old('jobdesk', $user->jobdesk) }}" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"> {{ old('jobdesk', $user->jobdesk) }}</textarea>
+                                        <textarea name="jobdesk" id="jobdesk" value="{{ old('jobdesk', $user->jobdesk) }}" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;"> {{ old('jobdesk', $user->jobdesk) }}</textarea>
                                     </div>
                                     @error('jobdesk')
                                     <div class="invalid-feedback" style="display: block">

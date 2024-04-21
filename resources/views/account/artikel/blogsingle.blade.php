@@ -1,7 +1,7 @@
 @extends('account.artikel.layout.header')
 
 @section('title')
-Artikel | MIS
+Artikel | Rumah Scopus
 @stop
 
 <style>
@@ -534,7 +534,7 @@ Artikel | MIS
 
                         <!-- adnow ads -->
                         <div id="SC_TBlock_883745"></div>
-                        <div id="SC_TBlock_883745" class="SC_TBlock">loading...</div>
+                        <div id="SC_TBlock_883745" class="SC_TBlock"></div>
                         <!-- end -->
 
                         <!-- yllix ads -->

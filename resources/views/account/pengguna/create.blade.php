@@ -298,9 +298,9 @@ Tambah Pengguna | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Jobdesk</label>
+                                    <label>Quotes</label>
                                     <div class="input-group">
-                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
+                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;"></textarea>
                                     </div>
                                     @error('jobdesk')
                                     <div class="invalid-feedback" style="display: block">
