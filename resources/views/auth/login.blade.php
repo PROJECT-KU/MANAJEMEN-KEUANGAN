@@ -153,7 +153,7 @@
     <!--================== CEK DIVACE APAKAH PWA ATAU WEBISTE ==================-->
     <script>
         // Cek apakah aplikasi berjalan sebagai PWA atau di browser
-        if (window.matchMedia('(display-mode: standalone)').matches) {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             // Aplikasi berjalan sebagai PWA
             document.addEventListener('DOMContentLoaded', function() {
                 var pwaLabel = document.createElement('p');
@@ -169,7 +169,6 @@
             });
         }
     </script>
-
     <!--================== END ==================-->
 
     <!--================== PWA ==================-->
