@@ -210,6 +210,8 @@
             });
         }
 
+        let isRefreshing = false;
+
         // Fungsi untuk menampilkan loader
         function showLoader() {
             // Tambahkan elemen loader ke dalam body
@@ -228,9 +230,10 @@
         }
 
         // Fungsi untuk menangani refresh saat menggeser ke bawah
-        function handlePullToRefresh(event) {
-            // Cek apakah scroll berada di paling atas
-            if (window.scrollY === 0) {
+        function handlePullToRefresh() {
+            // Cek apakah scroll berada di paling atas dan tidak sedang dalam proses refresh
+            if (window.scrollY === 0 && !isRefreshing) {
+                isRefreshing = true;
                 // Tampilkan loader
                 showLoader();
 
@@ -242,7 +245,7 @@
         }
 
         // Tambahkan event listener untuk mendeteksi gerakan menggeser ke bawah
-        window.addEventListener('touchmove', handlePullToRefresh, {
+        window.addEventListener('scroll', handlePullToRefresh, {
             passive: true
         });
     </script>
