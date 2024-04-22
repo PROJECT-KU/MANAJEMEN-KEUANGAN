@@ -171,6 +171,34 @@
     </script>
     <!--================== END ==================-->
 
+    <!--================== MEREFRESH PWA DI HP ==================-->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        // Fungsi untuk menangani refresh saat menggeser ke bawah
+        function handlePullToRefresh(event) {
+            // Cek apakah scroll berada di paling atas
+            if (window.scrollY === 0) {
+                // Lakukan refresh halaman
+                location.reload();
+            }
+        }
+
+        // Tambahkan event listener untuk mendeteksi gerakan menggeser ke bawah
+        window.addEventListener('touchmove', handlePullToRefresh, {
+            passive: true
+        });
+    </script>
+    <!--================== END ==================-->
+
     <!--================== PWA ==================-->
     <script src="{{ asset('/sw.js') }}"></script>
     <script>
