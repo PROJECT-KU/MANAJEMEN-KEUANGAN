@@ -152,10 +152,21 @@
 
     <!--================== CEK DIVACE APAKAH PWA ATAU WEBISTE ==================-->
     <script>
+        // Cek apakah aplikasi berjalan sebagai PWA atau di browser
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            document.body.textContent = 'PWA';
+            // Aplikasi berjalan sebagai PWA
+            document.addEventListener('DOMContentLoaded', function() {
+                var pwaLabel = document.createElement('p');
+                pwaLabel.textContent = 'PWA';
+                document.body.appendChild(pwaLabel);
+            });
         } else {
-            document.body.textContent = 'Website';
+            // Aplikasi dibuka di browser
+            document.addEventListener('DOMContentLoaded', function() {
+                var websiteLabel = document.createElement('p');
+                websiteLabel.textContent = 'Website';
+                document.body.appendChild(websiteLabel);
+            });
         }
     </script>
 
