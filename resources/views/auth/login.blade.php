@@ -374,27 +374,15 @@
     </script>
     <!-- end -->
 
+    <!--================== MENYIMPAN DATA LOGIN ==================-->
     <script>
         // Ambil elemen-elemen yang diperlukan
         const rememberMeCheckbox = document.getElementById('remember-me');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
 
-        // Cek apakah data tersimpan di localStorage saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            const storedUsername = localStorage.getItem('username');
-            const storedPassword = localStorage.getItem('password');
-
-            // Jika ada data tersimpan, isi input dan centang kotak "Remember Me"
-            if (storedUsername && storedPassword) {
-                usernameInput.value = storedUsername;
-                passwordInput.value = storedPassword;
-                rememberMeCheckbox.checked = true;
-            }
-        });
-
-        // Simpan data username dan password saat form disubmit jika checkbox "Remember Me" dicentang
-        document.getElementById('login-form').addEventListener('submit', function(event) {
+        // Fungsi untuk menyimpan data login ke local storage
+        function saveLoginData() {
             if (rememberMeCheckbox.checked) {
                 localStorage.setItem('username', usernameInput.value);
                 localStorage.setItem('password', passwordInput.value);
@@ -402,8 +390,49 @@
                 localStorage.removeItem('username');
                 localStorage.removeItem('password');
             }
+        }
+
+        // Cek apakah aplikasi berjalan sebagai PWA di perangkat seluler
+        window.addEventListener('beforeinstallprompt', (event) => {
+            // Pastikan bahwa pengguna belum menginstal PWA
+            if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+                // Tambahkan event listener untuk menyimpan data login saat PWA diinstal
+                event.prompt();
+                event.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        // PWA diinstal
+                        saveLoginData();
+                    }
+                });
+            }
+        });
+
+        // Cek apakah aplikasi berjalan di browser
+        if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+            // Hapus data login saat aplikasi dibuka di browser
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+        } else {
+            // Saat PWA dijalankan, cek apakah ada data login yang tersimpan
+            document.addEventListener('DOMContentLoaded', function() {
+                const storedUsername = localStorage.getItem('username');
+                const storedPassword = localStorage.getItem('password');
+
+                // Jika ada data tersimpan, isi input dan centang kotak "Ingatkan Saya"
+                if (storedUsername && storedPassword) {
+                    usernameInput.value = storedUsername;
+                    passwordInput.value = storedPassword;
+                    rememberMeCheckbox.checked = true;
+                }
+            });
+        }
+
+        // Tambahkan event listener untuk menyimpan data login saat formulir disubmit
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            saveLoginData();
         });
     </script>
+    <!--================== END ==================-->
 
     <script src="{{ asset('assets/login/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/login/js/main.js') }}"></script>
