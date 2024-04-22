@@ -275,39 +275,6 @@
     </script>
     <!--================== END ==================-->
 
-    <!--================== MENYIMPAN DATA LOGIN ==================-->
-    <script>
-        // Ambil elemen-elemen yang diperlukan
-        const rememberMeCheckbox = document.getElementById('remember-me');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-
-        // Cek apakah data tersimpan di localStorage saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            const storedUsername = localStorage.getItem('username');
-            const storedPassword = localStorage.getItem('password');
-
-            // Jika ada data tersimpan, isi input dan centang kotak "Remember Me"
-            if (storedUsername && storedPassword) {
-                usernameInput.value = storedUsername;
-                passwordInput.value = storedPassword;
-                rememberMeCheckbox.checked = true;
-            }
-        });
-
-        // Simpan data username dan password saat form disubmit jika checkbox "Remember Me" dicentang
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            if (rememberMeCheckbox.checked) {
-                localStorage.setItem('username', usernameInput.value);
-                localStorage.setItem('password', passwordInput.value);
-            } else {
-                localStorage.removeItem('username');
-                localStorage.removeItem('password');
-            }
-        });
-    </script>
-    <!--================== END ==================-->
-
     <!--================== IKLAN ==================-->
     <!-- google ads -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
@@ -406,6 +373,37 @@
         });
     </script>
     <!-- end -->
+
+    <script>
+        // Ambil elemen-elemen yang diperlukan
+        const rememberMeCheckbox = document.getElementById('remember-me');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        // Cek apakah data tersimpan di localStorage saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedUsername = localStorage.getItem('username');
+            const storedPassword = localStorage.getItem('password');
+
+            // Jika ada data tersimpan, isi input dan centang kotak "Remember Me"
+            if (storedUsername && storedPassword) {
+                usernameInput.value = storedUsername;
+                passwordInput.value = storedPassword;
+                rememberMeCheckbox.checked = true;
+            }
+        });
+
+        // Simpan data username dan password saat form disubmit jika checkbox "Remember Me" dicentang
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            if (rememberMeCheckbox.checked) {
+                localStorage.setItem('username', usernameInput.value);
+                localStorage.setItem('password', passwordInput.value);
+            } else {
+                localStorage.removeItem('username');
+                localStorage.removeItem('password');
+            }
+        });
+    </script>
 
     <script src="{{ asset('assets/login/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/login/js/main.js') }}"></script>
