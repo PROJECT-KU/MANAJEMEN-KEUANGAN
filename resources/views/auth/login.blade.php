@@ -83,6 +83,33 @@
         /*end  */
     </style>
     <!-- end -->
+
+    <!-- MEREFRESH PWA DI HP -->
+    <style>
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <!-- END -->
 </head>
 
 
@@ -183,12 +210,34 @@
             });
         }
 
+        // Fungsi untuk menampilkan loader
+        function showLoader() {
+            // Tambahkan elemen loader ke dalam body
+            var loader = document.createElement('div');
+            loader.className = 'loader';
+            document.body.appendChild(loader);
+        }
+
+        // Fungsi untuk menyembunyikan loader
+        function hideLoader() {
+            // Hapus elemen loader dari body jika ada
+            var loader = document.querySelector('.loader');
+            if (loader) {
+                loader.parentNode.removeChild(loader);
+            }
+        }
+
         // Fungsi untuk menangani refresh saat menggeser ke bawah
         function handlePullToRefresh(event) {
             // Cek apakah scroll berada di paling atas
             if (window.scrollY === 0) {
-                // Lakukan refresh halaman
-                location.reload();
+                // Tampilkan loader
+                showLoader();
+
+                // Lakukan refresh halaman setelah beberapa saat
+                setTimeout(() => {
+                    location.reload();
+                }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
             }
         }
 
