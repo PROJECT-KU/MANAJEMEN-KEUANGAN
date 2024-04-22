@@ -381,7 +381,7 @@
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
 
-        // Fungsi untuk menyimpan data login ke local storage
+        // Fungsi untuk menyimpan data login ke local storage jika checkbox "Ingatkan Saya" dicentang
         function saveLoginData() {
             if (rememberMeCheckbox.checked) {
                 localStorage.setItem('username', usernameInput.value);
@@ -400,32 +400,24 @@
                 event.prompt();
                 event.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        // PWA diinstal
+                        // PWA diinstal, simpan data login jika checkbox "Ingatkan Saya" dicentang
                         saveLoginData();
                     }
                 });
             }
         });
 
-        // Cek apakah aplikasi berjalan di browser
-        if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
-            // Hapus data login saat aplikasi dibuka di browser
-            localStorage.removeItem('username');
-            localStorage.removeItem('password');
-        } else {
-            // Saat PWA dijalankan, cek apakah ada data login yang tersimpan
-            document.addEventListener('DOMContentLoaded', function() {
-                const storedUsername = localStorage.getItem('username');
-                const storedPassword = localStorage.getItem('password');
-
-                // Jika ada data tersimpan, isi input dan centang kotak "Ingatkan Saya"
-                if (storedUsername && storedPassword) {
-                    usernameInput.value = storedUsername;
-                    passwordInput.value = storedPassword;
-                    rememberMeCheckbox.checked = true;
-                }
-            });
-        }
+        // Saat PWA dijalankan, cek apakah ada data login yang tersimpan
+        document.addEventListener('DOMContentLoaded', function() {
+            // Jika ada data tersimpan, isi input dan centang kotak "Ingatkan Saya"
+            const storedUsername = localStorage.getItem('username');
+            const storedPassword = localStorage.getItem('password');
+            if (storedUsername && storedPassword) {
+                usernameInput.value = storedUsername;
+                passwordInput.value = storedPassword;
+                rememberMeCheckbox.checked = true;
+            }
+        });
 
         // Tambahkan event listener untuk menyimpan data login saat formulir disubmit
         document.getElementById('login-form').addEventListener('submit', function(event) {
