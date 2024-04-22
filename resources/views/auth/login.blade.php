@@ -153,21 +153,12 @@
     <!--================== CEK DIVACE APAKAH PWA ATAU WEBISTE ==================-->
     <script>
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            // Aplikasi berjalan sebagai PWA
-            document.addEventListener('DOMContentLoaded', function() {
-                var pwaLabel = document.createElement('p');
-                pwaLabel.textContent = 'PWA';
-                document.body.appendChild(pwaLabel);
-            });
+            document.body.textContent = 'PWA';
         } else {
-            // Aplikasi berjalan sebagai website biasa
-            document.addEventListener('DOMContentLoaded', function() {
-                var websiteLabel = document.createElement('p');
-                websiteLabel.textContent = 'Website';
-                document.body.appendChild(websiteLabel);
-            });
+            document.body.textContent = 'Website';
         }
     </script>
+
     <!--================== END ==================-->
 
     <!--================== PWA ==================-->
