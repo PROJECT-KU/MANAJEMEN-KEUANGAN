@@ -150,6 +150,26 @@
     </div>
     </section>
 
+    <!--================== CEK DIVACE APAKAH PWA ATAU WEBISTE ==================-->
+    <script>
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            // Aplikasi berjalan sebagai PWA
+            document.addEventListener('DOMContentLoaded', function() {
+                var pwaLabel = document.createElement('p');
+                pwaLabel.textContent = 'PWA';
+                document.body.appendChild(pwaLabel);
+            });
+        } else {
+            // Aplikasi berjalan sebagai website biasa
+            document.addEventListener('DOMContentLoaded', function() {
+                var websiteLabel = document.createElement('p');
+                websiteLabel.textContent = 'Website';
+                document.body.appendChild(websiteLabel);
+            });
+        }
+    </script>
+    <!--================== END ==================-->
+
     <!--================== PWA ==================-->
     <script src="{{ asset('/sw.js') }}"></script>
     <script>
