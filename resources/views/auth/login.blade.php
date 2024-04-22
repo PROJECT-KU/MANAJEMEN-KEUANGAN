@@ -240,6 +240,10 @@
                 // Lakukan refresh halaman setelah beberapa saat
                 setTimeout(() => {
                     location.reload();
+                    // Setelah proses refresh selesai, sembunyikan loader
+                    hideLoader();
+                    // Set isRefreshing ke false untuk memungkinkan refresh kembali
+                    isRefreshing = false;
                 }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
             }
         }
