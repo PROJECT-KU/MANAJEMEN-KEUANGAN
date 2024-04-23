@@ -200,8 +200,8 @@ Dashboard | MIS
 <!--================== MANU DI PWA ==================-->
 <div class="row mb-4" id="MenuPwaCard">
     <div class="col-md-12">
-        <div class="card card-statistic-2" style="height: 100%; overflow: hidden;">
-            <div id="carousel" class="mb-3">
+        <div class="card card-statistic-2" style="overflow: hidden;">
+            <div id="carousel" style="height: 100%;">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
                     <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
@@ -239,17 +239,17 @@ Dashboard | MIS
 <!--================== END ==================-->
 
 
-<div class="row" id="sisasaldocard">
+<div class="row mb-4">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2">
+        <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100%;">
                 <div class="card-header">
                     <h4>SISA SALDO BULAN INI</h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px; height: 100%;">
                     {{ rupiah($saldo_bulan_ini) }}
                 </div>
             </div>
@@ -257,15 +257,15 @@ Dashboard | MIS
     </div>
 
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2">
+        <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100%;">
                 <div class="card-header">
                     <h4>SISA SALDO BULAN LALU</h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px; height: 100%;">
                     {{ rupiah($saldo_bulan_lalu) }}
                 </div>
             </div>
@@ -398,17 +398,17 @@ Dashboard | MIS
 </div> -->
 
 
-<div class="row" id="PemasukanCard">
+<div class="row mb-4">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;">
+        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100%;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN HARI INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px; height: 100%;">
                     {{ rupiah($Pemasukan_hari_ini) }}
                 </div>
             </div>
@@ -416,15 +416,15 @@ Dashboard | MIS
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;">
+        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanBulanIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100%;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN BULAN INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px; height: 100%;">
                     {{ rupiah($pemasukan_bulan_ini) }}
                 </div>
             </div>
@@ -432,15 +432,15 @@ Dashboard | MIS
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;">
+        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanTahunIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100%;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN TAHUN INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px; height: 100%;">
                     {{ rupiah($pemasukan_tahun_ini) }}
                 </div>
             </div>
@@ -448,17 +448,17 @@ Dashboard | MIS
     </div>
 </div>
 
-<div class="row" id="PengeluaranCard">
+<div class="row mb-2">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;">
+        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranHariIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PENGELUARAN HARI INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px;">
                     {{ rupiah($pengeluaran_hari_ini) }}
                 </div>
             </div>
@@ -466,15 +466,15 @@ Dashboard | MIS
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;">
+        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranBulanIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PENGELUARAN BULAN INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px;">
                     {{ rupiah($pengeluaran_bulan_ini) }}
                 </div>
             </div>
@@ -482,15 +482,15 @@ Dashboard | MIS
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;">
+        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranTahunIniCard">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap">
+            <div class="card-wrap" style="display: inline-block;">
                 <div class="card-header">
                     <h4><b>PENGELUARAN TAHUN INI</b></h4>
                 </div>
-                <div class="card-body" style="font-size: 20px">
+                <div class="card-body" style="font-size: 20px;">
                     {{ rupiah($pengeluaran_tahun_ini) }}
                 </div>
             </div>
@@ -614,9 +614,14 @@ Dashboard | MIS
     function toggleElementBasedOnDevice() {
         var totalGajiCard = document.getElementById('totalGajiCard');
         var MenuPwaCard = document.getElementById('MenuPwaCard');
-        var MenuSisaSaldo = document.getElementById('MenuSisaSaldo');
-        var PemasukanCard = document.getElementById('PemasukanCard');
-        var PengeluaranCard = document.getElementById('PengeluaranCard');
+        var SisaSaldoBulanIniCard = document.getElementById('SisaSaldoBulanIniCard');
+        var SisaSaldoBulanLaluCard = document.getElementById('SisaSaldoBulanLaluCard');
+        var PemasukanHariIniCard = document.getElementById('PemasukanHariIniCard');
+        var PemasukanBulanIniCard = document.getElementById('PemasukanBulanIniCard');
+        var PemasukanTahunIniCard = document.getElementById('PemasukanTahunIniCard');
+        var PengeluaranHariIniCard = document.getElementById('PengeluaranHariIniCard');
+        var PengeluaranBulanIniCard = document.getElementById('PengeluaranBulanIniCard');
+        var PengeluaranTahunIniCard = document.getElementById('PengeluaranBulanIniCard');
         var StatistikPemasukan = document.getElementById('StatistikPemasukan');
         var StatistikPengeluaran = document.getElementById('StatistikPengeluaran');
         var PenggunaBaru = document.getElementById('PenggunaBaru');
@@ -625,9 +630,14 @@ Dashboard | MIS
             // Jika aplikasi berjalan di perangkat seluler (PWA)
             totalGajiCard.style.display = 'none';
             MenuPwaCard.style.display = 'block';
-            MenuSisaSaldo.style.display = 'block';
-            PemasukanCard.style.display = 'none';
-            PengeluaranCard.style.display = 'none';
+            SisaSaldoBulanIniCard.style.display = 'block';
+            SisaSaldoBulanLaluCard.style.display = 'block';
+            PemasukanHariIniCard.style.display = 'none';
+            PemasukanBulanIniCard.style.display = 'none';
+            PemasukanTahunIniCard.style.display = 'none';
+            PengeluaranHariIniCard.style.display = 'none';
+            PengeluaranBulanIniCard.style.display = 'none';
+            PengeluaranTahunIniCard.style.display = 'none';
             StatistikPemasukan.style.display = 'none';
             StatistikPengeluaran.style.display = 'none';
             PenggunaBaru.style.display = 'none';
@@ -635,9 +645,14 @@ Dashboard | MIS
             // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
             MenuPwaCard.style.display = 'none';
-            MenuSisaSaldo.style.display = 'block';
-            PemasukanCard.style.display = 'block';
-            PengeluaranCard.style.display = 'block';
+            SisaSaldoBulanIniCard.style.display = 'block';
+            SisaSaldoBulanLaluCard.style.display = 'block';
+            PemasukanHariIniCard.style.display = 'block';
+            PemasukanBulanIniCard.style.display = 'block';
+            PemasukanTahunIniCard.style.display = 'block';
+            PengeluaranHariIniCard.style.display = 'block';
+            PengeluaranBulanIniCard.style.display = 'block';
+            PengeluaranTahunIniCard.style.display = 'block';
             StatistikPemasukan.style.display = 'block';
             StatistikPengeluaran.style.display = 'block';
             PenggunaBaru.style.display = 'block';
