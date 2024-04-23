@@ -146,7 +146,7 @@ Dashboard | MIS
                     </div>
 
                     <div class="card-body d-flex align-items-center" id="totalgaji">
-                        <span style="margin-left: -30px; font-size: 1em;">******</span>
+                        <span style="margin-left: -30px; font-size: 1em;">*******</span>
                         <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
                     </div>
 
