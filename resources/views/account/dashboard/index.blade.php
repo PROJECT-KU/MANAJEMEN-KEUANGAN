@@ -197,11 +197,12 @@ Dashboard | MIS
         <!--================== END ==================-->
 </div>
 
+
 <!--================== MANU DI PWA ==================-->
 <div class="row mb-4" id="MenuPwaCard">
     <div class="col-md-12">
-        <div class="card card-statistic-2" style="overflow: hidden;">
-            <div id="carousel" style="height: 100%;">
+        <div class="card card-statistic-2" style="overflow: hidden; height:100%">
+            <div id="carousel">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
                     <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
@@ -245,7 +246,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="height: 100%;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4>SISA SALDO BULAN INI</h4>
                 </div>
@@ -261,7 +262,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="height: 100%;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4>SISA SALDO BULAN LALU</h4>
                 </div>
@@ -404,7 +405,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="height: 100%;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN HARI INI</b></h4>
                 </div>
@@ -420,7 +421,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="height: 100%;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN BULAN INI</b></h4>
                 </div>
@@ -436,7 +437,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="height: 100%;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PEMASUKAN TAHUN INI</b></h4>
                 </div>
@@ -486,7 +487,7 @@ Dashboard | MIS
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
-            <div class="card-wrap" style="display: inline-block;">
+            <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
                     <h4><b>PENGELUARAN TAHUN INI</b></h4>
                 </div>
@@ -621,7 +622,7 @@ Dashboard | MIS
         var PemasukanTahunIniCard = document.getElementById('PemasukanTahunIniCard');
         var PengeluaranHariIniCard = document.getElementById('PengeluaranHariIniCard');
         var PengeluaranBulanIniCard = document.getElementById('PengeluaranBulanIniCard');
-        var PengeluaranTahunIniCard = document.getElementById('PengeluaranBulanIniCard');
+        var PengeluaranTahunIniCard = document.getElementById('PengeluaranTahunIniCard');
         var StatistikPemasukan = document.getElementById('StatistikPemasukan');
         var StatistikPengeluaran = document.getElementById('StatistikPengeluaran');
         var PenggunaBaru = document.getElementById('PenggunaBaru');
@@ -644,7 +645,7 @@ Dashboard | MIS
         } else {
             // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
-            MenuPwaCard.style.display = 'none';
+            // MenuPwaCard.style.display = 'none';
             SisaSaldoBulanIniCard.style.display = 'block';
             SisaSaldoBulanLaluCard.style.display = 'block';
             PemasukanHariIniCard.style.display = 'block';
