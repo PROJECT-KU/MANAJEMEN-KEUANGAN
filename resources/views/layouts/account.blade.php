@@ -61,7 +61,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
                     <ul class="navbar-nav mr-3 mb-3">
-                        <li id="sidebarToggle" style="display: none;"><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                        <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
                     <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
                 </form>
@@ -270,39 +270,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             @extends('layouts.version')
         </div>
     </div>
-
-    <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
-
-    <script>
-        // Fungsi untuk mendeteksi apakah aplikasi berjalan di perangkat seluler (PWA)
-        function isPWA() {
-            // Implementasi untuk mendeteksi apakah aplikasi merupakan PWA
-            // Gantikan dengan metode yang sesuai untuk mendeteksi apakah aplikasi merupakan PWA
-            return false; // Misalnya, return true jika aplikasi adalah PWA, dan false jika bukan
-        }
-
-        // Fungsi untuk mendeteksi apakah aplikasi dijalankan di perangkat seluler
-        function isMobileDevice() {
-            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-        }
-
-        // Fungsi untuk menampilkan atau menyembunyikan elemen berdasarkan kondisi
-        function toggleElementBasedOnDeviceAndPWA() {
-            var sidebarToggle = document.getElementById('sidebarToggle');
-
-            if (!isMobileDevice() || !isPWA()) {
-                // Jika aplikasi berjalan di browser atau bukan PWA, tampilkan tombol sidebar
-                sidebarToggle.style.display = 'block';
-            } else {
-                // Jika aplikasi berjalan di perangkat seluler dan merupakan PWA, sembunyikan tombol sidebar
-                sidebarToggle.style.display = 'none';
-            }
-        }
-
-        // Panggil fungsi ketika halaman dimuat
-        window.addEventListener('load', toggleElementBasedOnDeviceAndPWA);
-    </script>
-    <!--================== END ==================-->
 
     <!-- ucapan selamat -->
     <script>
