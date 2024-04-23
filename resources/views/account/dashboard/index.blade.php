@@ -14,6 +14,8 @@ Dashboard | MIS
         /* Agar card-icon yang berlebihan bisa turun ke baris baru */
         gap: 10px;
         /* Jarak antara card-icon */
+        justify-content: center;
+        /* Menempatkan card-icon di tengah secara horizontal */
     }
 </style>
 <!--================== END ==================-->
@@ -147,7 +149,7 @@ Dashboard | MIS
         </div>
         <!--================== END ==================-->
 
-
+        <!--================== TOTAL GAJI TAHUN INI ==================-->
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
             <div class="card card-statistic-2">
                 <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
@@ -192,12 +194,14 @@ Dashboard | MIS
                 </div>
             </div>
         </div>
+        <!--================== END ==================-->
 </div>
 
-<div class="row" id="MenuPwaCard">
-    <div class="col-md-12" style="align-items: center;">
-        <div class="card card-statistic-2" style="height: 250px; overflow: hidden;">
-            <div id="carousel">
+<!--================== MANU DI PWA ==================-->
+<div class="row mb-4" id="MenuPwaCard">
+    <div class="col-md-12">
+        <div class="card card-statistic-2" style="height: 100%; overflow: hidden;">
+            <div id="carousel" class="mb-3">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
                     <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
@@ -232,13 +236,14 @@ Dashboard | MIS
         </div>
     </div>
 </div>
+<!--================== END ==================-->
 
 
-<div class="row" id="SisaSaldoBulan">
+<div class="row" id="sisasaldocard">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
         <div class="card card-statistic-2">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -254,7 +259,7 @@ Dashboard | MIS
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
         <div class="card card-statistic-2">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -397,7 +402,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -413,7 +418,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -429,7 +434,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -447,7 +452,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#FFB6C1;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -463,7 +468,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#FFB6C1;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -479,7 +484,7 @@ Dashboard | MIS
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#FFB6C1;">
             <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt"></i>
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap">
                 <div class="card-header">
@@ -609,7 +614,7 @@ Dashboard | MIS
     function toggleElementBasedOnDevice() {
         var totalGajiCard = document.getElementById('totalGajiCard');
         var MenuPwaCard = document.getElementById('MenuPwaCard');
-        var SisaSaldoBulan = document.getElementById('SisaSaldoBulan');
+        var MenuSisaSaldo = document.getElementById('MenuSisaSaldo');
         var PemasukanCard = document.getElementById('PemasukanCard');
         var PengeluaranCard = document.getElementById('PengeluaranCard');
         var StatistikPemasukan = document.getElementById('StatistikPemasukan');
@@ -620,7 +625,7 @@ Dashboard | MIS
             // Jika aplikasi berjalan di perangkat seluler (PWA)
             totalGajiCard.style.display = 'none';
             MenuPwaCard.style.display = 'block';
-            SisaSaldoBulan.style.display = 'none';
+            MenuSisaSaldo.style.display = 'block';
             PemasukanCard.style.display = 'none';
             PengeluaranCard.style.display = 'none';
             StatistikPemasukan.style.display = 'none';
@@ -630,7 +635,7 @@ Dashboard | MIS
             // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
             MenuPwaCard.style.display = 'none';
-            SisaSaldoBulan.style.display = 'block';
+            MenuSisaSaldo.style.display = 'block';
             PemasukanCard.style.display = 'block';
             PengeluaranCard.style.display = 'block';
             StatistikPemasukan.style.display = 'block';
