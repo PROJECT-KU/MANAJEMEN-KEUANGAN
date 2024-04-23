@@ -199,7 +199,7 @@ Dashboard | MIS
 
 
 <!--================== MANU DI PWA ==================-->
-<div class="row mb-4" id="MenuPwaCard">
+<div class="row" id="MenuPwaCard">
     <div class="col-md-12">
         <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
             <div id="carousel" class="mb-5">
@@ -240,7 +240,7 @@ Dashboard | MIS
 <!--================== END ==================-->
 
 
-<div class="row mb-4">
+<div class="row">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
         <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
             <div class="card-icon shadow-primary bg-primary">
@@ -399,7 +399,7 @@ Dashboard | MIS
 </div> -->
 
 
-<div class="row mb-4">
+<div class="row">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
             <div class="card-icon shadow-primary bg-primary">
