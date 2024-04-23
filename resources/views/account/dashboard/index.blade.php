@@ -146,7 +146,7 @@ Dashboard | MIS
                     </div>
 
                     <div class="card-body d-flex align-items-center" id="totalgaji">
-                        <span style="margin-left: -30px; font-size: 1em;">*******</span>
+                        <span style="margin-left: -30px; font-size: 1em;">******</span>
                         <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
                     </div>
 
@@ -554,7 +554,7 @@ Dashboard | MIS
         if (totalgajiToggle.classList.contains('fa-eye')) {
             document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;">Rp. {{ number_format($totalGaji, 0, ', ', ', ') }}</span> <i class="fas fa-eye-slash totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>';
         } else {
-            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;"> * </span> <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()" style="margin-left: -1em;"></i>';
+            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;"> ****** </span> <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()" style="margin-left: -1em;"></i>';
         }
     }
 </script>
