@@ -645,7 +645,7 @@ Dashboard | MIS
         } else {
             // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
-            // MenuPwaCard.style.display = 'none';
+            MenuPwaCard.style.display = 'none';
             SisaSaldoBulanIniCard.style.display = 'block';
             SisaSaldoBulanLaluCard.style.display = 'block';
             PemasukanHariIniCard.style.display = 'block';
