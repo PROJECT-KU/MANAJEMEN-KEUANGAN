@@ -195,35 +195,35 @@ Dashboard | MIS
 </div>
 
 <div class="row" id="MenuPwaCard">
-    <div class="col-md-12">
+    <div class="col-md-12" style="align-items: center;">
         <div class="card card-statistic-2" style="height: 250px; overflow: hidden;">
             <div id="carousel">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
-                    <i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
                     <span style="font-size: 16px; display: inline-block;">Gaji</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFA500, #FF8C00, #FF6347, #FF4500); text-align: center;">
-                    <i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -2px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
-                    <i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.debit.index') }}"><i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
                     <span style="font-size: 16px;">Masuk</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FF6347, #FF4500, #FF0000, #B22222); text-align: center;">
-                    <i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.credit.index') }}"><i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
                     <span style="font-size: 16px;">Keluar</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
-                    <i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
                     <span style="font-size: 16px;">Masuk</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
-                    <i class="fas fa-chart-area" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <a href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
                     <span style="font-size: 16px;">Keluar</span>
                 </div>
@@ -234,7 +234,7 @@ Dashboard | MIS
 </div>
 
 
-<div class="row">
+<div class="row" id="SisaSaldoBulan">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
         <div class="card card-statistic-2">
             <div class="card-icon shadow-primary bg-primary">
@@ -393,7 +393,7 @@ Dashboard | MIS
 </div> -->
 
 
-<div class="row">
+<div class="row" id="PemasukanCard">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;">
             <div class="card-icon shadow-primary bg-primary">
@@ -443,7 +443,7 @@ Dashboard | MIS
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="PengeluaranCard">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#FFB6C1;">
             <div class="card-icon shadow-primary bg-primary">
@@ -493,7 +493,7 @@ Dashboard | MIS
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="StatistikPemasukan">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -527,7 +527,7 @@ Dashboard | MIS
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="StatistikPengeluaran">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -562,7 +562,7 @@ Dashboard | MIS
 </div>
 
 @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
-<div class="row">
+<div class="row" id="PenggunaBaru">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
@@ -609,15 +609,33 @@ Dashboard | MIS
     function toggleElementBasedOnDevice() {
         var totalGajiCard = document.getElementById('totalGajiCard');
         var MenuPwaCard = document.getElementById('MenuPwaCard');
+        var SisaSaldoBulan = document.getElementById('SisaSaldoBulan');
+        var PemasukanCard = document.getElementById('PemasukanCard');
+        var PengeluaranCard = document.getElementById('PengeluaranCard');
+        var StatistikPemasukan = document.getElementById('StatistikPemasukan');
+        var StatistikPengeluaran = document.getElementById('StatistikPengeluaran');
+        var PenggunaBaru = document.getElementById('PenggunaBaru');
 
         if (isMobileDevice()) {
             // Jika aplikasi berjalan di perangkat seluler (PWA)
             totalGajiCard.style.display = 'none';
             MenuPwaCard.style.display = 'block';
+            SisaSaldoBulan.style.display = 'none';
+            PemasukanCard.style.display = 'none';
+            PengeluaranCard.style.display = 'none';
+            StatistikPemasukan.style.display = 'none';
+            StatistikPengeluaran.style.display = 'none';
+            PenggunaBaru.style.display = 'none';
         } else {
             // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
             MenuPwaCard.style.display = 'none';
+            SisaSaldoBulan.style.display = 'block';
+            PemasukanCard.style.display = 'block';
+            PengeluaranCard.style.display = 'block';
+            StatistikPemasukan.style.display = 'block';
+            StatistikPengeluaran.style.display = 'block';
+            PenggunaBaru.style.display = 'block';
         }
     }
 
