@@ -49,33 +49,6 @@
             font-weight: bold;
         }
     </style>
-
-    <!-- MEREFRESH PWA DI HP -->
-    <style>
-        .loader {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-    <!-- END -->
 </head>
 @php
 $isStatusOff = (Auth::user()->status === 'off');
@@ -344,7 +317,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     hideLoader();
                     // Set isRefreshing ke false untuk memungkinkan refresh kembali
                     isRefreshing = false;
-                }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
+                }); // Mengatur delay refresh selama 1 detik (1000 milidetik)
             }
         }
 

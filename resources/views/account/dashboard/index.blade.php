@@ -5,7 +5,7 @@ Dashboard | MIS
 @stop
 
 @section('content')
-
+@extends('layouts.version')
 
 <div class="main-content">
     <section class="section">
