@@ -1,11 +1,11 @@
 @extends('layouts.account')
+@extends('layouts.loader')
 
 @section('title')
 Dashboard | MIS
 @stop
 
 @section('content')
-@extends('layouts.loader')
 
 <div class="main-content">
     <section class="section">
@@ -75,7 +75,7 @@ Dashboard | MIS
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <div class="card card-statistic-2">
                             <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
-                                <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px;">
+                                <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
                             </div>
 
                             <div class="card-wrap">
@@ -135,10 +135,10 @@ Dashboard | MIS
         <!--================== END ==================-->
 
 
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
             <div class="card card-statistic-2">
                 <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-dollar-sign" style="margin-top: 13px;"></i>
                 </div>
                 <div class="card-wrap flex-column">
                     <div class="card-header">
@@ -545,6 +545,31 @@ Dashboard | MIS
 
 </section>
 </div>
+
+<!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
+<script>
+    // Fungsi untuk mendeteksi apakah perangkat adalah ponsel atau browser
+    function isMobileDevice() {
+        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    }
+
+    // Fungsi untuk menyembunyikan atau menampilkan elemen berdasarkan tipe perangkat
+    function toggleElementBasedOnDevice() {
+        var totalGajiCard = document.getElementById('totalGajiCard');
+
+        if (isMobileDevice()) {
+            // Jika aplikasi berjalan di perangkat seluler (PWA), sembunyikan elemen
+            totalGajiCard.style.display = 'none';
+        } else {
+            // Jika aplikasi berjalan di browser, tampilkan elemen
+            totalGajiCard.style.display = 'block';
+        }
+    }
+
+    // Panggil fungsi ketika halaman dimuat
+    window.addEventListener('load', toggleElementBasedOnDevice);
+</script>
+<!--================== END ==================-->
 
 <!-- show and hide -->
 <script>
