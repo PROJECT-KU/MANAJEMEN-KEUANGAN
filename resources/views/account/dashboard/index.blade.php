@@ -7,7 +7,6 @@ Dashboard | MIS
 @section('content')
 @extends('layouts.loader')
 
-<div class="loader"></div>
 <div class="main-content">
     <section class="section">
         <div class="section-body">
