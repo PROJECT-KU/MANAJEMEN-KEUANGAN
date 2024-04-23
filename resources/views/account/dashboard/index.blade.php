@@ -201,8 +201,8 @@ Dashboard | MIS
 <!--================== MANU DI PWA ==================-->
 <div class="row mb-4" id="MenuPwaCard">
     <div class="col-md-12">
-        <div class="card card-statistic-2 mb-3" style="overflow: hidden; height:max-content;">
-            <div id="carousel">
+        <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
+            <div id="carousel" class="mb-3">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
                     <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
