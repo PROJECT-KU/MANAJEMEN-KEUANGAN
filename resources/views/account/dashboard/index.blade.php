@@ -5,6 +5,19 @@
 Dashboard | MIS
 @stop
 
+<!--================== MENAMPILKAN MENU HANYA DI PWA ==================-->
+<style>
+    #carousel {
+        display: flex;
+        /* Menggunakan flex untuk menampilkan dalam satu baris */
+        flex-wrap: wrap;
+        /* Agar card-icon yang berlebihan bisa turun ke baris baru */
+        gap: 10px;
+        /* Jarak antara card-icon */
+    }
+</style>
+<!--================== END ==================-->
+
 @section('content')
 
 <div class="main-content">
@@ -179,8 +192,47 @@ Dashboard | MIS
                 </div>
             </div>
         </div>
-
 </div>
+
+<div class="row" id="MenuPwaCard">
+    <div class="col-md-12">
+        <div class="card card-statistic-2" style="height: 250px; overflow: hidden;">
+            <div id="carousel">
+
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
+                    <i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block;">Gaji</span>
+                </div>
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFA500, #FF8C00, #FF6347, #FF4500); text-align: center;">
+                    <i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
+                </div>
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
+                    <i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
+                    <span style="font-size: 16px;">Masuk</span>
+                </div>
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FF6347, #FF4500, #FF0000, #B22222); text-align: center;">
+                    <i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
+                    <span style="font-size: 16px;">Keluar</span>
+                </div>
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
+                    <i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
+                    <span style="font-size: 16px;">Masuk</span>
+                </div>
+                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
+                    <i class="fas fa-chart-area" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i>
+                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
+                    <span style="font-size: 16px;">Keluar</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
@@ -556,13 +608,16 @@ Dashboard | MIS
     // Fungsi untuk menyembunyikan atau menampilkan elemen berdasarkan tipe perangkat
     function toggleElementBasedOnDevice() {
         var totalGajiCard = document.getElementById('totalGajiCard');
+        var MenuPwaCard = document.getElementById('MenuPwaCard');
 
         if (isMobileDevice()) {
-            // Jika aplikasi berjalan di perangkat seluler (PWA), sembunyikan elemen
+            // Jika aplikasi berjalan di perangkat seluler (PWA)
             totalGajiCard.style.display = 'none';
+            MenuPwaCard.style.display = 'block';
         } else {
-            // Jika aplikasi berjalan di browser, tampilkan elemen
+            // Jika aplikasi berjalan di browser
             totalGajiCard.style.display = 'block';
+            MenuPwaCard.style.display = 'none';
         }
     }
 
