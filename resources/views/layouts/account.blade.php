@@ -56,11 +56,11 @@ $tenggatDate = strtotime(Auth::user()->tenggat);
 $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
-        <div class="main-wrapper main-wrapper-1" id="NavbarPwa">
+        <div class="main-wrapper main-wrapper-1">
             <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3">
+                    <ul class="navbar-nav mr-3 mb-3" id="NavbarPwa">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
                     <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
@@ -99,7 +99,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 </ul>
                 <!--================== end ==================-->
             </nav>
-            <div class="main-sidebar sidebar-style-2">
+            <div class="main-sidebar sidebar-style-2" id="SidebarPwa">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
                         <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="150">
@@ -281,13 +281,16 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
         // Fungsi untuk menyembunyikan atau menampilkan elemen berdasarkan tipe perangkat
         function toggleElementBasedOnDevice() {
             var NavbarPwa = document.getElementById('NavbarPwa');
+            var SidebarPwa = document.getElementById('SidebarPwa');
 
             if (isMobileDevice()) {
                 // Jika aplikasi berjalan di perangkat seluler (PWA)
                 NavbarPwa.style.display = 'none';
+                SidebarPwa.style.display = 'none';
             } else {
                 // Jika aplikasi berjalan di browser
                 NavbarPwa.style.display = 'block';
+                SidebarPwa.style.display = 'block';
             }
         }
 
