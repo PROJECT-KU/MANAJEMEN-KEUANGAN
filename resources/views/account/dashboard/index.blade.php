@@ -268,14 +268,12 @@ Dashboard | MIS
                     <span style="font-size: 16px;">Keluar</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
-                    <a href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
+                    <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
-                    <span style="font-size: 16px;">Masuk</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
-                    <a href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
-                    <span style="font-size: 16px;">Keluar</span>
+                    <a href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
+                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">More</span>
                 </div>
 
             </div>
