@@ -57,9 +57,9 @@
         }
     }
 
-    // Fungsi untuk menangani refresh saat menggeser ke bawah
+    // Fungsi untuk menangani refresh saat menggeser ke atas
     function handlePullToRefresh() {
-        // Cek apakah scroll berada di paling atas, lebih dari 200px dan tidak sedang dalam proses refresh
+        // Cek apakah scroll berada di paling atas, lebih dari 200px, dan tidak sedang dalam proses refresh
         if (window.scrollY >= 200 && !isRefreshing) {
             isRefreshing = true;
             // Tampilkan loader
@@ -76,7 +76,7 @@
         }
     }
 
-    // Tambahkan event listener untuk mendeteksi gerakan menggeser ke bawah
+    // Tambahkan event listener untuk mendeteksi gerakan menggeser ke atas
     window.addEventListener('scroll', handlePullToRefresh, {
         passive: true
     });
