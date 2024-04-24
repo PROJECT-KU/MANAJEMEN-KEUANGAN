@@ -26,6 +26,42 @@ Dashboard | MIS
     #totalGajiCard {
         display: none;
     }
+
+    #PemasukanHariIniCard {
+        display: none;
+    }
+
+    #PemasukanBulanIniCard {
+        display: none;
+    }
+
+    #PemasukanTahunIniCard {
+        display: none;
+    }
+
+    #PengeluaranHariIniCard {
+        display: none;
+    }
+
+    #PengeluaranBulanIniCard {
+        display: none;
+    }
+
+    #PengeluaranTahunIniCard {
+        display: none;
+    }
+
+    #StatistikPemasukan {
+        display: none;
+    }
+
+    #StatistikPengeluaran {
+        display: none;
+    }
+
+    #PenggunaBaru {
+        display: none;
+    }
 </style>
 <!--================== END ==================-->
 
