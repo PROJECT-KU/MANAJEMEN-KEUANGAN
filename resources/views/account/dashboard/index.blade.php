@@ -665,7 +665,7 @@ Dashboard | MIS
 </script>
 <!--================== END ==================-->
 
-<!-- show and hide -->
+<!--================== SHOW & HIDE TOTAL GAJI ==================-->
 <script>
     function toggleTotalGaji() {
         const totalgajiToggle = document.getElementById('totalgaji-toggle');
@@ -677,7 +677,7 @@ Dashboard | MIS
         }
     }
 </script>
-<!-- end -->
+<!--================== END ==================-->
 
 <script>
     function submitForm() {
