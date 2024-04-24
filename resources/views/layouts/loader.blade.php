@@ -28,6 +28,15 @@
 
 <!--================== MEREFRESH PWA DI HP ==================-->
 <script>
+    // Fungsi untuk menyembunyikan sidebar saat proses refresh dimulai
+    function hideSidebarOnRefresh() {
+        var SidebarPwa = document.getElementById('SidebarPwa');
+        SidebarPwa.style.display = 'none'; // Sembunyikan sidebar
+    }
+
+    // Panggil fungsi saat halaman dimuat untuk menyembunyikan sidebar awal
+    window.addEventListener('load', hideSidebarOnRefresh);
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -72,6 +81,9 @@
                 hideLoader();
                 // Set isRefreshing ke false untuk memungkinkan refresh kembali
                 isRefreshing = false;
+                // Tampilkan kembali sidebar setelah proses refresh selesai
+                var SidebarPwa = document.getElementById('SidebarPwa');
+                SidebarPwa.style.display = 'block';
             }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
         }
     }
