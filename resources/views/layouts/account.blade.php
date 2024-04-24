@@ -352,8 +352,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     location.reload();
                     // Setelah proses refresh selesai, sembunyikan loader
                     hideLoader();
-                    // Set isRefreshing ke false untuk memungkinkan refresh kembali
-                    isRefreshing = false;
                     // Tampilkan kembali sidebar setelah proses refresh selesai
                     var SidebarPwa = document.getElementById('SidebarPwa');
                     SidebarPwa.style.display = 'block';
