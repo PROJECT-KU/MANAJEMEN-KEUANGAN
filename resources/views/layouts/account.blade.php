@@ -50,12 +50,18 @@
         }
     </style>
 
+    <!--================== MENYEMBUNYIKAN SAAT DI REFRESH DI PWA ==================-->
     <style>
         /* Menyembunyikan sidebar */
         #SidebarPwa {
             display: none;
         }
+
+        #NavbarPwa {
+            display: none;
+        }
     </style>
+    <!--================== END ==================-->
 </head>
 @php
 $isStatusOff = (Auth::user()->status === 'off');
