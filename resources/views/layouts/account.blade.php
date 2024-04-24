@@ -56,11 +56,11 @@ $tenggatDate = strtotime(Auth::user()->tenggat);
 $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
-        <div class="main-wrapper main-wrapper-1">
+        <div class="main-wrapper main-wrapper-1" id="NavbarPwa">
             <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3" id="NavbarPwa">
+                    <ul class="navbar-nav mr-3 mb-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
                     <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
