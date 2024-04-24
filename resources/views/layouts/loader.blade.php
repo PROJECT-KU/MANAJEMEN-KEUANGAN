@@ -39,6 +39,7 @@
     }
 
     let isRefreshing = false;
+    let startY = 0; // Simpan posisi awal sentuhan
 
     // Fungsi untuk menampilkan loader
     function showLoader() {
@@ -58,26 +59,48 @@
     }
 
     // Fungsi untuk menangani refresh saat menggeser ke bawah
-    function handlePullToRefresh() {
+    function handlePullToRefresh(event) {
         // Cek apakah scroll berada di paling atas dan tidak sedang dalam proses refresh
         if (window.scrollY === 0 && !isRefreshing) {
-            isRefreshing = true;
-            // Tampilkan loader
-            showLoader();
+            // Periksa apakah sedang melakukan gerakan tarik ke atas
+            if (event.touches && event.touches.length > 0) {
+                startY = event.touches[0].clientY; // Simpan posisi awal sentuhan
+            }
+        }
+    }
 
-            // Lakukan refresh halaman setelah beberapa saat
-            setTimeout(() => {
-                location.reload();
-                // Setelah proses refresh selesai, sembunyikan loader
-                hideLoader();
-                // Set isRefreshing ke false untuk memungkinkan refresh kembali
-                isRefreshing = false;
-            }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
+    // Fungsi untuk menangani selesai gerakan tarik
+    function handleTouchEnd(event) {
+        // Periksa apakah selesai gerakan tarik dan sudah cukup jauh
+        if (startY > 0 && event.changedTouches && event.changedTouches.length > 0) {
+            var endY = event.changedTouches[0].clientY; // Simpan posisi akhir sentuhan
+            var distance = startY - endY; // Hitung jarak geser
+
+            if (distance > 100) { // Jika jarak geser lebih dari 100px, lakukan refresh
+                isRefreshing = true;
+                // Tampilkan loader
+                showLoader();
+
+                // Lakukan refresh halaman setelah beberapa saat
+                setTimeout(() => {
+                    location.reload();
+                    // Setelah proses refresh selesai, sembunyikan loader
+                    hideLoader();
+                    // Set isRefreshing ke false untuk memungkinkan refresh kembali
+                    isRefreshing = false;
+                }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
+            }
+
+            // Reset posisi awal sentuhan
+            startY = 0;
         }
     }
 
     // Tambahkan event listener untuk mendeteksi gerakan menggeser ke bawah
-    window.addEventListener('scroll', handlePullToRefresh, {
+    window.addEventListener('touchstart', handlePullToRefresh, {
+        passive: true
+    });
+    window.addEventListener('touchend', handleTouchEnd, {
         passive: true
     });
 </script>
