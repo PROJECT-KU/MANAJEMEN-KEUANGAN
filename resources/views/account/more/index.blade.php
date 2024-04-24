@@ -130,194 +130,130 @@ Dashboard | MIS
                 @endif
                 <!--================== END ==================-->
 
-                <!--================== PRESENSI KARYAWAN ==================-->
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <div class="card card-statistic-2">
-                            <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
-                                <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
+                <!--================== TOTAL GAJI TAHUN INI ==================-->
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
+                    <div class="card card-statistic-2">
+                        <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+                            <i class="fas fa-dollar-sign" style="margin-top: 13px;"></i>
+                        </div>
+                        <div class="card-wrap flex-column">
+                            <div class="card-header">
+                                <h4>TOTAL GAJI TAHUN INI</h4>
                             </div>
 
-                            <div class="card-wrap">
-                                <div class="card-header">
-                                    <h4>PRESENSI KEHADIRAN</h4>
+                            <div class="card-body d-flex align-items-center" id="totalgaji">
+                                <span style="margin-left: -30px; font-size: 1em;">******</span>
+                                <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
+                            </div>
+
+                            <div class="d-flex" style="width: 100%;">
+                                @if ($gaji->isEmpty())
+                                <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                                    Belum ada data gaji untuk bulan ini. Mohon bersabar.
                                 </div>
-
+                                @else
                                 @php
-                                $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                                ->whereDate('created_at', now()->toDateString())
-                                ->first();
+                                $belumTerbayarkan = false;
+                                foreach ($gaji as $item) {
+                                if ($item->status != 'terbayar') {
+                                $belumTerbayarkan = true;
+                                break;
+                                }
+                                }
                                 @endphp
-                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                    <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
-                                        MASUK
-                                    </button>
-                                    <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                                        PULANG
-                                    </a>
+                                @if ($belumTerbayarkan)
+                                <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
+                                    Gaji pada bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
+                                </div>
+                                @else
+                                <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
+                                    Gaji pada bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
+                                </div>
+                                @endif
+                                @endif
                             </div>
-                            <div class="d-flex align-items-center">
-                                <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                                    Selamat Bekerja!
-                                </span>
-                            </div>
-                            @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
-                                    MASUK
-                                </a>
-                                <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                    PULANG
-                                </button>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                                Anda Belum Melakukan Presensi Pada Hari Ini!
-                            </span>
-                        </div>
-                        @else
-                        <div class="d-flex mx-1 mt-2 mb-2">
-                            <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                MASUK
-                            </button>
-                            <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                PULANG
-                            </button>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                                Selesai Bekerja!
-                            </span>
-                        </div>
-                        @endif
                     </div>
                 </div>
+                <!--================== END ==================-->
         </div>
-        <!--================== END ==================-->
 
-        <!--================== TOTAL GAJI TAHUN INI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                    <i class="fas fa-dollar-sign" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>TOTAL GAJI TAHUN INI</h4>
-                    </div>
 
-                    <div class="card-body d-flex align-items-center" id="totalgaji">
-                        <span style="margin-left: -30px; font-size: 1em;">******</span>
-                        <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
-                    </div>
+        <!--================== MANU DI PWA ==================-->
+        <div class="row" id="MenuPwaCard">
+            <div class="col-md-12">
+                <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
+                    <div id="carousel" class="mb-5">
 
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($gaji->isEmpty())
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Belum ada data gaji untuk bulan ini. Mohon bersabar.
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
+                            <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block;">Gaji</span>
                         </div>
-                        @else
-                        @php
-                        $belumTerbayarkan = false;
-                        foreach ($gaji as $item) {
-                        if ($item->status != 'terbayar') {
-                        $belumTerbayarkan = true;
-                        break;
-                        }
-                        }
-                        @endphp
-                        @if ($belumTerbayarkan)
-                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFA500, #FF8C00, #FF6347, #FF4500); text-align: center;">
+                            <a href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -2px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
                         </div>
-                        @else
-                        <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
+                            <a href="{{ route('account.debit.index') }}"><i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
+                            <span style="font-size: 16px;">Masuk</span>
                         </div>
-                        @endif
-                        @endif
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FF6347, #FF4500, #FF0000, #B22222); text-align: center;">
+                            <a href="{{ route('account.credit.index') }}"><i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
+                            <span style="font-size: 16px;">Keluar</span>
+                        </div>
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
+                            <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
+                        </div>
+                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
+                            <a href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
+                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">More</span>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
         <!--================== END ==================-->
-</div>
 
 
-<!--================== MANU DI PWA ==================-->
-<div class="row" id="MenuPwaCard">
-    <div class="col-md-12">
-        <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
-            <div id="carousel" class="mb-5">
-
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
-                    <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block;">Gaji</span>
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4>SISA SALDO BULAN INI</h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px; height: 100%;">
+                            {{ rupiah($saldo_bulan_ini) }}
+                        </div>
+                    </div>
                 </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFA500, #FF8C00, #FF6347, #FF4500); text-align: center;">
-                    <a href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -2px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
-                    <a href="{{ route('account.debit.index') }}"><i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                    <span style="font-size: 16px;">Masuk</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FF6347, #FF4500, #FF0000, #B22222); text-align: center;">
-                    <a href="{{ route('account.credit.index') }}"><i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                    <span style="font-size: 16px;">Keluar</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
-                    <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
-                    <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">More</span>
-                </div>
-
             </div>
-        </div>
-    </div>
-</div>
-<!--================== END ==================-->
 
-
-<div class="row">
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4>SISA SALDO BULAN INI</h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($saldo_bulan_ini) }}
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4>SISA SALDO BULAN LALU</h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px; height: 100%;">
+                            {{ rupiah($saldo_bulan_lalu) }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4>SISA SALDO BULAN LALU</h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($saldo_bulan_lalu) }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- <div class="row">
+        <!-- <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -442,209 +378,209 @@ Dashboard | MIS
 </div> -->
 
 
-<div class="row">
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN HARI INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($Pemasukan_hari_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN BULAN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($pemasukan_bulan_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanTahunIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN TAHUN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($pemasukan_tahun_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-2">
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranHariIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN HARI INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_hari_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN BULAN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_bulan_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranTahunIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN TAHUN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_tahun_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row" id="StatistikPemasukan">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
-                <h4 style="color: white;"><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
-                <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
-            </div>
-            <div class="card-body">
-                <div id="chartContainerPemasukan" style="display: none;">
-                    @foreach ($debit as $hasil)
-                    @php
-                    $target = 10000000; // Target nominal 10 juta
-                    $persentase = ($hasil->total_nominal / $target) * 100;
-                    @endphp
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
-                        <div style="display: flex; align-items: center; width: 100%;">
-                            <span style="margin-right: 5px; margin-left:5px">{{ rupiah($hasil->total_nominal) }}</span>
-                            <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px;">
-                                <div class="progress-bar bg-info text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
-                                </div>
-                            </div>
-                            <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PEMASUKAN HARI INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px; height: 100%;">
+                            {{ rupiah($Pemasukan_hari_ini) }}
                         </div>
                     </div>
-                    <div class="mb-3"></div>
-                    @endforeach
                 </div>
-                <canvas id="financeChartPemasukan" width="100%" height="40"></canvas>
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="row" id="StatistikPengeluaran">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
-                <h4 style="color: white;"><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
-                <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
-            </div>
-            <div class="card-body">
-                <div id="chartContainer" style="display: none;">
-                    @foreach ($credit as $hasil)
-                    @php
-                    $target = 10000000; // Target nominal 10 juta
-                    $persentase = ($hasil->total_nominal / $target) * 100;
-                    @endphp
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
-                        <div style="display: flex; align-items: center; width: 100%;">
-                            <span style="margin-right: 5px; margin-left:5px;">{{ rupiah($hasil->total_nominal) }}</span>
-                            <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px; width:500px">
-                                <div class="progress-bar bg-danger text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
-                                </div>
-                            </div>
-                            <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanBulanIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PEMASUKAN BULAN INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px; height: 100%;">
+                            {{ rupiah($pemasukan_bulan_ini) }}
                         </div>
                     </div>
-                    <div class="mb-3"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanTahunIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PEMASUKAN TAHUN INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px; height: 100%;">
+                            {{ rupiah($pemasukan_tahun_ini) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranHariIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PENGELUARAN HARI INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px;">
+                            {{ rupiah($pengeluaran_hari_ini) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranBulanIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PENGELUARAN BULAN INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px;">
+                            {{ rupiah($pengeluaran_bulan_ini) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranTahunIniCard">
+                    <div class="card-icon shadow-primary bg-primary">
+                        <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+                    </div>
+                    <div class="card-wrap" style="height: 100px;">
+                        <div class="card-header">
+                            <h4><b>PENGELUARAN TAHUN INI</b></h4>
+                        </div>
+                        <div class="card-body" style="font-size: 20px;">
+                            {{ rupiah($pengeluaran_tahun_ini) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="StatistikPemasukan">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                        <h4 style="color: white;"><i class=" fas fa-chart-pie"></i> STATISTIK PEMASUKAN PERKATEGORI</h4>
+                        <button type="button" class="btn btn-info" id="toggleChartBtnPemasukan" onclick="toggleChartPemasukan()">Buka Chart</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="chartContainerPemasukan" style="display: none;">
+                            @foreach ($debit as $hasil)
+                            @php
+                            $target = 10000000; // Target nominal 10 juta
+                            $persentase = ($hasil->total_nominal / $target) * 100;
+                            @endphp
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
+                                <div style="display: flex; align-items: center; width: 100%;">
+                                    <span style="margin-right: 5px; margin-left:5px">{{ rupiah($hasil->total_nominal) }}</span>
+                                    <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px;">
+                                        <div class="progress-bar bg-info text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
+                                        </div>
+                                    </div>
+                                    <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3"></div>
+                            @endforeach
+                        </div>
+                        <canvas id="financeChartPemasukan" width="100%" height="40"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="StatistikPengeluaran">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> STATISTIK PENGELUARAN PERKATEGORI</h4>
+                        <button type="button" class="btn btn-info" id="toggleChartBtn" onclick="toggleChart()">Buka Chart</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="chartContainer" style="display: none;">
+                            @foreach ($credit as $hasil)
+                            @php
+                            $target = 10000000; // Target nominal 10 juta
+                            $persentase = ($hasil->total_nominal / $target) * 100;
+                            @endphp
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <h6 style="margin-bottom: 5px;">{{ $hasil->name }}</h6>
+                                <div style="display: flex; align-items: center; width: 100%;">
+                                    <span style="margin-right: 5px; margin-left:5px;">{{ rupiah($hasil->total_nominal) }}</span>
+                                    <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100" style="flex: 1; margin-right: 5px; width:500px">
+                                        <div class="progress-bar bg-danger text-dark" style="width: {{ $persentase }}%; padding: 5px; text-align: center;">
+                                        </div>
+                                    </div>
+                                    <span style="margin-left: 5px; margin-right:5px">{{ rupiah($target) }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3"></div>
+                            @endforeach
+                        </div>
+                        <canvas id="financeChart" width="100%" height="40"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
+        <div class="row" id="PenggunaBaru">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
+                        <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
+                    </div>
+                    <div class="row" style="margin: 10px;">
+                        @foreach($users as $user)
+                        @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
+                            <div class="card text-center card-hover">
+                                @if ($user->gambar == null)
+                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
+                                    @else
+                                    <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                                        @endif
+                                        <div class="thumbnail-circle">
+                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                        </div>
+                                    </a>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $user->full_name }}</h5>
+                                    </div>
+                            </div>
+
+                    </div>
+                    @endif
                     @endforeach
                 </div>
-                <canvas id="financeChart" width="100%" height="40"></canvas>
             </div>
         </div>
-    </div>
-</div>
-
-@if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
-<div class="row" id="PenggunaBaru">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
-                <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
-            </div>
-            <div class="row" style="margin: 10px;">
-                @foreach($users as $user)
-                @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
-                    <div class="card text-center card-hover">
-                        @if ($user->gambar == null)
-                        <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
-                            @else
-                            <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
-                                @endif
-                                <div class="thumbnail-circle">
-                                    <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
-                                </div>
-                            </a>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $user->full_name }}</h5>
-                            </div>
-                    </div>
-
-            </div>
-            @endif
-            @endforeach
-        </div>
-    </div>
-</div>
-@endif
+        @endif
 
 
-</section>
+    </section>
 </div>
 
 <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
