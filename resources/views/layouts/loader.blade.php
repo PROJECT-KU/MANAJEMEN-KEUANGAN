@@ -60,7 +60,7 @@
     // Fungsi untuk menangani refresh saat menggeser ke bawah
     function handlePullToRefresh() {
         // Cek apakah scroll berada di paling atas, lebih dari 200px dan tidak sedang dalam proses refresh
-        if (window.scrollY <= 200 && !isRefreshing) {
+        if (window.scrollY >= 200 && !isRefreshing) {
             isRefreshing = true;
             // Tampilkan loader
             showLoader();
