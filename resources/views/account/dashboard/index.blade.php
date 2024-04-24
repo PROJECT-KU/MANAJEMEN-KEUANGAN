@@ -20,6 +20,15 @@ Dashboard | MIS
 </style>
 <!--================== END ==================-->
 
+<!--================== MENYEMBUNYIKAN SAAT DI REFRESH DI PWA ==================-->
+<style>
+    /* Menyembunyikan sidebar */
+    #totalGajiCard {
+        display: none;
+    }
+</style>
+<!--================== END ==================-->
+
 @section('content')
 
 <div class="main-content">

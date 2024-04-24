@@ -28,15 +28,6 @@
 
 <!--================== MEREFRESH PWA DI HP ==================-->
 <script>
-    // Fungsi untuk menyembunyikan sidebar saat proses refresh dimulai
-    function hideSidebarOnRefresh() {
-        var SidebarPwa = document.getElementById('SidebarPwa');
-        SidebarPwa.style.display = 'none'; // Sembunyikan sidebar
-    }
-
-    // Panggil fungsi saat halaman dimuat untuk menyembunyikan sidebar awal
-    window.addEventListener('load', hideSidebarOnRefresh);
-
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -76,15 +67,9 @@
 
             // Lakukan refresh halaman setelah beberapa saat
             setTimeout(() => {
-                // Panggil fungsi untuk menyembunyikan sidebar saat proses refresh dimulai
-                hideSidebarOnRefresh();
-                // Lakukan refresh halaman
                 location.reload();
                 // Setelah proses refresh selesai, sembunyikan loader
                 hideLoader();
-                // Tampilkan kembali sidebar setelah proses refresh selesai
-                var SidebarPwa = document.getElementById('SidebarPwa');
-                SidebarPwa.style.display = 'block';
                 // Set isRefreshing ke false untuk memungkinkan refresh kembali
                 isRefreshing = false;
             }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
@@ -95,26 +80,5 @@
     window.addEventListener('scroll', handlePullToRefresh, {
         passive: true
     });
-
-    // Fungsi untuk mendeteksi apakah perangkat adalah ponsel atau browser
-    function isMobileDevice() {
-        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-    }
-
-    // Fungsi untuk menyembunyikan atau menampilkan elemen berdasarkan tipe perangkat
-    function toggleElementBasedOnDevice() {
-        var SidebarPwa = document.getElementById('SidebarPwa');
-
-        if (isMobileDevice()) {
-            // Jika aplikasi berjalan di perangkat seluler (PWA)
-            SidebarPwa.style.display = 'none';
-        } else {
-            // Jika aplikasi berjalan di browser
-            SidebarPwa.style.display = 'block';
-        }
-    }
-
-    // Panggil fungsi ketika halaman dimuat
-    window.addEventListener('load', toggleElementBasedOnDevice);
 </script>
 <!--================== END ==================-->
