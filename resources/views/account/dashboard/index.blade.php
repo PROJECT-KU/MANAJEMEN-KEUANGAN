@@ -272,7 +272,7 @@ Dashboard | MIS
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
                 </div>
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
-                    <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
+                    <a href="{{ route('account.more.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
                     <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">More</span>
                 </div>
 
