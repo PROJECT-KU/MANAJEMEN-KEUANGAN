@@ -60,7 +60,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3">
+                    <ul class="navbar-nav mr-3 mb-3" id="navbar">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
                     <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
@@ -271,7 +271,23 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
         </div>
     </div>
 
-    <!-- ucapan selamat -->
+    <!--================== CEK APAKAH PWA ATAU WEBSITE ==================-->
+    <script>
+        // Deteksi jika diakses melalui browser di ponsel
+        const isMobileBrowser = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Deteksi jika diakses melalui PWA di ponsel
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        // Cek jika diakses melalui ponsel dan berbeda antara browser dan PWA
+        if (isMobileBrowser && !isPWA) {
+            const navbar = document.getElementById('navbar');
+            navbar.style.display = 'none'; // Sembunyikan navbar
+        }
+    </script>
+    <!--================== END ==================-->
+
+    <!--================== UCAPAN SELAMAT ==================-->
     <script>
         function getGreeting() {
             const currentTime = new Date();
@@ -303,22 +319,18 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
         const greetingElement = document.getElementById("greeting");
         greetingElement.innerText = getGreeting();
     </script>
-    <!-- end -->
-    <!-- General JS Scripts -->
+    <!--================== END ==================-->
+
+    <!--================== GENERAL JS ==================-->
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
     <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
-
-    <!-- JS Libraies -->
-
-    <!-- Page Specific JS File -->
-
-    <!-- Template JS File -->
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <!--================== END ==================-->
 
     @extends('layouts.alerts')
     </body>
