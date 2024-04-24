@@ -76,7 +76,7 @@
             var endY = event.changedTouches[0].clientY; // Simpan posisi akhir sentuhan
             var distance = startY - endY; // Hitung jarak geser
 
-            if (distance > 100) { // Jika jarak geser lebih dari 100px, lakukan refresh
+            if (distance > 300) { // Jika jarak geser lebih dari 300px, lakukan refresh
                 isRefreshing = true;
                 // Tampilkan loader
                 showLoader();
