@@ -301,6 +301,15 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
     <!--================== MEREFRESH PWA DI HP ==================-->
     <script>
+        // Fungsi untuk menyembunyikan sidebar saat proses refresh dimulai
+        function hideSidebarOnRefresh() {
+            var SidebarPwa = document.getElementById('SidebarPwa');
+            SidebarPwa.style.display = 'none'; // Sembunyikan sidebar
+        }
+
+        // Panggil fungsi saat halaman dimuat untuk menyembunyikan sidebar awal
+        window.addEventListener('load', hideSidebarOnRefresh);
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -340,9 +349,15 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                 // Lakukan refresh halaman setelah beberapa saat
                 setTimeout(() => {
+                    // Panggil fungsi untuk menyembunyikan sidebar saat proses refresh dimulai
+                    hideSidebarOnRefresh();
+                    // Lakukan refresh halaman
                     location.reload();
                     // Setelah proses refresh selesai, sembunyikan loader
                     hideLoader();
+                    // Tampilkan kembali sidebar setelah proses refresh selesai
+                    var SidebarPwa = document.getElementById('SidebarPwa');
+                    SidebarPwa.style.display = 'block';
                     // Set isRefreshing ke false untuk memungkinkan refresh kembali
                     isRefreshing = false;
                 }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
@@ -376,6 +391,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
         window.addEventListener('load', toggleElementBasedOnDevice);
     </script>
     <!--================== END ==================-->
+
 
     <!--================== UCAPAN SELAMAT ==================-->
     <script>
