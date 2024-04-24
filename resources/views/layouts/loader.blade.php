@@ -41,8 +41,8 @@
         // Hitung jarak yang telah digeser
         let deltaY = event.touches[0].clientY - startY;
 
-        // Cek apakah pengguna menggeser ke atas lebih dari 200 piksel
-        if (deltaY < -200) {
+        // Cek apakah pengguna menggeser ke bawah lebih dari 200 piksel
+        if (deltaY > 200) {
             // Lakukan reload halaman
             location.reload();
         }
