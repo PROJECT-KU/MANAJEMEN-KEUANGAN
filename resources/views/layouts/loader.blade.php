@@ -28,31 +28,57 @@
 
 <!--================== MEREFRESH PWA DI HP ==================-->
 <script>
-    let startY = 0;
-
-    // Fungsi untuk menangani gerakan awal ketika pengguna mulai menggeser
-    function handleTouchStart(event) {
-        // Simpan posisi awal sentuhan
-        startY = event.touches[0].clientY;
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }).catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
     }
 
-    // Fungsi untuk menangani gerakan saat pengguna sedang menggeser
-    function handleTouchMove(event) {
-        // Hitung jarak yang telah digeser
-        let deltaY = event.touches[0].clientY - startY;
+    let isRefreshing = false;
 
-        // Cek apakah pengguna menggeser ke bawah lebih dari 200 piksel
-        if (deltaY > 200) {
-            // Lakukan reload halaman
-            location.reload();
+    // Fungsi untuk menampilkan loader
+    function showLoader() {
+        // Tambahkan elemen loader ke dalam body
+        var loader = document.createElement('div');
+        loader.className = 'loader';
+        document.body.appendChild(loader);
+    }
+
+    // Fungsi untuk menyembunyikan loader
+    function hideLoader() {
+        // Hapus elemen loader dari body jika ada
+        var loader = document.querySelector('.loader');
+        if (loader) {
+            loader.parentNode.removeChild(loader);
         }
     }
 
-    // Tambahkan event listener untuk mendeteksi sentuhan awal
-    window.addEventListener('touchstart', handleTouchStart, false);
+    // Fungsi untuk menangani refresh saat menggeser ke bawah
+    function handlePullToRefresh() {
+        // Cek apakah scroll berada di paling atas dan tidak sedang dalam proses refresh
+        if (window.scrollY === 0 && !isRefreshing) {
+            isRefreshing = true;
+            // Tampilkan loader
+            showLoader();
 
-    // Tambahkan event listener untuk mendeteksi gerakan menggeser
-    window.addEventListener('touchmove', handleTouchMove, false);
+            // Lakukan refresh halaman setelah beberapa saat
+            setTimeout(() => {
+                location.reload();
+                // Setelah proses refresh selesai, sembunyikan loader
+                hideLoader();
+                // Set isRefreshing ke false untuk memungkinkan refresh kembali
+                isRefreshing = false;
+            }, 1000); // Mengatur delay refresh selama 1 detik (1000 milidetik)
+        }
+    }
+
+    // Tambahkan event listener untuk mendeteksi gerakan menggeser ke bawah
+    window.addEventListener('scroll', handlePullToRefresh, {
+        passive: true
+    });
 </script>
-
 <!--================== END ==================-->
