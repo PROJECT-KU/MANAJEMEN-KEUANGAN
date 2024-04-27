@@ -17,6 +17,8 @@ use Riskihajar\Terbilang\Facades\Terbilang;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\GajiSuccessMail;
+use App\Exports\GajiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class GajiController extends Controller
@@ -1175,6 +1177,43 @@ class GajiController extends Controller
       'Content-Disposition' => 'inline; filename="List-Gaji-Karyawan_' . date('d-m-Y') . '.pdf"',
     ];
     return Response::make($dompdf->output(), 200, $headers);
+  }
+
+  public function downloadExcel(Request $request)
+  {
+    $user = Auth::user();
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    if (!$startDate || !$endDate) {
+      $currentMonth = date('Y-m-01 00:00:00');
+      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+    } else {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+    }
+
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+      $gaji = DB::table('gaji')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
+    } else {
+      $gaji = DB::table('gaji')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
+        ->orderBy('gaji.created_at', 'DESC')
+        ->get();
+    }
+
+    // Set up Excel export
+    $excelFileName = 'List-Gaji-Karyawan_' . date('d-m-Y') . '.xlsx';
+
+    return Excel::download(new GajiExport($gaji), $excelFileName);
   }
 
   public function SlipGaji($id)

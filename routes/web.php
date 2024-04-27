@@ -141,6 +141,7 @@ Route::prefix('account')->group(
         Route::get('/gaji/filtermanager', 'account\GajiController@filtermanager')->name('account.gaji.filtermanager');
         Route::get('/gaji/filterkaryawan', 'account\GajiController@filterkaryawan')->name('account.gaji.filterkaryawan');
         Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
+        Route::get('/laporan_gaji/download-excel', 'account\GajiController@downloadExcel')->name('account.laporan_gaji.download-excel');
         Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
 
         //presensi

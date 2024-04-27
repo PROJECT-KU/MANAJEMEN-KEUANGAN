@@ -206,11 +206,35 @@ Data Gaji Karyawan | MIS
         <div class="card">
           <div class="card-header">
             <h4><i class="fas fa-list"></i> DATA GAJI KARYAWAN</h4>
-            <div class="card-header-action">
+
+
+            <div class="dropdown card-header-action">
+              <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                <i class="fas fa-download"></i> DOWNLOAD
+              </button>
+              <div class="dropdown-menu dropdown-menu-right">
+                <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+                  <i class="far fa-file-pdf"></i> PDF
+                </a>
+                <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+                  <i class="far fa-file-excel"></i> EXCEL
+                </a>
+              </div>
+            </div>
+
+
+
+            <!-- <div class="card-header-action">
               <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
                 <i class="fas fa-file-pdf"></i> Download PDF
               </a>
-            </div>
+            </div> -->
+            <!-- <div class="card-header-action">
+              <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Download EXCEL
+              </a>
+            </div> -->
+
           </div>
           <div class="card-header">
             <p style="margin-top: -3px; font-size: 15px"><strong>Periode
