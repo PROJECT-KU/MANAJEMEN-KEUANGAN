@@ -133,7 +133,7 @@
                                 <div class="container">
                                     <div class="signin-content">
                                         <div class="signin-image">
-                                            <figure><img src="{{ asset('assets/login/images/signin-image.jpg') }}" alt="sing up image"></figure>
+                                            <figure><img src="{{ asset('assets/login/images/welcome.jpg') }}" style="height: 450px; width: 1000px;" alt="sing up image"></figure>
                                         </div>
 
                                         <div class="signin-form">
