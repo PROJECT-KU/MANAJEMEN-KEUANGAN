@@ -12,6 +12,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
     <!-- show and hide password -->
     <style>
+        /* // <!-- SHOW AND HIDE PASSWORD --> */
         .password-group {
             position: relative;
             display: flex;
@@ -40,7 +41,9 @@
             justify-content: center;
         }
 
-        /* Gaya saat input dalam keadaan fokus */
+        /* // <!-- END --> */
+
+        /* // <!-- GAYA SAAT INPUT DALAM KEADAAN FOKUS --> */
         .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
@@ -50,9 +53,9 @@
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* end */
+        /* // <!-- END --> */
 
-        /* image */
+        /* // <!-- IMAGE --> */
         @media (max-width: 768px) {
             .signin-content {
                 flex-direction: column-reverse;
@@ -72,9 +75,25 @@
             }
         }
 
-        /*end  */
+        /* // <!-- END --> */
+
+        /* // <!-- MENAMPILKAN & MENYEMBUNYIKAN GAMBAR --> */
+        /* CSS untuk menyembunyikan gambar pada perangkat mobile */
+        @media (max-width: 767px) {
+            .signin-image {
+                display: none;
+            }
+        }
+
+        /* CSS untuk menampilkan gambar pada desktop atau tablet */
+        @media (min-width: 768px) {
+            .signin-image {
+                display: block;
+            }
+        }
+
+        /* // <!-- END --> */
     </style>
-    <!-- end -->
 </head>
 
 <!-- <body style="background: #f3f3f3"> -->

@@ -50,18 +50,6 @@
         }
     </style>
 
-    <!--================== MENYEMBUNYIKAN SAAT DI REFRESH DI PWA ==================-->
-    <style>
-        /* Menyembunyikan sidebar */
-        #SidebarPwa {
-            display: none;
-        }
-
-        #NavbarPwa {
-            display: none;
-        }
-    </style>
-    <!--================== END ==================-->
 </head>
 @php
 $isStatusOff = (Auth::user()->status === 'off');
@@ -283,34 +271,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             @extends('layouts.version')
         </div>
     </div>
-
-    <!--================== CEK APAKAH PWA ATAU WEBSITE ==================-->
-    <script>
-        // Fungsi untuk mendeteksi apakah perangkat adalah ponsel atau browser
-        function isMobileDevice() {
-            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-        }
-
-        // Fungsi untuk menyembunyikan atau menampilkan elemen berdasarkan tipe perangkat
-        function toggleElementBasedOnDevice() {
-            var NavbarPwa = document.getElementById('NavbarPwa');
-            var SidebarPwa = document.getElementById('SidebarPwa');
-
-            if (isMobileDevice()) {
-                // Jika aplikasi berjalan di perangkat seluler (PWA)
-                NavbarPwa.style.display = 'none';
-                SidebarPwa.style.display = 'none';
-            } else {
-                // Jika aplikasi berjalan di browser
-                NavbarPwa.style.display = 'block';
-                SidebarPwa.style.display = 'block';
-            }
-        }
-
-        // Panggil fungsi ketika halaman dimuat
-        window.addEventListener('load', toggleElementBasedOnDevice);
-    </script>
-    <!--================== END ==================-->
 
     <!--================== MEREFRESH PWA DI HP ==================-->
     <script>

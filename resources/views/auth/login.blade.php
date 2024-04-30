@@ -28,8 +28,9 @@
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
     <!--================== END ==================-->
 
-    <!-- show and hide password -->
+    <!-- -->
     <style>
+        /* // <!-- SHOW AND HIDE PASSWORD --> */
         .password-group {
             position: relative;
             display: flex;
@@ -48,7 +49,9 @@
             justify-content: center;
         }
 
-        /* Gaya saat input dalam keadaan fokus */
+        /* // <!-- END --> */
+
+        /* // <!-- GAYA SAAT INPUT DALAM KEADAAN FOKUS --> */
         .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
@@ -58,9 +61,9 @@
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* end */
+        /* // <!-- END --> */
 
-        /* image */
+        /* // <!-- IMAGE --> */
         @media (max-width: 768px) {
             .signin-content {
                 flex-direction: column-reverse;
@@ -80,12 +83,26 @@
             }
         }
 
-        /*end  */
-    </style>
-    <!-- end -->
+        /* // <!-- END -->  */
 
-    <!-- MEREFRESH PWA DI HP -->
-    <style>
+        /* // <!-- MENAMPILKAN & MENYEMBUNYIKAN GAMBAR --> */
+        /* CSS untuk menyembunyikan gambar pada perangkat mobile */
+        @media (max-width: 767px) {
+            .signin-image {
+                display: none;
+            }
+        }
+
+        /* CSS untuk menampilkan gambar pada desktop atau tablet */
+        @media (min-width: 768px) {
+            .signin-image {
+                display: block;
+            }
+        }
+
+        /* // <!-- END --> */
+
+        /* // <!-- MEREFRES PWA DI HP --> */
         .loader {
             position: fixed;
             top: 50%;
@@ -108,8 +125,9 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* // <!-- END --> */
     </style>
-    <!-- END -->
 </head>
 
 
@@ -176,27 +194,6 @@
     </div>
     </div>
     </section>
-
-    <!--================== CEK DIVACE APAKAH PWA ATAU WEBISTE ==================-->
-    <script>
-        // Cek apakah aplikasi berjalan sebagai PWA atau di browser
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            // Aplikasi berjalan sebagai PWA
-            document.addEventListener('DOMContentLoaded', function() {
-                var pwaLabel = document.createElement('p');
-                pwaLabel.textContent = 'PWA';
-                document.body.appendChild(pwaLabel);
-            });
-        } else {
-            // Aplikasi dibuka di browser
-            document.addEventListener('DOMContentLoaded', function() {
-                var websiteLabel = document.createElement('p');
-                websiteLabel.textContent = 'Website';
-                document.body.appendChild(websiteLabel);
-            });
-        }
-    </script>
-    <!--================== END ==================-->
 
     <!--================== MEREFRESH PWA DI HP ==================-->
     <script>

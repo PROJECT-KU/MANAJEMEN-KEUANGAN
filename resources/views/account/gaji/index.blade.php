@@ -207,7 +207,7 @@ Data Gaji Karyawan | MIS
           <div class="card-header">
             <h4><i class="fas fa-list"></i> DATA GAJI KARYAWAN</h4>
 
-
+            @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
             <div class="dropdown card-header-action">
               <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
                 <i class="fas fa-download"></i> DOWNLOAD
@@ -221,8 +221,7 @@ Data Gaji Karyawan | MIS
                 </a>
               </div>
             </div>
-
-
+            @endif
 
             <!-- <div class="card-header-action">
               <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">

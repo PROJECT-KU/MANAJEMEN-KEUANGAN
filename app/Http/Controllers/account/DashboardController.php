@@ -220,6 +220,14 @@ class DashboardController extends Controller
                 ->where('debit.user_id', $user->id)
                 ->first();
 
+            $uang_masuk_tahun_ini = DB::table('debit')
+                ->selectRaw('sum(nominal) as nominal')
+                ->whereYear('debit_date', '=', now()->year) // Filter tahun ini
+                ->whereMonth('debit_date', '=', 5) // Filter bulan Mei
+                ->where('debit.user_id', $user->id)
+                ->first();
+
+
             $uang_keluar_tahun_ini = DB::table('credit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('credit_date', Carbon::now()->year)
