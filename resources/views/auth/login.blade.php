@@ -195,6 +195,39 @@
     </div>
     </section>
 
+    <!--================== MENYIMPAN DATA USERNAME & PASSWORD ==================-->
+    <script>
+        // Fungsi untuk memeriksa apakah terdapat informasi login yang tersimpan
+        function checkSavedLogin() {
+            var savedUsername = localStorage.getItem('savedUsername');
+            var savedPassword = localStorage.getItem('savedPassword');
+
+            if (savedUsername && savedPassword) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('password').value = savedPassword;
+                document.getElementById('remember-me').checked = true;
+            }
+        }
+
+        // Fungsi untuk menyimpan informasi login saat tombol login ditekan
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            if (document.getElementById('remember-me').checked) {
+                var username = document.getElementById('username').value;
+                var password = document.getElementById('password').value;
+                localStorage.setItem('savedUsername', username);
+                localStorage.setItem('savedPassword', password);
+            } else {
+                localStorage.removeItem('savedUsername');
+                localStorage.removeItem('savedPassword');
+            }
+        });
+
+        // Panggil fungsi untuk memeriksa informasi login yang tersimpan saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', checkSavedLogin);
+    </script>
+
+    <!--================== END ==================-->
+
     <!--================== MEREFRESH PWA DI HP ==================-->
     <script>
         if ('serviceWorker' in navigator) {

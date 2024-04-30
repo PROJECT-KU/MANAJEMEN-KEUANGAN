@@ -246,10 +246,10 @@ Dashboard | MIS
 <!--================== MANU DI PWA ==================-->
 <div class="row" id="MenuPwaCard">
     <div class="col-md-12">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED;">
+            <h4 style="color: white;font-size:16px; margin-top:8px;">AKSES CEPAT</h4>
+        </div>
         <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
-                <h4 style="color: white;">AKSES CEPAT</h4>
-            </div>
             <div id="carousel" class="mb-5">
 
                 <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
