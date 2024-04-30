@@ -61,7 +61,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3" id="NavbarPwa">
+                    <ul class="navbar-nav mr-3 mb-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
                     </ul>
                     <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
@@ -271,40 +271,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             @extends('layouts.version')
         </div>
     </div>
-
-    <!--================== MEREFRESH PWA DI HP ==================-->
-    <script>
-        // Fungsi untuk mendeteksi apakah perangkat adalah ponsel atau browser
-        function isMobileDevice() {
-            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-        }
-
-        // Fungsi untuk memeriksa apakah situs diakses melalui PWA
-        function isPWA() {
-            return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-        }
-
-        // Fungsi untuk menyembunyikan atau menampilkan sidebar berdasarkan PWA dan perangkat seluler
-        function toggleSidebarBasedOnPWAAndDevice() {
-            var SidebarPwa = document.getElementById('SidebarPwa');
-
-            // Jika diakses melalui PWA di perangkat seluler
-            if (isPWA() && isMobileDevice()) {
-                SidebarPwa.style.display = 'none';
-            }
-        }
-
-        // Panggil fungsi untuk menyembunyikan sidebar saat halaman dimuat
-        window.addEventListener('load', toggleSidebarBasedOnPWAAndDevice);
-
-        // Fungsi untuk menangani proses reload halaman
-        window.addEventListener('beforeunload', function(event) {
-            var SidebarPwa = document.getElementById('SidebarPwa');
-            SidebarPwa.style.display = 'none'; // Sembunyikan sidebar saat halaman diperbarui
-        });
-    </script>
-    <!--================== END ==================-->
-
 
     <!--================== UCAPAN SELAMAT ==================-->
     <script>
