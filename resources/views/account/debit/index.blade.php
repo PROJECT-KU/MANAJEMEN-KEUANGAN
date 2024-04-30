@@ -117,26 +117,6 @@ Data Uang Masuk | MIS
                                             @endif
                                         </td>
 
-                                        <!-- Modal -->
-                                        @if (!empty($hasil->gambar))
-                                        <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
-                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-
-
                                         @if ( Auth::user()->level == 'ceo')
                                         @else
                                         <td class="text-center">
@@ -201,6 +181,24 @@ Data Uang Masuk | MIS
                 </div>
         </div>
     </section>
+    <!-- Modal -->
+    @if (!empty($hasil->gambar))
+    <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 <!--================== SWEET ALERT JIKA FIELDS PENCARIAN KOSONG ==================-->
