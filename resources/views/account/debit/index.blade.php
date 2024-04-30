@@ -1,5 +1,4 @@
 @extends('layouts.account')
-@extends('layouts.loader')
 
 @section('title')
 Data Uang Masuk | MIS
@@ -104,19 +103,18 @@ Data Uang Masuk | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->debit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if (!empty($hasil->gambar))
-                                            <a href="#" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
-                                                <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail mb-2 mt-2">
-                                                </div>
-                                            </a>
-                                            @else
+                                            @if ($hasil->gambar == null)
                                             <div>
                                                 <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail mb-2 mt-2">
                                             </div>
+                                            @else
+                                            <a href="#" onclick="showImage('{{ asset('images/' . $hasil->gambar) }}')">
+                                                <div>
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Credit" class="img-thumbnail mb-2 mt-2">
+                                                </div>
+                                            </a>
                                             @endif
                                         </td>
-
                                         @if ( Auth::user()->level == 'ceo')
                                         @else
                                         <td class="text-center">
@@ -143,16 +141,16 @@ Data Uang Masuk | MIS
                                         <td class="column-width" style="text-align: center;">Gaji Bulan {{ strftime('%B %Y', strtotime($item->tanggal)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($item->tanggal)) }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if (!empty($item->gambar))
-                                            <a href="#" data-toggle="modal" data-target="#gambarModalGaji{{ $item->id }}">
-                                                <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $item->gambar) }}" alt="Gaji Karyawan" class="img-thumbnail mb-2 mt-2">
-                                                </div>
-                                            </a>
-                                            @else
+                                            @if ($item->gambar == null)
                                             <div>
                                                 <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail mb-2 mt-2">
                                             </div>
+                                            @else
+                                            <a href="#" onclick="showImageGaji('{{ asset('images/' . $item->gambar) }}')">
+                                                <div>
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $item->gambar) }}" alt="Gambar Credit" class="img-thumbnail mb-2 mt-2">
+                                                </div>
+                                            </a>
                                             @endif
                                         </td>
                                     </tr>
@@ -187,47 +185,50 @@ Data Uang Masuk | MIS
                 </div>
         </div>
     </section>
-
-    <!--================== MODAL DEBIT ==================-->
-    @if (!empty($hasil->gambar))
-    <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-    <!--================== END ==================-->
-
-    <!--================== MODAL GAJI KARYAWAN ==================-->
-    @if (!empty($item->gambar))
-    <div class="modal fade" id="gambarModalGaji{{ $item->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <img src="{{ asset('images/' . $item->gambar) }}" alt="Gaji Karyawan" class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-    <!--================== END ==================-->
 </div>
+
+
+<!--================== SWEET ALERT GAMBAR CREDIT ==================-->
+<script>
+    function showImage(imageUrl) {
+        if (imageUrl) {
+            // Jika ada gambar, tampilkan SweetAlert dengan gambar
+            Swal.fire({
+                title: 'Bukti Uang Keluar',
+                imageUrl: imageUrl,
+                imageWidth: 400,
+                imageHeight: 200,
+                showCloseButton: false, // Menghilangkan tombol close
+                confirmButtonText: 'Tutup',
+                didOpen: () => { // Hindari pergerakan otomatis ke atas
+                    Swal.enableButtons(); // Aktifkan tombol secara manual
+                }
+            });
+        }
+    }
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT GAMBAR GAJI ==================-->
+<script>
+    function showImageGaji(imageUrl) {
+        if (imageUrl) {
+            // Jika ada gambar, tampilkan SweetAlert dengan gambar
+            Swal.fire({
+                title: 'Bukti Pembayaran Gaji',
+                imageUrl: imageUrl,
+                imageWidth: 400,
+                imageHeight: 200,
+                showCloseButton: false, // Menghilangkan tombol close
+                confirmButtonText: 'Tutup',
+                didOpen: () => { // Hindari pergerakan otomatis ke atas
+                    Swal.enableButtons(); // Aktifkan tombol secara manual
+                }
+            });
+        }
+    }
+</script>
+<!--================== END ==================-->
 
 <!--================== SWEET ALERT JIKA FIELDS PENCARIAN KOSONG ==================-->
 <script>
