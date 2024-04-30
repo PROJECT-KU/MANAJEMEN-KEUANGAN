@@ -107,12 +107,12 @@ Data Uang Masuk | MIS
                                             @if (!empty($hasil->gambar))
                                             <a href="#" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
                                                 <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail">
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail mb-2 mt-2">
                                                 </div>
                                             </a>
                                             @else
                                             <div>
-                                                <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail">
+                                                <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail mb-2 mt-2">
                                             </div>
                                             @endif
                                         </td>
@@ -120,10 +120,10 @@ Data Uang Masuk | MIS
                                         @if ( Auth::user()->level == 'ceo')
                                         @else
                                         <td class="text-center">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                            <a style="margin-right: 5px; margin-bottom:5px; width: 30px; height:30px; display: inline-flex; justify-content: center; align-items: center;" href="{{ route('account.debit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
-                                            <button style="margin-right: 5px; margin-bottom:5px;" onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
+                                            <button style="margin-right: 5px; margin-bottom:5px; width: 30px; height:30px; display: inline-flex; justify-content: center; align-items: center;" onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </td>
@@ -143,11 +143,17 @@ Data Uang Masuk | MIS
                                         <td class="column-width" style="text-align: center;">Gaji Bulan {{ strftime('%B %Y', strtotime($item->tanggal)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($item->tanggal)) }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            <a href="{{ asset('images/' . $item->gambar) }}" data-lightbox="{{ $item->id }}">
+                                            @if (!empty($item->gambar))
+                                            <a href="#" data-toggle="modal" data-target="#gambarModalGaji{{ $item->id }}">
                                                 <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $item->gambar) }}" alt="Bukti Gaji" class="img-thumbnail">
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $item->gambar) }}" alt="Gaji Karyawan" class="img-thumbnail mb-2 mt-2">
                                                 </div>
                                             </a>
+                                            @else
+                                            <div>
+                                                <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail mb-2 mt-2">
+                                            </div>
+                                            @endif
                                         </td>
                                     </tr>
                                     @php
@@ -181,7 +187,8 @@ Data Uang Masuk | MIS
                 </div>
         </div>
     </section>
-    <!-- Modal -->
+
+    <!--================== MODAL DEBIT ==================-->
     @if (!empty($hasil->gambar))
     <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -199,6 +206,27 @@ Data Uang Masuk | MIS
         </div>
     </div>
     @endif
+    <!--================== END ==================-->
+
+    <!--================== MODAL GAJI KARYAWAN ==================-->
+    @if (!empty($item->gambar))
+    <div class="modal fade" id="gambarModalGaji{{ $item->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ asset('images/' . $item->gambar) }}" alt="Gaji Karyawan" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    <!--================== END ==================-->
 </div>
 
 <!--================== SWEET ALERT JIKA FIELDS PENCARIAN KOSONG ==================-->
