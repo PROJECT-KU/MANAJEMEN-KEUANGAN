@@ -104,13 +104,6 @@ Data Uang Keluar | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->credit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
-                                                <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
-                                                </div>
-                                            </a>
-                                        </td>
-                                        <td class="column-width" style="text-align: center;">
                                             @if ($hasil->gambar == null)
                                             <div>
                                                 <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail mb-2 mt-2">
@@ -124,25 +117,6 @@ Data Uang Keluar | MIS
                                             @endif
                                         </td>
 
-                                        <!--================== MODAL DEBIT ==================-->
-                                        @if (!empty($hasil->gambar))
-                                        <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
-                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                        <!--================== END ==================-->
                                         @if ( Auth::user()->level == 'ceo')
                                         @else
                                         <td class="text-center">
@@ -206,6 +180,26 @@ Data Uang Keluar | MIS
                 </div>
         </div>
     </section>
+
+    <!--================== MODAL DEBIT ==================-->
+    @if (!empty($hasil->gambar))
+    <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    <!--================== END ==================-->
 </div>
 
 <!--================== SWEET ALERT JIKA FIELDS PENCARIAN KOSONG ==================-->
