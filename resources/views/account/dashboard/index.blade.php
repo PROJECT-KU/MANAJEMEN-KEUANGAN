@@ -288,33 +288,69 @@ Dashboard | MIS
 
 <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
+        <div class="card card-statistic-2" id="SisaSaldoBulanIniCard" style="background-color: #3CB371;">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
-                    <h4>SISA SALDO BULAN INI</h4>
+                    <h4 style="color: white;">PEMASUKAN</h4>
                 </div>
+                @if (Auth::user()->level == 'karyawan')
                 <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($saldo_bulan_ini) }}
+                    {{ rupiah($total_pemasukan + $totalGaji) }}
                 </div>
+                @elseif (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
+                <div class="card-body" style="font-size: 20px; height: 100%;">
+                    {{ rupiah($total_pemasukan) }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
 
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard">
+        <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard" style="background-color: #E9967A;">
             <div class="card-icon shadow-primary bg-primary">
                 <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
             </div>
             <div class="card-wrap" style="height: 100px;">
                 <div class="card-header">
-                    <h4>SISA SALDO BULAN LALU</h4>
+                    <h4 style="color: white;">PENGELUARAN</h4>
                 </div>
+                @if (Auth::user()->level == 'karyawan')
                 <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($saldo_bulan_lalu) }}
+                    {{ rupiah($total_pengeluaran) }}
                 </div>
+                @elseif (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
+                <div class="card-body" style="font-size: 20px; height: 100%;">
+                    {{ rupiah($total_pengeluaran + $totalGaji) }}
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+        <div class="card card-statistic-2" id="SisaSaldoBulanLaluCard" style="background-color: #6495ED;">
+            <div class="card-icon shadow-primary bg-primary">
+                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
+            </div>
+            <div class="card-wrap" style="height: 100px;">
+                <div class="card-header">
+                    <h4 style="color: white;">SELISIH</h4>
+                </div>
+                @if (Auth::user()->level == 'karyawan')
+                <div class="card-body" style="font-size: 20px; height: 100%;">
+                    {{ rupiah($saldo_selama_ini + $totalGaji) }}
+                </div>
+                @elseif (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
+                <div class="card-body" style="font-size: 20px; height: 100%;">
+                    {{ rupiah($total_pemasukan-($total_pengeluaran + $totalGaji)) }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -545,7 +581,7 @@ Dashboard | MIS
     </div>
 </div>
 
-<div class="row" id="StatistikPemasukan">
+<!-- <div class="row" id="StatistikPemasukan">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -577,9 +613,9 @@ Dashboard | MIS
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
-<div class="row" id="StatistikPengeluaran">
+<!-- <div class="row" id="StatistikPengeluaran">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -611,7 +647,7 @@ Dashboard | MIS
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
 <div class="row" id="PenggunaBaru">
