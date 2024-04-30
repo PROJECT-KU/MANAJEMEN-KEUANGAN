@@ -1,5 +1,4 @@
 @extends('layouts.account')
-@extends('layouts.loader')
 
 @section('title')
 Data Gaji Karyawan | MIS
