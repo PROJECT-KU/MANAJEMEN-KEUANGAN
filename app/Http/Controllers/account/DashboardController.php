@@ -334,6 +334,12 @@ class DashboardController extends Controller
         //saldo selama ini
         $saldo_selama_ini = $uang_masuk_selama_ini->nominal - $uang_keluar_selama_ini->nominal;
 
+        //total pemasukan
+        $total_pemasukan = $uang_masuk_selama_ini->nominal;
+
+        //total pengeluaran
+        $total_pengeluaran = $uang_keluar_selama_ini->nominal;
+
         //pengeluaran bulan ini
         $pengeluaran_bulan_ini = $uang_keluar_bulan_ini->nominal;
 
@@ -376,6 +382,7 @@ class DashboardController extends Controller
                 ->selectRaw('SUM(total) as total_gaji')
                 ->join('users', 'gaji.user_id', '=', 'users.id')
                 ->where('users.company', $user->company)
+                ->where('gaji.status', 'terbayar')
                 ->first()->total_gaji ?? 0;
 
             $gaji = DB::table('gaji')
@@ -425,6 +432,6 @@ class DashboardController extends Controller
 
         //  <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji'));
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji'));
     }
 }

@@ -272,7 +272,7 @@ Data Presensi Karyawan | MIS
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
                       <!-- <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BUKTI PRESENSI</th> -->
                       <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
-                      @if(Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
+                      @if(Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
                       <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
                       @endif
                     </tr>

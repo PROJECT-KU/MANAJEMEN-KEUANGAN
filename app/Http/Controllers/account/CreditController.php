@@ -5,6 +5,7 @@ namespace App\Http\Controllers\account;
 use App\CategoriesCredit;
 use App\Credit;
 use App\User;
+use App\Gaji;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +77,50 @@ class CreditController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        return view('account.credit.index', compact('credit', 'maintenances'));
+        $totalGaji = 0;
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->join('users', 'gaji.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->first()->total_gaji ?? 0;
+
+            $gaji = DB::table('gaji')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status',  'gaji.gambar', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(20);
+        } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->where('user_id', $user->id)
+                ->where('status', 'terbayar')
+                ->first()->total_gaji ?? 0;
+
+            $gaji = DB::table('gaji')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status',  'gaji.gambar', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+                ->where('gaji.user_id', $user->id)
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+
+            $totalGaji = DB::table('gaji')
+                ->selectRaw('SUM(total) as total_gaji')
+                ->where('user_id', $user->id)
+                ->first()->total_gaji ?? 0;
+
+            $gaji = Gaji::select('gaji.*', 'users.name as full_name')
+                ->join('users', 'gaji.user_id', '=', 'users.id')
+                ->where('gaji.user_id', $user->id)
+                ->orderBy('gaji.created_at', 'DESC')
+                ->paginate(10);
+        }
+
+        return view('account.credit.index', compact('credit', 'maintenances', 'totalGaji', 'gaji'));
     }
 
     public function search(Request $request)

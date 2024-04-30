@@ -104,8 +104,8 @@ Data Uang Masuk | MIS
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->debit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
-                                                <div class="thumbnail-circle">
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail rounded-circle">
+                                                <div>
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
                                                 </div>
                                             </a>
                                         </td>
@@ -125,6 +125,29 @@ Data Uang Masuk | MIS
                                     $no++;
                                     @endphp
                                     @endforeach
+
+                                    @foreach ($gaji as $item)
+                                    @if ($item->status == 'terbayar' && Auth::user()->level == 'karyawan')
+                                    <tr>
+                                        <th scope="row" style="text-align: center">{{ $no }}</th>
+                                        <td class="column-width" style="text-align: center;">GAJI KARYAWAN</td>
+                                        <td class="column-width" style="text-align: center;">{{ rupiah($item->total) }}</td>
+                                        <td class="column-width" style="text-align: center;">Gaji Bulan {{ strftime('%B %Y', strtotime($item->tanggal)) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($item->tanggal)) }}</td>
+                                        <td class="column-width" style="text-align: center;">
+                                            <a href="{{ asset('images/' . $item->gambar) }}" data-lightbox="{{ $item->id }}">
+                                                <div>
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $item->gambar) }}" alt="Bukti Gaji" class="img-thumbnail">
+                                                </div>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @php
+                                    $no++;
+                                    @endphp
+                                    @endif
+                                    @endforeach
+
                                 </tbody>
                             </table>
                             <div style="text-align: center;">
