@@ -195,8 +195,6 @@ Data Uang Keluar | MIS
             Swal.fire({
                 title: 'Bukti Uang Keluar',
                 imageUrl: imageUrl,
-                imageWidth: 400,
-                imageHeight: 200,
                 showCloseButton: false, // Menghilangkan tombol close
                 confirmButtonText: 'Tutup',
                 didOpen: () => { // Hindari pergerakan otomatis ke atas
@@ -216,8 +214,6 @@ Data Uang Keluar | MIS
             Swal.fire({
                 title: 'Bukti Pembayaran Gaji',
                 imageUrl: imageUrl,
-                imageWidth: 400,
-                imageHeight: 200,
                 showCloseButton: false, // Menghilangkan tombol close
                 confirmButtonText: 'Tutup',
                 didOpen: () => { // Hindari pergerakan otomatis ke atas
