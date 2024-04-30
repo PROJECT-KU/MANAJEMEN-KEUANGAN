@@ -1,4 +1,5 @@
 @extends('layouts.account')
+@extends('layouts.loader')
 
 @section('title')
 Data Uang Masuk | MIS
@@ -103,12 +104,39 @@ Data Uang Masuk | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->description }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->debit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            <a href="{{ asset('images/' . $hasil->gambar) }}" data-lightbox="{{ $hasil->id }}">
+                                            @if (!empty($hasil->gambar))
+                                            <a href="#" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
                                                 <div>
-                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-thumbnail">
+                                                    <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail">
                                                 </div>
                                             </a>
+                                            @else
+                                            <div>
+                                                <img style="width: 100px; height:100px;" src="{{ asset('images/placeholder.jpg') }}" alt="No Image" class="img-thumbnail">
+                                            </div>
+                                            @endif
                                         </td>
+
+                                        <!-- Modal -->
+                                        @if (!empty($hasil->gambar))
+                                        <div class="modal fade" id="gambarModal{{ $hasil->id }}" tabindex="-1" aria-labelledby="gambarModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endif
+
+
                                         @if ( Auth::user()->level == 'ceo')
                                         @else
                                         <td class="text-center">
