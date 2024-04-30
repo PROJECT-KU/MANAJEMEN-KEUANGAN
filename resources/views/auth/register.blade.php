@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
     <!-- show and hide password -->
     <style>
+        /* // <!-- SHOW AND HIDE PASSWORD --> */
         .password-group {
             position: relative;
             display: flex;
@@ -60,8 +61,9 @@
             /* Menyesuaikan posisi ikon */
         }
 
+        /* // <!-- END --> */
 
-        /* Gaya saat input dalam keadaan fokus */
+        /* // <!-- GAYA SAAT INPUT DALAM KEADAAN FOKUS --> */
         .form-control:focus {
             border-color: #007bff;
             /* Warna biru */
@@ -74,7 +76,9 @@
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* image */
+        /* // <!-- END --> */
+
+        /* // <!-- IMAGE --> */
         /* Tampilan desktop */
         .signin-content {
             display: flex;
@@ -100,9 +104,9 @@
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* end */
+        /* // <!-- END --> */
 
-        /* Tampilan perangkat seluler */
+        /* // <!-- TAMPILAN PERANGKAT SELULER --> */
         @media (max-width: 768px) {
             .signin-content {
                 flex-direction: column;
@@ -125,7 +129,7 @@
             }
         }
 
-        /*end  */
+        /* // <!-- END --> */
 
         .form-group label {
             margin-bottom: 5px;
@@ -141,8 +145,24 @@
                 /* Adjust the space between label and input for smaller screens */
             }
         }
+
+        /* // <!-- MENAMPILKAN & MENYEMBUNYIKAN GAMBAR --> */
+        /* CSS untuk menyembunyikan gambar pada perangkat mobile */
+        @media (max-width: 767px) {
+            .signup-image {
+                display: none;
+            }
+        }
+
+        /* CSS untuk menampilkan gambar pada desktop atau tablet */
+        @media (min-width: 768px) {
+            .signup-image {
+                display: block;
+            }
+        }
+
+        /* // <!-- END --> */
     </style>
-    <!-- end -->
 </head>
 
 <!-- <body style="background: #f3f3f3"> -->
