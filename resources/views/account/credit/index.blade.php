@@ -105,7 +105,7 @@ Data Uang Keluar | MIS
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->credit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             @if (!empty($hasil->gambar))
-                                            <a href="" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
+                                            <a href="#" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
                                                 <div>
                                                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail mb-2 mt-2">
                                                 </div>
