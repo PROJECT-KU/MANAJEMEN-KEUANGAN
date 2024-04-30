@@ -105,7 +105,7 @@ Data Uang Keluar | MIS
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($hasil->credit_date)) }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             @if (!empty($hasil->gambar))
-                                            <a href="#" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
+                                            <a href="" data-toggle="modal" data-target="#gambarModal{{ $hasil->id }}">
                                                 <div>
                                                     <img style="width: 100px; height:100px;" src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-thumbnail mb-2 mt-2">
                                                 </div>
@@ -190,13 +190,13 @@ Data Uang Keluar | MIS
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Masuk</h5>
+                    <h5 class="modal-title" id="gambarModalLabel">Gambar Uang Keluar</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Presensi" class="img-fluid">
+                    <img src="{{ asset('images/' . $hasil->gambar) }}" alt="Gambar Debit" class="img-fluid">
                 </div>
             </div>
         </div>
