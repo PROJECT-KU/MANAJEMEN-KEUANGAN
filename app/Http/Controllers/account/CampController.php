@@ -37,7 +37,7 @@ class CampController extends Controller
 
     function generateRandomToken($length)
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
         $token = '';
 
         for ($i = 0; $i < $length; $i++) {
@@ -157,7 +157,7 @@ class CampController extends Controller
         $user = Auth::user()->id;
 
         $id_transaksi = $this->generateRandomId(5);
-        $token = $this->generateRandomToken(100);
+        $token = $this->generateRandomToken(30);
 
         $title = $request->input('title');
         $camp_ke = $request->input('camp_ke');

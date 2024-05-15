@@ -252,6 +252,14 @@ Route::prefix('account')->group(
 
         // more
         Route::get('/more', 'account\MoreController@index')->name('account.more.index');
+
+        // perjalanan dinas
+        Route::get('/Perjalanan-Dinas', 'account\PerjalananDinasController@index')->name('account.PerjalananDinas.index');
+        Route::get('/Perjalanan-Dinas/create', 'account\PerjalananDinasController@create')->name('account.PerjalananDinas.create');
+        Route::get('/Perjalanan-Dinas/addcreate/{id}{token}', 'account\PerjalananDinasController@addcreate')->name('account.PerjalananDinas.addcreate');
+        Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
+        Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
+        Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
     }
 
 
