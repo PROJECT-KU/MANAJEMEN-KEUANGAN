@@ -1,4 +1,5 @@
 @extends('layouts.account')
+@extends('layouts.loader')
 
 @section('title')
 Data Uang Masuk | MIS

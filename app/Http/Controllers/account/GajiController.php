@@ -32,7 +32,7 @@ class GajiController extends Controller
 
   function generateRandomToken($length)
   {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
     $token = '';
 
     for ($i = 0; $i < $length; $i++) {
@@ -471,6 +471,8 @@ class GajiController extends Controller
     $operasional = $request->input('operasional');
     $operasional = empty($operasional) ? 0 : str_replace(",", "", $operasional);
 
+    $webinar = $request->input('webinar');
+    $webinar = empty($webinar) ? 0 : str_replace(",", "", $webinar);
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
     $tunjangan_bpjs = $request->input('tunjangan_bpjs');
@@ -551,7 +553,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
@@ -618,6 +620,7 @@ class GajiController extends Controller
       'bonus_luar9' => $bonus_luar9,
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
+      'webinar' => $webinar,
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
@@ -842,6 +845,8 @@ class GajiController extends Controller
     $operasional = $request->input('operasional');
     $operasional = empty($operasional) ? 0 : str_replace(",", "", $operasional);
 
+    $webinar = $request->input('webinar');
+    $webinar = empty($webinar) ? 0 : str_replace(",", "", $webinar);
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
     $tunjangan_bpjs = $request->input('tunjangan_bpjs');
@@ -922,7 +927,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
@@ -991,6 +996,7 @@ class GajiController extends Controller
       'bonus_luar9' => $bonus_luar9,
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
+      'webinar' => $webinar,
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,

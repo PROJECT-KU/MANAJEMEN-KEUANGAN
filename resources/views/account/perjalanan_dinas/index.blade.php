@@ -1,0 +1,831 @@
+@extends('layouts.account')
+@extends('layouts.loader')
+
+@section('title')
+Data Perjalanan Dinas | MIS
+@stop
+
+<style>
+  /* Sembunyikan tabel Diterima dan Ditolak secara default */
+  #tableDiterima,
+  #tableDitolak {
+    display: none;
+  }
+
+  #btnDiajukan {
+    display: block;
+  }
+</style>
+
+<style>
+  /* Gaya untuk tombol saat diklik */
+  .btn.clicked {
+    background-color: #6495ED !important;
+    /* Warna latar belakang saat diklik */
+    color: #fff !important;
+    /* Warna teks saat diklik */
+    border-color: #17a2b8 !important;
+    /* Warna border saat diklik */
+  }
+</style>
+
+@section('content')
+<div class="main-content">
+  <section class="section">
+    <div id="realtime-container">
+      <div class="section-header">
+        <h1>DATA PERJALANAN DINAS</h1>
+      </div>
+
+      <div class="section-body">
+
+        <!--================== MAINTENANCE ==================-->
+        @if (!$maintenances->isEmpty())
+        @foreach($maintenances as $maintenance)
+        @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
+          <div class="alert alert-danger" role="alert" style="text-align: center;">
+            <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
+            <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
+            <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
+            @if ($maintenance->start_date !== null)
+            <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
+            @endif
+          </div>
+          @endif
+          @endforeach
+          @endif
+          <!--================== END ==================-->
+
+          <!--================== FILTER ==================-->
+          <div class="card">
+            <div class="card-header  text-right">
+              <h4><i class="fas fa-filter"></i> FILTER</h4>
+            </div>
+
+            <div class="card-body">
+              <form action="{{ route('account.presensi.filter') }}" method="GET">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TANGGAL AWAL</label>
+                      <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                    </div>
+                  </div>
+                  <div class="col-md-2" style="text-align: center">
+                    <label style="margin-top: 38px;">S/D</label>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TANGGAL AKHIR</label>
+                      <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                    <div class="btn-group" style="width: 100%;">
+                      <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                      <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                        <i class="fa fa-times-circle mt-2"></i> HAPUS
+                      </a>
+                    </div>
+                    @else
+                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    @endif
+                  </div>
+                </div>
+              </form>
+              <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
+                <i class="fa fa-plus-circle"></i> TAMBAH PERJALANAN DINAS
+              </a>
+            </div>
+          </div>
+          <!--================== end ==================-->
+
+
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <button id="btnDiajukan" type="button" class="btn btn-block btnDiajukan clicked status-button" data-status="ajukan" style="height: 50px; font-size:15px; background-color:#DCDCDC;">DIAJUKAN</button>
+              </div>
+              <div class="col-md-4">
+                <button id="btnDiterima" type="button" class="btn btn-block btnDiterima status-button" data-status="diterima" style="height: 50px; font-size:15px; background-color:#DCDCDC;">DITERIMA</button>
+              </div>
+              <div class="col-md-4">
+                <button id="btnDitolak" type="button" class="btn btn-block btnDitolak status-button" data-status="ditolak" style="height: 50px; font-size:15px; background-color:#DCDCDC;">DITOLAK</button>
+              </div>
+            </div>
+          </div>
+
+          <!--================== TABEL DIAJUKAN ==================-->
+          <div id="tableDiajukan" class="card">
+            <div id="tblDiajukan" class="card-header" style="background-color: #FF7F50; color:white;">
+              <h4><i class="fas fa-list"></i> DATA PERJALANAN DINAS DIAJUKAN</h4>
+            </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <p style="margin-top: -3px; font-size: 15px;"><strong>Periode
+                  @if ($startDate && $endDate)
+                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                  @else
+                  {{ date('F Y') }}
+                  @endif
+                </strong>
+              </p>
+              <div class="input-group" style="width: 300px;">
+                <input type="text" class="form-control" id="searchDiajukan" placeholder="Pencarian">
+                <!-- <div class="input-group-append">
+                  <a href="{{ route('account.PerjalananDinas.index') }}"><button class="btn btn-outline-danger ml-1" type="button" id="clearSearch" style="display: none;">
+                      <i class="fas fa-trash"></i>
+                    </button></a>
+                </div> -->
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                    </tr>
+                    <tr>
+                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                      <th scope="col" style="text-align: center;">SISA SALDO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php
+                    $no = 1;
+                    @endphp
+                    @foreach ($DatasAjukan as $hasil)
+                    @if ($hasil->status == 'ajukan')
+                    <tr>
+                      <th scope="row" style="text-align: center">{{ $no }}</th>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center; width:150px">
+                        @if($hasil->status == 'ajukan')
+                        <span class="badge badge-warning">DIAJUKAN</span>
+                        @endif
+                      </td>
+                      <td class="text-center">
+                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                          <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                        </a>
+                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    @php
+                    $no++;
+                    @endphp
+                    @endif
+                    @endforeach
+                  </tbody>
+                </table>
+                <div style="text-align: center;">
+                  <style>
+                    @media (max-width: 767px) {
+                      .pagination {
+                        margin-left: 480px;
+                        /* Adjust the margin value as needed for mobile devices */
+                      }
+                    }
+
+                    @media (min-width: 768px) and (max-width: 991px) {
+                      .pagination {
+                        margin-left: 300px;
+                        /* Adjust the margin value as needed for iPads */
+                      }
+                    }
+                  </style>
+                  {{ $DatasAjukan->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ajukan'])->links("vendor.pagination.bootstrap-4") }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!--================== END ==================-->
+
+          <!--================== TABEL DITERIMA ==================-->
+          <div id="tableDiterima" class="card">
+            <div id="tblDiterima" class="card-header" style="background-color: #63ED7A; color:white;">
+              <h4><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITERIMA</h4>
+            </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                  @if ($startDate && $endDate)
+                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                  @else
+                  {{ date('F Y') }}
+                  @endif
+                </strong>
+              </p>
+              <div class="input-group" style="width: 300px;">
+                <input type="text" class="form-control" id="searchDiterima" placeholder="Pencarian">
+                <!-- <div class="input-group-append">
+                  <button class="btn btn-outline-danger ml-1" type="button" id="clearSearchDiterima">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div> -->
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                    </tr>
+                    <tr>
+                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                      <th scope="col" style="text-align: center;">SISA SALDO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php
+                    $no = 1;
+                    @endphp
+                    @foreach ($DatasDiterima as $hasil)
+                    @if ($hasil->status == 'diterima')
+                    <tr>
+                      <th scope="row" style="text-align: center">{{ $no }}</th>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center; width:150px">
+                        @if($hasil->status == 'diterima')
+                        <span class="badge badge-success">DITERIMA</span>
+                        @endif
+                      </td>
+                      <td class="text-center">
+                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                          <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                        </a>
+                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    @php
+                    $no++;
+                    @endphp
+                    @endif
+                    @endforeach
+                  </tbody>
+                </table>
+                <div style="text-align: center;">
+                  <style>
+                    @media (max-width: 767px) {
+                      .pagination {
+                        margin-left: 480px;
+                        /* Adjust the margin value as needed for mobile devices */
+                      }
+                    }
+
+                    @media (min-width: 768px) and (max-width: 991px) {
+                      .pagination {
+                        margin-left: 300px;
+                        /* Adjust the margin value as needed for iPads */
+                      }
+                    }
+                  </style>
+                  {{ $DatasDiterima->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'diterima'])->links("vendor.pagination.bootstrap-4") }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!--================== END ==================-->
+
+          <!--================== TABEL DITOLAK ==================-->
+          <div id="tableDitolak" class="card">
+            <div id="tblDitolak" class="card-header" style="background-color: #FC554B; color:white;">
+              <h4><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITOLAK</h4>
+            </div>
+            <div class="card-header  d-flex justify-content-between align-items-center">
+              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                  @if ($startDate && $endDate)
+                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                  @else
+                  {{ date('F Y') }}
+                  @endif
+                </strong>
+              </p>
+              <div class="input-group" style="width: 300px;">
+                <input type="text" class="form-control" id="searchDitolak" placeholder="Pencarian">
+                <!-- <div class="input-group-append">
+                  <a href="{{ route('account.PerjalananDinas.index') }}"><button class="btn btn-outline-danger ml-1" type="button" id="clearSearchDitolak" style="display: none;">
+                      <i class="fas fa-trash"></i>
+                    </button></a>
+                </div> -->
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                    </tr>
+                    <tr>
+                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                      <th scope="col" style="text-align: center;">SISA SALDO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php
+                    $no = 1;
+                    @endphp
+                    @foreach ($DatasDitolak as $hasil)
+                    @if ($hasil->status == 'ditolak')
+                    <tr>
+                      <th scope="row" style="text-align: center">{{ $no }}</th>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                      <td class="column-width" style="text-align: center; width:150px">
+                        @if($hasil->status == 'ditolak')
+                        <span class="badge badge-danger">DITOLAK</span>
+                        @endif
+                      </td>
+                      <td class="text-center">
+                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                          <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                        </a>
+                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    @php
+                    $no++;
+                    @endphp
+                    @endif
+                    @endforeach
+                  </tbody>
+                </table>
+                <div style="text-align: center;">
+                  <style>
+                    @media (max-width: 767px) {
+                      .pagination {
+                        margin-left: 480px;
+                        /* Adjust the margin value as needed for mobile devices */
+                      }
+                    }
+
+                    @media (min-width: 768px) and (max-width: 991px) {
+                      .pagination {
+                        margin-left: 300px;
+                        /* Adjust the margin value as needed for iPads */
+                      }
+                    }
+                  </style>
+                  {{ $DatasDitolak->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ditolak'])->links("vendor.pagination.bootstrap-4") }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!--================== END ==================-->
+
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<!--================== RESET SEARCH ==================-->
+<script>
+  // <!-- DIAJUKAN -->
+  document.getElementById('clearSearch').addEventListener('click', function() {
+    document.getElementById('searchDiajukan').value = '';
+    this.style.display = 'none';
+  });
+  // <!-- END -->
+
+  // <!-- DITERIMA -->
+  document.getElementById('clearSearchDiterima').addEventListener('click', function() {
+    document.getElementById('searchDiterima').value = '';
+    this.style.display = 'none';
+  });
+  // <!-- END -->
+
+  // <!-- DITOLAK -->
+  document.getElementById('clearSearchDitolak').addEventListener('click', function() {
+    document.getElementById('searchDitolak').value = '';
+    this.style.display = 'none';
+  });
+  // <!-- END -->
+</script>
+
+<!--================== END ==================-->
+
+<!--================== SEARCH WITH JQUERY ==================-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // jQuery function to handle search input for each table
+  $(document).ready(function() {
+    // Function to filter table rows based on search input value
+    function filterTable(inputId, tableId) {
+      $(inputId).on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $(tableId + " tbody tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    }
+
+    // Call filterTable function for each table
+    filterTable("#searchDiajukan", "#tableDiajukan");
+    filterTable("#searchDiterima", "#tableDiterima");
+    filterTable("#searchDitolak", "#tableDitolak");
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== MOVE TO BUTTON CLICKED ==================-->
+<script>
+  $(document).ready(function() {
+    // Tambahkan kelas .clicked ke tombol yang diklik
+    $('.btn').click(function() {
+      $('.btn').removeClass('clicked');
+      $(this).addClass('clicked');
+    });
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== UNTUK PINDAH TABEL DIAJUKAN ATAU DITERIMA ATAU DITOLAK ==================-->
+<script>
+  $(document).ready(function() {
+    $('#tableDiajukan').show();
+    $('#btnDiajukan').show();
+
+    // Menampilkan tabel Diajukan saat tombol "Diajukan" diklik
+    $('.btnDiajukan').click(function() {
+      $('#tableDiajukan').show(); // Menampilkan tabel Diajukan
+      $('#tableDiterima').hide(); // Menyembunyikan tabel Diterima
+      $('#tableDitolak').hide(); // Menyembunyikan tabel Ditolak
+    });
+
+    // Menampilkan tabel Diterima saat tombol "Diterima" diklik
+    $('.btnDiterima').click(function() {
+      $('#tableDiajukan').hide(); // Menyembunyikan tabel Diajukan
+      $('#tableDiterima').show(); // Menampilkan tabel Diterima
+      $('#tableDitolak').hide(); // Menyembunyikan tabel Ditolak
+    });
+
+    // Menampilkan tabel Ditolak saat tombol "Ditolak" diklik
+    $('.btnDitolak').click(function() {
+      $('#tableDiajukan').hide(); // Menyembunyikan tabel Diajukan
+      $('#tableDiterima').hide(); // Menyembunyikan tabel Diterima
+      $('#tableDitolak').show(); // Menampilkan tabel Ditolak
+    });
+  });
+</script>
+
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("searchButton").addEventListener("click", function() {
+      var searchInputValue = document.querySelector("input[name='q']").value.trim();
+
+      if (searchInputValue === "") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Peringatan',
+          text: 'Harap isi field pencarian terlebih dahulu!',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        // If not empty, submit the form
+        document.getElementById("searchForm").submit();
+      }
+    });
+  });
+</script>
+<!--================== END ==================-->
+
+
+<!--================== TIME SAAT INI ==================-->
+<script>
+  // Function to update the current time
+  function updateCurrentTime() {
+    // Get the current date and time
+    var now = new Date();
+
+    // Format the time as HH:mm:ss
+    var hours = now.getHours().toString().padStart(2, '0');
+    var minutes = now.getMinutes().toString().padStart(2, '0');
+
+    // Display the formatted time in the element with the ID "current-time"
+    $('#current-time').text(hours + ':' + minutes);
+  }
+
+  // Update the current time every second
+  setInterval(updateCurrentTime, 1000);
+
+  // Call the function once to initialize the time
+  updateCurrentTime();
+</script>
+<!--================== END ==================-->
+
+
+<!--================== mengirim pesan ke wa ==================-->
+<script>
+  // SENIN HADIR
+  function sendSeninHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // SENIN WARNING
+  function sendSeninWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 15.00 - 17.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // SENIN PULANG
+  function sendSeninPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}";
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`;
+
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+    } else {
+      alert("Nomor telepon tidak tersedia");
+    }
+  }
+  // END
+
+  // SELASA LIBUR
+  // function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
+  //   const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+  //   const message = `Hi, ${employeeName}. Hari ini kamu libur lo.. jangan lupa liburan dan jaga kesehatan ya!`; // The message content
+
+  //   // Checking if the phone number exists
+  //   if (userPhoneNumber) {
+  //     const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+  //     window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+  //   } else {
+  //     alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+  //   }
+  // }
+  function sendSelasaLibur(employeeName, checkInTime, checkOutTime, checkInDate) {
+    // Get the user ID from the row data attribute
+    const userId = $('#row-' + {
+      {
+        $hasil - > id
+      }
+    }).data('user-id');
+
+    // Make an AJAX request to fetch the user's phone number
+    $.ajax({
+      url: `/account/get-user-phone/${userId}`,
+      method: 'GET',
+      success: function(response) {
+        const userPhoneNumber = response.phone_number;
+
+        // Now you have the user's phone number, proceed with your existing code
+        const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`;
+
+        // Checking if the phone number exists
+        if (userPhoneNumber) {
+          const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+        } else {
+          alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+        }
+      },
+      error: function(error) {
+        console.error('Error fetching user phone number:', error);
+      }
+    });
+  }
+
+  // END
+
+  // KAMIS HADIR
+  function sendKamisHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // KAMIS WARNING
+  function sendKamisWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // KAMIS PULANG
+  function sendKamisPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU HADIR
+  function sendJumatHadir(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Anda telah melakukan presensi kehadiran pada pukul ${checkInTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU WARNING
+  function sendJumatWarning(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Jangan lupa untuk melakukan presensi pulang mulai pukul 18.00 - 20.00`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+
+  // JUMAT, SABTU, MINGGU PULANG
+  function sendJumatPulang(employeeName, checkInTime, checkOutTime, checkInDate) {
+    const userPhoneNumber = "{{ Auth::user()->telp }}"; // Assuming you're using the user's phone number here
+    const message = `Hi, ${employeeName}. Terimakasih sudah menyelesaikan presensi, anda hadir pada pukul ${checkInTime} dan pulang pada pukul ${checkOutTime} pada tanggal ${checkInDate}.`; // The message content
+
+    // Checking if the phone number exists
+    if (userPhoneNumber) {
+      const url = `https://wa.me/${userPhoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank'); // Opens the WhatsApp link in a new tab
+    } else {
+      alert("Nomor telepon tidak tersedia"); // Notifies the user if the phone number is not available
+    }
+  }
+  // END
+</script>
+<!--================== end ==================-->
+
+<!--================== RELOAD DATA KETIKA SUKSES ==================-->
+<script>
+  @if(Session::has('success'))
+  // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+  setTimeout(function() {
+    window.location.reload();
+  }, 1000); // Refresh halaman setelah 2 detik
+  @endif
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT DELETE ==================-->
+<script>
+  function Delete(id) {
+    var token = $("meta[name='csrf-token']").attr("content");
+
+    swal({
+      title: "APAKAH KAMU YAKIN?",
+      text: "INGIN MENGHAPUS DATA INI!",
+      icon: "warning",
+      buttons: {
+        cancel: {
+          text: "TIDAK",
+          value: null,
+          visible: true,
+          className: "",
+          closeModal: true,
+        },
+        confirm: {
+          text: "YA",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true
+        }
+      },
+      dangerMode: true,
+    }).then(function(isConfirm) {
+      if (isConfirm) {
+        // ajax delete
+        $.ajax({
+          url: "/account/presensi/" + id,
+          data: {
+            "_token": token,
+            "_method": "DELETE"
+          },
+          type: 'POST',
+          success: function(response) {
+            if (response.status === "success") {
+              swal({
+                title: 'BERHASIL!',
+                text: response.message,
+                icon: 'success',
+                timer: 1000,
+                buttons: false,
+              }).then(function() {
+                location.reload();
+              });
+            } else {
+              swal({
+                title: 'GAGAL!',
+                text: response.message,
+                icon: 'error',
+                timer: 1000,
+                buttons: false,
+              }).then(function() {
+                location.reload();
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+</script>
+<!--================== END ==================-->
+@stop

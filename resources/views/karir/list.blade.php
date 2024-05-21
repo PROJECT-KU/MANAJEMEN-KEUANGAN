@@ -1,4 +1,6 @@
 @extends('layouts.account')
+@extends('layouts.loader')
+
 
 @section('title')
 Data Karir | MIS

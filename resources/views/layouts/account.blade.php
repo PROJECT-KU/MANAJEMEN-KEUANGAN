@@ -140,21 +140,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <i class="fas fa-campground"></i> <span>LAPORAN CAMP</span>
                                     </a>
                                 </li>
-                                <li class="{{ setActive('account/karir') }} . {{ setActive('account/camp/search') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
-                                        <i class="fas fa-user-tie"></i> <span>KARIR</span>
-                                    </a>
-                                </li>
-                                <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
-                                    <a href="#" class="nav-link has-dropdown">
-                                        <i class="fas fa-user-cog"></i><span>PESERTA</span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/kategori') }}"><a class="nav-link" href="{{ route('account.kategori.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
-                                        <li class="{{ setActive('account/Scopus-Camp') }}"><a class="nav-link" href="{{ route('account.scopuscamp.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN</a></li>
-                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI</a></li>
-                                    </ul>
-                                </li>
                                 @endif
 
                                 @if ($isStatusOff || $isTenggatExpired)
@@ -180,7 +165,13 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                     </ul>
                                 </li>
+                                <li class="{{ setActive('account/Perjalanan-Dinas') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.PerjalananDinas.index') }}">
+                                        <i class="fas fa-suitcase-rolling"></i> <span>PERJALANAN DINAS</span>
+                                    </a>
+                                </li>
                                 @endif
+
 
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager'|| Auth::user()->level === 'ceo')
                                 <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
@@ -191,6 +182,21 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="{{ setActive('account/artikel-kategori') }}"><a class="nav-link" href="{{ route('account.Kategori-Artikel.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
                                         <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-file-signature"></i>DATA ARTIKEL</a></li>
                                         <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>DATA KOMENTAR</a></li>
+                                    </ul>
+                                </li>
+                                <li class="{{ setActive('account/karir') }} . {{ setActive('account/camp/search') }}">
+                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
+                                        <i class="fas fa-user-tie"></i> <span>KARIR</span>
+                                    </a>
+                                </li>
+                                <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-user-cog"></i><span>PESERTA</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/kategori') }}"><a class="nav-link" href="{{ route('account.kategori.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
+                                        <li class="{{ setActive('account/Scopus-Camp') }}"><a class="nav-link" href="{{ route('account.scopuscamp.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN</a></li>
+                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI</a></li>
                                     </ul>
                                 </li>
                                 @endif

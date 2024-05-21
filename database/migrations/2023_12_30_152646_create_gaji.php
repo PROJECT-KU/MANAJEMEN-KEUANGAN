@@ -113,6 +113,7 @@ class CreateGaji extends Migration
             $table->text('tunjangan_bpjs')->nullable();
             $table->text('tunjangan_thr')->nullable();
             $table->text('tunjangan_pulsa')->nullable();
+            $table->text('webinar')->nullable();
             $table->dateTime('tanggal')->nullable();
             $table->text('potongan')->nullable();
             $table->text('pph')->nullable();

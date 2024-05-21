@@ -19,7 +19,7 @@ class KarirController extends Controller
      */
     function generateRandomToken($length)
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_+=<>?';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
         $token = '';
 
         for ($i = 0; $i < $length; $i++) {
