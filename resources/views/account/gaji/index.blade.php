@@ -73,14 +73,10 @@ Data Gaji Karyawan | MIS
             <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <!-- <div class="input-group-prepend">
-                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a>
-                  </div> -->
-                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                   <div class="input-group-append">
-                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                    <!-- Remove the button if it's not needed -->
+                    <!-- <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
                   </div>
                   @if(request()->has('q'))
                   <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
@@ -94,14 +90,10 @@ Data Gaji Karyawan | MIS
             <form action="{{ route('account.gaji.searchkaryawan') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <!-- <div class="input-group-prepend">
-                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a>
-                  </div> -->
-                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                   <div class="input-group-append">
-                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                    <!-- Remove the button if it's not needed -->
+                    <!-- <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
                   </div>
                   @if(request()->has('q'))
                   <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
@@ -441,6 +433,21 @@ Data Gaji Karyawan | MIS
     </div>
   </section>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let searchInput = document.getElementById('searchInput');
+    let searchForm = document.getElementById('searchForm');
+    let debounceTimeout;
+
+    searchInput.addEventListener('keyup', function() {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(function() {
+        searchForm.submit();
+      }, 500); // Adjust the debounce delay as needed
+    });
+  });
+</script>
 
 <!--================== SWEET ALERT JIKA BELUM ADA KARYAWAN YANG PRESENSI PADA BULAN INI ==================-->
 <script>
