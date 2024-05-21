@@ -4,7 +4,7 @@
 @section('title')
 Data Gaji Karyawan | MIS
 @stop
-
+<link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -73,14 +73,14 @@ Data Gaji Karyawan | MIS
             <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
+                  <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                   <div class="input-group-append">
                     <!-- Remove the button if it's not needed -->
-                    <!-- <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
+                    <!-- <button type="button" class="btn btn-info rounded-pill" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
                   </div>
                   @if(request()->has('q'))
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1">
+                    <i class="fa fa-trash mt-2"></i>
                   </a>
                   @endif
                 </div>
@@ -90,14 +90,14 @@ Data Gaji Karyawan | MIS
             <form action="{{ route('account.gaji.searchkaryawan') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
+                  <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                   <div class="input-group-append">
                     <!-- Remove the button if it's not needed -->
-                    <!-- <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
+                    <!-- <button type="button" class="btn btn-info rounded-pill" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
                   </div>
                   @if(request()->has('q'))
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger ml-1">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1">
+                    <i class="fa fa-trash mt-2"></i>
                   </a>
                   @endif
                 </div>
