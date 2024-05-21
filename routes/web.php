@@ -260,6 +260,7 @@ Route::prefix('account')->group(
         Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
         Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
         Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
+        Route::get('/Perjalanan-Dinas/edit/{id}', 'account\PerjalananDinasController@edit')->name('account.PerjalananDinas.edit');
     }
 
 

@@ -96,7 +96,7 @@ Update Perjalanan Dinas | MIS
 
         <div class="card-body">
 
-          <form action="{{ route('account.PerjalananDinas.store') }}" method="POST" enctype="multipart/form-data">
+          <form action="{{ route('account.PerjalananDinas.edit', $DatasAjukan->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!--================== DETAIL PERJALANAN DINAS ==================-->
@@ -107,7 +107,7 @@ Update Perjalanan Dinas | MIS
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%">
                     <option value="" disabled selected>-- PILIH NAMA BENDAHARA --</option>
                     @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" {{ $user->id == $perjalanandinas->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}" {{ $user->id == $DatasAjukan->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
                     @endforeach
                   </select>
 
@@ -125,7 +125,7 @@ Update Perjalanan Dinas | MIS
                 <div class="form-group">
                   <label>Nama Camp</label>
                   <div class="input-group">
-                    <input type="text" name="tempat" value="{{ $perjalanandinas->tempat }}" placeholder="Masukkan Nama Camp" class="form-control" style="text-transform:uppercase;">
+                    <input type="text" name="tempat" value="{{ $DatasAjukan->tempat }}" placeholder="Masukkan Nama Camp" class="form-control" style="text-transform:uppercase;">
                   </div>
                   @error('tempat')
                   <div class="invalid-feedback" style="display: block">
@@ -142,7 +142,7 @@ Update Perjalanan Dinas | MIS
                     <div class="input-group-prepend">
                       <span class="input-group-text">#</span>
                     </div>
-                    <input type="number" name="camp" value="{{ $perjalanandinas->camp }}" placeholder="Masukkan Nomor Camp Ke" class="form-control">
+                    <input type="number" name="camp" value="{{ $DatasAjukan->camp }}" placeholder="Masukkan Nomor Camp Ke" class="form-control">
                   </div>
                   @error('camp')
                   <div class="invalid-feedback" style="display: block">
@@ -157,7 +157,7 @@ Update Perjalanan Dinas | MIS
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Tanggal Mulai Camp</label>
-                  <input type="date" name="tanggal_mulai" id="tanggal_mulai" value="{{ $perjalanandinas->tanggal_mulai }}" placeholder="Masukkan Total Tunjangan" class="form-control">
+                  <input type="datetime-local" name="tanggal_mulai" id="tanggal_mulai" value="{{ $DatasAjukan->tanggal_mulai }}" placeholder="Masukkan Total Tunjangan" class="form-control">
                 </div>
                 @error('tanggal_mulai')
                 <div class="invalid-feedback" style="display: block">
@@ -169,7 +169,7 @@ Update Perjalanan Dinas | MIS
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Tanggal Berakhir Camp</label>
-                  <input type="date" name="tanggal_akhir" id="tanggal_akhir" value="{{ $perjalanandinas->tanggal_akhir }}" placeholder="Masukkan Total Tunjangan" class="form-control">
+                  <input type="datetime-local" name="tanggal_akhir" id="tanggal_akhir" value="{{ $DatasAjukan->tanggal_akhir }}" placeholder="Masukkan Total Tunjangan" class="form-control">
                 </div>
                 @error('tanggal_akhir')
                 <div class="invalid-feedback" style="display: block">
@@ -187,14 +187,14 @@ Update Perjalanan Dinas | MIS
                     @if (Auth::user()->level == 'karyawan')
                     <select class="form-control" name="status">
                       <option value="" disabled selected>-- PILIH STATUS --</option>
-                      <option value="ajukan" {{ $perjalanandinas->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
+                      <option value="ajukan" {{ $DatasAjukan->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
                     </select>
                     @else
                     <select class="form-control" name="status">
                       <option value="" disabled selected>-- PILIH STATUS --</option>
-                      <option value="diterima" {{ $perjalanandinas->status == 'diterima' ? 'selected' : '' }}>DITERIMA</option>
-                      <option value="ajukan" {{ $perjalanandinas->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
-                      <option value="ditolak" {{ $perjalanandinas->status == 'ditolak' ? 'selected' : '' }}>DITOLAK</option>
+                      <option value="diterima" {{ $DatasAjukan->status == 'diterima' ? 'selected' : '' }}>DITERIMA</option>
+                      <option value="ajukan" {{ $DatasAjukan->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
+                      <option value="ditolak" {{ $DatasAjukan->status == 'ditolak' ? 'selected' : '' }}>DITOLAK</option>
                     </select>
                     @endif
                   </div>
@@ -230,7 +230,7 @@ Update Perjalanan Dinas | MIS
               <div class="form-group">
                 <label>Tanggal</label>
                 <div class="input-group">
-                  <input type="date" name="tanggal" id="tanggal" value="{{ $perjalanandinas->tanggal }}" placeholder="Masukkan Tanggal" class="form-control">
+                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ $DatasAjukan->tanggal }}" placeholder="Masukkan Tanggal" class="form-control">
                 </div>
                 @error('tanggal')
                 <div class="invalid-feedback" style="display: block">
@@ -261,7 +261,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_masuk" value="{{ $perjalanandinas->uang_masuk }}" placeholder="Total Uang Masuk" class="form-control uang_masuk_currency">
+                      <input type="text" name="uang_masuk" value="{{ $DatasAjukan->uang_masuk }}" placeholder="Total Uang Masuk" class="form-control uang_masuk_currency">
                     </div>
                     @error('uang_masuk')
                     <div class="invalid-feedback" style="display: block">
@@ -278,7 +278,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar" value="{{ $perjalanandinas->uang_keluar }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency">
+                      <input type="text" name="uang_keluar" value="{{ $DatasAjukan->uang_keluar }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency">
                     </div>
                   </div>
                 </div>
@@ -289,7 +289,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea name="keterangan" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan }}</textarea>
+                      <textarea name="keterangan" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -329,7 +329,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar2" value="{{ $perjalanandinas->uang_keluar2 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency2">
+                      <input type="text" name="uang_keluar2" value="{{ $DatasAjukan->uang_keluar2 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency2">
                     </div>
                   </div>
                 </div>
@@ -340,7 +340,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan2" value="{{ old('keterangan2') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan2 }}</textarea>
+                      <textarea type="text" name="keterangan2" value="{{ old('keterangan2') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan2 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -381,7 +381,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar3" value="{{ $perjalanandinas->uang_keluar3 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency3">
+                      <input type="text" name="uang_keluar3" value="{{ $DatasAjukan->uang_keluar3 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency3">
                     </div>
                   </div>
                 </div>
@@ -392,7 +392,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan3" value="{{ old('keterangan3') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan3 }}</textarea>
+                      <textarea type="text" name="keterangan3" value="{{ old('keterangan3') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan3 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -433,7 +433,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar4" value="{{ $perjalanandinas->uang_keluar4 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency4">
+                      <input type="text" name="uang_keluar4" value="{{ $DatasAjukan->uang_keluar4 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency4">
                     </div>
                   </div>
                 </div>
@@ -444,7 +444,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan4" value="{{ old('keterangan4') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan4 }}</textarea>
+                      <textarea type="text" name="keterangan4" value="{{ old('keterangan4') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan4 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -485,7 +485,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar5" value="{{ $perjalanandinas->uang_keluar5 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency5">
+                      <input type="text" name="uang_keluar5" value="{{ $DatasAjukan->uang_keluar5 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency5">
                     </div>
                   </div>
                 </div>
@@ -496,7 +496,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan5" value="{{ old('keterangan5') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan5 }}</textarea>
+                      <textarea type="text" name="keterangan5" value="{{ old('keterangan5') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan5 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -537,7 +537,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar6" value="{{ $perjalanandinas->uang_keluar6 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency6">
+                      <input type="text" name="uang_keluar6" value="{{ $DatasAjukan->uang_keluar6 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency6">
                     </div>
                   </div>
                 </div>
@@ -548,7 +548,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan6" value="{{ old('keterangan6') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan6 }}</textarea>
+                      <textarea type="text" name="keterangan6" value="{{ old('keterangan6') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan6 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -589,7 +589,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar7" value="{{ $perjalanandinas->uang_keluar7 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency7">
+                      <input type="text" name="uang_keluar7" value="{{ $DatasAjukan->uang_keluar7 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency7">
                     </div>
                   </div>
                 </div>
@@ -600,7 +600,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan7" value="{{ old('keterangan7') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan7 }}</textarea>
+                      <textarea type="text" name="keterangan7" value="{{ old('keterangan7') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan7 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -641,7 +641,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar8" value="{{ $perjalanandinas->uang_keluar8 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency8">
+                      <input type="text" name="uang_keluar8" value="{{ $DatasAjukan->uang_keluar8 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency8">
                     </div>
                   </div>
                 </div>
@@ -652,7 +652,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan8" value="{{ old('keterangan8') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan8 }}</textarea>
+                      <textarea type="text" name="keterangan8" value="{{ old('keterangan8') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan8 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -693,7 +693,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar9" value="{{ $perjalanandinas->uang_keluar9 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency9">
+                      <input type="text" name="uang_keluar9" value="{{ $DatasAjukan->uang_keluar9 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency9">
                     </div>
                   </div>
                 </div>
@@ -704,7 +704,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan9" value="{{ old('keterangan9') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan9 }}</textarea>
+                      <textarea type="text" name="keterangan9" value="{{ old('keterangan9') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan9 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -745,7 +745,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar10" value="{{ $perjalanandinas->uang_keluar10 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency10">
+                      <input type="text" name="uang_keluar10" value="{{ $DatasAjukan->uang_keluar10 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency10">
                     </div>
                   </div>
                 </div>
@@ -756,7 +756,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan10" value="{{ old('keterangan10') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan10 }}</textarea>
+                      <textarea type="text" name="keterangan10" value="{{ old('keterangan10') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan10 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -798,7 +798,7 @@ Update Perjalanan Dinas | MIS
               <div class="form-group">
                 <label>Tanggal</label>
                 <div class="input-group">
-                  <input type="date" name="tanggal11" id="tanggal11" value="{{ $perjalanandinas->tanggal11 }}" placeholder="Masukkan Tanggal" class="form-control">
+                  <input type="datetime-local" name="tanggal11" id="tanggal11" value="{{ $DatasAjukan->tanggal11 }}" placeholder="Masukkan Tanggal" class="form-control">
                 </div>
               </div>
             </div>
@@ -824,7 +824,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_masuk11" value="{{ $perjalanandinas->uang_masuk11 }}" placeholder="Total Uang Masuk" class="form-control uang_masuk_currency11">
+                      <input type="text" name="uang_masuk11" value="{{ $DatasAjukan->uang_masuk11 }}" placeholder="Total Uang Masuk" class="form-control uang_masuk_currency11">
                     </div>
                   </div>
                 </div>
@@ -836,7 +836,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar11" value="{{ $perjalanandinas->uang_keluar11 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency11">
+                      <input type="text" name="uang_keluar11" value="{{ $DatasAjukan->uang_keluar11 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency11">
                     </div>
                   </div>
                 </div>
@@ -847,7 +847,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan11" value="{{ old('keterangan11') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan11 }}</textarea>
+                      <textarea type="text" name="keterangan11" value="{{ old('keterangan11') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan11 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -888,7 +888,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar12" value="{{ $perjalanandinas->uang_keluar12 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency12">
+                      <input type="text" name="uang_keluar12" value="{{ $DatasAjukan->uang_keluar12 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency12">
                     </div>
                   </div>
                 </div>
@@ -899,7 +899,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan12" value="{{ old('keterangan12') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan12 }}</textarea>
+                      <textarea type="text" name="keterangan12" value="{{ old('keterangan12') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan12 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -940,7 +940,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar13" value="{{ $perjalanandinas->uang_keluar13 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency13">
+                      <input type="text" name="uang_keluar13" value="{{ $DatasAjukan->uang_keluar13 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency13">
                     </div>
                   </div>
                 </div>
@@ -951,7 +951,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan13" value="{{ old('keterangan13') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan13 }}</textarea>
+                      <textarea type="text" name="keterangan13" value="{{ old('keterangan13') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan13 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -992,7 +992,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar14" value="{{ $perjalanandinas->uang_keluar14 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency14">
+                      <input type="text" name="uang_keluar14" value="{{ $DatasAjukan->uang_keluar14 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency14">
                     </div>
                   </div>
                 </div>
@@ -1003,7 +1003,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan14" value="{{ old('keterangan14') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan14 }}</textarea>
+                      <textarea type="text" name="keterangan14" value="{{ old('keterangan14') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan14 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1044,7 +1044,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar15" value="{{ $perjalanandinas->uang_keluar15 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency15">
+                      <input type="text" name="uang_keluar15" value="{{ $DatasAjukan->uang_keluar15 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency15">
                     </div>
                   </div>
                 </div>
@@ -1055,7 +1055,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan15" value="{{ old('keterangan15') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan15 }}</textarea>
+                      <textarea type="text" name="keterangan15" value="{{ old('keterangan15') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan15 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1096,7 +1096,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar16" value="{{ $perjalanandinas->uang_keluar16 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency16">
+                      <input type="text" name="uang_keluar16" value="{{ $DatasAjukan->uang_keluar16 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency16">
                     </div>
                   </div>
                 </div>
@@ -1107,7 +1107,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan16" value="{{ old('keterangan16') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan16 }}</textarea>
+                      <textarea type="text" name="keterangan16" value="{{ old('keterangan16') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan16 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1148,7 +1148,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar17" value="{{ $perjalanandinas->uang_keluar17 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency17">
+                      <input type="text" name="uang_keluar17" value="{{ $DatasAjukan->uang_keluar17 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency17">
                     </div>
                   </div>
                 </div>
@@ -1159,7 +1159,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan17" value="{{ old('keterangan17') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan17 }}</textarea>
+                      <textarea type="text" name="keterangan17" value="{{ old('keterangan17') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan17 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1200,7 +1200,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar18" value="{{ $perjalanandinas->uang_keluar18 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency18">
+                      <input type="text" name="uang_keluar18" value="{{ $DatasAjukan->uang_keluar18 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency18">
                     </div>
                   </div>
                 </div>
@@ -1211,7 +1211,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan18" value="{{ old('keterangan18') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan18 }}</textarea>
+                      <textarea type="text" name="keterangan18" value="{{ old('keterangan18') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan18 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1252,7 +1252,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar19" value="{{ $perjalanandinas->uang_keluar19 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency19">
+                      <input type="text" name="uang_keluar19" value="{{ $DatasAjukan->uang_keluar19 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency19">
                     </div>
                   </div>
                 </div>
@@ -1263,7 +1263,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan19" value="{{ old('keterangan19') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan19 }}</textarea>
+                      <textarea type="text" name="keterangan19" value="{{ old('keterangan19') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan19 }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -1304,7 +1304,7 @@ Update Perjalanan Dinas | MIS
                       <div class="input-group-prepend">
                         <span class="input-group-text">Rp.</span>
                       </div>
-                      <input type="text" name="uang_keluar20" value="{{ $perjalanandinas->uang_keluar20 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency20">
+                      <input type="text" name="uang_keluar20" value="{{ $DatasAjukan->uang_keluar20 }}" placeholder="Total Uang Keluar" class="form-control uang_keluar_currency20">
                     </div>
                   </div>
                 </div>
@@ -1315,7 +1315,7 @@ Update Perjalanan Dinas | MIS
                   <div class="form-group">
                     <label>Keterangan</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan20" value="{{ old('keterangan20') }}" placeholder="Masukan Keterangan" class="form-control">{{ $perjalanandinas->keterangan20 }}</textarea>
+                      <textarea type="text" name="keterangan20" value="{{ old('keterangan20') }}" placeholder="Masukan Keterangan" class="form-control">{{ $DatasAjukan->keterangan20 }}</textarea>
                     </div>
                   </div>
                 </div>

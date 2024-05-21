@@ -92,6 +92,7 @@ class Gaji extends Model
     'tanggal',
     'total_lembur',
     'total_bonus',
+    'webinar',
     'potongan',
     'pph',
     'alpha',

@@ -1398,6 +1398,20 @@ Update Gaji Karyawan | MIS
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
+                <label>Bonus Webinar</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="webinar" id="webinar" value="{{ $gaji->webinar }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
                 <label>Tunjangan BPJS</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -2127,6 +2141,10 @@ Update Gaji Karyawan | MIS
   });
   // <!-- END -->
 
+  var cleaveC = new Cleave('.currency_webinar', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
   var cleaveC = new Cleave('.currency_tunjanganBPJS', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'

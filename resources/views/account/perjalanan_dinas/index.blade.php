@@ -179,7 +179,7 @@ Data Perjalanan Dinas | MIS
                         @endif
                       </td>
                       <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
                           <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
                         </a>
                         <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">

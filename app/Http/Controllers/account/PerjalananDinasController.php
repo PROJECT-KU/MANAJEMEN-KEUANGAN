@@ -1089,11 +1089,23 @@ class PerjalananDinasController extends Controller
     }
   }
 
-  public function edit($id, $token)
+  public function edit($id)
   {
     $user = Auth::user();
-    $perjalanandinas = PerjalananDinas::findOrFail($id);
-    return view('account.perjalanan_dinas.edit', compact('perjalanandinas'));
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+
+    // dd($datas);
+    $DatasAjukan = PerjalananDinas::findOrFail($id);
+    return view('account.perjalanan_dinas.edit', compact('DatasAjukan', 'datas'));
   }
 
   public function update(Request $request)

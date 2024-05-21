@@ -989,6 +989,25 @@ Tambah Gaji Karyawan | MIS
           </div>
 
           <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Bonus Webinar</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="webinar" id="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
+                </div>
+                @error('webinar')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
             <div class="col-md-6">
               <div class="form-group">
                 <label>Tunjangan BPJS</label>
@@ -1748,6 +1767,10 @@ Tambah Gaji Karyawan | MIS
   });
   // <!-- END -->
 
+  var cleaveC = new Cleave('.currency_webinar', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
   var cleaveC = new Cleave('.currency_tunjanganBPJS', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
