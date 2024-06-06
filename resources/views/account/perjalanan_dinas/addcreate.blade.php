@@ -69,6 +69,58 @@ Tambah laporan Camp | MIS
 
 <!--================== END ==================-->
 
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<style>
+  .custom-file-upload {
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+
+  .file-upload {
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  .file-upload:hover {
+    background-color: #0056b3;
+  }
+
+  #file-selected {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+  }
+
+  .image-preview {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+</style>
+<!--================== END ==================-->
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -81,27 +133,27 @@ Tambah laporan Camp | MIS
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            <label>Total Uang Masuk</label>
+            <label hidden>Total Uang Masuk</label>
             <div class="input-group">
-              <input type="text" name="totalmasukpage1" value="{{ $perjalanandinas->total_uang_masuk }}">
+              <input type="text" name="totalmasukpage1" value="{{ $perjalanandinas->total_uang_masuk }}" hidden>
             </div>
           </div>
         </div>
 
         <div class="col-md-4">
           <div class="form-group">
-            <label>Total Uang Keluar</label>
+            <label hidden>Total Uang Keluar</label>
             <div class="input-group">
-              <input type="text" name="totalkeluarpage1" value="{{ $perjalanandinas->total_uang_keluar }}">
+              <input type="text" name="totalkeluarpage1" value="{{ $perjalanandinas->total_uang_keluar }}" hidden>
             </div>
           </div>
         </div>
 
         <div class="col-md-4">
           <div class="form-group">
-            <label>Sisa Saldo</label>
+            <label hidden>Sisa Saldo</label>
             <div class="input-group">
-              <input type="text" name="sisasaldopage1" value="{{ $perjalanandinas->sisa_saldo }}">
+              <input type="text" name="sisasaldopage1" value="{{ $perjalanandinas->sisa_saldo }}" hidden>
             </div>
           </div>
         </div>
@@ -186,9 +238,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan21" value="{{ old('keterangan21') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan21">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan21')
                     <div class="invalid-feedback" style="display: block">
@@ -199,18 +258,26 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar21" id="gambar21" class="form-control" accept="image/*">
+                      <input type="file" name="gambar21" id="gambar21" class="inputfile" accept="image/*">
+                      <label for="gambar21" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar21')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview21" class="image-preview"></div>
+                    <span id="file-selected21"></span>
+                  </div>
+                  @error('gambar21')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
+
               </div>
             </div>
           </div>
@@ -252,9 +319,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan22" value="{{ old('keterangan22') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan22">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan22')
                     <div class="invalid-feedback" style="display: block">
@@ -265,20 +339,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar22" id="gambar22" class="form-control" accept="image/*">
+                      <input type="file" name="gambar22" id="gambar22" class="inputfile" accept="image/*">
+                      <label for="gambar22" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar22')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview22" class="image-preview"></div>
+                    <span id="file-selected22"></span>
+                  </div>
+                  @error('gambar22')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -319,9 +400,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan23" value="{{ old('keterangan23') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan23">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan23')
                     <div class="invalid-feedback" style="display: block">
@@ -332,20 +420,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar23" id="gambar23" class="form-control" accept="image/*">
+                      <input type="file" name="gambar23" id="gambar23" class="inputfile" accept="image/*">
+                      <label for="gambar23" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar23')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview23" class="image-preview"></div>
+                    <span id="file-selected23"></span>
+                  </div>
+                  @error('gambar23')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -386,9 +481,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan24" value="{{ old('keterangan24') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan24">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan24')
                     <div class="invalid-feedback" style="display: block">
@@ -399,20 +501,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar24" id="gambar24" class="form-control" accept="image/*">
+                      <input type="file" name="gambar24" id="gambar24" class="inputfile" accept="image/*">
+                      <label for="gambar24" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar24')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview24" class="image-preview"></div>
+                    <span id="file-selected24"></span>
+                  </div>
+                  @error('gambar24')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -453,9 +562,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan25" value="{{ old('keterangan25') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan25">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan25')
                     <div class="invalid-feedback" style="display: block">
@@ -466,20 +582,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar25" id="gambar25" class="form-control" accept="image/*">
+                      <input type="file" name="gambar25" id="gambar25" class="inputfile" accept="image/*">
+                      <label for="gambar25" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar25')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview25" class="image-preview"></div>
+                    <span id="file-selected25"></span>
+                  </div>
+                  @error('gambar25')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -520,9 +643,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan26" value="{{ old('keterangan26') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan26">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan26')
                     <div class="invalid-feedback" style="display: block">
@@ -533,20 +663,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar26" id="gambar26" class="form-control" accept="image/*">
+                      <input type="file" name="gambar26" id="gambar26" class="inputfile" accept="image/*">
+                      <label for="gambar26" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar26')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview26" class="image-preview"></div>
+                    <span id="file-selected26"></span>
+                  </div>
+                  @error('gambar26')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -587,9 +724,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan27" value="{{ old('keterangan27') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan27">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan27')
                     <div class="invalid-feedback" style="display: block">
@@ -600,20 +744,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar27" id="gambar27" class="form-control" accept="image/*">
+                      <input type="file" name="gambar27" id="gambar27" class="inputfile" accept="image/*">
+                      <label for="gambar27" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar27')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview27" class="image-preview"></div>
+                    <span id="file-selected27"></span>
+                  </div>
+                  @error('gambar27')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -654,9 +805,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan28" value="{{ old('keterangan28') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan28">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan28')
                     <div class="invalid-feedback" style="display: block">
@@ -667,20 +825,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar28" id="gambar28" class="form-control" accept="image/*">
+                      <input type="file" name="gambar28" id="gambar28" class="inputfile" accept="image/*">
+                      <label for="gambar28" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar28')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview28" class="image-preview"></div>
+                    <span id="file-selected28"></span>
+                  </div>
+                  @error('gambar28')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -721,9 +886,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan29" value="{{ old('keterangan29') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan29">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan29')
                     <div class="invalid-feedback" style="display: block">
@@ -734,20 +906,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar29" id="gambar29" class="form-control" accept="image/*">
+                      <input type="file" name="gambar29" id="gambar29" class="inputfile" accept="image/*">
+                      <label for="gambar29" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar29')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview29" class="image-preview"></div>
+                    <span id="file-selected29"></span>
+                  </div>
+                  @error('gambar29')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -788,9 +967,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan30" value="{{ old('keterangan30') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan30">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan30')
                     <div class="invalid-feedback" style="display: block">
@@ -801,20 +987,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar30" id="gambar30" class="form-control" accept="image/*">
+                      <input type="file" name="gambar30" id="gambar30" class="inputfile" accept="image/*">
+                      <label for="gambar30" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar30')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview30" class="image-preview"></div>
+                    <span id="file-selected30"></span>
+                  </div>
+                  @error('gambar30')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -905,9 +1098,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan31" value="{{ old('keterangan31') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan31">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan31')
                     <div class="invalid-feedback" style="display: block">
@@ -918,18 +1118,26 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar31" id="gambar31" class="form-control" accept="image/*">
+                      <input type="file" name="gambar31" id="gambar31" class="inputfile" accept="image/*">
+                      <label for="gambar31" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar31')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview31" class="image-preview"></div>
+                    <span id="file-selected31"></span>
+                  </div>
+                  @error('gambar31')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
+
               </div>
             </div>
           </div>
@@ -971,9 +1179,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan32" value="{{ old('keterangan32') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan32">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan32')
                     <div class="invalid-feedback" style="display: block">
@@ -984,20 +1199,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar32" id="gambar32" class="form-control" accept="image/*">
+                      <input type="file" name="gambar32" id="gambar32" class="inputfile" accept="image/*">
+                      <label for="gambar32" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar32')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview32" class="image-preview"></div>
+                    <span id="file-selected32"></span>
+                  </div>
+                  @error('gambar32')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1038,9 +1260,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan33" value="{{ old('keterangan33') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan33">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan33')
                     <div class="invalid-feedback" style="display: block">
@@ -1051,20 +1280,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar33" id="gambar33" class="form-control" accept="image/*">
+                      <input type="file" name="gambar33" id="gambar33" class="inputfile" accept="image/*">
+                      <label for="gambar33" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar33')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview33" class="image-preview"></div>
+                    <span id="file-selected33"></span>
+                  </div>
+                  @error('gambar33')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1105,9 +1341,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan34" value="{{ old('keterangan34') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan34">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan34')
                     <div class="invalid-feedback" style="display: block">
@@ -1118,20 +1361,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar34" id="gambar34" class="form-control" accept="image/*">
+                      <input type="file" name="gambar34" id="gambar34" class="inputfile" accept="image/*">
+                      <label for="gambar34" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar34')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview34" class="image-preview"></div>
+                    <span id="file-selected34"></span>
+                  </div>
+                  @error('gambar34')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1172,9 +1422,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan35" value="{{ old('keterangan35') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan35">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan35')
                     <div class="invalid-feedback" style="display: block">
@@ -1185,20 +1442,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar35" id="gambar35" class="form-control" accept="image/*">
+                      <input type="file" name="gambar35" id="gambar35" class="inputfile" accept="image/*">
+                      <label for="gambar35" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar35')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview35" class="image-preview"></div>
+                    <span id="file-selected35"></span>
+                  </div>
+                  @error('gambar35')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1239,9 +1503,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan36" value="{{ old('keterangan36') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan36">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan36')
                     <div class="invalid-feedback" style="display: block">
@@ -1252,20 +1523,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar36" id="gambar36" class="form-control" accept="image/*">
+                      <input type="file" name="gambar36" id="gambar36" class="inputfile" accept="image/*">
+                      <label for="gambar36" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar36')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview36" class="image-preview"></div>
+                    <span id="file-selected36"></span>
+                  </div>
+                  @error('gambar36')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1306,9 +1584,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan37" value="{{ old('keterangan37') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan37">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan37')
                     <div class="invalid-feedback" style="display: block">
@@ -1319,20 +1604,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar37" id="gambar37" class="form-control" accept="image/*">
+                      <input type="file" name="gambar37" id="gambar37" class="inputfile" accept="image/*">
+                      <label for="gambar37" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar37')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview37" class="image-preview"></div>
+                    <span id="file-selected37"></span>
+                  </div>
+                  @error('gambar37')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1373,9 +1665,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan38" value="{{ old('keterangan38') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan38">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan38')
                     <div class="invalid-feedback" style="display: block">
@@ -1386,20 +1685,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar38" id="gambar38" class="form-control" accept="image/*">
+                      <input type="file" name="gambar38" id="gambar38" class="inputfile" accept="image/*">
+                      <label for="gambar38" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar38')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview38" class="image-preview"></div>
+                    <span id="file-selected38"></span>
+                  </div>
+                  @error('gambar38')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1440,9 +1746,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan39" value="{{ old('keterangan39') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan39">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan39')
                     <div class="invalid-feedback" style="display: block">
@@ -1453,20 +1766,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar39" id="gambar39" class="form-control" accept="image/*">
+                      <input type="file" name="gambar39" id="gambar39" class="inputfile" accept="image/*">
+                      <label for="gambar39" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar39')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview39" class="image-preview"></div>
+                    <span id="file-selected39"></span>
+                  </div>
+                  @error('gambar39')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1508,9 +1828,16 @@ Tambah laporan Camp | MIS
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Keterangan</label>
+                    <label>Kategori</label>
                     <div class="input-group">
-                      <textarea type="text" name="keterangan40" value="{{ old('keterangan40') }}" placeholder="Masukan Keterangan" class="form-control"></textarea>
+                      <select class="form-control" name="keterangan40">
+                        <option value="" disabled selected>-- PILIH KATEGORI --</option>
+                        <option value="transportasi">TRANSPORTASI</option>
+                        <option value="makan">MAKAN</option>
+                        <option value="obat-obatan">OBAT-OBATAN</option>
+                        <option value="jajan atau belanja">JAJAN ATAU BELANJA</option>
+                        <option value="lain-lain">LAIN-LAIN</option>
+                      </select>
                     </div>
                     @error('keterangan40')
                     <div class="invalid-feedback" style="display: block">
@@ -1521,20 +1848,27 @@ Tambah laporan Camp | MIS
                 </div>
 
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group custom-file-upload" style="margin-top: -3px;">
                     <label>Bukti Struk</label>
                     <div class="input-group">
-                      <input type="file" name="gambar40" id="gambar40" class="form-control" accept="image/*">
+                      <input type="file" name="gambar40" id="gambar40" class="inputfile" accept="image/*">
+                      <label for="gambar40" class="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                      </label>
                     </div>
-                    @error('gambar40')
-                    <div class="invalid-feedback" style="display: block">
-                      {{ $message }}
-                    </div>
-                    @enderror
                   </div>
+                  <div class="image-preview-container">
+                    <div id="imagePreview40" class="image-preview"></div>
+                    <span id="file-selected40"></span>
+                  </div>
+                  @error('gambar40')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
           <!--================== END ==================-->
@@ -1543,36 +1877,64 @@ Tambah laporan Camp | MIS
       </div>
       <!--================== END ==================-->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <div class="button-container">
         <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
         <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
       </div>
-
-
-
 
     </form>
 
 </div>
 </section>
 </div>
+
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  for (var i = 21; i <= 40; i++) {
+    var fileInput = document.getElementById('gambar' + i);
+    if (fileInput) {
+      (function(i) { // Capture the value of i in a closure
+        fileInput.addEventListener('change', function(event) {
+          var fileInput = event.target;
+          var file = fileInput.files[0];
+          var fileName = file.name;
+          var fileSize = (file.size / 1024).toFixed(2); // in KB
+          var allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+
+          if (!allowedTypes.includes(file.type)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Only PNG, JPEG, and JPG files are allowed. Please choose a valid file type.'
+            });
+            return;
+          }
+
+          if (fileSize > 3000) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'File size exceeds the maximum limit of 3MB. Please choose a smaller file.'
+            });
+            return;
+          }
+
+          document.getElementById('file-selected' + i).innerHTML = fileName + ' (' + fileSize + ' KB)';
+
+          var reader = new FileReader();
+          reader.onload = function() {
+            var output = document.getElementById('imagePreview' + i);
+            output.innerHTML = `<img src="${reader.result}">`;
+            output.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        });
+      })(i); // Pass the current value of i to the closure
+    }
+  }
+</script>
+<!--================== END ==================-->
 
 <!--================== ADD DAN REMOVE FIELDS CARD ==================-->
 <script>

@@ -14,7 +14,7 @@ class PerjalananDinas extends Migration
     public function up()
     {
         Schema::create('perjalanan_dinas', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->unsignedBigInteger('user_id');
             $table->string('token', 300)->nullable();
             $table->string('id_transaksi', 300)->nullable();

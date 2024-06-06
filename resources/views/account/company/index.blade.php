@@ -13,103 +13,85 @@ Company | MIS
         </div>
 
         <div class="section-body">
-
-            <!--================== MAINTENANCE ==================-->
-            @if (!$maintenances->isEmpty())
-            @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
-                <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
-                    <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
-                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
-                    @if ($maintenance->start_date !== null)
-                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-                    @endif
-                </div>
-                @endif
-                @endforeach
-                @endif
-                <!--================== END ==================-->
-
-                <div class="card">
-                    <!-- <div class="card-header">
+            <div class="card">
+                <!-- <div class="card-header">
                         <h4><i class="fas fa-building"></i> UPDATE COMPANY</h4>
                     </div> -->
 
-                    <div class="card-body">
+                <div class="card-body">
 
-                        <form action="{{ route('account.company.update', $user->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Nama Perusahaan</label>
-                                        <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
-                                    </div>
+                    <form action="{{ route('account.company.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Nama Perusahaan</label>
+                                    <input type="text" id="company" name="company" class="form-control" value="{{ old('company', $user->company) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase">
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Email Perusahaan</label>
-                                        <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
-                                    </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Email Perusahaan</label>
+                                    <input type="text" id="email_company" name="email_company" class="form-control" value="{{ old('email_company', $user->email_company) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)">
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Manager Perusahaan</label>
-                                        <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Manager Perusahaan</label>
+                                    <input type="text" id="pj_company" name="pj_company" class="form-control" value="{{ old('pj_company', $user->pj_company) }}" maxlength="50" minlength="5" onkeypress="return/[a-zA-Z0-9., ]/i.test(event.key)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Alamat Perusahaan</label>
+                                    <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Telp Perusahaan</label>
+                                    <input type="tel" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Logo Perusahaan</label>
+                                    <div class="input-group">
+                                        <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Alamat Perusahaan</label>
-                                        <textarea id="alamat_company" name="alamat_company" class="form-control" value="{{ old('alamat_company', $user->alamat_company) }}">{{ ($user->alamat_company) }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Telp Perusahaan</label>
-                                        <input type="tel" id="telp_company" name="telp_company" class="form-control" value="{{ old('telp_company', $user->telp_company) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="thumbnail-circle" style="width: 12rem;">
+                                        @if (Auth::user()->logo_company == null)
+                                        <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                                        @else
+                                        <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->logo_company) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                                        @endif
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        @if ( Auth::user()->level == 'ceo')
+                        @else
+                        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
+                        <!-- <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button> -->
+                        @endif
 
+                    </form>
 
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Logo Perusahaan</label>
-                                        <div class="input-group">
-                                            <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <div class="thumbnail-circle" style="width: 12rem;">
-                                            @if (Auth::user()->logo_company == null)
-                                            <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
-                                            @else
-                                            <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->logo_company) }}" alt="Preview Image" style="width: 100px; height:100px;">
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @if ( Auth::user()->level == 'ceo')
-                            @else
-                            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                            <!-- <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button> -->
-                            @endif
-
-                        </form>
-
-                    </div>
                 </div>
+            </div>
         </div>
     </section>
 </div>

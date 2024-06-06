@@ -174,6 +174,10 @@
                                                 <input type="submit" name="signin" id="signin" class="form-submit" value="Log in" />
                                             </div>
 
+                                            <!-- <div class="form-group form-button" style="margin-top: -10px;">
+                                                <a href="{{ route('account.page-maintenance.blank') }}"><input type="button" id="signin" class="form-submit" value="Log in"></a>
+                                            </div> -->
+
                                             <span style="text-align: left;">Belum Punya Akun?</span>
                                             <span style="text-align: right; margin-left: 45px;">Lupa Password?</span>
                                             <div style="display: flex; align-items: center;">

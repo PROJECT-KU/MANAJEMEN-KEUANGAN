@@ -15,6 +15,8 @@ use App\Http\Middleware\CheckTestimoniToken;
 
 Route::get('/', 'Auth\LoginController@showLoginForm');
 
+Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
+
 
 // ARTIKEL PUBLIC
 Route::get('/blog', 'account\ArtikelController@public')->name('blog.artikel.blog');
@@ -174,7 +176,6 @@ Route::prefix('account')->group(
         Route::get('/maintenance/{id}/edit', 'account\MaintenanceController@edit')->name('account.maintenance.edit');
         Route::post('/maintenance/{id}', 'account\MaintenanceController@update')->name('account.maintenance.update');
         Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
-        Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
         Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
 
         // sewa
@@ -256,11 +257,17 @@ Route::prefix('account')->group(
         // perjalanan dinas
         Route::get('/Perjalanan-Dinas', 'account\PerjalananDinasController@index')->name('account.PerjalananDinas.index');
         Route::get('/Perjalanan-Dinas/create', 'account\PerjalananDinasController@create')->name('account.PerjalananDinas.create');
-        Route::get('/Perjalanan-Dinas/addcreate/{id}{token}', 'account\PerjalananDinasController@addcreate')->name('account.PerjalananDinas.addcreate');
+        Route::get('/Perjalanan-Dinas/addcreate/{id}', 'account\PerjalananDinasController@addcreate')->name('account.PerjalananDinas.addcreate');
         Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
         Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
         Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
-        Route::get('/Perjalanan-Dinas/edit/{id}', 'account\PerjalananDinasController@edit')->name('account.PerjalananDinas.edit');
+        Route::get('/Perjalanan-Dinas/editAjukan/{id}', 'account\PerjalananDinasController@editAjukan')->name('account.PerjalananDinas.editAjukan');
+        Route::get('/Perjalanan-Dinas/editDiterima/{id}', 'account\PerjalananDinasController@editDiterima')->name('account.PerjalananDinas.editDiterima');
+        Route::get('/Perjalanan-Dinas/editDitolak/{id}', 'account\PerjalananDinasController@editDitolak')->name('account.PerjalananDinas.editDitolak');
+        Route::post('/Perjalanan-Dinas/updateAjukan/{id}', 'account\PerjalananDinasController@updateAjukan')->name('account.PerjalananDinas.updateAjukan');
+        Route::post('/Perjalanan-Dinas/updateDiterima/{id}', 'account\PerjalananDinasController@updateDiterima')->name('account.PerjalananDinas.updateDiterima');
+        Route::post('/Perjalanan-Dinas/updateDitolak/{id}', 'account\PerjalananDinasController@updateDitolak')->name('account.PerjalananDinas.updateDitolak');
+        Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
     }
 
 
