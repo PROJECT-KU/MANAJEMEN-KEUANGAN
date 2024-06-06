@@ -14,6 +14,7 @@ use PDF;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
 class PerjalananDinasController extends Controller
 {
   /**
@@ -66,7 +67,6 @@ class PerjalananDinasController extends Controller
       ->select('perjalanan_dinas.id', 'perjalanan_dinas.user_id', 'perjalanan_dinas.token', 'perjalanan_dinas.id_transaksi', 'perjalanan_dinas.status', 'perjalanan_dinas.tempat', 'perjalanan_dinas.camp', 'perjalanan_dinas.tanggal_mulai', 'perjalanan_dinas.tanggal_akhir', 'perjalanan_dinas.total_uang_masuk', 'perjalanan_dinas.total_uang_keluar', 'perjalanan_dinas.sisa_saldo', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
       ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
       ->where('perjalanan_dinas.status', 'ajukan')
-      ->whereBetween('perjalanan_dinas.created_at', [$currentMonth, $nextMonth])
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
     if ($user->level == 'manager' || $user->level == 'ceo') {
@@ -87,7 +87,6 @@ class PerjalananDinasController extends Controller
       ->select('perjalanan_dinas.id', 'perjalanan_dinas.user_id', 'perjalanan_dinas.token', 'perjalanan_dinas.id_transaksi', 'perjalanan_dinas.status', 'perjalanan_dinas.tempat', 'perjalanan_dinas.camp', 'perjalanan_dinas.tanggal_mulai', 'perjalanan_dinas.tanggal_akhir', 'perjalanan_dinas.total_uang_masuk', 'perjalanan_dinas.total_uang_keluar', 'perjalanan_dinas.sisa_saldo', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
       ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
       ->where('perjalanan_dinas.status', 'diterima')
-      ->whereBetween('perjalanan_dinas.created_at', [$currentMonth, $nextMonth])
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
     if ($user->level == 'manager' || $user->level == 'ceo') {
@@ -108,7 +107,6 @@ class PerjalananDinasController extends Controller
       ->select('perjalanan_dinas.id', 'perjalanan_dinas.user_id', 'perjalanan_dinas.token', 'perjalanan_dinas.id_transaksi', 'perjalanan_dinas.status', 'perjalanan_dinas.tempat', 'perjalanan_dinas.camp', 'perjalanan_dinas.tanggal_mulai', 'perjalanan_dinas.tanggal_akhir', 'perjalanan_dinas.total_uang_masuk', 'perjalanan_dinas.total_uang_keluar', 'perjalanan_dinas.sisa_saldo', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
       ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
       ->where('perjalanan_dinas.status', 'ditolak')
-      ->whereBetween('perjalanan_dinas.created_at', [$currentMonth, $nextMonth])
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
     if ($user->level == 'manager' || $user->level == 'ceo') {
@@ -269,7 +267,7 @@ class PerjalananDinasController extends Controller
     return view('account.perjalanan_dinas.create', compact('datas'));
   }
 
-  public function addcreate($id, $token)
+  public function addcreate($id)
   {
     $user = Auth::user();
     $perjalanandinas = PerjalananDinas::findOrFail($id);
@@ -682,7 +680,7 @@ class PerjalananDinasController extends Controller
     // Redirect with success or error message
     if ($save) {
       if ($request->input('action') === 'save_add') {
-        return redirect()->route('account.PerjalananDinas.addcreate', ['id' => $save, 'token' => $token])->with('next', 'Data Perjalanan Dinas Berhasil Disimpan!');
+        return redirect()->route('account.PerjalananDinas.addcreate', ['id' => $save])->with('next', 'Data Perjalanan Dinas Berhasil Disimpan!');
       } else {
         return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
       }
@@ -705,7 +703,7 @@ class PerjalananDinasController extends Controller
       $image21 = $request->file('gambar21');
       $imageName21 = time() . '_gambar21.' . $image21->getClientOriginalExtension();
       $imagePath21 = $imageName21; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image21->move(public_path('scopuscamp'), $imageName21); // Pindahkan gambar ke direktori public/images
+      $image21->move(public_path('images'), $imageName21); // Pindahkan gambar ke direktori public/images
     }
     // <!-- END -->
 
@@ -1089,7 +1087,7 @@ class PerjalananDinasController extends Controller
     }
   }
 
-  public function edit($id)
+  public function editAjukan($id)
   {
     $user = Auth::user();
     $datas = DB::table('users')
@@ -1102,17 +1100,59 @@ class PerjalananDinasController extends Controller
       ->groupBy('users.id', 'users.full_name')
       ->orderBy('users.created_at', 'DESC')
       ->get();
-
-    // dd($datas);
     $DatasAjukan = PerjalananDinas::findOrFail($id);
-    return view('account.perjalanan_dinas.edit', compact('DatasAjukan', 'datas'));
+    return view('account.perjalanan_dinas.editajukan', compact('DatasAjukan', 'datas'));
   }
 
-  public function update(Request $request)
+  public function editDiterima($id)
   {
     $user = Auth::user();
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+    $DatasDiterima = PerjalananDinas::findOrFail($id);
+    return view('account.perjalanan_dinas.editditerima', compact('DatasDiterima', 'datas'));
+  }
 
-    $save = PerjalananDinas::create([
+  public function editDitolak($id)
+  {
+    $user = Auth::user();
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+    $DatasDitolak = PerjalananDinas::findOrFail($id);
+    return view('account.perjalanan_dinas.editditolak', compact('DatasDitolak', 'datas'));
+  }
+
+  public function updateAjukan(Request $request, $id)
+  {
+    $user = Auth::user();
+    $DatasAjukan = PerjalananDinas::findOrFail($id);
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+    $DatasAjukan->update([
       'user_id'                 => $request->input('user_id'),
       'tempat'                  => $request->input('tempat'),
       'camp'                    => $request->input('camp'),
@@ -1123,10 +1163,90 @@ class PerjalananDinasController extends Controller
     ]);
 
     // Redirect with success or error message
-    if ($save) {
+    if ($DatasAjukan) {
       return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
     } else {
       return redirect()->route('account.PerjalananDinas.index')->with('error', 'Data Perjalanan Dinas Gagal Disimpan!');
+    }
+  }
+
+  public function updateDiterima(Request $request, $id)
+  {
+    $user = Auth::user();
+    $DatasDiterima = PerjalananDinas::findOrFail($id);
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+    $DatasDiterima->update([
+      'user_id'                 => $request->input('user_id'),
+      'tempat'                  => $request->input('tempat'),
+      'camp'                    => $request->input('camp'),
+      'tanggal_mulai'           => $request->input('tanggal_mulai'),
+      'tanggal_akhir'           => $request->input('tanggal_akhir'),
+      'status'                  => $request->input('status'),
+      'deskripsi'               => $request->input('deskripsi'),
+    ]);
+
+    // Redirect with success or error message
+    if ($DatasDiterima) {
+      return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
+    } else {
+      return redirect()->route('account.PerjalananDinas.index')->with('error', 'Data Perjalanan Dinas Gagal Disimpan!');
+    }
+  }
+
+  public function updateDitolak(Request $request, $id)
+  {
+    $user = Auth::user();
+    $DatasDitolak = PerjalananDinas::findOrFail($id);
+    $datas = DB::table('users')
+      ->select(
+        'users.id',
+        'users.full_name'
+      )
+      ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
+      ->where('users.company', $user->company)
+      ->groupBy('users.id', 'users.full_name')
+      ->orderBy('users.created_at', 'DESC')
+      ->get();
+    $DatasDitolak->update([
+      'user_id'                 => $request->input('user_id'),
+      'tempat'                  => $request->input('tempat'),
+      'camp'                    => $request->input('camp'),
+      'tanggal_mulai'           => $request->input('tanggal_mulai'),
+      'tanggal_akhir'           => $request->input('tanggal_akhir'),
+      'status'                  => $request->input('status'),
+      'deskripsi'               => $request->input('deskripsi'),
+    ]);
+
+    // Redirect with success or error message
+    if ($DatasDitolak) {
+      return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
+    } else {
+      return redirect()->route('account.PerjalananDinas.index')->with('error', 'Data Perjalanan Dinas Gagal Disimpan!');
+    }
+  }
+
+  public function destroy($id)
+  {
+    try {
+      $perjalanan_dinas = PerjalananDinas::find($id);
+
+      if ($perjalanan_dinas) {
+        $perjalanan_dinas->delete();
+        return response()->json(['status' => 'success', 'message' => 'Data Berhasil Dihapus!']);
+      } else {
+        return response()->json(['status' => 'error', 'message' => 'Data Tidak Ditemukan!'], 404);
+      }
+    } catch (\Exception $e) {
+      return response()->json(['status' => 'error', 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()], 500);
     }
   }
 }

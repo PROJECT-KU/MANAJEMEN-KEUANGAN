@@ -13,131 +13,113 @@ Data Kategori Uang keluar | MIS
         </div>
 
         <div class="section-body">
-
-            <!--================== MAINTENANCE ==================-->
-            @if (!$maintenances->isEmpty())
-            @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
-                <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
-                    <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
-                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
-                    @if ($maintenance->start_date !== null)
-                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-                    @endif
+            <!--================== FILTER ==================-->
+            <div class="card">
+                <div class="card-header  text-right">
+                    <h4><i class="fas fa-filter"></i> FILTER</h4>
                 </div>
-                @endif
-                @endforeach
-                @endif
-                <!--================== END ==================-->
 
-                <!--================== FILTER ==================-->
-                <div class="card">
-                    <div class="card-header  text-right">
-                        <h4><i class="fas fa-filter"></i> FILTER</h4>
-                    </div>
+                <div class="card-body">
+                    <form action="{{ route('account.categories_credit.search') }}" method="GET" id="searchForm">
+                        <div class="form-group">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                                </div>
+                                @if(request()->has('q'))
+                                <a href="{{ route('account.categories_credit.index') }}" class="btn btn-danger ml-1">
+                                    <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                                </a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
 
-                    <div class="card-body">
-                        <form action="{{ route('account.categories_credit.search') }}" method="GET" id="searchForm">
-                            <div class="form-group">
+                    @if ( Auth::user()->level == 'ceo')
+                    @else
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <div class="form-group text-center">
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                                    </div>
-                                    @if(request()->has('q'))
-                                    <a href="{{ route('account.categories_credit.index') }}" class="btn btn-danger ml-1">
-                                        <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                                    </a>
+                                    <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH KATEGORI</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                </div>
+            </div>
+            <!--================== END ==================-->
+
+
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-list"></i> DATA KATEGORI UANG MASUK</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                                    <th scope="col">KODE KATEGORI</th>
+                                    <th scope="col">NAMA KATEGORI</th>
+                                    @if ( Auth::user()->level == 'ceo')
+                                    @else
+                                    <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                                     @endif
-                                </div>
-                            </div>
-                        </form>
-
-                        @if ( Auth::user()->level == 'ceo')
-                        @else
-                        <div class="row">
-                            <div class="col-12 mt-3">
-                                <div class="form-group text-center">
-                                    <div class="input-group mb-3">
-                                        <a href="{{ route('account.categories_credit.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH KATEGORI</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                    </div>
-                </div>
-                <!--================== END ==================-->
-
-
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-list"></i> DATA KATEGORI UANG MASUK</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                                        <th scope="col">KODE KATEGORI</th>
-                                        <th scope="col">NAMA KATEGORI</th>
-                                        @if ( Auth::user()->level == 'ceo')
-                                        @else
-                                        <th scope="col" style="width: 15%;text-align: center">AKSI</th>
-                                        @endif
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                    $no = 1;
-                                    @endphp
-                                    @foreach ($categories as $hasil)
-                                    <tr>
-                                        <th scope="row" style="text-align: center">{{ $no }}</th>
-                                        <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
-                                        <td style="text-transform:uppercase">{{ $hasil->name }}</td>
-                                        @if ( Auth::user()->level == 'ceo')
-                                        @else
-                                        <td class="text-center">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
-                                                <i class="fa fa-pencil-alt"></i>
-                                            </a>
-                                            <button style="margin-right: 5px; margin-bottom:5px;" onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                        @endif
-                                    </tr>
-                                    @php
-                                    $no++;
-                                    @endphp
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <div style="text-align: center;">
-                                <style>
-                                    @media (max-width: 767px) {
-                                        .pagination {
-                                            margin-left: 480px;
-                                            /* Adjust the margin value as needed for mobile devices */
-                                        }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                $no = 1;
+                                @endphp
+                                @foreach ($categories as $hasil)
+                                <tr>
+                                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                                    <td style="text-transform:uppercase">{{ $hasil->kode }}</td>
+                                    <td style="text-transform:uppercase">{{ $hasil->name }}</td>
+                                    @if ( Auth::user()->level == 'ceo')
+                                    @else
+                                    <td class="text-center">
+                                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.categories_credit.edit', $hasil->id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-pencil-alt"></i>
+                                        </a>
+                                        <button style="margin-right: 5px; margin-bottom:5px;" onClick="Delete(this.id)" class="btn btn-sm btn-danger" id="{{ $hasil->id }}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                    @endif
+                                </tr>
+                                @php
+                                $no++;
+                                @endphp
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <div style="text-align: center;">
+                            <style>
+                                @media (max-width: 767px) {
+                                    .pagination {
+                                        margin-left: 480px;
+                                        /* Adjust the margin value as needed for mobile devices */
                                     }
+                                }
 
-                                    @media (min-width: 768px) and (max-width: 991px) {
-                                        .pagination {
-                                            margin-left: 300px;
-                                            /* Adjust the margin value as needed for iPads */
-                                        }
+                                @media (min-width: 768px) and (max-width: 991px) {
+                                    .pagination {
+                                        margin-left: 300px;
+                                        /* Adjust the margin value as needed for iPads */
                                     }
-                                </style>
-                                {{$categories->links("vendor.pagination.bootstrap-4")}}
-                            </div>
+                                }
+                            </style>
+                            {{$categories->links("vendor.pagination.bootstrap-4")}}
                         </div>
                     </div>
                 </div>
+            </div>
         </div>
     </section>
 </div>
