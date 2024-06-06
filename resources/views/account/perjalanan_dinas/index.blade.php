@@ -4,7 +4,6 @@
 @section('title')
 Data Perjalanan Dinas | MIS
 @stop
-<link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
 <style>
   /* Sembunyikan tabel Diterima dan Ditolak secara default */
   #tableDiterima,
