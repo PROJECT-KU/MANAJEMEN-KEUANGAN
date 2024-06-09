@@ -467,20 +467,21 @@ Tambah Artikel | MIS
 <!--================== END ==================-->
 
 <!--================== CKEDITOR ==================-->
-<style>
-    .ckeditor-container {
-        width: 100%;
-    }
-</style>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
 <script>
-    // Replace 'jobdesk' textarea with CKEditor
-    CKEDITOR.replace('isi', {
-        width: '100%', // Set CKEditor width to 100%
-        height: '500px' // You can adjust the height as needed
+    document.addEventListener("DOMContentLoaded", function() {
+        ClassicEditor
+            .create(document.querySelector('#isi'))
+            .then(editor => {
+                console.log('CKEditor initialized successfully');
+            })
+            .catch(error => {
+                console.error(error);
+            });
     });
 </script>
+
 <!--================== END ==================-->
 
 <script>
