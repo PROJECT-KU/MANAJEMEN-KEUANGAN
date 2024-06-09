@@ -52,7 +52,7 @@ Tambah Artikel | MIS
                                 <div class="form-group">
                                     <label>Nama Kategori</label>
                                     <select class="form-control select2" name="categories_artikel_id" id="kategoriSelect" style="width: 100%" required>
-                                        <option value="">-- PILIH KATEGORI ARTIKEL --</option>
+                                        <option value="" selected disabled>-- PILIH KATEGORI ARTIKEL --</option>
                                         @foreach ($categories_artikel as $kategori)
                                         <option value="{{ $kategori->id }}">{{ strtoupper($kategori->kategori) }}</option>
                                         @endforeach

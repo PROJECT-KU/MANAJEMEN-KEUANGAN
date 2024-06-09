@@ -355,6 +355,26 @@ class ArtikelController extends Controller
         }
     }
 
+    // <!--================== HANDLE CKEDITOR ==================-->
+    public function upload(Request $request)
+    {
+        if ($request->hasFile('upload')) {
+
+            $file = $request->file('upload');
+            $name = $file->getClientOriginalName();
+            $name = Str::slug($name);
+            $img  = Image::make($file);
+            $img->stream();
+            $name = str_replace('png', '', $name) . '.png';
+
+            Storage::disk('images')->put('posts/' . $name, $img);
+
+            return response()->json([
+                'url' => "/images/posts/$name"
+            ]);
+        }
+    }
+    // <!--================== END ==================-->
 
     public function destroy($id)
     {

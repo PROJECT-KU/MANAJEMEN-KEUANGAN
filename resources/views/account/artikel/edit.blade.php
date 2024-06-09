@@ -208,12 +208,13 @@ Tambah Artikel | MIS
                             </div>
                         </div>
 
+
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Catatan</label>
+                                    <label for="isi">Isi Artikel</label>
                                     <div class="input-group">
-                                        <textarea name="isi" id="isi" placeholder="Masukkan Teks Artikel" class="form-control" style="width: 100%;">{{ $artikel->isi }}</textarea>
+                                        <textarea name="isi" id="isi" placeholder="Masukkan Teks Artikel" class="form-control">{{ $artikel->isi }}</textarea>
                                     </div>
                                     @error('note')
                                     <div class="invalid-feedback" style="display: block">
@@ -487,20 +488,21 @@ Tambah Artikel | MIS
 <!--================== END ==================-->
 
 <!--================== CKEDITOR ==================-->
-<style>
-    .ckeditor-container {
-        width: 100%;
-    }
-</style>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
 <script>
-    // Replace 'jobdesk' textarea with CKEditor
-    CKEDITOR.replace('isi', {
-        width: '100%', // Set CKEditor width to 100%
-        height: '300px' // You can adjust the height as needed
+    document.addEventListener("DOMContentLoaded", function() {
+        ClassicEditor
+            .create(document.querySelector('#isi'))
+            .then(editor => {
+                console.log('CKEditor initialized successfully');
+            })
+            .catch(error => {
+                console.error(error);
+            });
     });
 </script>
+
 <!--================== END ==================-->
 
 <script>
