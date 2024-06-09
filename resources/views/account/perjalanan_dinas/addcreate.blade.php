@@ -1465,24 +1465,72 @@ Tambah laporan Camp | MIS
               </div>
             </div>
           </div>
-          <!--================== END ==================-->
 
-          <!--================== INPUT 36 ==================-->
-          <div class="card card-custom input-field36" style="display: none;">
-            <div class="card-header d-flex justify-content-between">
-              <h4>TAMBAH INPUTAN</h4>
-              <div>
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger d-flex align-items-center" id="removeAddedInput36" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-trash"></i>
-                  <span class="ml-2">HAPUS</span>
-                </button>
+        </div>
+      </div>
+      <!--================== END ==================-->
+
+
+      <!--================== CARD 5 ==================-->
+      <div class="card card-field5" style="display: none;">
+        <div class="card-header d-flex justify-content-between">
+          <h4>TAMBAH LAPORAN</h4>
+          <div>
+            <label class="mb-3"></label>
+            <button type="button" class="btn btn-danger d-flex align-items-center" id="removeAddedCard5" style="height: 40px; white-space: nowrap;">
+              <i class="fas fa-trash"></i>
+              <span class="ml-2">HAPUS</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="row">
+            <div class="col-md-10">
+              <div class="form-group">
+                <label>Tanggal</label>
+                <div class="input-group">
+                  <input type="date" name="tanggal36" id="tanggal36" value="{{ old('tanggal36') }}" placeholder="Masukkan Tanggal" class="form-control">
+                </div>
+                @error('tanggal36')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
               </div>
             </div>
-            <div class="card-body">
 
+            <div class="col-md-2">
+              <label class="mb-3"></label>
+              <button type="button" class="btn btn-info ml-auto d-flex justify-content-center align-items-center" id="addInput36" style="height: 40px; white-space: nowrap;">
+                <i class="fas fa-plus"></i>
+                <span class="ml-2">INPUT</span>
+              </button>
+            </div>
+
+          </div>
+          <!--================== INPUT 36 ==================-->
+          <div class="card card-custom">
+            <div class="card-body">
               <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Uang Masuk</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">Rp.</span>
+                      </div>
+                      <input type="text" name="uang_masuk36" value="{{ old('uang_masuk36') }}" placeholder="Total Uang Masuk" class="form-control uang_masuk_currency36">
+                    </div>
+                    @error('uang_masuk36')
+                    <div class="invalid-feedback" style="display: block">
+                      {{ $message }}
+                    </div>
+                    @enderror
+                  </div>
+                </div>
+
+                <div class="col-md-6">
                   <div class="form-group">
                     <label>Uang Keluar</label>
                     <div class="input-group">
@@ -1945,21 +1993,35 @@ Tambah laporan Camp | MIS
     $('#addCard3').on('click', function() {
       if (cardCounter === 0) {
         $('.card-field4').show();
-        $('#addCard3').hide();
         $('#removeAddedCard4').show();
+      } else if (cardCounter === 1) {
+        $('.card-field5').show();
+        $('#removeAddedCard5').show();
+        $('#addCard3').hide(); // Hide add button after showing the second card field
       }
-
       cardCounter++;
     });
 
     // Remove additional card fields
     $('#removeAddedCard4').on('click', function() {
       $('.card-field4').hide();
-      $('#addCard3').show();
+      $('#removeAddedCard4').hide();
+      if (cardCounter > 1) {
+        $('#addCard3').show();
+      }
       cardCounter--;
     });
+
+    $('#removeAddedCard5').on('click', function() {
+      $('.card-field5').hide();
+      $('#removeAddedCard5').hide();
+      $('#addCard3').show(); // Show add button when the second card field is removed
+      cardCounter--;
+    });
+
   });
 </script>
+
 <!--================== END ==================-->
 
 <!--================== ADD DAN REMOVE FIELDS INPUT 3 ==================-->
@@ -2085,11 +2147,6 @@ Tambah laporan Camp | MIS
         $('#removeAddedInput33').show();
         $('#removeAddedInput34').show();
         $('#removeAddedInput35').show();
-        $('#removeAddedInput36').show();
-        $('#removeAddedInput37').show();
-        $('#removeAddedInput38').show();
-        $('#removeAddedInput39').show();
-        $('#removeAddedInput40').show();
       } else if (inputCounter === 1) {
         $('.input-field32').show();
         $('#addInput31').show();
@@ -2106,26 +2163,6 @@ Tambah laporan Camp | MIS
         $('.input-field35').show();
         $('#addInput31').show();
         $('#removeAddedInput35').show();
-      } else if (inputCounter === 5) {
-        $('.input-field36').show();
-        $('#addInput31').show();
-        $('#removeAddedInput36').show();
-      } else if (inputCounter === 6) {
-        $('.input-field37').show();
-        $('#addInput31').show();
-        $('#removeAddedInput37').show();
-      } else if (inputCounter === 7) {
-        $('.input-field38').show();
-        $('#addInput31').show();
-        $('#removeAddedInput38').show();
-      } else if (inputCounter === 8) {
-        $('.input-field39').show();
-        $('#addInput31').show();
-        $('#removeAddedInput39').show();
-      } else if (inputCounter === 9) {
-        $('.input-field40').show();
-        $('#addInput31').show();
-        $('#removeAddedInput40').show();
       }
 
       inputCounter++;
@@ -2149,32 +2186,67 @@ Tambah laporan Camp | MIS
     });
     $('#removeAddedInput35').on('click', function() {
       $('.input-field35').hide();
-      $('#addInput31').show();
+      $('#addInput31').hide();
       inputCounter--;
     });
-    $('#removeAddedInput36').on('click', function() {
-      $('.input-field36').hide();
-      $('#addInput31').show();
-      inputCounter--;
+
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== ADD DAN REMOVE FIELDS INPUT 5 ==================-->
+<script>
+  $(document).ready(function() {
+
+    var inputCounter = 0;
+
+    $('#addInput36').on('click', function() {
+      if (inputCounter === 0) {
+        $('.input-field37').show();
+        $('#removeAddedInput37').show();
+        $('#removeAddedInput38').show();
+        $('#removeAddedInput39').show();
+        $('#removeAddedInput40').show();
+      } else if (inputCounter === 1) {
+        $('.input-field37').show();
+        $('#addInput36').show();
+        $('#removeAddedInput37').show();
+      } else if (inputCounter === 2) {
+        $('.input-field38').show();
+        $('#addInput36').show();
+        $('#removeAddedInput38').show();
+      } else if (inputCounter === 3) {
+        $('.input-field39').show();
+        $('#addInput36').show();
+        $('#removeAddedInput39').show();
+      } else if (inputCounter === 4) {
+        $('.input-field40').show();
+        $('#addInput36').hide();
+        $('#removeAddedInput40').show();
+      }
+
+      inputCounter++;
     });
+
+    // Remove additional input fields
     $('#removeAddedInput37').on('click', function() {
       $('.input-field37').hide();
-      $('#addInput31').show();
+      $('#addInput36').show();
       inputCounter--;
     });
     $('#removeAddedInput38').on('click', function() {
       $('.input-field38').hide();
-      $('#addInput31').show();
+      $('#addInput36').show();
       inputCounter--;
     });
     $('#removeAddedInput39').on('click', function() {
       $('.input-field39').hide();
-      $('#addInput31').show();
+      $('#addInput36').show();
       inputCounter--;
     });
     $('#removeAddedInput40').on('click', function() {
       $('.input-field40').hide();
-      $('#addInput31').show();
+      $('#addInput36').show();
       inputCounter--;
     });
 

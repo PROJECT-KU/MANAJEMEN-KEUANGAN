@@ -247,6 +247,7 @@ Route::prefix('account')->group(
         Route::post('/article/store', 'account\ArtikelController@store')->name('account.Artikel.store');
         Route::get('/article/edit/{id}{token}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
         Route::put('/article/update/{id}', 'account\ArtikelController@update')->name('account.Artikel.update');
+        Route::post('/article/upload/', 'account\ArtikelController@upload')->name('account.Artikel.upload');
         Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
         Route::get('/article/search', 'account\ArtikelController@search')->name('account.Artikel.search');
         Route::get('/article/filter', 'account\ArtikelController@filter')->name('account.Artikel.filter');

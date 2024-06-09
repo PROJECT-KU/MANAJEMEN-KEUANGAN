@@ -114,15 +114,21 @@ Artikel | Rumah Scopus
                             </ul>
                         </div>
                         <div class="entry-content">
-                            <p>
-                                {!! strip_tags($artikel->isi) !!}
-                            </p>
-
-                            <!-- <blockquote>
-                                <p>
-                                    Et vero doloremque tempore voluptatem ratione vel aut. Deleniti sunt animi aut. Aut eos aliquam doloribus minus autem quos.
-                                </p>
-                            </blockquote> -->
+                            <div class="article-container">
+                                {!! $artikel->isi !!}
+                            </div>
+                            <style>
+                                .article-container img {
+                                    max-width: 100%;
+                                    /* Set maximum width to 100% */
+                                    height: auto;
+                                    /* Maintain aspect ratio */
+                                    display: block;
+                                    /* Ensure proper rendering */
+                                    margin: 0 auto;
+                                    /* Center the images */
+                                }
+                            </style>
                         </div>
 
                         <div class="entry-footer">
