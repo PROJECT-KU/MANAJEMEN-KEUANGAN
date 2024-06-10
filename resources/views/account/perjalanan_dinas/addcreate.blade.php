@@ -2138,56 +2138,53 @@ Tambah laporan Camp | MIS
 <script>
   $(document).ready(function() {
 
-    var inputCounter = 0;
+    var inputCounter4 = 0;
 
     $('#addInput31').on('click', function() {
-      if (inputCounter === 0) {
+      if (inputCounter4 === 0) {
         $('.input-field32').show();
         $('#removeAddedInput32').show();
-        $('#removeAddedInput33').show();
-        $('#removeAddedInput34').show();
-        $('#removeAddedInput35').show();
-      } else if (inputCounter === 1) {
-        $('.input-field32').show();
-        $('#addInput31').show();
-        $('#removeAddedInput32').show();
-      } else if (inputCounter === 2) {
+      } else if (inputCounter4 === 1) {
         $('.input-field33').show();
-        $('#addInput31').show();
         $('#removeAddedInput33').show();
-      } else if (inputCounter === 3) {
+      } else if (inputCounter4 === 2) {
         $('.input-field34').show();
-        $('#addInput31').show();
         $('#removeAddedInput34').show();
-      } else if (inputCounter === 4) {
+      } else if (inputCounter4 === 3) {
         $('.input-field35').show();
-        $('#addInput31').show();
         $('#removeAddedInput35').show();
       }
 
-      inputCounter++;
+      inputCounter4++;
+      if (inputCounter4 >= 4) {
+        $('#addInput31').hide();
+      }
     });
 
     // Remove additional input fields
     $('#removeAddedInput32').on('click', function() {
       $('.input-field32').hide();
+      $('#removeAddedInput32').hide();
+      inputCounter4--;
       $('#addInput31').show();
-      inputCounter--;
     });
     $('#removeAddedInput33').on('click', function() {
       $('.input-field33').hide();
+      $('#removeAddedInput33').hide();
+      inputCounter4--;
       $('#addInput31').show();
-      inputCounter--;
     });
     $('#removeAddedInput34').on('click', function() {
       $('.input-field34').hide();
+      $('#removeAddedInput34').hide();
+      inputCounter4--;
       $('#addInput31').show();
-      inputCounter--;
     });
     $('#removeAddedInput35').on('click', function() {
       $('.input-field35').hide();
-      $('#addInput31').hide();
-      inputCounter--;
+      $('#removeAddedInput35').hide();
+      inputCounter4--;
+      $('#addInput31').show();
     });
 
   });
@@ -2198,56 +2195,56 @@ Tambah laporan Camp | MIS
 <script>
   $(document).ready(function() {
 
-    var inputCounter = 0;
+    var inputCounter5 = 0;
 
     $('#addInput36').on('click', function() {
-      if (inputCounter === 0) {
+      if (inputCounter5 === 0) {
         $('.input-field37').show();
         $('#removeAddedInput37').show();
         $('#removeAddedInput38').show();
         $('#removeAddedInput39').show();
         $('#removeAddedInput40').show();
-      } else if (inputCounter === 1) {
+      } else if (inputCounter5 === 1) {
         $('.input-field37').show();
         $('#addInput36').show();
         $('#removeAddedInput37').show();
-      } else if (inputCounter === 2) {
+      } else if (inputCounter5 === 2) {
         $('.input-field38').show();
         $('#addInput36').show();
         $('#removeAddedInput38').show();
-      } else if (inputCounter === 3) {
+      } else if (inputCounter5 === 3) {
         $('.input-field39').show();
         $('#addInput36').show();
         $('#removeAddedInput39').show();
-      } else if (inputCounter === 4) {
+      } else if (inputCounter5 === 4) {
         $('.input-field40').show();
         $('#addInput36').hide();
         $('#removeAddedInput40').show();
       }
 
-      inputCounter++;
+      inputCounter5++;
     });
 
     // Remove additional input fields
     $('#removeAddedInput37').on('click', function() {
       $('.input-field37').hide();
       $('#addInput36').show();
-      inputCounter--;
+      inputCounter5--;
     });
     $('#removeAddedInput38').on('click', function() {
       $('.input-field38').hide();
       $('#addInput36').show();
-      inputCounter--;
+      inputCounter5--;
     });
     $('#removeAddedInput39').on('click', function() {
       $('.input-field39').hide();
       $('#addInput36').show();
-      inputCounter--;
+      inputCounter5--;
     });
     $('#removeAddedInput40').on('click', function() {
       $('.input-field40').hide();
       $('#addInput36').show();
-      inputCounter--;
+      inputCounter5--;
     });
 
   });

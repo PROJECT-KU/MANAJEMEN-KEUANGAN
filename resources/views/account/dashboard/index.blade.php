@@ -227,7 +227,7 @@ Dashboard | MIS
 <!--================== END ==================-->
 
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-lg-6 col-md-12 col-sm-6 col-xs-6">
         <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
             <div class="card-icon shadow-primary bg-primary">
@@ -250,11 +250,11 @@ Dashboard | MIS
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
         <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
             <div class="card-icon shadow-primary bg-primary">
@@ -352,7 +352,7 @@ Dashboard | MIS
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
 <div class="row" id="PenggunaBaru">
