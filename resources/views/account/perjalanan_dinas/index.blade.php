@@ -74,11 +74,6 @@ Data Perjalanan Dinas | MIS
             </p>
             <div class="input-group" style="width: 300px;">
               <input type="text" class="form-control" id="searchDiajukan" placeholder="Pencarian">
-              <!-- <div class="input-group-append">
-                  <a href="{{ route('account.PerjalananDinas.index') }}"><button class="btn btn-outline-danger ml-1" type="button" id="clearSearch" style="display: none;">
-                      <i class="fas fa-trash"></i>
-                    </button></a>
-                </div> -->
             </div>
           </div>
 
@@ -106,7 +101,6 @@ Data Perjalanan Dinas | MIS
                   $no = 1;
                   @endphp
                   @foreach ($DatasAjukan as $hasil)
-                  @if ($hasil->status == 'ajukan')
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
@@ -118,29 +112,25 @@ Data Perjalanan Dinas | MIS
                     <td class="column-width" style="text-align: center; width:150px">
                       @if($hasil->status == 'ajukan')
                       <span class="badge badge-warning">DIAJUKAN</span>
+                      @else
+                      <span class="badge badge-secondary">DRAFT</span>
                       @endif
                     </td>
-                    @if (Auth::user()->level == 'karyawan')
                     <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-eye" style="margin-top:6px"></i>
-                      </a>
-                    </td>
-                    @else
-                    <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editAjukan', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.Edit', $hasil->id) }}" class="btn btn-sm btn-info mt-2">
                         <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                      </a>
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
                       </a>
                       <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
                         <i class="fa fa-trash"></i>
                       </button>
                     </td>
-                    @endif
                   </tr>
                   @php
                   $no++;
                   @endphp
-                  @endif
                   @endforeach
                 </tbody>
               </table>
@@ -232,22 +222,14 @@ Data Perjalanan Dinas | MIS
                       <span class="badge badge-success">DITERIMA</span>
                       @endif
                     </td>
-                    @if (Auth::user()->level == 'karyawan')
                     <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editDiterima', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDiterima', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-eye" style="margin-top:6px"></i>
-                      </a>
-                    </td>
-                    @else
-                    <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editDiterima', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
-                        <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
                       </a>
                       <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
                         <i class="fa fa-trash"></i>
                       </button>
                     </td>
-                    @endif
                   </tr>
                   @php
                   $no++;
@@ -343,22 +325,14 @@ Data Perjalanan Dinas | MIS
                       <span class="badge badge-danger">DITOLAK</span>
                       @endif
                     </td>
-                    @if (Auth::user()->level == 'karyawan')
                     <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editDitolak', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDitolak', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-eye" style="margin-top:6px"></i>
-                      </a>
-                    </td>
-                    @else
-                    <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.editDitolak', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
-                        <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
                       </a>
                       <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
                         <i class="fa fa-trash"></i>
                       </button>
                     </td>
-                    @endif
                   </tr>
                   @php
                   $no++;

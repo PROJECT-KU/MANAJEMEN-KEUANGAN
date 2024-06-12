@@ -20,7 +20,7 @@ class PerjalananDinas extends Migration
             $table->string('id_transaksi', 300)->nullable();
 
             // <!-- INPUT 1 -->
-            $table->dateTime('tanggal')->nullable();
+            $table->date('tanggal')->nullable();
             $table->bigInteger('uang_masuk')->nullable();
             $table->bigInteger('uang_keluar')->nullable();
             $table->text('keterangan')->nullable();
@@ -82,7 +82,7 @@ class PerjalananDinas extends Migration
             // <!-- END -->
 
             // <!-- INPUT 11 -->
-            $table->dateTime('tanggal11')->nullable();
+            $table->date('tanggal11')->nullable();
             $table->bigInteger('uang_masuk11')->nullable();
             $table->bigInteger('uang_keluar11')->nullable();
             $table->text('keterangan11')->nullable();
@@ -144,7 +144,7 @@ class PerjalananDinas extends Migration
             // <!-- END -->
 
             // <!-- INPUT 21 -->
-            $table->dateTime('tanggal21')->nullable();
+            $table->date('tanggal21')->nullable();
             $table->bigInteger('uang_masuk21')->nullable();
             $table->bigInteger('uang_keluar21')->nullable();
             $table->text('keterangan21')->nullable();
@@ -206,7 +206,7 @@ class PerjalananDinas extends Migration
             // <!-- END -->
 
             // <!-- INPUT 31 -->
-            $table->dateTime('tanggal31')->nullable();
+            $table->date('tanggal31')->nullable();
             $table->bigInteger('uang_masuk31')->nullable();
             $table->bigInteger('uang_keluar31')->nullable();
             $table->text('keterangan31')->nullable();
@@ -238,6 +238,8 @@ class PerjalananDinas extends Migration
             // <!-- END -->
 
             // <!-- INPUT 36 -->
+            $table->date('tanggal36')->nullable();
+            $table->bigInteger('uang_masuk36')->nullable();
             $table->bigInteger('uang_keluar36')->nullable();
             $table->text('keterangan36')->nullable();
             $table->string('gambar36')->nullable();
@@ -270,8 +272,8 @@ class PerjalananDinas extends Migration
             $table->string('status', 300)->nullable();
             $table->string('tempat', 300)->nullable();
             $table->string('camp', 300)->nullable();
-            $table->dateTime('tanggal_mulai')->nullable();
-            $table->dateTime('tanggal_akhir')->nullable();
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_akhir')->nullable();
             $table->text('deskripsi')->nullable();
             $table->bigInteger('total_uang_masuk')->nullable();
             $table->bigInteger('total_uang_keluar')->nullable();

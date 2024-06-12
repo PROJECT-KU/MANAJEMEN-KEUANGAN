@@ -6,6 +6,7 @@ use App\Debit;
 use App\User;
 use App\Presensi;
 use App\Gaji;
+use App\Artikel;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -432,6 +433,15 @@ class DashboardController extends Controller
 
         //  <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji'));
+        // <!--================== DATA ARTIKEL ==================-->
+        $artikel = DB::table('artikel')
+            ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
+            ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
+            ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            ->orderBy('artikel.created_at', 'DESC')
+            ->paginate(6);
+        // <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel'));
     }
 }

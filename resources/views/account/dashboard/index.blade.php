@@ -183,176 +183,28 @@ Dashboard | MIS
         <!--================== END ==================-->
 </div>
 
-
-<!--================== MANU DI PWA ==================-->
-<!-- <div class="row" id="MenuPwaCard">
+<div class="row">
     <div class="col-md-12">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED;">
-            <h4 style="color: white;font-size:16px; margin-top:8px;">AKSES CEPAT</h4>
-        </div>
-        <div class="card card-statistic-2" style="overflow: hidden; height:max-content;">
-            <div id="carousel" class="mb-5">
-
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #007bff, #0056b3, #002366, #000080); text-align: center;">
-                    <a href="{{ route('account.gaji.index') }}"><i class="fas fa-file-invoice-dollar" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block;">Gaji</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFA500, #FF8C00, #FF6347, #FF4500); text-align: center;">
-                    <a href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -2px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
-                    <a href="{{ route('account.debit.index') }}"><i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                    <span style="font-size: 16px;">Masuk</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FF6347, #FF4500, #FF0000, #B22222); text-align: center;">
-                    <a href="{{ route('account.credit.index') }}"><i class="fas fa-hand-holding-usd" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                    <span style="font-size: 16px;">Keluar</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
-                    <a href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Laporan</span>
-                </div>
-                <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FF1493); text-align: center;">
-                    <a href="{{ route('account.more.index') }}"><i class="fas fa-th-large" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 1px;"></i></a>
-                    <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">More</span>
-                </div>
-
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
             </div>
-        </div>
-    </div>
-</div> -->
-<!--================== END ==================-->
-
-
-<!-- <div class="row">
-    <div class="col-lg-6 col-md-12 col-sm-6 col-xs-6">
-        <div class="card card-statistic-2" id="SisaSaldoBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <label>Kehadiran</label>
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4 style="color: white;">PEMASUKAN</h4>
+            <div class="card-body">
+                <div class="artikel-list mt-4">
+                    @foreach ($artikel as $item)
+                    <div class="artikel-item mb-3">
+                        <h5>{{ $item->judul }}</h5>
+                        <p>Jumlah Dilihat: {{ $item->dilihat }}</p>
+                    </div>
+                    @endforeach
                 </div>
-                @if (Auth::user()->level == 'karyawan')
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($total_pemasukan + $totalGaji) }}
-                </div>
-                @elseif (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($total_pemasukan) }}
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-</div> -->
-
-
-
-<!-- <div class="row">
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanHariIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN HARI INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($Pemasukan_hari_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN BULAN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($pemasukan_bulan_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#AFEEEE;" id="PemasukanTahunIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PEMASUKAN TAHUN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px; height: 100%;">
-                    {{ rupiah($pemasukan_tahun_ini) }}
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $artikel->links() }}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row mb-2">
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranHariIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN HARI INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_hari_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranBulanIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN BULAN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_bulan_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <div class="card card-statistic-2" style="background-color:#FFB6C1;" id="PengeluaranTahunIniCard">
-            <div class="card-icon shadow-primary bg-primary">
-                <i class="fas fa-money-check-alt" style="margin-top: 13px;"></i>
-            </div>
-            <div class="card-wrap" style="height: 100px;">
-                <div class="card-header">
-                    <h4><b>PENGELUARAN TAHUN INI</b></h4>
-                </div>
-                <div class="card-body" style="font-size: 20px;">
-                    {{ rupiah($pengeluaran_tahun_ini) }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->
 
 @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
 <div class="row" id="PenggunaBaru">

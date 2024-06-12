@@ -215,7 +215,6 @@ class ArtikelController extends Controller
             ->select('artikel.id', 'artikel.user_id', 'artikel.categories_artikel_id', 'artikel.token', 'artikel.judul', 'artikel.kata_kunci', 'artikel.gambar_depan', 'artikel.gambar_cover', 'artikel.isi', 'artikel.dilihat', 'artikel.status', 'artikel.created_at', 'users.id as user_id', 'users.full_name as full_name', 'users.gambar as gambar', 'categories_artikel.kategori')
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
-            ->whereBetween('artikel.created_at', [$currentMonth, $nextMonth])
             ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
 

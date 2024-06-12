@@ -240,6 +240,8 @@ class PerjalananDinas extends Model
         // <!-- END -->
 
         // <!-- INPUT 36 -->
+        'tanggal36',
+        'uang_masuk36',
         'uang_keluar36',
         'keterangan36',
         'gambar36',
