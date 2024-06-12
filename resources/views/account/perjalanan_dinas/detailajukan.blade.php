@@ -95,7 +95,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
     <div class="section-body">
 
-      <form action="{{ route('account.PerjalananDinas.updateAjukan', $DatasAjukan->id) }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ route('account.PerjalananDinas.DetailAjukan', $DatasAjukan->id) }}" method="GET" enctype="multipart/form-data">
         @csrf
 
 
@@ -118,7 +118,7 @@ Update Perjalanan Dinas Ajukan | MIS
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Nama Bendahara</label>
-                  <input type="text" name="user_name" value="{{ $data->where('id', $Datas->user_id)->first()->full_name }}" class="form-control" style="text-transform:uppercase;" readonly>
+                  <input type="text" name="user_name" value="{{ $datas->where('id', $DatasAjukan->user_id)->first()->full_name }}" class="form-control" style="text-transform:uppercase;" readonly>
                   <input type="hidden" name="user_id" value="{{ $DatasAjukan->user_id }}">
                 </div>
               </div>
@@ -2849,63 +2849,21 @@ Update Perjalanan Dinas Ajukan | MIS
         </div>
         <!--================== END CARD ==================-->
 
-        <style>
-          .button-container {
-            display: flex;
-            justify-content: center;
-            /* Center horizontally */
-            margin-top: -20px;
-            padding: 0 20px;
-            width: 100%;
-          }
-
-          .button-container .btn {
-            font-size: 14px;
-            text-align: center;
-            cursor: pointer;
-            padding: 10px 20px;
-            /* Add padding to increase clickable area */
-            display: flex;
-            justify-content: center;
-            /* Center the text within the button */
-            align-items: center;
-            /* Center the text vertically within the button */
-          }
-
-          /* Styles for mobile devices */
-          @media (max-width: 767px) {
-            .button-container .btn {
-              width: 100%;
-              /* Full width on mobile */
-            }
-          }
-
-          /* Styles for tablets */
-          @media (min-width: 768px) and (max-width: 1024px) {
-            .button-container .btn {
-              width: 100%;
-              /* Adjust width for tablets */
-            }
-          }
-
-          /* Styles for laptops and desktops */
-          @media (min-width: 1025px) {
-            .button-container .btn {
-              width: 90%;
-              align-items: center;
-              margin-left: 250px;
-              /* Adjust width for larger screens */
-            }
-          }
-        </style>
-
-        <div class="col-md-12">
-          <div class="button-container">
-            <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button">
-              <i class="fa fa-undo mr-1"></i> KEMBALI
-            </a>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <div class="d-flex justify-content-center">
+                  <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:40px; font-size:14px; padding:8px;">
+                    <i class="fa fa-undo mr-1"></i> KEMBALI
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+
 
 
 
