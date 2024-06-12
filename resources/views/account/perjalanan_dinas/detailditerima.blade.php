@@ -2849,22 +2849,11 @@ Update Perjalanan Dinas Ajukan | MIS
         </div>
         <!--================== END CARD ==================-->
 
-        <div class="container">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <div class="d-flex justify-content-center">
-                  <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:40px; font-size:14px; padding:8px;">
-                    <i class="fa fa-undo mr-1"></i> KEMBALI
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="button-container">
+          <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
+            <i class="fa fa-undo mr-1"></i> KEMBALI
+          </a>
         </div>
-
-
-
 
 
       </form>
