@@ -95,7 +95,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
     <div class="section-body">
 
-      <form action="{{ route('account.PerjalananDinas.DetailAjukan', $DatasAjukan->id) }}" method="GET" enctype="multipart/form-data">
+      <form action="{{ route('account.PerjalananDinas.UpdateEdit', $DatasAjukan->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
 
 
@@ -188,12 +188,19 @@ Update Perjalanan Dinas Ajukan | MIS
                 <div class="form-group">
                   <label>Status</label>
                   <div class="input-group">
-                    @if ($DatasAjukan->status == "ajukan")
-                    <input type="text" style="font-weight: bold; text-transform:uppercase; background-color:#FFA500;" name="status" value="{{ $DatasAjukan->status }}" placeholder="Masukan Keterangan" class="form-control" readonly>
-                    @elseif ($DatasAjukan->status == "diterima")
-                    <input type="text" style="font-weight: bold; text-transform:uppercase; background-color:#90EE90;" name="status" value="{{ $DatasAjukan->status }}" placeholder="Masukan Keterangan" class="form-control" readonly>
+                    @if (Auth::user()->level == 'karyawan')
+                    <select class="form-control" name="status" disabled>
+                      <option value="" disabled selected>-- PILIH STATUS --</option>
+                      <option value="ajukan" {{ $DatasAjukan->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
+                      <option value="draft" {{ $DatasAjukan->status == 'draft' ? 'selected' : '' }}>DRAFT</option>
+                    </select>
                     @else
-                    <input type="text" style="font-weight: bold; text-transform:uppercase; background-color:#CD5C5C; color:white;" name="status" value="{{ $DatasAjukan->status }}" placeholder="Masukan Keterangan" class="form-control" readonly>
+                    <select class="form-control" name="status" required>
+                      <option value="" disabled selected>-- PILIH STATUS --</option>
+                      <option value="diterima" {{ $DatasAjukan->status == 'diterima' ? 'selected' : '' }}>DITERIMA</option>
+                      <option value="ajukan" {{ $DatasAjukan->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
+                      <option value="ditolak" {{ $DatasAjukan->status == 'ditolak' ? 'selected' : '' }}>DITOLAK</option>
+                    </select>
                     @endif
                   </div>
                 </div>
@@ -254,7 +261,11 @@ Update Perjalanan Dinas Ajukan | MIS
                 <div class="form-group">
                   <label style=" font-weight: bold;">Catatan</label>
                   <div class="input-group" style=" border: 2px solid 	#FFA500; border-radius: 8px;">
+                    @if (Auth::user()->level == 'karyawan')
                     <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" readonly>{{ $DatasAjukan->deskripsi }}</textarea>
+                    @else
+                    <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" required>{{ $DatasAjukan->deskripsi }}</textarea>
+                    @endif
                   </div>
                 </div>
               </div>
@@ -281,7 +292,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Tanggal</label>
                     <div class="input-group">
-                      <input type="text" name="tanggal" id="tanggal" value="{{strftime('%d %B %Y', strtotime($DatasAjukan->tanggal)) }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
+                      <input type="date" name="tanggal" id="tanggal" value="{{ $DatasAjukan->tanggal }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -921,7 +932,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Tanggal</label>
                     <div class="input-group">
-                      <input type="text" name="tanggal11" id="tanggal11" value="{{ strftime('%d %B %Y', strtotime($DatasAjukan->tanggal11)) }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
+                      <input type="date" name="tanggal11" id="tanggal11" value="{{ $DatasAjukan->tanggal11 }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -1559,7 +1570,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Tanggal</label>
                     <div class="input-group">
-                      <input type="text" name="tanggal21" id="tanggal21" value="{{ strftime('%d %B %Y', strtotime($DatasAjukan->tanggal21)) }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
+                      <input type="date" name="tanggal21" id="tanggal21" value="{{ $DatasAjukan->tanggal21 }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -2195,7 +2206,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Tanggal</label>
                     <div class="input-group">
-                      <input type="text" name="tanggal31" id="tanggal31" value="{{ strftime('%d %B %Y', strtotime($DatasAjukan->tanggal31)) }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
+                      <input type="date" name="tanggal31" id="tanggal31" value="{{ $DatasAjukan->tanggal31 }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -2530,7 +2541,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Tanggal</label>
                     <div class="input-group">
-                      <input type="text" name="tanggal36" id="tanggal36" value="{{ strftime('%d %B %Y', strtotime($DatasAjukan->tanggal36)) }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
+                      <input type="date" name="tanggal36" id="tanggal36" value="{{ $DatasAjukan->tanggal36 }}" placeholder="Masukkan Tanggal" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -2849,23 +2860,20 @@ Update Perjalanan Dinas Ajukan | MIS
         </div>
         <!--================== END CARD ==================-->
 
-        <div class="container">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <div class="d-flex justify-content-center">
-                  <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:40px; font-size:14px; padding:8px;">
-                    <i class="fa fa-undo mr-1"></i> KEMBALI
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="button-container">
+          @if (Auth::user()->level == 'karyawan')
+          <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
+            <i class="fa fa-undo mr-1"></i> KEMBALI
+          </a>
+          @else
+          <button class="btn btn-primary btn-submit" name="action" value="save" type="submit" style="width:50%; margin-right:5px;">
+            <i class="fa fa-paper-plane"></i> SIMPAN
+          </button>
+          <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:50%; height:45px; font-size:14px; padding:10px;">
+            <i class="fa fa-undo mr-1"></i> KEMBALI
+          </a>
+          @endif
         </div>
-
-
-
-
 
       </form>
     </div>
