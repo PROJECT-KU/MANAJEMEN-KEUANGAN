@@ -262,12 +262,13 @@ Route::prefix('account')->group(
         Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
         Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
         Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
-        Route::get('/Perjalanan-Dinas/editAjukan/{id}', 'account\PerjalananDinasController@editAjukan')->name('account.PerjalananDinas.editAjukan');
-        Route::get('/Perjalanan-Dinas/editDiterima/{id}', 'account\PerjalananDinasController@editDiterima')->name('account.PerjalananDinas.editDiterima');
-        Route::get('/Perjalanan-Dinas/editDitolak/{id}', 'account\PerjalananDinasController@editDitolak')->name('account.PerjalananDinas.editDitolak');
-        Route::post('/Perjalanan-Dinas/updateAjukan/{id}', 'account\PerjalananDinasController@updateAjukan')->name('account.PerjalananDinas.updateAjukan');
-        Route::post('/Perjalanan-Dinas/updateDiterima/{id}', 'account\PerjalananDinasController@updateDiterima')->name('account.PerjalananDinas.updateDiterima');
-        Route::post('/Perjalanan-Dinas/updateDitolak/{id}', 'account\PerjalananDinasController@updateDitolak')->name('account.PerjalananDinas.updateDitolak');
+        Route::get('/Perjalanan-Dinas/Detail-Ajukan/{id}', 'account\PerjalananDinasController@DetailAjukan')->name('account.PerjalananDinas.DetailAjukan');
+        Route::get('/Perjalanan-Dinas/Detail-Diterima/{id}', 'account\PerjalananDinasController@DetailDiterima')->name('account.PerjalananDinas.DetailDiterima');
+        Route::get('/Perjalanan-Dinas/Detail-Ditolak/{id}', 'account\PerjalananDinasController@DetailDitolak')->name('account.PerjalananDinas.DetailDitolak');
+        Route::get('/Perjalanan-Dinas/Edit/{id}', 'account\PerjalananDinasController@Edit')->name('account.PerjalananDinas.Edit');
+        Route::get('/Perjalanan-Dinas/AddEdit/{id}', 'account\PerjalananDinasController@AddEdit')->name('account.PerjalananDinas.AddEdit');
+        Route::post('/Perjalanan-Dinas/Update-Edit/{id}', 'account\PerjalananDinasController@UpdateEdit')->name('account.PerjalananDinas.UpdateEdit');
+        Route::post('/Perjalanan-Dinas/Update-AddEdit/{id}', 'account\PerjalananDinasController@UpdateAddEdit')->name('account.PerjalananDinas.UpdateAddEdit');
         Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
     }
 

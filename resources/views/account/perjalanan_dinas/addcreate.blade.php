@@ -161,12 +161,12 @@ Tambah laporan Camp | MIS
       <!--================== CARD 3 ==================-->
       <div class="card">
         <div class="card-header d-flex justify-content-between">
-          <h4>TAMBAH LAPORAN</h4>
+          <h4>TAMBAH LAPORAN HARI KETIGA</h4>
           <div>
             <label class="mb-3"></label>
             <button type="button" class="btn btn-warning ml-auto d-flex justify-content-center align-items-center" id="addCard3" style="height: 40px; white-space: nowrap;">
               <i class="fas fa-plus"></i>
-              <span class="ml-2">CARD</span>
+              <span class="ml-2">HARI</span>
             </button>
           </div>
         </div>
@@ -1020,7 +1020,7 @@ Tambah laporan Camp | MIS
       <!--================== CARD 4 ==================-->
       <div class="card card-field4" style="display: none;">
         <div class="card-header d-flex justify-content-between">
-          <h4>TAMBAH LAPORAN</h4>
+          <h4>TAMBAH LAPORAN HARI KEEMPAT</h4>
           <div>
             <label class="mb-3"></label>
             <button type="button" class="btn btn-danger d-flex align-items-center" id="removeAddedCard4" style="height: 40px; white-space: nowrap;">
@@ -1474,7 +1474,7 @@ Tambah laporan Camp | MIS
       <!--================== CARD 5 ==================-->
       <div class="card card-field5" style="display: none;">
         <div class="card-header d-flex justify-content-between">
-          <h4>TAMBAH LAPORAN</h4>
+          <h4>TAMBAH LAPORAN HARI KELIMA</h4>
           <div>
             <label class="mb-3"></label>
             <button type="button" class="btn btn-danger d-flex align-items-center" id="removeAddedCard5" style="height: 40px; white-space: nowrap;">
@@ -2367,6 +2367,10 @@ Tambah laporan Camp | MIS
   // <!-- END -->
 
   // <!-- INPUT 36 -->
+  var cleaveC = new Cleave('.uang_masuk_currency36', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
   var cleaveC = new Cleave('.uang_keluar_currency36', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'

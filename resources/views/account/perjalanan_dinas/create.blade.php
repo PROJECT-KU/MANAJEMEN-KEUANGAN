@@ -234,6 +234,7 @@ Tambah laporan Camp | MIS
                     <select class="form-control" name="status" required>
                       <option value="" disabled selected>-- PILIH STATUS --</option>
                       <option value="ajukan">AJUKAN</option>
+                      <option value="draft">DRAFT</option>
                     </select>
                     @else
                     <select class="form-control" name="status" required>
@@ -260,12 +261,12 @@ Tambah laporan Camp | MIS
       <!--================== CARD 1==================-->
       <div class="card">
         <div class="card-header d-flex justify-content-between">
-          <h4>TAMBAH LAPORAN</h4>
+          <h4>TAMBAH LAPORAN HARI PERTAMA</h4>
           <div>
             <label class="mb-3"></label>
             <button type="button" class="btn btn-warning ml-auto d-flex justify-content-center align-items-center" id="addCard" style="height: 40px; white-space: nowrap;">
               <i class="fas fa-plus"></i>
-              <span class="ml-2">CARD</span>
+              <span class="ml-2">HARI</span>
             </button>
           </div>
         </div>
@@ -1119,7 +1120,7 @@ Tambah laporan Camp | MIS
       <!--================== CARD 2 ==================-->
       <div class="card card-field2" style="display: none;">
         <div class="card-header d-flex justify-content-between">
-          <h4>TAMBAH LAPORAN</h4>
+          <h4>TAMBAH LAPORAN HARI KEDUA</h4>
           <div>
             <label class="mb-3"></label>
             <button type="button" class="btn btn-danger d-flex align-items-center" id="removeAddedCard2" style="height: 40px; white-space: nowrap;">
