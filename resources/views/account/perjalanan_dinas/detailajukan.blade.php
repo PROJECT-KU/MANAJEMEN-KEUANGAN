@@ -356,7 +356,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar) }}" alt="Preview Image">
                               @endif
@@ -414,7 +414,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar2) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar2 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar2) }}" alt="Preview Image">
                               @endif
@@ -474,7 +474,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar3) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar3 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar3) }}" alt="Preview Image">
                               @endif
@@ -534,7 +534,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar4) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar4 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar4) }}" alt="Preview Image">
                               @endif
@@ -594,7 +594,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar5) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar5 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar5) }}" alt="Preview Image">
                               @endif
@@ -654,7 +654,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar6) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar6 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar6) }}" alt="Preview Image">
                               @endif
@@ -714,7 +714,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar7) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar7 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar7) }}" alt="Preview Image">
                               @endif
@@ -774,7 +774,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar8) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar8 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar8) }}" alt="Preview Image">
                               @endif
@@ -834,7 +834,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar9) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar9 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar9) }}" alt="Preview Image">
                               @endif
@@ -894,7 +894,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar10) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar10 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar10) }}" alt="Preview Image">
                               @endif
@@ -992,7 +992,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar11) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar11 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar11) }}" alt="Preview Image">
                               @endif
@@ -1052,7 +1052,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar12) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar12 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar12) }}" alt="Preview Image">
                               @endif
@@ -1112,7 +1112,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar13) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar13 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar13) }}" alt="Preview Image">
                               @endif
@@ -1172,7 +1172,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar14) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar14 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar14) }}" alt="Preview Image">
                               @endif
@@ -1232,7 +1232,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar15) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar15 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar15) }}" alt="Preview Image">
                               @endif
@@ -1292,7 +1292,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar16) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar16 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar16) }}" alt="Preview Image">
                               @endif
@@ -1352,7 +1352,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar17) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar17 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar17) }}" alt="Preview Image">
                               @endif
@@ -1412,7 +1412,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar18) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar18 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar18) }}" alt="Preview Image">
                               @endif
@@ -1472,7 +1472,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar19) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar19 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar19) }}" alt="Preview Image">
                               @endif
@@ -1532,7 +1532,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar20) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar20 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar20) }}" alt="Preview Image">
                               @endif
@@ -1629,7 +1629,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar21) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar21 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar21) }}" alt="Preview Image">
                               @endif
@@ -1688,7 +1688,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar22) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar22 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar22) }}" alt="Preview Image">
                               @endif
@@ -1748,7 +1748,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar23) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar23 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar23) }}" alt="Preview Image">
                               @endif
@@ -1808,7 +1808,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar24) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar24 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar24) }}" alt="Preview Image">
                               @endif
@@ -1868,7 +1868,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar25) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar25 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar25) }}" alt="Preview Image">
                               @endif
@@ -1928,7 +1928,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar26) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar26 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar26) }}" alt="Preview Image">
                               @endif
@@ -1988,7 +1988,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar27) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar27 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar27) }}" alt="Preview Image">
                               @endif
@@ -2048,7 +2048,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar28) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar28 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar28) }}" alt="Preview Image">
                               @endif
@@ -2108,7 +2108,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar29) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar29 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar29) }}" alt="Preview Image">
                               @endif
@@ -2168,7 +2168,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar30) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar30 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar30) }}" alt="Preview Image">
                               @endif
@@ -2265,7 +2265,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar31) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar31 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar31) }}" alt="Preview Image">
                               @endif
@@ -2324,7 +2324,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar32) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar32 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar32) }}" alt="Preview Image">
                               @endif
@@ -2384,7 +2384,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar33) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar33 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar33) }}" alt="Preview Image">
                               @endif
@@ -2444,7 +2444,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar34) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar34 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar34) }}" alt="Preview Image">
                               @endif
@@ -2504,7 +2504,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar35) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar35 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar35) }}" alt="Preview Image">
                               @endif
@@ -2599,7 +2599,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar36) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar36 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar36) }}" alt="Preview Image">
                               @endif
@@ -2659,7 +2659,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar37) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar37 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar37) }}" alt="Preview Image">
                               @endif
@@ -2719,7 +2719,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar38) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar38 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar38) }}" alt="Preview Image">
                               @endif
@@ -2779,7 +2779,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar39) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar39 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar39) }}" alt="Preview Image">
                               @endif
@@ -2839,7 +2839,7 @@ Update Perjalanan Dinas Ajukan | MIS
                           <a href="{{ asset('images/' . $DatasAjukan->gambar40) }}" data-lightbox="{{ $DatasAjukan->id }}">
                             <div class="card" style="width: 8rem; align-items:center; background-color:#F5F5F5;">
                               @if ($DatasAjukan->gambar40 == null)
-                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.JPG') }}" class="img-thumbnail">
+                              <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail">
                               @else
                               <img id="image-preview" style="width: 125px; height:125px;" class="card-img-top" src="{{ asset('images/' . $DatasAjukan->gambar40) }}" alt="Preview Image">
                               @endif

@@ -435,7 +435,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview" class="image-preview">
                       @if ($DatasEdit->gambar == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar) }}" alt="Current Image">
                       @endif
@@ -602,7 +602,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview2" class="image-preview">
                       @if ($DatasEdit->gambar2 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar2) }}" alt="Current Image">
                       @endif
@@ -770,7 +770,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview3" class="image-preview">
                       @if ($DatasEdit->gambar3 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar3) }}" alt="Current Image">
                       @endif
@@ -938,7 +938,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview4" class="image-preview">
                       @if ($DatasEdit->gambar4 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar4) }}" alt="Current Image">
                       @endif
@@ -1106,7 +1106,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview5" class="image-preview">
                       @if ($DatasEdit->gambar5 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar5) }}" alt="Current Image">
                       @endif
@@ -1274,7 +1274,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview6" class="image-preview">
                       @if ($DatasEdit->gambar6 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar6) }}" alt="Current Image">
                       @endif
@@ -1442,7 +1442,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview7" class="image-preview">
                       @if ($DatasEdit->gambar7 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar7) }}" alt="Current Image">
                       @endif
@@ -1610,7 +1610,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview8" class="image-preview">
                       @if ($DatasEdit->gambar8 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar8) }}" alt="Current Image">
                       @endif
@@ -1778,7 +1778,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview9" class="image-preview">
                       @if ($DatasEdit->gambar9 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar9) }}" alt="Current Image">
                       @endif
@@ -1946,7 +1946,7 @@ Update Perjalanan Dinas | MIS
                   <div class="image-preview-container">
                     <div id="imagePreview10" class="image-preview">
                       @if ($DatasEdit->gambar10 == null)
-                      <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                      <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                       @else
                       <img src="{{ asset('images/' . $DatasEdit->gambar10) }}" alt="Current Image">
                       @endif
@@ -2208,7 +2208,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview11" class="image-preview">
                           @if ($DatasEdit->gambar11 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar11) }}" alt="Current Image">
                           @endif
@@ -2376,7 +2376,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview12" class="image-preview">
                           @if ($DatasEdit->gambar12 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar12) }}" alt="Current Image">
                           @endif
@@ -2544,7 +2544,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview13" class="image-preview">
                           @if ($DatasEdit->gambar13 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar13) }}" alt="Current Image">
                           @endif
@@ -2712,7 +2712,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview14" class="image-preview">
                           @if ($DatasEdit->gambar14 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar14) }}" alt="Current Image">
                           @endif
@@ -2880,7 +2880,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview15" class="image-preview">
                           @if ($DatasEdit->gambar15 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar15) }}" alt="Current Image">
                           @endif
@@ -3048,7 +3048,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview16" class="image-preview">
                           @if ($DatasEdit->gambar16 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar16) }}" alt="Current Image">
                           @endif
@@ -3216,7 +3216,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview17" class="image-preview">
                           @if ($DatasEdit->gambar17 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar17) }}" alt="Current Image">
                           @endif
@@ -3384,7 +3384,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview18" class="image-preview">
                           @if ($DatasEdit->gambar18 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar18) }}" alt="Current Image">
                           @endif
@@ -3552,7 +3552,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview19" class="image-preview">
                           @if ($DatasEdit->gambar19 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar19) }}" alt="Current Image">
                           @endif
@@ -3720,7 +3720,7 @@ Update Perjalanan Dinas | MIS
                       <div class="image-preview-container">
                         <div id="imagePreview20" class="image-preview">
                           @if ($DatasEdit->gambar20 == null)
-                          <img src="{{ asset('assets/img/avatar/no-image.JPG') }}" alt="Current Image">
+                          <img src="{{ asset('assets/img/avatar/no-image.jpg') }}" alt="Current Image">
                           @else
                           <img src="{{ asset('images/' . $DatasEdit->gambar20) }}" alt="Current Image">
                           @endif
