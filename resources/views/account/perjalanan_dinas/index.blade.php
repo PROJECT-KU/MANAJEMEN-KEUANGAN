@@ -118,12 +118,18 @@ Data Perjalanan Dinas | MIS
                     </td>
                     <td class="text-center">
                       @if (Auth::user()->level == 'karyawan')
+                      @if($hasil->status == 'ajukan')
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
+                      </a>
+                      @else
                       <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.Edit', $hasil->id) }}" class="btn btn-sm btn-info mt-2">
                         <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
                       </a>
                       <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-eye" style="margin-top:6px"></i>
                       </a>
+                      @endif
                       @else
                       <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
