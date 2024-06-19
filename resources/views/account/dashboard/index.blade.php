@@ -28,6 +28,21 @@ Dashboard | MIS
             @endif
             <!--================== END ==================-->
 
+            <!--================== PERJALANAN DINAS AJUKAN ==================-->
+            @if ($hasAjukan)
+            <div class="alert alert-danger" role="alert" style="text-align: center; padding: 15px 0 0 0; width: 100%; box-sizing: border-box; border-radius: 10px;">
+                <b style="font-size: 20px;">Terdapat Perjalanan Dinas dengan status "PENGAJUAN"!</b>
+                <br>Silahkan periksa dan ambil tindakan yang diperlukan.<br>
+                <a href="{{ route('account.PerjalananDinas.index') }}" style="text-align: center; text-decoration: none; display: block; width: 100%; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <button type="button" class="btn btn-info" style="width: 100%; border-radius: 0 0 10px 10px; text-decoration: none; color: white; margin-top:10px; font-size:15px;">
+                        LIHAT PENGAJUAN
+                    </button>
+                </a>
+            </div>
+            @endif
+
+            <!--================== END ==================-->
+
             <!--================== MASA SEWA AKUN AKAN HABIS ==================-->
             @if (Auth::user()->tenggat === null)
             @elseif (now() > Auth::user()->tenggat)
