@@ -442,6 +442,46 @@ class DashboardController extends Controller
             ->paginate(6);
         // <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel'));
+        // <!--================== PERJALANAN DINAS ==================-->
+        $Ajukan = DB::table('perjalanan_dinas')
+            ->select(
+                'perjalanan_dinas.id',
+                'perjalanan_dinas.user_id',
+                'perjalanan_dinas.token',
+                'perjalanan_dinas.id_transaksi',
+                'perjalanan_dinas.status',
+                'perjalanan_dinas.tempat',
+                'perjalanan_dinas.camp',
+                'perjalanan_dinas.tanggal_mulai',
+                'perjalanan_dinas.tanggal_akhir',
+                'perjalanan_dinas.total_uang_masuk',
+                'perjalanan_dinas.total_uang_keluar',
+                'perjalanan_dinas.sisa_saldo',
+                'users.id as user_id',
+                'users.full_name as full_name',
+                'users.telp as telp'
+            )
+            ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
+            ->orderBy('perjalanan_dinas.created_at', 'DESC');
+
+        if ($user->level == 'manager' || $user->level == 'ceo') {
+            $Ajukan->where('perjalanan_dinas.status', 'ajukan')
+                ->where('users.company', $user->company);
+        } else {
+            $Ajukan->where(function ($query) use ($user) {
+                $query->where('perjalanan_dinas.user_id', $user->id)
+                    ->whereIn('perjalanan_dinas.status', ['draft', 'ajukan']);
+            });
+        }
+
+        $Ajukan = $Ajukan->get();
+
+        $hasAjukan = false;
+        if ($user->level == 'manager' && $Ajukan->where('status', 'ajukan')->isNotEmpty()) {
+            $hasAjukan = true;
+        }
+        // <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
     }
 }
