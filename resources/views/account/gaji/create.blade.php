@@ -989,7 +989,7 @@ Tambah Gaji Karyawan | MIS
           </div>
 
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Bonus Webinar</label>
                 <div class="input-group">
@@ -999,6 +999,22 @@ Tambah Gaji Karyawan | MIS
                   <input type="text" name="webinar" id="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
                 </div>
                 @error('webinar')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Bonus Kinerja</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="kinerja" id="kinerja" value="{{ old('kinerja') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja">
+                </div>
+                @error('kinerja')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1768,6 +1784,10 @@ Tambah Gaji Karyawan | MIS
   // <!-- END -->
 
   var cleaveC = new Cleave('.currency_webinar', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_kinerja', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

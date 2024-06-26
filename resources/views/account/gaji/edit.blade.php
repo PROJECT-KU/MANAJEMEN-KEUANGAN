@@ -1407,6 +1407,17 @@ Update Gaji Karyawan | MIS
                 </div>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Bonus Kinerja</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="kinerja" id="kinerja" value="{{ $gaji->kinerja }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja">
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="row">
@@ -2142,6 +2153,10 @@ Update Gaji Karyawan | MIS
   // <!-- END -->
 
   var cleaveC = new Cleave('.currency_webinar', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_kinerja', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
