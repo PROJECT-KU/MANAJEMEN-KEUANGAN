@@ -473,6 +473,8 @@ class GajiController extends Controller
 
     $webinar = $request->input('webinar');
     $webinar = empty($webinar) ? 0 : str_replace(",", "", $webinar);
+    $kinerja = $request->input('kinerja');
+    $kinerja = empty($kinerja) ? 0 : str_replace(",", "", $kinerja);
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
     $tunjangan_bpjs = $request->input('tunjangan_bpjs');
@@ -553,7 +555,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $kinerja + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
@@ -621,6 +623,7 @@ class GajiController extends Controller
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
       'webinar' => $webinar,
+      'kinerja' => $kinerja,
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
@@ -847,6 +850,8 @@ class GajiController extends Controller
 
     $webinar = $request->input('webinar');
     $webinar = empty($webinar) ? 0 : str_replace(",", "", $webinar);
+    $kinerja = $request->input('kinerja');
+    $kinerja = empty($kinerja) ? 0 : str_replace(",", "", $kinerja);
     $tunjangan = $request->input('tunjangan');
     $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
     $tunjangan_bpjs = $request->input('tunjangan_bpjs');
@@ -927,7 +932,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $kinerja + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
@@ -997,6 +1002,7 @@ class GajiController extends Controller
       'bonus_luar10' => $bonus_luar10,
       'operasional' => $operasional,
       'webinar' => $webinar,
+      'kinerja' => $kinerja,
       'tunjangan' => $tunjangan,
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
@@ -1160,7 +1166,11 @@ class GajiController extends Controller
     $totalGajiTerbayar = $gajiTerbayar->sum('total');
     $terbilangterbayar = Terbilang::make($totalGajiTerbayar, ' rupiah');
 
-    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji', 'user', 'terbilang', 'startDate', 'endDate', 'totalGajiTerbayar', 'terbilangterbayar'))->render();
+    $logoPath = public_path('assets/img/LogoRSC.PNG');
+    $imageData = base64_encode(file_get_contents($logoPath));
+    $src = 'data:image/png;base64,' . $imageData;
+
+    $html = view('account.gaji.pdf', compact('gaji', 'totalGaji', 'user', 'terbilang', 'startDate', 'endDate', 'totalGajiTerbayar', 'terbilangterbayar', 'src'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();

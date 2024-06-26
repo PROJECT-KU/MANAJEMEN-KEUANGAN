@@ -1,6 +1,10 @@
 <div class="main-content">
   <section class="section">
     <center>
+      <img src="{{ $src }}" alt="Logo" height="45px">
+    </center>
+
+    <center>
       <div class="section-header">
         <h1>LIST GAJI KARYAWAN</h1>
         <div class="section-header">
@@ -35,11 +39,11 @@
               <tr>
                 <th scope="col" style="text-align: center;width: 6%">NO.</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">ID TRANSAKSI</th>
-                <th scope="col" class="column-width" style="text-align: center; width:150px">NAMA KARYAWAN</th>
+                <th scope="col" class="column-width" style="text-align: center; width:200px">NAMA KARYAWAN</th>
                 <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
-                <th scope="col" class="column-width" style="text-align: center; width:150px">NO REKENING</th>
+                <th scope="col" class="column-width" style="text-align: center; width:250px">NO REKENING</th>
                 <th scope="col" class="column-width" style="text-align: center;">BANK</th>
-                <th scope="col" class="column-width" style="text-align: center; width:150px">TOTAL GAJI</th>
+                <th scope="col" class="column-width" style="text-align: center; width:200px">TOTAL GAJI</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">TANGGAL PEMBAYARAN</th>
                 <!-- <th scope="col" class="column-width" style="text-align: center; width:150px">STATUS PEMBAYARAN</th> -->
               </tr>

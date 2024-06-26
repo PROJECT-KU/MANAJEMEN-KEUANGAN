@@ -93,6 +93,7 @@ class Gaji extends Model
     'total_lembur',
     'total_bonus',
     'webinar',
+    'kinerja',
     'potongan',
     'pph',
     'alpha',
