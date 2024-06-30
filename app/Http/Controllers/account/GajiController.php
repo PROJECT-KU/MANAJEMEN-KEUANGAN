@@ -1166,7 +1166,7 @@ class GajiController extends Controller
     $totalGajiTerbayar = $gajiTerbayar->sum('total');
     $terbilangterbayar = Terbilang::make($totalGajiTerbayar, ' rupiah');
 
-    $logoPath = public_path('assets/img/LogoRSC.PNG');
+    $logoPath = public_path('assets/img/LogoRSC.png');
     $imageData = base64_encode(file_get_contents($logoPath));
     $src = 'data:image/png;base64,' . $imageData;
 
