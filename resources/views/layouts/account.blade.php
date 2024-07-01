@@ -143,7 +143,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 @if ($isStatusOff || $isTenggatExpired)
-                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
+                                <!-- <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                 </li>
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
@@ -154,7 +154,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 <li class="dropdown {{ setActive('account/laporan_debit'). setActive('account/laporan_credit') }}. {{ setActive('account/laporan_semua') }}">
                                     <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
-                                </li>
+                                </li> -->
                                 @else
                                 @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan' || Auth::user()->level === 'trainer' || Auth::user()->level === 'ceo')
                                 <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
