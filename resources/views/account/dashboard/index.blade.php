@@ -23,7 +23,7 @@ Dashboard | MIS
             <!--================== AKUN DINONAKTIFKAN ==================-->
             @if (Auth::user()->status === 'off')
             <div class="alert alert-danger" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">Akun Anda Di Nonaktifkan Sementara!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
+                <b style="font-size: 20px;">Akun Anda Telah Di Nonaktifkan!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
             </div>
             @endif
             <!--================== END ==================-->
@@ -86,6 +86,8 @@ Dashboard | MIS
                 @endif
                 <!--================== END ==================-->
 
+                @if (Auth::user()->status === 'off')
+                @else
                 <!--================== PRESENSI KARYAWAN ==================-->
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
@@ -196,66 +198,70 @@ Dashboard | MIS
             </div>
         </div>
         <!--================== END ==================-->
-</div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
-                <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
-            </div>
-            <div class="card-body">
-                <div class="artikel-list mt-4">
-                    @foreach ($artikel as $item)
-                    <div class="artikel-item mb-3">
-                        <h5>{{ $item->judul }}</h5>
-                        <p>Jumlah Dilihat: {{ $item->dilihat }}</p>
+
+        <!--================== TAMPILAN ARTIKEL ==================-->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
+                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
                     </div>
+                    <div class="card-body">
+                        <div class="artikel-list mt-4">
+                            @foreach ($artikel as $item)
+                            <div class="artikel-item mb-3">
+                                <h5>{{ $item->judul }}</h5>
+                                <p>Jumlah Dilihat: {{ $item->dilihat }}</p>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $artikel->links() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================== END ==================-->
+
+        @endif
+
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
+        <div class="row" id="PenggunaBaru">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
+                        <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
+                    </div>
+                    <div class="row" style="margin: 10px;">
+                        @foreach($users as $user)
+                        @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
+                            <div class="card text-center card-hover">
+                                @if ($user->gambar == null)
+                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
+                                    @else
+                                    <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                                        @endif
+                                        <div class="thumbnail-circle">
+                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                        </div>
+                                    </a>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $user->full_name }}</h5>
+                                    </div>
+                            </div>
+
+                    </div>
+                    @endif
                     @endforeach
                 </div>
-                <div class="d-flex justify-content-center mt-4">
-                    {{ $artikel->links() }}
-                </div>
             </div>
         </div>
-    </div>
-</div>
-
-@if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
-<div class="row" id="PenggunaBaru">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
-                <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
-            </div>
-            <div class="row" style="margin: 10px;">
-                @foreach($users as $user)
-                @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
-                    <div class="card text-center card-hover">
-                        @if ($user->gambar == null)
-                        <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
-                            @else
-                            <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
-                                @endif
-                                <div class="thumbnail-circle">
-                                    <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
-                                </div>
-                            </a>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $user->full_name }}</h5>
-                            </div>
-                    </div>
-
-            </div>
-            @endif
-            @endforeach
-        </div>
-    </div>
-</div>
-@endif
+        @endif
 
 
-</section>
+    </section>
 </div>
 
 <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
