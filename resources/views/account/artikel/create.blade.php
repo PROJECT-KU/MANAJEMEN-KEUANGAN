@@ -29,6 +29,7 @@ Tambah Artikel | MIS
     }
 </style>
 <!--================== END ==================-->
+<link rel="stylesheet" href="{{ asset('assets/artikel/summernote/summernote-bs4.css') }}">
 
 @section('content')
 <div class="main-content">
@@ -197,16 +198,12 @@ Tambah Artikel | MIS
 
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Isi Artikel</label>
-                                    <div class="input-group">
-                                        <textarea name="isi" id="isi" placeholder="Masukkan Teks Artikel" class="form-control" style="width: 100%;" required></textarea>
+                                <div class="card card-outline card-info">
+                                    <div class="card-body pad">
+                                        <div class="mb-3">
+                                            <textarea class="textarea" name="isi" id="isi" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
                                     </div>
-                                    @error('note')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -221,6 +218,26 @@ Tambah Artikel | MIS
 </div>
 </section>
 </div>
+
+<script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>
+<script>
+    $(function() {
+        // Initialize Summernote
+        $('.textarea').summernote({
+            height: 300, // Set the height of the editor to 300px
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['fontname', ['fontname']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']], // Only keep the link button
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+    })
+</script>
 
 <!--================== SWEET ALERT KATA KUNCI ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -346,7 +363,7 @@ Tambah Artikel | MIS
 
 <!--================== MAKSIMAL UPLOAD GAMBAR & JENIS FILE YANG DI PERBOLEHKAN ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-// <!-- GAMBAR DEPAN -->
+<!-- GAMBAR DEPAN -->
 <script>
     document.getElementById('gambar_depan').addEventListener('change', function() {
         const maxFileSizeInBytes = 5 * 1024 * 1024; // 5MB
@@ -384,9 +401,9 @@ Tambah Artikel | MIS
         }
     });
 </script>
-// <!-- END -->
+<!-- END -->
 
-// <!-- GAMBAR COVER -->
+<!-- GAMBAR COVER -->
 <script>
     document.getElementById('gambar_cover').addEventListener('change', function() {
         const maxFileSizeInBytes = 5 * 1024 * 1024; // 5MB
@@ -424,11 +441,11 @@ Tambah Artikel | MIS
         }
     });
 </script>
-// <!-- END -->
+<!-- END -->
 <!--================== END ==================-->
 
 <!--================== PREVIEW IMAGE ==================-->
-// <!-- GAMBAR DEPAN -->
+<!-- GAMBAR DEPAN -->
 <script>
     const imageInput = document.getElementById('gambar_depan');
     const imagePreview = document.getElementById('image-preview_gambar_depan');
@@ -445,9 +462,9 @@ Tambah Artikel | MIS
         }
     });
 </script>
-// <!-- END -->
+<!-- END -->
 
-// <!-- GAMBAR COVER -->
+<!-- GAMBAR COVER -->
 <script>
     const imageInputCover = document.getElementById('gambar_cover');
     const imagePreviewCover = document.getElementById('image-preview_gambar_cover');
@@ -464,11 +481,11 @@ Tambah Artikel | MIS
         }
     });
 </script>
-// <!-- END -->
+<!-- END -->
 <!--================== END ==================-->
 
 <!--================== CKEDITOR ==================-->
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<!-- <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -481,7 +498,7 @@ Tambah Artikel | MIS
                 console.error(error);
             });
     });
-</script>
+</script> -->
 
 <!--================== END ==================-->
 

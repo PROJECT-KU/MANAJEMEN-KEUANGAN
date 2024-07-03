@@ -14,145 +14,6 @@ Data Presensi Karyawan | MIS
       </div>
 
       <div class="section-body">
-        <!--================== JIKA BELUM MELAKUKAN PRESESNI PULANG ==================-->
-        <!-- @php
-          $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-          ->whereDate('created_at', now()->toDateString())
-          ->first();
-          @endphp
-
-          @foreach ($presensi as $item)
-          @if ((Auth::user()->level === 'manager') && $item->status_pulang === null )
-          <div class="alert alert-warning" role="alert" style="text-align: center;">
-            <p style="font-size: 16px;">
-              <i class="fas fa-exclamation-circle mr-1"></i>
-              Terdapat Karyawan atau staff yang belum melakukan presensi pulang, silahkan ingatkan.
-            </p>
-          </div>
-          @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
-          @elseif ((Auth::user()->level === 'karyawan' || Auth::user()->level === 'staff' || Auth::user()->level == 'trainer') && $item->status_pulang === null && $todayPresensi)
-          <div class="alert alert-danger" role="alert" style="text-align: center;">
-            <p style="font-size: 16px;">
-              <i class="fas fa-exclamation-circle mr-1"></i>
-              Anda belum melakukan presensi pulang, segera presensi pulang.
-            </p>
-          </div>
-          @break {{-- Optional: Menghentikan iterasi jika sudah menemukan satu data --}}
-          @endif
-          @endforeach -->
-        <!--================== END ==================-->
-
-        <!--================== PRESENSI ==================-->
-        <!-- <div class="card">
-            <div class="card-header  text-right">
-              <h4><i class="fas fa-user-clock"></i> PRESENSI KARYAWAN</h4>
-            </div>
-
-            <div class="card-body">
-              <div class="form-group">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-
-                  </div>
-                </div>
-                @php
-                $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                ->whereDate('created_at', now()->toDateString())
-                ->first();
-                @endphp
-
-                @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                @php
-                // Check if there are items in the paginator
-                if ($presensi->count() > 0) {
-                // Access the first item in the paginator
-                $firstItem = $presensi->first();
-                // Convert created_at to Carbon instance
-                $createdAt = \Carbon\Carbon::parse($firstItem->created_at);
-                // Check if created_at is today
-                $isToday = $createdAt->isToday();
-                } else {
-                // Handle the case where there are no items in the paginator
-                $isToday = false;
-                }
-                @endphp
-
-                @if($isToday)
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                    Masuk Pukul {{ $createdAt->format('H:i') }}
-                  </span>
-                </div>
-                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
-                @else
-                {{-- Handle case where created_at is not today --}}
-                @endif
-
-                @elseif (!$todayPresensi)
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                    Anda Belum Melakukan Presensi Masuk Pada Hari Ini!
-                  </span>
-                </div>
-                <p class="mt-2">Jam Kerja 08.00 - 20.00</p>
-                @else
-                <div class="d-flex align-items-center">
-                  <span class="btn btn-primary" style="padding-top: 10px; font-size: 30px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; height:50px" id="current-time"></span>
-                  <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                    Selesai Bekerja!
-                  </span>
-                </div>
-                @endif
-              </div>
-            </div>
-
-            <div class="card-body">
-              <form action="{{ route('account.presensi.search') }}" method="GET">
-                <div class="form-group">
-                  <div class="input-group mb-3">
-                    @php
-                    $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                    ->whereDate('created_at', now()->toDateString())
-                    ->first();
-                    @endphp
-                    <div class="text-center">
-                      @if ($todayPresensi && is_null($todayPresensi->status_pulang))
-                      <div class="d-flex justify-content-center align-items-center mx-1">
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                          MASUK
-                        </button>
-                        <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                          PULANG
-                        </a>
-                      </div>
-                      @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex justify-content-center align-items-center mx-1">
-                        <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                          MASUK
-                        </a>
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                          PULANG
-                        </button>
-                    </div>
-                    @else
-                    <div class="d-flex justify-content-center align-items-center mx-1">
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-4" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        MASUK
-                      </button>
-                      <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="padding-top: 10px; padding-bottom:10px; font-size: 20px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif" disabled>
-                        PULANG
-                      </button>
-                    </div>
-                    @endif
-                  </div>
-                </div>
-            </div>
-            </form>
-          </div>
-      </div> -->
-        <!--================== END ==================-->
-
         <!--================== FILTER ==================-->
         @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager')
         <div class="card">
@@ -164,25 +25,25 @@ Data Presensi Karyawan | MIS
             <form action="{{ route('account.presensi.search') }}" method="GET" id="searchForm">
               <div class="form-group">
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
+                  <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                   <div class="input-group-append">
-                    <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+                    <!-- <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
                   </div>
                   @if(request()->has('q'))
-                  <a href="{{ route('account.presensi.index') }}" class="btn btn-danger ml-1">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
+                  <a href="{{ route('account.presensi.index') }}" class="btn btn-danger rounded-pill ml-1">
+                    <i class="fa fa-trash mt-2"></i>
                   </a>
                   @endif
                 </div>
               </div>
             </form>
 
-            <form action="{{ route('account.presensi.filter') }}" method="GET">
+            <form action="{{ route('account.presensi.filter') }}" method="GET" id="filterForm">
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>TANGGAL AWAL</label>
-                    <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                    <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker rounded-pill">
                   </div>
                 </div>
                 <div class="col-md-2" style="text-align: center">
@@ -191,23 +52,24 @@ Data Presensi Karyawan | MIS
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>TANGGAL AKHIR</label>
-                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker rounded-pill">
                   </div>
                 </div>
                 <div class="col-md-2">
                   @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                   <div class="btn-group" style="width: 100%;">
-                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                    <a href="{{ route('account.presensi.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                      <i class="fa fa-times-circle mt-2"></i> HAPUS
+                    <a href="{{ route('account.presensi.index') }}" id="clearFilterButton" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;">
+                      <i class="fa fa-trash mt-2"></i>
                     </a>
                   </div>
                   @else
-                  <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                  <button class="btn btn-info mr-1 btn-block rounded-pill" type="submit" style="margin-top: 30px; font-size:15px;" id="filterButton"><i class="fa fa-filter"></i> FILTER</button>
                   @endif
                 </div>
               </div>
             </form>
+
+
             @if (Auth::user()->level == 'manager')
             <a href="{{ route('account.presensi.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
               <i class="fa fa-plus-circle"></i> TAMBAH PRESENSI
@@ -219,6 +81,160 @@ Data Presensi Karyawan | MIS
         @endif
         <!--================== end ==================-->
 
+        <!--================== DATA PRESENSI HARI INI ==================-->
+        <div class="card" id="presensiCard">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4><i class="fas fa-clock"></i> PRESENSI HARI INI</h4>
+            <p style="margin-top: 15px; font-size: 15px; margin-bottom: 0;"><strong>Periode {{ \Carbon\Carbon::now()->format('d F Y') }}</strong></p>
+          </div>
+
+          <div class="card-body">
+            @if($presensihariini->isEmpty())
+            <p class="text-center">Belum ada karyawan yang presensi pada hari ini.</p>
+            @else
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL PRESENSI</th>
+                    <th scope="col" colspan="2" class="column-width" style="text-align: center;">KEHADIRAN</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LAMA KERJA</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS PRESENSI</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">LOKASI PRESENSI</th>
+                    @if(Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
+                    <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                    @endif
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">HADIR</th>
+                    <th scope="col" style="text-align: center;">PULANG</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php
+                  $no = 1;
+                  @endphp
+                  @foreach ($presensihariini as $hasil)
+                  <tr>
+                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                    <td class="column-width" style="text-align: center;">
+                      {{ strftime('%A, %d %B %Y', strtotime($hasil->created_at)) }}
+                    </td>
+                    <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->created_at)) }}</td>
+                    @if($hasil->time_pulang == null)
+                    <td class="column-width" style="text-align: center;"></td>
+                    @else
+                    <td class="column-width" style="text-align: center;">{{ strftime('%H:%M:%S', strtotime($hasil->time_pulang)) }}</td>
+                    @endif
+                    @if($hasil->time_pulang == null)
+                    <td class="column-width" style="text-align: center;"></td>
+                    @else
+                    <td class="column-width" style="text-align: center;">
+                      @php
+                      $created_at = strtotime($hasil->created_at);
+                      $time_pulang = strtotime($hasil->time_pulang);
+
+                      // Menghitung selisih waktu dalam detik
+                      $selisih_detik = $time_pulang - $created_at;
+
+                      // Menghitung jumlah jam dan menit
+                      $jam = floor($selisih_detik / 3600);
+                      $menit = floor(($selisih_detik % 3600) / 60);
+
+                      // Menampilkan lama kerja dalam format "jam jam menit menit"
+                      echo sprintf('%02d jam %02d menit', $jam, $menit);
+                      @endphp
+                    </td>
+                    @endif
+                    <td class="column-width" style="text-align: center;">
+                      @if ($hasil->status == 'hadir')
+                      <span class="badge badge-success mt-2">HADIR</span>
+                      @elseif ($hasil->status == 'camp jogja')
+                      <span class="badge badge-success mt-2">CAMP JOGJA</span>
+                      @elseif ($hasil->status == 'perjalanan luar kota jawa')
+                      <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                      @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
+                      <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                      @elseif ($hasil->status == 'camp luar kota')
+                      <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
+                      @elseif ($hasil->status == 'remote')
+                      <span class="badge badge-info mt-2">REMOTE</span>
+                      @elseif ($hasil->status == 'izin')
+                      <span class="badge badge-warning mt-2">IZIN</span>
+                      @elseif ($hasil->status == 'lembur')
+                      <span class="badge badge-primary mt-2">LEMBUR</span>
+                      @elseif ($hasil->status == 'cuti')
+                      <span class="badge badge-warning mt-2">CUTI</span>
+                      @elseif ($hasil->status == 'terlambat')
+                      <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                      @elseif ($hasil->status == 'alpha')
+                      <span class="badge badge-danger mt-2">ALPHA</span>
+                      @elseif ($hasil->status == 'pulang')
+                      <span class="badge badge-danger mt-2">PULANG</span>
+                      @endif
+                      <br>
+                      @if ($hasil->status_pulang == 'hadir')
+                      <span class="badge badge-success mt-2">HADIR</span>
+                      @elseif ($hasil->status_pulang == 'camp jogja')
+                      <span class="badge badge-success">CAMP JOGJA</span>
+                      @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
+                      <span class="badge badge-info">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                      @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
+                      <span class="badge badge-info">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                      @elseif ($hasil->status_pulang == 'camp luar kota')
+                      <span class="badge badge-success">CAMP LUAR KOTA</span>
+                      @elseif ($hasil->status_pulang == 'remote')
+                      <span class="badge badge-info mt-2">REMOTE</span>
+                      @elseif ($hasil->status_pulang == 'izin')
+                      <span class="badge badge-warning mt-2">IZIN</span>
+                      @elseif ($hasil->status_pulang == 'lembur')
+                      <span class="badge badge-primary mt-2">LEMBUR</span>
+                      @elseif ($hasil->status_pulang == 'cuti')
+                      <span class="badge badge-warning mt-2">CUTI</span>
+                      @elseif ($hasil->status_pulang == 'terlambat')
+                      <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                      @elseif ($hasil->status_pulang == 'alpha')
+                      <span class="badge badge-danger">ALPHA</span>
+                      @elseif ($hasil->status_pulang == 'pulang')
+                      <span class="badge badge-danger mt-2">PULANG</span>
+                      @endif
+                    </td>
+                    <td class="column-width" style="text-align: center;">
+                      <a href="https://www.google.com/maps?q={{ $hasil->latitude }},{{ $hasil->longitude }}" target="_blank">
+                        Lihat di Google Maps
+                      </a>
+                    </td>
+                    @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
+                    <td class="text-center">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-primary mt-2">
+                        <i class="fa fa-pencil-alt"></i>
+                      </a>
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                      <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </td>
+                    @endif
+                  </tr>
+                  @php
+                  $no++;
+                  @endphp
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+            @endif
+          </div>
+        </div>
+        <!--================== END ==================-->
+
+
+        <!--================== DATA PRESENSI ==================-->
         <div class="card">
           <div class="card-header">
             <h4><i class="fas fa-list"></i> DATA PRESENSI KARYAWAN</h4>
@@ -417,11 +433,51 @@ Data Presensi Karyawan | MIS
 
           </div>
         </div>
+        <!--================== END ==================-->
 
       </div>
     </div>
   </section>
 </div>
+
+<!--================== SEARCH WITH JQUERY ==================-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let searchInput = document.getElementById('searchInput');
+    let searchForm = document.getElementById('searchForm');
+    let debounceTimeout;
+    let presensiCard = document.getElementById('presensiCard'); // Pastikan ID sesuai dengan elemen card yang ingin disembunyikan
+
+    searchInput.addEventListener('keyup', function() {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(function() {
+        if (searchInput.value.trim() === '') {
+          window.location.href = "{{ route('account.presensi.search') }}";
+          if (presensiCard) {
+            presensiCard.style.display = 'block'; // Tampilkan card jika pencarian kosong
+          }
+        } else {
+          searchForm.submit();
+          if (presensiCard) {
+            presensiCard.style.display = 'none'; // Sembunyikan card jika pencarian tidak kosong
+          }
+        }
+      }, 500); // Sesuaikan waktu debounce sesuai kebutuhan
+    });
+
+    // Pemrosesan awal saat halaman dimuat
+    if (searchInput.value.trim() === '') {
+      if (presensiCard) {
+        presensiCard.style.display = 'block'; // Tampilkan card saat halaman dimuat jika pencarian kosong
+      }
+    } else {
+      if (presensiCard) {
+        presensiCard.style.display = 'none'; // Sembunyikan card saat halaman dimuat jika pencarian tidak kosong
+      }
+    }
+  });
+</script>
+<!--================== END ==================-->
 
 <!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
 <script>

@@ -38,7 +38,7 @@
 <body>
 
     <!--================== MEREFRESH PWA DI HP ==================-->
-    <script>
+    <!-- <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -91,7 +91,7 @@
         window.addEventListener('scroll', handlePullToRefresh, {
             passive: true
         });
-    </script>
+    </script> -->
     <!--================== END ==================-->
 
 </body>
