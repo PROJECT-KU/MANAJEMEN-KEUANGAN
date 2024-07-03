@@ -233,7 +233,7 @@
     <!--================== END ==================-->
 
     <!--================== MEREFRESH PWA DI HP ==================-->
-    <script>
+    <!-- <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -286,11 +286,11 @@
         window.addEventListener('scroll', handlePullToRefresh, {
             passive: true
         });
-    </script>
+    </script> -->
     <!--================== END ==================-->
 
     <!--================== PWA ==================-->
-    <script src="{{ asset('/sw.js') }}"></script>
+    <!-- <script src="{{ asset('/sw.js') }}"></script>
     <script>
         if ("serviceWorker" in navigator) {
             // Register a service worker hosted at the root of the
@@ -306,7 +306,7 @@
         } else {
             console.error("Service workers are not supported.");
         }
-    </script>
+    </script> -->
     <!--================== END ==================-->
 
     <!--================== IKLAN ==================-->

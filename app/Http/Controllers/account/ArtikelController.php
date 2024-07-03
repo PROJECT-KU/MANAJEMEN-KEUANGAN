@@ -244,6 +244,22 @@ class ArtikelController extends Controller
         return view('account.artikel.create', compact('users', 'currentTime', 'categories_artikel'));
     }
 
+    public function uploadImage(Request $request)
+    {
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+
+            return response()->json([
+                'success' => true,
+                'url' => asset('images/' . $imageName)
+            ]);
+        }
+
+        return response()->json(['success' => false], 400);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -270,6 +286,7 @@ class ArtikelController extends Controller
             $image_cover->move(public_path('images'), $imageName_cover); // Pindahkan gambar ke direktori public/images
         }
         //end
+
 
         $save = Artikel::create([
             'user_id'                        => $request->input('user_id'),

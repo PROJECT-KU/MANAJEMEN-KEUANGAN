@@ -156,8 +156,15 @@ Tambah Presensi Karyawan | MIS
                 </div>
               </div>
             </div>
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+            <div class="d-flex">
+              <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+                <i class="fa fa-paper-plane"></i> SIMPAN
+              </button>
+              <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
+                <i class="fa fa-redo"></i> RESET
+              </button>
+            </div>
+
           </form>
 
         </div>

@@ -41,6 +41,10 @@ class PresensiController extends Controller
   public function index(Request $request)
   {
     $user = Auth::user();
+
+    $currentDate = Carbon::now()->format('Y-m-d');
+    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
+
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
@@ -65,13 +69,6 @@ class PresensiController extends Controller
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
-        ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
-        ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
-    } else if ($user->level == 'admin') {
-      $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
-        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
         ->paginate(10);
@@ -87,7 +84,7 @@ class PresensiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function filter(Request $request)
@@ -95,6 +92,9 @@ class PresensiController extends Controller
     $user = Auth::user();
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
+
+    $currentDate = Carbon::now()->format('Y-m-d');
+    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
 
     if (!$startDate || !$endDate) {
       $currentMonth = date('Y-m-01 00:00:00');
@@ -126,13 +126,16 @@ class PresensiController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function search(Request $request)
   {
     $search = $request->get('q');
     $user = Auth::user();
+
+    $currentDate = Carbon::now()->format('Y-m-d');
+    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
 
     // Default date range to the current month if not provided
     $startDate = $request->get('start_date') ?? date('Y-m-01');
@@ -181,7 +184,7 @@ class PresensiController extends Controller
     if ($presensi->isEmpty()) {
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi tidak ditemukan.');
     }
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate'));
+    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function create()
