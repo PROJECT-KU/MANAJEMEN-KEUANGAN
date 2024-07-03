@@ -43,7 +43,8 @@ class PresensiController extends Controller
     $user = Auth::user();
 
     $currentDate = Carbon::now()->format('Y-m-d');
-    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
+    $startOfDay = Carbon::now()->startOfDay();
+    $endOfDay = Carbon::now()->endOfDay();
 
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
@@ -80,6 +81,56 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    } else {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    }
+
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
       ->get();
@@ -94,7 +145,8 @@ class PresensiController extends Controller
     $endDate = $request->input('tanggal_akhir');
 
     $currentDate = Carbon::now()->format('Y-m-d');
-    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
+    $startOfDay = Carbon::now()->startOfDay();
+    $endOfDay = Carbon::now()->endOfDay();
 
     if (!$startDate || !$endDate) {
       $currentMonth = date('Y-m-01 00:00:00');
@@ -122,6 +174,56 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    } else {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    }
+
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
       ->get();
@@ -135,7 +237,8 @@ class PresensiController extends Controller
     $user = Auth::user();
 
     $currentDate = Carbon::now()->format('Y-m-d');
-    $presensihariini = Presensi::whereDate('created_at', $currentDate)->get();
+    $startOfDay = Carbon::now()->startOfDay();
+    $endOfDay = Carbon::now()->endOfDay();
 
     // Default date range to the current month if not provided
     $startDate = $request->get('start_date') ?? date('Y-m-01');
@@ -171,6 +274,56 @@ class PresensiController extends Controller
               $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         })
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    }
+
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('users.company', $user->company)
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
+        ->orderBy('presensi.created_at', 'DESC')
+        ->paginate(10);
+    } else {
+      $presensihariini = DB::table('presensi')
+        ->select(
+          'presensi.id',
+          'presensi.status',
+          'presensi.status_pulang',
+          'presensi.note',
+          'presensi.gambar',
+          'presensi.gambar_pulang',
+          'presensi.time_pulang',
+          'presensi.status_pulang',
+          'presensi.latitude',
+          'presensi.longitude',
+          'presensi.created_at',
+          'presensi.updated_at',
+          'users.id as user_id',
+          'users.full_name as full_name',
+          'users.telp as telp'
+        )
+        ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+        ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
+        ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
         ->paginate(10);
     }

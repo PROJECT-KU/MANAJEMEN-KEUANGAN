@@ -251,7 +251,6 @@ Route::prefix('account')->group(
         Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
         Route::get('/article/search', 'account\ArtikelController@search')->name('account.Artikel.search');
         Route::get('/article/filter', 'account\ArtikelController@filter')->name('account.Artikel.filter');
-        Route::post('/upload-image', 'account\ArtikelController@uploadImage')->name('account.upload.image');
 
         // more
         Route::get('/more', 'account\MoreController@index')->name('account.more.index');
