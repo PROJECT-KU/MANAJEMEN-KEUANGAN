@@ -1,6 +1,6 @@
 {
-    "name": "MIS Rumah Scopus",
-    "short_name": "MIS",
+    "name": "NEXUX by Rumah Scopus",
+    "short_name": "NEXUX by Rumah Scopus",
     "start_url": "/index.php",
     "background_color": "#6777ef",
     "description": "Management Rumah Scopus",
@@ -8,7 +8,7 @@
     "theme_color": "#6777ef",
     "icons": [
         {
-            "src": "/assets/img/pwa.png",
+            "src": "/assets/img/nexus.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
