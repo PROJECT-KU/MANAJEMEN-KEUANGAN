@@ -11,7 +11,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/nexus.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -58,7 +58,8 @@ $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg"></div>
+            <div class="navbar-bg" style="background: linear-gradient(to right, #ff3131, #ff914d); height: 100px;"></div>
+
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto">
                     <ul class="navbar-nav mr-3 mb-3">
@@ -103,7 +104,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2" id="SidebarPwa">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="150">
+                        <img src="{{ asset('assets/img/nexusby.png') }}" alt="logo" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
                         <img src="{{ asset('assets/img/logoterbaru1.png') }}" alt="logo" width="50px">

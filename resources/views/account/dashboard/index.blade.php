@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Dashboard | MIS
+Dashboard | NEXUS
 @stop
 
 
@@ -201,7 +201,7 @@ Dashboard | MIS
 
 
         <!--================== TAMPILAN ARTIKEL ==================-->
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
@@ -222,7 +222,7 @@ Dashboard | MIS
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!--================== END ==================-->
 
         @endif

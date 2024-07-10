@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Pengguna | MIS
+Detail Pengguna | NEXUS
 @stop
 
 @section('content')
@@ -281,12 +281,13 @@ Detail Pengguna | MIS
               </div>
             </div>
 
-            <a href="{{ route('account.pengguna.index') }}" class="btn btn-info">
-              <i class="fa fa-undo"></i> KEMBALI
-            </a>
+            <div class="d-flex">
+              <a href="{{ route('account.pengguna.index') }}" class="btn btn-info rounded-pill" style="width: 100%; font-size: 14px;">
+                <i class="fa fa-undo"></i> KEMBALI
+              </a>
+            </div>
 
           </form>
-
         </div>
       </div>
     </div>
@@ -300,14 +301,14 @@ Detail Pengguna | MIS
   }
 </style>
 
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<!-- <script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
 <script>
   // Replace 'jobdesk' textarea with CKEditor
   CKEDITOR.replace('jobdesk', {
     width: '100%', // Set CKEditor width to 100%
     height: '300px' // You can adjust the height as needed
   });
-</script>
+</script> -->
 <!-- end ckeditor -->
 
 <!-- upload image -->
