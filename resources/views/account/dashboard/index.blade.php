@@ -151,19 +151,6 @@ Dashboard | NEXUS
                 </div>
         </div>
         <!--================== END ==================-->
-        <button onclick="downloadPWA()">Download PWA</button>
-
-        <script>
-            function downloadPWA() {
-                var link = document.createElement('a');
-                link.href = '/path/to/your/service-worker.js';
-                link.download = 'service-worker.js';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        </script>
-
 
         <!--================== TOTAL GAJI TAHUN INI ==================-->
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
