@@ -1,11 +1,10 @@
-// Service Worker script (sw.js)
+// service-worker.js
 
 const CACHE_NAME = 'nexus-pwa-cache-v1';
 const urlsToCache = [
     '/',
-    '/index.php',
-    '/assets/img/nexus.png',
-    // tambahkan semua URL yang perlu dicache di sini
+    '/offline', // contoh halaman offline jika dibutuhkan
+    // tambahkan URL yang ingin Anda cache di sini
 ];
 
 self.addEventListener('install', (event) => {
