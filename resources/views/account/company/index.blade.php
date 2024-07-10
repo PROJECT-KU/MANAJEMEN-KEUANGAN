@@ -84,8 +84,11 @@ Company | MIS
                         </div>
                         @if ( Auth::user()->level == 'ceo')
                         @else
-                        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <!-- <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button> -->
+                        <div class="d-flex">
+                            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 100%; font-size: 14px;">
+                                <i class="fa fa-paper-plane"></i> UPDATE
+                            </button>
+                        </div>
                         @endif
 
                     </form>
