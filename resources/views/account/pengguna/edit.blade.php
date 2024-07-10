@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Update Pengguna | MIS
+Update Pengguna | NEXUS
 @stop
 
 <style>
@@ -297,7 +297,7 @@ Update Pengguna | MIS
                                 <div class="form-group">
                                     <label>Quotes</label>
                                     <div class="input-group">
-                                        <textarea name="jobdesk" id="jobdesk" value="{{ old('jobdesk', $user->jobdesk) }}" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;"> {{ old('jobdesk', $user->jobdesk) }}</textarea>
+                                        <textarea name="jobdesk" id="jobdesk" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
                                     </div>
                                     @error('jobdesk')
                                     <div class="invalid-feedback" style="display: block">
@@ -416,13 +416,16 @@ Update Pengguna | MIS
                             </div>
                         </div>
 
-                        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-                        <a href="{{ route('account.pengguna.index') }}" class="btn btn-info">
-                            <i class="fa fa-undo"></i> KEMBALI
-                        </a>
+                        <div class="d-flex">
+                            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+                                <i class="fa fa-paper-plane"></i> UPDATE
+                            </button>
+                            <a href="{{ route('account.pengguna.index') }}" class="btn btn-info rounded-pill" style="width: 50%; font-size: 14px;">
+                                <i class="fa fa-undo"></i> KEMBALI
+                            </a>
+                        </div>
 
                     </form>
-
                 </div>
             </div>
         </div>
@@ -531,7 +534,7 @@ Update Pengguna | MIS
 <!--================== END ==================-->
 
 <!--================== CKEDITOR ==================-->
-<style>
+<!-- <style>
     .ckeditor-container {
         width: 100%;
     }
@@ -544,7 +547,7 @@ Update Pengguna | MIS
         width: '100%', // Set CKEditor width to 100%
         height: '300px' // You can adjust the height as needed
     });
-</script>
+</script> -->
 <!--================== END ==================-->
 
 <!--================== PREVIEW IMAGE ==================-->

@@ -2,7 +2,7 @@
   $version = "1.26.8";
   ?>
 
- <footer class="main-footer" style="border-top: 3px solid #6777ef;background-color: #ffffff;margin-bottom: -20px" id="PwaFooter">
+ <footer class="main-footer" style="border-top: 3px solid #ff914d;background-color: #ffffff;margin-bottom: -20px" id="PwaFooter">
    <div class="footer-left">
      © <strong>Rumah Scopus Foundation</strong> <?php echo date("Y"); ?>
    </div>

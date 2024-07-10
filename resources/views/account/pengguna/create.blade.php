@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MIS
+Tambah Pengguna | NEXUS
 @stop
 
 <style>
@@ -339,11 +339,17 @@ Tambah Pengguna | MIS
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                        <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+
+                        <div class="d-flex">
+                            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+                                <i class="fa fa-paper-plane"></i> SIMPAN
+                            </button>
+                            <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
+                                <i class="fa fa-redo"></i> RESET
+                            </button>
+                        </div>
 
                     </form>
-
                 </div>
             </div>
         </div>
@@ -423,7 +429,7 @@ Tambah Pengguna | MIS
 <!--================== END ==================-->
 
 <!--================== CKEDITOR ==================-->
-<style>
+<!-- <style>
     .ckeditor-container {
         width: 100%;
     }
@@ -436,7 +442,7 @@ Tambah Pengguna | MIS
         width: '100%', // Set CKEditor width to 100%
         height: '300px' // You can adjust the height as needed
     });
-</script>
+</script> -->
 <!--================== END ==================-->
 
 <!--================== PREVIEW IMAGE ==================-->
