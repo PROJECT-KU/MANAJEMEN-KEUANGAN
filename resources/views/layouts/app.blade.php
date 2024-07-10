@@ -21,7 +21,21 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <!-- Include SweetAlert CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
+    <!--================== SERVICE WORKER ==================-->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((reg) => {
+                        console.log('Service Worker registered.', reg);
+                    })
+                    .catch((err) => {
+                        console.error('Service Worker registration failed:', err);
+                    });
+            });
+        }
+    </script>
+    <!--================== END ==================-->
 </head>
 
 <body>

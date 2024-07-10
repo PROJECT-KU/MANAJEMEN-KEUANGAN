@@ -26,8 +26,6 @@
     <meta name="theme-color" content="#6777ef" />
     <link rel="apple-touch-icon" href="{{ asset('nexus.png') }}">
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!--================== END ==================-->
 
     <!-- -->
@@ -161,7 +159,7 @@
 
                                             <div class="form-group">
                                                 <label for="username"><i class="zmdi zmdi-account material-icons-name"></i></label>
-                                                <input type="text" name="username" id="username" class="form-control" placeholder="Masukkan Username Anda" tabindex="1" required autofocus maxlength="30" minlength="5" onkeypress="return /[a-zA-Z0-9 ]/i.test(event.key)">
+                                                <input type="text" name="username" id="username" class="form-control" placeholder="Masukkan Username Anda" tabindex="1" required autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
                                             </div>
                                             <div class="form-group password-group">
                                                 <label for="password"><i class="zmdi zmdi-lock"></i></label>
@@ -170,107 +168,72 @@
                                             </div>
                                             <div class="form-group">
                                                 <input type="checkbox" name="remember-me" id="remember-me" class="agree-term" />
-                                                <label for="remember-me" class="label-agree-term"><span><span></span></span>Ingatkan Saya</label>
+                                                <label for="remember-me" class="label-agree-term" req><span><span></span></span>Ingatkan Saya</label>
                                             </div>
                                             <div class="form-group form-button">
                                                 <input type="submit" name="signin" id="signin" class="form-submit" value="Log in" />
                                             </div>
 
+                                            <!-- <div class="form-group form-button" style="margin-top: -10px;">
+                                                <a href="{{ route('account.page-maintenance.blank') }}"><input type="button" id="signin" class="form-submit" value="Log in"></a>
+                                            </div> -->
+
                                             <span style="text-align: left;">Belum Punya Akun?</span>
                                             <span style="text-align: right; margin-left: 45px;">Lupa Password?</span>
                                             <div style="display: flex; align-items: center;">
-                                                <a href="{{ route('register') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align: left; margin-left: 3px;">Buat Sekarang!</a>
-                                                <a href="{{ route('formemail.reset') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align: right; margin-left: 62px;">Reset Sekarang!</a>
+                                                <a href="{{ route('register') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align:left; margin-left: 3px;">Buat Sekarang!</a>
+                                                <a href="{{ route('formemail.reset') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align:rignt; margin-left:62px;">Reset Sekarang!</a>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
                             </section>
+
                         </form>
-
-                        <!--================== INSTALLASI PWA DENGAN SWEET ALERT ==================-->
-                        <script>
-                            let deferredPrompt;
-
-                            window.addEventListener('beforeinstallprompt', (e) => {
-                                // Prevent Chrome 67 and earlier from automatically showing the prompt
-                                e.preventDefault();
-                                // Stash the event so it can be triggered later.
-                                deferredPrompt = e;
-
-                                // Show SweetAlert to install PWA
-                                Swal.fire({
-                                    title: 'Install NEXUS by Rumah Scopus',
-                                    text: 'Add NEXUS by Rumah Scopus to your home screen for easy access.',
-                                    icon: 'info',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Install',
-                                    cancelButtonText: 'Not Now'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // Trigger PWA prompt
-                                        deferredPrompt.prompt();
-                                        // Wait for the user to respond to the prompt
-                                        deferredPrompt.userChoice.then((choiceResult) => {
-                                            if (choiceResult.outcome === 'accepted') {
-                                                console.log('User accepted the A2HS prompt');
-                                            } else {
-                                                console.log('User dismissed the A2HS prompt');
-                                            }
-                                            deferredPrompt = null;
-                                        });
-                                    }
-                                });
-                            });
-
-                            // Set logo PWA
-                            const installButton = document.getElementById('installButton');
-                            installButton.style.backgroundImage = 'url("/assets/img/nexus.png")';
-                            installButton.style.backgroundSize = 'contain'; // Menyesuaikan ukuran logo agar sesuai dengan tombol
-                        </script>
-                        <!--================== END ==================-->
-
-
                     </div>
                 </div>
+
         </div>
-        </section>
+    </div>
+    </div>
+    </section>
 
-        <!--================== MENYIMPAN DATA USERNAME & PASSWORD ==================-->
-        <script>
-            // Fungsi untuk memeriksa apakah terdapat informasi login yang tersimpan
-            function checkSavedLogin() {
-                var savedUsername = localStorage.getItem('savedUsername');
-                var savedPassword = localStorage.getItem('savedPassword');
+    <!--================== MENYIMPAN DATA USERNAME & PASSWORD ==================-->
+    <script>
+        // Fungsi untuk memeriksa apakah terdapat informasi login yang tersimpan
+        function checkSavedLogin() {
+            var savedUsername = localStorage.getItem('savedUsername');
+            var savedPassword = localStorage.getItem('savedPassword');
 
-                if (savedUsername && savedPassword) {
-                    document.getElementById('username').value = savedUsername;
-                    document.getElementById('password').value = savedPassword;
-                    document.getElementById('remember-me').checked = true;
-                }
+            if (savedUsername && savedPassword) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('password').value = savedPassword;
+                document.getElementById('remember-me').checked = true;
             }
+        }
 
-            // Fungsi untuk menyimpan informasi login saat tombol login ditekan
-            document.getElementById('login-form').addEventListener('submit', function(event) {
-                if (document.getElementById('remember-me').checked) {
-                    var username = document.getElementById('username').value;
-                    var password = document.getElementById('password').value;
-                    localStorage.setItem('savedUsername', username);
-                    localStorage.setItem('savedPassword', password);
-                } else {
-                    localStorage.removeItem('savedUsername');
-                    localStorage.removeItem('savedPassword');
-                }
-            });
+        // Fungsi untuk menyimpan informasi login saat tombol login ditekan
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            if (document.getElementById('remember-me').checked) {
+                var username = document.getElementById('username').value;
+                var password = document.getElementById('password').value;
+                localStorage.setItem('savedUsername', username);
+                localStorage.setItem('savedPassword', password);
+            } else {
+                localStorage.removeItem('savedUsername');
+                localStorage.removeItem('savedPassword');
+            }
+        });
 
-            // Panggil fungsi untuk memeriksa informasi login yang tersimpan saat halaman dimuat
-            window.addEventListener('DOMContentLoaded', checkSavedLogin);
-        </script>
+        // Panggil fungsi untuk memeriksa informasi login yang tersimpan saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', checkSavedLogin);
+    </script>
 
-        <!--================== END ==================-->
+    <!--================== END ==================-->
 
-        <!--================== MEREFRESH PWA DI HP ==================-->
-        <!-- <script>
+    <!--================== MEREFRESH PWA DI HP ==================-->
+    <!-- <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -324,10 +287,10 @@
             passive: true
         });
     </script> -->
-        <!--================== END ==================-->
+    <!--================== END ==================-->
 
-        <!--================== PWA ==================-->
-        <!-- <script src="{{ asset('/sw.js') }}"></script>
+    <!--================== PWA ==================-->
+    <!-- <script src="{{ asset('/sw.js') }}"></script>
     <script>
         if ("serviceWorker" in navigator) {
             // Register a service worker hosted at the root of the
@@ -344,18 +307,18 @@
             console.error("Service workers are not supported.");
         }
     </script> -->
-        <!--================== END ==================-->
+    <!--================== END ==================-->
 
-        <!--================== IKLAN ==================-->
-        <!-- google ads -->
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
-        <!-- end -->
+    <!--================== IKLAN ==================-->
+    <!-- google ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
+    <!-- end -->
 
-        <!-- adnow ads -->
-        <div id="SC_TBlock_883745"></div>
-        <div id="SC_TBlock_883745" class="SC_TBlock"></div>
-        <!-- end -->
-        <!--================== END ==================-->
+    <!-- adnow ads -->
+    <div id="SC_TBlock_883745"></div>
+    <div id="SC_TBlock_883745" class="SC_TBlock"></div>
+    <!-- end -->
+    <!--================== END ==================-->
 
     </div>
 

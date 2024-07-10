@@ -49,7 +49,22 @@
             font-weight: bold;
         }
     </style>
-
+    <!--================== SERVICE WORKER ==================-->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((reg) => {
+                        console.log('Service Worker registered.', reg);
+                    })
+                    .catch((err) => {
+                        console.error('Service Worker registration failed:', err);
+                    });
+            });
+        }
+    </script>
+    <!--================== END ==================-->
+</head>
 </head>
 @php
 $isStatusOff = (Auth::user()->status === 'off');
