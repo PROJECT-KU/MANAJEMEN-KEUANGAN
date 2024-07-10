@@ -26,6 +26,8 @@
     <meta name="theme-color" content="#6777ef" />
     <link rel="apple-touch-icon" href="{{ asset('nexus.png') }}">
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!--================== END ==================-->
 
     <!-- -->
@@ -187,10 +189,6 @@
                         </form>
 
                         <!--================== INSTALLASI PWA DENGAN SWEET ALERT ==================-->
-                        <!-- SweetAlert CSS and JS -->
-                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
                         <script>
                             let deferredPrompt;
 
@@ -225,14 +223,10 @@
                                 });
                             });
 
-                            // Toggle password visibility
-                            const passwordToggle = document.getElementById('password-toggle');
-                            const passwordInput = document.getElementById('password');
-                            passwordToggle.addEventListener('click', function() {
-                                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                                passwordInput.setAttribute('type', type);
-                                this.classList.toggle('zmdi-eye-off');
-                            });
+                            // Set logo PWA
+                            const installButton = document.getElementById('installButton');
+                            installButton.style.backgroundImage = 'url("/assets/img/nexus.png")';
+                            installButton.style.backgroundSize = 'contain'; // Menyesuaikan ukuran logo agar sesuai dengan tombol
                         </script>
                         <!--================== END ==================-->
 
