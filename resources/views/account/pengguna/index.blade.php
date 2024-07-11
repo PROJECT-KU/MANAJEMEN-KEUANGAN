@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Pengguna | NEXUS
+Data Pengguna | MIS
 @stop
 
 @section('content')
