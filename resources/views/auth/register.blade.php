@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Daftar Akun | MIS</title>
-    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/login/css/style.css') }}">
@@ -180,7 +180,7 @@
                             <div class="container">
                                 <div class="signup-content">
                                     <div class="signup-form">
-                                        <h2 class="form-title">Sign up</h2>
+                                        <h2 class="form-title"><strong>Sign up</strong></h2>
 
 
                                         <div class="row">

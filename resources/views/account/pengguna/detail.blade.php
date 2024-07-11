@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Detail Pengguna | NEXUS
+Detail Pengguna | MIS
 @stop
 
 @section('content')

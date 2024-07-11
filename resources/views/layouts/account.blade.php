@@ -11,7 +11,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('assets/img/nexus.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -119,10 +119,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             <div class="main-sidebar sidebar-style-2" id="SidebarPwa">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/nexusby.png') }}" alt="logo" width="150">
+                        <img src="{{ asset('assets/img/logo-header.png') }}" alt="logo" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <img src="{{ asset('assets/img/nexus.png') }}" alt="logo" width="50px">
+                        <img src="{{ asset('assets/img/logo-pwa.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>

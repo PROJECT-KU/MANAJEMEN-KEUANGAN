@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <title>Masuk Akun | NEXUS</title>
-    <link rel="shortcut icon" href="{{ asset('assets/img/nexus.png') }}">
+    <title>Masuk Akun | MIS</title>
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
 
     <!--================== LOGIN NEW ==================-->
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ asset('assets/login/css/style.css') }}">
 
 
-    <link rel="shortcut icon" href="{{ asset('assets/img/nexus.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
     <!--================== END ==================-->
 
     <!--================== IKLAN ==================-->
@@ -24,7 +24,7 @@
 
     <!--================== PWA ==================-->
     <meta name="theme-color" content="#6777ef" />
-    <link rel="apple-touch-icon" href="{{ asset('nexus.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo-pwa.png') }}">
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
     <!--================== END ==================-->
 
@@ -151,7 +151,7 @@
                                 <div class="container">
                                     <div class="signin-content">
                                         <div class="signin-image">
-                                            <figure><img src="{{ asset('assets/login/images/welcome.jpg') }}" style="height: 450px; width: 900px;" alt="sing up image"></figure>
+                                            <figure><img src="{{ asset('assets/login/images/welcome.jpg') }}" style="height: 450px; width: 700px;" alt="sing up image"></figure>
                                         </div>
 
                                         <div class="signin-form">

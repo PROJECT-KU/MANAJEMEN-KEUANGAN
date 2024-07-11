@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ asset('assets/login/fonts/material-icon/css/material-design-iconic-font.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/login/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
-    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
     <!-- show and hide password -->
     <style>
         /* // <!-- SHOW AND HIDE PASSWORD --> */

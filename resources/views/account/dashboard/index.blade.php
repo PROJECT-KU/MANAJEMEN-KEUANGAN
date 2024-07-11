@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Dashboard | NEXUS
+Dashboard | MIS
 @stop
 
 
