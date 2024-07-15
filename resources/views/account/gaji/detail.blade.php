@@ -1398,12 +1398,12 @@ Detail Gaji Karyawan | MIS
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label>Tunjangan BPJS</label>
+              <label>Tunjangan Kesehatan</label>
               <div class="input-group">
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS" readonly>
+                <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS" readonly>
               </div>
             </div>
           </div>
@@ -1649,13 +1649,6 @@ Detail Gaji Karyawan | MIS
       reader.readAsDataURL(file);
     }
   });
-</script>
-<!--================== end ==================-->
-
-<!--================== CKEditor JS ==================-->
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-  CKEDITOR.replace('note');
 </script>
 <!--================== end ==================-->
 
