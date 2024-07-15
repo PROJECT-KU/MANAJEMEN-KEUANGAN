@@ -148,9 +148,9 @@ Artikel | Rumah Scopus
                     <div class="blog-author d-flex align-items-center">
 
                         @if ($user->gambar == null)
-                        <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" alt="">
+                        <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 100px; height: 100px;" alt="">
                         @else
-                        <img src="{{ asset('images/' . $user->gambar) }}" class="rounded-circle float-left" alt="">
+                        <img src="{{ asset('images/' . $user->gambar) }}" class="rounded-circle float-left" style="width: 100px; height: 100px;" alt="">
                         @endif
                         <div>
                             <h4>{{ $user->full_name }}</h4>
