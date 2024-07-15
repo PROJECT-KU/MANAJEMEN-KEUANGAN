@@ -201,7 +201,7 @@
                   <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->alpha, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-                  <td style="text-align: left; width:145px">Tunjangan BPJS</td>
+                  <td style="text-align: left; width:145px">Tunjangan Kesehatan</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->tunjangan_bpjs, 0, ',', '.') }}</td>
                 </tr>
                 <tr>

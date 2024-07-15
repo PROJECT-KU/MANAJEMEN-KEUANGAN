@@ -1026,12 +1026,12 @@ Tambah Gaji Karyawan | MIS
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label>Tunjangan BPJS</label>
+                <label>Tunjangan Kesehatan</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan BPJS" class="form-control currency_tunjanganBPJS">
+                  <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS">
                 </div>
                 @error('tunjangan_bpjs')
                 <div class="invalid-feedback" style="display: block">
@@ -1295,13 +1295,6 @@ Tambah Gaji Karyawan | MIS
   });
 </script>
 <!-- end upload image -->
-
-<!-- Include CKEditor JS -->
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-  CKEDITOR.replace('note');
-</script>
-<!-- end ckeditor -->
 
 <!-- add dan remove field lembur -->
 <script>
