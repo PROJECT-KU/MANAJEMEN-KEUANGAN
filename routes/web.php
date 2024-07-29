@@ -25,6 +25,10 @@ Route::get('/blog/topic/blog-single/{id}{token}', 'account\ArtikelController@blo
 Route::post('/blog/store', 'account\ArtikelController@storekomentar')->name('blog.store.komentar');
 Route::get('/blog/contact', 'account\ArtikelController@contact')->name('blog.contact.kontak');
 
+// PLAGIASI
+Route::get('/Cek-Plagiasi', 'account\PlagiasiController@index')->name('cek.plagiasi.public');
+Route::post('/Cek-Plagiasi/proses', 'account\PlagiasiController@uploadFile')->name('cek.plagiasi.proses');
+
 Auth::routes();
 
 /**
