@@ -87,20 +87,20 @@ Update Perjalanan Dinas Ajukan | MIS
 <!--================== END ==================-->
 
 @section('content')
-<div class="card-body">
-  <div class="main-content">
-    <section class="section">
-      <div class="section-header">
-        <h1>PERJALANAN DINAS AJUKAN</h1>
-      </div>
+<div class="main-content">
+  <section class="section">
+    <div class="section-header">
+      <h1>PERJALANAN DINAS AJUKAN</h1>
+    </div>
 
-      <div class="section-body">
+    <div class="section-body">
 
-        <form action="{{ route('account.PerjalananDinas.DetailDiterima', $DatasDiterima->id) }}" method="GET" enctype="multipart/form-data">
-          @csrf
+      <form action="{{ route('account.PerjalananDinas.DetailDiterima', $DatasDiterima->id) }}" method="GET" enctype="multipart/form-data">
+        @csrf
 
 
-          <!--================== DETAIL PERJALANAN DINAS ==================-->
+        <!--================== DETAIL PERJALANAN DINAS ==================-->
+        <div class="card">
           <div class="card">
             <div class="card-header">
               <h4>DETAIL PERJALANAN DINAS</h4>
@@ -2857,10 +2857,10 @@ Update Perjalanan Dinas Ajukan | MIS
           </div>
 
 
-        </form>
-      </div>
-    </section>
-  </div>
+      </form>
+    </div>
+  </section>
+</div>
 </div>
 
 <!--================== PREVIEW IMAGE ==================-->
