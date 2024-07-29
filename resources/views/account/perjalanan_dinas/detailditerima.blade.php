@@ -100,7 +100,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
 
         <!--================== DETAIL PERJALANAN DINAS ==================-->
-        <div class="card">
+        <div class="card" style="background-color: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 5px; padding: 20px; margin: 20px;">
           <div class="card">
             <div class="card-header">
               <h4>DETAIL PERJALANAN DINAS</h4>
