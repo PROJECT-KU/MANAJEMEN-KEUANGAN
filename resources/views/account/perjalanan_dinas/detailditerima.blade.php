@@ -2514,6 +2514,14 @@ Update Perjalanan Dinas Ajukan | MIS
           </div>
           <!--================== END CARD ==================-->
 
+          @if($DatasDiterima->tanggal36 !== null)
+          <div class="button-container">
+            <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
+              <i class="fa fa-undo mr-1"></i> KEMBALI
+            </a>
+          </div>
+          @endif
+
           <!--================== CARD 5 ==================-->
           <div class="accordion" id="additionalInputsAccordion6">
             @if($DatasDiterima->tanggal36 !== null)
