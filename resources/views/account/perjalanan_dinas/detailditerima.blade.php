@@ -87,7 +87,7 @@ Update Perjalanan Dinas Ajukan | MIS
 <!--================== END ==================-->
 
 @section('content')
-<div class="card">
+<div class="card-body">
   <div class="main-content">
     <section class="section">
       <div class="section-header">
