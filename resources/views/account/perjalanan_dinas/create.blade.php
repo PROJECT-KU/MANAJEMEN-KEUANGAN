@@ -1977,13 +1977,13 @@ Tambah laporan Camp | MIS
       <!--================== END ==================-->
 
       <div class="button-container">
-        <button class="btn btn-primary btn-submit" name="action" value="save" type="submit">
+        <!-- <button class="btn btn-primary btn-submit" name="action" value="save" type="submit">
           <i class="fa fa-paper-plane"></i> SIMPAN
-        </button>
-        <button class="btn btn-addcreate" name="action" value="save_add" type="submit" style="background-color: #8FBC8F; color: white;">
+        </button> -->
+        <button class="btn btn-addcreate" name="action" value="save_add" type="submit" style="background-color: #8FBC8F; color: white; width:50%; margin-right:10px;">
           <i class="fa fa-plus"></i> SIMPAN & TAMBAH DATA
         </button>
-        <button class="btn btn-warning btn-reset" type="reset">
+        <button class="btn btn-warning btn-reset" type="reset" style="width: 50%;">
           <i class="fa fa-redo"></i> RESET
         </button>
       </div>
