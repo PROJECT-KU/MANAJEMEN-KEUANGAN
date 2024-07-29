@@ -1185,12 +1185,397 @@ class PerjalananDinasController extends Controller
   {
     $user = Auth::user();
     $DatasEdit = PerjalananDinas::findOrFail($id);
+    // <!-- INPUT 1 -->
+    $uang_masuk = $request->input('uang_masuk');
+    $uang_masuk = empty($uang_masuk) ? null : str_replace(",", "", $uang_masuk);
+    $uang_keluar = $request->input('uang_keluar');
+    $uang_keluar = empty($uang_keluar) ? null : str_replace(",", "", $uang_keluar);
+    $imagePath = $DatasEdit->gambar;
+    if ($request->hasFile('gambar')) {
+      $image = $request->file('gambar');
+      $imageName = time() . '_gambar.' . $image->getClientOriginalExtension();
+      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
 
+    // <!-- INPUT 2 -->
+    $uang_keluar2 = $request->input('uang_keluar2');
+    $uang_keluar2 = empty($uang_keluar2) ? null : str_replace(",", "", $uang_keluar2);
+    $imagePath2 = $DatasEdit->gambar2;
+    if ($request->hasFile('gambar2')) {
+      $image2 = $request->file('gambar2');
+      $imageName2 = time() . '_gambar2.' . $image2->getClientOriginalExtension();
+      $imagePath2 = $imageName2; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image2->move(public_path('images'), $imageName2); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 3 -->
+    $uang_keluar3 = $request->input('uang_keluar3');
+    $uang_keluar3 = empty($uang_keluar3) ? null : str_replace(",", "", $uang_keluar3);
+    $imagePath3 = $DatasEdit->gambar3;
+    if ($request->hasFile('gambar3')) {
+      $image3 = $request->file('gambar3');
+      $imageName3 = time() . '_gambar3.' . $image3->getClientOriginalExtension();
+      $imagePath3 = $imageName3; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image3->move(public_path('images'), $imageName3); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 4 -->
+    $uang_keluar4 = $request->input('uang_keluar4');
+    $uang_keluar4 = empty($uang_keluar4) ? null : str_replace(",", "", $uang_keluar4);
+    $imagePath4 = $DatasEdit->gambar4;
+    if ($request->hasFile('gambar4')) {
+      $image4 = $request->file('gambar4');
+      $imageName4 = time() . '_gambar4.' . $image4->getClientOriginalExtension();
+      $imagePath4 = $imageName4; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image4->move(public_path('images'), $imageName4); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 5 -->
+    $uang_keluar5 = $request->input('uang_keluar5');
+    $uang_keluar5 = empty($uang_keluar5) ? null : str_replace(",", "", $uang_keluar5);
+    $imagePath5 = $DatasEdit->gambar5;
+    if ($request->hasFile('gambar5')) {
+      $image5 = $request->file('gambar5');
+      $imageName5 = time() . '_gambar5.' . $image5->getClientOriginalExtension();
+      $imagePath5 = $imageName5; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image5->move(public_path('images'), $imageName5); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 6 -->
+    $uang_keluar6 = $request->input('uang_keluar6');
+    $uang_keluar6 = empty($uang_keluar6) ? null : str_replace(",", "", $uang_keluar6);
+    $imagePath6 = $DatasEdit->gambar6;
+    if ($request->hasFile('gambar6')) {
+      $image6 = $request->file('gambar6');
+      $imageName6 = time() . '_gambar6.' . $image6->getClientOriginalExtension();
+      $imagePath6 = $imageName6; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image6->move(public_path('images'), $imageName6); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 7 -->
+    $uang_keluar7 = $request->input('uang_keluar7');
+    $uang_keluar7 = empty($uang_keluar7) ? null : str_replace(",", "", $uang_keluar7);
+    $imagePath7 = $DatasEdit->gambar7;
+    if ($request->hasFile('gambar7')) {
+      $image7 = $request->file('gambar7');
+      $imageName7 = time() . '_gambar7.' . $image7->getClientOriginalExtension();
+      $imagePath7 = $imageName7; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image7->move(public_path('images'), $imageName7); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 8 -->
+    $uang_keluar8 = $request->input('uang_keluar8');
+    $uang_keluar8 = empty($uang_keluar8) ? null : str_replace(",", "", $uang_keluar8);
+    $imagePath8 = $DatasEdit->gambar8;
+    if ($request->hasFile('gambar8')) {
+      $image8 = $request->file('gambar8');
+      $imageName8 = time() . '_gambar8.' . $image8->getClientOriginalExtension();
+      $imagePath8 = $imageName8; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image8->move(public_path('images'), $imageName8); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 9 -->
+    $uang_keluar9 = $request->input('uang_keluar9');
+    $uang_keluar9 = empty($uang_keluar9) ? null : str_replace(",", "", $uang_keluar9);
+    $imagePath9 = $DatasEdit->gambar9;
+    if ($request->hasFile('gambar9')) {
+      $image9 = $request->file('gambar9');
+      $imageName9 = time() . '_gambar9.' . $image9->getClientOriginalExtension();
+      $imagePath9 = $imageName9; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image9->move(public_path('images'), $imageName9); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 10 -->
+    $uang_keluar10 = $request->input('uang_keluar10');
+    $uang_keluar10 = empty($uang_keluar10) ? null : str_replace(",", "", $uang_keluar10);
+    $imagePath10 = $DatasEdit->gambar10;
+    if ($request->hasFile('gambar10')) {
+      $image10 = $request->file('gambar10');
+      $imageName10 = time() . '_gambar10.' . $image10->getClientOriginalExtension();
+      $imagePath10 = $imageName10; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image10->move(public_path('images'), $imageName10); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 11 -->
+    $uang_masuk11 = $request->input('uang_masuk11');
+    $uang_masuk11 = empty($uang_masuk11) ? null : str_replace(",", "", $uang_masuk11);
+    $uang_keluar11 = $request->input('uang_keluar11');
+    $uang_keluar11 = empty($uang_keluar11) ? null : str_replace(",", "", $uang_keluar11);
+    $imagePath11 = $DatasEdit->gambar11;
+    if ($request->hasFile('gambar11')) {
+      $image11 = $request->file('gambar11');
+      $imageName11 = time() . '_gambar11.' . $image11->getClientOriginalExtension();
+      $imagePath11 = $imageName11; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image11->move(public_path('images'), $imageName11); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 12 -->
+    $uang_keluar12 = $request->input('uang_keluar12');
+    $uang_keluar12 = empty($uang_keluar12) ? null : str_replace(",", "", $uang_keluar12);
+    $imagePath12 = $DatasEdit->gambar12;
+    if ($request->hasFile('gambar12')) {
+      $image12 = $request->file('gambar12');
+      $imageName12 = time() . '_gambar12.' . $image12->getClientOriginalExtension();
+      $imagePath12 = $imageName12; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image12->move(public_path('images'), $imageName12); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 13 -->
+    $uang_keluar13 = $request->input('uang_keluar13');
+    $uang_keluar13 = empty($uang_keluar13) ? null : str_replace(",", "", $uang_keluar13);
+    $imagePath13 = $DatasEdit->gambar13;
+    if ($request->hasFile('gambar13')) {
+      $image13 = $request->file('gambar13');
+      $imageName13 = time() . '_gambar13.' . $image13->getClientOriginalExtension();
+      $imagePath13 = $imageName13; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image13->move(public_path('images'), $imageName13); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 14 -->
+    $uang_keluar14 = $request->input('uang_keluar14');
+    $uang_keluar14 = empty($uang_keluar14) ? null : str_replace(",", "", $uang_keluar14);
+    $imagePath14 = $DatasEdit->gambar14;
+    if ($request->hasFile('gambar14')) {
+      $image14 = $request->file('gambar14');
+      $imageName14 = time() . '_gambar14.' . $image14->getClientOriginalExtension();
+      $imagePath14 = $imageName14; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image14->move(public_path('images'), $imageName14); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 15 -->
+    $uang_keluar15 = $request->input('uang_keluar15');
+    $uang_keluar15 = empty($uang_keluar15) ? null : str_replace(",", "", $uang_keluar15);
+    $imagePath15 = $DatasEdit->gambar15;
+    if ($request->hasFile('gambar15')) {
+      $image15 = $request->file('gambar15');
+      $imageName15 = time() . '_gambar15.' . $image15->getClientOriginalExtension();
+      $imagePath15 = $imageName15; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image15->move(public_path('images'), $imageName15); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 16 -->
+    $uang_keluar16 = $request->input('uang_keluar16');
+    $uang_keluar16 = empty($uang_keluar16) ? null : str_replace(",", "", $uang_keluar16);
+    $imagePath16 = $DatasEdit->gambar16;
+    if ($request->hasFile('gambar16')) {
+      $image16 = $request->file('gambar16');
+      $imageName16 = time() . '_gambar16.' . $image16->getClientOriginalExtension();
+      $imagePath16 = $imageName16; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image16->move(public_path('images'), $imageName16); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 17 -->
+    $uang_keluar17 = $request->input('uang_keluar17');
+    $uang_keluar17 = empty($uang_keluar17) ? null : str_replace(",", "", $uang_keluar17);
+    $imagePath17 = $DatasEdit->gambar17;
+    if ($request->hasFile('gambar17')) {
+      $image17 = $request->file('gambar17');
+      $imageName17 = time() . '_gambar17.' . $image17->getClientOriginalExtension();
+      $imagePath17 = $imageName17; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image17->move(public_path('images'), $imageName17); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 18 -->
+    $uang_keluar18 = $request->input('uang_keluar18');
+    $uang_keluar18 = empty($uang_keluar18) ? null : str_replace(",", "", $uang_keluar18);
+    $imagePath18 = $DatasEdit->gambar18;
+    if ($request->hasFile('gambar18')) {
+      $image18 = $request->file('gambar18');
+      $imageName18 = time() . '_gambar18.' . $image18->getClientOriginalExtension();
+      $imagePath18 = $imageName18; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image18->move(public_path('images'), $imageName18); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 19 -->
+    $uang_keluar19 = $request->input('uang_keluar19');
+    $uang_keluar19 = empty($uang_keluar19) ? null : str_replace(",", "", $uang_keluar19);
+    $imagePath19 = $DatasEdit->gambar19;
+    if ($request->hasFile('gambar19')) {
+      $image19 = $request->file('gambar19');
+      $imageName19 = time() . '_gambar19.' . $image19->getClientOriginalExtension();
+      $imagePath19 = $imageName19; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image19->move(public_path('images'), $imageName19); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- INPUT 20 -->
+    $uang_keluar20 = $request->input('uang_keluar20');
+    $uang_keluar20 = empty($uang_keluar20) ? null : str_replace(",", "", $uang_keluar20);
+    $imagePath20 = $DatasEdit->gambar20;
+    if ($request->hasFile('gambar20')) {
+      $image20 = $request->file('gambar20');
+      $imageName20 = time() . '_gambar20.' . $image20->getClientOriginalExtension();
+      $imagePath20 = $imageName20; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
+      $image20->move(public_path('images'), $imageName20); // Pindahkan gambar ke direktori public/images
+    }
+    // <!-- END -->
+
+    // <!-- TOTAL UANG MASUK -->
+    $total_uang_masuk = $uang_masuk + $uang_masuk11;
+    // <!-- END -->
+
+    // <!-- TOAL UANG KELUAR -->
+    $total_uang_keluar = $uang_keluar + $uang_keluar2 + $uang_keluar3 + $uang_keluar4 + $uang_keluar5 + $uang_keluar6 + $uang_keluar7 + $uang_keluar8 + $uang_keluar9 + $uang_keluar10 + $uang_keluar11 + $uang_keluar12 + $uang_keluar13 + $uang_keluar14 + $uang_keluar15 + $uang_keluar16 + $uang_keluar17 + $uang_keluar18 + $uang_keluar19 + $uang_keluar20;
+    // <!-- END -->
+
+    // <!-- SISA SALDO -->
+    $sisa_saldo = $total_uang_masuk - $total_uang_keluar;
+    // <!-- END -->
 
     $DatasEdit->update([
       'user_id'                 => $request->input('user_id'),
-      'deskripsi'               => $request->input('deskripsi'),
+      'tempat'                  => $request->input('tempat'),
+      'camp'                    => $request->input('camp'),
+      'tanggal_mulai'           => $request->input('tanggal_mulai'),
+      'tanggal_akhir'           => $request->input('tanggal_akhir'),
       'status'                  => $request->input('status'),
+
+      // <!-- INPUT 1 -->
+      'tanggal'                  => $request->input('tanggal'),
+      'uang_masuk'               => $uang_masuk,
+      'uang_keluar'              => $uang_keluar,
+      'keterangan'               => $request->input('keterangan'),
+      'gambar'                   => $imagePath,
+      // <!-- END -->
+
+      // <!-- INPUT 2 -->
+      'uang_keluar2'              => $uang_keluar2,
+      'keterangan2'               => $request->input('keterangan2'),
+      'gambar2'                   => $imagePath2,
+      // <!-- END -->
+
+      // <!-- INPUT 3 -->
+      'uang_keluar3'              => $uang_keluar3,
+      'keterangan3'               => $request->input('keterangan3'),
+      'gambar3'                   => $imagePath3,
+      // <!-- END -->
+
+      // <!-- INPUT 4 -->
+      'uang_keluar4'              => $uang_keluar4,
+      'keterangan4'               => $request->input('keterangan4'),
+      'gambar4'                   => $imagePath4,
+      // <!-- END -->
+
+      // <!-- INPUT 5 -->
+      'uang_keluar5'              => $uang_keluar5,
+      'keterangan5'               => $request->input('keterangan5'),
+      'gambar5'                   => $imagePath5,
+      // <!-- END -->
+
+      // <!-- INPUT 6 -->
+      'uang_keluar6'              => $uang_keluar6,
+      'keterangan6'               => $request->input('keterangan6'),
+      'gambar6'                   => $imagePath6,
+      // <!-- END -->
+
+      // <!-- INPUT 7 -->
+      'uang_keluar7'              => $uang_keluar7,
+      'keterangan7'               => $request->input('keterangan7'),
+      'gambar7'                   => $imagePath7,
+      // <!-- END -->
+
+      // <!-- INPUT 8 -->
+      'uang_keluar8'              => $uang_keluar8,
+      'keterangan8'               => $request->input('keterangan8'),
+      'gambar8'                   => $imagePath8,
+      // <!-- END -->
+
+      // <!-- INPUT 9 -->
+      'uang_keluar9'              => $uang_keluar9,
+      'keterangan9'               => $request->input('keterangan9'),
+      'gambar9'                   => $imagePath9,
+      // <!-- END -->
+
+      // <!-- INPUT 10 -->
+      'uang_keluar10'              => $uang_keluar10,
+      'keterangan10'               => $request->input('keterangan10'),
+      'gambar10'                   => $imagePath10,
+      // <!-- END -->
+
+      // <!-- INPUT 11 -->
+      'tanggal11'                  => $request->input('tanggal11'),
+      'uang_masuk11'               => $uang_masuk11,
+      'uang_keluar11'              => $uang_keluar11,
+      'keterangan11'               => $request->input('keterangan11'),
+      'gambar11'                   => $imagePath11,
+      // <!-- END -->
+
+      // <!-- INPUT 12 -->
+      'uang_keluar12'              => $uang_keluar12,
+      'keterangan12'               => $request->input('keterangan12'),
+      'gambar12'                   => $imagePath12,
+      // <!-- END -->
+
+      // <!-- INPUT 13 -->
+      'uang_keluar13'              => $uang_keluar13,
+      'keterangan13'               => $request->input('keterangan13'),
+      'gambar13'                   => $imagePath13,
+      // <!-- END -->
+
+      // <!-- INPUT 14 -->
+      'uang_keluar14'              => $uang_keluar14,
+      'keterangan14'               => $request->input('keterangan14'),
+      'gambar14'                   => $imagePath14,
+      // <!-- END -->
+
+      // <!-- INPUT 15 -->
+      'uang_keluar15'              => $uang_keluar15,
+      'keterangan15'               => $request->input('keterangan15'),
+      'gambar15'                   => $imagePath15,
+      // <!-- END -->
+
+      // <!-- INPUT 16 -->
+      'uang_keluar16'              => $uang_keluar16,
+      'keterangan16'               => $request->input('keterangan16'),
+      'gambar16'                   => $imagePath16,
+      // <!-- END -->
+
+      // <!-- INPUT 17 -->
+      'uang_keluar17'              => $uang_keluar17,
+      'keterangan17'               => $request->input('keterangan17'),
+      'gambar17'                   => $imagePath17,
+      // <!-- END -->
+
+      // <!-- INPUT 18 -->
+      'uang_keluar18'              => $uang_keluar18,
+      'keterangan18'               => $request->input('keterangan18'),
+      'gambar18'                   => $imagePath18,
+      // <!-- END -->
+
+      // <!-- INPUT 19 -->
+      'uang_keluar19'              => $uang_keluar19,
+      'keterangan19'               => $request->input('keterangan19'),
+      'gambar19'                   => $imagePath19,
+      // <!-- END -->
+
+      // <!-- INPUT 20 -->
+      'uang_keluar20'              => $uang_keluar20,
+      'keterangan20'               => $request->input('keterangan20'),
+      'gambar20'                   => $imagePath20,
+      // <!-- END -->
+
+      'total_uang_masuk'           => $total_uang_masuk,
+      'total_uang_keluar'          => $total_uang_keluar,
+      'sisa_saldo'                 => $sisa_saldo,
     ]);
 
     // Redirect with success or error message
@@ -1602,6 +1987,29 @@ class PerjalananDinasController extends Controller
     // Redirect with success or error message
     if ($DatasEdit) {
       return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
+    } else {
+      return redirect()->route('account.PerjalananDinas.index')->with('error', 'Data Perjalanan Dinas Gagal Disimpan!');
+    }
+  }
+
+  public function PengajuanManager(Request $request, $id)
+  {
+    $user = Auth::user();
+    $DatasEdit = PerjalananDinas::findOrFail($id);
+
+    $DatasEdit->update([
+      'user_id'                 => $request->input('user_id'),
+      'deskripsi'               => $request->input('deskripsi'),
+      'status'                  => $request->input('status'),
+    ]);
+
+    // Redirect with success or error message
+    if ($DatasEdit) {
+      if ($request->input('action') === 'save_add') {
+        return redirect()->route('account.PerjalananDinas.AddEdit', ['id' => $DatasEdit])->with('next', 'Data Perjalanan Dinas Berhasil Disimpan!');
+      } else {
+        return redirect()->route('account.PerjalananDinas.index')->with('success', 'Data Perjalanan Dinas Berhasil Disimpan!');
+      }
     } else {
       return redirect()->route('account.PerjalananDinas.index')->with('error', 'Data Perjalanan Dinas Gagal Disimpan!');
     }

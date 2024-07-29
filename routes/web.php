@@ -272,6 +272,7 @@ Route::prefix('account')->group(
         Route::get('/Perjalanan-Dinas/Edit/{id}', 'account\PerjalananDinasController@Edit')->name('account.PerjalananDinas.Edit');
         Route::get('/Perjalanan-Dinas/AddEdit/{id}', 'account\PerjalananDinasController@AddEdit')->name('account.PerjalananDinas.AddEdit');
         Route::post('/Perjalanan-Dinas/Update-Edit/{id}', 'account\PerjalananDinasController@UpdateEdit')->name('account.PerjalananDinas.UpdateEdit');
+        Route::post('/Perjalanan-Dinas/Update-Manager/{id}', 'account\PerjalananDinasController@PengajuanManager')->name('account.PerjalananDinas.PengajuanManager');
         Route::post('/Perjalanan-Dinas/Update-AddEdit/{id}', 'account\PerjalananDinasController@UpdateAddEdit')->name('account.PerjalananDinas.UpdateAddEdit');
         Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
     }

@@ -95,7 +95,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
     <div class="section-body">
 
-      <form action="{{ route('account.PerjalananDinas.UpdateEdit', $DatasAjukan->id) }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ route('account.PerjalananDinas.PengajuanManager', $DatasAjukan->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
 
 
