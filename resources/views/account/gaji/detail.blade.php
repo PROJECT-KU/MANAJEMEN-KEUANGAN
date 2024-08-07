@@ -1701,40 +1701,40 @@ Detail Gaji Karyawan | MIS
         var norek = selectedKaryawanOption.data('norek');
         var bank = selectedKaryawanOption.data('bank');
         var email = selectedKaryawanOption.data('email');
-        var alpha = selectedKaryawanOption.data('alpha');
-        var hadir = selectedKaryawanOption.data('hadir');
-        var camp_jogja = selectedKaryawanOption.data('camp_jogja');
-        var camp_luar_kota = selectedKaryawanOption.data('camp_luar_kota');
-        var perjalanan_jawa = selectedKaryawanOption.data('perjalanan_jawa');
-        var perjalanan_luar_jawa = selectedKaryawanOption.data('perjalanan_luar_jawa');
-        var remote = selectedKaryawanOption.data('remote');
-        var izin = selectedKaryawanOption.data('izin');
+        // var alpha = selectedKaryawanOption.data('alpha');
+        // var hadir = selectedKaryawanOption.data('hadir');
+        // var camp_jogja = selectedKaryawanOption.data('camp_jogja');
+        // var camp_luar_kota = selectedKaryawanOption.data('camp_luar_kota');
+        // var perjalanan_jawa = selectedKaryawanOption.data('perjalanan_jawa');
+        // var perjalanan_luar_jawa = selectedKaryawanOption.data('perjalanan_luar_jawa');
+        // var remote = selectedKaryawanOption.data('remote');
+        // var izin = selectedKaryawanOption.data('izin');
 
         $('#nik').val(nik);
         $('#norek').val(norek);
         $('#bank').val(bank);
         $('#email').val(email);
-        $('#alpha').val(alpha);
-        $('#hadir').val(hadir);
-        $('#camp_jogja').val(camp_jogja);
-        $('#camp_luar_kota').val(camp_luar_kota);
-        $('#perjalanan_jawa').val(perjalanan_jawa);
-        $('#perjalanan_luar_jawa').val(perjalanan_luar_jawa);
-        $('#remote').val(remote);
-        $('#izin').val(izin);
+        // $('#alpha').val(alpha);
+        // $('#hadir').val(hadir);
+        // $('#camp_jogja').val(camp_jogja);
+        // $('#camp_luar_kota').val(camp_luar_kota);
+        // $('#perjalanan_jawa').val(perjalanan_jawa);
+        // $('#perjalanan_luar_jawa').val(perjalanan_luar_jawa);
+        // $('#remote').val(remote);
+        // $('#izin').val(izin);
       } else {
         $('#nik').val('');
         $('#norek').val('');
         $('#bank').val('');
         $('#email').val('');
-        $('#alpha').val('');
-        $('#hadir').val('');
-        $('#camp_jogja').val('');
-        $('#camp_luar_kota').val('');
-        $('#perjalanan_jawa').val('');
-        $('#perjalanan_luar_jawa').val('');
-        $('#remote').val('');
-        $('#izin').val('');
+        // $('#alpha').val('');
+        // $('#hadir').val('');
+        // $('#camp_jogja').val('');
+        // $('#camp_luar_kota').val('');
+        // $('#perjalanan_jawa').val('');
+        // $('#perjalanan_luar_jawa').val('');
+        // $('#remote').val('');
+        // $('#izin').val('');
       }
     }
 
