@@ -200,7 +200,7 @@ Detail Gaji Karyawan | MIS
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" disabled="true">
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}" {{ $user->id == $gaji->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" {{ $user->id == $gaji->user_id ? 'selected' : '' }}>{{ $user->full_name }}</option>
                     @endforeach
                   </select>
 
@@ -347,7 +347,7 @@ Detail Gaji Karyawan | MIS
 
           <!-- lembur default -->
           <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Bonus Lembur (Per Jam)</label>
                 <div class="input-group">
@@ -364,7 +364,7 @@ Detail Gaji Karyawan | MIS
               </div>
             </div>
 
-            <div class="col-md-5">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Total Jam Lembur</label>
                 <input type="text" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -389,7 +389,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 1 -->
         @if($gaji->lembur1 == null || $gaji->jumlah_lembur1 == null || $gaji->lembur1 == '0' || $gaji->jumlah_lembur1 == '0')
         <div class="row lembur-field0" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -406,7 +406,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -428,7 +428,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field0">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -445,7 +445,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur1" value="{{ $gaji->jumlah_lembur1 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -471,7 +471,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 2 -->
         @if($gaji->lembur2 == null || $gaji->jumlah_lembur2 == null || $gaji->lembur2 == '0' || $gaji->jumlah_lembur2 == '0')
         <div class="row lembur-field2" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -488,7 +488,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -510,7 +510,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field2">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -527,7 +527,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur2" value="{{ $gaji->jumlah_lembur2 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -553,7 +553,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 3 -->
         @if($gaji->lembur3 == null || $gaji->jumlah_lembur3 == null || $gaji->lembur3 == '0' || $gaji->jumlah_lembur3 == '0')
         <div class="row lembur-field3" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -570,7 +570,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -592,7 +592,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field3">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -609,7 +609,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur3" value="{{ $gaji->jumlah_lembur3 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -635,7 +635,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 4 -->
         @if($gaji->lembur4 == null || $gaji->jumlah_lembur4 == null || $gaji->lembur4 == '0' || $gaji->jumlah_lembur4 == '0')
         <div class="row lembur-field4" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -652,7 +652,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -674,7 +674,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field4">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -691,7 +691,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur4" value="{{ $gaji->jumlah_lembur4 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -717,7 +717,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 5 -->
         @if($gaji->lembur5 == null || $gaji->jumlah_lembur5 == null || $gaji->lembur5 == '0' || $gaji->jumlah_lembur5 == '0')
         <div class="row lembur-field5" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -734,7 +734,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -756,7 +756,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field5">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -773,7 +773,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur5" value="{{ $gaji->jumlah_lembur5 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -799,7 +799,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 6 -->
         @if($gaji->lembur6 == null || $gaji->jumlah_lembur6 == null || $gaji->lembur6 == '0' || $gaji->jumlah_lembur6 == '0')
         <div class="row lembur-field6" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -816,7 +816,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -838,7 +838,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field6">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -855,7 +855,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur6" value="{{ $gaji->jumlah_lembur6 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -881,7 +881,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 7 -->
         @if($gaji->lembur7 == null || $gaji->jumlah_lembur7 == null || $gaji->lembur7 == '0' || $gaji->jumlah_lembur7 == '0')
         <div class="row lembur-field7" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -898,7 +898,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -920,7 +920,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field7">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -937,7 +937,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur7" value="{{ $gaji->jumlah_lembur7 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -963,7 +963,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 8 -->
         @if($gaji->lembur8 == null || $gaji->jumlah_lembur8 == null || $gaji->lembur8 == '0' || $gaji->jumlah_lembur8 == '0')
         <div class="row lembur-field8" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -980,7 +980,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1002,7 +1002,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field8">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -1019,7 +1019,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur8" value="{{ $gaji->jumlah_lembur8 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1045,7 +1045,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 9 -->
         @if($gaji->lembur9 == null || $gaji->jumlah_lembur9 == null || $gaji->lembur9 == '0' || $gaji->jumlah_lembur9 == '0')
         <div class="row lembur-field9" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -1062,7 +1062,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1084,7 +1084,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field9">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -1101,7 +1101,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur9" value="{{ $gaji->jumlah_lembur9 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1127,7 +1127,7 @@ Detail Gaji Karyawan | MIS
         <!-- lembur field 10 -->
         @if($gaji->lembur10 == null || $gaji->jumlah_lembur10 == null || $gaji->lembur10 == '0' || $gaji->jumlah_lembur10 == '0')
         <div class="row lembur-field10" style="display: none;">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -1144,7 +1144,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1166,7 +1166,7 @@ Detail Gaji Karyawan | MIS
         </div>
         @else
         <div class="row lembur-field10">
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Bonus Lembur (Per Jam)</label>
               <div class="input-group">
@@ -1183,7 +1183,7 @@ Detail Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="form-group">
               <label>Total Jam Lembur</label>
               <input type="text" name="jumlah_lembur10" value="{{ $gaji->jumlah_lembur10 }}" placeholder="Masukkan Total Jam" class="form-control" readonly>
@@ -1223,7 +1223,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-6">
             <div class="form-group">
               <label>Total Alpha</label>
-              <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus5" value="{{ $gaji->jumlah_bonus5 ?? 0}}" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1236,7 +1236,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus" value="{{ $gaji->bonus }}" placeholder="Bonus Kehadiran" class="form-control currency_kehadiran" readonly>
+                <input type="text" name="bonus" value="{{ $gaji->bonus ?? 0}}" placeholder="Bonus Kehadiran" class="form-control currency_kehadiran" readonly>
               </div>
             </div>
           </div>
@@ -1244,7 +1244,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Kehadiran</label>
-              <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus" value="{{ $gaji->jumlah_bonus ?? 0}}" placeholder="Total Kehadiran" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1259,7 +1259,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus1" value="{{ $gaji->bonus1 }}" placeholder="Bonus Camp Jogja" class="form-control currency_camp_jogja" readonly>
+                <input type="text" name="bonus1" value="{{ $gaji->bonus1 ?? 0}}" placeholder="Bonus Camp Jogja" class="form-control currency_camp_jogja" readonly>
               </div>
             </div>
           </div>
@@ -1267,7 +1267,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Camp Jogja</label>
-              <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus1" value="{{ $gaji->jumlah_bonus1 ?? 0}}" placeholder="Total Camp Jogja" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1280,7 +1280,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus4" value="{{ $gaji->bonus4 }}" placeholder="Bonus Camp Luar Kota" class="form-control currency_camp_luar_kota" readonly>
+                <input type="text" name="bonus4" value="{{ $gaji->bonus4 ?? 0}}" placeholder="Bonus Camp Luar Kota" class="form-control currency_camp_luar_kota" readonly>
               </div>
             </div>
           </div>
@@ -1288,7 +1288,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Camp Luar Kota</label>
-              <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
+              <input type="text" value="{{ $gaji->jumlah_bonus4 ?? 0}}" placeholder="Total Camp Luar Kota" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1303,7 +1303,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus2" value="{{ $gaji->bonus2 }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_jawa" readonly>
+                <input type="text" name="bonus2" value="{{ $gaji->bonus2 ?? 0}}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_jawa" readonly>
               </div>
             </div>
           </div>
@@ -1311,7 +1311,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Perjalanan Dalam Jawa</label>
-              <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus2" value="{{ $gaji->jumlah_bonus2 ?? 0}}" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1324,7 +1324,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus3" value="{{ $gaji->bonus3 }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa" readonly>
+                <input type="text" name="bonus3" value="{{ $gaji->bonus3 ?? 0}}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa" readonly>
               </div>
             </div>
           </div>
@@ -1332,7 +1332,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Perjalanan Luar Jawa</label>
-              <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus3" value="{{ $gaji->jumlah_bonus3 ?? 0}}" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1347,7 +1347,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus6" value="{{ $gaji->bonus6 }}" placeholder="Bonus Remote" class="form-control currency_remote" readonly>
+                <input type="text" name="bonus6" value="{{ $gaji->bonus6 ?? 0 }}" placeholder="Bonus Remote" class="form-control currency_remote" readonly>
               </div>
             </div>
           </div>
@@ -1355,28 +1355,21 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-3">
             <div class="form-group">
               <label>Total Remote</label>
-              <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
+              <input type="text" name="jumlah_bonus6" value="{{ $gaji->jumlah_bonus6 ?? 0}}" placeholder="Total Remote" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
 
           <!-- IZIN -->
-          <div class="col-md-3">
+          <div class="col-md-6">
             <div class="form-group">
-              <label>Bonus Izin</label>
+              <label>Jumlah Izin</label>
               <div class="input-group">
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="bonus7" value="{{ $gaji->bonus7 }}" placeholder="Bonus Izin" class="form-control currency_izin" readonly>
+                <input type="text" name="bonus7" value="{{ $gaji->jumlah_bonus7 ?? 0}}" placeholder="Bonus Izin" class="form-control currency_izin" readonly>
               </div>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="form-group">
-              <label>Total Izin</label>
-              <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
             </div>
           </div>
           <!-- END -->
@@ -1393,6 +1386,31 @@ Detail Gaji Karyawan | MIS
       </div>
       <div class="card-body">
         <div class="row">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Bonus Webinar</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="webinar" id="webinar" value="{{ $gaji->webinar }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar" readonly>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Bonus Kinerja</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Rp.</span>
+                </div>
+                <input type="text" name="kinerja" id="kinerja" value="{{ $gaji->kinerja }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja" readonly>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="row">
@@ -2121,6 +2139,14 @@ Detail Gaji Karyawan | MIS
   });
   // <!-- END -->
 
+  var cleaveC = new Cleave('.currency_webinar', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_kinerja', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
   var cleaveC = new Cleave('.currency_tunjanganBPJS', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
