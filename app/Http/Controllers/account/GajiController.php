@@ -1082,14 +1082,14 @@ class GajiController extends Controller
         'users.bank',
         'users.telp',
         'users.email',
-        DB::raw('SUM(presensi.alpha) as alpha'),
-        DB::raw('SUM(presensi.hadir) as hadir'),
-        DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
-        DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
-        DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
-        DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
-        DB::raw('SUM(presensi.remote) as remote'),
-        DB::raw('SUM(presensi.izin) as izin')
+        // DB::raw('SUM(presensi.alpha) as alpha'),
+        // DB::raw('SUM(presensi.hadir) as hadir'),
+        // DB::raw('SUM(presensi.camp_jogja) as camp_jogja'),
+        // DB::raw('SUM(presensi.camp_luar_kota) as camp_luar_kota'),
+        // DB::raw('SUM(presensi.perjalanan_jawa) as perjalanan_jawa'),
+        // DB::raw('SUM(presensi.perjalanan_luar_jawa) as perjalanan_luar_jawa'),
+        // DB::raw('SUM(presensi.remote) as remote'),
+        // DB::raw('SUM(presensi.izin) as izin')
       )
       ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
