@@ -555,7 +555,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $kinerja + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
@@ -932,7 +932,7 @@ class GajiController extends Controller
     // <!-- END -->
 
     // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $webinar + $kinerja + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
+    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
     $total = $subtotal;
     $total = empty($total) ? 0 : str_replace(",", "", $total);
     // <!-- END -->
