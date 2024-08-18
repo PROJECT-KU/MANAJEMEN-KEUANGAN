@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Karir | RUMAH SCOPUS</title>
-    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -89,7 +89,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <div class="login-brand">
-                            <img src="{{ asset('assets/img/logoterbaru.png') }}" alt="logo" width="350">
+                            <img src="{{ asset('assets/img/logo-header-new.png') }}" alt="logo" width="350">
                         </div>
 
                         <div class="card card-primary">
@@ -144,7 +144,7 @@
                                             @enderror
                                         </div>
 
-                                        <div class="form-group col-md-6">
+                                        <!-- <div class="form-group col-md-6">
                                             <label for="posisi">Posisi yang Kamu Lamar</label>
                                             <input id="posisi" type="text" class="form-control" name="posisi" value="{{ old('posisi') }}" maxlength="30" minlength="5" required>
                                             @error('posisi')
@@ -152,13 +152,27 @@
                                                 {{ $message }}
                                             </div>
                                             @enderror
+                                        </div> -->
+                                        <div class="form-group col-md-6">
+                                            <label for="posisi">Posisi yang Kamu Lamar</label>
+                                            <select id="posisi" class="form-control" name="posisi" required>
+                                                <option value="" disabled selected>Pilih Posisi</option>
+                                                <option value="Digital Marketing" {{ old('posisi') == 'Digital Marketing' ? 'selected' : '' }}>Digital Marketing</option>
+                                                <option value="Assisten Trainer" {{ old('posisi') == 'Asisten Trainer' ? 'selected' : '' }}>Asisten Trainer</option>
+                                            </select>
+                                            @error('posisi')
+                                            <div class="invalid-feedback" style="display: block">
+                                                {{ $message }}
+                                            </div>
+                                            @enderror
                                         </div>
+
                                     </div>
 
                                     <div class="row">
                                         <div class="form-group col-md-12">
                                             <label for="desc">Jelaskan Tentang Diri Kamu</label>
-                                            <textarea name="desc" id="desc" placeholder="Jelaskan diri kamu" class="form-control"></textarea>
+                                            <textarea name="desc" id="desc" placeholder="Jelaskan diri kamu" class="form-control" required></textarea>
                                             @error('desc')
                                             <div class="invalid-feedback" style="display: block">
                                                 {{ $message }}
@@ -223,7 +237,7 @@
                             </div>
                         </div>
                         <div class="simple-footer">
-                            © <strong>Berto Juni</strong> 2019. Hak Cipta Dilindungi.
+                            © <strong>Rumah Scopus Foundation</strong> 2019. Hak Cipta Dilindungi.
                         </div>
                     </div>
                 </div>
@@ -334,29 +348,6 @@
 
             // Mengatur nilai input dengan nomor telepon yang diformat
             input.value = phoneNumber;
-        }
-    </script>
-    <!--================== END ==================-->
-
-    <!--================== CKEDITOR ==================-->
-    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script>
-        CKEDITOR.replace('desc');
-
-        function validateform() {
-            var editorContent = CKEDITOR.instances.desc.getData();
-            if (editorContent.trim() === '') {
-                // Use SweetAlert for a more visually appealing alert
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Jelaskan Tentang Diri Kamu harus diisi.',
-                    confirmButtonText: 'OK'
-                });
-                return false;
-            }
-            return true;
         }
     </script>
     <!--================== END ==================-->

@@ -200,7 +200,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>DATA KOMENTAR</a></li>
                                     </ul>
                                 </li>
-                                <li class="{{ setActive('account/karir') }} . {{ setActive('account/camp/search') }}">
+                                <li class="{{ setActive('account/karir') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
                                         <i class="fas fa-user-tie"></i> <span>KARIR</span>
                                     </a>

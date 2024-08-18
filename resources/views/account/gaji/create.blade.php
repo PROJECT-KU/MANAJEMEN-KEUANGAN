@@ -164,6 +164,58 @@ Tambah Gaji Karyawan | MIS
 </style>
 <!--================== end ==================-->
 
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<style>
+  .custom-file-upload {
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+
+  .file-upload {
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  .file-upload:hover {
+    background-color: #0056b3;
+  }
+
+  #file-selected {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+  }
+
+  .image-preview {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+</style>
+<!--================== END ==================-->
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -955,7 +1007,7 @@ Tambah Gaji Karyawan | MIS
             <!-- END -->
 
             <!-- IZIN -->
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Izin</label>
                 <div class="input-group">
@@ -965,9 +1017,9 @@ Tambah Gaji Karyawan | MIS
                   <input type="text" name="bonus7" value="{{ old('bonus7') }}" placeholder="Bonus Izin" class="form-control currency_izin">
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Total Izin</label>
                 <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
@@ -1203,98 +1255,83 @@ Tambah Gaji Karyawan | MIS
 
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group">
+              <div class="form-group custom-file-upload" style="margin-top: -3px;">
                 <label>Bukti Pembayaran</label>
                 <div class="input-group">
-                  <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*">
+                  <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*">
+                  <label for="gambar" class="file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                  </label>
                 </div>
-                <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera -->
-                @error('gambar')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
+              @error('gambar')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
             </div>
             <div class="col-md-6">
-              <div class="form-group">
-                <div class="card" style="width: 18rem;">
-                  <img id="image-preview" class="card-img-top" src="#" alt="Preview Image">
-                </div>
+              <div class="image-preview-container">
+                <div id="imagePreview" class="image-preview"></div>
+                <span id="file-selected"></span>
               </div>
             </div>
           </div>
 
-          <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-          <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
-
-          </form>
-
         </div>
       </div>
+
+      <div class="d-flex mt-3">
+        <button class="btn btn-primary mr-1 btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+        <button class="btn btn-warning btn-reset" type="reset" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-redo"></i> RESET</button>
+      </div>
+
+      </form>
+
     </div>
   </section>
 </div>
 
-<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  document.getElementById('gambar').addEventListener('change', function() {
-    const maxFileSizeInBytes = 5024 * 5024; // 5MB
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
-    const fileInput = this;
+  document.getElementById('gambar').addEventListener('change', function(event) {
+    var fileInput = event.target;
+    var file = fileInput.files[0];
+    var fileName = file.name;
+    var fileSize = (file.size / 1024).toFixed(2); // in KB
+    var allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
 
-    if (fileInput.files.length > 0) {
-      const selectedFile = fileInput.files[0];
-      const fileSize = selectedFile.size; // Get the file size in bytes
-      const fileName = selectedFile.name.toLowerCase();
-
-      // Check file size
-      if (fileSize > maxFileSizeInBytes) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Ukuran File Melebihi Batas',
-          text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
-        });
-        fileInput.value = ''; // Clear the file input
-        return;
-      }
-
-      // Check file extension
-      const fileExtension = fileName.split('.').pop();
-      if (!allowedExtensions.includes(fileExtension)) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Jenis File Tidak Valid',
-          text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
-        });
-        fileInput.value = ''; // Clear the file input
-      }
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Only PNG, JPEG, and JPG files are allowed. Please choose a valid file type.'
+      });
+      return;
     }
+
+    if (fileSize > 3000) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'File size exceeds the maximum limit of 3MB. Please choose a smaller file.'
+      });
+      return;
+    }
+
+    document.getElementById('file-selected').innerHTML = fileName + ' (' + fileSize + ' KB)';
+
+    var reader = new FileReader();
+    reader.onload = function() {
+      var output = document.getElementById('imagePreview');
+      output.innerHTML = `<img src="${reader.result}">`;
+      output.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
   });
 </script>
-<!-- end -->
-
-<!-- upload image -->
-<script>
-  const imageInput = document.getElementById('gambar');
-  const imagePreview = document.getElementById('image-preview');
-
-  imageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = 'block'; // Show the preview
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-</script>
-<!-- end upload image -->
+<!--================== END ==================-->
 
 <!-- add dan remove field lembur -->
 <script>

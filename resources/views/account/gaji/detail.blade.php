@@ -1596,15 +1596,17 @@ Detail Gaji Karyawan | MIS
           </div>
         </div>
 
-
-        <a href="{{ route('account.gaji.index') }}" class="btn btn-info">
-          <i class="fa fa-undo"></i> KEMBALI
-        </a>
-
-        </form>
-
       </div>
     </div>
+
+    <div class="d-flex mt-3">
+      <a href="{{ route('account.gaji.index') }}" class="btn btn-info" style="flex: 1; height:40px; font-size: 15px;">
+        <i class="fa fa-undo"></i> KEMBALI
+      </a>
+    </div>
+
+    </form>
+
 </div>
 </section>
 </div>

@@ -1578,11 +1578,11 @@ Update Gaji Karyawan | MIS
             <div class="col-md-6">
               <div class="form-group">
                 <a href="{{ asset('images/' . $gaji->gambar) }}" data-lightbox="{{ $gaji->id }}">
-                  <div class="card" style="width: 18rem;">
+                  <div class="card" style="width: 18rem; height: 250px; overflow: hidden; border: 2px dashed #000;">
                     @if ($gaji->gambar == null)
-                    <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail">
+                    <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
                     @else
-                    <img id="image-preview" style="width: 200px; height:200px;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
+                    <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" class="card-img-top" src="{{ asset('images/' . $gaji->gambar) }}" alt="Preview Image">
                     @endif
                   </div>
                 </a>
@@ -1602,15 +1602,17 @@ Update Gaji Karyawan | MIS
             </div>
           </div>
 
-          <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-          <a href="{{ route('account.gaji.index') }}" class="btn btn-info">
-            <i class="fa fa-undo"></i> KEMBALI
-          </a>
-
-          </form>
-
         </div>
       </div>
+
+      <div class="d-flex mt-3">
+        <button class="btn btn-primary mr-1 btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+        <a href="{{ route('account.gaji.index') }}" class="btn btn-info" style="flex: 1; height:40px; font-size: 15px;">
+          <i class="fa fa-undo"></i> KEMBALI
+        </a>
+      </div>
+
+      </form>
     </div>
   </section>
 </div>
