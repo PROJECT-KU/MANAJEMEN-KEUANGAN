@@ -106,16 +106,16 @@ Data Karir | MIS
                             </a>
                         </div>
                     </div>
-                    <div class="card-header">
-                        <!-- <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                    <!-- <div class="card-header">
+                        <p style="margin-top: -3px; font-size: 15px"><strong>Periode
                                 @if ($startDate && $endDate)
                                 {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
                                 @else
                                 {{ date('F Y') }}
                                 @endif
                             </strong>
-                        </p> -->
-                    </div>
+                        </p>
+                    </div> -->
                     <div class="card-body">
                         <div class="table-responsive">
                             <div class="table-responsive">
@@ -162,8 +162,8 @@ Data Karir | MIS
                                                     <i class="fa fa-pencil-alt"></i>
                                                 </a>
                                                 <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
-                                                    <i class="fa fa-eye"></i>
-                                                </a> -->
+                                                        <i class="fa fa-eye"></i>
+                                                    </a> -->
                                             </td>
                                         </tr>
                                         @php

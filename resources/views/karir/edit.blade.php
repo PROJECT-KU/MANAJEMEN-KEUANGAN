@@ -213,23 +213,6 @@ Update Karir | MIS
 
 <!--================== end ==================-->
 
-<!--================== CKEDITOR ==================-->
-<style>
-    .ckeditor-container {
-        width: 100%;
-    }
-</style>
-
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-    // Replace 'jobdesk' textarea with CKEditor
-    CKEDITOR.replace('desc', {
-        width: '100%', // Set CKEditor width to 100%
-        height: '300px' // You can adjust the height as needed
-    });
-</script>
-<!--================== END ==================-->
-
 
 
 <script>

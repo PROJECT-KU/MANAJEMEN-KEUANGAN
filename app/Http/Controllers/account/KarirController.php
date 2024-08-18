@@ -133,7 +133,7 @@ class KarirController extends Controller
 
             Mail::to($emailTo)->send(new KarirCreateMail($save, $appName));
 
-            return redirect()->route('karir.index')->with('success', 'Data Laporan Camp Berhasil Disimpan!');
+            return redirect()->route('karir.index')->with('success', 'Pendaftaran Recru Berhasil Disimpan!');
         } else {
             // Redirect with an error message if data creation fails
             return redirect()->route('karir.index')->with('error', 'Gagal menyimpan data laporan camp.');
