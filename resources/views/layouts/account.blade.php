@@ -203,6 +203,14 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/karir') }}">
                                     <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
                                         <i class="fas fa-user-tie"></i> <span>KARIR</span>
+                                        @php
+                                        $totalStatusNull = App\Karir::whereNull('status')->count();
+                                        @endphp
+
+                                        @if ($totalStatusNull > 0)
+                                        <span class="badge badge-warning right" style="width: fit-content;">{{ $totalStatusNull }}</span>
+                                        @endif
+
                                     </a>
                                 </li>
                                 <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">

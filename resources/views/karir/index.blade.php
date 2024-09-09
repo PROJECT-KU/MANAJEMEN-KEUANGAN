@@ -159,6 +159,7 @@
                                                 <option value="" disabled selected>Pilih Posisi</option>
                                                 <option value="Digital Marketing" {{ old('posisi') == 'Digital Marketing' ? 'selected' : '' }}>Digital Marketing</option>
                                                 <option value="Assisten Trainer" {{ old('posisi') == 'Asisten Trainer' ? 'selected' : '' }}>Asisten Trainer</option>
+                                                <option value="Socmed Analysis" {{ old('posisi') == 'Socmed Analysis' ? 'selected' : '' }}>Socmed Analysis</option>
                                             </select>
                                             @error('posisi')
                                             <div class="invalid-feedback" style="display: block">
