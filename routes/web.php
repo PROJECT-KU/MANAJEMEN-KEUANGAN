@@ -44,6 +44,7 @@ Route::prefix('account')->group(
         Route::get('/karir/edit/{id}{token}', 'account\KarirController@edit')->name('karir.edit');
         Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
         Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
+        Route::delete('/karir/{id}', 'account\KarirController@destroy')->name('account.karir.destroy');
 
         //reset password
         Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');

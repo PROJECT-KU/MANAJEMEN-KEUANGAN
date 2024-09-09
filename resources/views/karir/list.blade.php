@@ -161,9 +161,9 @@ Data Karir | MIS
                                                 <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
                                                     <i class="fa fa-pencil-alt"></i>
                                                 </a>
-                                                <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
-                                                        <i class="fa fa-eye"></i>
-                                                    </a> -->
+                                                <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                         @php
@@ -263,7 +263,7 @@ Data Karir | MIS
 
         swal({
             title: "APAKAH KAMU YAKIN?",
-            text: "INGIN MENGHAPUS DATA INI!",
+            text: "INGIN MENGHAPUS DATA INI SECARA PERMANEN!",
             icon: "warning",
             buttons: {
                 cancel: {
@@ -286,23 +286,43 @@ Data Karir | MIS
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/gaji/" + id,
+                    url: "/account/karir/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"
                     },
                     type: 'POST',
                     success: function(response) {
-                        if (response.status === "success") {
+                        if (response.statusdatadeleted === "success") {
+                            // Custom SweetAlert with a progress bar
                             swal({
                                 title: 'BERHASIL!',
-                                text: response.message,
+                                text: 'Data berhasil di hapus',
+                                content: {
+                                    element: "div",
+                                    attributes: {
+                                        innerHTML: `
+                                        <div style="position: relative; width: 100%; background: #eee; height: 10px;">
+                                            <div id="progress-bar" style="position: absolute; background: green; height: 10px; width: 0%;"></div>
+                                        </div>
+                                    `
+                                    }
+                                },
                                 icon: 'success',
-                                timer: 1000,
                                 buttons: false,
-                            }).then(function() {
-                                location.reload();
+                                closeOnClickOutside: false,
                             });
+
+                            // Animate the progress bar over 3 seconds
+                            let progress = 0;
+                            let interval = setInterval(function() {
+                                progress += 1;
+                                document.getElementById("progress-bar").style.width = progress + "%";
+                                if (progress >= 100) {
+                                    clearInterval(interval);
+                                    location.reload(); // Reload page after the progress reaches 100%
+                                }
+                            }, 30); // 30ms * 100 iterations = 3 seconds
                         } else {
                             swal({
                                 title: 'GAGAL!',
@@ -314,6 +334,16 @@ Data Karir | MIS
                                 location.reload();
                             });
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle server errors or unexpected responses
+                        swal({
+                            title: 'GAGAL!',
+                            text: 'Terjadi kesalahan saat menghapus data.',
+                            icon: 'error',
+                            buttons: false,
+                            timer: 2000,
+                        });
                     }
                 });
             }

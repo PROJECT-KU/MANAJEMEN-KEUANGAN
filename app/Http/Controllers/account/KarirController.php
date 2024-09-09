@@ -19,22 +19,24 @@ class KarirController extends Controller
      */
     function generateRandomToken($length)
     {
+        // First character must be a letter
+        $firstCharacter = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // Remaining characters can include numbers and symbols
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
         $token = '';
 
-        for ($i = 0; $i < $length; $i++) {
+        // Ensure the first character is a letter
+        $token .= $firstCharacter[rand(0, strlen($firstCharacter) - 1)];
+
+        // Generate the rest of the token
+        for ($i = 1; $i < $length; $i++) {
             $token .= $characters[rand(0, strlen($characters) - 1)];
         }
 
         return $token;
     }
 
-    public function index(Request $request)
-    {
-
-        return view('karir.index');
-    }
-
+    // <!--================== ADMIN ==================-->
     public function list(Request $request)
     {
         $user = Auth::user();
@@ -75,69 +77,6 @@ class KarirController extends Controller
             ->get();
 
         return view('karir.detail', compact('karir', 'maintenances'));
-    }
-
-    public function store(Request $request)
-    {
-        $token = $this->generateRandomToken(30);
-
-        // PATH UNTUK MENYIMPAN CV
-        $cvPath = null;
-        if ($request->hasFile('cv')) {
-            $filecv = $request->file('cv');
-            $cvName = time() . '_cv.' . $filecv->getClientOriginalExtension();
-            $cvPath = $cvName;
-            $filecv->move(public_path('karir'), $cvName);
-        }
-        // END
-
-        // PATH UNTUK MENYIMPAN LAMARAN
-        $lamaranPath = null;
-        if ($request->hasFile('lamaran')) {
-            $filelamaran = $request->file('lamaran');
-            $lamaranName = time() . '_lamaran.' . $filelamaran->getClientOriginalExtension();
-            $lamaranPath = $lamaranName;
-            $filelamaran->move(public_path('karir'), $lamaranName);
-        }
-        // END
-
-        // PATH UNTUK MENYIMPAN LAINNYA
-        $lainnyaPath = null;
-        if ($request->hasFile('lainnya')) {
-            $filelainnya = $request->file('lainnya');
-            $lainnyaName = time() . '_lainnya.' . $filelainnya->getClientOriginalExtension();
-            $lainnyaPath = $lainnyaName;
-            $filelainnya->move(public_path('karir'), $lainnyaName);
-        }
-        // END
-
-        $save = Karir::create([
-            'token'         => $token,
-            'nama'          => $request->input('nama'),
-            'telp'          => $request->input('telp'),
-            'email'         => $request->input('email'),
-            'tanggal'       => $request->input('tanggal'),
-            'cv'            => $cvPath ?? null,
-            'lamaran'       => $lamaranPath ?? null,
-            'lainnya'       => $lainnyaPath ?? null,
-            'pendidikan'    => $request->input('pendidikan'),
-            'posisi'        => $request->input('posisi'),
-            'desc'          => $request->input('desc'),
-        ]);
-
-        // Redirect with success or error message
-        if ($save) {
-            // dd($save);
-            $appName = 'Rumah Scopus Foundation';
-            $emailTo = $request->input('email');
-
-            Mail::to($emailTo)->send(new KarirCreateMail($save, $appName));
-
-            return redirect()->route('karir.index')->with('success', 'Pendaftaran Recru Berhasil Disimpan!');
-        } else {
-            // Redirect with an error message if data creation fails
-            return redirect()->route('karir.index')->with('error', 'Gagal menyimpan data laporan camp.');
-        }
     }
 
     public function edit(Request $request, $id, $token)
@@ -281,4 +220,105 @@ class KarirController extends Controller
         }
         return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate', 'karirExist'));
     }
+
+    // <!-- DELETE DATA -->
+    public function destroy(Request $request, $id)
+    {
+        $karirData = Karir::findOrFail($id);
+
+        // Delete the associated CV if it exists
+        if ($karirData->cv && file_exists(public_path('karir/' . $karirData->cv))) {
+            unlink(public_path('karir/' . $karirData->cv));
+        }
+
+        // Delete the associated Lamaran if it exists
+        if ($karirData->lamaran && file_exists(public_path('karir/' . $karirData->lamaran))) {
+            unlink(public_path('karir/' . $karirData->lamaran));
+        }
+
+        // Delete the associated Lainnya if it exists
+        if ($karirData->lainnya && file_exists(public_path('karir/' . $karirData->lainnya))) {
+            unlink(public_path('karir/' . $karirData->lainnya));
+        }
+
+        // Delete the record from the database
+        $karirData->delete();
+
+        // Return a JSON response with a status and message
+        return response()->json(['statusdatadeleted' => 'success', 'message' => 'Data berhasil dihapus.']);
+    }
+    // <!-- END -->
+
+    // <!--================== END ==================-->
+
+    // <!--================== PUBLIC ==================-->
+    public function index(Request $request)
+    {
+
+        return view('karir.index');
+    }
+
+    public function store(Request $request)
+    {
+        $token = $this->generateRandomToken(30);
+
+        // PATH UNTUK MENYIMPAN CV
+        $cvPath = null;
+        if ($request->hasFile('cv')) {
+            $filecv = $request->file('cv');
+            $cvName = time() . '_cv.' . $filecv->getClientOriginalExtension();
+            $cvPath = $cvName;
+            $filecv->move(public_path('karir'), $cvName);
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAMARAN
+        $lamaranPath = null;
+        if ($request->hasFile('lamaran')) {
+            $filelamaran = $request->file('lamaran');
+            $lamaranName = time() . '_lamaran.' . $filelamaran->getClientOriginalExtension();
+            $lamaranPath = $lamaranName;
+            $filelamaran->move(public_path('karir'), $lamaranName);
+        }
+        // END
+
+        // PATH UNTUK MENYIMPAN LAINNYA
+        $lainnyaPath = null;
+        if ($request->hasFile('lainnya')) {
+            $filelainnya = $request->file('lainnya');
+            $lainnyaName = time() . '_lainnya.' . $filelainnya->getClientOriginalExtension();
+            $lainnyaPath = $lainnyaName;
+            $filelainnya->move(public_path('karir'), $lainnyaName);
+        }
+        // END
+
+        $save = Karir::create([
+            'token'         => $token,
+            'nama'          => $request->input('nama'),
+            'telp'          => $request->input('telp'),
+            'email'         => $request->input('email'),
+            'tanggal'       => $request->input('tanggal'),
+            'cv'            => $cvPath ?? null,
+            'lamaran'       => $lamaranPath ?? null,
+            'lainnya'       => $lainnyaPath ?? null,
+            'pendidikan'    => $request->input('pendidikan'),
+            'posisi'        => $request->input('posisi'),
+            'desc'          => $request->input('desc'),
+        ]);
+
+        // Redirect with success or error message
+        if ($save) {
+            // dd($save);
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+
+            Mail::to($emailTo)->send(new KarirCreateMail($save, $appName));
+
+            return redirect()->route('karir.index')->with('success', 'Pendaftaran Recru Berhasil Disimpan!');
+        } else {
+            // Redirect with an error message if data creation fails
+            return redirect()->route('karir.index')->with('error', 'Gagal menyimpan data laporan camp.');
+        }
+    }
+    // <!--================== END ==================-->
 }
