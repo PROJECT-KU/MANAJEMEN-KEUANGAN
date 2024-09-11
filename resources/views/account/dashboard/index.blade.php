@@ -105,14 +105,27 @@ Dashboard | MIS
                                 $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
                                 ->whereDate('created_at', now()->toDateString())
                                 ->first();
+
+                                $timeDifferenceInMinutes = null;
+                                if ($todayPresensi) {
+                                $createdAt = $todayPresensi->created_at;
+                                $currentTime = now();
+                                $timeDifferenceInMinutes = $currentTime->diffInMinutes($createdAt);
+                                }
                                 @endphp
-                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
+
+                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' )
+                                    <div class="d-flex mx-1 mt-2 mb-2">
                                     <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
                                         MASUK
                                     </button>
-                                    <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+
+                                    <button id="pulangBtn" class="btn btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif"
+                                        data-time-difference="{{ $timeDifferenceInMinutes }}"
+                                        data-pulang-route="{{ route('account.presensi.edit', $todayPresensi->id) }}"
+                                        @if($timeDifferenceInMinutes < 5) disabled @endif>
                                         PULANG
-                                    </a>
+                                    </button>
                             </div>
                             <div class="d-flex align-items-center">
                                 <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
@@ -263,6 +276,61 @@ Dashboard | MIS
 
     </section>
 </div>
+
+<!-- ALERT AND COUNTDOWN LOGIC -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pulangBtn = document.getElementById('pulangBtn');
+
+        if (pulangBtn) {
+            let countdownFinished = false; // Variable to track countdown status
+            const timeDifference = parseInt(pulangBtn.getAttribute('data-time-difference'), 10);
+            const pulangRoute = pulangBtn.getAttribute('data-pulang-route');
+
+            console.log('Time Difference:', timeDifference); // Debugging log
+
+            if (timeDifference < 5) {
+                const minutesRemaining = 5 - timeDifference;
+                pulangBtn.disabled = false;
+
+                let countdown = minutesRemaining * 60;
+                const interval = setInterval(function() {
+                    countdown--;
+                    const minutes = Math.floor(countdown / 60);
+                    const seconds = countdown % 60;
+
+                    pulangBtn.innerText = `PULANG (available in ${minutes}:${seconds.toString().padStart(2, '0')})`;
+
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        countdownFinished = true;
+                        pulangBtn.disabled = false;
+                        pulangBtn.innerText = 'PULANG';
+                    }
+                }, 1000);
+            }
+
+            pulangBtn.addEventListener('click', function(e) {
+                if (timeDifference < 5 && !countdownFinished) {
+                    e.preventDefault(); // Prevent navigation
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tunggu 5 menit!',
+                        text: 'Anda harus menunggu 5 menit setelah presensi masuk untuk melakukan pulang.',
+                    }).then(() => {
+                        console.log('SweetAlert shown'); // Debugging log
+                    });
+                } else {
+                    // Redirect to the route if time difference is 5 minutes or more
+                    window.location.href = pulangRoute;
+                }
+            });
+        } else {
+            console.log('Button not found'); // Debugging log
+        }
+    });
+</script>
+
 
 <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
 <!-- <script>
