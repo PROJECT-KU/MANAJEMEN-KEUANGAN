@@ -240,7 +240,7 @@ Dashboard | MIS
         @endif
 
         @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
-        <div class="row" id="PenggunaBaru" style="margin-left: 1px;">
+        <div class="row" id="PenggunaBaru" style="margin-left: 1px; margin-right:1px;">
             <div class="col-lg-6 col-md-6 col-sm-12">
                 <div class="card card-statistic-2">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
@@ -249,15 +249,15 @@ Dashboard | MIS
                     <div class="row" style="margin: 3px;">
                         @foreach($users as $user)
                         @if ($loop->iteration <= 6)
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 mt-4">
+                            <div class="col-lg-4 col-md-6 col-sm-6 mt-4">
                             <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
                                 @if ($user->gambar == null)
-                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
+                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.png') }}" data-lightbox="{{ $user->id }}">
                                     @else
                                     <a class="mt-3" href="{{ asset('images/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
                                         @endif
                                         <div class="thumbnail-circle">
-                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.PNG') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('images/' . $user->gambar) : asset('assets/img/avatar/avatar-1.png') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
                                         </div>
                                     </a>
                                     <div class="card-body">
