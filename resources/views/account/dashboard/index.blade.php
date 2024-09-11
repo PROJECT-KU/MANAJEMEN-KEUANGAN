@@ -237,20 +237,20 @@ Dashboard | MIS
             </div>
         </div> -->
         <!--================== END ==================-->
-
         @endif
 
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin' )
-        <div class="row" id="PenggunaBaru">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:rgba(169, 169, 169, 0.4);">
-                        <h4><i class="fas fa-user"></i> PENGGUNA BARU</h4>
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
+        <div class="row" id="PenggunaBaru" style="margin-left: 1px;">
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card card-statistic-2">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
+                        <h4 class="mb-3" style="color:chocolate;"><i class="fas fa-user"></i> PENGGUNA BARU</h4>
                     </div>
-                    <div class="row" style="margin: 10px;">
+                    <div class="row" style="margin: 3px;">
                         @foreach($users as $user)
-                        @if ($loop->iteration <= 6) <div class="col-md-4 mb-4">
-                            <div class="card text-center card-hover">
+                        @if ($loop->iteration <= 6)
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 mt-4">
+                            <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
                                 @if ($user->gambar == null)
                                 <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.PNG') }}" data-lightbox="{{ $user->id }}">
                                     @else
@@ -263,18 +263,18 @@ Dashboard | MIS
                                     <div class="card-body">
                                         <h5 class="card-title">{{ $user->full_name }}</h5>
                                     </div>
+                                    <a href="{{ route('account.pengguna.edit', $user->id) }}" class="btn btn-info">Lihat Detail</a>
                             </div>
-
                     </div>
                     @endif
                     @endforeach
                 </div>
             </div>
         </div>
-        @endif
+</div>
+@endif
 
-
-    </section>
+</section>
 </div>
 
 <!-- ALERT AND COUNTDOWN LOGIC -->
@@ -494,14 +494,14 @@ Dashboard | MIS
 <!--================== end ==================-->
 
 <!--================== popup akun berhasil ==================-->
-@if (session('message'))
+@if (is_null(auth()->user()->email_verified_at))
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Use SweetAlert to display the success message
+    // Use SweetAlert to display the message if email is not verified
     Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'Selamat Akun Anda Berhasil Dibuat!',
+        icon: 'warning',
+        title: 'Verification Needed',
+        text: 'Please verify your email address to continue!',
         confirmButtonText: 'OK'
     });
 </script>
