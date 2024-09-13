@@ -414,7 +414,7 @@ Profil | MANAGEMENT
                                 class="form-control form-control-sm {{ Auth::user()->status === null ? 'bg-danger text-white' : 'bg-success text-white' }} text-uppercase"
                                 type="text"
                                 placeholder="Username"
-                                value="{{ Auth::user()->status === null ? 'nonaktif' : strtoupper(Auth::user()->status) }}"
+                                value="{{ Auth::user()->status === null ? 'nonactive' : strtoupper(Auth::user()->status) }}"
                                 readonly>
                             </div>
                           </div>
