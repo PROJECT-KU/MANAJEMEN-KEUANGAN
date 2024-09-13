@@ -98,9 +98,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
-                            <a href="{{ route('account.profil.password', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                            <!-- <a href="{{ route('account.profil.password', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="fas fa-unlock-alt"></i> RESET PASSWORD
-                            </a>
+                            </a> -->
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                     document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
