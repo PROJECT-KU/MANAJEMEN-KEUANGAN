@@ -239,12 +239,12 @@ Dashboard | MIS
                             <div class="col-lg-4 col-md-6 col-sm-6 mt-4">
                             <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
                                 @if ($user->gambar == null)
-                                <a class="mt-3" href="{{ asset('assets/img/avatar/avatar-1.png') }}" data-lightbox="{{ $user->id }}">
+                                <a class="mt-3" href="{{ asset('assets/img/profil/no-image.jpg') }}" data-lightbox="{{ $user->id }}">
                                     @else
                                     <a class="mt-3" href="{{ asset('assets/img/profil/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
                                         @endif
                                         <div class="thumbnail-circle">
-                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/avatar/avatar-1.png') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/profil/no-image.jpg') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
                                         </div>
                                     </a>
                                     <div class="card-body">
