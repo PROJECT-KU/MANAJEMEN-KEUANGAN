@@ -422,7 +422,7 @@ Profil | MANAGEMENT
                           <div class="row mt-3">
                             <div class="col-md-6">
                               <label>No Telp</label>
-                              <input type="text" class="form-control" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
+                              <input type="text" class="form-control form-control-sm" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
                             </div>
                             <div class="col-md-6">
                               <label>Jenis Akun</label>
