@@ -83,10 +83,11 @@
 
                                     <center>
                                         <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($karir->lokasi_interview) }}" target="_blank">
-                                            <button type="button" class="btn btn-info" style="font-size: 20px;">Lihat Google Maps</button></a>
+                                            <button type="button" class="btn btn-info" style="font-size: 20px; background-color:#FF8C00">Lihat Google Maps</button></a>
                                     </center>
 
-                                    <p>Dimohon untuk datang 15 menit sebelum dimulai</p>
+                                    <p>Dimohon <b>membawa hardcopy Curriculum vitae, surat lamaran kerja, transkip nilai, dan ijazah.</b> Mohon menggunakan pakaian bersih, rapi, dan sopan.</p>
+                                    <p><b>Dimohon untuk datang 15 menit sebelum waktu interview yang diberikan.</b></p>
                                     <p>Salam,<br>
 
                                         Admin Rumah Scopus Foundation<br>

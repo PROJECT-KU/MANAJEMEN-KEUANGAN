@@ -1,5 +1,5 @@
  <?php
-  $version = "2.0.4";
+  $version = "2.0.5";
   ?>
 
  <footer class="main-footer" style="border-top: 3px solid #ff914d;background-color: #ffffff;margin-bottom: -20px" id="PwaFooter">
