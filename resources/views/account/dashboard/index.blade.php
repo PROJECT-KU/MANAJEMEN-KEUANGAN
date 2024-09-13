@@ -13,11 +13,11 @@ Dashboard | MIS
         <div class="section-body">
 
             <!--================== AKUN BELUM DI VERIFIKASI ==================-->
-            @if (!Auth::user()->email_verified_at)
+            <!-- @if (!Auth::user()->email_verified_at)
             <div class="alert alert-danger" role="alert" style="text-align: center;">
                 <b style="font-size: 20px;">Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
             </div>
-            @endif
+            @endif -->
             <!--================== END ==================-->
 
             <!--================== AKUN DINONAKTIFKAN ==================-->
@@ -86,7 +86,7 @@ Dashboard | MIS
                 @endif
                 <!--================== END ==================-->
 
-                @if (Auth::user()->status === 'off')
+                @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
                 @else
                 <!--================== PRESENSI KARYAWAN ==================-->
                 <div class="row">
@@ -433,8 +433,8 @@ Dashboard | MIS
     // Use SweetAlert to display the message if email is not verified
     Swal.fire({
         icon: 'warning',
-        title: 'Verification Needed',
-        text: 'Please verify your email address to continue!',
+        title: 'Belum Verifikasi Email',
+        text: 'Silahkan verifikasi email untuk dapat menggunakan aplikasi ini',
         confirmButtonText: 'OK'
     });
 </script>

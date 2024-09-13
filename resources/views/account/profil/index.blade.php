@@ -6,304 +6,685 @@ Profil | MANAGEMENT
 @stop
 
 @section('content')
+<!--================== ICON VERIFIKASI EMAIL ==================-->
+<style>
+  .input-container {
+    position: relative;
+  }
+
+  .input-container input {
+    padding-right: 2.5rem;
+    /* Adjust space for the icon */
+  }
+
+  .input-container .icon-container {
+    position: absolute;
+    right: 0.5rem;
+    top: 75%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    /* Size of the badge */
+    height: 20px;
+    /* Size of the badge */
+    background-color: lightblue;
+    /* Badge color */
+    border-radius: 50%;
+    /* Circular badge */
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.2);
+    /* Optional shadow */
+  }
+
+  .icon-container .icon {
+    font-size: 1rem;
+    /* Icon size */
+    color: blue;
+    /* Color for the checkmark icon */
+  }
+</style>
+<!--================== END ==================-->
+
+<!--================== RESET PASSWORD ==================-->
+<style>
+  /* Password and Confirmation password group */
+  .password-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    z-index: 1;
+    color: #000;
+    font-size: 24px;
+  }
+
+  /* Danger color */
+  .border-danger {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, .25) !important;
+  }
+
+  /* Responsive adjustment */
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .form-group {
+    flex: 1;
+  }
+
+  .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 40px;
+  }
+
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+  }
+</style>
+<!--================== END ==================-->
+
+<!--================== POPUP ==================-->
+<style>
+  /* Custom Popup Styles */
+  .custom-popup {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    z-index: 9999;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Black background with opacity */
+  }
+
+  .custom-popup-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    /* Could be more or less, depending on screen size */
+    max-width: 500px;
+    /* Optional: limits width */
+    border-radius: 8px;
+    /* Optional: rounded corners */
+  }
+
+  .custom-popup-title {
+    margin: 0;
+    padding-bottom: 10px;
+  }
+
+  .custom-popup-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .custom-popup-close:hover,
+  .custom-popup-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>
+<!--================== END ==================-->
+
 <div class="main-content">
   <section class="section">
     <div class="section-header">
       <h1>PROFIL</h1>
     </div>
 
-
-
     <div class="section-body">
-      <div class="card">
-        <div class="card-header">
-          <h4><i class="fas fa-user-edit"></i> PROFIL</h4>
-        </div>
 
-        <div class="card-body">
+      <section class="content">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-3">
 
-          <form action="{{ route('account.profil.update', $user->id) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Nama</label>
-                  <input type="text" name="full_name" class="form-control" value="{{ old('full_name', $user->full_name) }}" class="form-control currency" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-
-                  @error('full_name')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Email</label>
-                  <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" readonly>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Nama Perusahaan</label>
-                  <input type="text" name="company" class="form-control" value="{{ old('company', $user->company) }}" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
-
-                  @error('company')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>No Telp</label>
-                  <input type="tel" name="telp" class="form-control" value="{{ old('telp', $user->telp) }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
-                  @error('telp')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Level</label>
-                  <select class="form-control" name="level" disabled="true">
-                    <option value="" disabled selected>Silahkan Pilih</option>
-                    <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
-                    <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User</option>
-                    <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
-                    <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
-                    <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
-                    <option value="trainer" {{ $user->level == 'trainer' ? 'selected' : '' }}>Trainer</option>
-                  </select>
-
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Jenis</label>
-                  <select class="form-control" name="jenis" disabled="true">
-                    <option value="" disabled selected>Silahkan Pilih</option>
-                    <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis</option>
-                    <option value="penyewaan" {{ $user->jenis == 'penyewaan' ? 'selected' : '' }}>Penyewaan</option>
-                    <option value="kasir" {{ $user->jenis == 'kasir' ? 'selected' : '' }}>kasir</option>
-                    <option value="perorangan" {{ $user->jenis == 'perorangan' ? 'selected' : '' }}>Perorangan</option>
-                  </select>
-
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Username</label>
-                  <input type="text" name="username" class="form-control" value="{{ old('username', $user->username) }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
-
-                  @error('username')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>NIK</label>
-                  <input type="text" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" required>
-                  @error('nik')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Nomor Rekening</label>
-                  <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="30" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)" required>
-                  @error('norek')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Bank</label>
-                  <select class="form-control bank" name="bank" required>
-                    <option value="" disabled selected>Silahkan Pilih</option>
-                    <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
-                    <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
-                    <option value="009" {{ $user->bank == '009' ? 'selected' : '' }}>BNI</option>
-                    <option value="200" {{ $user->bank == '200' ? 'selected' : '' }}>BANK TABUNGAN NEGARA</option>
-                    <option value="011" {{ $user->bank == '011' ? 'selected' : '' }}>BANK DANAMON</option>
-                    <option value="013" {{ $user->bank == '013' ? 'selected' : '' }}>BANK PERMATA</option>
-                    <option value="014" {{ $user->bank == '014' ? 'selected' : '' }}>BCA</option>
-                    <option value="016" {{ $user->bank == '016' ? 'selected' : '' }}>MAYBANK</option>
-                    <option value="019" {{ $user->bank == '019' ? 'selected' : '' }}>PANINBANK</option>
-                    <option value="022" {{ $user->bank == '022' ? 'selected' : '' }}>CIMB NIAGA</option>
-                    <option value="023" {{ $user->bank == '023' ? 'selected' : '' }}>BANK UOB INDONESIA</option>
-                    <option value="028" {{ $user->bank == '028' ? 'selected' : '' }}>BANK OCBC NISP</option>
-                    <option value="087" {{ $user->bank == '087' ? 'selected' : '' }}>BANK HSBC INDONESIA</option>
-                    <option value="147" {{ $user->bank == '147' ? 'selected' : '' }}>BANK MUAMALAT</option>
-                    <option value="153" {{ $user->bank == '153' ? 'selected' : '' }}>BANK SINARMAS</option>
-                    <option value="426" {{ $user->bank == '426' ? 'selected' : '' }}>BANK MEGA</option>
-                    <option value="441" {{ $user->bank == '441' ? 'selected' : '' }}>BANK BUKOPIN</option>
-                    <option value="451" {{ $user->bank == '451' ? 'selected' : '' }}>BSI</option>
-                    <option value="484" {{ $user->bank == '484' ? 'selected' : '' }}>BANK KEB HANA INDONESIA</option>
-                    <option value="494" {{ $user->bank == '494' ? 'selected' : '' }}>BANK RAYA INDONESIA</option>
-                    <option value="506" {{ $user->bank == '506' ? 'selected' : '' }}>BANK MEGA SYARIAH</option>
-                    <option value="046" {{ $user->bank == '046' ? 'selected' : '' }}>BANK DBS INDONESIA</option>
-                    <option value="947" {{ $user->bank == '947' ? 'selected' : '' }}>BANK ALADIN SYARIAH</option>
-                    <option value="950" {{ $user->bank == '950' ? 'selected' : '' }}>BANK COMMONWEALTH</option>
-                    <option value="213" {{ $user->bank == '213' ? 'selected' : '' }}>BANK BTPN</option>
-                    <option value="490" {{ $user->bank == '490' ? 'selected' : '' }}>BANK NEO COMMERCE</option>
-                    <option value="501" {{ $user->bank == '501' ? 'selected' : '' }}>BANK DIGITAL BCA</option>
-                    <option value="521" {{ $user->bank == '521' ? 'selected' : '' }}>BANK BUKOPIN SYARIAH </option>
-                    <option value="535" {{ $user->bank == '535' ? 'selected' : '' }}>SEABANK INDONESIA</option>
-                    <option value="542" {{ $user->bank == '542' ? 'selected' : '' }}>BANK JAGO</option>
-                    <option value="567" {{ $user->bank == '567' ? 'selected' : '' }}>ALLO BANK</option>
-                    <option value="110" {{ $user->bank == '110' ? 'selected' : '' }}>BPD JAWA BARAT</option>
-                    <option value="111" {{ $user->bank == '111' ? 'selected' : '' }}>BPD DKI</option>
-                    <option value="112" {{ $user->bank == '112' ? 'selected' : '' }}>BPD DAERAH ISTIMEWA YOGYAKARTA</option>
-                    <option value="113" {{ $user->bank == '113' ? 'selected' : '' }}>BPD JAWA TENGAH</option>
-                    <option value="114" {{ $user->bank == '114' ? 'selected' : '' }}>BPD JAWA TIMUR</option>
-                    <option value="115" {{ $user->bank == '115' ? 'selected' : '' }}>BPD JAMBI</option>
-                    <option value="116" {{ $user->bank == '116' ? 'selected' : '' }}>BANK ACEH SYARIAH</option>
-                    <option value="117" {{ $user->bank == '117' ? 'selected' : '' }}>BPD SUMATERA UTARA</option>
-                    <option value="118" {{ $user->bank == '118' ? 'selected' : '' }}>BANK NAGARI</option>
-                    <option value="119" {{ $user->bank == '119' ? 'selected' : '' }}>BPD RIAU KEPRI SYARIAH</option>
-                    <option value="120" {{ $user->bank == '120' ? 'selected' : '' }}>BPD SUMATERA SELATAN DAN BANGKA BELITUNG</option>
-                    <option value="121" {{ $user->bank == '121' ? 'selected' : '' }}>BPD LAMPUNG</option>
-                    <option value="122" {{ $user->bank == '122' ? 'selected' : '' }}>BPD KALIMANTAN SELATAN</option>
-                    <option value="123" {{ $user->bank == '123' ? 'selected' : '' }}>BPD KALIMANTAN BARAT</option>
-                    <option value="124" {{ $user->bank == '124' ? 'selected' : '' }}>BPD KALIMANTAN TIMUR DAN KALIMANTAN UTARA</option>
-                    <option value="125" {{ $user->bank == '125' ? 'selected' : '' }}>BPD KALIMANTAN TENGAH</option>
-                    <option value="126" {{ $user->bank == '126' ? 'selected' : '' }}>BPD SULAWESI SELATAN DAN SULAWESI BARAT</option>
-                    <option value="127" {{ $user->bank == '127' ? 'selected' : '' }}>BPD SULAWESI UTARA DAN GORONTALO</option>
-                    <option value="128" {{ $user->bank == '128' ? 'selected' : '' }}>BANK NTB SYARIAH</option>
-                    <option value="129" {{ $user->bank == '129' ? 'selected' : '' }}>BPD BALI</option>
-                    <option value="130" {{ $user->bank == '130' ? 'selected' : '' }}>BPD NUSA TENGGARA TIMUR</option>
-                    <option value="131" {{ $user->bank == '131' ? 'selected' : '' }}>BPD MALUKU DAN MALUKU UTARA</option>
-                    <option value="132" {{ $user->bank == '132' ? 'selected' : '' }}>BPD PAPUA</option>
-                    <option value="133" {{ $user->bank == '133' ? 'selected' : '' }}>BPD BENGKULU</option>
-                    <option value="134" {{ $user->bank == '134' ? 'selected' : '' }}>BPD SULAWESI TENGAH</option>
-                    <option value="135" {{ $user->bank == '135' ? 'selected' : '' }}>BPD SULAWESI TENGGARA</option>
-                    <option value="137" {{ $user->bank == '137' ? 'selected' : '' }}>BPD BANTEN</option>
-                  </select>
-                  @error('bank')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Foto Profil</label>
-                  <div class="input-group">
-                    <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*">
-                  </div>
-                  <!-- <i class="fas fa-info mt-2" style="color: red"></i> Upload Gambar atau Gunakan Kamera -->
-                  @error('gambar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <div class="thumbnail-circle" style="width: 12rem;">
+              <!--================== FOTO PROFIL ==================-->
+              <div class="card card-primary card-outline">
+                <div class="card-body box-profile">
+                  <div class="text-center">
                     @if (Auth::user()->gambar == null)
-                    <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
+                    <img alt="User profile picture" id="image-preview" src="{{ asset('assets/img/profil/no-image.jpg') }}" class="profile-user-img img-fluid img-circle" style="width: 128px; height: 128px; border-radius: 50%;">
                     @else
-                    <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->gambar) }}" alt="Preview Image" style="width: 100px; height:100px;">
+                    <img id="image-preview" class="profile-user-img img-fluid img-circle" src="{{ asset('assets/img/profil/' . Auth::user()->gambar) }}" alt="User profile picture" style="width: 128px; height: 128px; border-radius: 50%;">
                     @endif
                   </div>
+
+                  <h3 class="profile-username text-center">{{ Auth::user()->full_name }}</h3>
+                  <p class="text-muted text-center">{{ Auth::user()->level }}</p>
+
+                  <form action="{{ route('account.profil.updatePhoto', $user->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-group">
+                      <label for="foto">Update Foto</label>
+                      <input type="file" name="gambar" class="form-control-file" id="foto" onchange="toggleSubmitButton()">
+                    </div>
+                    <button type="submit" id="updateButton" class="btn btn-primary btn-block" disabled><b>Update Foto</b></button>
+                  </form>
                 </div>
               </div>
+              <!--================== END ==================-->
+
+              <!--================== DATA PROFIL ==================-->
+              <div class="card card-primary">
+                <div class="card-header">
+                  <h3 class="card-title">Tentang Saya</h3>
+                </div>
+                <div class="card-body">
+                  <!-- Email Section -->
+                  <strong><i class="fas fa-envelope-open mr-1"></i> Email</strong>
+                  <p class="text-muted">
+                    {{ Auth::user()->email }}
+                    @if (Auth::user()->level === 'manager' || Auth::user()->level === 'admin')
+                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @endif
+                  </p>
+                  <hr>
+
+                  <!-- Jobdesk Section -->
+                  <strong><i class="fas fa-briefcase"></i> Job Desk</strong>
+                  <p class="text-muted">
+                    {{ Auth::user()->jobdesk }}
+                    @if (Auth::user()->email_verified_at == null)
+                    <button id="edit-jobdesk-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @else
+                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonJobdesk">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @endif
+                  </p>
+                  <hr>
+
+                  <!-- No Telp Section -->
+                  <strong><i class="fas fa-phone mr-1"></i> No Telp</strong>
+                  <p class="text-muted">
+                    {{ Auth::user()->telp }}
+                    @if (Auth::user()->email_verified_at == null)
+                    <button id="edit-telp-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @else
+                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonTelp">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @endif
+                  </p>
+                  <hr>
+
+                  <!-- Lama Kerja Section -->
+                  <strong><i class="far fa-file-alt mr-1"></i> Lama Kerja</strong>
+                  <p class="text-muted">
+                    {{ $workDuration }}
+                  </p>
+                </div>
+              </div>
+              <!--================== END ==================-->
             </div>
 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Quotes</label>
-                  <div class="input-group">
-                    <textarea name="jobdesk" id="jobdesk" value="" placeholder="Masukkan Quotes" class="form-control" style="width: 100%;">{{ old('jobdesk', $user->jobdesk) }}</textarea>
+            <!--================== MODAL DATA PROFIL ==================-->
+            <!-- Modal for updating email -->
+            <div id="customPopupEmail" class="custom-popup">
+              <div class="custom-popup-content">
+                <span class="custom-popup-close" id="customPopupCloseEmail">&times;</span>
+                <h5 class="custom-popup-title">Email</h5>
+                <form action="{{ route('account.profil.update.datadiri') }}" method="POST">
+                  @csrf
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Masukkan Email Terbaru</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
                   </div>
-                  @error('jobdesk')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
+                  <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Modal for updating jobdesk -->
+            <div id="customPopupJobdesk" class="custom-popup">
+              <div class="custom-popup-content">
+                <span class="custom-popup-close" id="customPopupCloseJobdesk">&times;</span>
+                <h5 class="custom-popup-title">Job Desk</h5>
+                <form action="{{ route('account.profil.update.datadiri') }}" method="POST">
+                  @csrf
+                  <div class="mb-3">
+                    <label for="jobdesk" class="form-label">Masukkan Job Desk Anda</label>
+                    <input type="text" class="form-control" id="jobdesk" name="jobdesk" value="{{ Auth::user()->jobdesk }}" required>
                   </div>
-                  @enderror
-                </div>
+                  <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                </form>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Akun Dibikin Pada Tanggal</label>
-                  <input class="form-control" name="notif" placeholder="" value="{{ strftime('%d %B %Y %H:%M', strtotime($user->created_at)) }}" readonly>
-                </div>
+            <!-- Modal for updating telp -->
+            <div id="customPopupTelp" class="custom-popup">
+              <div class="custom-popup-content">
+                <span class="custom-popup-close" id="customPopupCloseTelp">&times;</span>
+                <h5 class="custom-popup-title">No Telp</h5>
+                <form action="{{ route('account.profil.update.datadiri') }}" method="POST">
+                  @csrf
+                  <div class="mb-3">
+                    <label for="telp" class="form-label">Masukkan No Telp Anda</label>
+                    <input type="text" class="form-control" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                </form>
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Lama Bekerja</label>
-                  <?php
-                  $now = now();
-                  $diff = $user->created_at->diff($now);
+            </div>
+            <!--================== END ==================-->
 
-                  $years = $diff->y;
-                  $months = $diff->m;
+            <div class="col-md-9">
+              <div class="card">
+                <div class="card-header p-2">
+                  <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Data Profil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Reset Password</a></li>
+                  </ul>
+                </div>
+                <div class="card-body">
+                  <div class="tab-content">
 
-                  $result = '';
+                    <!--================== TAB DATA DIRI ==================-->
+                    <div class="active tab-pane" id="activity" style="margin-top: -20px;">
+                      <!-- NOTIF EMAIL BELUM DI VERIFIKASI -->
+                      @if (Auth::user()->email_verified_at == null)
+                      <div class="alert alert-warning" role="alert">
+                        Email anda <b>Belum Terverifikasi</b>, Silahkan verifikasi sekarang untuk melengkapi data diri.
+                      </div>
+                      @endif
+                      <!-- END -->
+                      <div class="post">
+                        <div class="user-block d-flex justify-content-between align-items-center">
+                          <div class="d-flex align-items-center">
+                            @if (Auth::user()->gambar == null)
+                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/no-image.jpg') }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            @else
+                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/' . Auth::user()->gambar) }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            @endif
+                            <span class="username ml-2">
+                              <span>{{ Auth::user()->full_name }}</span>
+                            </span>
+                          </div>
 
-                  if ($years > 0) {
-                    $result .= $years . ($years > 1 ? ' tahun ' : ' tahun ');
-                  }
+                        </div>
 
-                  if ($months > 0) {
-                    $result .= $months . ($months > 1 ? ' bulan' : ' bulan');
-                  } else {
-                    $result .= '1 bulan';
-                  }
-                  ?>
-                  <input class="form-control" name="lama_bekerja" placeholder="" value="{{ $result }}" readonly>
+                        <div class="row mt-3">
+                          <div class="col-md-6">
+                            <label>Nama</label>
+                            <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->full_name }}" placeholder="Nama" readonly>
+                          </div>
+                          <div class="col-md-6">
+                            <label>Username</label>
+                            <input class="form-control form-control-sm" type="text" placeholder="Username" value="{{ Auth::user()->username }}" readonly>
+                          </div>
+                        </div>
+
+                        <div class="row mt-3">
+                          <!-- BUTTON VERIFIKASI EMAIL -->
+                          <div class="col-md-12 col-lg-6 mb-3">
+                            <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST">
+                              @csrf
+                              <input type="hidden" name="code_verified_mail" value="{{ Auth::user()->code_verified_mail }}">
+                              <div class="row">
+                                @if(Auth::user()->email_verified_at)
+                                <div class="col-md-12 d-flex align-items-center mb-3">
+                                  <div class="w-100 input-container">
+                                    <label>Email</label>
+                                    <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                    <div class="icon-container">
+                                      <i class="fas fa-check icon"></i>
+                                    </div>
+                                  </div>
+                                </div>
+                                @else
+                                <div class="col-md-8 d-flex align-items-center mb-3">
+                                  <div class="w-100 input-container">
+                                    <label>Email</label>
+                                    <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                  </div>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center mt-3">
+                                  <button type="submit" class="btn btn-info w-100">Verifikasi</button>
+                                </div>
+                                @endif
+                              </div>
+                            </form>
+                          </div>
+                          <!-- END -->
+
+                          <div class="col-md-12 col-lg-6">
+                            <label>Nama Perusahaan</label>
+                            <input class="form-control form-control-sm" type="text" placeholder="Nama Perusahaan" value="{{ Auth::user()->company }}" readonly>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <!--================== MODAL VERIFIKASI EMAIL ==================-->
+                      <div id="customPopup" class="custom-popup">
+                        <div class="custom-popup-content">
+                          <span class="custom-popup-close" id="customPopupClose">&times;</span>
+                          <h5 class="custom-popup-title">Verifikasi Email</h5>
+                          <form id="verification-form" action="{{ route('account.profil.verify.code') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                              <label for="email" class="form-label">Masukkan Kode Verifikasi</label>
+                              <input type="text" class="form-control" id="email" name="verification_code" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Verifikasi Sekarang!</button>
+                          </form>
+                        </div>
+                      </div>
+                      <!--================== END ==================-->
+
+                      <form id="verification-form" action="{{ route('account.profil.update') }}" method="POST">
+                        @csrf
+                        <div class="post">
+                          <div class="row">
+                            <div class="col-md-6">
+                              <label>Role Akun</label>
+                              <input class="form-control form-control-sm" type="text" placeholder="Role" value="{{ strtoupper(Auth::user()->level) }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                              <label>Status Akun</label>
+                              <input
+                                class="form-control form-control-sm {{ Auth::user()->status === null ? 'bg-danger text-white' : 'bg-success text-white' }} text-uppercase"
+                                type="text"
+                                placeholder="Username"
+                                value="{{ Auth::user()->status === null ? 'nonaktif' : strtoupper(Auth::user()->status) }}"
+                                readonly>
+                            </div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-md-6">
+                              <label>No Telp</label>
+                              <input type="text" class="form-control" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
+                            </div>
+                            <div class="col-md-6">
+                              <label>Jenis Akun</label>
+                              <input class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ strtoupper(Auth::user()->jenis) }}" readonly>
+                            </div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-md-4">
+                              <label>NIK</label>
+                              <input type="text" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }} required>
+                            </div>
+                            <div class="col-md-4">
+                              <label>No Rekening</label>
+                              <input type="text" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }} required>
+                            </div>
+                            <div class="col-md-4">
+                              <label>Bank</label>
+                              <select class="form-control bank" name="bank" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }} required>
+                                <option value="" disabled selected>-- PILIH NAMA BANK --</option>
+                                <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
+                                <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
+                                <option value="009" {{ $user->bank == '009' ? 'selected' : '' }}>BNI</option>
+                                <option value="200" {{ $user->bank == '200' ? 'selected' : '' }}>BANK TABUNGAN NEGARA</option>
+                                <option value="011" {{ $user->bank == '011' ? 'selected' : '' }}>BANK DANAMON</option>
+                                <option value="013" {{ $user->bank == '013' ? 'selected' : '' }}>BANK PERMATA</option>
+                                <option value="014" {{ $user->bank == '014' ? 'selected' : '' }}>BCA</option>
+                                <option value="016" {{ $user->bank == '016' ? 'selected' : '' }}>MAYBANK</option>
+                                <option value="019" {{ $user->bank == '019' ? 'selected' : '' }}>PANINBANK</option>
+                                <option value="022" {{ $user->bank == '022' ? 'selected' : '' }}>CIMB NIAGA</option>
+                                <option value="023" {{ $user->bank == '023' ? 'selected' : '' }}>BANK UOB INDONESIA</option>
+                                <option value="028" {{ $user->bank == '028' ? 'selected' : '' }}>BANK OCBC NISP</option>
+                                <option value="087" {{ $user->bank == '087' ? 'selected' : '' }}>BANK HSBC INDONESIA</option>
+                                <option value="147" {{ $user->bank == '147' ? 'selected' : '' }}>BANK MUAMALAT</option>
+                                <option value="153" {{ $user->bank == '153' ? 'selected' : '' }}>BANK SINARMAS</option>
+                                <option value="426" {{ $user->bank == '426' ? 'selected' : '' }}>BANK MEGA</option>
+                                <option value="441" {{ $user->bank == '441' ? 'selected' : '' }}>BANK BUKOPIN</option>
+                                <option value="451" {{ $user->bank == '451' ? 'selected' : '' }}>BSI</option>
+                                <option value="484" {{ $user->bank == '484' ? 'selected' : '' }}>BANK KEB HANA INDONESIA</option>
+                                <option value="494" {{ $user->bank == '494' ? 'selected' : '' }}>BANK RAYA INDONESIA</option>
+                                <option value="506" {{ $user->bank == '506' ? 'selected' : '' }}>BANK MEGA SYARIAH</option>
+                                <option value="046" {{ $user->bank == '046' ? 'selected' : '' }}>BANK DBS INDONESIA</option>
+                                <option value="947" {{ $user->bank == '947' ? 'selected' : '' }}>BANK ALADIN SYARIAH</option>
+                                <option value="950" {{ $user->bank == '950' ? 'selected' : '' }}>BANK COMMONWEALTH</option>
+                                <option value="213" {{ $user->bank == '213' ? 'selected' : '' }}>BANK BTPN</option>
+                                <option value="490" {{ $user->bank == '490' ? 'selected' : '' }}>BANK NEO COMMERCE</option>
+                                <option value="501" {{ $user->bank == '501' ? 'selected' : '' }}>BANK DIGITAL BCA</option>
+                                <option value="521" {{ $user->bank == '521' ? 'selected' : '' }}>BANK BUKOPIN SYARIAH </option>
+                                <option value="535" {{ $user->bank == '535' ? 'selected' : '' }}>SEABANK INDONESIA</option>
+                                <option value="542" {{ $user->bank == '542' ? 'selected' : '' }}>BANK JAGO</option>
+                                <option value="567" {{ $user->bank == '567' ? 'selected' : '' }}>ALLO BANK</option>
+                                <option value="110" {{ $user->bank == '110' ? 'selected' : '' }}>BPD JAWA BARAT</option>
+                                <option value="111" {{ $user->bank == '111' ? 'selected' : '' }}>BPD DKI</option>
+                                <option value="112" {{ $user->bank == '112' ? 'selected' : '' }}>BPD DAERAH ISTIMEWA YOGYAKARTA</option>
+                                <option value="113" {{ $user->bank == '113' ? 'selected' : '' }}>BPD JAWA TENGAH</option>
+                                <option value="114" {{ $user->bank == '114' ? 'selected' : '' }}>BPD JAWA TIMUR</option>
+                                <option value="115" {{ $user->bank == '115' ? 'selected' : '' }}>BPD JAMBI</option>
+                                <option value="116" {{ $user->bank == '116' ? 'selected' : '' }}>BANK ACEH SYARIAH</option>
+                                <option value="117" {{ $user->bank == '117' ? 'selected' : '' }}>BPD SUMATERA UTARA</option>
+                                <option value="118" {{ $user->bank == '118' ? 'selected' : '' }}>BANK NAGARI</option>
+                                <option value="119" {{ $user->bank == '119' ? 'selected' : '' }}>BPD RIAU KEPRI SYARIAH</option>
+                                <option value="120" {{ $user->bank == '120' ? 'selected' : '' }}>BPD SUMATERA SELATAN DAN BANGKA BELITUNG</option>
+                                <option value="121" {{ $user->bank == '121' ? 'selected' : '' }}>BPD LAMPUNG</option>
+                                <option value="122" {{ $user->bank == '122' ? 'selected' : '' }}>BPD KALIMANTAN SELATAN</option>
+                                <option value="123" {{ $user->bank == '123' ? 'selected' : '' }}>BPD KALIMANTAN BARAT</option>
+                                <option value="124" {{ $user->bank == '124' ? 'selected' : '' }}>BPD KALIMANTAN TIMUR DAN KALIMANTAN UTARA</option>
+                                <option value="125" {{ $user->bank == '125' ? 'selected' : '' }}>BPD KALIMANTAN TENGAH</option>
+                                <option value="126" {{ $user->bank == '126' ? 'selected' : '' }}>BPD SULAWESI SELATAN DAN SULAWESI BARAT</option>
+                                <option value="127" {{ $user->bank == '127' ? 'selected' : '' }}>BPD SULAWESI UTARA DAN GORONTALO</option>
+                                <option value="128" {{ $user->bank == '128' ? 'selected' : '' }}>BANK NTB SYARIAH</option>
+                                <option value="129" {{ $user->bank == '129' ? 'selected' : '' }}>BPD BALI</option>
+                                <option value="130" {{ $user->bank == '130' ? 'selected' : '' }}>BPD NUSA TENGGARA TIMUR</option>
+                                <option value="131" {{ $user->bank == '131' ? 'selected' : '' }}>BPD MALUKU DAN MALUKU UTARA</option>
+                                <option value="132" {{ $user->bank == '132' ? 'selected' : '' }}>BPD PAPUA</option>
+                                <option value="133" {{ $user->bank == '133' ? 'selected' : '' }}>BPD BENGKULU</option>
+                                <option value="134" {{ $user->bank == '134' ? 'selected' : '' }}>BPD SULAWESI TENGAH</option>
+                                <option value="135" {{ $user->bank == '135' ? 'selected' : '' }}>BPD SULAWESI TENGGARA</option>
+                                <option value="137" {{ $user->bank == '137' ? 'selected' : '' }}>BPD BANTEN</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-12 mt-4">
+                            <button type="submit" class="btn btn-info" style="width: 100%;" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }}>SIMPAN</button>
+                          </div>
+                      </form>
+
+                    </div>
+                  </div>
+                  <!--================== END TAB DATA DIRI ==================-->
+
+                  <!--================== TAB RESET PASSWORD ==================-->
+                  <div class="tab-pane" id="settings">
+                    <form class="form-horizontal" id="register-form" action="{{ route('account.profil.reset.password') }}" method="POST">
+                      @csrf
+                      <div class="row">
+                        <div class="col-md-12 mt-4">
+                          <label>Masukan Password Lama</label>
+                          <div class="password-group">
+                            <input type="password" class="form-control" id="old-password" name="old_password" placeholder="Masukan Password Lama"
+                              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                              title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih"
+                              required>
+                            <i class="fas fa-eye password-toggle" id="old-password-toggle"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6 mt-4">
+                          <label>Masukan Password Baru</label>
+                          <div class="password-group">
+                            <input type="password" class="form-control" name="password" id="password"
+                              placeholder="Masukan Password Baru"
+                              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                              title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih"
+                              required>
+                            <i class="fas fa-eye password-toggle" id="password-toggle"></i>
+                          </div>
+                        </div>
+                        <div class="col-md-6 mt-4">
+                          <label>Ulangi Password Baru</label>
+                          <div class="password-group">
+                            <input type="password" class="form-control" name="password_confirmation"
+                              id="password_confirmation" placeholder="Ulangi Password Baru"
+                              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                              title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih"
+                              required>
+                            <i class="fas fa-eye password-toggle" id="password-confirmation-toggle"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <div class="col-md-12 mt-4">
+                          <button type="submit" class="btn btn-info" style="width: 100%;">Simpan</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <!--================== END TAB RESET PASSWORD ==================-->
+
                 </div>
               </div>
             </div>
-
-            <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> UPDATE</button>
-            <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
-
-          </form>
-
+          </div>
         </div>
-      </div>
     </div>
   </section>
 </div>
 
-<!--================== DORMAT NO REKENING ==================-->
+<!--================== POPUP EDIT DATA DIRI ==================-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const openPopupButton = document.getElementById('openPopupButtonEmail');
+    const customPopupemail = document.getElementById('customPopupEmail');
+    const customPopupClose = document.getElementById('customPopupCloseEmail');
+
+    // Show popup when the pencil icon is clicked
+    openPopupButton.addEventListener('click', function() {
+      customPopupemail.style.display = 'block';
+    });
+
+    // Hide popup when the close button is clicked
+    customPopupClose.addEventListener('click', function() {
+      customPopupemail.style.display = 'none';
+    });
+
+    // Hide popup when clicking outside the popup content
+    window.addEventListener('click', function(event) {
+      if (event.target === customPopupemail) {
+        customPopupemail.style.display = 'none';
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const openPopupButton = document.getElementById('openPopupButtonJobdesk');
+    const customPopupemail = document.getElementById('customPopupJobdesk');
+    const customPopupClose = document.getElementById('customPopupCloseJobdesk');
+
+    // Show popup when the pencil icon is clicked
+    openPopupButton.addEventListener('click', function() {
+      customPopupemail.style.display = 'block';
+    });
+
+    // Hide popup when the close button is clicked
+    customPopupClose.addEventListener('click', function() {
+      customPopupemail.style.display = 'none';
+    });
+
+    // Hide popup when clicking outside the popup content
+    window.addEventListener('click', function(event) {
+      if (event.target === customPopupemail) {
+        customPopupemail.style.display = 'none';
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const openPopupButton = document.getElementById('openPopupButtonTelp');
+    const customPopupemail = document.getElementById('customPopupTelp');
+    const customPopupClose = document.getElementById('customPopupCloseTelp');
+
+    // Show popup when the pencil icon is clicked
+    openPopupButton.addEventListener('click', function() {
+      customPopupemail.style.display = 'block';
+    });
+
+    // Hide popup when the close button is clicked
+    customPopupClose.addEventListener('click', function() {
+      customPopupemail.style.display = 'none';
+    });
+
+    // Hide popup when clicking outside the popup content
+    window.addEventListener('click', function(event) {
+      if (event.target === customPopupemail) {
+        customPopupemail.style.display = 'none';
+      }
+    });
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT HARUS VERIFIKASI EMAIL DAHULU ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('edit-jobdesk-button');
+    if (button) {
+      button.addEventListener('click', function(event) {
+        // Check the data-action attribute to determine if the email is verified
+        if (button.getAttribute('data-action') === 'verify-email') {
+          event.preventDefault(); // Prevent default action
+          Swal.fire({
+            title: 'Harus verifikasi Email',
+            text: 'Anda harus memverifikasi email Anda sebelum mengedit jobdesk Anda.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
+        }
+      });
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('edit-telp-button');
+    if (button) {
+      button.addEventListener('click', function(event) {
+        // Check the data-action attribute to determine if the email is verified
+        if (button.getAttribute('data-action') === 'verify-email') {
+          event.preventDefault(); // Prevent default action
+          Swal.fire({
+            title: 'Harus verifikasi Email',
+            text: 'Anda harus memverifikasi email Anda sebelum mengedit No Telp Anda.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
+        }
+      });
+    }
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== FORMAT NO REKENING ==================-->
 <script>
   function formatNoRek(input) {
     // Menghapus semua karakter non-digit
@@ -315,6 +696,123 @@ Profil | MANAGEMENT
     // Mengatur nilai input dengan nomor telepon yang diformat
     input.value = NoRek;
   }
+</script>
+<!--================== END ==================-->
+
+<!--================== FOTO PROFIL ==================-->
+<script>
+  function toggleSubmitButton() {
+    var fileInput = document.getElementById('foto');
+    var submitButton = document.getElementById('updateButton');
+    submitButton.disabled = !fileInput.files.length; // Disable button if no file selected
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    @if(session('success'))
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: '{{ session("success") }}',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    }).then(() => {
+      location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== MAKSIMAL UPLOAD GAMBAR & FILE YANG DI PERBOLEHKAN ==================-->
+<script>
+  document.getElementById('foto').addEventListener('change', function() {
+    const maxFileSizeInBytes = 3 * 1024 * 1024;
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    const fileInput = this;
+
+    if (fileInput.files.length > 0) {
+      const selectedFile = fileInput.files[0];
+      const fileSize = selectedFile.size; // Get the file size in bytes
+      const fileName = selectedFile.name.toLowerCase();
+
+      // Check file size
+      if (fileSize > maxFileSizeInBytes) {
+        // Display a SweetAlert error message
+        Swal.fire({
+          icon: 'error',
+          title: 'Ukuran File Melebihi Batas',
+          text: 'Ukuran File Yang Diperbolehkan Dibawah 3MB.',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+        fileInput.value = ''; // Clear the file input
+        return;
+      }
+
+      // Check file extension
+      const fileExtension = fileName.split('.').pop();
+      if (!allowedExtensions.includes(fileExtension)) {
+        // Display a SweetAlert error message
+        Swal.fire({
+          icon: 'error',
+          title: 'Jenis File Tidak Valid',
+          text: 'Hanya File JPG, JPEG, PNG, dan GIF Yang Diperbolehkan.',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+        fileInput.value = ''; // Clear the file input
+      }
+    }
+  });
+</script>
+<!--================== END ==================-->
+
+<!--================== DATA PROFIL ==================-->
+<script>
+  // Function to show SweetAlert messages
+  document.addEventListener('DOMContentLoaded', function() {
+    @if(session('statusauthorized'))
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'You are not authorized to update the email',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    }).then(() => {
+      location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
+
+    @if(session('statusdataprofil'))
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Data profil berhasil diperbarui',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    }).then(() => {
+      location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
+
+    @if(session('statusdatabank'))
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Data bank berhasil diperbarui',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    }).then(() => {
+      location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
+  });
 </script>
 <!--================== END ==================-->
 
@@ -342,109 +840,299 @@ Profil | MANAGEMENT
 </script>
 <!--================== END ==================-->
 
-
-<!--================== MAKSIMAL UPLOAD GAMBAR & FILE YANG DI PERBOLEHKAN ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!--================== VERIFIKASI EMAIL ==================-->
 <script>
-  document.getElementById('gambar').addEventListener('change', function() {
-    const maxFileSizeInBytes = 5024 * 5024; // 5MB
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
-    const fileInput = this;
+  document.addEventListener('DOMContentLoaded', function() {
+    const submitButton = document.querySelector('#verify-email-form .btn-info');
+    const parentDiv = submitButton.parentElement;
 
-    if (fileInput.files.length > 0) {
-      const selectedFile = fileInput.files[0];
-      const fileSize = selectedFile.size; // Get the file size in bytes
-      const fileName = selectedFile.name.toLowerCase();
+    // Check if there's an existing countdown and continue it
+    const countdownRemaining = parseInt(localStorage.getItem('countdownRemaining')) || 0;
+    if (countdownRemaining > 0) {
+      startCountdown(submitButton, parentDiv, countdownRemaining);
+    }
 
-      // Check file size
-      if (fileSize > maxFileSizeInBytes) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Ukuran File Melebihi Batas',
-          text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
-        });
-        fileInput.value = ''; // Clear the file input
+    document.getElementById('verify-email-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const countdownRemaining = parseInt(localStorage.getItem('countdownRemaining')) || 0;
+      if (countdownRemaining > 0) {
         return;
       }
 
-      // Check file extension
-      const fileExtension = fileName.split('.').pop();
-      if (!allowedExtensions.includes(fileExtension)) {
-        // Display a SweetAlert error message
-        Swal.fire({
-          icon: 'error',
-          title: 'Jenis File Tidak Valid',
-          text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+      const countdown = 120;
+      localStorage.setItem('countdownRemaining', countdown);
+      localStorage.setItem('countdownStartDate', new Date().toISOString());
+
+      startCountdown(submitButton, parentDiv, countdown);
+
+      fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({
+            _token: document.querySelector('input[name="_token"]').value
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.statusterkirim === 'success') {
+            Swal.fire({
+              title: 'Kode Verifikasi Email Terkirim',
+              text: 'Kode verifikasi telah dikirimkan ke email Anda. Silakan periksa email Anda dan masukan kode ke dalam inputan.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              // After the user clicks OK, show the custom popup
+              const customPopup = document.getElementById('customPopup');
+              customPopup.style.display = 'block';
+            });
+          } else {
+            Swal.fire({
+              title: 'Error',
+              text: 'Ada masalah saat mengirim kode verifikasi email.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+        })
+        .catch(error => {
+          Swal.fire({
+            title: 'Error',
+            text: 'Terjadi kesalahan yang tidak terduga.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         });
-        fileInput.value = ''; // Clear the file input
+    });
+
+    function startCountdown(button, parentDiv, countdown) {
+      const countdownSpan = document.createElement('span');
+      countdownSpan.className = 'btn btn-warning w-100';
+      countdownSpan.style.height = 'fit-content';
+      countdownSpan.textContent = `Wait ${countdown} seconds`;
+
+      parentDiv.replaceChild(countdownSpan, button);
+
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownSpan.textContent = `Wait ${countdown} seconds`;
+        localStorage.setItem('countdownRemaining', countdown);
+
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          countdownSpan.replaceWith(button);
+          button.textContent = 'Verifikasi';
+          button.disabled = false;
+          localStorage.removeItem('countdownRemaining');
+          localStorage.removeItem('countdownStartDate');
+        }
+      }, 1000);
+    }
+
+    function clearLocalStorageIfExpired() {
+      const countdownRemaining = parseInt(localStorage.getItem('countdownRemaining')) || 0;
+      const countdownStartDate = localStorage.getItem('countdownStartDate');
+
+      if (countdownRemaining <= 0 || !countdownStartDate) {
+        localStorage.removeItem('countdownRemaining');
+        localStorage.removeItem('countdownStartDate');
+        return;
+      }
+
+      const now = new Date();
+      const startDate = new Date(countdownStartDate);
+
+      if (now.toDateString() !== startDate.toDateString()) {
+        localStorage.removeItem('countdownRemaining');
+        localStorage.removeItem('countdownStartDate');
       }
     }
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const verificationForm = document.getElementById('verification-form');
+
+    verificationForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      // Get the verification code from the input field
+      const verificationCode = document.querySelector('input[name="verification_code"]').value;
+
+      // Send the verification code to the server via AJAX
+      fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({
+            verification_code: verificationCode,
+            _token: document.querySelector('input[name="_token"]').value
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.statusvalid === 'success') {
+            Swal.fire({
+              title: 'Success!',
+              text: data.message,
+              icon: 'success',
+              timer: 3000,
+              timerProgressBar: true,
+              showConfirmButton: false
+            }).then(() => {
+              // Optional: Close the modal and refresh the page or redirect
+              const customPopup = document.getElementById('customPopup');
+              customPopup.style.display = 'none'; // Hide the popup
+              window.location.reload(); // Refresh the page
+            });
+          } else if (data.statuskadaluarsa === 'error') {
+            Swal.fire({
+              title: 'Code Expired!',
+              text: data.message,
+              icon: 'warning',
+              timer: 3000,
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
+          } else if (data.statustidakvalid === 'error') {
+            Swal.fire({
+              title: 'Invalid Code!',
+              text: data.message,
+              icon: 'error',
+              timer: 3000,
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
+          }
+        })
+        .catch(error => {
+          Swal.fire({
+            title: 'Error!',
+            text: 'An unexpected error occurred.',
+            icon: 'error',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+        });
+    });
+  });
 </script>
 <!--================== END ==================-->
 
-<!--================== PREVIEW IMAGE ==================-->
+<!--================== SHOW & HIDE PASSWORD ==================-->
 <script>
-  const imageInput = document.getElementById('gambar');
-  const imagePreview = document.getElementById('image-preview');
+  // Validasi konfirmasi password saat submit
+  document.getElementById('register-form').addEventListener('submit', function(event) {
+    const password = document.getElementById('password').value;
+    const passwordConfirmation = document.getElementById('password_confirmation').value;
 
-  imageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = 'block'; // Show the preview
-      };
-      reader.readAsDataURL(file);
+    if (password !== passwordConfirmation) {
+      event.preventDefault(); // Cegah pengiriman form
+      Swal.fire({
+        icon: 'error',
+        title: 'Passwords Tidak Sesuai',
+        text: 'Harap pastikan password dan konfirmasi password cocok.',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
+
+  // Fungsi untuk menampilkan atau menyembunyikan password dan mengubah border warna
+  function togglePasswordVisibility(inputId, toggleId) {
+    const passwordInput = document.getElementById(inputId);
+    const passwordToggle = document.getElementById(toggleId);
+
+    passwordToggle.addEventListener('click', function() {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+
+      // Toggle the icon
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+
+      // Toggle the border color
+      passwordInput.classList.toggle('border-danger');
+    });
+  }
+
+  // Panggil fungsi togglePasswordVisibility untuk setiap input password
+  togglePasswordVisibility('old-password', 'old-password-toggle');
+  togglePasswordVisibility('password', 'password-toggle');
+  togglePasswordVisibility('password_confirmation', 'password-confirmation-toggle');
+</script>
+<!--================== END ==================-->
+
+<!--================== RESET PASSWORD ==================-->
+<script>
+  document.getElementById('register-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Get form data
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.statuserrorreset === 'error') {
+          // Show SweetAlert if old password does not match
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message,
+            confirmButtonText: 'OK'
+          });
+        } else if (data.statussuksesreset === 'success') {
+          // Show SweetAlert if password is successfully changed
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: data.message,
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            willClose: () => {
+              window.location.href = "{{ route('account.profil.show', ['id' => Auth::user()->id]) }}";
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  });
+</script>
+
+
+<!-- JIKA KONFIRMASI PASSWORD TIDAK SAMA -->
+<script>
+  document.getElementById('register-form').addEventListener('submit', function(event) {
+    const password = document.getElementById('password').value;
+    const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+    if (password !== passwordConfirmation) {
+      event.preventDefault(); // Cegah pengiriman form
+      Swal.fire({
+        icon: 'error',
+        title: 'Passwords Tidak Sesuai',
+        text: 'Harap pastikan password dan konfirmasi password cocok.',
+        confirmButtonText: 'OK'
+      });
     }
   });
 </script>
-<!--================== END ==================-->
-
-<!--================== CKEDITOR ==================-->
-<style>
-  .ckeditor-container {
-    width: 100%;
-  }
-</style>
-
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-  // Replace 'jobdesk' textarea with CKEditor
-  CKEDITOR.replace('jobdesk', {
-    width: '100%', // Set CKEditor width to 100%
-    height: '300px' // You can adjust the height as needed
-  });
-</script>
-<!--================== END ==================-->
-
-<!--================== LOADER BUTTON ==================-->
-<script>
-  // <!-- BUTTON SUBMIT -->
-  $(".btn-submit").click(function() {
-    $(".btn-submit").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
-
-    timeoutHandler = setTimeout(function() {
-      $(".btn-submit").removeClass('btn-progress');
-
-    }, 1000);
-  });
-  // <!-- END -->
-
-  // <!-- BUTTON RESET -->
-  $(".btn-reset").click(function() {
-    $(".btn-reset").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
-
-    timeoutHandler = setTimeout(function() {
-      $(".btn-reset").removeClass('btn-progress');
-
-    }, 500);
-  })
-  // <!-- END -->
-</script>
+<!-- END -->
 <!--================== END ==================-->
 @stop

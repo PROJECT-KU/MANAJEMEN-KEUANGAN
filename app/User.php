@@ -17,7 +17,28 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'full_name', 'username', 'email', 'password', 'level', 'jenis', 'telp', 'company', 'alamat_company', 'telp_company', 'email_company', 'logo_company', 'pj_company', 'level', 'nik', 'norek', 'bank', 'gambar', 'jobdesk', 'total_hadir'
+        'full_name',
+        'username',
+        'email',
+        'password',
+        'level',
+        'jenis',
+        'telp',
+        'company',
+        'alamat_company',
+        'telp_company',
+        'email_company',
+        'logo_company',
+        'pj_company',
+        'level',
+        'nik',
+        'norek',
+        'bank',
+        'gambar',
+        'jobdesk',
+        'total_hadir',
+        'code_verified_mail',
+        'code_verified_mail_sent_at',
     ];
 
     /**
@@ -26,7 +47,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     /**

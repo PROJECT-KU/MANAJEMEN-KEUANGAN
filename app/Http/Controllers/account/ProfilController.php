@@ -11,6 +11,10 @@ use Dompdf\Dompdf;
 use Illuminate\Support\Facades\Response;
 use PDF;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerificationCodeMail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class ProfilController extends Controller
 {
@@ -26,83 +30,228 @@ class ProfilController extends Controller
   {
     $user = User::find($id);
 
-    // Jika data pengguna tidak ditemukan, redirect atau tampilkan pesan kesalahan
+    // If user data not found, redirect or show an error message
     if (!$user) {
       return redirect()->route('account.profil.index')->with('error', 'User not found.');
     }
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
+    // Calculate work duration if email is verified and status is active
+    $workDuration = '';
+    if ($user->email_verified_at && $user->status === 'active') {
+      $now = now();
+      $diff = $user->created_at->diff($now);
 
-    // Jika user adalah 'manager' dan pengguna memiliki perusahaan yang sama, atau jika user bukan 'manager' dan ID pengguna sesuai dengan ID user saat ini
+      $years = $diff->y;
+      $months = $diff->m;
+      $days = $diff->d;
+
+      if ($years > 0) {
+        $workDuration .= $years . ($years > 1 ? ' tahun ' : ' tahun ');
+      }
+
+      if ($months > 0 || $years > 0) {
+        $workDuration .= $months . ($months > 1 ? ' bulan ' : ' bulan ');
+      }
+
+      if ($days > 0 || $months == 0 || $years == 0) {
+        $workDuration .= $days . ($days > 1 ? ' hari' : ' hari');
+      }
+    } else {
+      $workDuration = 'Email belum diverifikasi atau status tidak aktif';
+    }
+
+    // Check if user is allowed to view the profile
     if (
-      Auth::check() && Auth::user()->level == 'manager' && Auth::user()->level == 'ceo' && Auth::user()->company == $user->company ||
+      Auth::check() && Auth::user()->level == 'manager' && Auth::user()->company == $user->company ||
       Auth::check() && Auth::user()->id == $user->id
     ) {
-      return view('account.profil.index', compact('user', 'maintenances'));
+      return view('account.profil.index', compact('user', 'workDuration'));
     } else {
       return redirect()->route('account.profil.index')->with('error', 'Access denied.');
     }
   }
 
-  public function update(Request $request, $id)
+  // <!--================== UPDATE FOTO PROFIL ==================-->
+  public function updatePhoto(Request $request, $id)
   {
-
     $user = User::find($id);
-    // Validate the request data
-    $request->validate([
-      'full_name' => 'required',
-      'company' => 'required',
-      'username' => 'required',
-      'telp' => 'required',
-      'nik' => 'required',
-      'norek' => 'required',
-      'bank' => 'required',
-      'gambar' => 'max:5120',
-    ], [
-      'full_name.required'   => 'Masukkan Nama Lengkap!',
-      'company.required'  => 'Masukkan Nama Tempat Anda Bekerja!',
-      'username.required'          => 'Masukkan Username Anda!',
-      'telp.required'          => 'Masukkan No Telp Anda!',
-      'nik.required'          => 'Masukkan NIK Anda!',
-      'norek.required'          => 'Masukkan Nomor Rekening Anda!',
-      'bank.required'          => 'Masukkan BANK Anda!',
-      'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
-    ]);
 
+    $user = Auth::user();
 
-    // Initialize the $imagePath variable
-
-    //menyinpan image di path
-    $imagePath = null;
-
-    if ($request->hasFile('gambar')) {
-      $image = $request->file('gambar');
-      $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+    // Menghapus foto lama jika ada
+    if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
+      unlink(public_path('assets/img/profil/' . $user->gambar));
     }
-    //end
 
-    // Find the user by ID
-    $user = User::findOrFail($id);
-    $user->update([
-      // Update user data
-      'full_name' => $request->input('full_name'),
-      'company' => $request->input('company'),
-      'username' => $request->input('username'),
-      'telp' => $request->input('telp'),
-      'nik' => $request->input('nik'),
-      'norek' => $request->input('norek'),
-      'bank' => $request->input('bank'),
-      'jobdesk' => $request->input('jobdesk'),
-      'gambar' => $imagePath, // Update the image path
-    ]);
+    // Menyimpan foto baru di assets/public/img/profil
+    $fileName = time() . '.' . $request->gambar->extension();
+    $request->gambar->move(public_path('assets/img/profil'), $fileName);
 
-    // Save the updated user data
+    // Update nama file gambar di database
+    $user->gambar = $fileName;
     $user->save();
 
-    return redirect()->route('account.profil.show', $user->id)->with('success', 'Data Diri Berhasil diperbarui!');
+    // Redirect dengan session success
+    return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
   }
+  // <!--================== END ==================-->
+
+  // <!--================== VERIFIKASI EMAIL ==================-->
+  public function verifyEmail(Request $request)
+  {
+    $user = Auth::user();
+
+    // Check if a code was already sent within the last 2 minutes
+    if ($user->code_verified_mail_sent_at && now()->diffInMinutes($user->code_verified_mail_sent_at) <= 2) {
+      return response()->json(['statuswaitingsend' => 'error', 'message' => 'Kode verifikasi sudah dikirim. Harap tunggu 2 menit sebelum mencoba lagi.'], 200);
+    }
+
+    // Generate a new verification code
+    $verificationCode = sprintf('%06d', random_int(0, 999999));
+
+    // Log for debugging purposes
+    Log::info('Generating verification code: ' . $verificationCode);
+
+    // Update user's verification code and timestamp
+    $user->code_verified_mail = $verificationCode;
+    $user->code_verified_mail_sent_at = now();
+    $user->save();
+
+    // Send verification code via email
+    Mail::to($user->email)->send(new VerificationCodeMail($user, config('app.name'), $verificationCode));
+
+    return response()->json(['statusterkirim' => 'success', 'message' => 'Kode Verifikasi berhasil dikirim ke email Anda.'], 200);
+  }
+
+  // Verify the submitted code
+  public function verify(Request $request)
+  {
+    $user = Auth::user();
+    $verificationCode = $request->input('verification_code');
+
+    // Check if the code is correct and was sent within the last 2 minutes
+    if ($user->code_verified_mail == $verificationCode) {
+      if (now()->diffInMinutes($user->code_verified_mail_sent_at) <= 2) {
+        // Mark email as verified
+        $user->email_verified_at = now();
+        $user->code_verified_mail = null;
+        $user->code_verified_mail_sent_at = null;
+        $user->save();
+
+        return response()->json([
+          'statusvalid' => 'success',
+          'message' => 'Email berhasil diverifikasi!',
+        ]);
+      } else {
+        return response()->json([
+          'statuskadaluarsa' => 'error',
+          'message' => 'Kode verifikasi sudah kadaluarsa!',
+        ]);
+      }
+    } else {
+      return response()->json([
+        'statustidakvalid' => 'error',
+        'message' => 'Kode verifikasi tidak valid!',
+      ]);
+    }
+  }
+  // <!--================== END ==================-->
+
+  // <!--================== UPDATE DATA DIRI ==================-->
+  public function updatediri(Request $request)
+  {
+    $user = Auth::user();
+
+    // Validate input data
+    $request->validate([
+      'email' => 'nullable|email|unique:users,email,' . $user->id,
+      'jobdesk' => 'nullable|string',
+      'telp' => 'nullable|string',
+    ]);
+
+    // Update email only if provided
+    if ($request->has('email') && $request->input('email') !== $user->email) {
+      $user->email = $request->input('email');
+      // Optionally, reset email verification status
+      $user->email_verified_at = null; // Reset email verification if email changes
+    }
+
+    // Update jobdesk and telp if present
+    if ($request->has('jobdesk')) {
+      $user->jobdesk = $request->input('jobdesk');
+    }
+
+    if ($request->has('telp')) {
+      $user->telp = $request->input('telp');
+    }
+
+    // Save user data
+    $user->save();
+
+    // Return a success message
+    return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
+  }
+  // <!--================== END ==================-->
+
+  // <!--================== UPDATE BANK ==================-->
+  public function update(Request $request)
+  {
+    $user = Auth::user();
+
+    // Validate input data
+    $request->validate([
+      'nik' => 'nullable|string',
+      'norek' => 'nullable|string',
+      'bank' => 'nullable|string',
+    ]);
+
+    if ($request->has('nik')) {
+      $user->nik = $request->input('nik');
+    }
+
+    if ($request->has('norek')) {
+      $user->norek = $request->input('norek');
+    }
+
+    if ($request->has('bank')) {
+      $user->bank = $request->input('bank');
+    }
+
+    $user->save();
+
+    // Return a success message
+    return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
+  }
+  // <!--================== END ==================-->
+
+  // <!--================== RESET PASSWORD ==================-->
+  public function resetPassword(Request $request)
+  {
+    $user = Auth::user();
+
+    // Validate input
+    $request->validate([
+      'old_password' => 'required',
+      'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    // Check if old password matches
+    if (!Hash::check($request->input('old_password'), $user->password)) {
+      return response()->json([
+        'statuserrorreset' => 'error',
+        'message' => 'Password lama tidak sesuai, Silahkan masukan password lama yang sesuai!'
+      ]);
+    }
+
+    // Update password
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return response()->json([
+      'statussuksesreset' => 'success',
+      'message' => 'Password anda berhasil diubah!'
+    ]);
+  }
+  // <!--================== END ==================-->
+
 }
