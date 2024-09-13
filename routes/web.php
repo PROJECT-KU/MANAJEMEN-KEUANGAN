@@ -73,9 +73,14 @@ Route::prefix('account')->group(
 
         //profil
         Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
-        Route::put('/profil/update/{id}', 'account\ProfilController@update')->name('account.profil.update');
+        Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
+        Route::post('/profil/update/foto/{id}', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
         Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
         Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
+        Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
+        Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
+        Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');
+        Route::post('/profil/reset-password', 'account\ProfilController@resetPassword')->name('account.profil.reset.password');
 
         // download pdf
         Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');

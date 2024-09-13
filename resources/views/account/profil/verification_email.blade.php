@@ -77,17 +77,11 @@
                                     <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
                                 </div>
                                 <div class="card-body">
-                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $karir->nama }}</p>
-                                    <p><b>Selamat kamu telah lolos seleksi berkas!</b></p>
-                                    <p>Selanjutnya, kamu kami panggil untuk melakukan seleksi Interview pada <b>{{ strftime('%d %B %Y', strtotime($karir->tanggal_interview)) }}</b> pukul <b>{{ strftime('%H:%M', strtotime($karir->tanggal_interview)) }}</b> yang berlokasi di <b>{{ $karir->lokasi_interview }}</b></p>
+                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $user->full_name }}</p>
+                                    <p style="font-size: 15px;">Kode verifikasi Email kamu <b>{{ $verificationCode }}</b></p>
+                                    <p style="font-size:15px">Silakan gunakan kode ini untuk memverifikasi alamat email Anda. Jika Anda tidak merasa memverifikasi email, silahkan abaikan psesan ini.</p>
+                                    <p style="font-size:15px; font-weight: bold;">Hati-hati penipuan, jangan pernah bagikan kode verifikasi ke siapa pun.</p>
 
-                                    <center>
-                                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($karir->lokasi_interview) }}" target="_blank">
-                                            <button type="button" class="btn btn-info" style="font-size: 20px; background-color:#FF8C00">Lihat Google Maps</button></a>
-                                    </center>
-
-                                    <p>Dimohon <b>membawa hardcopy Curriculum vitae, surat lamaran kerja, transkip nilai, dan ijazah.</b> Mohon menggunakan pakaian bersih, rapi, dan sopan.</p>
-                                    <p><b>Dimohon untuk datang 15 menit sebelum waktu interview yang diberikan.</b></p>
                                     <p>Salam,<br>
 
                                         Admin Rumah Scopus Foundation<br>

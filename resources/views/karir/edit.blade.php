@@ -125,63 +125,70 @@ Update Karir | MIS
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="row mb-5 justify-content-center">
+                        <!-- CV File -->
+                        @if($karir->cv)
+                        <div class="col-md-4 col-sm-6">
                             <div class="form-group">
-                                <div class="card" style="width: max-content;">
-                                    <h5 class="card-title">Berkas CV</h5>
+                                <div class="card d-flex flex-column shadow-lg" style="height: 100%;">
+                                    <h5 class="card-title text-center">Berkas CV</h5>
                                     <div class="card-img-top text-center">
                                         <i class="far fa-file-pdf" style="font-size: 5em;"></i>
                                     </div>
-                                    <div class="card-body">
-                                        <input type="file" name="cv" id="cv" value="{{ asset('karir/' . $karir->cv) }}" class="form-control" hidden>
-                                        <a href="{{ asset('karir/' . $karir->cv) }}" class="btn btn-primary">
-                                            <i class="fas fa-download"></i> Download
-                                        </a>
-                                    </div>
+                                    <input type="file" name="cv" id="cv" value="{{ asset('karir/' . $karir->cv) }}" class="form-control" hidden>
+                                    <a href="{{ asset('karir/' . $karir->cv) }}" class="btn btn-primary w-100 mt-auto">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                        @endif
 
-                        <div class="col-md-4">
+                        <!-- Surat Lamaran File -->
+                        @if($karir->lamaran)
+                        <div class="col-md-4 col-sm-6">
                             <div class="form-group">
-                                <div class="card" style="width: max-content;">
-                                    <h5 class="card-title">Berkas Surat Lamaran</h5>
+                                <div class="card d-flex flex-column shadow-lg" style="height: 100%;">
+                                    <h5 class="card-title text-center">Berkas Surat Lamaran</h5>
                                     <div class="card-img-top text-center">
                                         <i class="far fa-file-pdf" style="font-size: 5em;"></i>
                                     </div>
-                                    <div class="card-body">
-                                        <input type="file" name="lamaran" id="lamaran" value="{{ asset('karir/' . $karir->lamaran) }}" class="form-control" hidden>
-                                        <a href="{{ asset('karir/' . $karir->lamaran) }}" class="btn btn-primary">
-                                            <i class="fas fa-download"></i> Download
-                                        </a>
-                                    </div>
+                                    <input type="file" name="lamaran" id="lamaran" value="{{ asset('karir/' . $karir->lamaran) }}" class="form-control" hidden>
+                                    <a href="{{ asset('karir/' . $karir->lamaran) }}" class="btn btn-primary w-100 mt-auto">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                        @endif
 
-                        <div class="col-md-4">
+                        <!-- Berkas Lainnya -->
+                        @if($karir->lainnya)
+                        <div class="col-md-4 col-sm-6">
                             <div class="form-group">
-                                <div class="card" style="width: max-content;">
-                                    <h5 class="card-title">Berkas Lainnya</h5>
+                                <div class="card d-flex flex-column shadow-lg" style="height: 100%;">
+                                    <h5 class="card-title text-center">Berkas Lainnya</h5>
                                     <div class="card-img-top text-center">
                                         <i class="far fa-file-pdf" style="font-size: 5em;"></i>
                                     </div>
-                                    <div class="card-body">
-                                        <input type="file" name="lainnya" id="lainnya" value="{{ asset('karir/' . $karir->lainnya) }}" class="form-control" hidden>
-                                        <a href="{{ asset('karir/' . $karir->lainnya) }}" class="btn btn-primary">
-                                            <i class="fas fa-download"></i> Download
-                                        </a>
-                                    </div>
+                                    <input type="file" name="lainnya" id="lainnya" value="{{ asset('karir/' . $karir->lainnya) }}" class="form-control" hidden>
+                                    <a href="{{ asset('karir/' . $karir->lainnya) }}" class="btn btn-primary w-100 mt-auto">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                        @endif
                     </div>
 
-                    <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-                    <a href="{{ route('karir.list') }}" class="btn btn-info">
-                        <i class="fa fa-undo"></i> KEMBALI
-                    </a>
+                    <div class="d-flex">
+                        <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+                            <i class="fa fa-paper-plane"></i> SIMPAN
+                        </button>
+                        <a href="{{ route('karir.list') }}" class="btn btn-info btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
+                            <i class="fa fa-redo"></i> KEMBALI
+                        </a>
+                    </div>
 
                     </form>
                 </div>
