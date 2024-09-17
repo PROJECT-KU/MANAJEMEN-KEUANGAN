@@ -117,8 +117,9 @@ class ProfilController extends Controller
     $user->code_verified_mail_sent_at = now();
     $user->save();
 
+    $appName = 'Rumah Scopus Foundation';
     // Send verification code via email
-    Mail::to($user->email)->send(new VerificationCodeMail($user, config('app.name'), $verificationCode));
+    Mail::to($user->email)->send(new VerificationCodeMail($user, $appName, $verificationCode));
 
     return response()->json(['statusterkirim' => 'success', 'message' => 'Kode Verifikasi berhasil dikirim ke email Anda.'], 200);
   }
@@ -163,16 +164,26 @@ class ProfilController extends Controller
     $user = Auth::user();
 
     // Validate input data
-    $request->validate([
-      'email' => 'nullable|email|unique:users,email,' . $user->id,
-      'jobdesk' => 'nullable|string',
-      'telp' => 'nullable|string',
-    ]);
+    try {
+      $request->validate([
+        'email' => 'nullable|email|unique:users,email,' . $user->id,
+        'jobdesk' => 'nullable|string',
+        'telp' => 'nullable|string',
+      ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+      // Check if the validation error is for the email field
+      if ($e->validator->errors()->has('email')) {
+        // Return back with SweetAlert message for duplicate email
+        return redirect()->back()->with('erroremailterpakai', 'Email sudah terdaftar.')->withErrors($e->validator);
+      }
 
-    // Update email only if provided
+      // Handle other validation errors
+      throw $e;
+    }
+
+    // Update email only if provided and different from the current email
     if ($request->has('email') && $request->input('email') !== $user->email) {
       $user->email = $request->input('email');
-      // Optionally, reset email verification status
       $user->email_verified_at = null; // Reset email verification if email changes
     }
 
@@ -188,7 +199,7 @@ class ProfilController extends Controller
     // Save user data
     $user->save();
 
-    // Return a success message
+    // Return success message
     return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
   }
   // <!--================== END ==================-->

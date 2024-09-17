@@ -430,12 +430,17 @@ Dashboard | MIS
 @if (is_null(auth()->user()->email_verified_at))
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Use SweetAlert to display the message if email is not verified
+    // Use SweetAlert to display the message if the email is not verified
     Swal.fire({
         icon: 'warning',
         title: 'Belum Verifikasi Email',
         text: 'Silahkan verifikasi email untuk dapat menggunakan aplikasi ini',
         confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to the profile page when "OK" is clicked
+            window.location.href = "{{ route('account.profil.show', ['id' => Auth::user()->id]) }}";
+        }
     });
 </script>
 @endif

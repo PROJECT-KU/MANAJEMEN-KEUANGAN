@@ -12,14 +12,18 @@ class VerificationCodeMail extends Mailable
 
     use Queueable, SerializesModels;
 
+    public $verificationCode;
+
     public $user;
     public $appName;
 
-
-    use Queueable, SerializesModels;
-
-    public $verificationCode;
-
+    /**
+     * Create a new message instance.
+     *
+     * @param Karir $user
+     * @param string $appName
+     * @return void
+     */
     public function __construct(user $user, $appName, $verificationCode)
     {
         $this->verificationCode = $verificationCode;
@@ -32,8 +36,8 @@ class VerificationCodeMail extends Mailable
         $logoPath = public_path('assets/img/LogoRSC.png');
 
         return $this->view('account.profil.verification_email')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
             ->subject('Kode Verifikasi Email')
+            ->from('info@rumahscopusfoundation.com', $this->appName)
             ->with(['verificationCode' => $this->verificationCode])
             ->attach($logoPath, ['mime' => 'image/png']);
     }
