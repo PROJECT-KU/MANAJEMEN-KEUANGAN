@@ -106,10 +106,10 @@ Data Pengguna | MIS
                   <td style="text-align: center;">{{ $item->jenis }}</td>
                   <td style="text-align: center;">{{ $item->level }}</td>
                   <td style="text-align: center;">
-                    @if ($item->status == 'on')
-                    <button class="btn btn-success" disabled>ON</button>
+                    @if ($item->status == 'active')
+                    <button class="btn btn-success" disabled>ACTIVE</button>
                     @else
-                    <button class="btn btn-danger" disabled>OFF</button>
+                    <button class="btn btn-danger" disabled>NON ACTIVE</button>
                     @endif
                   </td>
                   @if ( Auth::user()->level == 'ceo')
