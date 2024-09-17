@@ -86,6 +86,60 @@ Dashboard | MIS
                 @endif
                 <!--================== END ==================-->
 
+                <!--================== TOTAL KARYAWAN ==================-->
+                @if (Auth::user()->level === 'manager')
+                <div class="row"> <!-- Tambahkan row untuk mengatur tata letak grid -->
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanCard">
+                        <div class="card card-statistic-2">
+                            <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+                                <i class="fas fa-users" style="margin-top: 13px;"></i>
+                            </div>
+                            <div class="card-wrap flex-column">
+                                <div class="card-header">
+                                    <h4>Total Karyawan</h4>
+                                </div>
+                                <div class="card-body">
+                                    <h5>{{ $totalKaryawan }} Karyawan</h5> <!-- Menampilkan jumlah total karyawan -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanAktifCard">
+                        <div class="card card-statistic-2">
+                            <div class="card-icon shadow-primary" style="background-color: #008000;">
+                                <i class="fas fa-user-check" style="margin-top: 13px;"></i>
+                            </div>
+                            <div class="card-wrap flex-column">
+                                <div class="card-header">
+                                    <h4>Total Karyawan Aktif</h4>
+                                </div>
+                                <div class="card-body">
+                                    <h5>{{ $totalKaryawanAktif }} Karyawan Aktif</h5> <!-- Menampilkan jumlah total karyawan aktif -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanNonAktifCard">
+                        <div class="card card-statistic-2">
+                            <div class="card-icon shadow-primary" style="background-color: #800000;">
+                                <i class="fas fa-user-times" style="margin-top: 13px;"></i>
+                            </div>
+                            <div class="card-wrap flex-column">
+                                <div class="card-header">
+                                    <h4>Total Karyawan Non Aktif</h4>
+                                </div>
+                                <div class="card-body">
+                                    <h5>{{ $totalKaryawanNonAktif }} Karyawan Non Aktif</h5> <!-- Menampilkan jumlah total karyawan nonaktif -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <!--================== END ==================-->
+
                 @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
                 @else
                 <!--================== PRESENSI KARYAWAN ==================-->

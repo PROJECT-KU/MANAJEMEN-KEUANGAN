@@ -482,6 +482,25 @@ class DashboardController extends Controller
         }
         // <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
+        // <!--================== TOTAL KARYAWAN ==================-->
+        // Hitung total karyawan
+        $totalKaryawan = DB::table('users')
+            ->where('company', $user->company)
+            ->count();
+
+        // Hitung total karyawan aktif
+        $totalKaryawanAktif = DB::table('users')
+            ->where('company', $user->company)
+            ->where('status', 'active') // Karyawan yang statusnya 'active'
+            ->count();
+
+        // Hitung total karyawan nonaktif
+        $totalKaryawanNonAktif = DB::table('users')
+            ->where('company', $user->company)
+            ->where('status', 'nonactive') // Karyawan yang statusnya 'nonactive'
+            ->count();
+        // <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact('totalKaryawan', 'totalKaryawanAktif', 'totalKaryawanNonAktif', 'saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
     }
 }
