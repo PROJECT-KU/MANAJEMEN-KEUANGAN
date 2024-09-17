@@ -812,6 +812,19 @@ Profil | MANAGEMENT
       location.reload(); // Automatically refresh the page after the alert
     });
     @endif
+
+    @if(session('erroremailterpakai'))
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Email sudah terdaftar silahkan gunakan email yang lain',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    }).then(() => {
+      location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
   });
 </script>
 <!--================== END ==================-->
@@ -950,6 +963,22 @@ Profil | MANAGEMENT
         localStorage.removeItem('countdownStartDate');
       }
     }
+
+    // Close button functionality for custom popup
+    const closeButton = document.getElementById('customPopupClose');
+    const customPopup = document.getElementById('customPopup');
+
+    // Close popup when the close button is clicked
+    closeButton.addEventListener('click', function() {
+      customPopup.style.display = 'none';
+    });
+
+    // Close popup when clicking outside the popup content
+    window.addEventListener('click', function(event) {
+      if (event.target === customPopup) {
+        customPopup.style.display = 'none';
+      }
+    });
   });
 
   document.addEventListener('DOMContentLoaded', function() {
