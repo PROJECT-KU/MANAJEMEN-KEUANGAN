@@ -216,7 +216,7 @@
                                                 <span style="text-align: left;" class="create-account">Belum Punya Akun?</span>
                                                 <a href="{{ route('register') }}" class="signup-image-link create-account" style="color: #6495ED; text-decoration: none; text-align:left; margin-left: 3px;">Buat Sekarang!</a>
                                             </div>
-                                            <p>test deploy</p>
+
 
                                         </div>
                                     </div>
