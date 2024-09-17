@@ -105,12 +105,28 @@
             .signin-image {
                 display: none;
             }
+
+            .create-account {
+                display: none;
+            }
+
+            .reset-password {
+                margin-left: 1em;
+            }
         }
 
         /* CSS untuk menampilkan gambar pada desktop atau tablet */
         @media (min-width: 768px) {
             .signin-image {
                 display: block;
+            }
+
+            .create-account {
+                display: block;
+            }
+
+            .reset-password {
+                margin-left: 5em;
             }
         }
 
@@ -175,28 +191,30 @@
                                                 <label for="username"><i class="zmdi zmdi-account material-icons-name"></i></label>
                                                 <input type="text" name="username" id="username" class="form-control" placeholder="Masukkan Username Anda" tabindex="1" required autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)">
                                             </div>
+
                                             <div class="form-group password-group">
                                                 <label for="password"><i class="zmdi zmdi-lock"></i></label>
                                                 <input type="password" name="password" id="password" class="form-control" placeholder="Masukkan Password Anda" tabindex="2" required>
                                                 <i class="zmdi zmdi-eye password-toggle" id="password-toggle"></i>
                                             </div>
+
                                             <div class="form-group">
                                                 <input type="checkbox" name="remember-me" id="remember-me" class="agree-term" />
                                                 <label for="remember-me" class="label-agree-term" req><span><span></span></span>Ingatkan Saya</label>
+                                                <a href="{{ route('formemail.reset') }}" class="reset-password" style="color: #6495ED; text-decoration: none; text-align:rignt;">Reset Password!</a>
                                             </div>
+
                                             <div class="form-group form-button">
-                                                <input type="submit" name="signin" id="signin" class="form-submit" value="Log in" />
+                                                <input type="submit" name="signin" style="width: 100%;" id="signin" class="form-submit" value="Log in" />
                                             </div>
 
                                             <!-- <div class="form-group form-button" style="margin-top: -10px;">
                                                 <a href="{{ route('account.page-maintenance.blank') }}"><input type="button" id="signin" class="form-submit" value="Log in"></a>
                                             </div> -->
 
-                                            <span style="text-align: left;">Belum Punya Akun?</span>
-                                            <span style="text-align: right; margin-left: 45px;">Lupa Password?</span>
                                             <div style="display: flex; align-items: center;">
-                                                <a href="{{ route('register') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align:left; margin-left: 3px;">Buat Sekarang!</a>
-                                                <a href="{{ route('formemail.reset') }}" class="signup-image-link" style="color: #6495ED; text-decoration: none; text-align:rignt; margin-left:62px;">Reset Sekarang!</a>
+                                                <span style="text-align: left;" class="create-account">Belum Punya Akun?</span>
+                                                <a href="{{ route('register') }}" class="signup-image-link create-account" style="color: #6495ED; text-decoration: none; text-align:left; margin-left: 3px;">Buat Sekarang!</a>
                                             </div>
 
                                         </div>
