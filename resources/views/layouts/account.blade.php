@@ -65,7 +65,7 @@
 </head>
 </head>
 @php
-$isStatusOff = (Auth::user()->status === 'off');
+$isStatusnonactive = (Auth::user()->status === 'nonactive');
 $tenggatDate = strtotime(Auth::user()->tenggat);
 $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
@@ -130,7 +130,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                         @php
                         $tenggatDate = Auth::user()->tenggat;
-                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @php $isStatusOff=(Auth::user()->status === 'off');
+                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @php $isStatusnonactive=(Auth::user()->status === 'nonactive');
                             $tenggatDate = Auth::user()->tenggat;
                             $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
                             $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate); $isPenyewaanUser=(Auth::user()->jenis === 'penyewaan');
@@ -156,7 +156,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif
 
-                                @if ($isStatusOff || $isTenggatExpired)
+                                @if ($isStatusnonactive || $isTenggatExpired)
                                 <!-- <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
                                 </li>
@@ -307,10 +307,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
             const currentHour = currentTime.getHours();
             let fullName = "{{ Auth::user()->full_name }}"; // Ganti ini dengan cara Anda mendapatkan nama lengkap pengguna
 
-            // Batasi nama hingga 50 karakter
-            if (fullName.length > 15) {
-                fullName = fullName.slice(0, 15);
-            }
+            // Ambil hanya kata pertama dari nama lengkap
+            fullName = fullName.split(' ')[0]; // Mengambil kata pertama saja
+
+            console.log(fullName);
 
             let greeting;
 

@@ -165,16 +165,34 @@ class PenggunaController extends Controller
     {
         $user = User::findOrFail($id);
 
-        return view('account.pengguna.edit', compact('user'));
+        // Calculate work duration if email is verified and status is active
+        $workDuration = '';
+        if ($user->email_verified_at && $user->status === 'active') {
+            $now = now();
+            $diff = $user->created_at->diff($now);
+
+            $years = $diff->y;
+            $months = $diff->m;
+            $days = $diff->d;
+
+            if ($years > 0) {
+                $workDuration .= $years . ($years > 1 ? ' tahun ' : ' tahun ');
+            }
+
+            if ($months > 0 || $years > 0) {
+                $workDuration .= $months . ($months > 1 ? ' bulan ' : ' bulan ');
+            }
+
+            if ($days > 0 || $months == 0 || $years == 0) {
+                $workDuration .= $days . ($days > 1 ? ' hari' : ' hari');
+            }
+        } else {
+            $workDuration = 'Email belum diverifikasi atau status tidak aktif';
+        }
+
+        return view('account.pengguna.edit', compact('user', 'workDuration'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function detail($id)
     {
         $user = User::findOrFail($id);
@@ -182,65 +200,111 @@ class PenggunaController extends Controller
         return view('account.pengguna.detail', compact('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    // <!--================== UPDATE FOTO PROFIL ==================-->
+    public function updatePhoto(Request $request, $id)
+    {
+        $user = User::find($id);
 
+        // Menghapus foto lama jika ada
+        if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
+            unlink(public_path('assets/img/profil/' . $user->gambar));
+        }
+
+        // Menyimpan foto baru di assets/public/img/profil
+        $fileName = time() . '.' . $request->gambar->extension();
+        $request->gambar->move(public_path('assets/img/profil'), $fileName);
+
+        // Update nama file gambar di database
+        $user->gambar = $fileName;
+        $user->save();
+
+        // Redirect dengan session success
+        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== UPDATE DATA DIRI ==================-->
+    public function updatediri(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        // Validate input data
+        try {
+            $request->validate([
+                'email' => 'nullable|email|unique:users,email,' . $user->id,
+                'jobdesk' => 'nullable|string',
+                'telp' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Check if the validation error is for the email field
+            if ($e->validator->errors()->has('email')) {
+                // Return back with SweetAlert message for duplicate email
+                return redirect()->back()->with('erroremailterpakai', 'Email sudah terdaftar.')->withErrors($e->validator);
+            }
+
+            // Handle other validation errors
+            throw $e;
+        }
+
+        // Update email only if provided and different from the current email
+        if ($request->has('email') && $request->input('email') !== $user->email) {
+            $user->email = $request->input('email');
+            $user->email_verified_at = null; // Reset email verification if email changes
+        }
+
+        // Update jobdesk and telp if present
+        if ($request->has('jobdesk')) {
+            $user->jobdesk = $request->input('jobdesk');
+        }
+
+        if ($request->has('telp')) {
+            $user->telp = $request->input('telp');
+        }
+
+        // Save user data
+        $user->save();
+
+        // Return success message
+        return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== UPDATE DATA DIRI PENGGUNA ==================-->
     public function update(Request $request, $id)
     {
-        // Validate the request data
-        $request->validate([
-            'full_name' => 'required',
-            'company' => '',
-            'email' => 'required|email',
-            'username' => 'required',
-            'level' => 'required',
-            'jenis' => 'required',
-            'telp' => 'required',
-            'jobdesk' => 'required',
-        ]);
-
-        // Find the user by ID
         $user = User::findOrFail($id);
 
-        // Update user data
-        $user->full_name = $request->input('full_name');
-        $user->company = $request->input('company');
-        $user->email = $request->input('email');
-        $user->username = $request->input('username');
-        $user->level = $request->input('level');
-        $user->jenis = $request->input('jenis');
-        $user->telp = $request->input('telp');
-        $user->notif = $request->input('notif');
-        $user->tenggat = $request->input('tenggat');
-        $user->title = $request->input('title');
-        $user->nik = $request->input('nik');
-        $user->norek = $request->input('norek');
-        $user->bank = $request->input('bank');
-        $user->jobdesk = $request->input('jobdesk');
-        $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
-
-        if ($request->input('status')) {
-            $user->status = 'on';
-        } else {
-            $user->status = 'off';
-        }
-
-        // Check if password is being updated
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->input('password'));
-        }
+        // Use old data if no new input is provided
+        $user->full_name = $request->input('full_name') ?? $user->full_name;
+        $user->username = $request->input('username') ?? $user->username;
+        $user->company = $request->input('company') ?? $user->company;
+        $user->level = $request->input('level') ?? $user->level;
+        $user->status = $request->input('status') ?? $user->status;
+        $user->nik = $request->input('nik') ?? $user->nik;
+        $user->norek = $request->input('norek') ?? $user->norek;
+        $user->bank = $request->input('bank') ?? $user->bank;
 
         // Save the updated user data
         $user->save();
 
-        // Redirect with success message
-        return redirect()->route('account.pengguna.index')->with('success', 'Data pengguna berhasil diperbarui!');
+        // Redirect with a success message
+        return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
     }
+    // <!--================== END ==================-->
+
+    // <!--================== VERIFIKASI EMAIL ==================-->
+    public function verifyEmail($id)
+    {
+        $user = User::findOrFail($id);
+        $user->email_verified_at = now(); // Mark email as verified
+        $user->save();
+
+        // Redirect with success message
+        return redirect()->back()->with('statusverifikasiemail', 'Email berhasil diverifikasi.');
+    }
+
+    // <!--================== END ==================-->
+
     public function destroy($id)
     {
         // Find the user by ID

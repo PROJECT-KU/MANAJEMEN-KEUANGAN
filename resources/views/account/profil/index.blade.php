@@ -333,7 +333,7 @@ Profil | MANAGEMENT
 
                         <div class="row mt-3">
                           <div class="col-md-6">
-                            <label>Nama</label>
+                            <label>Nama Lengkap</label>
                             <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->full_name }}" placeholder="Nama" readonly>
                           </div>
                           <div class="col-md-6">
@@ -411,7 +411,7 @@ Profil | MANAGEMENT
                             <div class="col-md-6">
                               <label>Status Akun</label>
                               <input
-                                class="form-control form-control-sm {{ Auth::user()->status === null ? 'bg-danger text-white' : 'bg-success text-white' }} text-uppercase"
+                                class="form-control form-control-sm {{ Auth::user()->status === 'nonactive' ? 'bg-danger text-white' : 'bg-success text-white' }} text-uppercase"
                                 type="text"
                                 placeholder="Username"
                                 value="{{ Auth::user()->status === null ? 'nonactive' : strtoupper(Auth::user()->status) }}"
@@ -514,7 +514,7 @@ Profil | MANAGEMENT
                   <!--================== END TAB DATA DIRI ==================-->
 
                   <!--================== TAB RESET PASSWORD ==================-->
-                  <div class="tab-pane" id="settings">
+                  <div class="tab-pane" id="settings" style="margin-top: -40px;">
                     <form class="form-horizontal" id="register-form" action="{{ route('account.profil.reset.password') }}" method="POST">
                       @csrf
                       <div class="row">
@@ -924,7 +924,8 @@ Profil | MANAGEMENT
     function startCountdown(button, parentDiv, countdown) {
       const countdownSpan = document.createElement('span');
       countdownSpan.className = 'btn btn-warning w-100';
-      countdownSpan.style.height = 'fit-content';
+      countdownSpan.style.height = 'max-content';
+      countdownSpan.style.margin = '0 auto';
       countdownSpan.textContent = `Wait ${countdown} seconds`;
 
       parentDiv.replaceChild(countdownSpan, button);
