@@ -232,7 +232,7 @@
                                             </div>
 
                                             <div class="form-group col-md-6" id="namaPerusahaanContainer" style="display: none;">
-                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)" style="text-transform:uppercase">
+                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)">
                                                 @error('company')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}
