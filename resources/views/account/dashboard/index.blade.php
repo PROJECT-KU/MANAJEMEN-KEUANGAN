@@ -13,11 +13,11 @@ Dashboard | MIS
         <div class="section-body">
 
             <!--================== AKUN BELUM DI VERIFIKASI ==================-->
-            <!-- @if (!Auth::user()->email_verified_at)
-            <div class="alert alert-danger" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">Akun Anda Belum Diverifikasi Oleh Admin!</b><br>Silahkan Hubungin Admin Untuk Verifikasi Akun!
+            @if (Auth::user()->status == "nonactive")
+            <div class="alert alert-danger mt-5" role="alert" style="text-align: center;">
+                <b style="font-size: 20px;">Akun Anda Telah Di Non Active kan</b><br>Silahkan Hubungin Admin Untuk meng Active kan Akun!
             </div>
-            @endif -->
+            @endif
             <!--================== END ==================-->
 
             <!--================== AKUN DINONAKTIFKAN ==================-->

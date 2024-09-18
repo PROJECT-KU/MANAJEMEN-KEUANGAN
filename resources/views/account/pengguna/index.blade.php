@@ -123,9 +123,9 @@ Data Pengguna | MIS
                     <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary mt-2">
                       <i class="fa fa-pencil-alt"></i>
                     </a>
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning mt-2">
+                    <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning mt-2">
                       <i class="fa fa-eye"></i>
-                    </a>
+                    </a> -->
                     <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
                       <i class="fa fa-trash"></i>
                     </button>

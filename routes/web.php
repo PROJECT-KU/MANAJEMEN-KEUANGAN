@@ -59,8 +59,11 @@ Route::prefix('account')->group(
         Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
         Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
         Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
+        Route::post('/pengguna/update/foto/{id}', 'account\PenggunaController@updatePhoto')->name('account.pengguna.update.updatePhoto');
+        Route::post('/pengguna/update/data-diri/{id}', 'account\PenggunaController@updatediri')->name('account.pengguna.update.datadiri');
+        Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
+        Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
         Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
-        Route::put('/pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
         Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
         Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
 
