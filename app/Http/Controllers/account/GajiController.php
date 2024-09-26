@@ -32,10 +32,17 @@ class GajiController extends Controller
 
   function generateRandomToken($length)
   {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // First character must be a letter
+    $firstCharacter = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // Remaining characters can include numbers and symbols
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
     $token = '';
 
-    for ($i = 0; $i < $length; $i++) {
+    // Ensure the first character is a letter
+    $token .= $firstCharacter[rand(0, strlen($firstCharacter) - 1)];
+
+    // Generate the rest of the token
+    for ($i = 1; $i < $length; $i++) {
       $token .= $characters[rand(0, strlen($characters) - 1)];
     }
 
@@ -133,15 +140,16 @@ class GajiController extends Controller
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
+    // Tentukan rentang tanggal
     if (!$startDate || !$endDate) {
       $currentMonth = date('Y-m-01 00:00:00');
       $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
     } else {
       $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+      $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate)); // Akhiri pada akhir hari
     }
 
-
+    // Ambil data gaji untuk paginasi
     $gaji = DB::table('gaji')
       ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
@@ -150,18 +158,22 @@ class GajiController extends Controller
       ->orderBy('gaji.created_at', 'DESC')
       ->paginate(10);
 
+    // Hitung total gaji berdasarkan kriteria filter yang sama
+    $totalGaji = DB::table('gaji')
+      ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+      ->sum('gaji.total');
 
+    // Ambil data maintenance
     $maintenances = DB::table('maintenance')
       ->orderBy('created_at', 'DESC')
       ->get();
 
+    // Periksa apakah presensi ada
     $presensiExist = Presensi::where('status', '<>', null)
       ->whereBetween('created_at', [$currentMonth, $nextMonth])
       ->exists();
 
-    // Calculate total gaji
-    $totalGaji = $gaji->sum('total');
-
+    // Kembalikan view dengan semua data yang diperlukan
     return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
 

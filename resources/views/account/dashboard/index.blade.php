@@ -5,6 +5,131 @@
 Dashboard | MIS
 @stop
 
+<style>
+    .bar-chart-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        height: 200px;
+        border-left: 2px solid #333;
+        border-bottom: 2px solid #333;
+        padding-left: 10px;
+        padding-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .bar {
+        flex-grow: 1;
+        margin: 0 5px;
+        position: relative;
+        transition: background-color 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .increase {
+        background-color: rgba(76, 175, 80, 0.7);
+    }
+
+    .increase:hover {
+        background-color: rgba(76, 175, 80, 1);
+    }
+
+    .decrease {
+        background-color: rgba(244, 67, 54, 0.7);
+        transform: translateY(100%);
+    }
+
+    .decrease:hover {
+        background-color: rgba(244, 67, 54, 1);
+    }
+
+    .bar-label {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        text-align: center;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .total-salary {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: -5px;
+        font-weight: bold;
+        font-size: 14px;
+        display: none;
+        /* Initially hidden */
+    }
+
+    .month-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .month {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    /* Media Queries for Responsive Design */
+    @media (max-width: 768px) {
+        .bar-label {
+            display: none;
+            /* Hide total salary above the bar on mobile */
+        }
+
+        .bar:hover .total-salary {
+            display: block;
+            /* Show only when hovered */
+        }
+
+        .bar-chart {
+            height: 140px;
+        }
+
+        .month {
+            font-size: 5px;
+        }
+
+        .bar {
+            margin: 0 2px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .bar-chart {
+            height: 120px;
+        }
+
+        .month {
+            font-size: 5px;
+        }
+
+        .bar {
+            margin: 0 1px;
+        }
+    }
+</style>
+
+
 
 @section('content')
 
@@ -280,44 +405,110 @@ Dashboard | MIS
         <!--================== END ==================-->
         @endif
 
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
-        <div class="row" id="PenggunaBaru" style="margin-left: 1px; margin-right:1px;">
-            <div class="col-lg-6 col-md-6 col-sm-12">
-                <div class="card card-statistic-2">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
-                        <h4 class="mb-3" style="color:chocolate;"><i class="fas fa-user"></i> PENGGUNA BARU</h4>
+        <!--================== CHART GAJI PERBULAN SELAMA SETAHUN ==================-->
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header border-0"
+                    style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title"><i class="fas fa-dollar-sign"></i> Total Gaji Per Bulan</h4>
                     </div>
-                    <div class="row" style="margin: 3px;">
-                        @foreach($users as $user)
-                        @if ($loop->iteration <= 6)
-                            <div class="col-lg-4 col-md-6 col-sm-6 mt-4">
-                            <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-                                @if ($user->gambar == null)
-                                <a class="mt-3" href="{{ asset('assets/img/profil/no-image.jpg') }}" data-lightbox="{{ $user->id }}">
-                                    @else
-                                    <a class="mt-3" href="{{ asset('assets/img/profil/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
-                                        @endif
-                                        <div class="thumbnail-circle">
-                                            <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/profil/no-image.jpg') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
-                                        </div>
-                                    </a>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $user->full_name }}</h5>
-                                    </div>
-                                    <a href="{{ route('account.pengguna.edit', $user->id) }}" class="btn btn-info">Lihat Detail</a>
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseCardGaji"
+                        aria-expanded="true" aria-controls="collapseCardGaji">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <!-- Collapsible Content -->
+                <div id="collapseCardGaji" class="collapse show">
+                    <div class="card-body chartgaji">
+                        <div class="d-flex">
+                            <p class="d-flex flex-column">
+                                <span class="total-salary-above-label">Total Gaji Tahun {{ $currentYear }}</span>
+                                <span class="text-bold text-lg total-salary-above">Rp {{ number_format($totalGaji, 0, ',', '.') }}</span>
+                            </p>
+                            <p class="ml-auto d-flex flex-column text-right">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up"></i> {{ number_format(($totalGaji / 12), 0, ',', '.') }}
+                                </span>
+                                <span class="text-muted">Rata-rata per Bulan</span>
+                            </p>
+                        </div>
+
+                        <!-- Bar Chart -->
+                        <div class="bar-chart">
+                            @foreach($salaryData as $month => $salary)
+                            <div class="bar {{ $salary >= 0 ? 'increase' : 'decrease' }}"
+                                style="height: {{ abs(($salary / $totalGaji) * 500) }}%;">
+                                <span class="bar-label">Rp {{ number_format($salary, 0, ',', '.') }}</span>
+                                <span class="total-salary">Rp {{ number_format($salary, 0, ',', '.') }}</span>
                             </div>
+                            @endforeach
+                        </div>
+
+                        <div class="month-labels">
+                            @foreach($salaryData as $month => $salary)
+                            <span class="month">{{ date('F', mktime(0, 0, 0, $month, 1)) }}</span>
+                            @endforeach
+                        </div>
                     </div>
-                    @endif
-                    @endforeach
+                </div>
+            </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== PENGGUNA BARU ==================-->
+        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header border-0"
+                    style="justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title"><i class="fas fa-user"></i> Pengguna Baru</h4>
+                    </div>
+                    <!-- Tombol untuk membuka/menutup card -->
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapsePenggunaBaru"
+                        aria-expanded="true" aria-controls="collapsePenggunaBaru">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <!-- Card body yang dapat di-collapse -->
+                <div id="collapsePenggunaBaru" class="collapse show">
+                    <div class="card-body">
+                        <div class="row" style="margin: 3px;">
+                            @foreach($users as $user)
+                            @if ($loop->iteration <= 6)
+                                <div class="col-lg-4 col-md-12 mt-4">
+                                <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+                                    @if ($user->gambar == null)
+                                    <a class="mt-3" href="{{ asset('assets/img/profil/no-image.jpg') }}" data-lightbox="{{ $user->id }}">
+                                        @else
+                                        <a class="mt-3" href="{{ asset('assets/img/profil/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
+                                            @endif
+                                            <div class="thumbnail-circle">
+                                                <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/profil/no-image.jpg') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
+                                            </div>
+                                        </a>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ $user->full_name }}</h5>
+                                        </div>
+                                        <a href="{{ route('account.pengguna.edit', $user->id) }}" class="btn btn-info">Lihat Detail</a>
+                                </div>
+                        </div>
+                        @endif
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
 </div>
 @endif
 
+<!--================== END ==================-->
+
 </section>
 </div>
-
 
 <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
 <!-- <script>
