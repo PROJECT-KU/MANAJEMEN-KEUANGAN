@@ -516,19 +516,19 @@ class DashboardController extends Controller
                 ->orderBy('month', 'ASC')
                 ->get();
 
-            // Calculate total salary and initialize salary data array
-            $totalGaji = 0;
+            // Initialize salary data array with 0 for all months
             $salaryData = array_fill(1, 12, 0);
+            $totalGaji = 0;
 
             // Map fetched salary data to corresponding month and calculate total
             foreach ($salaries as $salary) {
                 $salaryData[$salary->month] = $salary->total_gaji;
-                $totalGaji += $salary->total_gaji; // Add to total salary
+                $totalGaji += $salary->total_gaji;
             }
         } else {
-            // Fetch total salary for the specific user (non-manager)
             $currentYear = Carbon::now()->year;
 
+            // Fetch total salary for the specific user (non-manager)
             $salaries = DB::table('gaji')
                 ->selectRaw('MONTH(gaji.tanggal) as month, SUM(gaji.total) as total_gaji')
                 ->where('gaji.user_id', $user->id) // Filter by user's ID for non-managers
@@ -538,14 +538,14 @@ class DashboardController extends Controller
                 ->orderBy('month', 'ASC')
                 ->get();
 
-            // Calculate total salary and initialize salary data array
-            $totalGaji = 0;
+            // Initialize salary data array with 0 for all months
             $salaryData = array_fill(1, 12, 0);
+            $totalGaji = 0;
 
             // Map fetched salary data to corresponding month and calculate total
             foreach ($salaries as $salary) {
                 $salaryData[$salary->month] = $salary->total_gaji;
-                $totalGaji += $salary->total_gaji; // Add to total salary
+                $totalGaji += $salary->total_gaji;
             }
         }
         // <!--================== END ==================-->

@@ -425,11 +425,14 @@ Dashboard | MIS
                         <div class="d-flex">
                             <p class="d-flex flex-column">
                                 <span class="total-salary-above-label">Total Gaji Tahun {{ $currentYear }}</span>
-                                <span class="text-bold text-lg total-salary-above">Rp {{ number_format($totalGaji, 0, ',', '.') }}</span>
+                                <span class="text-bold text-lg total-salary-above">
+                                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
+                                </span>
                             </p>
                             <p class="ml-auto d-flex flex-column text-right">
                                 <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i> {{ number_format(($totalGaji / 12), 0, ',', '.') }}
+                                    <i class="fas fa-arrow-up"></i>
+                                    {{ $totalGaji > 0 ? number_format(($totalGaji / 12), 0, ',', '.') : '0' }}
                                 </span>
                                 <span class="text-muted">Rata-rata per Bulan</span>
                             </p>
@@ -439,7 +442,7 @@ Dashboard | MIS
                         <div class="bar-chart">
                             @foreach($salaryData as $month => $salary)
                             <div class="bar {{ $salary >= 0 ? 'increase' : 'decrease' }}"
-                                style="height: {{ abs(($salary / $totalGaji) * 500) }}%;">
+                                style="height: {{ $totalGaji > 0 ? abs(($salary / $totalGaji) * 500) : 0 }}%;">
                                 <span class="bar-label">Rp {{ number_format($salary, 0, ',', '.') }}</span>
                                 <span class="total-salary">Rp {{ number_format($salary, 0, ',', '.') }}</span>
                             </div>
