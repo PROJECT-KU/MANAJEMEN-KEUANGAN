@@ -501,6 +501,55 @@ class DashboardController extends Controller
             ->count();
         // <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('totalKaryawan', 'totalKaryawanAktif', 'totalKaryawanNonAktif', 'saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
+        // <!--================== MENAMPILKAN TOTAL GAJI PERBULAN SELAMA 1 TAHUN DENGAN CHART ==================-->
+        if ($user->level == 'manager') {
+            $currentYear = Carbon::now()->year;
+
+            // Fetch total salary for each month for all users in the same company
+            $salaries = DB::table('gaji')
+                ->selectRaw('MONTH(gaji.tanggal) as month, SUM(gaji.total) as total_gaji')
+                ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+                ->where('users.company', $user->company) // Filter by company for managers
+                ->where('gaji.status', 'terbayar')
+                ->whereYear('gaji.tanggal', $currentYear)
+                ->groupBy('month')
+                ->orderBy('month', 'ASC')
+                ->get();
+
+            // Calculate total salary and initialize salary data array
+            $totalGaji = 0;
+            $salaryData = array_fill(1, 12, 0);
+
+            // Map fetched salary data to corresponding month and calculate total
+            foreach ($salaries as $salary) {
+                $salaryData[$salary->month] = $salary->total_gaji;
+                $totalGaji += $salary->total_gaji; // Add to total salary
+            }
+        } else {
+            // Fetch total salary for the specific user (non-manager)
+            $currentYear = Carbon::now()->year;
+
+            $salaries = DB::table('gaji')
+                ->selectRaw('MONTH(gaji.tanggal) as month, SUM(gaji.total) as total_gaji')
+                ->where('gaji.user_id', $user->id) // Filter by user's ID for non-managers
+                ->where('gaji.status', 'terbayar')
+                ->whereYear('gaji.tanggal', $currentYear)
+                ->groupBy('month')
+                ->orderBy('month', 'ASC')
+                ->get();
+
+            // Calculate total salary and initialize salary data array
+            $totalGaji = 0;
+            $salaryData = array_fill(1, 12, 0);
+
+            // Map fetched salary data to corresponding month and calculate total
+            foreach ($salaries as $salary) {
+                $salaryData[$salary->month] = $salary->total_gaji;
+                $totalGaji += $salary->total_gaji; // Add to total salary
+            }
+        }
+        // <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact('salaryData', 'currentYear',  'totalKaryawan', 'totalKaryawanAktif', 'totalKaryawanNonAktif', 'saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
     }
 }

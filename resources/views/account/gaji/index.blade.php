@@ -4,7 +4,6 @@
 @section('title')
 Data Gaji Karyawan | MIS
 @stop
-<link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -93,7 +92,7 @@ Data Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AWAL</label>
-                  <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker rounded-pill">
                 </div>
               </div>
               <div class="col-md-2" style="text-align: center">
@@ -102,30 +101,29 @@ Data Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AKHIR</label>
-                  <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker rounded-pill">
                 </div>
               </div>
               <div class="col-md-2">
                 @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                 <div class="btn-group" style="width: 100%;">
-                  <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;"">
+                    <i class=" fa fa-trash mt-2"></i>
                   </a>
                 </div>
                 @else
-                <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                <button class="btn btn-info mr-1 btn-block rounded-pill" type="submit" style="margin-top: 30px; font-size:15px;" id="filterButton"><i class="fa fa-filter"></i> FILTER</button>
                 @endif
               </div>
             </div>
           </form>
           @else
-          <form action="{{ route('account.gaji.filterkaryawan') }}" method="GET">
+          <!-- <form action="{{ route('account.gaji.filterkaryawan') }}" method="GET">
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AWAL</label>
-                  <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
                 </div>
               </div>
               <div class="col-md-2" style="text-align: center">
@@ -134,7 +132,7 @@ Data Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AKHIR</label>
-                  <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
                 </div>
               </div>
               <div class="col-md-2">
@@ -150,7 +148,7 @@ Data Gaji Karyawan | MIS
                 @endif
               </div>
             </div>
-          </form>
+          </form> -->
           @endif
 
           @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
@@ -401,7 +399,6 @@ Data Gaji Karyawan | MIS
 
       </div>
 
-      @if(Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
       <table class="table table-bordered mt-5" style="border: 2px solid red;">
         <thead>
           <tr>
@@ -414,7 +411,6 @@ Data Gaji Karyawan | MIS
           </tr>
         </tbody>
       </table>
-      @endif
 
     </div>
   </section>

@@ -43,7 +43,7 @@ Data Presensi Karyawan | MIS
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>TANGGAL AWAL</label>
-                    <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker rounded-pill">
+                    <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker rounded-pill">
                   </div>
                 </div>
                 <div class="col-md-2" style="text-align: center">
@@ -52,7 +52,7 @@ Data Presensi Karyawan | MIS
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>TANGGAL AKHIR</label>
-                    <input type="text" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker rounded-pill">
+                    <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker rounded-pill">
                   </div>
                 </div>
                 <div class="col-md-2">
