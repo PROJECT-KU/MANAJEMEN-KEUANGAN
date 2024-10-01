@@ -53,7 +53,6 @@ class KarirController extends Controller
 
         $karir = DB::table('karir')
             ->select('karir.id', 'karir.token', 'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
-            ->whereBetween('karir.created_at', [$currentMonth, $nextMonth])
             ->orderBy('karir.created_at', 'DESC')
             ->paginate(10);
 
