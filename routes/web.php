@@ -17,17 +17,23 @@ Route::get('/', 'Auth\LoginController@showLoginForm');
 
 Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
+// HOME PUBLIC
+Route::get('/beranda', 'Publict\PublicHomeController@home')->name('home');
 
 // ARTIKEL PUBLIC
-Route::get('/blog', 'account\ArtikelController@public')->name('blog.artikel.blog');
-Route::get('/blog/topic/{categories_artikel_id}{token}', 'account\ArtikelController@publickategori')->name('blog.topic.kategori');
-Route::get('/blog/topic/blog-single/{id}{token}', 'account\ArtikelController@blogsingle')->name('blog.topic.blog-single');
-Route::post('/blog/store', 'account\ArtikelController@storekomentar')->name('blog.store.komentar');
-Route::get('/blog/contact', 'account\ArtikelController@contact')->name('blog.contact.kontak');
+Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
+Route::get('/blog/topic/{categories_artikel_id}{token}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
+Route::get('/blog/topic/blog-single/{id}{token}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
+Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');
+Route::get('/blog/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
 
 // PLAGIASI
-Route::get('/Cek-Plagiasi', 'account\PlagiasiController@index')->name('cek.plagiasi.public');
-Route::post('/Cek-Plagiasi/proses', 'account\PlagiasiController@uploadFile')->name('cek.plagiasi.proses');
+Route::get('/Cek-Plagiasi', 'Publict\PublicPlagiasiController@index')->name('cek.plagiasi.public');
+Route::post('/Cek-Plagiasi/proses', 'Publict\PublicPlagiasiController@uploadFile')->name('cek.plagiasi.proses');
+
+// MEME PUBLIC
+Route::get('/Scopus-Kafe', 'Publict\PublicScopusKafeController@public')->name('public.scopuskafe.index');
+Route::get('/Scopus-Kafe/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
 
 Auth::routes();
 
@@ -284,6 +290,20 @@ Route::prefix('account')->group(
         Route::post('/Perjalanan-Dinas/Update-Manager/{id}', 'account\PerjalananDinasController@PengajuanManager')->name('account.PerjalananDinas.PengajuanManager');
         Route::post('/Perjalanan-Dinas/Update-AddEdit/{id}', 'account\PerjalananDinasController@UpdateAddEdit')->name('account.PerjalananDinas.UpdateAddEdit');
         Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
+
+        // meme
+        Route::get('/meme/data', 'account\DataMemeController@index')->name('account.meme.index');
+        Route::get('/meme/create-data', 'account\DataMemeController@create')->name('account.meme.create');
+        Route::post('/meme/store-data', 'account\DataMemeController@store')->name('account.meme.store');
+        Route::get('/meme/edit-data/{id}', 'account\DataMemeController@edit')->name('account.meme.edit');
+        Route::post('/meme/update-data/{id}', 'account\DataMemeController@update')->name('account.meme.update');
+        Route::delete('/meme/delete/{id}', 'account\DataMemeController@destroy')->name('account.meme.delete');
+
+        // paperisasi
+        Route::get('/paperisasi/data', 'account\PaperisasiController@index')->name('account.paperisasi.index');
+        Route::get('/paperisasi/data/create', 'account\PaperisasiController@create')->name('account.paperisasi.create');
+        Route::post('/paperisasi/data/store', 'account\PaperisasiController@store')->name('account.paperisasi.store');
+        Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
     }
 
 

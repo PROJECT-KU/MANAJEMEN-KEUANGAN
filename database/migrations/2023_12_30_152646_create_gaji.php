@@ -17,23 +17,23 @@ class CreateGaji extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('presensi_id')->nullable();
-            $table->string('token', 300)->nullable();
-            $table->string('email', 300)->nullable();
-            $table->string('id_transaksi', 300)->nullable();
-            $table->string('gaji_pokok', 300)->nullable();
+            $table->string('token', 100)->nullable();
+            $table->string('email', 100)->nullable();
+            $table->string('id_transaksi', 100)->nullable();
+            $table->string('gaji_pokok', 100)->nullable();
 
             // <!-- JUMLAH NOMINAL LEMBUR -->
-            $table->string('lembur', 300)->nullable();
-            $table->string('lembur1', 300)->nullable();
-            $table->string('lembur2', 300)->nullable();
-            $table->string('lembur3', 300)->nullable();
-            $table->string('lembur4', 300)->nullable();
-            $table->string('lembur5', 300)->nullable();
-            $table->string('lembur6', 300)->nullable();
-            $table->string('lembur7', 300)->nullable();
-            $table->string('lembur8', 300)->nullable();
-            $table->string('lembur9', 300)->nullable();
-            $table->string('lembur10', 300)->nullable();
+            $table->string('lembur', 100)->nullable();
+            $table->string('lembur1', 100)->nullable();
+            $table->string('lembur2', 100)->nullable();
+            $table->string('lembur3', 100)->nullable();
+            $table->string('lembur4', 100)->nullable();
+            $table->string('lembur5', 100)->nullable();
+            $table->string('lembur6', 100)->nullable();
+            $table->string('lembur7', 100)->nullable();
+            $table->string('lembur8', 100)->nullable();
+            $table->string('lembur9', 100)->nullable();
+            $table->string('lembur10', 100)->nullable();
             // <!-- END -->
 
             // <!-- TOTAL JAM LEMBUR -->
@@ -50,65 +50,65 @@ class CreateGaji extends Migration
             $table->text('jumlah_lembur10')->nullable();
             // <!-- END -->
 
-            $table->string('total_lembur', 300)->nullable();
+            $table->string('total_lembur', 100)->nullable();
 
             // <!-- JUMLAH NOMINAL BONUS JOGJA -->
-            $table->string('bonus', 300)->nullable();
-            $table->string('bonus1', 300)->nullable();
-            $table->string('bonus2', 300)->nullable();
-            $table->string('bonus3', 300)->nullable();
-            $table->string('bonus4', 300)->nullable();
-            $table->string('bonus5', 300)->nullable();
-            $table->string('bonus6', 300)->nullable();
-            $table->string('bonus7', 300)->nullable();
-            $table->string('bonus8', 300)->nullable();
-            $table->string('bonus9', 300)->nullable();
-            $table->string('bonus10', 300)->nullable();
+            $table->string('bonus', 100)->nullable();
+            $table->string('bonus1', 100)->nullable();
+            $table->string('bonus2', 100)->nullable();
+            $table->string('bonus3', 100)->nullable();
+            $table->string('bonus4', 100)->nullable();
+            $table->string('bonus5', 100)->nullable();
+            $table->string('bonus6', 100)->nullable();
+            $table->string('bonus7', 100)->nullable();
+            $table->string('bonus8', 100)->nullable();
+            $table->string('bonus9', 100)->nullable();
+            $table->string('bonus10', 100)->nullable();
             // <!-- END -->
 
             // <!-- JUMLAH NOMINAL BONUS LUAR KOTA -->
-            $table->string('bonus_luar', 300)->nullable();
-            $table->string('bonus_luar1', 300)->nullable();
-            $table->string('bonus_luar2', 300)->nullable();
-            $table->string('bonus_luar3', 300)->nullable();
-            $table->string('bonus_luar4', 300)->nullable();
-            $table->string('bonus_luar5', 300)->nullable();
-            $table->string('bonus_luar6', 300)->nullable();
-            $table->string('bonus_luar7', 300)->nullable();
-            $table->string('bonus_luar8', 300)->nullable();
-            $table->string('bonus_luar9', 300)->nullable();
-            $table->string('bonus_luar10', 300)->nullable();
+            $table->string('bonus_luar', 100)->nullable();
+            $table->string('bonus_luar1', 100)->nullable();
+            $table->string('bonus_luar2', 100)->nullable();
+            $table->string('bonus_luar3', 100)->nullable();
+            $table->string('bonus_luar4', 100)->nullable();
+            $table->string('bonus_luar5', 100)->nullable();
+            $table->string('bonus_luar6', 100)->nullable();
+            $table->string('bonus_luar7', 100)->nullable();
+            $table->string('bonus_luar8', 100)->nullable();
+            $table->string('bonus_luar9', 100)->nullable();
+            $table->string('bonus_luar10', 100)->nullable();
             // <!-- END -->
 
             // <!-- TOTAL HARI BONUS JOGJA -->
-            $table->string('jumlah_bonus', 300)->nullable();
-            $table->string('jumlah_bonus1', 300)->nullable();
-            $table->string('jumlah_bonus2', 300)->nullable();
-            $table->string('jumlah_bonus3', 300)->nullable();
-            $table->string('jumlah_bonus4', 300)->nullable();
-            $table->string('jumlah_bonus5', 300)->nullable();
-            $table->string('jumlah_bonus6', 300)->nullable();
-            $table->string('jumlah_bonus7', 300)->nullable();
-            $table->string('jumlah_bonus8', 300)->nullable();
-            $table->string('jumlah_bonus9', 300)->nullable();
-            $table->string('jumlah_bonus10', 300)->nullable();
+            $table->string('jumlah_bonus', 100)->nullable();
+            $table->string('jumlah_bonus1', 100)->nullable();
+            $table->string('jumlah_bonus2', 100)->nullable();
+            $table->string('jumlah_bonus3', 100)->nullable();
+            $table->string('jumlah_bonus4', 100)->nullable();
+            $table->string('jumlah_bonus5', 100)->nullable();
+            $table->string('jumlah_bonus6', 100)->nullable();
+            $table->string('jumlah_bonus7', 100)->nullable();
+            $table->string('jumlah_bonus8', 100)->nullable();
+            $table->string('jumlah_bonus9', 100)->nullable();
+            $table->string('jumlah_bonus10', 100)->nullable();
             // <!-- END -->
 
             // <!-- TOTAL HARI BONUS LUAR KOTA -->
-            $table->string('jumlah_bonus_luar', 300)->nullable();
-            $table->string('jumlah_bonus_luar1', 300)->nullable();
-            $table->string('jumlah_bonus_luar2', 300)->nullable();
-            $table->string('jumlah_bonus_luar3', 300)->nullable();
-            $table->string('jumlah_bonus_luar4', 300)->nullable();
-            $table->string('jumlah_bonus_luar5', 300)->nullable();
-            $table->string('jumlah_bonus_luar6', 300)->nullable();
-            $table->string('jumlah_bonus_luar7', 300)->nullable();
-            $table->string('jumlah_bonus_luar8', 300)->nullable();
-            $table->string('jumlah_bonus_luar9', 300)->nullable();
-            $table->string('jumlah_bonus_luar10', 300)->nullable();
+            $table->string('jumlah_bonus_luar', 100)->nullable();
+            $table->string('jumlah_bonus_luar1', 100)->nullable();
+            $table->string('jumlah_bonus_luar2', 100)->nullable();
+            $table->string('jumlah_bonus_luar3', 100)->nullable();
+            $table->string('jumlah_bonus_luar4', 100)->nullable();
+            $table->string('jumlah_bonus_luar5', 100)->nullable();
+            $table->string('jumlah_bonus_luar6', 100)->nullable();
+            $table->string('jumlah_bonus_luar7', 100)->nullable();
+            $table->string('jumlah_bonus_luar8', 100)->nullable();
+            $table->string('jumlah_bonus_luar9', 100)->nullable();
+            $table->string('jumlah_bonus_luar10', 100)->nullable();
             // <!-- END -->
 
-            $table->string('total_bonus', 300)->nullable();
+            $table->string('total_bonus', 100)->nullable();
             $table->text('tunjangan')->nullable();
             $table->text('tunjangan_bpjs')->nullable();
             $table->text('tunjangan_thr')->nullable();
@@ -119,10 +119,10 @@ class CreateGaji extends Migration
             $table->text('potongan')->nullable();
             $table->text('pph')->nullable();
             $table->text('alpha')->nullable();
-            $table->string('total', 300)->nullable();
-            $table->text('status')->default('PENDING');
+            $table->string('total', 100)->nullable();
+            $table->text('status')->nullable();
             $table->text('note')->nullable();
-            $table->string('gambar', 300)->nullable();
+            $table->string('gambar', 100)->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')
