@@ -98,9 +98,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                             <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
-                            <!-- <a href="{{ route('account.profil.password', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
-                                <i class="fas fa-unlock-alt"></i> RESET PASSWORD
-                            </a> -->
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                     document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
@@ -124,83 +121,67 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">MAIN MENU</li>
-                        <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>DASHBOARD</span></a></li>
+
+                        <!--================== DASBOARD ==================-->
+                        <h6 style="font-weight: bold; margin-bottom: -5px; margin-left: 15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-2">DASBOARD</h6>
+                        <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                        <!--================== END ==================-->
+
+
                         @if (Auth::user()->email_verified_at)
-
-
                         @php
                         $tenggatDate = Auth::user()->tenggat;
                         $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @php $isStatusnonactive=(Auth::user()->status === 'nonactive');
                             $tenggatDate = Auth::user()->tenggat;
                             $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
-                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate); $isPenyewaanUser=(Auth::user()->jenis === 'penyewaan');
-                                $isAdminOrPenyewaan = (Auth::user()->level === 'admin' || $isPenyewaanUser);
+                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate);
                                 @endphp
 
-
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
-                                <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.pengguna.index') }}">
-                                        <i class="fas fa-user"></i> <span>PENGGUNA</span>
-                                    </a>
-                                </li>
+                                <!--==================PERUSAHAAN==================-->
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PERUSAHAAN</h6>
                                 <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
-                                        <i class="fas fa-building"></i> <span>COMPANY</span>
+                                    <a class="nav-link" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
+                                        <i class="fas fa-building"></i> <span>Company</span>
                                     </a>
                                 </li>
-                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.camp.index') }}">
-                                        <i class="fas fa-campground"></i> <span>LAPORAN CAMP</span>
+                                <!--================== END ==================-->
+                                @endif
+
+                                <!--================== KARYAWAN ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KARYAWAN</h6>
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'ceo')
+                                <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link" href="{{ route('account.pengguna.index') }}">
+                                        <i class="fas fa-user"></i> <span>Pengguna</span>
                                     </a>
                                 </li>
                                 @endif
 
-                                @if ($isStatusnonactive || $isTenggatExpired)
-                                <!-- <li class="dropdown {{ setActive('account/gaji'). setActive('account/debit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
-                                </li>
-                                <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
-                                </li>
-                                <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
-                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
-                                </li>
-                                <li class="dropdown {{ setActive('account/laporan_debit'). setActive('account/laporan_credit') }}. {{ setActive('account/laporan_semua') }}">
-                                    <a href="#" class="nav-link has-dropdown" disabled><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
-                                </li> -->
+                                @if ($isStatusnonactive)
                                 @else
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'karyawan' || Auth::user()->level === 'trainer' || Auth::user()->level === 'ceo')
-                                <li class="dropdown {{ setActive('account/gaji'). setActive('account/presensi') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>KARYAWAN</span></a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/gaji') }}"><a class="nav-link" href="{{ route('account.gaji.index') }}"><i class="fas fa-dollar-sign"></i>GAJI</a></li>
-                                        <li class="{{ setActive('account/presensi') }}"><a class="nav-link" href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock"></i>PRESENSI</a></li>
-
-                                    </ul>
+                                @if (Auth::user()->level !== 'staff')
+                                <li class="{{ setActive('account/gaji') }}">
+                                    <a class="nav-link" href="{{ route('account.gaji.index') }}">
+                                        <i class="fas fa-dollar-sign"></i> <span>Gaji Karyawan</span>
+                                    </a>
+                                </li>
+                                <li class="{{ setActive('account/presensi') }}">
+                                    <a class="nav-link" href="{{ route('account.presensi.index') }}">
+                                        <i class="fas fa-user-clock"></i> <span>Presensi</span>
+                                    </a>
                                 </li>
                                 <li class="{{ setActive('account/Perjalanan-Dinas') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('account.PerjalananDinas.index') }}">
-                                        <i class="fas fa-suitcase-rolling"></i> <span>PERJALANAN DINAS</span>
+                                    <a class="nav-link" href="{{ route('account.PerjalananDinas.index') }}">
+                                        <i class="fas fa-suitcase-rolling"></i> <span>Perjalanan Dinas</span>
                                     </a>
                                 </li>
                                 @endif
 
-
-                                @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager'|| Auth::user()->level === 'ceo')
-                                <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
-                                    <a href="#" class="nav-link has-dropdown">
-                                        <i class="fas fa-newspaper"></i><span>ARTIKEL</span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/artikel-kategori') }}"><a class="nav-link" href="{{ route('account.Kategori-Artikel.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
-                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-file-signature"></i>DATA ARTIKEL</a></li>
-                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>DATA KOMENTAR</a></li>
-                                    </ul>
-                                </li>
+                                @if (Auth::user()->level !== 'karyawan')
                                 <li class="{{ setActive('account/karir') }}">
-                                    <a class="nav-link @if ($isTenggatExpired) disabled @endif" href="{{ route('karir.list') }}">
-                                        <i class="fas fa-user-tie"></i> <span>KARIR</span>
+                                    <a class="nav-link" href="{{ route('karir.list') }}">
+                                        <i class="fas fa-user-tie"></i> <span>Karir</span>
                                         @php
                                         $totalStatusNull = App\Karir::whereNull('status')->count();
                                         @endphp
@@ -211,32 +192,94 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                     </a>
                                 </li>
-                                <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
+                                @endif
+                                <!--================== END ==================-->
+
+                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+
+                                <!--================== PAPER ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/meme') . setActive('account/meme/edit-data') }}"><a class="nav-link" href="{{ route('account.meme.index') }}"><i class="fas fa-dice-d6"></i>Data Meme</a></li>
+                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>Data Komentar</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="{{ setActive('account/paperisasi/data') }}">
+                                    <a class="nav-link" href="{{ route('account.paperisasi.index') }}">
+                                        <i class="fas fa-folder-open"></i> <span>Paperisasi</span>
+                                    </a>
+                                </li>
+                                <!--================== END ==================-->
+
+                                <!--================== BLOG ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">BLOG</h6>
+                                <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-newspaper"></i><span>Artikel</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li class="{{ setActive('account/artikel-kategori') }}"><a class="nav-link" href="{{ route('account.Kategori-Artikel.index') }}"><i class="fas fa-dice-d6"></i>Kategori</a></li>
+                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-file-signature"></i>Data Artikel</a></li>
+                                        <!-- <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>DATA KOMENTAR</a></li> -->
+                                    </ul>
+                                </li>
+                                <!--================== END ==================-->
+
+                                <!--================== SCOPUS CAMP ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">SCOPUS CAMP</h6>
+                                <!-- <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-user-cog"></i><span>PESERTA</span>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/kategori') }}"><a class="nav-link" href="{{ route('account.kategori.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI</a></li>
-                                        <li class="{{ setActive('account/Scopus-Camp') }}"><a class="nav-link" href="{{ route('account.scopuscamp.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN</a></li>
-                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI</a></li>
+                                        <li class="{{ setActive('account/kategori') }}"><a class="nav-link" href="{{ route('account.kategori.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI CAMP</a></li>
+                                        <li class="{{ setActive('account/Scopus-Camp') }}"><a class="nav-link" href="{{ route('account.scopuscamp.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN CAMP</a></li>
+                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI CAMP</a></li>
                                     </ul>
+                                </li> -->
+
+                                <li class="{{ setActive('account/kategori') }}">
+                                    <a class="nav-link" href="{{ route('account.kategori.index') }}">
+                                        <i class="fas fa-dice-d6"></i> <span>Kategori Camp</span>
+                                    </a>
                                 </li>
+
+                                <li class="{{ setActive('account/Scopus-Camp') }}">
+                                    <a class="nav-link" href="{{ route('account.scopuscamp.index') }}">
+                                        <i class="fas fa-file-signature"></i> <span>Pendaftaran Camp</span>
+                                    </a>
+                                </li>
+
+                                <li class="{{ setActive('account/Laporan-Peserta') }}">
+                                    <a class="nav-link" href="{{ route('account.peserta.list') }}">
+                                        <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
+                                    </a>
+                                </li>
+                                <!--================== END ==================-->
                                 @endif
 
+                                <!--================== KEUANGAN ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KEUANGAN</h6>
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG MASUK</span></a>
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
                                     <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
-                                        <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> UANG MASUK</a></li>
+                                        <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
+                                        <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Masuk</a></li>
                                     </ul>
                                 </li>
                                 <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>UANG KELUAR</span></a>
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Keluar</span></a>
                                     <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> KATEGORI</a></li>
-                                        <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> UANG KELUAR</a></li>
+                                        <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
+                                        <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Keluar</a></li>
                                     </ul>
                                 </li>
+                                <!--================== END ==================-->
 
                                 <!-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
@@ -249,27 +292,39 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif -->
 
-                                <li class="dropdown {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>LAPORAN</span></a>
+                                <!--================== LAPORAN ==================-->
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">LAPORAN</h6>
+
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
+                                    <a class="nav-link" href="{{ route('account.camp.index') }}">
+                                        <i class="fas fa-campground"></i> <span>Laporan Camp</span>
+                                    </a>
+                                </li>
+                                @endif
+
+                                <li class="dropdown mb-5 {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
+                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>Laporan</span></a>
                                     <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> UANG MASUK</a></li>
-                                        <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> UANG KELUAR</a></li>
+                                        <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> Uang Masuk</a></li>
+                                        <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> Uang Keluar</a></li>
                                         <li class="dropdown {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
-                                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>SEMUA</span></a>
+                                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>Semua</span></a>
                                             <ul class="dropdown-menu">
-                                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-area"></i>CATATAN</a></li>
-                                                <li class="{{ setActive('account/neraca') }}"><a class="nav-link" href="{{ route('account.neraca.index') }}"><i class="fas fa-balance-scale"></i>NERACA</a></li>
+                                                <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-area"></i>Catatan</a></li>
+                                                <li class="{{ setActive('account/neraca') }}"><a class="nav-link" href="{{ route('account.neraca.index') }}"><i class="fas fa-balance-scale"></i>Neraca</a></li>
                                             </ul>
                                         </li>
                                     </ul>
                                 </li>
+                                <!--================== END ==================-->
 
-                                <li class="dropdown show">
+                                <!-- <li class="dropdown show">
                                     <a href="https://mail.hostinger.com/" class="nav-link" target="_blank">
                                         <i class="fas fa-envelope-open"></i>
                                         <span>MASUK EMAIL</span>
                                     </a>
-                                </li>
+                                </li> -->
                                 @endif
 
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->

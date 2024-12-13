@@ -13,7 +13,7 @@ class Plagiasi extends Migration
      */
     public function up()
     {
-        Schema::create('perjalanan_dinas', function (Blueprint $table) {
+        Schema::create('plagiasi', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('token', 300)->nullable();
             $table->string('id_transaksi', 300)->nullable();
