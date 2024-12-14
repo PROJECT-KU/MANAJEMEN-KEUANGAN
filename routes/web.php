@@ -304,6 +304,7 @@ Route::prefix('account')->group(
         Route::get('/paperisasi/data/create', 'account\PaperisasiController@create')->name('account.paperisasi.create');
         Route::post('/paperisasi/data/store', 'account\PaperisasiController@store')->name('account.paperisasi.store');
         Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
+        Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
     }
 
 

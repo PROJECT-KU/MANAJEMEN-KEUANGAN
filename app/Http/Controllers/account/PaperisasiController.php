@@ -16,6 +16,7 @@ use Riskihajar\Terbilang\Facades\Terbilang;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class PaperisasiController extends Controller
 {
@@ -128,24 +129,36 @@ class PaperisasiController extends Controller
         $token = $this->generateRandomToken(30);
         $id_paper = $this->generateRandomId(5);
 
+        // Maksimal ukuran file dalam byte (5 MB)
+        $maxFileSize = 2 * 1024 * 1024;
+
         // Handle File Anatomy Upload
         if ($request->hasFile('file_anatomi')) {
             $fileAnatomy = $request->file('file_anatomi');
-            $anatomyName = time() . '_anatomy.' . $fileAnatomy->getClientOriginalExtension();
-            $anatomyPath = 'paperisasi/' . $anatomyName;
+            if ($fileAnatomy->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file anatomy pertama melebihi 5 MB.');
+            }
+            $anatomyName = time() . '_' . Str::uuid() . '_anatomy.' . $fileAnatomy->getClientOriginalExtension();
+            $anatomyPathFirst = 'paperisasi/' . $anatomyName;
             $fileAnatomy->move(public_path('paperisasi'), $anatomyName);
         }
 
         if ($request->hasFile('file_anatomi_second')) {
             $fileAnatomySecond = $request->file('file_anatomi_second');
-            $anatomyNameSecond = time() . '_anatomy_second.' . $fileAnatomySecond->getClientOriginalExtension();
+            if ($fileAnatomySecond->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file anatomy kedua melebihi 5 MB.');
+            }
+            $anatomyNameSecond = time() . '_' . Str::uuid() . '_anatomy_second.' . $fileAnatomySecond->getClientOriginalExtension();
             $anatomyPathSecond = 'paperisasi/' . $anatomyNameSecond;
             $fileAnatomySecond->move(public_path('paperisasi'), $anatomyNameSecond);
         }
 
         if ($request->hasFile('file_anatomi_third')) {
             $fileAnatomyThird = $request->file('file_anatomi_third');
-            $anatomyNameThird = time() . '_anatomy_third.' . $fileAnatomyThird->getClientOriginalExtension();
+            if ($fileAnatomyThird->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file anatomy ketiga melebihi 5 MB.');
+            }
+            $anatomyNameThird = time() . '_' . Str::uuid() . '_anatomy_third.' . $fileAnatomyThird->getClientOriginalExtension();
             $anatomyPathThird = 'paperisasi/' . $anatomyNameThird;
             $fileAnatomyThird->move(public_path('paperisasi'), $anatomyNameThird);
         }
@@ -153,21 +166,30 @@ class PaperisasiController extends Controller
         // Handle File Paper Upload
         if ($request->hasFile('file_paper')) {
             $filePaper = $request->file('file_paper');
-            $paperName = time() . '_paper.' . $filePaper->getClientOriginalExtension();
+            if ($filePaper->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file paper pertama melebihi 5 MB.');
+            }
+            $paperName = time() . '_' . Str::uuid() . '_paper.' . $filePaper->getClientOriginalExtension();
             $paperPath = 'paperisasi/' . $paperName;
             $filePaper->move(public_path('paperisasi'), $paperName);
         }
 
         if ($request->hasFile('file_paper_second')) {
             $filePaperSecond = $request->file('file_paper_second');
-            $paperNameSecond = time() . '_paper_second.' . $filePaperSecond->getClientOriginalExtension();
+            if ($filePaperSecond->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file paper kedua melebihi 5 MB.');
+            }
+            $paperNameSecond = time() . '_' . Str::uuid() . '_paper_second.' . $filePaperSecond->getClientOriginalExtension();
             $paperPathSecond = 'paperisasi/' . $paperNameSecond;
             $filePaperSecond->move(public_path('paperisasi'), $paperNameSecond);
         }
 
         if ($request->hasFile('file_paper_third')) {
             $filePaperThird = $request->file('file_paper_third');
-            $paperNameThird = time() . '_paper_third.' . $filePaperThird->getClientOriginalExtension();
+            if ($filePaperThird->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file paper ketiga melebihi 5 MB.');
+            }
+            $paperNameThird = time() . '_' . Str::uuid() . '_paper_third.' . $filePaperThird->getClientOriginalExtension();
             $paperPathThird = 'paperisasi/' . $paperNameThird;
             $filePaperThird->move(public_path('paperisasi'), $paperNameThird);
         }
@@ -194,7 +216,7 @@ class PaperisasiController extends Controller
             'progres_anatomi_status'        => $request->input('progres_anatomi_status'),
             'progres_anatomi_estimasi'      => $request->input('progres_anatomi_estimasi'),
             'progres_anatomi_keterangan'    => $request->input('progres_anatomi_keterangan'),
-            'file_anatomi'                  => $anatomyPath ?? null,
+            'file_anatomi'                  => $anatomyPathFirst ?? null,
 
             'progres_anatomi_tanggal_second'       => $request->input('progres_anatomi_tanggal_second'),
             'progres_anatomi_status_second'        => $request->input('progres_anatomi_status_second'),
@@ -316,16 +338,34 @@ class PaperisasiController extends Controller
     // <!--================== DELETE DATA ==================-->
     public function destroy(Request $request, $id)
     {
-        $meme = Meme::findOrFail($id);
+        // Temukan data berdasarkan ID
+        $data = Paperisasi::findOrFail($id);
 
-        if ($meme->gambar && file_exists(public_path('assets/img/meme/' . $meme->gambar))) {
-            unlink(public_path('assets/img/meme/' . $meme->gambar));
+        // Array file yang akan dicek dan dihapus
+        $files = [
+            $data->file_anatomi,
+            $data->file_anatomi_second,
+            $data->file_anatomi_third,
+            $data->file_paper,
+            $data->file_paper_second,
+            $data->file_paper_third,
+        ];
+
+        // Iterasi untuk menghapus file
+        foreach ($files as $filePath) {
+            if ($filePath && file_exists(public_path($filePath))) {
+                unlink(public_path($filePath));
+            }
         }
 
-        $meme->delete();
+        // Hapus data dari database
+        $data->delete();
 
-        // Return a JSON response with a status and message
-        return response()->json(['statusdatadeleted' => 'success', 'message' => 'Data berhasil dihapus.']);
+        // Return JSON response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus beserta file terkait.',
+        ]);
     }
     // <!--================== END ==================-->
 
