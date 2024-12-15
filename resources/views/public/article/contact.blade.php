@@ -11,8 +11,8 @@ Blog | Rumah Scopus
     <div class="container" data-aos="fade-up">
 
         <header class="section-header">
-            <h2>Contact</h2>
-            <p>Contact Us</p>
+            <h2>Kontak</h2>
+            <p>Hubungi Kami Sekarang</p>
         </header>
 
         <div class="row gy-4">

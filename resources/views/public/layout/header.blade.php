@@ -90,7 +90,7 @@
                     </li>
                     <li><a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }} || {{ Request::is('paperisasi/public/data/search') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('blog/contact') ? 'active' : '' }}" href="{{ url('/blog/contact') }}">Contact</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('blog/contact') ? 'active' : '' }}" href="{{ url('/blog/contact') }}">Kontak</a></li>
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
@@ -119,7 +119,7 @@
                     </div>
 
                     <div class="col-lg-2 col-6 footer-links">
-                        <h4>Useful Links</h4>
+                        <h4>Link Bermanfaat</h4>
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/blog') }}">Blog</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
@@ -129,17 +129,18 @@
                     </div>
 
                     <div class="col-lg-2 col-6 footer-links">
-                        <h4>Our Services</h4>
+                        <h4>Layanan Kami</h4>
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Class Online</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Class Offline</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Scopus Kafe</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Online Training</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="#">Meeting Room</a></li>
                         </ul>
                     </div>
 
                     <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-                        <h4>Contact Us</h4>
+                        <h4>Hubungi Kami</h4>
                         <p>
                             Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman Regency, Special Region of Yogyakarta 55551 <br><br>
                             <strong>Phone:</strong> <b>[Dinar]</b> +62 812-2688-3280<br>
