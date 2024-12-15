@@ -188,7 +188,7 @@ Beranda | Rumah Scopus
 
 <div class="mt-5 mb-5">
     <div style="background: linear-gradient(to right, #ff3131, #ff914d); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; padding: 30px;">
-        <h1 class="text-center mt-3" style="font-weight: bold; color: white;">Sudah di Percaya Ribuan Orang</h1>
+        <h1 class="text-center mt-3" style="font-weight: bold; color: white;">Sudah Dipercaya Ribuan Orang</h1>
         <div class="card-body d-flex justify-content-center" style="padding: 30px; border-radius: 15px;">
             <div class="row justify-content-center">
                 <!-- First Card -->

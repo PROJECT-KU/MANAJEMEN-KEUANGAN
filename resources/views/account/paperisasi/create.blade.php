@@ -296,13 +296,13 @@ Tambah Data Paper | MIS
                                     <label>Status Paper</label>
                                     <select class="form-control" name="status_paper" required>
                                         <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
-                                        <option value="antrian">ANTRIAN PAPER</option>
-                                        <option value="diterima">PAPER DITERIMA</option>
-                                        <option value="in progress">PENGERJAAN PAPER</option>
-                                        <option value="submit">SUBMIT PAPER</option>
-                                        <option value="revisi">REVISI PAPER</option>
-                                        <option value="resubmit">RESUBMIT PAPER</option>
-                                        <option value="done">PAPER SELESAI</option>
+                                        <option value="antrian paper">ANTRIAN PAPER</option>
+                                        <option value="paper diterima">PAPER DITERIMA</option>
+                                        <option value="pengerjaan paper">PENGERJAAN PAPER</option>
+                                        <option value="submit paper">SUBMIT PAPER</option>
+                                        <option value="revisi revisi">REVISI PAPER</option>
+                                        <option value="resubmit paper">RESUBMIT PAPER</option>
+                                        <option value="paper selesasi">PAPER SELESAI</option>
                                     </select>
                                 </div>
                             </div>
@@ -990,4 +990,32 @@ Tambah Data Paper | MIS
     });
 </script>
 <!--================== END ==================-->
+
+<script>
+    /**
+     * btn submit loader
+     */
+    $(".btn-submit").click(function() {
+        $(".btn-submit").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-submit").removeClass('btn-progress');
+
+        }, 1000);
+    });
+
+    /**
+     * btn reset loader
+     */
+    $(".btn-reset").click(function() {
+        $(".btn-reset").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-reset").removeClass('btn-progress');
+            $("#karyawanSelect").val('');
+        }, 500);
+    })
+</script>
 @stop
