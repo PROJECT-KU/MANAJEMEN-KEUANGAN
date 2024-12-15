@@ -19,14 +19,14 @@ Data Paperisasi | MIS
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
+                    <form action="{{ route('account.paperisasi.search') }}" method="GET" id="searchForm">
                         <div class="form-group">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                                 <div class="input-group-append">
                                 </div>
                                 @if(request()->has('q'))
-                                <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1">
+                                <a href="{{ route('account.paperisasi.index') }}" class="btn btn-danger rounded-pill ml-1">
                                     <i class="fa fa-trash mt-2"></i>
                                 </a>
                                 @endif
@@ -34,7 +34,7 @@ Data Paperisasi | MIS
                         </div>
                     </form>
 
-                    <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
+                    <form action="{{ route('account.paperisasi.filter') }}" method="GET">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -54,7 +54,7 @@ Data Paperisasi | MIS
                             <div class="col-md-2">
                                 @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                                 <div class="btn-group" style="width: 100%;">
-                                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;"">
+                                    <a href="{{ route('account.paperisasi.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;"">
                                         <i class=" fa fa-trash mt-2"></i>
                                     </a>
                                 </div>
@@ -131,17 +131,17 @@ Data Paperisasi | MIS
                                         <td class="column-width" style="text-align: center;">{{ $data->q_jurnal }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $data->apc_jurnal}}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if($data->status_paper == 'antrian')
+                                            @if($data->status_paper == 'antrian paper')
                                             <span class="badge badge-danger">ANTRIAN PAPER</span>
-                                            @elseif($data->status_paper == 'diterima')
+                                            @elseif($data->status_paper == 'paper diterima')
                                             <span class="badge badge-info">PAPER DITERIMA</span>
-                                            @elseif($data->status_paper == 'in progress')
+                                            @elseif($data->status_paper == 'pengerjaan paper')
                                             <span class="badge badge-warning">PENGERJAAN PAPER</span>
-                                            @elseif($data->status_paper == 'submit')
+                                            @elseif($data->status_paper == 'submit paper')
                                             <span class="badge badge-success">SUBMIT PAPER</span>
-                                            @elseif($data->status_paper == 'revisi')
+                                            @elseif($data->status_paper == 'revisi paper')
                                             <span class="badge badge-warning">REVISI PAPER</span>
-                                            @elseif($data->status_paper == 'resubmit')
+                                            @elseif($data->status_paper == 'resubmit paper')
                                             <span class="badge badge-info">RESUBMIT PAPER</span>
                                             @else
                                             <span class="badge badge-success">PAPER SELESAI</span>
@@ -244,6 +244,72 @@ Data Paperisasi | MIS
         window.location.reload();
     }, 1000); // Refresh halaman setelah 2 detik
     @endif
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT DELETE ==================-->
+<script>
+    function Delete(id) {
+        var token = $("meta[name='csrf-token']").attr("content");
+
+        swal({
+            title: "APAKAH KAMU YAKIN?",
+            text: "INGIN MENGHAPUS DATA INI!",
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "TIDAK",
+                    value: null,
+                    visible: true,
+                    className: "",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: "YA",
+                    value: true,
+                    visible: true,
+                    className: "",
+                    closeModal: true
+                }
+            },
+            dangerMode: true,
+        }).then(function(isConfirm) {
+            if (isConfirm) {
+                // ajax delete
+                $.ajax({
+                    url: "/account/paperisasi/data/delete/" + id,
+                    data: {
+                        "_token": token,
+                        "_method": "DELETE"
+                    },
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.status === "success") {
+                            swal({
+                                title: 'BERHASIL!',
+                                text: response.message,
+                                icon: 'success',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        } else {
+                            swal({
+                                title: 'GAGAL!',
+                                text: response.message,
+                                icon: 'error',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
 </script>
 <!--================== END ==================-->
 

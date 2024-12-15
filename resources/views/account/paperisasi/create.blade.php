@@ -296,13 +296,13 @@ Tambah Data Paper | MIS
                                     <label>Status Paper</label>
                                     <select class="form-control" name="status_paper" required>
                                         <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
-                                        <option value="antrian">ANTRIAN PAPER</option>
-                                        <option value="diterima">PAPER DITERIMA</option>
-                                        <option value="in progress">PENGERJAAN PAPER</option>
-                                        <option value="submit">SUBMIT PAPER</option>
-                                        <option value="revisi">REVISI PAPER</option>
-                                        <option value="resubmit">RESUBMIT PAPER</option>
-                                        <option value="done">PAPER SELESAI</option>
+                                        <option value="antrian paper">ANTRIAN PAPER</option>
+                                        <option value="paper diterima">PAPER DITERIMA</option>
+                                        <option value="pengerjaan paper">PENGERJAAN PAPER</option>
+                                        <option value="submit paper">SUBMIT PAPER</option>
+                                        <option value="revisi revisi">REVISI PAPER</option>
+                                        <option value="resubmit paper">RESUBMIT PAPER</option>
+                                        <option value="paper selesasi">PAPER SELESAI</option>
                                     </select>
                                 </div>
                             </div>
@@ -779,15 +779,16 @@ Tambah Data Paper | MIS
 </section>
 </div>
 
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<!--================== UPLOAD FILE WITH VIEW ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function handleFileUpload(inputId, previewId, fileInfoId, allowedTypes) {
+    function handleFileUpload(inputId, previewId, fileInfoId, allowedTypes, maxFileSizeMB, alertFileSizeMB) {
         document.getElementById(inputId).addEventListener('change', function(event) {
             var fileInput = event.target;
             var file = fileInput.files[0];
             var fileName = file.name;
-            var fileSize = (file.size / 1024).toFixed(2); // Ukuran file dalam KB
+            var fileSizeKB = (file.size / 1024).toFixed(2); // Ukuran file dalam KB
+            var fileSizeMB = (file.size / (1024 * 1024)).toFixed(2); // Ukuran file dalam MB
 
             // Validasi tipe file
             if (!allowedTypes.includes(file.type)) {
@@ -802,12 +803,21 @@ Tambah Data Paper | MIS
                 return;
             }
 
-            // Validasi ukuran file
-            if (file.size > 1024 * 10240) { // 10MB dalam byte
+            // SweetAlert jika file melebihi alertFileSizeMB (2 MB)
+            if (file.size > alertFileSizeMB * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ukuran file besar',
+                    text: `Ukuran file ini adalah ${fileSizeMB} MB, yang melebihi ${alertFileSizeMB} MB. Harap pertimbangkan untuk mengunggah file yang lebih kecil.`
+                });
+            }
+
+            // Validasi ukuran maksimum file
+            if (file.size > maxFileSizeMB * 1024 * 1024) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'Ukuran file melebihi batas maksimum 10 MB. Harap pilih file yang lebih kecil.'
+                    text: `Ukuran file melebihi batas maksimum ${maxFileSizeMB} MB. Harap pilih file yang lebih kecil.`
                 });
                 fileInput.value = ""; // Reset input file
                 document.getElementById(previewId).innerHTML = ""; // Reset preview
@@ -815,36 +825,43 @@ Tambah Data Paper | MIS
                 return;
             }
 
-            // Tampilkan nama file karena preview hanya untuk gambar
-            document.getElementById(previewId).innerHTML = '<span style="color: #555;">Preview tidak tersedia untuk tipe file ini.</span>';
+            // Tampilkan nama dan ukuran file
+            var displaySize = fileSizeMB >= 1 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+            document.getElementById(fileInfoId).innerHTML = `${fileName} (${displaySize})`;
 
-            // Menampilkan nama dan ukuran file
-            document.getElementById(fileInfoId).innerHTML = fileName + ' (' + fileSize + ' KB)';
+            // Preview untuk non-gambar
+            document.getElementById(previewId).innerHTML = '<span style="color: #555;">Preview tidak tersedia untuk tipe file ini.</span>';
         });
     }
 
-    // Inisialisasi untuk file first anatomy
+    // Inisialisasi untuk file anatomy
     handleFileUpload(
         'file_anatomi',
         'imagePreview-anatomy',
         'file-selected-anatomy',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
-    // Inisialisasi untuk file second anatomy
+    // Inisialisasi untuk file anatomy second
     handleFileUpload(
         'file_anatomi_second',
-        'imagePreview-anatomy',
+        'imagePreview-anatomy-second',
         'file-selected-anatomy-second',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
-    // Inisialisasi untuk file third anatomy
+    // Inisialisasi untuk file anatomy third
     handleFileUpload(
         'file_anatomi_third',
-        'imagePreview-anatomy',
+        'imagePreview-anatomy-third',
         'file-selected-anatomy-third',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
     // Inisialisasi untuk file paper
@@ -852,21 +869,29 @@ Tambah Data Paper | MIS
         'file_paper',
         'imagePreview-paper',
         'file-selected-paper',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
+    // Inisialisasi untuk file paper second
     handleFileUpload(
         'file_paper_second',
-        'imagePreview-paper',
+        'imagePreview-paper-second',
         'file-selected-paper-second',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
+    // Inisialisasi untuk file paper third
     handleFileUpload(
         'file_paper_third',
-        'imagePreview-paper',
+        'imagePreview-paper-third',
         'file-selected-paper-third',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 </script>
 
@@ -917,7 +942,6 @@ Tambah Data Paper | MIS
 
     });
 </script>
-<!-- end add dan remove field lembur -->
 <!--================== END ==================-->
 
 <!--================== ADD AND REMOVE CARD PAPER ==================-->
@@ -965,6 +989,33 @@ Tambah Data Paper | MIS
 
     });
 </script>
-<!-- end add dan remove field lembur -->
 <!--================== END ==================-->
+
+<script>
+    /**
+     * btn submit loader
+     */
+    $(".btn-submit").click(function() {
+        $(".btn-submit").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-submit").removeClass('btn-progress');
+
+        }, 1000);
+    });
+
+    /**
+     * btn reset loader
+     */
+    $(".btn-reset").click(function() {
+        $(".btn-reset").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-reset").removeClass('btn-progress');
+            $("#karyawanSelect").val('');
+        }, 500);
+    })
+</script>
 @stop

@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Data Paper | MIS
+Update Data Paper | MIS
 @stop
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
@@ -177,7 +177,7 @@ Tambah Data Paper | MIS
         </div>
 
         <div class="section-body">
-            <form action="{{ route('account.paperisasi.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('account.paperisasi.update', $datas->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <!--================== DETAIL PAPER ==================-->
@@ -203,6 +203,25 @@ Tambah Data Paper | MIS
                                     <label>Judul Paper</label>
                                     <div class="input-group">
                                         <input type="text" name="judul_paper" value="{{ $datas->judul_paper}}" placeholder="Masukkan Judul Paper" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nama First Author</label>
+                                    <div class="input-group">
+                                        <input type="text" name="first_author" value="{{ $datas->first_author }}" placeholder="Masukkan Nama First Author" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Affiliasi First Author</label>
+                                    <div class="input-group">
+                                        <input type="text" name="affiliasi_first_author" value="{{ $datas->affiliasi_first_author }}" placeholder="Masukkan Affiliasi First Author" class="form-control" required>
                                     </div>
                                 </div>
                             </div>
@@ -277,13 +296,13 @@ Tambah Data Paper | MIS
                                     <label>Status Paper</label>
                                     <select class="form-control" name="status_paper" required>
                                         <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
-                                        <option value="antrian" {{ $datas->status_paper == 'antrian' ? 'selected' : '' }}>ANTRIAN PAPER</option>
-                                        <option value="diterima" {{ $datas->status_paper == 'diterima' ? 'selected' : '' }}>PAPER DITERIMA</option>
-                                        <option value="in progress" {{ $datas->status_paper == 'in progress' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
-                                        <option value="submit" {{ $datas->status_paper == 'submit' ? 'selected' : '' }}>SUBMIT PAPER</option>
-                                        <option value="revisi" {{ $datas->status_paper == 'revisi' ? 'selected' : '' }}>REVISI PAPER</option>
-                                        <option value="resubmit" {{ $datas->status_paper == 'resubmit' ? 'selected' : '' }}>RESUBMIT PAPER</option>
-                                        <option value="done" {{ $datas->status_paper == 'done' ? 'selected' : '' }}>PAPER SELESAI</option>
+                                        <option value="antrian paper" {{ $datas->status_paper == 'antrian' ? 'selected' : '' }}>ANTRIAN PAPER</option>
+                                        <option value="paper diterima" {{ $datas->status_paper == 'diterima' ? 'selected' : '' }}>PAPER DITERIMA</option>
+                                        <option value="pengerjaan paper" {{ $datas->status_paper == 'in progress' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                        <option value="submit paper" {{ $datas->status_paper == 'submit' ? 'selected' : '' }}>SUBMIT PAPER</option>
+                                        <option value="revisi paper" {{ $datas->status_paper == 'revisi' ? 'selected' : '' }}>REVISI PAPER</option>
+                                        <option value="resubmit paper" {{ $datas->status_paper == 'resubmit' ? 'selected' : '' }}>RESUBMIT PAPER</option>
+                                        <option value="paper selesai" {{ $datas->status_paper == 'done' ? 'selected' : '' }}>PAPER SELESAI</option>
                                     </select>
                                 </div>
                             </div>
@@ -295,10 +314,20 @@ Tambah Data Paper | MIS
         <!--================== END ==================-->
 
         <!--================== PROGRES KERANGKA ANATOMY ==================-->
+        <!--================== FIRST CARD ==================-->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4>PROGRES KERANGKA ANATOMY</h4>
+                @if( $datas->progres_anatomi_tanggal_second === null || $datas->progres_anatomi_tanggal_third === null)
+                <div>
+                    <button type="button" class="btn btn-info" id="AddAnatomy" style="height: 40px; white-space: nowrap;">
+                        <i class="fas fa-plus"></i> INPUT
+                    </button>
+                </div>
+                @endif
             </div>
+
+
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -352,24 +381,366 @@ Tambah Data Paper | MIS
                                 </label>
                             </div>
                         </div>
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888">
+                            @if($datas->file_anatomi)
+                            <!-- Display the file name and a download link -->
+                            <div class="text-center">
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_anatomi) }}</p>
+                                <a href="{{ asset($datas->file_anatomi) }}" class="btn btn-sm btn-primary" download>
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="image-preview-container-anatomy">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
                             <div id="imagePreview-anatomy" class="image-preview"></div>
-                            <span id="file-selected-anatomy" class="file-info-anatomy"></span>
+                            <span id="file-selected-anatomy" class="file-info-anatomy">
+                                <p class="text-center">No file uploaded .</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================== END FIRST CARD ==================-->
+
+        <!--================== SECOND CARD ==================-->
+        @if($datas->progres_anatomi_tanggal_second)
+        <div class="card Anatomy-Card-Second">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES KERANGKA ANATOMY SECOND</h4>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_anatomi_tanggal_second" value="{{ $datas->progres_anatomi_tanggal_second }}" placeholder="Masukkan Tanggal Pengerjaan Anatomy" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_estimasi_second" value="{{ $datas->progres_anatomi_estimasi_second }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_keterangan_second" value="{{ $datas->progres_anatomi_keterangan_second }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Anatomy</label>
+                            <select class="form-control" name="progres_anatomi_status_second">
+                                <option value="" disabled selected>-- PILIH STATUS ANATOMY --</option>
+                                <option value="in progress anatomy" {{ $datas->progres_anatomi_status_second == 'in progress anatomy' ? 'selected' : '' }}>PENGERJAAN ANATOMY</option>
+                                <option value="revisi anatomy" {{ $datas->progres_anatomi_status_second == 'revisi anatomy' ? 'selected' : '' }}>REVISI ANATOMY</option>
+                                <option value="done anatomy" {{ $datas->progres_anatomi_status_second == 'done anatomy' ? 'selected' : '' }}>ANATOMY SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-anatomy">
+                            <label for="file_anatomi_second" class="form-label">File Anatomy Second</label>
+                            <div class="input-group">
+                                <input type="file" name="file_anatomi_second" id="file_anatomi_second" class="inputfile" hidden>
+                                <label for="file_anatomi_second" class="file-upload-anatomy">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Anatomy Second
+                                </label>
+                            </div>
+                        </div>
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888;">
+                            @if($datas->file_anatomi_second)
+                            <div class="text-center">
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_anatomi_second) }}</p>
+                                <a href="{{ asset($datas->file_anatomi_second) }}" class="btn btn-sm btn-primary" download>
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-anatomy-second" class="image-preview"></div>
+                            <span id="file-selected-anatomy-second" class="file-info-anatomy">
+                                <p class="text-center">No file uploaded .</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!--================== END ==================-->
+        @else
+        <div class="card Anatomy-Card-Second" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES KERANGKA ANATOMY SECOND</h4>
+                <button type="button" class="btn btn-danger" id="RemoveAnatomyCardSecond" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-trash"></i> HAPUS
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_anatomi_tanggal_second" value="{{ $datas->progres_anatomi_tanggal_second }}" placeholder="Masukkan Tanggal Pengerjaan Anatomy" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_estimasi_second" value="{{ $datas->progres_anatomi_estimasi_second }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_keterangan_second" value="{{ $datas->progres_anatomi_keterangan_second }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Anatomy</label>
+                            <select class="form-control" name="progres_anatomi_status_second">
+                                <option value="" disabled selected>-- PILIH STATUS ANATOMY --</option>
+                                <option value="in progress anatomy" {{ $datas->progres_anatomi_status_second == 'in progress anatomy' ? 'selected' : '' }}>PENGERJAAN ANATOMY</option>
+                                <option value="revisi anatomy" {{ $datas->progres_anatomi_status_second == 'revisi anatomy' ? 'selected' : '' }}>REVISI ANATOMY</option>
+                                <option value="done anatomy" {{ $datas->progres_anatomi_status_second == 'done anatomy' ? 'selected' : '' }}>ANATOMY SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-anatomy">
+                            <label for="file_anatomi_second" class="form-label">File Anatomy Second</label>
+                            <div class="input-group">
+                                <input type="file" name="file_anatomi_second" id="file_anatomi_second" class="inputfile" hidden>
+                                <label for="file_anatomi_second" class="file-upload-anatomy">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Anatomy Second
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-anatomy-second" class="image-preview"></div>
+                            <span id="file-selected-anatomy-second" class="file-info-anatomy">
+                                <p class="text-center">No file uploaded .</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        <!--================== END SECOND CARD ==================-->
+
+        <!--================== THIRD CARD ==================-->
+        @if($datas->progres_anatomi_tanggal_third)
+        <div class="card Anatomy-Card-Third">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES KERANGKA ANATOMY THIRD</h4>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_anatomi_tanggal_third" value="{{ $datas->progres_anatomi_tanggal_third }}" placeholder="Masukkan Tanggal Pengerjaan Anatomy" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_estimasi_third" value="{{ $datas->progres_anatomi_estimasi_third }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_keterangan_third" value="{{ $datas->progres_anatomi_keterangan_third }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Aantomy</label>
+                            <select class="form-control" name="progres_anatomi_status_third">
+                                <option value="" disabled selected>-- PILIH STATUS ANATOMY --</option>
+                                <option value="in progress anatomy" {{ $datas->progres_anatomi_status_third == 'in progress anatomy' ? 'selected' : '' }}>PENGERJAAN ANATOMY</option>
+                                <option value="revisi anatomy" {{ $datas->progres_anatomi_status_third == 'revisi anatomy' ? 'selected' : '' }}>REVISI ANATOMY</option>
+                                <option value="done anatomy" {{ $datas->progres_anatomi_status_third == 'done anatomy' ? 'selected' : '' }}>ANATOMY SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-anatomy">
+                            <label for="file_anatomi_third" class="form-label">File Anatomy Third</label>
+                            <div class="input-group">
+                                <input type="file" name="file_anatomi_third" id="file_anatomi_third" class="inputfile" hidden>
+                                <label for="file_anatomi_third" class="file-upload-anatomy">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Anatomy Third
+                                </label>
+                            </div>
+                        </div>
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888;">
+                            @if($datas->file_anatomi_third)
+                            <!-- Display the file name and a download link -->
+                            <div class="text-center">
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_anatomi_third) }}</p>
+                                <a href="{{ asset($datas->file_anatomi_third) }}" class="btn btn-sm btn-primary" download>
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-anatomy-third" class="image-preview"></div>
+                            <span id="file-selected-anatomy-third" class="file-info-anatomy">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="card Anatomy-Card-Third" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES KERANGKA ANATOMY THIRD</h4>
+                <button type="button" class="btn btn-danger" id="RemoveAnatomyCardThird" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-trash"></i> HAPUS
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_anatomi_tanggal_third" value="{{ $datas->progres_anatomi_tanggal_third }}" placeholder="Masukkan Tanggal Pengerjaan Anatomy" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_estimasi_third" value="{{ $datas->progres_anatomi_estimasi_third }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_anatomi_keterangan_third" value="{{ $datas->progres_anatomi_keterangan_third }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Aantomy</label>
+                            <select class="form-control" name="progres_anatomi_status_third">
+                                <option value="" disabled selected>-- PILIH STATUS ANATOMY --</option>
+                                <option value="in progress anatomy" {{ $datas->progres_anatomi_status_third == 'in progress anatomy' ? 'selected' : '' }}>PENGERJAAN ANATOMY</option>
+                                <option value="revisi anatomy" {{ $datas->progres_anatomi_status_third == 'revisi anatomy' ? 'selected' : '' }}>REVISI ANATOMY</option>
+                                <option value="done anatomy" {{ $datas->progres_anatomi_status_third == 'done anatomy' ? 'selected' : '' }}>ANATOMY SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-anatomy">
+                            <label for="file_anatomi_third" class="form-label">File Anatomy Third</label>
+                            <div class="input-group">
+                                <input type="file" name="file_anatomi_third" id="file_anatomi_third" class="inputfile" hidden>
+                                <label for="file_anatomi_third" class="file-upload-anatomy">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Anatomy Third
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-anatomy-third" class="image-preview"></div>
+                            <span id="file-selected-anatomy-third" class="file-info-anatomy">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        <!--================== END THIRD CARD ==================-->
+        <!--================== END PROGRES KERANGKA ANATOMY ==================-->
 
         <!--================== PROGRES PAPER ==================-->
+        <!--================== FIRST CARD ==================-->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4>PROGRES PAPER</h4>
+                @if( $datas->progres_paper_tanggal_second === null || $datas->progres_paper_tanggal_third === null)
+                <div>
+                    <button type="button" class="btn btn-info" id="AddPaper" style="height: 40px; white-space: nowrap;">
+                        <i class="fas fa-plus"></i> INPUT
+                    </button>
+                </div>
+                @endif
             </div>
+
+
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -401,7 +772,7 @@ Tambah Data Paper | MIS
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Status Aantomy</label>
+                            <label>Status Paper</label>
                             <select class="form-control" name="progres_paper_status">
                                 <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
                                 <option value="in progress paper" {{ $datas->progres_paper_status == 'in progress paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
@@ -423,27 +794,352 @@ Tambah Data Paper | MIS
                                 </label>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888;">
                             @if($datas->file_paper)
                             <!-- Display the file name and a download link -->
                             <div class="text-center">
-                                <p>Uploaded File: {{ basename($datas->file_paper) }}</p>
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_paper) }}</p>
                                 <a href="{{ asset($datas->file_paper) }}" class="btn btn-sm btn-primary" download>
                                     <i class="fas fa-download"></i> Download File
                                 </a>
                             </div>
-                            @else
-                            <p class="text-center">No file uploaded.</p>
                             @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-paper" class="image-preview"></div>
+                            <span id="file-selected-paper" class="file-info-paper">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
                         </div>
                     </div>
                 </div>
 
             </div>
         </div>
-        <!--================== END ==================-->
+        <!--================== END FIRST CARD ==================-->
+
+        <!--================== SECOND CARD ==================-->
+        @if($datas->progres_paper_tanggal_second)
+        <div class="card Paper-Card-Second">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES PAPER SECOND</h4>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_paper_tanggal_second" value="{{ $datas->progres_paper_tanggal_second }}" placeholder="Masukkan Tanggal Pengerjaan Paper" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_estimasi_second" value="{{ $datas->progres_paper_estimasi_second }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_keterangan_second" value="{{ $datas->progres_paper_keterangan_second }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Paper</label>
+                            <select class="form-control" name="progres_paper_status_second">
+                                <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
+                                <option value="in progress paper" {{ $datas->progres_paper_status_second == 'in progress paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                <option value="revisi paper" {{ $datas->progres_paper_status_second == 'revisi paper' ? 'selected' : '' }}>REVISI PAPER</option>
+                                <option value="done paper" {{ $datas->progres_paper_status_second == 'done paper' ? 'selected' : '' }}>PAPER SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-paper">
+                            <label for="file_paper_second" class="form-label">File Paper Second</label>
+                            <div class="input-group">
+                                <input type="file" name="file_paper_second" id="file_paper_second" class="inputfile" hidden>
+                                <label for="file_paper_second" class="file-upload-paper">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Paper Second
+                                </label>
+                            </div>
+                        </div>
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888;">
+                            @if($datas->file_paper_second)
+                            <!-- Display the file name and a download link -->
+                            <div class="text-center">
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_paper_second) }}</p>
+                                <a href="{{ asset($datas->file_paper_second) }}" class="btn btn-sm btn-primary" download>
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-paper-second" class="image-preview"></div>
+                            <span id="file-selected-paper-second" class="file-info-paper">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="card Paper-Card-Second" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES PAPER SECOND</h4>
+                <button type="button" class="btn btn-danger" id="RemovePaperCardSecond" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-trash"></i> HAPUS
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_paper_tanggal_second" value="{{ $datas->progres_paper_tanggal_second }}" placeholder="Masukkan Tanggal Pengerjaan Paper" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_estimasi_second" value="{{ $datas->progres_paper_estimasi_second }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_keterangan_second" value="{{ $datas->progres_paper_keterangan_second }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Paper</label>
+                            <select class="form-control" name="progres_paper_status_second">
+                                <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
+                                <option value="in progress paper" {{ $datas->progres_paper_status_second == 'in progress paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                <option value="revisi paper" {{ $datas->progres_paper_status_second == 'revisi paper' ? 'selected' : '' }}>REVISI PAPER</option>
+                                <option value="done paper" {{ $datas->progres_paper_status_second == 'done paper' ? 'selected' : '' }}>PAPER SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-paper">
+                            <label for="file_paper_second" class="form-label">File Paper Second</label>
+                            <div class="input-group">
+                                <input type="file" name="file_paper_second" id="file_paper_second" class="inputfile" hidden>
+                                <label for="file_paper_second" class="file-upload-paper">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Paper Second
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-paper-second" class="image-preview"></div>
+                            <span id="file-selected-paper-second" class="file-info-paper">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        <!--================== END SECOND CARD ==================-->
+
+        <!--================== THIRD CARD ==================-->
+        @if($datas->progres_paper_tanggal_third)
+        <div class="card Paper-Card-Third">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES PAPER THIRD</h4>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_paper_tanggal_third" value="{{ $datas->progres_paper_tanggal_third }}" placeholder="Masukkan Tanggal Pengerjaan Paper" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_estimasi_third" value="{{ $datas->progres_paper_estimasi_third }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_keterangan_third" value="{{ $datas->progres_paper_keterangan_third }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Paper</label>
+                            <select class="form-control" name="progres_paper_status_third">
+                                <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
+                                <option value="in progress paper" {{ $datas->progres_paper_status_third == 'in progress paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                <option value="revisi paper" {{ $datas->progres_paper_status_third == 'revisi paper' ? 'selected' : '' }}>REVISI PAPER</option>
+                                <option value="done paper" {{ $datas->progres_paper_status_third == 'done paper' ? 'selected' : '' }}>PAPER SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-paper">
+                            <label for="file_paper_third" class="form-label">File Paper Third</label>
+                            <div class="input-group">
+                                <input type="file" name="file_paper_third" id="file_paper_third" class="inputfile" hidden>
+                                <label for="file_paper_third" class="file-upload-paper">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Paper Third
+                                </label>
+                            </div>
+                        </div>
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888;">
+                            @if($datas->file_paper_third)
+                            <!-- Display the file name and a download link -->
+                            <div class="text-center">
+                                <p style="color: #fff;">Uploaded File: {{ basename($datas->file_paper_third) }}</p>
+                                <a href="{{ asset($datas->file_paper_third) }}" class="btn btn-sm btn-primary" download>
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-paper-third" class="image-preview"></div>
+                            <span id="file-selected-paper-third" class="file-info-paper">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="card Paper-Card-Third" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>PROGRES PAPER THIRD</h4>
+                <button type="button" class="btn btn-danger" id="RemovePaperCardThird" style="height: 40px; white-space: nowrap;">
+                    <i class="fas fa-trash"></i> HAPUS
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tanggal Pengerjaan</label>
+                            <div class="input-group">
+                                <input type="datetime-local" name="progres_paper_tanggal_third" value="{{ $datas->progres_paper_tanggal_third }}" placeholder="Masukkan Tanggal Pengerjaan Paper" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Estimasi Pengerjaan </label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_estimasi_third" value="{{ $datas->progres_paper_estimasi_third }}" placeholder="Masukkan Estimasi Pengerjaan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <div class="input-group">
+                                <input type="text" name="progres_paper_keterangan_third" value="{{ $datas->progres_paper_keterangan_third }}" placeholder="Masukkan Keterangan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status Paper</label>
+                            <select class="form-control" name="progres_paper_status_third">
+                                <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
+                                <option value="in progress paper" {{ $datas->progres_paper_status_third == 'in progress paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                <option value="revisi paper" {{ $datas->progres_paper_status_third == 'revisi paper' ? 'selected' : '' }}>REVISI PAPER</option>
+                                <option value="done paper" {{ $datas->progres_paper_status_third == 'done paper' ? 'selected' : '' }}>PAPER SELESAI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group custom-file-upload-paper">
+                            <label for="file_paper_third" class="form-label">File Paper Third</label>
+                            <div class="input-group">
+                                <input type="file" name="file_paper_third" id="file_paper_third" class="inputfile" hidden>
+                                <label for="file_paper_third" class="file-upload-paper">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File Paper Third
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <div id="imagePreview-paper-third" class="image-preview"></div>
+                            <span id="file-selected-paper-third" class="file-info-paper">
+                                <p class="text-center">No file uploaded.</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        <!--================== END THIRD CARD ==================-->
+        <!--================== END PROGRES PAPER ==================-->
 
         <div class="d-flex mt-3">
             <button class="btn btn-primary mr-1 btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
@@ -456,15 +1152,16 @@ Tambah Data Paper | MIS
 </section>
 </div>
 
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<!--================== UPLOAD FILE WITH VIEW ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function handleFileUpload(inputId, previewId, fileInfoId, allowedTypes) {
+    function handleFileUpload(inputId, previewId, fileInfoId, allowedTypes, maxFileSizeMB, alertFileSizeMB) {
         document.getElementById(inputId).addEventListener('change', function(event) {
             var fileInput = event.target;
             var file = fileInput.files[0];
             var fileName = file.name;
-            var fileSize = (file.size / 1024).toFixed(2); // Ukuran file dalam KB
+            var fileSizeKB = (file.size / 1024).toFixed(2); // Ukuran file dalam KB
+            var fileSizeMB = (file.size / (1024 * 1024)).toFixed(2); // Ukuran file dalam MB
 
             // Validasi tipe file
             if (!allowedTypes.includes(file.type)) {
@@ -479,12 +1176,21 @@ Tambah Data Paper | MIS
                 return;
             }
 
-            // Validasi ukuran file
-            if (file.size > 1024 * 10240) { // 10MB dalam byte
+            // SweetAlert jika file melebihi alertFileSizeMB (2 MB)
+            if (file.size > alertFileSizeMB * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ukuran file besar',
+                    text: `Ukuran file ini adalah ${fileSizeMB} MB, yang melebihi ${alertFileSizeMB} MB. Harap pertimbangkan untuk mengunggah file yang lebih kecil.`
+                });
+            }
+
+            // Validasi ukuran maksimum file
+            if (file.size > maxFileSizeMB * 1024 * 1024) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'Ukuran file melebihi batas maksimum 10 MB. Harap pilih file yang lebih kecil.'
+                    text: `Ukuran file melebihi batas maksimum ${maxFileSizeMB} MB. Harap pilih file yang lebih kecil.`
                 });
                 fileInput.value = ""; // Reset input file
                 document.getElementById(previewId).innerHTML = ""; // Reset preview
@@ -492,19 +1198,12 @@ Tambah Data Paper | MIS
                 return;
             }
 
-            // Pratinjau file
-            if (file.type.startsWith('image/')) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById(previewId).innerHTML = '<img src="' + e.target.result + '" alt="' + fileName + '" style="max-width: 100%; height: auto; border-radius: 5px;" />';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                document.getElementById(previewId).innerHTML = '<span style="color: #555;">Preview tidak tersedia untuk file non-gambar.</span>';
-            }
+            // Tampilkan nama dan ukuran file
+            var displaySize = fileSizeMB >= 1 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+            document.getElementById(fileInfoId).innerHTML = `${fileName} (${displaySize})`;
 
-            // Menampilkan nama dan ukuran file
-            document.getElementById(fileInfoId).innerHTML = fileName + ' (' + fileSize + ' KB)';
+            // Preview untuk non-gambar
+            document.getElementById(previewId).innerHTML = '<span style="color: #555;">Preview tidak tersedia untuk tipe file ini.</span>';
         });
     }
 
@@ -513,7 +1212,29 @@ Tambah Data Paper | MIS
         'file_anatomi',
         'imagePreview-anatomy',
         'file-selected-anatomy',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
+    );
+
+    // Inisialisasi untuk file anatomy second
+    handleFileUpload(
+        'file_anatomi_second',
+        'imagePreview-anatomy-second',
+        'file-selected-anatomy-second',
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
+    );
+
+    // Inisialisasi untuk file anatomy third
+    handleFileUpload(
+        'file_anatomi_third',
+        'imagePreview-anatomy-third',
+        'file-selected-anatomy-third',
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 
     // Inisialisasi untuk file paper
@@ -521,9 +1242,154 @@ Tambah Data Paper | MIS
         'file_paper',
         'imagePreview-paper',
         'file-selected-paper',
-        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png']
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
+    );
+
+    // Inisialisasi untuk file paper second
+    handleFileUpload(
+        'file_paper_second',
+        'imagePreview-paper-second',
+        'file-selected-paper-second',
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
+    );
+
+    // Inisialisasi untuk file paper third
+    handleFileUpload(
+        'file_paper_third',
+        'imagePreview-paper-third',
+        'file-selected-paper-third',
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        2 // Alert jika lebih dari 2MB
     );
 </script>
+
 <!--================== END ==================-->
+
+<!--================== ADD AND REMOVE CARD ANATOMY ==================-->
+<script>
+    $(document).ready(function() {
+
+        var AnatomyCounter = 0;
+
+        $('#AddAnatomy').on('click', function() {
+            if (AnatomyCounter === 0) {
+                $('.Anatomy-Card-Second').show();
+                $('#RemoveAnatomyCardSecond').show();
+            } else if (AnatomyCounter === 1) {
+                $('.Anatomy-Card-Third').show();
+                $('#RemoveAnatomyCardThird').show();
+                // Sembunyikan tombol AddAnatomy setelah Anatomy-Card-Third ditampilkan
+                $(this).hide();
+            }
+            AnatomyCounter++;
+        });
+
+        // Remove Anatomy-Card-Second
+        $('#RemoveAnatomyCardSecond').on('click', function() {
+            $('.Anatomy-Card-Second').hide();
+            $('#RemoveAnatomyCardSecond').hide();
+            AnatomyCounter--;
+
+            // Tampilkan tombol AddAnatomy jika kurang dari 2 cards yang tampil
+            if (AnatomyCounter < 2) {
+                $('#AddAnatomy').show();
+            }
+        });
+
+        // Remove Anatomy-Card-Third
+        $('#RemoveAnatomyCardThird').on('click', function() {
+            $('.Anatomy-Card-Third').hide();
+            $('#RemoveAnatomyCardThird').hide();
+            AnatomyCounter--;
+
+            // Tampilkan tombol AddAnatomy jika kurang dari 2 cards yang tampil
+            if (AnatomyCounter < 2) {
+                $('#AddAnatomy').show();
+            }
+        });
+
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== ADD AND REMOVE CARD PAPER ==================-->
+<script>
+    $(document).ready(function() {
+
+        var PaperCounter = 0;
+
+        $('#AddPaper').on('click', function() {
+            if (PaperCounter === 0) {
+                $('.Paper-Card-Second').show();
+                $('#RemovePaperCardSecond').show();
+            } else if (PaperCounter === 1) {
+                $('.Paper-Card-Third').show();
+                $('#RemovePaperCardThird').show();
+                // Sembunyikan tombol AddAnatomy setelah Anatomy-Card-Third ditampilkan
+                $(this).hide();
+            }
+            PaperCounter++;
+        });
+
+        // Remove Anatomy-Card-Second
+        $('#RemovePaperCardSecond').on('click', function() {
+            $('.Paper-Card-Second').hide();
+            $('#RemovePaperCardSecond').hide();
+            PaperCounter--;
+
+            // Tampilkan tombol AddAnatomy jika kurang dari 2 cards yang tampil
+            if (PaperCounter < 2) {
+                $('#AddPaper').show();
+            }
+        });
+
+        // Remove Anatomy-Card-Third
+        $('#RemovePaperCardThird').on('click', function() {
+            $('.Paper-Card-Third').hide();
+            $('#RemovePaperCardThird').hide();
+            PaperCounter--;
+
+            // Tampilkan tombol AddAnatomy jika kurang dari 2 cards yang tampil
+            if (PaperCounter < 2) {
+                $('#AddPaper').show();
+            }
+        });
+
+    });
+</script>
+<!--================== END ==================-->
+
+<script>
+    /**
+     * btn submit loader
+     */
+    $(".btn-submit").click(function() {
+        $(".btn-submit").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-submit").removeClass('btn-progress');
+
+        }, 1000);
+    });
+
+    /**
+     * btn reset loader
+     */
+    $(".btn-reset").click(function() {
+        $(".btn-reset").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-reset").removeClass('btn-progress');
+            $("#karyawanSelect").val('');
+        }, 500);
+    })
+</script>
 
 @stop

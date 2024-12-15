@@ -35,6 +35,10 @@ Route::post('/Cek-Plagiasi/proses', 'Publict\PublicPlagiasiController@uploadFile
 Route::get('/Scopus-Kafe', 'Publict\PublicScopusKafeController@public')->name('public.scopuskafe.index');
 Route::get('/Scopus-Kafe/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
 
+// PAPERISASI
+Route::get('/paperisasi/public/data', 'Publict\PublicPaperisasiController@public')->name('public.papaperisasi.data');
+Route::get('/paperisasi/public/data/search', 'Publict\PublicPaperisasiController@publicsearch')->name('public.paperisasi.search');
+
 Auth::routes();
 
 /**
@@ -301,9 +305,13 @@ Route::prefix('account')->group(
 
         // paperisasi
         Route::get('/paperisasi/data', 'account\PaperisasiController@index')->name('account.paperisasi.index');
+        Route::get('/paperisasi/data/search', 'account\PaperisasiController@search')->name('account.paperisasi.search');
+        Route::get('/paperisasi/data/filter', 'account\PaperisasiController@filter')->name('account.paperisasi.filter');
         Route::get('/paperisasi/data/create', 'account\PaperisasiController@create')->name('account.paperisasi.create');
         Route::post('/paperisasi/data/store', 'account\PaperisasiController@store')->name('account.paperisasi.store');
         Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
+        Route::post('/paperisasi/data/update-data/{id}', 'account\PaperisasiController@update')->name('account.paperisasi.update');
+        Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
     }
 
 

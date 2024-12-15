@@ -10,8 +10,8 @@
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="{{ asset('assets/img/scopus.jpg') }}" rel="icon">
-    <link href="{{ asset('assets/img/scopus.jpg') }}" rel="apple-touch-icon">
+    <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="icon">
+    <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
@@ -88,6 +88,7 @@
                             <li><a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
                         </ul>
                     </li>
+                    <li><a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }} || {{ Request::is('paperisasi/public/data/search') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('blog/contact') ? 'active' : '' }}" href="{{ url('/blog/contact') }}">Contact</a></li>
                 </ul>
