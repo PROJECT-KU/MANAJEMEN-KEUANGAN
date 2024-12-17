@@ -297,7 +297,7 @@ Tambah Data Paper | MIS
                                     <select class="form-control" name="status_paper" required>
                                         <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
                                         <option value="antrian paper">ANTRIAN PAPER</option>
-                                        <option value="paper diterima">PAPER DITERIMA</option>
+                                        <option value="paper masuk">PAPER MASUK</option>
                                         <option value="pengerjaan paper">PENGERJAAN PAPER</option>
                                         <option value="submit paper">SUBMIT PAPER</option>
                                         <option value="revisi revisi">REVISI PAPER</option>

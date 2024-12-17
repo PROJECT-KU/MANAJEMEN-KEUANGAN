@@ -133,8 +133,8 @@ Data Paperisasi | MIS
                                         <td class="column-width" style="text-align: center;">
                                             @if($data->status_paper == 'antrian paper')
                                             <span class="badge badge-danger">ANTRIAN PAPER</span>
-                                            @elseif($data->status_paper == 'paper diterima')
-                                            <span class="badge badge-info">PAPER DITERIMA</span>
+                                            @elseif($data->status_paper == 'paper masuk')
+                                            <span class="badge badge-info">PAPER MASUK</span>
                                             @elseif($data->status_paper == 'pengerjaan paper')
                                             <span class="badge badge-warning">PENGERJAAN PAPER</span>
                                             @elseif($data->status_paper == 'submit paper')

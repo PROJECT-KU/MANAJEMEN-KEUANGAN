@@ -296,13 +296,13 @@ Update Data Paper | MIS
                                     <label>Status Paper</label>
                                     <select class="form-control" name="status_paper" required>
                                         <option value="" disabled selected>-- PILIH STATUS PAPER --</option>
-                                        <option value="antrian paper" {{ $datas->status_paper == 'antrian' ? 'selected' : '' }}>ANTRIAN PAPER</option>
-                                        <option value="paper diterima" {{ $datas->status_paper == 'diterima' ? 'selected' : '' }}>PAPER DITERIMA</option>
-                                        <option value="pengerjaan paper" {{ $datas->status_paper == 'in progress' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
-                                        <option value="submit paper" {{ $datas->status_paper == 'submit' ? 'selected' : '' }}>SUBMIT PAPER</option>
-                                        <option value="revisi paper" {{ $datas->status_paper == 'revisi' ? 'selected' : '' }}>REVISI PAPER</option>
-                                        <option value="resubmit paper" {{ $datas->status_paper == 'resubmit' ? 'selected' : '' }}>RESUBMIT PAPER</option>
-                                        <option value="paper selesai" {{ $datas->status_paper == 'done' ? 'selected' : '' }}>PAPER SELESAI</option>
+                                        <option value="antrian paper" {{ $datas->status_paper == 'antrian paper' ? 'selected' : '' }}>ANTRIAN PAPER</option>
+                                        <option value="paper masuk" {{ $datas->status_paper == 'paper masuk' ? 'selected' : '' }}>PAPER MASUK</option>
+                                        <option value="pengerjaan paper" {{ $datas->status_paper == 'pengerjaan paper' ? 'selected' : '' }}>PENGERJAAN PAPER</option>
+                                        <option value="submit paper" {{ $datas->status_paper == 'submit paper' ? 'selected' : '' }}>SUBMIT PAPER</option>
+                                        <option value="revisi paper" {{ $datas->status_paper == 'revisi paper' ? 'selected' : '' }}>REVISI PAPER</option>
+                                        <option value="resubmit paper" {{ $datas->status_paper == 'resubmit paper' ? 'selected' : '' }}>RESUBMIT PAPER</option>
+                                        <option value="paper selesai" {{ $datas->status_paper == 'paper selesai' ? 'selected' : '' }}>PAPER SELESAI</option>
                                     </select>
                                 </div>
                             </div>
