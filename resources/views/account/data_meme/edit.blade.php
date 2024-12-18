@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Edit Data Meme | MIS
+Edit Data Scopus Kafe | MIS
 @stop
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
@@ -59,7 +59,7 @@ Edit Data Meme | MIS
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>EDIT DATA MEME</h1>
+            <h1>EDIT DATA SCOPUS KAFE</h1>
         </div>
 
         <div class="section-body">
@@ -71,7 +71,7 @@ Edit Data Meme | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Nama Meme</label>
+                                    <label>Kategory</label>
                                     <input type="text" name="name" value="{{ $datameme->name }}" placeholder="Nama Meme" minlength="5" class="form-control">
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Data Meme | MIS
+Tambah Data Scopus Kafe | MIS
 @stop
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
@@ -71,7 +71,7 @@ Tambah Data Meme | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Nama Meme</label>
+                                    <label>Kategory</label>
                                     <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama Meme" minlength="5" class="form-control" required>
                                 </div>
                             </div>
