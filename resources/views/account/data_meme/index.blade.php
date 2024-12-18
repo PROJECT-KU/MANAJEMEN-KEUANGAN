@@ -2,13 +2,13 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Meme | MIS
+Data Scopus Kafe | MIS
 @stop
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>DATA MEME</h1>
+            <h1>DATA SCOPUS KAFE</h1>
         </div>
 
         <div class="section-body">
@@ -83,7 +83,7 @@ Data Meme | MIS
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-list"></i> DATA MEME</h4>
+                    <h4><i class="fas fa-list"></i> DATA SCOPUS KAFE</h4>
                     <div class="dropdown card-header-action">
                         <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
                             <i class="fas fa-download"></i> DOWNLOAD
@@ -116,7 +116,7 @@ Data Meme | MIS
                                 <thead>
                                     <tr>
                                         <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA MEME</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">KATEGORY</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SESI</th>
                                         <th scope="col" colspan="2" class="column-width" style="text-align: center;">WAKTU</th>
