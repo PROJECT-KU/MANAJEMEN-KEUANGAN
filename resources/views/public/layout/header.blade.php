@@ -73,13 +73,13 @@
     <header id="header" class="header fixed-top">
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-            <a href="{{ url('/blog') }}" class="logo d-flex align-items-center">
+            <a href="{{ url('/') }}" class="logo d-flex align-items-center">
                 <img style="width: 180px;" src="{{ asset('assets/img/LogoRSC.png') }}" alt="">
             </a>
 
             <nav id="navbar" class="navbar">
                 <ul>
-                    <li><a class="nav-link scrollto {{ Request::is('beranda') ? 'active' : '' }}" href="{{ url('/beranda') }}">Beranda</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }} || Request::is('blog/topic/blog-single/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('Scopus-Kafe') ? 'active' : '' }}" href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                     <li class="dropdown"><a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>

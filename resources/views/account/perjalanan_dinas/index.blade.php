@@ -54,8 +54,8 @@ Data Perjalanan Dinas | MIS
 
         <!--================== TABEL DIAJUKAN ==================-->
 
-        <!-- ALERT JIKA DATA ADA YANG DI AJUKAN -->
-        @if ($DatasAjukan->where('status', 'ajukan')->isNotEmpty())
+        <!--================== ALERT JIKA DATA ADA YANG DI AJUKAN ==================-->
+        <!-- @if ($DatasAjukan->where('status', 'ajukan')->isNotEmpty())
         @if (Auth::user()->level == 'manager')
         <div class="alert alert-danger" id="alertajukan" role="alert" style="text-align: center; padding: 15px; width: 100%; box-sizing: border-box; border-radius: 10px;">
           <b style="font-size: 20px;">Terdapat Pengajuan Data Perjalanan Dinas</b>
@@ -122,336 +122,335 @@ Data Perjalanan Dinas | MIS
               border-color: #ffc107;
               color: #212529;
             }
-          </style>
+          </style> -->
+        <!--================== END ==================-->
 
-          <!-- END -->
+        <div id="tableDiajukan" class="card">
+          <div id="tblDiajukan" class="card-header" style="background-color: #FF7F50; color:white;">
+            <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DIAJUKAN</h4>
+            <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DIAJUKAN</h4>
+            <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-none d-sm-block ml-auto"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
+            </a>
+            <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-block d-sm-none btn-block"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
+            </a>
+          </div>
 
-          <div id="tableDiajukan" class="card">
-            <div id="tblDiajukan" class="card-header" style="background-color: #FF7F50; color:white;">
-              <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DIAJUKAN</h4>
-              <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DIAJUKAN</h4>
-              <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-none d-sm-block ml-auto"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
-              </a>
-              <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-block d-sm-none btn-block"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
-              </a>
-            </div>
-
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <p style="margin-top: -3px; font-size: 15px;"><strong>Periode
-                  @if ($startDate && $endDate)
-                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                  @else
-                  {{ date('F Y') }}
-                  @endif
-                </strong>
-              </p>
-              <div class="input-group" style="width: 300px;">
-                <input type="text" class="form-control" id="searchDiajukan" placeholder="Pencarian">
-              </div>
-            </div>
-
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
-                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
-                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
-                    </tr>
-                    <tr>
-                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
-                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
-                      <th scope="col" style="text-align: center;">SISA SALDO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @php
-                    $no = 1;
-                    @endphp
-                    @foreach ($DatasAjukan as $hasil)
-                    <tr>
-                      <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center; width:150px">
-                        @if($hasil->status == 'ajukan')
-                        <span class="badge badge-warning" style="color: black; font-weight: bold;">DIAJUKAN</span>
-                        @else
-                        <span class="badge badge-secondary">DRAFT</span>
-                        @endif
-                      </td>
-                      <td class="text-center">
-                        @if (Auth::user()->level == 'karyawan')
-                        @if($hasil->status == 'ajukan')
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                          <i class="fa fa-eye" style="margin-top:6px"></i>
-                        </a>
-                        @else
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.Edit', $hasil->id) }}" class="btn btn-sm btn-info mt-2">
-                          <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
-                        </a>
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                          <i class="fa fa-eye" style="margin-top:6px"></i>
-                        </a>
-                        @endif
-                        @else
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                          <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
-                        </a>
-                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                        @endif
-                      </td>
-                    </tr>
-                    @php
-                    $no++;
-                    @endphp
-                    @endforeach
-                  </tbody>
-                </table>
-                <div style="text-align: center;">
-                  <style>
-                    @media (max-width: 767px) {
-                      .pagination {
-                        margin-left: 480px;
-                        /* Adjust the margin value as needed for mobile devices */
-                      }
-                    }
-
-                    @media (min-width: 768px) and (max-width: 991px) {
-                      .pagination {
-                        margin-left: 300px;
-                        /* Adjust the margin value as needed for iPads */
-                      }
-                    }
-                  </style>
-                  {{ $DatasAjukan->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ajukan'])->links("vendor.pagination.bootstrap-4") }}
-                </div>
-              </div>
-
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <p style="margin-top: -3px; font-size: 15px;"><strong>Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </p>
+            <div class="input-group" style="width: 300px;">
+              <input type="text" class="form-control" id="searchDiajukan" placeholder="Pencarian">
             </div>
           </div>
-          <!--================== END ==================-->
 
-          <!--================== TABEL DITERIMA ==================-->
-          <div id="tableDiterima" class="card">
-            <div id="tblDiajukan" class="card-header" style="background-color: #63ED7A; color:white;">
-              <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITERIMA</h4>
-              <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DITERIMA</h4>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                    <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                    <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                    <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                    <th scope="col" style="text-align: center;">SISA SALDO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php
+                  $no = 1;
+                  @endphp
+                  @foreach ($DatasAjukan as $hasil)
+                  <tr>
+                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                    <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center; width:150px">
+                      @if($hasil->status == 'ajukan')
+                      <span class="badge badge-warning" style="color: black; font-weight: bold;">DIAJUKAN</span>
+                      @else
+                      <span class="badge badge-secondary">DRAFT</span>
+                      @endif
+                    </td>
+                    <td class="text-center">
+                      @if (Auth::user()->level == 'karyawan')
+                      @if($hasil->status == 'ajukan')
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
+                      </a>
+                      @else
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.Edit', $hasil->id) }}" class="btn btn-sm btn-info mt-2">
+                        <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                      </a>
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
+                      </a>
+                      @endif
+                      @else
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-pencil-alt" style="margin-top:6px"></i>
+                      </a>
+                      <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                      @endif
+                    </td>
+                  </tr>
+                  @php
+                  $no++;
+                  @endphp
+                  @endforeach
+                </tbody>
+              </table>
+              <div style="text-align: center;">
+                <style>
+                  @media (max-width: 767px) {
+                    .pagination {
+                      margin-left: 480px;
+                      /* Adjust the margin value as needed for mobile devices */
+                    }
+                  }
+
+                  @media (min-width: 768px) and (max-width: 991px) {
+                    .pagination {
+                      margin-left: 300px;
+                      /* Adjust the margin value as needed for iPads */
+                    }
+                  }
+                </style>
+                {{ $DatasAjukan->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ajukan'])->links("vendor.pagination.bootstrap-4") }}
+              </div>
             </div>
 
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                  @if ($startDate && $endDate)
-                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                  @else
-                  {{ date('F Y') }}
-                  @endif
-                </strong>
-              </p>
-              <div class="input-group" style="width: 300px;">
-                <input type="text" class="form-control" id="searchDiterima" placeholder="Pencarian">
-                <!-- <div class="input-group-append">
+          </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== TABEL DITERIMA ==================-->
+        <div id="tableDiterima" class="card">
+          <div id="tblDiajukan" class="card-header" style="background-color: #63ED7A; color:white;">
+            <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITERIMA</h4>
+            <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DITERIMA</h4>
+          </div>
+
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </p>
+            <div class="input-group" style="width: 300px;">
+              <input type="text" class="form-control" id="searchDiterima" placeholder="Pencarian">
+              <!-- <div class="input-group-append">
                   <button class="btn btn-outline-danger ml-1" type="button" id="clearSearchDiterima">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div> -->
-              </div>
-            </div>
-
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
-                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
-                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
-                    </tr>
-                    <tr>
-                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
-                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
-                      <th scope="col" style="text-align: center;">SISA SALDO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @php
-                    $no = 1;
-                    @endphp
-                    @foreach ($DatasDiterima as $hasil)
-                    @if ($hasil->status == 'diterima')
-                    <tr>
-                      <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center; width:150px">
-                        @if($hasil->status == 'diterima')
-                        <span class="badge badge-success">DITERIMA</span>
-                        @endif
-                      </td>
-                      <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDiterima', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                          <i class="fa fa-eye" style="margin-top:6px"></i>
-                        </a>
-                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    @php
-                    $no++;
-                    @endphp
-                    @endif
-                    @endforeach
-                  </tbody>
-                </table>
-                <div style="text-align: center;">
-                  <style>
-                    @media (max-width: 767px) {
-                      .pagination {
-                        margin-left: 480px;
-                        /* Adjust the margin value as needed for mobile devices */
-                      }
-                    }
-
-                    @media (min-width: 768px) and (max-width: 991px) {
-                      .pagination {
-                        margin-left: 300px;
-                        /* Adjust the margin value as needed for iPads */
-                      }
-                    }
-                  </style>
-                  {{ $DatasDiterima->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'diterima'])->links("vendor.pagination.bootstrap-4") }}
-                </div>
-              </div>
-
             </div>
           </div>
-          <!--================== END ==================-->
 
-          <!--================== TABEL DITOLAK ==================-->
-          <div id="tableDitolak" class="card">
-            <div id="tblDiajukan" class="card-header" style="background-color: #FC554B; color:white;">
-              <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITOLAK</h4>
-              <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DITOLAK</h4>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                    <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                    <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                    <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                    <th scope="col" style="text-align: center;">SISA SALDO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php
+                  $no = 1;
+                  @endphp
+                  @foreach ($DatasDiterima as $hasil)
+                  @if ($hasil->status == 'diterima')
+                  <tr>
+                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                    <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center; width:150px">
+                      @if($hasil->status == 'diterima')
+                      <span class="badge badge-success">DITERIMA</span>
+                      @endif
+                    </td>
+                    <td class="text-center">
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDiterima', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
+                      </a>
+                      <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  @php
+                  $no++;
+                  @endphp
+                  @endif
+                  @endforeach
+                </tbody>
+              </table>
+              <div style="text-align: center;">
+                <style>
+                  @media (max-width: 767px) {
+                    .pagination {
+                      margin-left: 480px;
+                      /* Adjust the margin value as needed for mobile devices */
+                    }
+                  }
+
+                  @media (min-width: 768px) and (max-width: 991px) {
+                    .pagination {
+                      margin-left: 300px;
+                      /* Adjust the margin value as needed for iPads */
+                    }
+                  }
+                </style>
+                {{ $DatasDiterima->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'diterima'])->links("vendor.pagination.bootstrap-4") }}
+              </div>
             </div>
 
-            <div class="card-header  d-flex justify-content-between align-items-center">
-              <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                  @if ($startDate && $endDate)
-                  {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                  @else
-                  {{ date('F Y') }}
-                  @endif
-                </strong>
-              </p>
-              <div class="input-group" style="width: 300px;">
-                <input type="text" class="form-control" id="searchDitolak" placeholder="Pencarian">
-                <!-- <div class="input-group-append">
+          </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== TABEL DITOLAK ==================-->
+        <div id="tableDitolak" class="card">
+          <div id="tblDiajukan" class="card-header" style="background-color: #FC554B; color:white;">
+            <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA PERJALANAN DINAS DITOLAK</h4>
+            <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DITOLAK</h4>
+          </div>
+
+          <div class="card-header  d-flex justify-content-between align-items-center">
+            <p style="margin-top: -3px; font-size: 15px"><strong>Periode
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </strong>
+            </p>
+            <div class="input-group" style="width: 300px;">
+              <input type="text" class="form-control" id="searchDitolak" placeholder="Pencarian">
+              <!-- <div class="input-group-append">
                   <a href="{{ route('account.PerjalananDinas.index') }}"><button class="btn btn-outline-danger ml-1" type="button" id="clearSearchDitolak" style="display: none;">
                       <i class="fas fa-trash"></i>
                     </button></a>
                 </div> -->
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
-                      <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
-                      <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
-                      <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
-                    </tr>
-                    <tr>
-                      <th scope="col" style="text-align: center;">TOTAL MASUK</th>
-                      <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
-                      <th scope="col" style="text-align: center;">SISA SALDO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @php
-                    $no = 1;
-                    @endphp
-                    @foreach ($DatasDitolak as $hasil)
-                    @if ($hasil->status == 'ditolak')
-                    <tr>
-                      <th scope="row" style="text-align: center">{{ $no }}</th>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
-                      <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                      <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
-                      <td class="column-width" style="text-align: center; width:150px">
-                        @if($hasil->status == 'ditolak')
-                        <span class="badge badge-danger">DITOLAK</span>
-                        @endif
-                      </td>
-                      <td class="text-center">
-                        <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDitolak', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
-                          <i class="fa fa-eye" style="margin-top:6px"></i>
-                        </a>
-                        <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    @php
-                    $no++;
-                    @endphp
-                    @endif
-                    @endforeach
-                  </tbody>
-                </table>
-                <div style="text-align: center;">
-                  <style>
-                    @media (max-width: 767px) {
-                      .pagination {
-                        margin-left: 480px;
-                        /* Adjust the margin value as needed for mobile devices */
-                      }
-                    }
-
-                    @media (min-width: 768px) and (max-width: 991px) {
-                      .pagination {
-                        margin-left: 300px;
-                        /* Adjust the margin value as needed for iPads */
-                      }
-                    }
-                  </style>
-                  {{ $DatasDitolak->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ditolak'])->links("vendor.pagination.bootstrap-4") }}
-                </div>
-              </div>
-
             </div>
           </div>
-          <!--================== END ==================-->
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BENDAHARA</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
+                    <th scope="col" colspan="3" class="column-width" style="text-align: center;">TOTAL SALDO</th>
+                    <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                    <th scope="col" rowspan="2" style="text-align: center">AKSI</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">TOTAL MASUK</th>
+                    <th scope="col" style="text-align: center;">TOTAL KELUAR</th>
+                    <th scope="col" style="text-align: center;">SISA SALDO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php
+                  $no = 1;
+                  @endphp
+                  @foreach ($DatasDitolak as $hasil)
+                  @if ($hasil->status == 'ditolak')
+                  <tr>
+                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
+                    <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
+                    <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->tempat }} #{{ $hasil->camp }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_keluar, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->sisa_saldo, 0, ',', '.') }}</td>
+                    <td class="column-width" style="text-align: center; width:150px">
+                      @if($hasil->status == 'ditolak')
+                      <span class="badge badge-danger">DITOLAK</span>
+                      @endif
+                    </td>
+                    <td class="text-center">
+                      <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailDitolak', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top:6px"></i>
+                      </a>
+                      <button style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  @php
+                  $no++;
+                  @endphp
+                  @endif
+                  @endforeach
+                </tbody>
+              </table>
+              <div style="text-align: center;">
+                <style>
+                  @media (max-width: 767px) {
+                    .pagination {
+                      margin-left: 480px;
+                      /* Adjust the margin value as needed for mobile devices */
+                    }
+                  }
 
+                  @media (min-width: 768px) and (max-width: 991px) {
+                    .pagination {
+                      margin-left: 300px;
+                      /* Adjust the margin value as needed for iPads */
+                    }
+                  }
+                </style>
+                {{ $DatasDitolak->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'status' => 'ditolak'])->links("vendor.pagination.bootstrap-4") }}
+              </div>
+            </div>
+
+          </div>
         </div>
+        <!--================== END ==================-->
+
       </div>
+    </div>
   </section>
 </div>
 

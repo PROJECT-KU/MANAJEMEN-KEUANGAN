@@ -174,6 +174,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/Perjalanan-Dinas') }}">
                                     <a class="nav-link" href="{{ route('account.PerjalananDinas.index') }}">
                                         <i class="fas fa-suitcase-rolling"></i> <span>Perjalanan Dinas</span>
+                                        <span class="badge badge-warning right" style="width: fit-content;">{{ $countAjukan }}</span>
                                     </a>
                                 </li>
                                 @endif

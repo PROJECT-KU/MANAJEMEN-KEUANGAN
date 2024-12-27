@@ -243,7 +243,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Anatomy Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_anatomi_estimasi }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_anatomi_estimasi }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_anatomi_keterangan }}</p>
@@ -279,7 +279,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Anatomy Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_anatomi_estimasi_second }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_anatomi_estimasi_second }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_anatomi_keterangan_second }}</p>
@@ -315,7 +315,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Anatomy Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_anatomi_estimasi_third }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_anatomi_estimasi_third }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_anatomi_keterangan_third }}</p>
@@ -351,7 +351,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_paper_estimasi }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_paper_estimasi }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_paper_keterangan }}</p>
@@ -387,7 +387,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_paper_estimasi_second }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_paper_estimasi_second }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_paper_keterangan_second }}</p>
@@ -423,7 +423,7 @@ Cek ID | Rumah Scopus
                             <div class="timeline-item">
                                 <h3 class="timeline-header">Progress Paper</h3>
                                 <div class="timeline-footer">
-                                    <a href="#" class="btn btn-sm bg-warning">{{ $data->progres_paper_estimasi_third }}</a>
+                                    <a href="#" class="btn btn-sm bg-warning">Estimasi Pengerjaan : {{ $data->progres_paper_estimasi_third }}</a>
                                 </div>
                                 <div class="timeline-body">
                                     <p>{{ $data->progres_paper_keterangan_third }}</p>

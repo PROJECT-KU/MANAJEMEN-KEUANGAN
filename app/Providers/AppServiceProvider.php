@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        View::composer('*', function ($view) {
+            $user = Auth::user();
+            $countAjukan = 0; // Default to 0
+
+            if ($user) { // Check if user is authenticated
+                $countAjukan = DB::table('perjalanan_dinas')
+                    ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
+                    ->where('perjalanan_dinas.status', 'ajukan')
+                    ->when($user->level == 'manager' || $user->level == 'ceo', function ($query) use ($user) {
+                        return $query->where('users.company', $user->company);
+                    }, function ($query) use ($user) {
+                        return $query->where('perjalanan_dinas.user_id', $user->id);
+                    })
+                    ->count();
+            }
+
+            $view->with('countAjukan', $countAjukan);
+        });
     }
 }
