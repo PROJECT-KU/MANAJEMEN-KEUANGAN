@@ -83,6 +83,16 @@ class PerjalananDinasController extends Controller
       'tanggal_akhir' => $endDate,
       'status' => request('status', 'ajukan')
     ]);
+    // Count the number of ajukan
+    $countAjukan = DB::table('perjalanan_dinas')
+      ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id') // Join the users table
+      ->where('perjalanan_dinas.status', 'ajukan')
+      ->when($user->level == 'manager' || $user->level == 'ceo', function ($query) use ($user) {
+        return $query->where('users.company', $user->company);
+      }, function ($query) use ($user) {
+        return $query->where('perjalanan_dinas.user_id', $user->id);
+      })
+      ->count();
     // <!-- END -->
 
     // <!-- DATA DITERIMA -->
@@ -129,7 +139,7 @@ class PerjalananDinasController extends Controller
       ->orderBy('created_at', 'DESC')
       ->get();
 
-    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'maintenances', 'startDate', 'endDate'));
+    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'maintenances', 'startDate', 'endDate', 'countAjukan'));
   }
 
   public function filter(Request $request)

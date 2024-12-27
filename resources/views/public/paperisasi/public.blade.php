@@ -199,8 +199,8 @@ Cek ID | Rumah Scopus
                                 <div class="timeline-footer" style="font-size: 20px;">
                                     @if($data->status_paper == 'antrian paper')
                                     <a class="badge badge-danger">ANTRIAN PAPER</a>
-                                    @elseif($data->status_paper == 'paper diterima')
-                                    <a class="badge badge-info">PAPER DITERIMA</a>
+                                    @elseif($data->status_paper == 'paper masuk')
+                                    <a class="badge badge-info">PAPER MASUK</a>
                                     @elseif($data->status_paper == 'pengerjaan paper')
                                     <a class="badge badge-warning">PENGERJAAN PAPER</a>
                                     @elseif($data->status_paper == 'submit paper')

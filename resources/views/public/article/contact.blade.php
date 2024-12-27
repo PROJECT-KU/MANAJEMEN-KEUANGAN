@@ -31,12 +31,12 @@ Blog | Rumah Scopus
                     <div class="col-md-6">
                         <div class="info-box">
                             <i class="bi bi-clock"></i>
-                            <h3>Open Hours</h3>
-                            <p>Thursday : 13.00 - 20.00 WIB</p>
-                            <p>Friday : 08.30 - 20.00 WIB</p>
-                            <p>Saturday : 08.30 - 20.00 WIB</p>
-                            <p>Sunday : 08.30 - 20.00 WIB</p>
-                            <p>Monday : 09.00 - 16.00 WIB</p>
+                            <h3>Jam Buka</h3>
+                            <p>Kamis : 13.00 - 19.00 WIB</p>
+                            <p>Jumat : 08.30 - 19.00 WIB</p>
+                            <p>Sabtu : 08.30 - 19.00 WIB</p>
+                            <p>Minggu : 08.30 - 19.00 WIB</p>
+                            <p>Senin : 09.00 - 16.00 WIB</p>
                         </div>
                     </div>
 

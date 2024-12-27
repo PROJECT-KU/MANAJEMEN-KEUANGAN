@@ -154,7 +154,7 @@ Dashboard | MIS
             <!--================== END ==================-->
 
             <!--================== PERJALANAN DINAS AJUKAN ==================-->
-            @if ($hasAjukan)
+            <!-- @if ($hasAjukan)
             <div class="alert alert-danger" role="alert" style="text-align: center; padding: 15px 0 0 0; width: 100%; box-sizing: border-box; border-radius: 10px;">
                 <b style="font-size: 20px;">Terdapat Perjalanan Dinas dengan status "PENGAJUAN"!</b>
                 <br>Silahkan periksa dan ambil tindakan yang diperlukan.<br>
@@ -164,8 +164,7 @@ Dashboard | MIS
                     </button>
                 </a>
             </div>
-            @endif
-
+            @endif -->
             <!--================== END ==================-->
 
             <!--================== MASA SEWA AKUN AKAN HABIS ==================-->

@@ -27,7 +27,7 @@ class PublicPlagiasiController extends Controller
     public function index(Request $request)
     {
 
-        return view('public.plagiasi.index', compact(''));
+        return view('public.plagiasi.index');
     }
 
     public function uploadFile(Request $request)
