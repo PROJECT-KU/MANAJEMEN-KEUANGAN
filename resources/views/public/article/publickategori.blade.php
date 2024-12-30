@@ -116,7 +116,7 @@ Kategori Blog | Rumah Scopus
                             <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}" class="readmore stretched-link" style="text-align: right;  background: linear-gradient(to right, #ff3131, #ff914d);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;">
-                                <span>Read More</span>
+                                <span>Selengkapnya</span>
                                 <i class="bi bi-arrow-right"></i>
                             </a>
                         </header>

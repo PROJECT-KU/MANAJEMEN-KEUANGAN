@@ -314,25 +314,24 @@ Beranda | Rumah Scopus
     <div class="container">
         <h1 class="text-center mt-3" style="font-weight: bold; position: relative;">
             Testimoni
-            <span style="
-                display: block; 
-                width: 15%; 
-                height: 8px; 
-                background: linear-gradient(to right, #ff3131, #ff914d); 
-                position: absolute; 
-                bottom: -15px; 
-                left: 50%; 
-                transform: translateX(-50%); 
-                border-radius: 50px; 
-                opacity: 0.8; 
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+            <span style="display: block; 
+                         width: 15%; 
+                         height: 8px; 
+                         background: linear-gradient(to right, #ff3131, #ff914d); 
+                         position: absolute; 
+                         bottom: -15px; 
+                         left: 50%; 
+                         transform: translateX(-50%); 
+                         border-radius: 50px; 
+                         opacity: 0.8; 
+                         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
             </span>
         </h1>
         <div class="row gy-4 mt-5">
-            <div class="col-lg-6" id="video" data-aos="fade-left">
-                <div class="card" style="background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                    <video width="40%" height="100%" controls style="border-radius: 15px 15px 0 0; object-fit: cover;">
-                        <source src="{{ asset('assets/img/public/video_testimoni.mp4') }}" type="video/mp4">
+            <div class="col-lg-6 d-flex justify-content-center" id="video" data-aos="fade-left">
+                <div class="card" id="video-card" style="background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; width: 100%; height: 680px;">
+                    <video id="videoElement" controls style="border-radius: 15px 15px 0 0; object-fit: cover; width: 100%; height: 100%; min-height: 100%; max-height: 100%; max-width: 100%;">
+                        <source src="{{ asset('assets/img/public/testimoni.MOV') }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                 </div>
@@ -383,6 +382,43 @@ Beranda | Rumah Scopus
 </script>
 <!--================== END ==================-->
 
+<!--================== ANIMASI MENGHITUNG ANGKA ==================-->
+<!-- CSS -->
+<style>
+    /* Default height for non-zoomed or smaller screens */
+    #video-card {
+        height: 680px;
+    }
 
+    /* Full-screen height for larger screens or zoomed-in view */
+    /* No changes needed for this as we handle full screen dynamically */
+</style>
+
+<!-- JavaScript -->
+<script>
+    // Get the video and card elements
+    const videoElement = document.getElementById('videoElement');
+    const videoCard = document.getElementById('video-card');
+
+    // Function to handle fullscreen change
+    function handleFullscreenChange() {
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+            // If in fullscreen mode, make the card fill the screen
+            videoCard.style.height = "100vh"; // Full screen height
+            videoElement.style.objectFit = "contain"; // Ensure no cropping
+        } else {
+            // If not in fullscreen, revert to original height
+            videoCard.style.height = "680px"; // Default height
+            videoElement.style.objectFit = "cover"; // Maintain cover behavior
+        }
+    }
+
+    // Add event listener for fullscreen change
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+</script>
+<!--================== END ==================-->
 
 @stop

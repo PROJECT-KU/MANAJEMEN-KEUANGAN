@@ -25,7 +25,7 @@ Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artike
 Route::get('/blog/topic/{categories_artikel_id}{token}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
 Route::get('/blog/topic/blog-single/{id}{token}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
 Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');
-Route::get('/blog/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
+Route::get('/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
 
 // PLAGIASI
 Route::get('/Cek-Plagiasi', 'Publict\PublicPlagiasiController@index')->name('cek.plagiasi.public');
@@ -33,7 +33,7 @@ Route::post('/Cek-Plagiasi/proses', 'Publict\PublicPlagiasiController@uploadFile
 
 // MEME PUBLIC
 Route::get('/Scopus-Kafe', 'Publict\PublicScopusKafeController@public')->name('public.scopuskafe.index');
-Route::get('/Scopus-Kafe/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
+Route::get('/Scopus-Kafe/Form-Pendaftaran', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
 
 // PAPERISASI
 Route::get('/paperisasi/public/data', 'Publict\PublicPaperisasiController@public')->name('public.papaperisasi.data');

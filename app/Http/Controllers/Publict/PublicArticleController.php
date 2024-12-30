@@ -148,7 +148,7 @@ class PublicArticleController extends Controller
         $artikel->dilihat += 1;
         $artikel->save();
 
-        return view('public.article.blogsingle', compact('artikel', 'datas', 'maintenances', 'startDate', 'endDate', 'categories_artikel', 'artikel_komentar'));
+        return view('public.article.blogsingle', compact('artikel', 'datas', 'maintenances', 'categories_artikel', 'artikel_komentar'));
     }
 
     // MENAMBAH DATA KOMENTAR

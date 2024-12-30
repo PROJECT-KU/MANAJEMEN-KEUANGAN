@@ -17,8 +17,6 @@ class Meme extends Model
      */
     protected $fillable = [
         'token',
-        'name',
-        'tanggal',
         'sesi',
         'waktu_mulai',
         'waktu_selesai',

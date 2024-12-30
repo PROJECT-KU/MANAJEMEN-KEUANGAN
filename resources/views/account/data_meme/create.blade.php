@@ -71,21 +71,6 @@ Tambah Data Scopus Kafe | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Kategory</label>
-                                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama Meme" minlength="5" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Tanggal Mulai</label>
-                                    <input type="date" name="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Tanggal Mulai Sesi" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
                                     <label>Sesi</label>
                                     <select class="form-control" name="sesi" id="sesi" required>
                                         <option value="" disabled selected>-- PILIH SESI --</option>

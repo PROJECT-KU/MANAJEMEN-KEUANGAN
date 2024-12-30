@@ -57,8 +57,8 @@ class DataMemeController extends Controller
         }
 
         $meme = DB::table('meme')
-            ->select('meme.id', 'meme.token', 'meme.name', 'meme.tanggal', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
-            ->whereBetween('meme.tanggal', [$currentMonth, $nextMonth])
+            ->select('meme.id', 'meme.token', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
+            ->whereBetween('meme.created_at', [$currentMonth, $nextMonth])
             ->orderBy('meme.created_at', 'DESC')
             ->paginate(10);
 
@@ -84,8 +84,8 @@ class DataMemeController extends Controller
 
         // Ambil data meme untuk paginasi
         $meme = DB::table('meme')
-            ->select('meme.id', 'meme.token', 'meme.name', 'meme.tanggal', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
-            ->whereBetween('meme.tanggal', [$currentMonth, $nextMonth])
+            ->select('meme.id', 'meme.token', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
+            ->whereBetween('meme.created_at', [$currentMonth, $nextMonth])
             ->orderBy('meme.created_at', 'DESC')
             ->paginate(10);
 
@@ -110,11 +110,10 @@ class DataMemeController extends Controller
         }
 
         $meme = DB::table('meme')
-            ->select('meme.id', 'meme.token', 'meme.name', 'meme.tanggal', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
+            ->select('meme.id', 'meme.token', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
             ->where('users.company', $user->company)
             ->where(function ($query) use ($search) {
-                $query->where('meme.name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('meme.sesi', 'LIKE', '%' . $search . '%')
+                $query->orWhere('meme.sesi', 'LIKE', '%' . $search . '%')
                     ->orWhere('meme.status', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('meme.created_at', 'DESC')
@@ -154,8 +153,6 @@ class DataMemeController extends Controller
 
         $save = Meme::create([
             'token'         => $token,
-            'name'          => $request->input('name'),
-            'tanggal'       => $request->input('tanggal'),
             'sesi'          => $request->input('sesi'),
             'waktu_mulai'   => $request->input('waktu_mulai'),
             'waktu_selesai' => $request->input('waktu_selesai'),
@@ -205,8 +202,6 @@ class DataMemeController extends Controller
         $biaya = empty($biaya) ? 0 : str_replace(",", "", $biaya);
 
         $datameme->update([
-            'name'          => $request->input('name'),
-            'tanggal'       => $request->input('tanggal'),
             'sesi'          => $request->input('sesi'),
             'waktu_mulai'   => $request->input('waktu_mulai'),
             'waktu_selesai' => $request->input('waktu_selesai'),
@@ -247,7 +242,7 @@ class DataMemeController extends Controller
     {
 
         $meme = DB::table('meme')
-            ->select('meme.id', 'meme.token', 'meme.name', 'meme.tanggal', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
+            ->select('meme.id', 'meme.token', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
             ->orderBy('meme.created_at', 'DESC')
             ->paginate(10);
 
