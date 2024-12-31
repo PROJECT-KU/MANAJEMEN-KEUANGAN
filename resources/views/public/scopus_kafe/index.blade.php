@@ -68,4 +68,33 @@ Scopus Kafe | Rumah Scopus
         </div>
     </div>
 </div>
+
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if (session()->has('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            html: 'Data Pendaftaran Scopus Kafe Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
+            confirmButtonText: 'OK'
+        });
+    });
+</script>
+@endif
+
+@if (session()->has('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: 'Data Pendaftaran Scopus Kafe Gagal Terkirim',
+            confirmButtonText: 'OK'
+        });
+    });
+</script>
+@endif
+<!--================== END ==================-->
 @stop

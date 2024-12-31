@@ -5,32 +5,55 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Meme_Pendaftaran extends Model
+class PendaftaranScopusKafe extends Model
 {
     /**
      * @var string
      */
-    protected $table = 'meme_pendaftaran';
+    protected $table = 'pendaftaran_scopus_kafe';
 
     /**
      * @var array
      */
     protected $fillable = [
-        'meme_id',
-        'token',
-        'nama_pendaftar',
-        'telp_pendaftar',
-        'email_pendaftar',
-        'institusi_pendaftar',
-        'judul_pendaftar',
-        'tanggal',
+        'id_pemesanan',
+
+        // detail data diri
+        'nama',
+        'tanggal_pemesanan',
+        'email',
+        'telp',
+
+        // form sesi 1
         'sesi',
         'waktu_mulai',
         'waktu_selesai',
-        'kode_unik_biaya',
+        'lokasi',
         'biaya',
-        'total',
+        'kode_unik_pembayaran',
+        'subtotal_pembayaran',
+
+        // form sesi 2
+        'sesi_kedua',
+        'waktu_mulai_kedua',
+        'waktu_selesai_kedua',
+        'lokasi_kedua',
+        'biaya_kedua',
+        'kode_unik_pembayaran_kedua',
+        'subtotal_pembayaran_kedua',
+
+        // form sesi 3
+        'sesi_ketiga',
+        'waktu_mulai_ketiga',
+        'waktu_selesai_ketiga',
+        'lokasi_ketiga',
+        'biaya_ketiga',
+        'kode_unik_pembayaran_ketiga',
+        'subtotal_pembayaran_ketiga',
+
+        'total_keseluruhan_pembayaran',
         'status',
+        'gambar',
         'created_at',
         'updated_at',
     ];

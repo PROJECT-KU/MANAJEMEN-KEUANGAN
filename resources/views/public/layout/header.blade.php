@@ -187,6 +187,7 @@
     <script src="{{ asset('assets/artikel/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
     <script src="{{ asset('assets/artikel/vendor/swiper/swiper-bundle.min.js') }}"></script>
     <script src="{{ asset('assets/artikel/vendor/php-email-form/validate.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Template Main JS File -->
     <script src="{{ asset('assets/artikel/js/main.js') }}"></script>
