@@ -126,7 +126,7 @@ class MaintenanceController extends Controller
 
     public function page()
     {
-        return view('errors.page-maintenance', compact('maintenance'));
+        return view('errors.page-maintenance');
     }
 
     public function destroy($id)

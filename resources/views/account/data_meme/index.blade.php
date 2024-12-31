@@ -99,16 +99,6 @@ Data Scopus Kafe | MIS
                     </div>
                 </div>
 
-                <div class="card-header">
-                    <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-                            @if ($startDate && $endDate)
-                            {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                            @else
-                            {{ date('F Y') }}
-                            @endif
-                        </strong>
-                    </p>
-                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <div class="table-responsive">
@@ -116,8 +106,6 @@ Data Scopus Kafe | MIS
                                 <thead>
                                     <tr>
                                         <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">KATEGORY</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TANGGAL</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SESI</th>
                                         <th scope="col" colspan="2" class="column-width" style="text-align: center;">WAKTU</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">JUMLAH KUOTA</th>
@@ -136,8 +124,6 @@ Data Scopus Kafe | MIS
                                     @foreach ($meme as $hasil)
                                     <tr>
                                         <th scope="row" style="text-align: center">{{ $no }}</th>
-                                        <td class="column-width" style="text-align: center;">{{ $hasil->name }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ date('d F Y', strtotime($hasil->tanggal)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->sesi }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             {{ date('H:i', strtotime($hasil->waktu_mulai)) }}

@@ -33,24 +33,10 @@ Scopus Kafe | Rumah Scopus
 </section>
 
 <div class="container mt-5 mb-5">
-    @php
-    $tanggal = array();
-    foreach($datas as $data) {
-    if($data->status == 'publish') {
-    $tanggal[] = $data->tanggal;
-    }
-    }
-    $tanggal = array_unique($tanggal);
-    @endphp
-    @foreach($tanggal as $tgl)
     <div class="main-card" style="background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 20px;" data-aos="fade-right">
-        <h1 class="text-center mt-3" style="font-weight: bold; color: white;">
-            Periode {{ \Carbon\Carbon::parse($tgl)->translatedFormat('d F Y') }}
-        </h1>
         <div class="card-body" style="padding: 30px; border-radius: 15px;">
             <div class="row" style="display: flex; justify-content: center; flex-wrap: wrap;">
                 @foreach($datas as $item)
-                @if($item->tanggal == $tgl)
                 <div class="col-md-3 mb-2" data-aos="fade-up" style="margin: 10px;">
                     <div class="inner-card" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); position: relative;">
                         <div class="d-flex align-items-center">
@@ -67,23 +53,48 @@ Scopus Kafe | Rumah Scopus
                                     <i class="fas fa-users" style="margin-right: 10px;"></i>
                                     <span>Sisa Kuota : {{ $item->kuota }}</span>
                                 </p>
-                                <p style="display: flex; align-items: center;">
+                                <p style="display: flex; align-items: center; margin-bottom: 30px;">
                                     <i class="fas fa-map-marker-alt" style="margin-right: 18px;"></i>
                                     <span>{{ $item->lokasi }}</span>
                                 </p>
                             </div>
                         </div>
+                        <a href="{{ url('/Scopus-Kafe/Form-Pendaftaran') }}"><button class="btn btn-info" src="" style="background-color: #6495ED; color:white; font-size: 16px; width: 100%; position: absolute; bottom: 0; left: 0;">Daftar Sekarang</button></a>
                         <div class="label" style="position: absolute; top: 0px; right: 0px; background-color: #ff3131; color: white; padding: 5px; border-radius: 5px; font-size: 15px;">Rp. {{$item->biaya}}</div>
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-info" src="" style="background-color: #6495ED; color:white; font-size: 16px; width: 100%; position: absolute; bottom: 0; left: 0;">Daftar Sekarang</button>
-                        </div>
                     </div>
                 </div>
-                @endif
                 @endforeach
             </div>
         </div>
     </div>
-    @endforeach
 </div>
+
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if (session()->has('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            html: 'Data Pendaftaran Scopus Kafe Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
+            confirmButtonText: 'OK'
+        });
+    });
+</script>
+@endif
+
+@if (session()->has('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: 'Data Pendaftaran Scopus Kafe Gagal Terkirim',
+            confirmButtonText: 'OK'
+        });
+    });
+</script>
+@endif
+<!--================== END ==================-->
 @stop

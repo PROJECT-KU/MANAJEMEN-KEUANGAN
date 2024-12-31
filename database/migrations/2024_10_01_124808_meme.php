@@ -16,8 +16,6 @@ class Meme extends Migration
         Schema::create('meme', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('token', 100)->nullable();
-            $table->string('name')->nullable();
-            $table->dateTime('tanggal')->nullable();
             $table->string('sesi')->nullable();
             $table->time('waktu_mulai')->nullable();
             $table->time('waktu_selesai')->nullable();

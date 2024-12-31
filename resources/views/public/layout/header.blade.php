@@ -79,18 +79,32 @@
 
             <nav id="navbar" class="navbar">
                 <ul>
-                    <li><a class="nav-link scrollto {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }} || Request::is('blog/topic/blog-single/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('Scopus-Kafe') ? 'active' : '' }}" href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
-                    <li class="dropdown"><a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a>
+                    </li>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }} || Request::is('blog/topic/blog-single/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a>
+                    </li>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('Scopus-Kafe') || Request::is('Scopus-Kafe/Form-Pendaftaran') ? 'active' : '' }}"
+                            href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
                             <li><a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
                         </ul>
                     </li>
-                    <li><a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }} || {{ Request::is('paperisasi/public/data/search') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('blog/contact') ? 'active' : '' }}" href="{{ url('/blog/contact') }}">Kontak</a></li>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }} || {{ Request::is('paperisasi/public/data/search') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a>
+                    </li>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a>
+                    </li>
+                    <li>
+                        <a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a>
+                    </li>
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
@@ -173,6 +187,7 @@
     <script src="{{ asset('assets/artikel/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
     <script src="{{ asset('assets/artikel/vendor/swiper/swiper-bundle.min.js') }}"></script>
     <script src="{{ asset('assets/artikel/vendor/php-email-form/validate.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Template Main JS File -->
     <script src="{{ asset('assets/artikel/js/main.js') }}"></script>
