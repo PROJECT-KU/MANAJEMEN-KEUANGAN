@@ -145,7 +145,9 @@ Beranda | Rumah Scopus
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">
-                            <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            <a href="https://rumahscopus.com/event/">
+                                <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -157,11 +159,13 @@ Beranda | Rumah Scopus
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Online Training</h5>
                             <p style="text-align: justify;">
-                                Pendampingan secara online <b>selama 8 kali pertemuan</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>. Akan mendapatkan pendampingan kembali <b>selama 6 bulan.</b>
+                                Pendampingan secara online <b>selama 8 kali pertemuan</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>. Akan mendapatkan pendampingan kembali <b>selama 3 bulan.</b>
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">
-                            <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            <a href="https://rumahscopus.com/courses/online-class/">
+                                <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -177,7 +181,9 @@ Beranda | Rumah Scopus
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">
-                            <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            <a href="{{ url('/Scopus-Kafe') }}">
+                                <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            </a>
                         </div>
                     </div>
                 </div>
