@@ -200,13 +200,13 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== PAPER ==================-->
                                 <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
-                                <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') }}">
+                                <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/meme') . setActive('account/meme/edit-data') }}"><a class="nav-link" href="{{ route('account.meme.index') }}"><i class="fas fa-dice-d6"></i>Create Data</a></li>
-                                        <li class="{{ setActive('account/article') }}"><a class="nav-link" href="{{ route('account.Artikel.index') }}"><i class="fas fa-comments"></i>Data Komentar</a></li>
+                                        <li class="{{ setActive('account/pendaftaran-scopus-kafe') }}"><a class="nav-link" href="{{ route('account.pendafataran-scopus-kafe.index') }}"><i class="fas fa-users"></i>Data Pendaftaran</a></li>
                                     </ul>
                                 </li>
 

@@ -84,19 +84,6 @@ Data Scopus Kafe | MIS
             <div class="card">
                 <div class="card-header">
                     <h4><i class="fas fa-list"></i> DATA SCOPUS KAFE</h4>
-                    <div class="dropdown card-header-action">
-                        <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-                            <i class="fas fa-download"></i> DOWNLOAD
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
-                                <i class="far fa-file-pdf"></i> PDF
-                            </a>
-                            <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
-                                <i class="far fa-file-excel"></i> EXCEL
-                            </a>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card-body">
@@ -173,7 +160,7 @@ Data Scopus Kafe | MIS
                                         }
                                     }
                                 </style>
-                                {{ $meme->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
+                                {{ $meme->links("vendor.pagination.bootstrap-4") }}
                             </div>
 
                         </div>

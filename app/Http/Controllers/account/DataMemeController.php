@@ -45,24 +45,13 @@ class DataMemeController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $startDate = $request->input('tanggal_awal');
-        $endDate = $request->input('tanggal_akhir');
-
-        if (!$startDate || !$endDate) {
-            $currentMonth = date('Y-m-01 00:00:00');
-            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
-        } else {
-            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
-        }
 
         $meme = DB::table('meme')
             ->select('meme.id', 'meme.token', 'meme.sesi', 'meme.waktu_mulai', 'meme.waktu_selesai', 'meme.kuota', 'meme.biaya', 'meme.deskripsi', 'meme.lokasi', 'meme.status', 'meme.gambar', 'meme.created_at', 'meme.updated_at')
-            ->whereBetween('meme.created_at', [$currentMonth, $nextMonth])
             ->orderBy('meme.created_at', 'DESC')
             ->paginate(10);
 
-        return view('account.data_meme.index', compact('meme', 'startDate', 'endDate'));
+        return view('account.data_meme.index', compact('meme'));
     }
     // <!--================== END ==================-->
 

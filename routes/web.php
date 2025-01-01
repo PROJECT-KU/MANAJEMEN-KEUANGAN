@@ -18,7 +18,7 @@ Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
 Route::get('/', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
 // HOME PUBLIC
-Route::get('/beranda', 'Publict\PublicHomeController@home')->name('home');
+Route::get('/home', 'Publict\PublicHomeController@home')->name('home');
 
 // ARTIKEL PUBLIC
 Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
@@ -314,6 +314,11 @@ Route::prefix('account')->group(
         Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
         Route::post('/paperisasi/data/update-data/{id}', 'account\PaperisasiController@update')->name('account.paperisasi.update');
         Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
+
+        // pendaftaran scopsu kafe
+        Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendafataran-scopus-kafe.index');
+        Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendafataran-scopus-kafe.filter');
+        Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendafataran-scopus-kafe.search');
     }
 
 
