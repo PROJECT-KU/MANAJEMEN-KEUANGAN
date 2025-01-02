@@ -4,56 +4,7 @@
 Tambah Data Scopus Kafe | MIS
 @stop
 
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
-<style>
-    .custom-file-upload {
-        position: relative;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-
-    .inputfile {
-        width: 0.1px;
-        height: 0.1px;
-        opacity: 0;
-        overflow: hidden;
-        position: absolute;
-        z-index: -1;
-    }
-
-    .file-upload {
-        cursor: pointer;
-        display: inline-block;
-        padding: 10px 20px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        transition: background-color 0.3s;
-    }
-
-    .file-upload:hover {
-        background-color: #0056b3;
-    }
-
-    #file-selected {
-        display: block;
-        margin-top: 5px;
-        color: #888;
-    }
-
-    .image-preview {
-        margin-top: 10px;
-    }
-
-    .image-preview img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 5px;
-    }
-</style>
-<!--================== END ==================-->
+Route::post('/meme/store-data', 'account\DataMemeController@store')->name('account.meme.store');
 
 @section('content')
 <div class="main-content">
@@ -155,7 +106,7 @@ Tambah Data Scopus Kafe | MIS
                             </div>
                         </div>
 
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group custom-file-upload" style="margin-top: -3px;">
                                     <label>Gambar</label>
@@ -173,7 +124,7 @@ Tambah Data Scopus Kafe | MIS
                                     <span id="file-selected"></span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                 </div>
             </div>
