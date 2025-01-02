@@ -19,14 +19,14 @@ Data Pendaftaran Scopus Kafe | MIS
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('account.pendafataran-scopus-kafe.search') }}" method="GET" id="searchForm">
+                    <form action="{{ route('account.pendaftaran-scopus-kafe.search') }}" method="GET" id="searchForm">
                         <div class="form-group">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
                                 <div class="input-group-append">
                                 </div>
                                 @if(request()->has('q'))
-                                <a href="{{ route('account.pendafataran-scopus-kafe.index') }}" class="btn btn-danger rounded-pill ml-1">
+                                <a href="{{ route('account.pendaftaran-scopus-kafe.index') }}" class="btn btn-danger rounded-pill ml-1">
                                     <i class="fa fa-trash mt-2"></i>
                                 </a>
                                 @endif
@@ -34,7 +34,7 @@ Data Pendaftaran Scopus Kafe | MIS
                         </div>
                     </form>
 
-                    <form action="{{ route('account.pendafataran-scopus-kafe.filter') }}" method="GET">
+                    <form action="{{ route('account.pendaftaran-scopus-kafe.filter') }}" method="GET">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -54,7 +54,7 @@ Data Pendaftaran Scopus Kafe | MIS
                             <div class="col-md-2">
                                 @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
                                 <div class="btn-group" style="width: 100%;">
-                                    <a href="{{ route('account.pendafataran-scopus-kafe.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;"">
+                                    <a href="{{ route('account.pendaftaran-scopus-kafe.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;">
                                         <i class=" fa fa-trash mt-2"></i>
                                     </a>
                                 </div>
@@ -97,7 +97,6 @@ Data Pendaftaran Scopus Kafe | MIS
                                         <th scope="col" class="column-width" style="text-align: center;">ID PEMESANAN</th>
                                         <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMESANAN</th>
                                         <th scope="col" class="column-width" style="text-align: center;">NAMA</th>
-                                        <th scope="col" class="column-width" style="text-align: center;">TELP</th>
                                         <th scope="col" class="column-width" style="text-align: center;">TOTAL PEMBAYARAN</th>
                                         <th scope="col" class="column-width" style="text-align: center;">STATUS PEMESANAN</th>
                                         <th scope="col" style="width: 15%;text-align: center">AKSI</th>
@@ -114,11 +113,10 @@ Data Pendaftaran Scopus Kafe | MIS
                                         <td class="column-width" style="text-align: center;">{{ $data->id_pemesanan }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($data->tanggal_pemesanan)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $data->nama }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ $data->telp }}</td>
                                         <td class="column-width" style="text-align: center;">Rp. {{ number_format($data->total_keseluruhan_pembayaran, 0, ',', '.') }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if($data->status == 'menunggu konfirmasi')
-                                            <span class="badge badge-warning">MENUNGGU KONFIRMASI </span>
+                                            @if($data->status == 'menunggu verifikasi')
+                                            <span class="badge badge-warning">MENUNGGU VERIFIKASI </span>
                                             @elseif($data->status == 'pembayaran diterima')
                                             <span class="badge badge-success">PEMBAYARAN DITERIMA</span>
                                             @else
@@ -127,7 +125,7 @@ Data Pendaftaran Scopus Kafe | MIS
                                         </td>
 
                                         <td class="text-center">
-                                            <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.paperisasi.editdata', $data->id) }}" class="btn btn-sm btn-info mt-2">
+                                            <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.pendaftaran-scopus-kafe.edit', $data->id) }}" class="btn btn-sm btn-info mt-2">
                                                 <i class="fa fa-pen" style="margin-top: 6px;"></i>
                                             </a>
                                             <button style="margin-right: 5px; margin-bottom:4px; width:30px; height:30px;" onclick="Delete('{{ $data->id }}')" class="btn btn-sm btn-danger mt-2">
@@ -255,7 +253,7 @@ Data Pendaftaran Scopus Kafe | MIS
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/paperisasi/data/delete/" + id,
+                    url: "/account/pendaftaran-scopus-kafe/data/delete/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

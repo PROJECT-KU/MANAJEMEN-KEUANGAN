@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CreatePublicPendaftaranScopusKafeMail;
 
 class PublicPendaftaranScopusKafeController extends Controller
 {
@@ -75,6 +77,33 @@ class PublicPendaftaranScopusKafeController extends Controller
             $file->move(public_path('pendaftaran_scopus_kafe'), $gambarName);
         }
 
+        // form sesi 1
+        $biaya = $request->input('biaya');
+        $biaya = empty($biaya) ? 0 : str_replace(",", "", $biaya);
+        $kode_unik_pembayaran = $request->input('kode_unik_pembayaran');
+        $kode_unik_pembayaran = empty($kode_unik_pembayaran) ? 0 : str_replace(",", "", $kode_unik_pembayaran);
+        $subtotal_pembayaran = $request->input('subtotal_pembayaran');
+        $subtotal_pembayaran = empty($subtotal_pembayaran) ? 0 : str_replace(",", "", $subtotal_pembayaran);
+
+        // form sesi 2
+        $biaya_kedua = $request->input('biaya_kedua');
+        $biaya_kedua = empty($biaya_kedua) ? 0 : str_replace(",", "", $biaya_kedua);
+        $kode_unik_pembayaran_kedua = $request->input('kode_unik_pembayaran_kedua');
+        $kode_unik_pembayaran_kedua = empty($kode_unik_pembayaran_kedua) ? 0 : str_replace(",", "", $kode_unik_pembayaran_kedua);
+        $subtotal_pembayaran_kedua = $request->input('subtotal_pembayaran_kedua');
+        $subtotal_pembayaran_kedua = empty($subtotal_pembayaran_kedua) ? 0 : str_replace(",", "", $subtotal_pembayaran_kedua);
+
+        // form sesi 3
+        $biaya_ketiga = $request->input('biaya_ketiga');
+        $biaya_ketiga = empty($biaya_ketiga) ? 0 : str_replace(",", "", $biaya_ketiga);
+        $kode_unik_pembayaran_ketiga = $request->input('kode_unik_pembayaran_ketiga');
+        $kode_unik_pembayaran_ketiga = empty($kode_unik_pembayaran_ketiga) ? 0 : str_replace(",", "", $kode_unik_pembayaran_ketiga);
+        $subtotal_pembayaran_ketiga = $request->input('subtotal_pembayaran_ketiga');
+        $subtotal_pembayaran_ketiga = empty($subtotal_pembayaran_ketiga) ? 0 : str_replace(",", "", $subtotal_pembayaran_ketiga);
+
+        $total_keseluruhan_pembayaran = $request->input('total_keseluruhan_pembayaran');
+        $total_keseluruhan_pembayaran = empty($total_keseluruhan_pembayaran) ? 0 : str_replace(",", "", $total_keseluruhan_pembayaran);
+
         $save = PendaftaranScopusKafe::create([
             'id_pemesanan'                  => $id_pemesanan,
 
@@ -89,33 +118,39 @@ class PublicPendaftaranScopusKafeController extends Controller
             'waktu_mulai'                   => $request->input('waktu_mulai'),
             'waktu_selesai'                 => $request->input('waktu_selesai'),
             'lokasi'                        => $request->input('lokasi'),
-            'biaya'                         => $request->input('biaya'),
-            'kode_unik_pembayaran'          => $request->input('kode_unik_pembayaran'),
-            'subtotal_pembayaran'           => $request->input('subtotal_pembayaran'),
+            'biaya'                         => $biaya,
+            'kode_unik_pembayaran'          => $kode_unik_pembayaran,
+            'subtotal_pembayaran'           => $subtotal_pembayaran,
 
             // form sesi 2
             'sesi_kedua'                          => $request->input('sesi_kedua'),
             'waktu_mulai_kedua'                   => $request->input('waktu_mulai_kedua'),
             'waktu_selesai_kedua'                 => $request->input('waktu_selesai_kedua'),
             'lokasi_kedua'                        => $request->input('lokasi_kedua'),
-            'biaya_kedua'                         => $request->input('biaya_kedua'),
-            'kode_unik_pembayaran_kedua'          => $request->input('kode_unik_pembayaran_kedua'),
-            'subtotal_pembayaran_kedua'           => $request->input('subtotal_pembayaran_kedua'),
+            'biaya_kedua'                         => $biaya_kedua,
+            'kode_unik_pembayaran_kedua'          => $kode_unik_pembayaran_kedua,
+            'subtotal_pembayaran_kedua'           => $subtotal_pembayaran_kedua,
 
             // form sesi 3
             'sesi_ketiga'                          => $request->input('sesi_ketiga'),
             'waktu_mulai_ketiga'                   => $request->input('waktu_mulai_ketiga'),
             'waktu_selesai_ketiga'                 => $request->input('waktu_selesai_ketiga'),
             'lokasi_ketiga'                        => $request->input('lokasi_ketiga'),
-            'biaya_ketiga'                         => $request->input('biaya_ketiga'),
-            'kode_unik_pembayaran_ketiga'          => $request->input('kode_unik_pembayaran_ketiga'),
-            'subtotal_pembayaran_ketiga'           => $request->input('subtotal_pembayaran_ketiga'),
+            'biaya_ketiga'                         => $biaya_ketiga,
+            'kode_unik_pembayaran_ketiga'          => $kode_unik_pembayaran_ketiga,
+            'subtotal_pembayaran_ketiga'           => $subtotal_pembayaran_ketiga,
 
-            'total_keseluruhan_pembayaran'         => $request->input('total_keseluruhan_pembayaran'),
+            'total_keseluruhan_pembayaran'         => $total_keseluruhan_pembayaran,
             'gambar'                               => $gambarPathFirst ?? null,
         ]);
 
         if ($save) {
+            $datas = PendaftaranScopusKafe::findOrFail($save->id);
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+
+            Mail::to($emailTo)->send(new CreatePublicPendaftaranScopusKafeMail($datas, $save, $appName));
+
             return redirect()->route('public.scopuskafe.index')->with('success', 'Data Pendaftaran Scopus Kafe Berhasil Disimpan!');
         } else {
             return redirect()->route('public.scopuskafe.index')->with('error', 'Data Pendaftaran Scopus Kafe Gagal Disimpan!');

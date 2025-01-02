@@ -34,6 +34,6 @@ class LoginController extends Controller
 
         Session::flash('success', 'You have been logged out successfully.');
 
-        return $this->loggedOut($request) ?: redirect('/');
+        return $this->loggedOut($request) ?: redirect('/K4rY4w4N');
     }
 }

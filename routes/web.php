@@ -316,9 +316,12 @@ Route::prefix('account')->group(
         Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
 
         // pendaftaran scopsu kafe
-        Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendafataran-scopus-kafe.index');
-        Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendafataran-scopus-kafe.filter');
-        Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendafataran-scopus-kafe.search');
+        Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendaftaran-scopus-kafe.index');
+        Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendaftaran-scopus-kafe.filter');
+        Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendaftaran-scopus-kafe.search');
+        Route::get('/pendaftaran-scopus-kafe/data/edit/{id}', 'account\PendaftaranScopusKafeController@edit')->name('account.pendaftaran-scopus-kafe.edit');
+        Route::post('/pendaftaran-scopus-kafe/data/update-data/{id}', 'account\PendaftaranScopusKafeController@update')->name('account.pendaftaran-scopus-kafe.update');
+        Route::delete('/pendaftaran-scopus-kafe/data/delete/{id}', 'account\PendaftaranScopusKafeController@destroy')->name('account.pendaftaran-scopus-kafe.delete');
     }
 
 

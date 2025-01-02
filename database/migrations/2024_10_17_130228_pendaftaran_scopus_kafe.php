@@ -51,7 +51,7 @@ class PendaftaranScopusKafe extends Migration
             $table->text('subtotal_pembayaran_ketiga')->nullable();
 
             $table->string('total_keseluruhan_pembayaran')->nullable();
-            $table->string('status')->default('menunggu konfirmasi');
+            $table->string('status')->default('menunggu verifikasi');
             $table->string('gambar')->nullable();
             $table->timestamps();
         });
