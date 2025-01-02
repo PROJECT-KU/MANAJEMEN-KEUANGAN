@@ -99,6 +99,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
+                            <!-- <a href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
+                                <i class="fas fa-sign-out-alt"></i> KELUAR
+                            </a> -->
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                     document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
                                 <i class="fas fa-sign-out-alt"></i> KELUAR
@@ -203,10 +207,18 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
+                                        @php
+                                        // Menghitung jumlah data dengan status 'menunggu verifikasi'
+                                        $totalStatusMenunggu = App\PendaftaranScopusKafe::where('status', 'menunggu verifikasi')->count();
+                                        @endphp
+
+                                        @if ($totalStatusMenunggu > 0)
+                                        <span class="badge badge-warning right" style="width: fit-content;">{{ $totalStatusMenunggu }}</span>
+                                        @endif
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/meme') . setActive('account/meme/edit-data') }}"><a class="nav-link" href="{{ route('account.meme.index') }}"><i class="fas fa-dice-d6"></i>Create Data</a></li>
-                                        <li class="{{ setActive('account/pendaftaran-scopus-kafe') }}"><a class="nav-link" href="{{ route('account.pendafataran-scopus-kafe.index') }}"><i class="fas fa-users"></i>Data Pendaftaran</a></li>
+                                        <li class="{{ setActive('account/pendaftaran-scopus-kafe') }}"><a class="nav-link" href="{{ route('account.pendaftaran-scopus-kafe.index') }}"><i class="fas fa-users"></i>Data Pendaftaran</a></li>
                                     </ul>
                                 </li>
 
