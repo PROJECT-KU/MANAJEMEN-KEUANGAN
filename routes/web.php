@@ -15,10 +15,10 @@ use App\Http\Middleware\CheckTestimoniToken;
 
 Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
 
-Route::get('/', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
+Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
 // HOME PUBLIC
-Route::get('/home', 'Publict\PublicHomeController@home')->name('home');
+Route::get('/', 'Publict\PublicHomeController@home')->name('home');
 
 // ARTIKEL PUBLIC
 Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
