@@ -249,7 +249,7 @@ Data Scopus Kafe | MIS
 
         swal({
             title: "APAKAH KAMU YAKIN?",
-            text: "INGIN MENGHAPUS DATA INI SECARA PERMANEN!",
+            text: "INGIN MENGHAPUS DATA INI!",
             icon: "warning",
             buttons: {
                 cancel: {
@@ -279,36 +279,16 @@ Data Scopus Kafe | MIS
                     },
                     type: 'POST',
                     success: function(response) {
-                        if (response.statusdatadeleted === "success") {
-                            // Custom SweetAlert with a progress bar
+                        if (response.status === "success") {
                             swal({
                                 title: 'BERHASIL!',
-                                text: 'Data berhasil di hapus',
-                                content: {
-                                    element: "div",
-                                    attributes: {
-                                        innerHTML: `
-                                        <div style="position: relative; width: 100%; background: #eee; height: 10px;">
-                                            <div id="progress-bar" style="position: absolute; background: green; height: 10px; width: 0%;"></div>
-                                        </div>
-                                    `
-                                    }
-                                },
+                                text: response.message,
                                 icon: 'success',
+                                timer: 1000,
                                 buttons: false,
-                                closeOnClickOutside: false,
+                            }).then(function() {
+                                location.reload();
                             });
-
-                            // Animate the progress bar over 3 seconds
-                            let progress = 0;
-                            let interval = setInterval(function() {
-                                progress += 1;
-                                document.getElementById("progress-bar").style.width = progress + "%";
-                                if (progress >= 100) {
-                                    clearInterval(interval);
-                                    location.reload(); // Reload page after the progress reaches 100%
-                                }
-                            }, 30); // 30ms * 100 iterations = 3 seconds
                         } else {
                             swal({
                                 title: 'GAGAL!',
@@ -320,16 +300,6 @@ Data Scopus Kafe | MIS
                                 location.reload();
                             });
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle server errors or unexpected responses
-                        swal({
-                            title: 'GAGAL!',
-                            text: 'Terjadi kesalahan saat menghapus data.',
-                            icon: 'error',
-                            buttons: false,
-                            timer: 2000,
-                        });
                     }
                 });
             }
