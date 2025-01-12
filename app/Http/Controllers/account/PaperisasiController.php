@@ -57,7 +57,7 @@ class PaperisasiController extends Controller
         $endDate = $request->input('tanggal_akhir', date('Y-m-t 23:59:59'));
 
         // Ambil data dengan paginasi
-        $datas = Paperisasi::whereBetween('tanggal_masuk_paper', [$startDate, $endDate])
+        $datas = DB::table('paperisasi')
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
 
