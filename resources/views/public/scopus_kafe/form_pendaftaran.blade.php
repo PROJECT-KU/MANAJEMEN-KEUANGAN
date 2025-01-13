@@ -138,7 +138,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Tanggal Pemesanan</label>
+                                    <label>Tanggal Reservasi</label>
                                     <div class="input-group">
                                         <input type="date" name="tanggal_pemesanan" id="tanggal_pemesanan" value="{{ old('tanggal_pemesanan') }}" placeholder="Masukkan Tanggal Pemesanan" class="form-control" required>
                                     </div>
@@ -535,8 +535,9 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
 
                             <div class="col-md-6">
                                 <div class="card">
+                                    <span style="text-align: center; font-size:21px; font-weight: bold;" class="mt-3">Total yang Harus Dibayarkan</span>
                                     <div class="card-body mt-3" style="color: black; display: flex; justify-content: space-between; align-items: center;">
-                                        <label style="white-space: nowrap; font-weight: bold;">Subtotal Keseluruhan :</label>
+                                        <label style="white-space: nowrap; font-weight: bold;">Subtotal :</label>
                                         <div style="display: flex; justify-content: flex-end; width: 100%;">
                                             <span style="margin-right: 5px;">Rp.</span>
                                             <span id="subtotalKeseluruhanPembayaran">0</span>
@@ -552,7 +553,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
                                     </div>
                                     <hr style="margin: 10px;">
                                     <div class="card-body mb-3" style="color: black; display: flex; justify-content: space-between; align-items: center;">
-                                        <label style="white-space: nowrap; font-weight: bold;">Total Keseluruhan :</label>
+                                        <label style="white-space: nowrap; font-weight: bold;">Total :</label>
                                         <div style="display: flex; justify-content: flex-end; width: 100%;">
                                             <span style="margin-right: 5px;">Rp.</span>
                                             <span id="totalKeseluruhanPembayaran">0</span>
