@@ -4,8 +4,6 @@
 Tambah Data Scopus Kafe | MIS
 @stop
 
-Route::post('/meme/store-data', 'account\DataMemeController@store')->name('account.meme.store');
-
 @section('content')
 <div class="main-content">
     <section class="section">
