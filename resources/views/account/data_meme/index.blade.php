@@ -258,4 +258,15 @@ Data Scopus Kafe | MIS
     }
 </script>
 <!--================== END ==================-->
+
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
+<script>
+    @if(Session::has('success'))
+    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000); // Refresh halaman setelah 2 detik
+    @endif
+</script>
+<!--================== END ==================-->
 @stop

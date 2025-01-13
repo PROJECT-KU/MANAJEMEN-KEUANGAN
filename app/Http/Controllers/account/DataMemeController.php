@@ -154,9 +154,9 @@ class DataMemeController extends Controller
         ]);
 
         if ($save) {
-            return redirect()->route('account.meme.index')->with('success-create', 'Data Meme Berhasil Disimpan!');
+            return redirect()->route('account.meme.index')->with('success', 'Data Meme Berhasil Disimpan!');
         } else {
-            return redirect()->route('account.meme.index')->with('error-create', 'Data Meme Gagal Disimpan!');
+            return redirect()->route('account.meme.index')->with('erro', 'Data Meme Gagal Disimpan!');
         }
     }
     // <!--================== END ==================-->
@@ -203,9 +203,9 @@ class DataMemeController extends Controller
         ]);
 
         if ($datameme) {
-            return redirect()->route('account.meme.index')->with('success-create', 'Data Meme Berhasil Disimpan!');
+            return redirect()->route('account.meme.index')->with('success', 'Data Meme Berhasil Disimpan!');
         } else {
-            return redirect()->route('account.meme.index')->with('error-create', 'Data Meme Gagal Disimpan!');
+            return redirect()->route('account.meme.index')->with('error', 'Data Meme Gagal Disimpan!');
         }
     }
     // <!--================== END ==================-->
