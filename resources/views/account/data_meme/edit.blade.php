@@ -68,23 +68,23 @@ Edit Data Scopus Kafe | MIS
                     <form action="{{ route('account.meme.update', $datameme->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Kategory</label>
                                     <input type="text" name="name" value="{{ $datameme->name }}" placeholder="Nama Meme" minlength="5" class="form-control">
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Tanggal Mulai</label>
                                     <input type="date" name="tanggal" value="{{ date('Y-m-d', strtotime($datameme->tanggal)) }}" class="form-control">
                                 </div>
-                            </div>
-                            <div class="col-md-6">
+                            </div> -->
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Sesi</label>
                                     <select class="form-control" name="sesi" id="sesi" required>
