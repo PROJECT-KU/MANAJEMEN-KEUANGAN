@@ -222,7 +222,10 @@ class DataMemeController extends Controller
         $meme->delete();
 
         // Return a JSON response with a status and message
-        return response()->json(['statusdatadeleted' => 'success', 'message' => 'Data berhasil dihapus.']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus beserta file terkait.',
+        ]);
     }
     // <!--================== END ==================-->
 
