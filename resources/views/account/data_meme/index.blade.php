@@ -193,55 +193,6 @@ Data Scopus Kafe | MIS
 </script>
 <!--================== END ==================-->
 
-<!--================== SWEET ALERT ==================-->
-<script>
-    // Function to show SweetAlert messages
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session('success-create'))
-        Swal.fire({
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 3000,
-            html: `
-                <h2>Berhasil!</h2>
-                <p>Data Meme Berhasil Disimpan!</p>
-                <div style="position: relative; width: 100%; background: #eee; height: 10px; margin-top: 10px;">
-                    <div id="progress-bar" style="position: absolute; background: green; height: 10px; width: 0%; transition: width 3s;"></div>
-                </div>
-            `,
-            didOpen: () => {
-                var progressBar = document.getElementById('progress-bar');
-                progressBar.style.width = '100%'; // Animate the progress bar to full width
-            },
-        }).then(() => {
-            location.reload(); // Automatically refresh the page after the alert
-        });
-        @endif
-
-        @if(session('error-create'))
-        Swal.fire({
-            icon: 'error',
-            showConfirmButton: false,
-            timer: 3000,
-            html: `
-                <h2>Gagal!</h2>
-                <p>Data Meme Gagal Disimpan!</p>
-                <div style="position: relative; width: 100%; background: #eee; height: 10px; margin-top: 10px;">
-                    <div id="progress-bar" style="position: absolute; background: red; height: 10px; width: 0%; transition: width 3s;"></div>
-                </div>
-            `,
-            didOpen: () => {
-                var progressBar = document.getElementById('progress-bar');
-                progressBar.style.width = '100%'; // Animate the progress bar to full width
-            },
-        }).then(() => {
-            location.reload(); // Automatically refresh the page after the alert
-        });
-        @endif
-    });
-</script>
-<!--================== END ==================-->
-
 <!--================== SWEET ALERT DELETE ==================-->
 <script>
     function Delete(id) {
