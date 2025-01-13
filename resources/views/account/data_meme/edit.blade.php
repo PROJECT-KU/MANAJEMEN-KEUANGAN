@@ -170,7 +170,7 @@ Edit Data Scopus Kafe | MIS
                             </div>
                         </div>
 
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group custom-file-upload" style="margin-top: -3px;">
                                     <label>Gambar</label>
@@ -194,7 +194,7 @@ Edit Data Scopus Kafe | MIS
                                     <span id="file-selected"></span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                 </div>
             </div>
