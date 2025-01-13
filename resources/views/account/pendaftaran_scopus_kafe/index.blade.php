@@ -95,7 +95,7 @@ Data Pendaftaran Scopus Kafe | MIS
                                     <tr>
                                         <th scope="col" style="text-align: center;width: 6%">NO.</th>
                                         <th scope="col" class="column-width" style="text-align: center;">ID PEMESANAN</th>
-                                        <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMESANAN</th>
+                                        <th scope="col" class="column-width" style="text-align: center;">TANGGAL RESERVASI</th>
                                         <th scope="col" class="column-width" style="text-align: center;">NAMA</th>
                                         <th scope="col" class="column-width" style="text-align: center;">TOTAL PEMBAYARAN</th>
                                         <th scope="col" class="column-width" style="text-align: center;">STATUS PEMESANAN</th>
@@ -111,7 +111,7 @@ Data Pendaftaran Scopus Kafe | MIS
                                     <tr>
                                         <th scope="row" style="text-align: center">{{ $no }}</th>
                                         <td class="column-width" style="text-align: center;">{{ $data->id_pemesanan }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y %H:%M', strtotime($data->tanggal_pemesanan)) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($data->tanggal_pemesanan)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $data->nama }}</td>
                                         <td class="column-width" style="text-align: center;">Rp. {{ number_format($data->total_keseluruhan_pembayaran, 0, ',', '.') }}</td>
                                         <td class="column-width" style="text-align: center;">
