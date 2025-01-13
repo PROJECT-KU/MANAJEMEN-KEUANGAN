@@ -10,7 +10,7 @@ class Meme extends Model
     /**
      * @var string
      */
-    protected $table = 'Meme';
+    protected $table = 'meme';
 
     /**
      * @var array
