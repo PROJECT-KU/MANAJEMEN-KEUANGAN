@@ -10,7 +10,7 @@ class Paperisasi extends Model
     /**
      * @var string
      */
-    protected $table = 'Paperisasi';
+    protected $table = 'paperisasi';
 
     /**
      * @var array
