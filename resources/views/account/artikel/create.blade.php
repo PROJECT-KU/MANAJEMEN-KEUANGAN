@@ -219,6 +219,7 @@ Tambah Artikel | MIS
 </section>
 </div>
 
+<!--================== SUMMERNOTE ==================-->
 <script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>
 <script>
     $(function() {
@@ -238,6 +239,7 @@ Tambah Artikel | MIS
         });
     })
 </script>
+<!--================== END ==================-->
 
 <!--================== SWEET ALERT KATA KUNCI ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

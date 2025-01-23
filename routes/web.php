@@ -41,6 +41,10 @@ Route::post('/Scopus-Kafe/store', 'Publict\PublicPendaftaranScopusKafeController
 Route::get('/paperisasi/public/data', 'Publict\PublicPaperisasiController@public')->name('public.papaperisasi.data');
 Route::get('/paperisasi/public/data/search', 'Publict\PublicPaperisasiController@publicsearch')->name('public.paperisasi.search');
 
+// refrensi paper
+Route::get('/Refrensi-Paper', 'Publict\PublicRefrensiPaperController@PublicRefrensiPaper')->name('public.refrensi-paper.PublicRefrensiPaper');
+Route::get('/Refrensi-Paper/selengkapnya/{id}', 'Publict\PublicRefrensiPaperController@Selengkapnya')->name('public.refrensi-paper.Selengkapnya');
+
 Auth::routes();
 
 /**
@@ -315,13 +319,23 @@ Route::prefix('account')->group(
         Route::post('/paperisasi/data/update-data/{id}', 'account\PaperisasiController@update')->name('account.paperisasi.update');
         Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
 
-        // pendaftaran scopsu kafe
+        // pendaftaran scopuS kafe
         Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendaftaran-scopus-kafe.index');
         Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendaftaran-scopus-kafe.filter');
         Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendaftaran-scopus-kafe.search');
         Route::get('/pendaftaran-scopus-kafe/data/edit/{id}', 'account\PendaftaranScopusKafeController@edit')->name('account.pendaftaran-scopus-kafe.edit');
         Route::post('/pendaftaran-scopus-kafe/data/update-data/{id}', 'account\PendaftaranScopusKafeController@update')->name('account.pendaftaran-scopus-kafe.update');
         Route::delete('/pendaftaran-scopus-kafe/data/delete/{id}', 'account\PendaftaranScopusKafeController@destroy')->name('account.pendaftaran-scopus-kafe.delete');
+
+        // refrensi paper
+        Route::get('/refrensi-paper/data', 'account\RefrensiPaperController@index')->name('account.refrensi-paper.index');
+        Route::get('/refrensi-paper/data/filter', 'account\RefrensiPaperController@filter')->name('account.refrensi-paper.filter');
+        Route::get('/refrensi-paper/data/search', 'account\RefrensiPaperController@search')->name('account.refrensi-paper.search');
+        Route::get('/refrensi-paper/data/create', 'account\RefrensiPaperController@create')->name('account.refrensi-paper.create');
+        Route::post('/refrensi-paper/data/store', 'account\RefrensiPaperController@store')->name('account.refrensi-paper.store');
+        Route::get('/refrensi-paper/data/edit/{id}', 'account\RefrensiPaperController@edit')->name('account.refrensi-paper.edit');
+        Route::post('/refrensi-paper/data/update-data/{id}', 'account\RefrensiPaperController@update')->name('account.refrensi-paper.update');
+        Route::delete('/refrensi-paper/data/delete/{id}', 'account\RefrensiPaperController@destroy')->name('account.refrensi-paper.delete');
     }
 
 

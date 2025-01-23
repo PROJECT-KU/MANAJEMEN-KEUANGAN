@@ -50,7 +50,6 @@ Beranda | Rumah Scopus
     </div>
 </section>
 
-
 <div class="container mt-5 mb-5">
     <div class="main-card" style="background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden;" data-aos="fade-right">
         <h1 class="text-center mt-3" style="font-weight: bold; color: white;">Kenapa Memilih Kami ?</h1>
