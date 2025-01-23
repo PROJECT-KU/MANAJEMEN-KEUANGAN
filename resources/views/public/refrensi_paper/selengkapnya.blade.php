@@ -80,11 +80,19 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                     <!--================== ARTIKEL ==================-->
                     <article class="entry entry-single">
                         <h2 class="entry-title">
-                            <a href="">{{ $datas->nama_journal }}</a>
+                            <a href="">{{ $datas->judul_paper }}</a>
                         </h2>
+                        <div class="entry-meta">
+                            <ul>
+                                <li class="d-flex align-items-center">
+                                    <i class="bi bi-person"></i>
+                                    <a href="">{{ $datas->nama_author }}</a>
+                                </li>
+                            </ul>
+                        </div>
                         <div class="entry-content">
                             <div class="article-container">
-                                {!! $datas->subjek_area_journal !!}
+                                {!! $datas->abstrak !!}
                             </div>
                             <style>
                                 .article-container img {
@@ -108,11 +116,11 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <h3 class="sidebar-title">Detail Paper</h3>
                         <hr>
                         <!--================== MENAMPILKAN NAMA AUTHOR ==================-->
-                        <h3 class="sidebar-title">Nama Author</h3>
+                        <h3 class="sidebar-title">Subjek Area Journal</h3>
                         <div class="sidebar-item tags">
                             <ul>
                                 @php
-                                $authors = explode(',', $datas->nama_author); // Mengambil nama author
+                                $authors = explode(',', $datas->subjek_area_journal); // Mengambil nama author
                                 @endphp
                                 @foreach ($authors as $author)
                                 <li><a href="#">{{ $author }}</a></li>
@@ -122,9 +130,9 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== JUDUL PAPER ==================-->
-                        <h3 class="sidebar-title">Judul Paper</h3>
+                        <h3 class="sidebar-title">Nama Journal</h3>
                         <div class="sidebar-item">
-                            <p>{{ $datas->judul_paper ?? 'Judul Paper tidak tersedia' }}</p> <!-- Mengakses langsung judul_paper -->
+                            <p>{{ $datas->nama_journal ?? 'Nama Journal tidak tersedia' }}</p> <!-- Mengakses langsung judul_paper -->
                         </div>
                         <!--================== END ==================-->
 

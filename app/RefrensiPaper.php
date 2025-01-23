@@ -22,6 +22,7 @@ class RefrensiPaper extends Model
         'nama_journal',
         'quartile_journal',
         'subjek_area_journal',
+        'abstrak',
         'judul_paper',
         'doi',
         'apc',

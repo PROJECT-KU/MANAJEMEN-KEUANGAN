@@ -54,12 +54,12 @@ Tambah Data Refrensi Paper | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Nama Author</label>
+                                    <label>Subjek Area</label>
                                     <div class="input-group" id="keyword-container">
                                         <!-- Tempat untuk menampilkan kata kunci -->
                                     </div>
-                                    <input id="kata_kunci_input" type="text" name="nama_author" placeholder="Masukkan Nama Author" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
-                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan nama author</p>
+                                    <input id="kata_kunci_input" type="text" name="subjek_area_journal" placeholder="Masukkan Subjek Area Journal" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan subjek area journal</p>
                                     @error('kata_kunci')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -67,6 +67,17 @@ Tambah Data Refrensi Paper | MIS
                                     @enderror
                                     <!-- Elemen tersembunyi untuk menyimpan kata kunci sebagai tag -->
                                     <input type="hidden" id="kata_kunci_tags" name="kata_kunci_tags">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Nama Author</label>
+                                    <div class="input-group">
+                                        <input type="text" name="nama_author" value="{{ old('nama_author') }}" placeholder="Masukkan Nama Author" class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -137,10 +148,11 @@ Tambah Data Refrensi Paper | MIS
 
                         <div class="row">
                             <div class="col-md-12">
+                                <label>Abstrak</label>
                                 <div class="card card-outline card-info">
                                     <div class="card-body pad">
                                         <div class="mb-3">
-                                            <textarea class="textarea" name="subjek_area_journal" id="subjek_area_journal" placeholder="Subjek Area Journal" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea class="textarea" name="abstrak" id="abstrak" placeholder="Abstrak Journal" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -194,7 +206,7 @@ Tambah Data Refrensi Paper | MIS
 
         // Menampilkan Sweet Alert dengan pilihan
         Swal.fire({
-            title: 'Apakah Kamu Sudah Menekan Enter Di Keyboard Pada Input Nama Author ?',
+            title: 'Apakah Kamu Sudah Menekan Enter Di Keyboard Pada Input Subjek Area Journal ?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sudah',

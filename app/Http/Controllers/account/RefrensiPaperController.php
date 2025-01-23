@@ -124,6 +124,7 @@ class RefrensiPaperController extends Controller
             'doi'                           => $request->input('doi'),
             'apc'                           => $request->input('apc'),
             'type'                          => $request->input('type'),
+            'type'                          => $request->input('abstrak'),
         ]);
 
         if ($save) {
@@ -154,6 +155,7 @@ class RefrensiPaperController extends Controller
             'doi'                       => $request->input('doi') ?? $datas->doi,
             'apc'                       => $request->input('apc') ?? $datas->apc,
             'type'                      => $request->input('type') ?? $datas->type,
+            'abstrak'                      => $request->input('abstrak') ?? $datas->abstrak,
         ]);
 
         if ($datas) {
