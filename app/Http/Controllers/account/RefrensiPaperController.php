@@ -150,7 +150,7 @@ class RefrensiPaperController extends Controller
             'subjek_area_journal'       => $request->input('kata_kunci_tags') ?? $datas->kata_kunci_tags,
             'nama_journal'              => $request->input('nama_journal') ?? $datas->nama_journal,
             'quartile_journal'          => $request->input('quartile_journal') ?? $datas->quartile_journal,
-            'nama_author'               => $request->input('nama_author') ?? $datas->subjek_area_journal,
+            'nama_author'               => $request->input('nama_author') ?? $datas->nama_author,
             'judul_paper'               => $request->input('judul_paper') ?? $datas->judul_paper,
             'doi'                       => $request->input('doi') ?? $datas->doi,
             'apc'                       => $request->input('apc') ?? $datas->apc,
