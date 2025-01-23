@@ -1,7 +1,7 @@
 @extends('public.layout.header')
 
 @section('title')
-Refrensi Paper Selengkapnya | Rumah Scopus
+Referensi Paper Selengkapnya | Rumah Scopus
 @stop
 
 <style>
@@ -64,7 +64,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                 <li><a href="">Referensi Paper</a></li>
             </ol>
 
-            <h2>Refrensi Paper</h2>
+            <h2>Referensi Paper</h2>
 
         </div>
     </section>
@@ -117,7 +117,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <h3 class="sidebar-title">Detail Paper</h3>
                         <hr>
                         <!--================== MENAMPILKAN NAMA AUTHOR ==================-->
-                        <h3 class="sidebar-title">Subjek Area Journal</h3>
+                        <h3 class="sidebar-title">Subjek Area Jurnal</h3>
                         <div class="sidebar-item tags">
                             <ul>
                                 @php
@@ -131,7 +131,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== JUDUL PAPER ==================-->
-                        <h3 class="sidebar-title">Nama Journal</h3>
+                        <h3 class="sidebar-title">Nama Jurnal</h3>
                         <div class="sidebar-item">
                             <p>{{ $datas->nama_journal ?? 'Nama Journal tidak tersedia' }}</p> <!-- Mengakses langsung judul_paper -->
                         </div>
@@ -158,7 +158,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== QUARTILE & APC ==================-->
-                        <h3 class="sidebar-title">Type Journal</h3>
+                        <h3 class="sidebar-title">Type Jurnal</h3>
                         <div class="sidebar-item recent-posts">
                             <p>{{ $datas->type ?? 'Type Journal tidak tersedia' }}</p>
                         </div>
