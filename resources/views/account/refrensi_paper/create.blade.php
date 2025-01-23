@@ -54,7 +54,7 @@ Tambah Data Refrensi Paper | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Subjek Area</label>
+                                    <label>Subjek Area Journal</label>
                                     <div class="input-group" id="keyword-container">
                                         <!-- Tempat untuk menampilkan kata kunci -->
                                     </div>

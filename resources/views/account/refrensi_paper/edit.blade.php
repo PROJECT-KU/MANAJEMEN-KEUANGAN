@@ -54,11 +54,11 @@ Update Data Refrensi Paper | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Subjek Area</label>
+                                    <label>Subjek Area Journal</label>
                                     <div class="input-group" id="keyword-container">
                                         <!-- Tempat untuk menampilkan kata kunci -->
                                     </div>
-                                    <input id="kata_kunci_input" type="text" value="{{ $datas->subjek_area_journal }}" name="subjek_area_journal" placeholder="Masukkan Nama Author" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                                    <input id="kata_kunci_input" type="text" value="{{ $datas->subjek_area_journal }}" name="subjek_area_journal" placeholder="Masukkan Subjek Area Journal" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
                                     <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan subjek area journal</p>
                                     @error('kata_kunci')
                                     <div class="invalid-feedback" style="display: block">
