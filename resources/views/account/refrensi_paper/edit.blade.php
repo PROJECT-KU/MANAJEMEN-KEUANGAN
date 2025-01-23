@@ -54,12 +54,12 @@ Update Data Refrensi Paper | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Nama Author</label>
+                                    <label>Subjek Area</label>
                                     <div class="input-group" id="keyword-container">
                                         <!-- Tempat untuk menampilkan kata kunci -->
                                     </div>
-                                    <input id="kata_kunci_input" type="text" value="{{ $datas->nama_author }}" name="nama_author" placeholder="Masukkan Nama Author" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
-                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan nama author</p>
+                                    <input id="kata_kunci_input" type="text" value="{{ $datas->subjek_area_journal }}" name="subjek_area_journal" placeholder="Masukkan Nama Author" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
+                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan subjek area journal</p>
                                     @error('kata_kunci')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -67,6 +67,17 @@ Update Data Refrensi Paper | MIS
                                     @enderror
                                     <!-- Elemen tersembunyi untuk menyimpan kata kunci sebagai tag -->
                                     <input type="hidden" value="{{ $datas->nama_author }}" id="kata_kunci_tags" name="kata_kunci_tags">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Nama Author</label>
+                                    <div class="input-group">
+                                        <input type="text" name="nama_author" value="{{ $datas->nama_author }}" placeholder="Masukkan Nama Journal" class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -137,10 +148,11 @@ Update Data Refrensi Paper | MIS
 
                         <div class="row">
                             <div class="col-md-12">
+                                <label>Abstrak</label>
                                 <div class="card card-outline card-info">
                                     <div class="card-body pad">
                                         <div class="mb-3">
-                                            <textarea class="textarea" name="subjek_area_journal" id="subjek_area_journal" placeholder="Subjek Area Journal" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{{ $datas->subjek_area_journal }}</textarea>
+                                            <textarea class="textarea" name="abstrak" id="subjek_area_journal" placeholder="Subjek Area Journal" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{{ $datas->abstrak }}</textarea>
                                         </div>
                                     </div>
                                 </div>

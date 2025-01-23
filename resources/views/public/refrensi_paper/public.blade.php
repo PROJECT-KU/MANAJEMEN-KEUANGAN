@@ -106,16 +106,14 @@ Refrensi Paper | Rumah Scopus
                         <div style="width: 100%;">
                             <div class="d-flex align-items-center" style="width: 100%;">
                                 <div style="margin-left: 0; width: 100%;">
-                                    <h5 style="font-weight: bold; width: 100%;">{{ $data->nama_journal }}</h5>
-                                    <p style="width: 100%;">Q-{{ $data->quartile_journal }}
-                                        <br>
-                                        APC {{ $data->apc }} - {{ $data->type }}
-                                    </p>
+                                    <h5 style="font-weight: bold; width: 100%;">{{ $data->judul_paper }}</h5>
+                                    <p style="width: 100%;">Q-{{ $data->nama_journal }}</p>
+                                    <p style="width: 100%;">Q-{{ $data->quartile_journal }}</p>
                                     <hr style="width: 100%; margin: 10px 0;">
-                                    <h5 style="font-weight: bold; width: 100%;">Subjek Area</h5>
+                                    <h5 style="font-weight: bold; width: 100%;">Abstrak</h5>
                                     <span style="width: 100%; display: inline-block;">
-                                        {{ implode(' ', array_slice(explode(' ', strip_tags($data->subjek_area_journal)), 0, 5)) }}
-                                        @if(str_word_count(strip_tags($data->subjek_area_journal)) > 5)
+                                        {{ implode(' ', array_slice(explode(' ', strip_tags($data->abstrak)), 0, 5)) }}
+                                        @if(str_word_count(strip_tags($data->abstrak)) > 5)
                                         ...
                                         @endif
                                     </span>

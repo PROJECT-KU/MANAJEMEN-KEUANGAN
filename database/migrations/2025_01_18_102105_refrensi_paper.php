@@ -21,6 +21,7 @@ class RefrensiPaper extends Migration
             $table->string('nama_journal')->nullable();
             $table->string('quartile_journal')->nullable();
             $table->text('subjek_area_journal')->nullable();
+            $table->text('abstrak')->nullable();
             $table->text('judul_paper')->nullable();
             $table->string('doi')->nullable();
             $table->string('apc')->nullable();
