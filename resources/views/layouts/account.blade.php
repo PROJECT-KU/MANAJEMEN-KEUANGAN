@@ -227,6 +227,12 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                         <i class="fas fa-folder-open"></i> <span>Paperisasi</span>
                                     </a>
                                 </li>
+
+                                <li class="{{ setActive('account/refrensi-paper/data') }}">
+                                    <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
+                                        <i class="fas fa-folder"></i> <span>Refrensi Paper</span>
+                                    </a>
+                                </li>
                                 <!--================== END ==================-->
 
                                 <!--================== BLOG ==================-->
