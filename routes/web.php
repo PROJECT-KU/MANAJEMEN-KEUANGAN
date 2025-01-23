@@ -42,7 +42,7 @@ Route::get('/paperisasi/public/data', 'Publict\PublicPaperisasiController@public
 Route::get('/paperisasi/public/data/search', 'Publict\PublicPaperisasiController@publicsearch')->name('public.paperisasi.search');
 
 // refrensi paper
-Route::get('/Refrensi-Paper/data', 'Publict\PublicRefrensiPaperController@PublicRefrensiPaper')->name('public.refrensi-paper.PublicRefrensiPaper');
+Route::get('/Refrensi-Paper', 'Publict\PublicRefrensiPaperController@PublicRefrensiPaper')->name('public.refrensi-paper.PublicRefrensiPaper');
 Route::get('/Refrensi-Paper/selengkapnya/{id}', 'Publict\PublicRefrensiPaperController@Selengkapnya')->name('public.refrensi-paper.Selengkapnya');
 
 Auth::routes();
