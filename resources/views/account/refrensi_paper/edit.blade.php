@@ -66,7 +66,7 @@ Update Data Refrensi Paper | MIS
                                     </div>
                                     @enderror
                                     <!-- Elemen tersembunyi untuk menyimpan kata kunci sebagai tag -->
-                                    <input type="hidden" value="{{ $datas->nama_author }}" id="kata_kunci_tags" name="kata_kunci_tags">
+                                    <input type="hidden" value="{{ $datas->subjek_area_journal }}" id="kata_kunci_tags" name="kata_kunci_tags">
                                 </div>
                             </div>
                         </div>
@@ -206,7 +206,7 @@ Update Data Refrensi Paper | MIS
 
         // Menampilkan Sweet Alert dengan pilihan
         Swal.fire({
-            title: 'Apakah Kamu Sudah Menekan Enter Di Keyboard Pada Input Nama Author ?',
+            title: 'Apakah Kamu Sudah Menekan Enter Di Keyboard Pada Input Subjek Area Journal ?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sudah',
