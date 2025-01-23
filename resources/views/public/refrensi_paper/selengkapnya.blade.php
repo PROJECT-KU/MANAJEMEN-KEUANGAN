@@ -61,7 +61,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
 
             <ol>
                 <li><a href="{{ url('/blog') }}">Home</a></li>
-                <li><a href="">Refrensi Paper</a></li>
+                <li><a href="">Referensi Paper</a></li>
             </ol>
 
             <h2>Refrensi Paper</h2>
@@ -151,7 +151,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== QUARTILE & APC ==================-->
-                        <h3 class="sidebar-title">Quartile & APC</h3>
+                        <h3 class="sidebar-title">Quartile & Harga</h3>
                         <div class="sidebar-item recent-posts">
                             <p>Q-{{ $datas->quartile_journal ?? 'Quartile Journal tidak tersedia' }} | {{ $datas->apc ?? 'APC Journal tidak tersedia' }}</p>
                         </div>
