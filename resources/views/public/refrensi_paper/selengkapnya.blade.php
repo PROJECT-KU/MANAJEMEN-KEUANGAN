@@ -140,7 +140,13 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                         <!--================== DOI ==================-->
                         <h3 class="sidebar-title">DOI</h3>
                         <div class="sidebar-item recent-posts">
-                            <p>{{ $datas->doi ?? 'DOI tidak tersedia' }}</p> <!-- Mengakses langsung DOI -->
+                            <p>
+                                @if($datas->doi)
+                                <a href="https://doi.org/{{ $datas->doi }}" target="_blank" rel="noopener noreferrer">{{ $datas->doi }}</a>
+                                @else
+                                DOI tidak tersedia
+                                @endif
+                            </p>
                         </div>
                         <!--================== END ==================-->
 
