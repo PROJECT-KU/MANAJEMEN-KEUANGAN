@@ -104,7 +104,7 @@
                         <a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a>
                     </li>
                     <li>
-                        <a class="nav-link scrollto {{ Request::is('Refrensi-Paper') ? 'active' : '' }} || {{ Request::is('/Refrensi-Paper/selengkapnya/*') ? 'active' : '' }" href="{{ url('/Refrensi-Paper') }}">Refrensi Paper</a>
+                        <a class="nav-link scrollto {{ Request::is('Refrensi-Paper/data') ? 'active' : '' }} || {{ Request::is('Refrensi-Paper/selengkapnya/*') ? 'active' : '' }" href="{{ url('/Refrensi-Paper') }}">Refrensi Paper</a>
                     </li>
                     <li>
                         <a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a>
