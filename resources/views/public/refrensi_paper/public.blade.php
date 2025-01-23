@@ -107,7 +107,7 @@ Refrensi Paper | Rumah Scopus
                             <div class="d-flex align-items-center" style="width: 100%;">
                                 <div style="margin-left: 0; width: 100%;">
                                     <h5 style="font-weight: bold; width: 100%;">{{ $data->judul_paper }}</h5>
-                                    <p style="width: 100%;">Q-{{ $data->nama_journal }}</p>
+                                    <p style="width: 100%;">{{ $data->nama_journal }}</p>
                                     <p style="width: 100%;">Q-{{ $data->quartile_journal }}</p>
                                     <hr style="width: 100%; margin: 10px 0;">
                                     <h5 style="font-weight: bold; width: 100%;">Abstrak</h5>

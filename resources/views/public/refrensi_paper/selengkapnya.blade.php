@@ -91,6 +91,7 @@ Refrensi Paper Selengkapnya | Rumah Scopus
                             </ul>
                         </div>
                         <div class="entry-content">
+                            <h5 style="font-weight: bold; width: 100%;">Abstrak</h5>
                             <div class="article-container">
                                 {!! $datas->abstrak !!}
                             </div>
