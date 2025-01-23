@@ -116,10 +116,10 @@ class RefrensiPaperController extends Controller
         $token = $this->generateRandomToken(30);
         $save = RefrensiPaper::create([
             'token'                         => $token,
-            'nama_author'                   => $request->input('kata_kunci_tags'),
+            'subjek_area_journal'           => $request->input('kata_kunci_tags'),
             'nama_journal'                  => $request->input('nama_journal'),
             'quartile_journal'              => $request->input('quartile_journal'),
-            'subjek_area_journal'           => $request->input('subjek_area_journal'),
+            'nama_author'                   => $request->input('nama_author'),
             'judul_paper'                   => $request->input('judul_paper'),
             'doi'                           => $request->input('doi'),
             'apc'                           => $request->input('apc'),
@@ -147,15 +147,15 @@ class RefrensiPaperController extends Controller
         $datas = RefrensiPaper::findOrFail($id);
 
         $datas->update([
-            'nama_author'               => $request->input('kata_kunci_tags') ?? $datas->kata_kunci_tags,
+            'subjek_area_journal'       => $request->input('kata_kunci_tags') ?? $datas->kata_kunci_tags,
             'nama_journal'              => $request->input('nama_journal') ?? $datas->nama_journal,
             'quartile_journal'          => $request->input('quartile_journal') ?? $datas->quartile_journal,
-            'subjek_area_journal'       => $request->input('subjek_area_journal') ?? $datas->subjek_area_journal,
+            'nama_author'               => $request->input('nama_author') ?? $datas->subjek_area_journal,
             'judul_paper'               => $request->input('judul_paper') ?? $datas->judul_paper,
             'doi'                       => $request->input('doi') ?? $datas->doi,
             'apc'                       => $request->input('apc') ?? $datas->apc,
             'type'                      => $request->input('type') ?? $datas->type,
-            'abstrak'                      => $request->input('abstrak') ?? $datas->abstrak,
+            'abstrak'                   => $request->input('abstrak') ?? $datas->abstrak,
         ]);
 
         if ($datas) {
