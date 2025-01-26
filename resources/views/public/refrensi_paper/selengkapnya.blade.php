@@ -169,13 +169,9 @@ Referensi Paper Selengkapnya | Rumah Scopus
                         @else
                         <h3 class="sidebar-title">File PDF</h3>
                         <div class="sidebar-item recent-posts">
-                            @if(!empty($datas->file))
                             <a href="{{ asset('referensi_paper/' . $datas->file) }}" download class="btn btn-primary">
                                 Download PDF
                             </a>
-                            @else
-                            <p>Type Journal tidak tersedia</p>
-                            @endif
                         </div>
                         @endif
                         <!--================== END ==================-->
