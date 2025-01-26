@@ -324,7 +324,7 @@ Tambah Data Refrensi Paper | MIS
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row mb-5">
                             <div class="col-md-6">
                                 <div class="form-group custom-file-upload-anatomy">
                                     <label for="file" class="form-label">File Referensi</label>
