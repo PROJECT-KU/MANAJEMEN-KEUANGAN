@@ -124,7 +124,7 @@ class RefrensiPaperController extends Controller
             if ($FileReferensi->getSize() > $maxFileSize) {
                 return redirect()->back()->with('error', 'Ukuran file anatomy pertama melebihi 5 MB.');
             }
-            $ReferensiName = time() . '_' . Str::uuid() . $FileReferensi->getClientOriginalExtension();
+            $ReferensiName = time() . '_' . Str::uuid() . '_Referensi_Paper_RSC.' . $FileReferensi->getClientOriginalExtension();
             $referensiPathFirst = 'refrerensi_paper/' . $ReferensiName;
             $FileReferensi->move(public_path('refrerensi_paper'), $ReferensiName);
         }
@@ -170,7 +170,7 @@ class RefrensiPaperController extends Controller
             if ($FileReferensi->getSize() > $maxFileSize) {
                 return redirect()->back()->with('error', 'Ukuran file anatomy kedua melebihi 5 MB.');
             }
-            $ReferensiName = time() . '_' . Str::uuid() . $FileReferensi->getClientOriginalExtension();
+            $ReferensiName = time() . '_' . Str::uuid() . '_Referensi_Paper_RSC.' . $FileReferensi->getClientOriginalExtension();
             $ReferensiPath = 'refrerensi_paper/' . $ReferensiName;
 
             // Check and delete the old file if it exists
