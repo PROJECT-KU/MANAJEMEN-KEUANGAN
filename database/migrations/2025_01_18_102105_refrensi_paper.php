@@ -26,6 +26,7 @@ class RefrensiPaper extends Migration
             $table->string('doi')->nullable();
             $table->string('apc')->nullable();
             $table->string('type')->nullable();
+            $table->string('file')->nullable();
             $table->timestamps();
         });
     }

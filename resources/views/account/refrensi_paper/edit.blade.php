@@ -4,6 +4,172 @@
 Update Data Refrensi Paper | MIS
 @stop
 
+
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<style>
+    .custom-file-upload {
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .inputfile {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .file-upload {
+        cursor: pointer;
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .file-upload:hover {
+        background-color: #0056b3;
+    }
+
+    #file-selected {
+        display: block;
+        margin-top: 5px;
+        color: #888;
+    }
+
+    .image-preview {
+        margin-top: 10px;
+        display: none;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+    }
+</style>
+<!--================== END ==================-->
+
+<!--================== CARD VIEW UPLOAD FILE ==================-->
+<style>
+    /* Container styling - Anatomy */
+    .custom-file-upload-anatomy {
+        position: relative;
+    }
+
+    .file-upload-anatomy {
+        display: inline-block;
+        background: #28a745;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .file-upload-anatomy i {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    .file-upload-anatomy:hover {
+        background: #218838;
+    }
+
+    .image-preview-container-anatomy {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #28a745;
+        padding: 15px;
+        border-radius: 5px;
+        min-height: 150px;
+    }
+
+    .file-info-anatomy {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+    }
+
+    /* Container styling - Paper */
+    .custom-file-upload-paper {
+        position: relative;
+    }
+
+    .file-upload-paper {
+        display: inline-block;
+        background: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .file-upload-paper i {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    .file-upload-paper:hover {
+        background: #0056b3;
+    }
+
+    .image-preview-container-paper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #007bff;
+        padding: 15px;
+        border-radius: 5px;
+        min-height: 150px;
+    }
+
+    .file-info-paper {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+    }
+
+    .inputfile {
+        display: none;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+
+        .image-preview-container-anatomy,
+        .image-preview-container-paper {
+            min-height: 100px;
+        }
+
+        .file-upload-anatomy,
+        .file-upload-paper {
+            font-size: 14px;
+            padding: 8px 15px;
+        }
+    }
+</style>
+<!--================== END ==================-->
+
 <!--================== AUTHOR ==================-->
 <style>
     .keyword-container {
@@ -159,6 +325,39 @@ Update Data Refrensi Paper | MIS
                             </div>
                         </div>
 
+                        <div class="row mb-5">
+                            <div class="col-md-6">
+                                <div class="form-group custom-file-upload-anatomy">
+                                    <label for="file" class="form-label">File Referensi</label>
+                                    <div class="input-group">
+                                        <input type="file" name="file" id="file" class="inputfile" hidden>
+                                        <label for="file" class="file-upload-anatomy">
+                                            <i class="fas fa-cloud-upload-alt"></i> Choose File Referensi
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 50%; background-color:#888">
+                                    @if($datas->file)
+                                    <!-- Display the file name and a download link -->
+                                    <div class="text-center">
+                                        <p style="color: #fff;">Uploaded File: {{ basename($datas->file) }}</p>
+                                        <a href="{{ asset($datas->file) }}" class="btn btn-sm btn-primary" download>
+                                            <i class="fas fa-download"></i> Download File
+                                        </a>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="image-preview-container-paper d-flex justify-content-center align-items-center" style="height: 100%;">
+                                    <div id="imagePreview-anatomy" class="image-preview"></div>
+                                    <span id="file-selected-anatomy" class="file-info-anatomy">
+                                        <p class="text-center">No file uploaded .</p>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex">
                             <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
                                 <i class="fa fa-paper-plane"></i> SIMPAN
@@ -173,6 +372,75 @@ Update Data Refrensi Paper | MIS
         </div>
     </section>
 </div>
+
+
+<!--================== UPLOAD FILE WITH VIEW ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function handleFileUpload(inputId, previewId, fileInfoId, allowedTypes, maxFileSizeMB, alertFileSizeMB) {
+        document.getElementById(inputId).addEventListener('change', function(event) {
+            var fileInput = event.target;
+            var file = fileInput.files[0];
+            var fileName = file.name;
+            var fileSizeKB = (file.size / 1024).toFixed(5); // Ukuran file dalam KB
+            var fileSizeMB = (file.size / (1024 * 1024)).toFixed(5); // Ukuran file dalam MB
+
+            // Validasi tipe file
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Hanya file PDF, DOC, dan DOCX yang diizinkan. Harap pilih jenis file yang valid.'
+                });
+                fileInput.value = ""; // Reset input file
+                document.getElementById(previewId).innerHTML = ""; // Reset preview
+                document.getElementById(fileInfoId).innerHTML = ""; // Reset file info
+                return;
+            }
+
+            // SweetAlert jika file melebihi alertFileSizeMB (2 MB)
+            if (file.size > alertFileSizeMB * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ukuran file besar',
+                    text: `Ukuran file ini adalah ${fileSizeMB} MB, yang melebihi ${alertFileSizeMB} MB. Harap pertimbangkan untuk mengunggah file yang lebih kecil.`
+                });
+            }
+
+            // Validasi ukuran maksimum file
+            if (file.size > maxFileSizeMB * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: `Ukuran file melebihi batas maksimum ${maxFileSizeMB} MB. Harap pilih file yang lebih kecil.`
+                });
+                fileInput.value = ""; // Reset input file
+                document.getElementById(previewId).innerHTML = ""; // Reset preview
+                document.getElementById(fileInfoId).innerHTML = ""; // Reset file info
+                return;
+            }
+
+            // Tampilkan nama dan ukuran file
+            var displaySize = fileSizeMB >= 1 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+            document.getElementById(fileInfoId).innerHTML = `${fileName} (${displaySize})`;
+
+            // Preview untuk non-gambar
+            document.getElementById(previewId).innerHTML = '<span style="color: #555;">Preview tidak tersedia untuk tipe file ini.</span>';
+        });
+    }
+
+    // Inisialisasi untuk file anatomy
+    handleFileUpload(
+        'file',
+        'imagePreview-anatomy',
+        'file-selected-anatomy',
+        ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        5, // Maksimal 5MB
+        5 // Alert jika lebih dari 2MB
+    );
+</script>
+
+<!--================== END ==================-->
 
 <!--================== SUMMERNOTE ==================-->
 <script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>

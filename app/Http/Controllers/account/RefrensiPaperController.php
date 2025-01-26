@@ -114,6 +114,21 @@ class RefrensiPaperController extends Controller
     public function store(Request $request)
     {
         $token = $this->generateRandomToken(30);
+
+        // Maksimal ukuran file dalam byte (5 MB)
+        $maxFileSize = 5 * 1024 * 1024;
+
+        // Handle File Anatomy Upload
+        if ($request->hasFile('file')) {
+            $FileReferensi = $request->file('file');
+            if ($FileReferensi->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file anatomy pertama melebihi 5 MB.');
+            }
+            $ReferensiName = time() . '_' . Str::uuid() . $FileReferensi->getClientOriginalExtension();
+            $referensiPathFirst = 'refrerensi_paper/' . $ReferensiName;
+            $FileReferensi->move(public_path('refrerensi_paper'), $ReferensiName);
+        }
+
         $save = RefrensiPaper::create([
             'token'                         => $token,
             'subjek_area_journal'           => $request->input('kata_kunci_tags'),
@@ -125,6 +140,7 @@ class RefrensiPaperController extends Controller
             'apc'                           => $request->input('apc'),
             'type'                          => $request->input('type'),
             'abstrak'                       => $request->input('abstrak'),
+            'file'                          => $referensiPathFirst ?? null,
         ]);
 
         if ($save) {
@@ -146,6 +162,28 @@ class RefrensiPaperController extends Controller
     {
         $datas = RefrensiPaper::findOrFail($id);
 
+        $maxFileSize = 5 * 1024 * 1024;
+
+        // Handle File Anatomy Upload
+        if ($request->hasFile('file')) {
+            $FileReferensi = $request->file('file');
+            if ($FileReferensi->getSize() > $maxFileSize) {
+                return redirect()->back()->with('error', 'Ukuran file anatomy kedua melebihi 5 MB.');
+            }
+            $ReferensiName = time() . '_' . Str::uuid() . $FileReferensi->getClientOriginalExtension();
+            $ReferensiPath = 'refrerensi_paper/' . $ReferensiName;
+
+            // Check and delete the old file if it exists
+            if ($datas->file && file_exists(public_path($datas->file))) {
+                unlink(public_path($datas->file));
+            }
+
+            $FileReferensi->move(public_path('refrerensi_paper'), $ReferensiName);
+            $datas->file = $ReferensiPath; // Update the file path in the database
+        } else {
+            $ReferensiPath = $datas->file;
+        }
+
         $datas->update([
             'subjek_area_journal'       => $request->input('kata_kunci_tags') ?? $datas->kata_kunci_tags,
             'nama_journal'              => $request->input('nama_journal') ?? $datas->nama_journal,
@@ -156,6 +194,7 @@ class RefrensiPaperController extends Controller
             'apc'                       => $request->input('apc') ?? $datas->apc,
             'type'                      => $request->input('type') ?? $datas->type,
             'abstrak'                   => $request->input('abstrak') ?? $datas->abstrak,
+            'file'                      => $ReferensiPath ?? null,
         ]);
 
         if ($datas) {
@@ -172,6 +211,17 @@ class RefrensiPaperController extends Controller
     {
         // Temukan data berdasarkan ID
         $data = RefrensiPaper::findOrFail($id);
+
+        $files = [
+            $data->file,
+        ];
+
+        // Iterasi untuk menghapus file
+        foreach ($files as $filePath) {
+            if ($filePath && file_exists(public_path($filePath))) {
+                unlink(public_path($filePath));
+            }
+        }
 
         // Hapus data dari database
         $data->delete();
