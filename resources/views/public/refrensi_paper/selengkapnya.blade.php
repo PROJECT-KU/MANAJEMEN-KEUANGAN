@@ -151,7 +151,7 @@ Referensi Paper Selengkapnya | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== QUARTILE & APC ==================-->
-                        <h3 class="sidebar-title">Quartile & Harga</h3>
+                        <h3 class="sidebar-title">Quartile & APC</h3>
                         <div class="sidebar-item recent-posts">
                             <p>Q-{{ $datas->quartile_journal ?? 'Quartile Journal tidak tersedia' }} | {{ $datas->apc ?? 'APC Journal tidak tersedia' }}</p>
                         </div>
@@ -162,6 +162,22 @@ Referensi Paper Selengkapnya | Rumah Scopus
                         <div class="sidebar-item recent-posts">
                             <p>{{ $datas->type ?? 'Type Journal tidak tersedia' }}</p>
                         </div>
+                        <!--================== END ==================-->
+
+                        <!--================== QUARTILE & APC ==================-->
+                        @if ($datas->file == null)
+                        @else
+                        <h3 class="sidebar-title">File PDF</h3>
+                        <div class="sidebar-item recent-posts">
+                            @if(!empty($datas->file))
+                            <a href="{{ asset('storage/' . $datas->file) }}" download class="btn btn-primary">
+                                Download PDF
+                            </a>
+                            @else
+                            <p>Type Journal tidak tersedia</p>
+                            @endif
+                        </div>
+                        @endif
                         <!--================== END ==================-->
                     </div>
                 </div>
