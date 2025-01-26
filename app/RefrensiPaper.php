@@ -27,6 +27,7 @@ class RefrensiPaper extends Model
         'doi',
         'apc',
         'type',
+        'file',
         'created_at',
         'updated_at',
     ];
