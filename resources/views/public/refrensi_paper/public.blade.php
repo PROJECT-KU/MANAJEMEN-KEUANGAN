@@ -131,6 +131,9 @@ Refrensi Paper | Rumah Scopus
                 </div>
                 @endforeach
             </div>
+            <div class="d-flex justify-content-center mt-4">
+                {{ $datas->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links('vendor.pagination.bootstrap-4') }}
+            </div>
         </div>
     </div>
 </div>
