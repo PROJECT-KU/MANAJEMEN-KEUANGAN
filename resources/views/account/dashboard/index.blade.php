@@ -284,7 +284,7 @@ Dashboard | MIS
                                 ->whereDate('created_at', now()->toDateString())
                                 ->first();
                                 @endphp
-                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
+                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
                                     <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
                                         MASUK
                                     </button>
@@ -297,7 +297,7 @@ Dashboard | MIS
                                     Selamat Bekerja!
                                 </span>
                             </div>
-                            @elseif (!$todayPresensi && date('H:i:s') >= '08:00:00' && date('H:i:s') <= '21:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
+                            @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
                                 <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
                                     MASUK
                                 </a>
