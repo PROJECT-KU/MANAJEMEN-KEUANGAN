@@ -169,9 +169,11 @@ Referensi Paper Selengkapnya | Rumah Scopus
                         @else
                         <h3 class="sidebar-title">File PDF</h3>
                         <div class="sidebar-item recent-posts">
-                            <a href="{{ asset('referensi_paper/' . $datas->file) }}" download class="btn btn-primary">
-                                Download PDF
+                            @if($datas->file)
+                            <a href="{{ asset($datas->file) }}" download class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download PDF
                             </a>
+                            @endif
                         </div>
                         @endif
                         <!--================== END ==================-->
