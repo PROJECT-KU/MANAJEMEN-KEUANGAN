@@ -286,6 +286,7 @@ Tambah Data Refrensi Paper | MIS
                                             <option value="" disabled selected>Pilih Type Journal</option>
                                             <option value="Open Access">Open Access</option>
                                             <option value="Close Access">Close Access</option>
+                                            <option value="Hybrid">Hybrid</option>
                                         </select>
                                     </div>
                                 </div>
