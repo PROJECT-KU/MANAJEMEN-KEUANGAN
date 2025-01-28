@@ -156,24 +156,24 @@ Refrensi Paper | Rumah Scopus
     </div>
 </div>
 
-</div>
-
-<!--================== SEARCH WITH JQUERY ==================-->
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let searchInput = document.getElementById('searchInput');
-        let searchForm = document.getElementById('searchForm');
-        let debounceTimeout;
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("searchButton").addEventListener("click", function() {
+            var searchInputValue = document.querySelector("input[name='q']").value.trim();
 
-        searchInput.addEventListener('keyup', function() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(function() {
-                if (searchInput.value.trim() === '') {
-                    window.location.href = "{{ route('account.refrensi-paper.index') }}";
-                } else {
-                    searchForm.submit();
-                }
-            }, 500); // Adjust the debounce delay as needed
+            if (searchInputValue === "") {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Harap isi field pencarian terlebih dahulu!',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // If not empty, submit the form
+                document.getElementById("searchForm").submit();
+            }
         });
     });
 </script>
