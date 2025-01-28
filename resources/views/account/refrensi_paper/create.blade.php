@@ -302,13 +302,13 @@ Tambah Data Refrensi Paper | MIS
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>DOI</label>
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">https://doi.org/</span>
-                                    </div>
                                     <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">https://doi.org/</span>
+                                        </div>
                                         <input type="text" name="doi" value="{{ old('doi') }}" placeholder="Masukkan DOI Paper" class="form-control" required>
                                     </div>
                                 </div>
