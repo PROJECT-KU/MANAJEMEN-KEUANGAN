@@ -287,6 +287,7 @@ Update Data Refrensi Paper | MIS
                                             <option value="" disabled selected>Pilih Type Journal</option>
                                             <option value="Open Access" {{ $datas->type == 'Open Access' ? 'selected' : '' }}>Open Access</option>
                                             <option value="Close Access" {{ $datas->type == 'Close Access' ? 'selected' : '' }}>Close Access</option>
+                                            <option value="Hybrid" {{ $datas->type == 'Hybrid' ? 'selected' : '' }}>Hybrid</option>
                                         </select>
                                     </div>
                                 </div>
