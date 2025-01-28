@@ -142,7 +142,7 @@ Referensi Paper Selengkapnya | Rumah Scopus
                         <div class="sidebar-item recent-posts">
                             <p>
                                 @if($datas->doi)
-                                <a href="https://doi.org/{{ $datas->doi }}" target="_blank" rel="noopener noreferrer">{{ $datas->doi }}</a>
+                                <a href="https://doi.org/{{ $datas->doi }}" target="_blank" rel="noopener noreferrer">https://doi.org/{{ $datas->doi }}</a>
                                 @else
                                 DOI tidak tersedia
                                 @endif
