@@ -302,7 +302,7 @@ Tambah Data Refrensi Paper | MIS
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>DOI</label>
                                     <div class="input-group-prepend">
