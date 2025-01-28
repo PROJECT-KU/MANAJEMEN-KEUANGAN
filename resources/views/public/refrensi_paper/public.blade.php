@@ -103,8 +103,11 @@ Refrensi Paper | Rumah Scopus
             <form action="{{ route('public.refrensi-paper.SearchPublic') }}" method="GET" id="searchForm">
                 <div class="form-group">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
+                        <div class="input-group-prepend">
+                        </div>
+                        <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
                         <div class="input-group-append">
+                            <button type="button" class="btn btn-info rounded-pill ml-1" id="searchButton"><i class="fa fa-search"></i> CARI</button>
                         </div>
                         @if(request()->has('q'))
                         <a href="{{ route('public.refrensi-paper.PublicRefrensiPaper') }}" class="btn btn-danger rounded-pill ml-1">
