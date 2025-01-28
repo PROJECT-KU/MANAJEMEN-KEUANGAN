@@ -303,11 +303,11 @@ Update Data Refrensi Paper | MIS
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>DOI</label>
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text">Q-</span>
+                                        <span class="input-group-text">https://doi.org/</span>
                                     </div>
                                     <div class="input-group">
                                         <input type="text" name="doi" value="{{ $datas->doi }}" placeholder="Masukkan DOI Paper" class="form-control" required>
