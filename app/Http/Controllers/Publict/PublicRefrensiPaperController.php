@@ -44,4 +44,42 @@ class PublicRefrensiPaperController extends Controller
     }
 
     // <!--================== END ==================-->
+
+    // <!--================== FILTER & SEARCH ==================-->
+    public function searchpublic(Request $request)
+    {
+        // Ambil input pencarian dan tanggal
+        $search = $request->get('q');
+        $startDate = $request->input('tanggal_awal', date('Y-m-01 00:00:00'));
+        $endDate = $request->input('tanggal_akhir', date('Y-m-t 23:59:59'));
+
+        // Query data menggunakan Eloquent dengan filter
+        $datas = RefrensiPaper::query()
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->where('nama_author', 'LIKE', "%$search%")
+                        ->orWhere('nama_journal', 'LIKE', "%$search%")
+                        ->orWhere('quartile_journal', 'LIKE', "%$search%")
+                        ->orWhere('subjek_area_journal', 'LIKE', "%$search%")
+                        ->orWhere('judul_paper', 'LIKE', "%$search%")
+                        ->orWhere('type', 'LIKE', "%$search%");
+                }
+            })
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'DESC')
+            ->paginate(16);
+
+        // Tambahkan parameter pencarian ke paginasi
+        $datas->appends($request->only(['q', 'tanggal_awal', 'tanggal_akhir']));
+
+        // Jika data tidak ditemukan
+        if ($datas->isEmpty()) {
+            return redirect()->route('public.refrensi-paper.PublicRefrensiPaper')
+                ->with('error', 'Data Refrensi Paper Tidak Ditemukan.');
+        }
+
+        // Kembalikan ke view
+        return view('public.refrensi_paper.public', compact('datas', 'startDate', 'endDate'));
+    }
+    // <!--================== END ==================-->
 }

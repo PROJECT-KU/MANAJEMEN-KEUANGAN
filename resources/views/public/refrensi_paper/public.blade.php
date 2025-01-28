@@ -96,9 +96,24 @@ Refrensi Paper | Rumah Scopus
     </div>
 </section>
 
+
 <div class="container mt-5 mb-5">
     <div class="main-card" data-aos="fade-right">
         <div class="card-body">
+            <form action="{{ route('public.refrensi-paper.SearchPublic') }}" method="GET" id="searchForm">
+                <div class="form-group">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
+                        <div class="input-group-append">
+                        </div>
+                        @if(request()->has('q'))
+                        <a href="{{ route('public.refrensi-paper.PublicRefrensiPaper') }}" class="btn btn-danger rounded-pill ml-1">
+                            <i class="fa fa-trash mt-2"></i>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
             <div class="row">
                 @foreach ($datas as $data)
                 <div class="col-md-3 mb-2" data-aos="fade-up">
@@ -139,4 +154,25 @@ Refrensi Paper | Rumah Scopus
 </div>
 
 </div>
+
+<!--================== SEARCH WITH JQUERY ==================-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let searchInput = document.getElementById('searchInput');
+        let searchForm = document.getElementById('searchForm');
+        let debounceTimeout;
+
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(function() {
+                if (searchInput.value.trim() === '') {
+                    window.location.href = "{{ route('account.refrensi-paper.index') }}";
+                } else {
+                    searchForm.submit();
+                }
+            }, 500); // Adjust the debounce delay as needed
+        });
+    });
+</script>
+<!--================== END ==================-->
 @stop
