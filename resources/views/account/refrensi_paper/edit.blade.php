@@ -306,6 +306,9 @@ Update Data Refrensi Paper | MIS
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>DOI</label>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Q-</span>
+                                    </div>
                                     <div class="input-group">
                                         <input type="text" name="doi" value="{{ $datas->doi }}" placeholder="Masukkan DOI Paper" class="form-control" required>
                                     </div>
