@@ -25,7 +25,7 @@ Tambah Data Scopus Kafe | MIS
                                         <option value="" disabled selected>-- PILIH SESI --</option>
                                         <option value="sesi 1">SESI 1</option>
                                         <option value="sesi 2">SESI 2</option>
-                                        <option value="sesi 3">SESI 3</option>
+                                        <!-- <option value="sesi 3">SESI 3</option> -->
                                     </select>
                                 </div>
                             </div>

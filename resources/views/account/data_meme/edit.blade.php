@@ -91,7 +91,7 @@ Edit Data Scopus Kafe | MIS
                                         <option value="" disabled selected>-- PILIH SESI --</option>
                                         <option value="sesi 1" {{ $datameme->sesi == 'sesi 1' ? 'selected' : '' }}>SESI 1</option>
                                         <option value="sesi 2" {{ $datameme->sesi == 'sesi 2' ? 'selected' : '' }}>SESI 2</option>
-                                        <option value="sesi 3" {{ $datameme->sesi == 'sesi 3' ? 'selected' : '' }}>SESI 3</option>
+                                        <!-- <option value="sesi 3" {{ $datameme->sesi == 'sesi 3' ? 'selected' : '' }}>SESI 3</option> -->
                                     </select>
                                 </div>
                             </div>
@@ -220,16 +220,16 @@ Edit Data Scopus Kafe | MIS
         switch (selectedSesi) {
             case 'sesi 1':
                 waktuMulaiInput.value = '08:00';
-                waktuSelesaiInput.value = '12:00';
+                waktuSelesaiInput.value = '13:00';
                 break;
             case 'sesi 2':
-                waktuMulaiInput.value = '12:30';
-                waktuSelesaiInput.value = '16:30';
+                waktuMulaiInput.value = '13:00';
+                waktuSelesaiInput.value = '18:00';
                 break;
-            case 'sesi 3':
-                waktuMulaiInput.value = '17:00';
-                waktuSelesaiInput.value = '21:00';
-                break;
+                // case 'sesi 3':
+                //     waktuMulaiInput.value = '17:00';
+                //     waktuSelesaiInput.value = '21:00';
+                //     break;
             default:
                 waktuMulaiInput.value = '';
                 waktuSelesaiInput.value = '';
