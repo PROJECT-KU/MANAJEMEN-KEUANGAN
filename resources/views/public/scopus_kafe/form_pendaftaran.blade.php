@@ -663,17 +663,17 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
     };
 
     const sesiMapKedua = {
-        'sesi 1': {
+        'sesi 1 kedua': {
             waktuMulai: '08:00',
             waktuSelesai: '13:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 2': {
+        'sesi 2 kedua': {
             waktuMulai: '13:00',
             waktuSelesai: '18:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        // 'sesi 3': {
+        // 'sesi 3 kedua': {
         //     waktuMulai: '17:00',
         //     waktuSelesai: '21:00',
         //     lokasi: 'Rumah Scopus Pusat'
@@ -681,17 +681,17 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
     };
 
     const sesiMapKetiga = {
-        'sesi 1': {
+        'sesi 1 ketiga': {
             waktuMulai: '08:00',
             waktuSelesai: '13:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 2': {
+        'sesi 2 ketiga': {
             waktuMulai: '13:00',
             waktuSelesai: '18:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        // 'sesi 3': {
+        // 'sesi 3 ketiga': {
         //     waktuMulai: '17:00',
         //     waktuSelesai: '21:00',
         //     lokasi: 'Rumah Scopus Pusat'
