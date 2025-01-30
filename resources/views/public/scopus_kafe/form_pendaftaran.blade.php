@@ -194,7 +194,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
                                         <option value="" disabled selected>-- PILIH SESI --</option>
                                         <option value="sesi 1">SESI 1</option>
                                         <option value="sesi 2">SESI 2</option>
-                                        <option value="sesi 3">SESI 3</option>
+                                        <!-- <option value="sesi 3">SESI 3</option> -->
                                     </select>
                                     @error('sesi')
                                     <span class="text-danger">{{ $message }}</span>
@@ -296,7 +296,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
                                         <option value="" disabled selected>-- PILIH SESI --</option>
                                         <option value="sesi 1 kedua">SESI 1</option>
                                         <option value="sesi 2 kedua">SESI 2</option>
-                                        <option value="sesi 3 kedua">SESI 3</option>
+                                        <!-- <option value="sesi 3 kedua">SESI 3</option> -->
                                     </select>
                                 </div>
                             </div>
@@ -396,7 +396,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
                                         <option value="" disabled selected>-- PILIH SESI --</option>
                                         <option value="sesi 1 ketiga">SESI 1</option>
                                         <option value="sesi 2 ketiga">SESI 2</option>
-                                        <option value="sesi 3 ketiga">SESI 3</option>
+                                        <!-- <option value="sesi 3 ketiga">SESI 3</option> -->
                                     </select>
                                 </div>
                             </div>
@@ -592,7 +592,7 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
     function handleFormChange(sesiSelect, waktuMulaiInput, waktuSelesaiInput, lokasiInput, biayaInput, kodeUnikInput, totalPembayaranInput, sesiMap, updateTotalKeseluruhan) {
         sesiSelect.addEventListener('change', (e) => {
             const selectedSesi = e.target.value;
-            const biaya = 500000; // Default biaya
+            const biaya = 1000000; // Default biaya
             const kodeUnik = generateUniqueCode(); // Generate kode unik
             const totalPembayaran = biaya + kodeUnik;
 
@@ -647,55 +647,55 @@ Form Pendaftaran Scopus Kafe | Rumah Scopus
     const sesiMapPertama = {
         'sesi 1': {
             waktuMulai: '08:00',
-            waktuSelesai: '12:00',
+            waktuSelesai: '13:00',
             lokasi: 'Rumah Scopus Pusat'
         },
         'sesi 2': {
-            waktuMulai: '12:30',
-            waktuSelesai: '16:30',
+            waktuMulai: '13:00',
+            waktuSelesai: '18:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 3': {
-            waktuMulai: '17:00',
-            waktuSelesai: '21:00',
-            lokasi: 'Rumah Scopus Pusat'
-        }
+        // 'sesi 3': {
+        //     waktuMulai: '17:00',
+        //     waktuSelesai: '21:00',
+        //     lokasi: 'Rumah Scopus Pusat'
+        // }
     };
 
     const sesiMapKedua = {
-        'sesi 1 kedua': {
+        'sesi 1': {
             waktuMulai: '08:00',
-            waktuSelesai: '12:00',
+            waktuSelesai: '13:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 2 kedua': {
-            waktuMulai: '12:30',
-            waktuSelesai: '16:30',
+        'sesi 2': {
+            waktuMulai: '13:00',
+            waktuSelesai: '18:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 3 kedua': {
-            waktuMulai: '17:00',
-            waktuSelesai: '21:00',
-            lokasi: 'Rumah Scopus Pusat'
-        }
+        // 'sesi 3': {
+        //     waktuMulai: '17:00',
+        //     waktuSelesai: '21:00',
+        //     lokasi: 'Rumah Scopus Pusat'
+        // }
     };
 
     const sesiMapKetiga = {
-        'sesi 1 ketiga': {
+        'sesi 1': {
             waktuMulai: '08:00',
-            waktuSelesai: '12:00',
+            waktuSelesai: '13:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 2 ketiga': {
-            waktuMulai: '12:30',
-            waktuSelesai: '16:30',
+        'sesi 2': {
+            waktuMulai: '13:00',
+            waktuSelesai: '18:00',
             lokasi: 'Rumah Scopus Pusat'
         },
-        'sesi 3 ketiga': {
-            waktuMulai: '17:00',
-            waktuSelesai: '21:00',
-            lokasi: 'Rumah Scopus Pusat'
-        }
+        // 'sesi 3': {
+        //     waktuMulai: '17:00',
+        //     waktuSelesai: '21:00',
+        //     lokasi: 'Rumah Scopus Pusat'
+        // }
     };
 
     // Inisialisasi form pertama
