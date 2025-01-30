@@ -13,7 +13,7 @@ Scopus Kafe | Rumah Scopus
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <h1 data-aos="fade-up">Scopus Kafe</h1>
                 <h2 data-aos="fade-up" data-aos-delay="400">
-                    Scopus Kafe adalah pendampingan secara private, yang akan di dampingi oleh Trainer Rumah Scopus. Pendampingan ini berdurasi selama 4 jam per sesinya. Pendampingan ini akan di
+                    Scopus Kafe adalah pendampingan secara private, yang akan di dampingi oleh Trainer Rumah Scopus. Pendampingan ini berdurasi selama 5 jam per sesinya. Pendampingan ini akan di
                     selenggarakan di Rumah Scopus Pusat yang terletak di Yogyakarta.
                 </h2>
                 <div data-aos="fade-up" data-aos-delay="600">
