@@ -148,16 +148,16 @@ Tambah Data Scopus Kafe | MIS
         switch (selectedSesi) {
             case 'sesi 1':
                 waktuMulaiInput.value = '08:00';
-                waktuSelesaiInput.value = '12:00';
+                waktuSelesaiInput.value = '13:00';
                 break;
             case 'sesi 2':
-                waktuMulaiInput.value = '12:30';
-                waktuSelesaiInput.value = '16:30';
+                waktuMulaiInput.value = '13:00';
+                waktuSelesaiInput.value = '18:00';
                 break;
-            case 'sesi 3':
-                waktuMulaiInput.value = '17:00';
-                waktuSelesaiInput.value = '21:00';
-                break;
+                // case 'sesi 3':
+                //     waktuMulaiInput.value = '17:00';
+                //     waktuSelesaiInput.value = '21:00';
+                //     break;
             default:
                 waktuMulaiInput.value = '';
                 waktuSelesaiInput.value = '';
