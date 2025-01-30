@@ -30,8 +30,8 @@ Beranda | Rumah Scopus
     <div class="container">
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
-                <h1 data-aos="fade-up">Selamat Datang di Rumah Scopus</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Seperti Menjelajahi Hutan Ilmu Pengetahuan, Menemukan Jalan Menuju Scopus Adalah Petualangan yang Tak Terlupakan</h2>
+                <h1 data-aos="fade-up">Rumah Scopus: Pelatihan Jurnal Bereputasi untuk Mewujudkan Impian Publikasi Internasional</h1>
+                <h2 data-aos="fade-up" data-aos-delay="400">Jelajahi Hutan Ilmu Pengetahuan Bersama Kami, Temukan Jalan Mudah Menuju Scopus dengan Pelatihan Terbaik dan Terpercaya!</h2>
                 <div data-aos="fade-up" data-aos-delay="600">
                     <div class="text-center text-lg-start">
                         <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">
@@ -176,7 +176,7 @@ Beranda | Rumah Scopus
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Scopus Kafe</h5>
                             <p style="text-align: justify;">
-                                Pendampingan secara langsung atau offline <b>dengan private selama 4 jam</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>.
+                                Pendampingan secara langsung atau offline <b>dengan private selama 5 jam</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>.
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">
@@ -309,7 +309,7 @@ Beranda | Rumah Scopus
             </div>
 
             <div class="col-lg-6" data-aos="fade-left">
-                <img src="{{ asset('assets/artikel/img/tiny.jpg') }}" class="img-fluid" alt="">
+                <img src="{{ asset('assets/artikel/img/Tiny.jpg') }}" class="img-fluid" alt="">
             </div>
         </div>
     </div>
