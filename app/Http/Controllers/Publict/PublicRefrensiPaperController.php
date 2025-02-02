@@ -30,7 +30,6 @@ class PublicRefrensiPaperController extends Controller
 
         // Ambil data dengan paginasi
         $datas = DB::table('refrensi_paper')
-            ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'DESC')
             ->paginate(16);
 
