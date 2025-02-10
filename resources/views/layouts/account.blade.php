@@ -198,6 +198,12 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     </a>
                                 </li>
                                 @endif
+
+                                <li class="{{ setActive('account/ToDoList') }}">
+                                    <a class="nav-link" href="{{ route('account.todolist.index') }}">
+                                        <i class="fas fa-list-alt"></i> <span>To Do List</span>
+                                    </a>
+                                </li>
                                 <!--================== END ==================-->
 
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')

@@ -157,136 +157,148 @@ Data Pendaftaran Scopus Kafe | MIS
                                             /* Adjust the margin value as needed for iPads */
                                         }
                                     }
+                                </style>
+                                {{ $datas->appends(['tanggal_awal'=> $startDate, 'tanggal_akhir'=> $endDate])->links("vendor.pagination.bootstrap-4")}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!--==================SEARCH WITH JQUERY==================-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let searchInput = document.getElementById('searchInput');
+        let searchForm = document.getElementById('searchForm');
+        let debounceTimeout;
 
-                                    </styl> {
-                                            {
-                                            $datas->appends(['tanggal_awal'=> $startDate, 'tanggal_akhir'=> $endDate])->links("vendor.pagination.bootstrap-4")
-                                        }
-                                    }
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(debounceTimeout);
 
-                                    </div></div></div></div></div></div></section></div>< !--==================SEARCH WITH JQUERY==================--><script>document.addEventListener('DOMContentLoaded', function() {
-                                            let searchInput=document.getElementById('searchInput');
-                                            let searchForm=document.getElementById('searchForm');
-                                            let debounceTimeout;
+            debounceTimeout = setTimeout(function() {
+                    if (searchInput.value.trim() === '') {
+                        window.location.href = "{{ route('account.gaji.index') }}";
+                    } else {
+                        searchForm.submit();
+                    }
+                }
 
-                                            searchInput.addEventListener('keyup', function() {
-                                                    clearTimeout(debounceTimeout);
+                , 500); // Adjust the debounce delay as needed
+        });
+    });
+</script>
+<!--==================END==================-->
+<!--==================SWEET ALERT JIKA FIELDS KOSONG==================-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("searchButton").addEventListener("click", function() {
+            var searchInputValue = document.querySelector("input[name='q']").value.trim();
 
-                                                    debounceTimeout=setTimeout(function() {
-                                                            if (searchInput.value.trim()==='') {
-                                                                window.location.href="{{ route('account.gaji.index') }}";
-                                                            }
+            if (searchInputValue === "") {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Harap isi field pencarian terlebih dahulu!',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // If not empty, submit the form
+                document.getElementById("searchForm").submit();
+            }
+        });
+    });
+</script>
+<!--==================END==================-->
+<!--==================RELOAD KETIKA DATA SUKSES==================-->
+<script>
+    @if(Session::has('success')) // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
 
-                                                            else {
-                                                                searchForm.submit();
-                                                            }
-                                                        }
+    setTimeout(function() {
+            window.location.reload();
+        }
 
-                                                        , 500); // Adjust the debounce delay as needed
-                                                });
-                                        });
+        , 1000); // Refresh halaman setelah 2 detik
 
-                                    </script>< !--==================END==================-->< !--==================SWEET ALERT JIKA FIELDS KOSONG==================--><script>document.addEventListener("DOMContentLoaded", function() {
-                                            document.getElementById("searchButton").addEventListener("click", function() {
-                                                    var searchInputValue=document.querySelector("input[name='q']").value.trim();
+    @endif
+</script>
+<!--==================END==================-->
+<!--==================SWEET ALERT DELETE==================-->
+<script>
+    function Delete(id) {
+        var token = $("meta[name='csrf-token']").attr("content");
 
-                                                    if (searchInputValue==="") {
-                                                        Swal.fire({
-                                                            icon: 'warning',
-                                                            title: 'Peringatan',
-                                                            text: 'Harap isi field pencarian terlebih dahulu!',
-                                                            confirmButtonColor: '#3085d6',
-                                                            confirmButtonText: 'OK'
-                                                        });
-                                                }
+        swal({
 
-                                                else {
-                                                    // If not empty, submit the form
-                                                    document.getElementById("searchForm").submit();
-                                                }
-                                            });
-                                    });
-                                    </script>< !--==================END==================-->< !--==================RELOAD KETIKA DATA SUKSES==================--><script>@if(Session::has('success')) // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+            title: "APAKAH KAMU YAKIN?",
+            text: "INGIN MENGHAPUS DATA INI!",
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "TIDAK",
+                    value: null,
+                    visible: true,
+                    className: "",
+                    closeModal: true,
+                }
 
-                                    setTimeout(function() {
-                                            window.location.reload();
-                                        }
+                ,
+                confirm: {
+                    text: "YA",
+                    value: true,
+                    visible: true,
+                    className: "",
+                    closeModal: true
+                }
+            }
 
-                                        , 1000); // Refresh halaman setelah 2 detik
+            ,
+            dangerMode: true,
+        }).then(function(isConfirm) {
+            if (isConfirm) {
 
-                                    @endif </script>< !--==================END==================-->< !--==================SWEET ALERT DELETE==================--><script>function Delete(id) {
-                                        var token=$("meta[name='csrf-token']").attr("content");
+                // ajax delete
+                $.ajax({
 
-                                        swal({
+                    url: "/account/pendaftaran-scopus-kafe/data/delete/" + id,
+                    data: {
+                        "_token": token,
+                        "_method": "DELETE"
+                    }
 
-                                            title: "APAKAH KAMU YAKIN?",
-                                            text: "INGIN MENGHAPUS DATA INI!",
-                                            icon: "warning",
-                                            buttons: {
-                                                cancel: {
-                                                    text: "TIDAK",
-                                                    value: null,
-                                                    visible: true,
-                                                    className: "",
-                                                    closeModal: true,
-                                                }
+                    ,
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.status === "success") {
+                            swal({
 
-                                                ,
-                                                confirm: {
-                                                    text: "YA",
-                                                    value: true,
-                                                    visible: true,
-                                                    className: "",
-                                                    closeModal: true
-                                                }
-                                            }
+                                title: 'BERHASIL!',
+                                text: response.message,
+                                icon: 'success',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        } else {
+                            swal({
 
-                                            ,
-                                            dangerMode: true,
-                                        }).then(function(isConfirm) {
-                                            if (isConfirm) {
-
-                                                // ajax delete
-                                                $.ajax({
-
-                                                    url: "/account/pendaftaran-scopus-kafe/data/delete/" + id,
-                                                    data: {
-                                                        "_token": token,
-                                                        "_method": "DELETE"
-                                                    }
-
-                                                    ,
-                                                    type: 'POST',
-                                                    success: function(response) {
-                                                        if (response.status==="success") {
-                                                            swal({
-
-                                                                title: 'BERHASIL!',
-                                                                text: response.message,
-                                                                icon: 'success',
-                                                                timer: 1000,
-                                                                buttons: false,
-                                                            }).then(function() {
-                                                                location.reload();
-                                                            });
-                                                    }
-
-                                                    else {
-                                                        swal({
-
-                                                            title: 'GAGAL!',
-                                                            text: response.message,
-                                                            icon: 'error',
-                                                            timer: 1000,
-                                                            buttons: false,
-                                                        }).then(function() {
-                                                            location.reload();
-                                                        });
-                                                }
-                                            }
-                                        });
-                                    }
-                                    });
-                                    }
-
-                                    </script>< !--==================END==================-->@stop
+                                title: 'GAGAL!',
+                                text: response.message,
+                                icon: 'error',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>
+<!--==================END==================-->
+@stop
