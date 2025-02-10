@@ -339,15 +339,15 @@ Route::prefix('account')->group(
         Route::delete('/refrensi-paper/data/delete/{id}', 'account\RefrensiPaperController@destroy')->name('account.refrensi-paper.delete');
 
         // to do list
-        Route::get('/ToDoList/data', 'account\ToDoListController@index')->name('account.todolist.index');
-        Route::get('/ToDoList/data/create', 'account\ToDoListController@create')->name('account.todolist.create');
-        Route::post('/ToDoList/data/store', 'account\ToDoListController@store')->name('account.todolist.store');
-        Route::post('/ToDoList/data/UpdateStatusTaskOto', 'account\ToDoListController@updateStatus')->name('account.updatestatusoto.updatestatus');
-        Route::get('/ToDoList/data/edit/{id}', 'account\ToDoListController@edit')->name('account.todolist.edit');
-        Route::post('/ToDoList/data/update-data/{id}', 'account\ToDoListController@update')->name('account.todolist.update');
-        Route::post('/ToDoList/data/update-checklist', 'account\ToDoListController@updateChecklist')->name('account.todolist.updateChecklist');
-        Route::post('/ToDoList/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
-        Route::post('/ToDoList/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
+        Route::get('/todolist/data', 'account\ToDoListController@index')->name('account.todolist.index');
+        Route::get('/todolist/data/create', 'account\ToDoListController@create')->name('account.todolist.create');
+        Route::post('/todolist/data/store', 'account\ToDoListController@store')->name('account.todolist.store');
+        Route::post('/todolist/data/UpdateStatusTaskOto', 'account\ToDoListController@updateStatus')->name('account.updatestatusoto.updatestatus');
+        Route::get('/todolist/data/edit/{id}', 'account\ToDoListController@edit')->name('account.todolist.edit');
+        Route::post('/todolist/data/update-data/{id}', 'account\ToDoListController@update')->name('account.todolist.update');
+        Route::post('/todolist/data/update-checklist', 'account\ToDoListController@updateChecklist')->name('account.todolist.updateChecklist');
+        Route::post('/todolist/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
+        Route::post('/todolist/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
     }
 
 
