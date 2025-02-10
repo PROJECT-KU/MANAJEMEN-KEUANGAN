@@ -34,63 +34,50 @@ class ToDoListController extends Controller
     // <!--================== TAMPILAN DATA ==================-->
     public function index()
     {
-        try {
-            $user = Auth::user();
-            $today = Carbon::today()->toDateString();
+        $user = Auth::user();
+        $today = Carbon::today()->toDateString();
 
-            // ✅ Update otomatis jika melewati deadline (jaga agar tidak mengupdate Completed)
-            DB::table('todolist')
-                ->where('tanggal_deadline', '<', $today)
-                ->whereNotIn('status', ['Completed', 'Melebihi Deadline'])
-                ->update(['status' => 'Melebihi Deadline']);
+        // ✅ Update status otomatis jika melewati deadline
+        DB::table('todolist')
+            ->where('tanggal_deadline', '<', $today)
+            ->whereNotIn('status', ['Completed', 'Melebihi Deadline']) // ✅ Completed tetap utuh
+            ->update(['status' => 'Melebihi Deadline']);
 
-            // ✅ Status yang akan diambil
-            $statuses = ['Assign Task', 'In Progress', 'Testing', 'Revisi', 'Completed', 'Melebihi Deadline'];
-            $data = [];
+        // ✅ Status yang akan diambil
+        $statuses = ['Assign Task', 'In Progress', 'Testing', 'Revisi', 'Completed', 'Melebihi Deadline'];
+        $data = [];
 
-            foreach ($statuses as $status) {
-                $varName = 'Datas' . str_replace(' ', '', $status);
+        foreach ($statuses as $status) {
+            $varName = 'Datas' . str_replace(' ', '', $status);
 
-                $query = DB::table('todolist')
-                    ->leftJoin('users as user1', 'todolist.user_id', '=', 'user1.id')
-                    ->leftJoin('users as user2', 'todolist.user_id_kedua', '=', 'user2.id')
-                    ->select(
-                        'todolist.*',
-                        'user1.full_name as full_name',
-                        'user2.full_name as full_name_kedua'
-                    )
-                    ->where('todolist.status', $status)
-                    ->orderBy('todolist.created_at', 'DESC');
+            $query = DB::table('todolist')
+                ->leftJoin('users as user1', 'todolist.user_id', '=', 'user1.id')
+                ->leftJoin('users as user2', 'todolist.user_id_kedua', '=', 'user2.id')
+                ->select('todolist.*', 'user1.full_name as full_name', 'user2.full_name as full_name_kedua')
+                ->where('todolist.status', $status)
+                ->orderBy('todolist.created_at', 'DESC');
 
-                // ✅ Jika bukan manajer, filter hanya berdasarkan user_id yang terkait
-                if ($user->level !== 'manager') {
-                    $query->where(function ($q) use ($user) {
-                        $q->where('todolist.user_id', $user->id)
-                            ->orWhere('todolist.user_id_kedua', $user->id);
-                    });
-                }
-
-                $tasks = $query->get();
-
-                // 🔹 Hitung progress checklist untuk setiap task
-                foreach ($tasks as $task) {
-                    $tasklistArray = array_filter(explode(',', $task->tasklist ?? ''));
-                    $checkedTasksArray = json_decode($task->checked ?? '[]', true) ?? [];
-
-                    $totalTasks = count($tasklistArray);
-                    $checkedTasks = count($checkedTasksArray);
-
-                    $task->progressPercent = $totalTasks > 0 ? round(($checkedTasks / $totalTasks) * 100) : 0;
-                }
-
-                $data[$varName] = $tasks;
+            // ✅ Jika bukan manajer, filter berdasarkan `user_id` atau `user_id_kedua`
+            if ($user->level !== 'manager') {
+                $query->where(function ($q) use ($user) {
+                    $q->where('todolist.user_id', $user->id)
+                        ->orWhere('todolist.user_id_kedua', $user->id);
+                });
             }
 
-            return view('account.todolist.index', $data + ['user' => $user]);
-        } catch (\Exception $e) {
-            \Log::error("Error loading ToDo List: " . $e->getMessage());
-            return response()->view('errors.500', [], 500);
+            $tasks = $query->get();
+
+            // 🔹 Hitung progress checklist untuk setiap task
+            foreach ($tasks as $task) {
+                $totalTasks = count(explode(',', $task->tasklist));
+                $checkedTasks = count(json_decode($task->checked, true) ?? []);
+                $task->progressPercent = $totalTasks > 0 ? round(($checkedTasks / $totalTasks) * 100) : 0;
+            }
+
+            $data[$varName] = $tasks;
         }
+
+        return view('account.todolist.index', $data + ['user' => $user]);
     }
     // <!--================== END ==================-->
 
