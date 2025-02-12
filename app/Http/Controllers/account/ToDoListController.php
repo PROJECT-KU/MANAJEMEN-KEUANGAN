@@ -296,7 +296,9 @@ class ToDoListController extends Controller
         // Ubah tasklist ke array, hapus task yang sesuai
         $tasks = explode(',', $todolist->tasklist);
         $tasks = array_map('trim', $tasks);
-        $tasks = array_filter($tasks, fn($t) => $t !== $task);
+        $tasks = array_filter($tasks, function ($t) use ($task) {
+            return $t !== $task;
+        });
 
         // Simpan kembali data yang telah dihapus
         $todolist->tasklist = implode(', ', $tasks);
