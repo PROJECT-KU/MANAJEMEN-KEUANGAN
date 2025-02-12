@@ -89,16 +89,12 @@ class ToDoListController extends Controller
         if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'admin') {
 
             $datas = DB::table('users')
-                ->select(
-                    'users.id',
-                    'users.full_name',
-                )
+                ->select('users.id', 'users.full_name')
                 ->where('users.company', $user->company)
                 ->groupBy('users.id', 'users.full_name')
                 ->orderBy('users.created_at', 'DESC')
                 ->get();
 
-            // dd($datas);
             return view('account.todolist.create', compact('datas'));
         } else {
             $users = User::where('id', $user->id)
