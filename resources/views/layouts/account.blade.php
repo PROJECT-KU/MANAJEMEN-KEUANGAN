@@ -199,7 +199,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif
 
-                                <li class="{{ setActive('account/ToDoList') }}">
+                                <li class="{{ setActive('account/todolist') }}">
                                     <a class="nav-link" href="{{ route('account.todolist.index') }}">
                                         <i class="fas fa-list-alt"></i> <span>To Do List</span>
                                     </a>
