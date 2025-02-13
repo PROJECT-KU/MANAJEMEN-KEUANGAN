@@ -208,8 +208,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
 
                                 <!--================== PAPER ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
@@ -236,6 +236,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
+                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
                                     <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
                                         <i class="fas fa-folder"></i> <span>Refrensi Paper</span>
