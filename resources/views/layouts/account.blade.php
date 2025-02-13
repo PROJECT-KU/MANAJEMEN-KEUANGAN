@@ -234,7 +234,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                     </a>
                                 </li>
 
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === '99')
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
                                     <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
                                         <i class="fas fa-folder"></i> <span>Refrensi Paper</span>
