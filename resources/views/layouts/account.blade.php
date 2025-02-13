@@ -154,7 +154,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== KARYAWAN ==================-->
                                 <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KARYAWAN</h6>
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->level === 'ceo')
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-user"></i> <span>Pengguna</span>
