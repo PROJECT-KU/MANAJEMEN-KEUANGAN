@@ -29,3 +29,5 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Logika lain untuk mengelola pembaruan cache jika diperlukan
+
+importScripts("https://js.pusher.com/beams/service-worker.js");
