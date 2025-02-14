@@ -432,6 +432,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <!--================== END ==================-->
 
+    <!--================== PUSHER NOTIFICATION TO HP ==================-->
+    <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
+    <!--================== END ==================-->
+
     @extends('layouts.alerts')
     </body>
 
