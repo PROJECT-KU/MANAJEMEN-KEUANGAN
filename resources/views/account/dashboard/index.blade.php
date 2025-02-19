@@ -137,6 +137,33 @@ Dashboard | MIS
     <section class="section">
         <div class="section-body">
 
+            <!--================== ASSIGN TASK ==================-->
+            @php
+            $user = Auth::user();
+            $userId = $user->id;
+
+            if ($user->level === 'manager') {
+            $tasks = DB::table('todolist')->where('status', 'Assign Task')->get();
+            $taskCount = $tasks->count();
+            } else {
+            $tasks = DB::table('todolist')
+            ->where('status', 'Assign Task')
+            ->where(function ($query) use ($userId) {
+            $query->where('user_id', $userId)->orWhere('user_id_kedua', $userId);
+            })
+            ->get();
+            $taskCount = $tasks->count();
+            }
+            @endphp
+
+            @if ($taskCount > 0)
+            <div class="alert alert-info mt-3" role="alert" style="text-align: center;">
+                <h5 class="text-center">Notifikasi Tugas</h5>
+                <p style="font-size: 20px;">Anda memiliki Jumlah tugas yang harus dikerjakan sebanyak: {{ $taskCount }}<br>Anda bisa melihat tugas di menu To Do List</p>
+            </div>
+            @endif
+            <!--================== END ==================-->
+
             <!--================== AKUN BELUM DI VERIFIKASI ==================-->
             @if (Auth::user()->status == "nonactive")
             <div class="alert alert-danger mt-5" role="alert" style="text-align: center;">

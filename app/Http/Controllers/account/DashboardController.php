@@ -7,6 +7,7 @@ use App\User;
 use App\Presensi;
 use App\Gaji;
 use App\Artikel;
+use App\Todolist;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
