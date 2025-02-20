@@ -307,4 +307,32 @@ class ToDoListController extends Controller
         return response()->json(['message' => 'Task berhasil dihapus!']);
     }
     // <!--================== END ==================-->
+
+    // <!--================== DELETE DATA ==================-->
+    public function destroy(Request $request, $id)
+    {
+        // Temukan data berdasarkan ID
+        $data = Todolist::findOrFail($id);
+
+        $files = [
+            $data->file_task,
+        ];
+
+        // Iterasi untuk menghapus file
+        foreach ($files as $filePath) {
+            if ($filePath && file_exists(public_path($filePath))) {
+                unlink(public_path($filePath));
+            }
+        }
+
+        // Hapus data dari database
+        $data->delete();
+
+        // Return JSON response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus beserta file terkait.',
+        ]);
+    }
+    // <!--================== END ==================-->
 }
