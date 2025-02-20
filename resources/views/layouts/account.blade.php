@@ -202,6 +202,14 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/todolist') }}">
                                     <a class="nav-link" href="{{ route('account.todolist.index') }}">
                                         <i class="fas fa-list-alt"></i> <span>To Do List</span>
+                                        @php
+                                        // Menghitung jumlah data dengan status 'menunggu verifikasi'
+                                        $totalAssignTask = App\Todolist::where('status', 'Assign Task')->count();
+                                        @endphp
+
+                                        @if ($totalAssignTask > 0)
+                                        <span class="badge badge-warning right" style="width: fit-content;">{{ $totalAssignTask }}</span>
+                                        @endif
                                     </a>
                                 </li>
                                 <!--================== END ==================-->
@@ -235,8 +243,10 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
+                                @if (Auth::user()->level !== 'manager')
                                 <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                @endif
+                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
                                     <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
                                         <i class="fas fa-folder"></i> <span>Refrensi Paper</span>
@@ -430,10 +440,6 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-    <!--================== END ==================-->
-
-    <!--================== PUSHER NOTIFICATION TO HP ==================-->
-    <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
     <!--================== END ==================-->
 
     @extends('layouts.alerts')

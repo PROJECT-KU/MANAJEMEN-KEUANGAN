@@ -87,9 +87,20 @@ TO DO List | MIS
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <a href="{{ route('account.todolist.edit', $task->id) }}" class="btn btn-info btn-block">
+                                                @if($user->level == 'manager')
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ route('account.todolist.edit', $task->id) }}" class="btn btn-info flex-grow-1">
+                                                        <i class="fa fa-pen"></i> Edit Task
+                                                    </a>
+                                                    <button onclick="Delete('{{ $task->id }}')" class="btn btn-danger">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                                @else
+                                                <a href="{{ route('account.todolist.edit', $task->id) }}" class="btn btn-info w-100">
                                                     <i class="fa fa-pen"></i> Edit Task
                                                 </a>
+                                                @endif
                                             </div>
                                             @endforeach
                                         </div>
@@ -245,5 +256,69 @@ TO DO List | MIS
     });
 </script>
 <!--================== END ==================-->
+<!--================== SWEET ALERT DELETE ==================-->
+<script>
+    function Delete(id) {
+        var token = $("meta[name='csrf-token']").attr("content");
 
+        swal({
+            title: "APAKAH KAMU YAKIN?",
+            text: "INGIN MENGHAPUS DATA INI!",
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "TIDAK",
+                    value: null,
+                    visible: true,
+                    className: "",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: "YA",
+                    value: true,
+                    visible: true,
+                    className: "",
+                    closeModal: true
+                }
+            },
+            dangerMode: true,
+        }).then(function(isConfirm) {
+            if (isConfirm) {
+                // ajax delete
+                $.ajax({
+                    url: "/account/todolist/data/delete/" + id,
+                    data: {
+                        "_token": token,
+                        "_method": "DELETE"
+                    },
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.status === "success") {
+                            swal({
+                                title: 'BERHASIL!',
+                                text: response.message,
+                                icon: 'success',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        } else {
+                            swal({
+                                title: 'GAGAL!',
+                                text: response.message,
+                                icon: 'error',
+                                timer: 1000,
+                                buttons: false,
+                            }).then(function() {
+                                location.reload();
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>
+<!--================== END ==================-->
 @stop

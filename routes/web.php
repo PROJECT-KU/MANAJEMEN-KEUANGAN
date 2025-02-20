@@ -348,6 +348,7 @@ Route::prefix('account')->group(
         Route::post('/todolist/data/update-checklist', 'account\ToDoListController@updateChecklist')->name('account.todolist.updateChecklist');
         Route::post('/todolist/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
         Route::post('/todolist/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
+        Route::delete('/todolist/data/delete/{id}', 'account\ToDoListController@destroy')->name('account.todolist.delete');
     }
 
 

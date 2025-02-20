@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\AssignTaskTodolist;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use App\Services\PusherBeamsService;
 
 class ToDoListController extends Controller
 {
@@ -141,25 +140,19 @@ class ToDoListController extends Controller
         if ($save) {
             $user = User::findOrFail($request->input('user_id'));
             $appName = 'Rumah Scopus Foundation';
-            $isStatusAssign = $request->input('status') == 'Assign Task';
-
-            if ($isStatusAssign) {
+            $isStatus = $request->input('status') == 'Assign Task';
+            if ($isStatus) {
                 $user1 = User::find($request->input('user_id'));
                 $user2 = User::find($request->input('user_id_kedua'));
 
-                // Kirim Email
                 if ($user1) {
-                    Mail::to($user1->email)->send(new AssignTaskTodolist($user1, $save, $appName, $isStatusAssign));
+                    Mail::to($user1->email)->send(new AssignTaskTodolist($user1, $save, $appName, $isStatus));
                 }
+
                 if ($user2) {
-                    Mail::to($user2->email)->send(new AssignTaskTodolist($user2, $save, $appName, $isStatusAssign));
+                    Mail::to($user2->email)->send(new AssignTaskTodolist($user2, $save, $appName, $isStatus));
                 }
-
-                // Kirim Notifikasi ke HP menggunakan Pusher Beams
-                $this->sendPushNotification($user1, $save);
-                $this->sendPushNotification($user2, $save);
             }
-
             return redirect()->route('account.todolist.index')->with('success', 'Data To Do List Paper Berhasil Disimpan!');
         } else {
             return redirect()->route('account.todolist.index')->with('error', 'Data To Do List Paper Gagal Disimpan!');
@@ -315,18 +308,31 @@ class ToDoListController extends Controller
     }
     // <!--================== END ==================-->
 
-    // <!--================== SEND NOTIFICATION TO HANDPHOND ==================-->
-
-    public function sendPushNotification($user, $task)
+    // <!--================== DELETE DATA ==================-->
+    public function destroy(Request $request, $id)
     {
-        if ($user) {
-            $pusherBeams = new PusherBeamsService();
-            $pusherBeams->sendNotification(
-                $user->id,
-                "Tugas Baru: {$task->judul_task}",
-                "Anda mendapatkan tugas baru dengan judul '{$task->judul_task}'. Deadline: {$task->tanggal_deadline}."
-            );
+        // Temukan data berdasarkan ID
+        $data = Todolist::findOrFail($id);
+
+        $files = [
+            $data->file_task,
+        ];
+
+        // Iterasi untuk menghapus file
+        foreach ($files as $filePath) {
+            if ($filePath && file_exists(public_path($filePath))) {
+                unlink(public_path($filePath));
+            }
         }
+
+        // Hapus data dari database
+        $data->delete();
+
+        // Return JSON response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus beserta file terkait.',
+        ]);
     }
     // <!--================== END ==================-->
 }

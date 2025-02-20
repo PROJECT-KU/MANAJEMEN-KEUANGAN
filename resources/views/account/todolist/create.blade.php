@@ -528,25 +528,4 @@ Tambah Data TO DO LIST| MIS
         }, 500);
     })
 </script>
-
-<script>
-    const beamsClient = new PusherPushNotifications.Client({
-        instanceId: 'adacb53b-bbc5-4126-9552-9df8191a6377'
-    });
-
-    beamsClient.start()
-        .then(() => beamsClient.addDeviceInterest(`user-${USER_ID}`))
-        .then(() => console.log('Terdaftar untuk menerima notifikasi!'))
-        .catch(console.error);
-
-    const pusher = new Pusher("f53a8e1d57aaf863efb2", {
-        cluster: "ap1",
-        encrypted: true
-    });
-
-    const channel = pusher.subscribe(`private-user-${USER_ID}`);
-    channel.bind("new-task", function(data) {
-        alert(`Notifikasi: ${data.title} - ${data.message}`);
-    });
-</script>
 @stop
