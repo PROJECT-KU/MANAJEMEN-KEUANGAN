@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use App\Models\Todolist;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +44,23 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $view->with('countAjukan', $countAjukan);
+        });
+
+        View::composer('*', function ($view) {
+            $user = Auth::user();
+            $totalAssignTaskQuery = DB::table('todolist')->where('status', 'Assign Task');
+
+            if ($user && $user->level !== 'manager') {
+                $totalAssignTaskQuery->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->orWhere('user_id_kedua', $user->id);
+                });
+            }
+
+            $totalAssignTask = $totalAssignTaskQuery->count();
+
+            // Bagikan variabel ke semua view
+            $view->with('totalAssignTask', $totalAssignTask);
         });
     }
 }

@@ -202,12 +202,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <li class="{{ setActive('account/todolist') }}">
                                     <a class="nav-link" href="{{ route('account.todolist.index') }}">
                                         <i class="fas fa-list-alt"></i> <span>To Do List</span>
-                                        @php
-                                        // Menghitung jumlah data dengan status 'menunggu verifikasi'
-                                        $totalAssignTask = App\Todolist::where('status', 'Assign Task')->count();
-                                        @endphp
 
-                                        @if ($totalAssignTask > 0)
+                                        @if (isset($totalAssignTask) && $totalAssignTask > 0)
                                         <span class="badge badge-warning right" style="width: fit-content;">{{ $totalAssignTask }}</span>
                                         @endif
                                     </a>

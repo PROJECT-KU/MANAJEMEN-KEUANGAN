@@ -77,7 +77,22 @@ class ToDoListController extends Controller
             $data[$varName] = $tasks;
         }
 
-        return view('account.todolist.index', $data + ['user' => $user]);
+        // ✅ Hitung jumlah tugas dengan status 'Assign Task'
+        $totalAssignTaskQuery = DB::table('todolist')->where('status', 'Assign Task');
+
+        if ($user->level !== 'manager') {
+            $totalAssignTaskQuery->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhere('user_id_kedua', $user->id);
+            });
+        }
+
+        $totalAssignTask = $totalAssignTaskQuery->count();
+
+        return view('account.todolist.index', $data + [
+            'user' => $user,
+            'totalAssignTask' => $totalAssignTask
+        ]);
     }
     // <!--================== END ==================-->
 
