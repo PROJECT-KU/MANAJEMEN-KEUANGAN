@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MIS
+Tambah Karyawan | MIS
 @stop
 
 <style>
@@ -21,7 +21,7 @@ Tambah Pengguna | MIS
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>TAMBAH PENGGUNA</h1>
+            <h1>TAMBAH DATA KARYAWAN</h1>
         </div>
 
         <div class="section-body">

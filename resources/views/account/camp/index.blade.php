@@ -22,22 +22,29 @@ Data Laporan Camp | MIS
 
         <div class="card-body">
           <form action="{{ route('account.camp.search') }}" method="GET" id="searchForm">
-            <div class="form-group">
-              <div class="input-group mb-3">
-                <!-- <div class="input-group-prepend">
-                    <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a>
-                  </div> -->
-                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                <div class="input-group-append">
-                  <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
+            <div class="form-group position-relative">
+              <div class="input-group">
+                <!-- Input Pencarian -->
+                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN"
+                  value="{{ app('request')->input('q') }}"
+                  style="height: 45px; padding-right: 110px; border-right: 0;">
+
+                <!-- Tombol di dalam Input -->
+                <div class="position-absolute d-flex align-items-center"
+                  style="right: 10px; height: 45px; z-index: 10; border-radius: 40px; padding-left: 5px;">
+
+                  <button type="submit" class="btn btn-info rounded-pill"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-search"></i>
+                  </button>
+
+                  @if(request()->has('q'))
+                  <a href="{{ route('account.camp.index') }}" class="btn btn-danger rounded-pill ml-1"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                  @endif
                 </div>
-                @if(request()->has('q'))
-                <a href="{{ route('account.camp.index') }}" class="btn btn-danger ml-1">
-                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                </a>
-                @endif
               </div>
             </div>
           </form>
@@ -47,7 +54,7 @@ Data Laporan Camp | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AWAL</label>
-                  <input type="text" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
                 </div>
               </div>
               <div class="col-md-2" style="text-align: center">
@@ -56,7 +63,7 @@ Data Laporan Camp | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AKHIR</label>
-                  <input type="text" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
                 </div>
               </div>
               <div class="col-md-2">
@@ -64,7 +71,7 @@ Data Laporan Camp | MIS
                 <div class="btn-group" style="width: 100%;">
                   <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                   <a href="{{ route('account.camp.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS
+                    <i class="fa fa-trash mt-2"></i> HAPUS
                   </a>
                 </div>
                 @else
@@ -80,7 +87,7 @@ Data Laporan Camp | MIS
             <div class="col-12 mt-3">
               <div class="form-group text-center">
                 <div class="input-group mb-3">
-                  <a href="{{ route('account.camp.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH LAPORAN CAMP</a>
+                  <a href="{{ route('account.camp.create') }}" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;"><i class="fa fa-plus-circle"></i> TAMBAH LAPORAN CAMP</a>
                 </div>
               </div>
             </div>
@@ -94,10 +101,18 @@ Data Laporan Camp | MIS
       <div class="card">
         <div class="card-header">
           <h4><i class="fas fa-list"></i> DATA LAPORAN CAMP</h4>
-          <div class="card-header-action">
-            <a href="{{ route('account.laporan_camp.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-              <i class="fas fa-file-pdf"></i> Download PDF
-            </a>
+          <div class="dropdown card-header-action">
+            <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+              <i class="fas fa-download"></i> DOWNLOAD
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a href="{{ route('account.laporan_camp.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+                <i class="far fa-file-pdf"></i> PDF
+              </a>
+              <a href="{{ route('account.laporan_camp.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+                <i class="far fa-file-excel"></i> EXCEL
+              </a>
+            </div>
           </div>
         </div>
         <!-- <div class="card-header">
@@ -117,6 +132,7 @@ Data Laporan Camp | MIS
                 <thead>
                   <tr>
                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
+                    <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
                     <th scope="col" class="column-width" style="text-align: center;">NAMA CAMP</th>
                     <th scope="col" class="column-width" style="text-align: center;">TOTAL UANG MASUK</th>
                     <th scope="col" class="column-width" style="text-align: center;">TOTAL PENGELUARAN</th>
@@ -136,11 +152,14 @@ Data Laporan Camp | MIS
 
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->id_transaksi }}</td>
                     <td class="column-width" style="text-align: center; text-transform:uppercase;">{{ $hasil->title }} #{{ $hasil->camp_ke }}</td>
                     <td class=" column-width" style="text-align: center;">Rp. {{ number_format($hasil->total_uang_masuk, 0, ',', '.') }}</td>
                     <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                     <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->keuntungan, 0, ',', '.') }}</td>
-                    <td class="column-width" style="text-align: center;">{{ number_format($hasil->persentase_keuntungan, 0, ',', '.') }}%</td>
+                    <td class="column-width" style="text-align: center;">
+                      {{ rtrim(rtrim(number_format($hasil->persentase_keuntungan, 1, ',', '.'), '0'), ',') }}%
+                    </td>
                     <td class="column-width" style="text-align: center; width:200px">
                       {{ strftime('%d %B %Y', strtotime($hasil->tanggal)) }} <br>
                       s/d<br>
@@ -148,15 +167,15 @@ Data Laporan Camp | MIS
                     </td>
                     <td class="column-width" style="text-align: center;">
                       @if($hasil->status == 'pending')
-                      <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i></span>
+                      <span class="badge badge-warning">Pending</span>
                       @else
-                      <span class="badge badge-success"><i class="fas fa-check-circle"></i></span>
+                      <span class="badge badge-success">Terbayar</span>
                       @endif
                     </td>
 
                     @if ( Auth::user()->level == 'ceo')
                     <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2">
                         <i class="fa fa-eye"></i>
                       </a>
                       <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_Camp.Slip-Camp', $hasil->id) }}" class="btn btn-sm btn-info mt-2 mb-2">
@@ -165,10 +184,10 @@ Data Laporan Camp | MIS
                     </td>
                     @else
                     <td class="text-center">
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-pencil-alt"></i>
                       </a>
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2">
                         <i class="fa fa-eye"></i>
                       </a>
                       <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2">

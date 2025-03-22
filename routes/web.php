@@ -228,6 +228,7 @@ Route::prefix('account')->group(
         Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
         Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
         Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
+        Route::get('/laporan_camp/download-excel', 'account\CampController@downloadExcel')->name('account.laporan_camp.download-excel');
         Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 
         // Laporan peserta

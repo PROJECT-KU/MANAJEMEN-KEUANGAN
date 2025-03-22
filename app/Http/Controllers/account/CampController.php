@@ -14,6 +14,8 @@ use PDF;
 use Illuminate\Support\Facades\DB;
 use Riskihajar\Terbilang\Facades\Terbilang;
 use App\Models\Employee;
+use App\Exports\CampExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CampController extends Controller
 {
@@ -37,16 +39,21 @@ class CampController extends Controller
 
     function generateRandomToken($length)
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
-        $token = '';
+        $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        for ($i = 0; $i < $length; $i++) {
+        // Pastikan karakter pertama adalah huruf
+        $token = $letters[rand(0, strlen($letters) - 1)];
+
+        // Tambahkan karakter acak hingga panjang yang diinginkan
+        for ($i = 1; $i < $length; $i++) {
             $token .= $characters[rand(0, strlen($characters) - 1)];
         }
 
         return $token;
     }
 
+    // <!--================== TAMPILAN DATA ==================-->
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -78,7 +85,9 @@ class CampController extends Controller
 
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate', 'totalCamp'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== FILTER ==================-->
     public function filter(Request $request)
     {
         $user = Auth::user();
@@ -108,7 +117,9 @@ class CampController extends Controller
 
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== SEARCH ==================-->
     public function search(Request $request)
     {
         $search = $request->get('q');
@@ -141,7 +152,9 @@ class CampController extends Controller
         }
         return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== CREATE DATA ==================-->
     public function create()
     {
         $user = Auth::user();
@@ -525,7 +538,9 @@ class CampController extends Controller
             return redirect()->route('account.camp.index')->with('success', 'Data Laporan Camp Berhasil Disimpan!');
         }
     }
+    // <!--================== END ==================-->
 
+    // <!--================== DETAIL DATA ==================-->
     public function detail($id, $token)
     {
         $user = Auth::user();
@@ -538,7 +553,9 @@ class CampController extends Controller
 
         return view('account.camp.detail', compact('camp', 'users')); // Sesuaikan path template dengan benar
     }
+    // <!--================== END ==================-->
 
+    // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
         try {
@@ -554,7 +571,9 @@ class CampController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()], 500);
         }
     }
+    // <!--================== END ==================-->
 
+    // <!--================== UPDATE DATA ==================-->
     public function edit($id, $token)
     {
         $user = Auth::user();
@@ -937,72 +956,84 @@ class CampController extends Controller
             return redirect()->route('account.camp.index')->with('success', 'Data Laporan Camp Berhasil Disimpan!');
         }
     }
+    // <!--================== END ==================-->
 
+    // <!--================== DOWNLOAD LIST DATA ==================-->
     public function downloadPdf(Request $request)
     {
         $user = Auth::user();
         $startDate = $request->input('tanggal_awal');
         $endDate = $request->input('tanggal_akhir');
+        $status = $request->input('status'); // Cek apakah ada filter status
 
         if (!$startDate || !$endDate) {
-            // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
-            $currentMonth = date('Y-m-01 00:00:00');
-            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+            // Jika tidak ada filter tanggal, ambil semua data yang statusnya "terbayar" saja
+            $query = DB::table('camp')
+                ->select('camp.*')
+                ->leftJoin('users', 'camp.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->where('camp.status', 'terbayar');
         } else {
-            // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
             $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+            $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate));
+
+            // Query utama untuk mengambil data camp berdasarkan filter
+            $query = DB::table('camp')
+                ->select('camp.*')
+                ->leftJoin('users', 'camp.user_id', '=', 'users.id')
+                ->where('users.company', $user->company)
+                ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth]);
+
+            // Jika status 'terbayar' dipilih, filter hanya yang terbayar
+            if ($status === 'terbayar') {
+                $query->where('camp.status', 'terbayar');
+            }
         }
 
-        $camp = DB::table('camp')
-            ->select('camp.id', 'camp.id_transaksi', 'camp.token',  'camp.title', 'camp.camp_ke', 'camp.uang_masuk', 'camp.lain_lain', 'camp.total_uang_masuk', 'camp.gaji_trainer', 'camp.gaji_team', 'camp.team_cabang', 'camp.booknote', 'camp.grammarly', 'camp.tiket_trainer', 'camp.tiket_team', 'camp.hotel', 'camp.marketing', 'camp.konsumsi_tambahan', 'camp.lainnya', 'camp.total', 'camp.keuntungan', 'camp.tanggal', 'camp.tanggal_akhir', 'camp.status', 'camp.note', 'camp.persentase_keuntungan')
-            ->leftJoin('users', 'camp.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
-            ->whereBetween('camp.tanggal', [$currentMonth, $nextMonth])
-            ->orderBy('camp.created_at', 'DESC')
-            ->get();
+        $camp = $query->orderBy('camp.created_at', 'DESC')->get();
 
-        // Additional data retrieval for 'maintenance'
+        // Ambil semua data maintenance untuk laporan
         $maintenances = DB::table('maintenance')
             ->orderBy('created_at', 'DESC')
             ->get();
 
-
-        // Calculate total gaji
+        // Hitung total gaji dan konversi ke terbilang
         $totalCamp = $camp->sum('total');
         $terbilang = Terbilang::make($totalCamp, ' rupiah');
-        $users = User::all(); // Get all users
 
-        // total gaji yang status terbayar
+        // Hitung total gaji yang sudah terbayar
         $campTerbayar = $camp->where('status', 'terbayar');
         $totalCampTerbayar = $campTerbayar->sum('total');
         $terbilangterbayar = Terbilang::make($totalCampTerbayar, ' rupiah');
 
+        // Render view PDF
         $html = view('account.camp.pdf', compact('camp', 'totalCamp', 'user', 'terbilang', 'startDate', 'endDate', 'totalCampTerbayar', 'terbilangterbayar'))->render();
 
-        // Instantiate Dompdf with the default configuration
         $dompdf = new Dompdf();
-
-        // Load the HTML content into Dompdf
         $dompdf->loadHtml($html);
-
-        // (Optional) Set paper size and orientation
         $dompdf->setPaper('A4', 'landscape');
-
-        // Render the PDF
         $dompdf->render();
 
-        // Get the output as a string
-        $output = $dompdf->output();
-
-        // Set the response headers
+        // Buat respons PDF
         $headers = [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="Laporan-Camp_' . date('d-m-Y') . '.pdf"',
         ];
+
         return Response::make($dompdf->output(), 200, $headers);
     }
 
+    public function downloadExcel(Request $request)
+    {
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+        $status = $request->input('status');
+
+        return Excel::download(new CampExport($startDate, $endDate, $status), 'Laporan-Camp_' . date('d-m-Y') . '.xlsx');
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== SLIP CAMP ==================-->
     public function SlipCamp($id)
     {
         $user = Auth::user();
@@ -1047,4 +1078,5 @@ class CampController extends Controller
         // Output the generated PDF to the browser
         return Response::make($dompdf->output(), 200, $headers);
     }
+    // <!--================== END ==================-->
 }

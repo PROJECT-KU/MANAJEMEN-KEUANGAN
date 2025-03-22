@@ -62,7 +62,16 @@
         }
     </script>
     <!--================== END ==================-->
-</head>
+    <style>
+        .navbar {
+            position: fixed;
+            z-index: 1050;
+            /* Agar navbar tetap di atas */
+            background: linear-gradient(to right, #ff3131, #ff914d);
+            width: auto;
+            height: auto;
+        }
+    </style>
 </head>
 @php
 $isStatusnonactive = (Auth::user()->status === 'nonactive');
@@ -71,23 +80,28 @@ $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg" style="background: linear-gradient(to right, #ff3131, #ff914d); height: 100px;"></div>
+            <div class="navbar-bg"></div>
 
             <nav class="navbar navbar-expand-lg main-navbar">
-                <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3">
-                        <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                <form class="form-inline mr-auto d-flex align-items-center">
+                    <ul class="navbar-nav mr-3">
+                        <li>
+                            <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg d-flex align-items-center">
+                                <i class="fas fa-bars"></i>
+                            </a>
+                        </li>
                     </ul>
-                    <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
+                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-2" style="font-size:13px; width:150px;"></p>
                 </form>
 
-                <!--================== dropdown profil ==================-->
+                <!-- Dropdown Profil -->
                 <ul class="navbar-nav navbar-right">
-                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user d-flex align-items-center">
                             @if (Auth::user()->gambar == null)
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @else
-                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -99,12 +113,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
-                            <!-- <a href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
-                                <i class="fas fa-sign-out-alt"></i> KELUAR
-                            </a> -->
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
+                document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
                                 <i class="fas fa-sign-out-alt"></i> KELUAR
                             </a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -113,9 +123,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         </div>
                     </li>
                 </ul>
-                <!--================== end ==================-->
             </nav>
-            <div class="main-sidebar sidebar-style-2" id="SidebarPwa">
+
+            <div class="main-sidebar sidebar-style-2" id="SidebarPwa" style="position: fixed;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
                         <img src="{{ asset('assets/img/logo-header.png') }}" alt="logo" width="150">
@@ -157,7 +167,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
-                                        <i class="fas fa-user"></i> <span>Pengguna</span>
+                                        <i class="fas fa-users"></i> <span>Data Karyawan</span>
                                     </a>
                                 </li>
                                 @endif
@@ -386,11 +396,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 </aside>
             </div>
 
-            <!-- Main Content -->
-            @yield('content')
-
-            @extends('layouts.version')
         </div>
+        <!-- Main Content -->
+        @yield('content')
+
+        @extends('layouts.version')
     </div>
 
     <!--================== UCAPAN SELAMAT ==================-->

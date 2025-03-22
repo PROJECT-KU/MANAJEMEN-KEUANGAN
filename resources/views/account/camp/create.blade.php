@@ -394,6 +394,7 @@ Tambah laporan Camp | MIS
   }
 </style>
 <!--================== end ==================-->
+<link rel="stylesheet" href="{{ asset('assets/artikel/summernote/summernote-bs4.css') }}">
 
 @section('content')
 <div class="main-content">
@@ -2455,7 +2456,7 @@ Tambah laporan Camp | MIS
         <div class="card-body">
           <!--================== LAINNYA ==================-->
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group">
                 <label>Status Pembayaran</label>
                 <select class="form-control" name="status" required>
@@ -2470,28 +2471,35 @@ Tambah laporan Camp | MIS
                 @enderror
               </div>
             </div>
+          </div>
 
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Catatan</label>
-                <div class="input-group">
-                  <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
+          <div class="row">
+            <div class="col-md-12">
+              <label>Catatan</label>
+              <div class="card card-outline card-info">
+                <div class="card-body pad">
+                  <textarea class="textarea" name="note" id="note" placeholder="Masukan Catatan" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                 </div>
-                @error('note')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
+              @error('note')
+              <div class="invalid-feedback" style="display: block">
+                {{ $message }}
+              </div>
+              @enderror
             </div>
           </div>
           <!--================== END ==================-->
 
-          <button class="btn btn-primary mr-1 btn-submit" type="submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-          <button class="btn btn-warning btn-reset" type="reset"><i class="fa fa-redo"></i> RESET</button>
+          <div class="d-flex">
+            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+              <i class="fa fa-paper-plane"></i> SIMPAN
+            </button>
+            <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
+              <i class="fa fa-redo"></i> RESET
+            </button>
+          </div>
 
           </form>
-
         </div>
       </div>
     </div>
@@ -3372,12 +3380,27 @@ Tambah laporan Camp | MIS
 </script>
 <!--================== end ==================-->
 
-<!-- Include CKEditor JS -->
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<!--================== SUMMERNOTE ==================-->
+<script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>
 <script>
-  CKEDITOR.replace('note');
+  $(function() {
+    // Initialize Summernote
+    $('.textarea').summernote({
+      height: 300, // Set the height of the editor to 300px
+      toolbar: [
+        ['style', ['style']],
+        ['font', ['bold', 'underline', 'clear']],
+        ['fontname', ['fontname']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['table', ['table']],
+        ['insert', ['link']], // Only keep the link button
+        ['view', ['fullscreen', 'codeview', 'help']]
+      ]
+    });
+  })
 </script>
-<!-- end ckeditor -->
+<!--================== END ==================-->
 
 <script>
   // datepicker

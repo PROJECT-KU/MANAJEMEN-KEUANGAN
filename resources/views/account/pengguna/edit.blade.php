@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Update Pengguna | MIS
+Update Karyawan | MIS
 @stop
 
 @section('content')
@@ -150,7 +150,7 @@ Update Pengguna | MIS
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>PROFIL</h1>
+            <h1>PROFIL KARYAWAN</h1>
         </div>
 
         <div class="section-body">
