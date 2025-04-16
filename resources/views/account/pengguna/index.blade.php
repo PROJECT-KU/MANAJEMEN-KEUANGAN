@@ -74,11 +74,9 @@ Data Karyawan | MIS
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <!-- <th scope="col" rowspan="2" style="text-align: center;">NAMA</th> -->
                   <th scope="col" rowspan="2" style="text-align: center;">EMAIL</th>
                   <th scope="col" rowspan="2" style="text-align: center;">USERNAME</th>
                   <th scope="col" rowspan="2" style="text-align: center;">VERIFIKASI EMAIL</th>
-                  <!--<th scope="col" rowspan="2" style="text-align: center;">TANGGAL DI BUAT</th>-->
                   <th scope="col" rowspan="2" style="text-align: center;">JENIS</th>
                   <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
                   <th scope="col" rowspan="2" style="text-align: center;">STATUS</th>
@@ -92,8 +90,14 @@ Data Karyawan | MIS
                 @foreach ($users as $item)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <!-- <td style="text-align: center;">{{ $item->full_name }}</td> -->
-                  <td style="text-align: center;">{{ $item->email }}</td>
+                  <td style="display: flex; align-items: center; gap: 10px;">
+                    <img
+                      src="{{ $item->gambar ? asset('assets/img/profil/' . $item->gambar) : asset('assets/img/profil/no-image.jpg') }}"
+                      alt="Foto Profil"
+                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <span>{{ $item->email }}</span>
+                  </td>
+
                   <td style="text-align: center;">{{ $item->username }}</td>
                   <td style="text-align: center;">
                     @if ($item->email_verified_at)
@@ -102,14 +106,6 @@ Data Karyawan | MIS
                     <button class="btn btn-danger" disabled>Belum Diverifikasi</button>
                     @endif
                   </td>
-                  <!--<td style="text-align: center;">
-                    @if ($item->avatar)
-                    <img src="{{ asset('assets/img/avatar/' . $item->avatar) }}" alt="Avatar" width="50">
-                    @else
-                    No Avatar
-                    @endif
-                  </td>-->
-                  <!--<td style="text-align: center;">{{ date('d-m-Y H:i', strtotime($item->created_at)) }}</td>-->
                   <td style="text-align: center;">{{ $item->jenis }}</td>
                   <td style="text-align: center;">{{ $item->level }}</td>
                   <td style="text-align: center;">
@@ -120,15 +116,17 @@ Data Karyawan | MIS
                     @endif
                   </td>
                   <td class="text-center">
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-warning mt-2">
-                      <i class="fa fa-pencil-alt"></i>
-                    </a>
-                    <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-info mt-2">
+                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-pencil-alt"></i>
+                      </a>
+                      <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-info mt-2">
                       <i class="fa fa-eye"></i>
                     </a> -->
-                    <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                      <i class="fa fa-trash"></i>
-                    </button>
+                      <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 @php

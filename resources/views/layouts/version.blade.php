@@ -32,7 +32,7 @@
  </style>
 
  <?php
-  $version = "2.9.3";
+  $version = "3.0.1";
   ?>
 
  <footer class="main-footer" id="PwaFooter">

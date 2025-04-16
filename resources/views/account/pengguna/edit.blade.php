@@ -197,8 +197,8 @@ Update Karyawan | MIS
                                     <p class="text-muted">
                                         {{ $user->email }}
                                         @if (Auth::user()->level === 'manager' || Auth::user()->level === 'admin')
-                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail">
-                                            <i class="fas fa-pencil-alt"></i>
+                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail" style="width: 24px; height:24px">
+                                            <i class="fas fa-pencil-alt" style="font-size:15px"></i>
                                         </button>
                                         @endif
                                     </p>
@@ -209,12 +209,12 @@ Update Karyawan | MIS
                                     <p class="text-muted">
                                         {{ $user->jobdesk }}
                                         @if ($user->email_verified_at == null)
-                                        <button id="edit-jobdesk-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
-                                            <i class="fas fa-pencil-alt"></i>
+                                        <button id="edit-jobdesk-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: 24px; height:24px">
+                                            <i class="fas fa-pencil-alt" style="font-size:15px"></i>
                                         </button>
                                         @else
-                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonJobdesk">
-                                            <i class="fas fa-pencil-alt"></i>
+                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonJobdesk" style="width: 24px; height:24px">
+                                            <i class="fas fa-pencil-alt" style="font-size:15px"></i>
                                         </button>
                                         @endif
                                     </p>
@@ -225,12 +225,12 @@ Update Karyawan | MIS
                                     <p class="text-muted">
                                         {{ $user->telp }}
                                         @if ($user->email_verified_at == null)
-                                        <button id="edit-telp-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
-                                            <i class="fas fa-pencil-alt"></i>
+                                        <button id="edit-telp-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: 24px; height:24px">
+                                            <i class="fas fa-pencil-alt" style="font-size:15px"></i>
                                         </button>
                                         @else
-                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonTelp">
-                                            <i class="fas fa-pencil-alt"></i>
+                                        <button class="btn btn-sm btn-warning float-right" id="openPopupButtonTelp" style="width: 24px; height:24px">
+                                            <i class="fas fa-pencil-alt" style="font-size:15px"></i>
                                         </button>
                                         @endif
                                     </p>
@@ -258,7 +258,7 @@ Update Karyawan | MIS
                                         <label for="email" class="form-label">Masukkan Email Terbaru</label>
                                         <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
                                 </form>
                             </div>
                         </div>
@@ -274,7 +274,7 @@ Update Karyawan | MIS
                                         <label for="jobdesk" class="form-label">Masukkan Job Desk Anda</label>
                                         <input type="text" class="form-control" id="jobdesk" name="jobdesk" value="{{ $user->jobdesk }}" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
                                 </form>
                             </div>
                         </div>
@@ -290,7 +290,7 @@ Update Karyawan | MIS
                                         <label for="telp" class="form-label">Masukkan No Telp Anda</label>
                                         <input type="text" class="form-control" id="telp" name="telp" value="{{ $user->telp }}" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100">SIMPAN</button>
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit"><i class="fa fa-paper-plane"></i> SIMPAN</button>
                                 </form>
                             </div>
                         </div>
@@ -309,6 +309,7 @@ Update Karyawan | MIS
 
                                         <!--================== TAB DATA DIRI ==================-->
                                         <div class="active tab-pane" id="activity" style="margin-top: -20px;">
+
                                             <!-- NOTIF EMAIL BELUM DI VERIFIKASI -->
                                             @if ($user->email_verified_at == null)
                                             <div class="alert alert-warning" role="alert">
@@ -316,6 +317,7 @@ Update Karyawan | MIS
                                             </div>
                                             @endif
                                             <!-- END -->
+
                                             <div class="post">
                                                 <div class="user-block d-flex justify-content-between align-items-center">
                                                     <div class="d-flex align-items-center">
@@ -335,15 +337,15 @@ Update Karyawan | MIS
                                                     <div class="row mt-3">
                                                         <div class="col-md-6">
                                                             <label>Nama Lengkap</label>
-                                                            <input class="form-control form-control-sm" type="text" id="full_name" name="full_name" value="{{ $user->full_name }}" placeholder="Nama">
+                                                            <input class="form-control form-control" type="text" id="full_name" name="full_name" value="{{ $user->full_name }}" placeholder="Nama">
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label>Username</label>
-                                                            <input class="form-control form-control-sm" type="text" id="username" name="username" placeholder="Username" value="{{ $user->username }}">
+                                                            <input class="form-control form-control" type="text" id="username" name="username" placeholder="Username" value="{{ $user->username }}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 mt-4" id="submit-container" style="display: none;">
-                                                        <button type="submit" class="btn btn-info" style="width: 100%;">UPDATE DATA</button>
+                                                        <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"><i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                     </div>
                                                 </form>
 
@@ -357,7 +359,7 @@ Update Karyawan | MIS
                                                                 <div class="col-md-12 d-flex align-items-center mb-3">
                                                                     <div class="w-100 input-container">
                                                                         <label>Email</label>
-                                                                        <input class="form-control form-control-sm" type="text" value="{{ $user->email }}" readonly>
+                                                                        <input class="form-control form-control" type="text" value="{{ $user->email }}" readonly>
                                                                         <div class="icon-container">
                                                                             <i class="fas fa-check icon"></i>
                                                                         </div>
@@ -367,7 +369,7 @@ Update Karyawan | MIS
                                                                 <div class="col-md-8 d-flex align-items-center mb-3">
                                                                     <div class="w-100 input-container">
                                                                         <label>Email</label>
-                                                                        <input class="form-control form-control-sm" type="text" value="{{ $user->email }}">
+                                                                        <input class="form-control form-control" type="text" value="{{ $user->email }}">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4 d-flex align-items-center mt-3">
@@ -383,11 +385,11 @@ Update Karyawan | MIS
                                                         <form id="verification-form-company" action="{{ route('account.pengguna.update', $user->id) }}" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <label>Nama Perusahaan</label>
-                                                            <input class="form-control form-control-sm" type="text" id="company" name="company" placeholder="Nama Perusahaan" value="{{ $user->company }}">
+                                                            <input class="form-control form-control" type="text" id="company" name="company" placeholder="Nama Perusahaan" value="{{ $user->company }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 mt-2" id="submit-container-company" style="display: none;">
-                                                    <button type="submit" class="btn btn-info" style="width: 100%;">UPDATE DATA</button>
+                                                    <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                 </div>
                                                 </form>
                                             </div>
@@ -398,7 +400,7 @@ Update Karyawan | MIS
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <label>Role Akun</label>
-                                                            <select class="form-control" id="level" name="level">
+                                                            <select class="form-control" id="level" name="level" style="height:max-content">
                                                                 <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
                                                                 <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
                                                                 <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
@@ -408,7 +410,7 @@ Update Karyawan | MIS
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label>Status Akun</label>
-                                                            <select class="form-control" id="status" name="status">
+                                                            <select class="form-control" id="status" name="status" style="height:max-content">
                                                                 <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>ACTIVE</option>
                                                                 <option value="nonactive" {{ $user->status == 'nonactive' ? 'selected' : '' }}>NON ACTIVE</option>
                                                             </select>
@@ -418,11 +420,11 @@ Update Karyawan | MIS
                                                     <div class="row mt-3">
                                                         <div class="col-md-6">
                                                             <label>No Telp</label>
-                                                            <input type="text" class="form-control form-control-sm" id="telp" name="telp" value="{{ $user->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
+                                                            <input type="text" class="form-control form-control" id="telp" name="telp" value="{{ $user->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label>Jenis Akun</label>
-                                                            <input class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ strtoupper($user->jenis) }}" readonly>
+                                                            <input class="form-control form-control" type="text" placeholder="jenis" value="{{ strtoupper($user->jenis) }}" readonly>
                                                         </div>
                                                     </div>
 
@@ -437,7 +439,7 @@ Update Karyawan | MIS
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label>Bank</label>
-                                                            <select class="form-control bank" id="bank" name="bank">
+                                                            <select class="form-control bank" id="bank" name="bank" style="height:max-content">
                                                                 <option value="" disabled selected>-- PILIH NAMA BANK --</option>
                                                                 <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                                                                 <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -502,7 +504,7 @@ Update Karyawan | MIS
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 mt-4" id="submit-container-bank" style="display: none;">
-                                                    <button type="submit" class="btn btn-info" style="width: 100%;">UPDATE DATA</button>
+                                                    <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -550,7 +552,7 @@ Update Karyawan | MIS
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="col-md-12 mt-4">
-                                                        <button type="submit" class="btn btn-info" style="width: 100%;">Simpan</button>
+                                                        <button type="submit" class="btn btn-info btn-submit" style="width: 100%;">Simpan</button>
                                                     </div>
                                                 </div>
                                             </form>
@@ -565,473 +567,511 @@ Update Karyawan | MIS
                 </div>
             </section>
         </div>
+    </section>
+</div>
+<!--================== SHOW & HIDE BUTTON SUBMIT ==================-->
+<script>
+    // UPDAT DATA NAMA DAN USERNAME
+    document.addEventListener("DOMContentLoaded", function() {
+        const fullNameInput = document.getElementById('full_name');
+        const usernameInput = document.getElementById('username');
+        const submitContainer = document.getElementById('submit-container');
 
-        <!--================== SHOW & HIDE BUTTON SUBMIT ==================-->
-        <script>
-            // UPDAT DATA NAMA DAN USERNAME
-            document.addEventListener("DOMContentLoaded", function() {
-                const fullNameInput = document.getElementById('full_name');
-                const usernameInput = document.getElementById('username');
-                const submitContainer = document.getElementById('submit-container');
+        function checkForChanges() {
+            if (fullNameInput.value !== fullNameInput.defaultValue || usernameInput.value !== usernameInput.defaultValue) {
+                submitContainer.style.display = 'block'; // Show the submit button
+            } else {
+                submitContainer.style.display = 'none'; // Hide the submit button
+            }
+        }
 
-                function checkForChanges() {
-                    if (fullNameInput.value !== fullNameInput.defaultValue || usernameInput.value !== usernameInput.defaultValue) {
-                        submitContainer.style.display = 'block'; // Show the submit button
-                    } else {
-                        submitContainer.style.display = 'none'; // Hide the submit button
-                    }
-                }
+        fullNameInput.addEventListener('input', checkForChanges);
+        usernameInput.addEventListener('input', checkForChanges);
+    });
 
-                fullNameInput.addEventListener('input', checkForChanges);
-                usernameInput.addEventListener('input', checkForChanges);
-            });
+    // UPDAT DATA COMPANY
+    document.addEventListener("DOMContentLoaded", function() {
+        const companyInput = document.getElementById('company');
+        const submitContainerCompany = document.getElementById('submit-container-company');
 
-            // UPDAT DATA COMPANY
-            document.addEventListener("DOMContentLoaded", function() {
-                const companyInput = document.getElementById('company');
-                const submitContainerCompany = document.getElementById('submit-container-company');
+        function checkForChanges() {
+            if (companyInput.value !== companyInput.defaultValue) {
+                submitContainerCompany.style.display = 'block'; // Show the submit button
+            } else {
+                submitContainerCompany.style.display = 'none'; // Hide the submit button
+            }
+        }
 
-                function checkForChanges() {
-                    if (companyInput.value !== companyInput.defaultValue) {
-                        submitContainerCompany.style.display = 'block'; // Show the submit button
-                    } else {
-                        submitContainerCompany.style.display = 'none'; // Hide the submit button
-                    }
-                }
+        companyInput.addEventListener('input', checkForChanges);
+    });
 
-                companyInput.addEventListener('input', checkForChanges);
-            });
+    // UPDAT DATA BANK
+    document.addEventListener("DOMContentLoaded", function() {
+        const levelInput = document.getElementById('level');
+        const statusInput = document.getElementById('status');
+        const nikInput = document.getElementById('nik');
+        const norekInput = document.getElementById('norek');
+        const bankInput = document.getElementById('bank');
+        const submitContainerBank = document.getElementById('submit-container-bank');
 
-            // UPDAT DATA BANK
-            document.addEventListener("DOMContentLoaded", function() {
-                const levelInput = document.getElementById('level');
-                const statusInput = document.getElementById('status');
-                const nikInput = document.getElementById('nik');
-                const norekInput = document.getElementById('norek');
-                const bankInput = document.getElementById('bank');
-                const submitContainerBank = document.getElementById('submit-container-bank');
+        function checkForChanges() {
+            if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || nikInput.value !== nikInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
+                submitContainerBank.style.display = 'block'; // Show the submit button
+            } else {
+                submitContainerBank.style.display = 'none'; // Hide the submit button
+            }
+        }
 
-                function checkForChanges() {
-                    if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || nikInput.value !== nikInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
-                        submitContainerBank.style.display = 'block'; // Show the submit button
-                    } else {
-                        submitContainerBank.style.display = 'none'; // Hide the submit button
-                    }
-                }
+        levelInput.addEventListener('input', checkForChanges);
+        statusInput.addEventListener('input', checkForChanges);
+        nikInput.addEventListener('input', checkForChanges);
+        norekInput.addEventListener('input', checkForChanges);
+        bankInput.addEventListener('input', checkForChanges);
+    });
+</script>
+<!--================== END ==================-->
 
-                levelInput.addEventListener('input', checkForChanges);
-                statusInput.addEventListener('input', checkForChanges);
-                nikInput.addEventListener('input', checkForChanges);
-                norekInput.addEventListener('input', checkForChanges);
-                bankInput.addEventListener('input', checkForChanges);
-            });
-        </script>
-        <!--================== END ==================-->
+<!--================== POPUP EDIT DATA DIRI ==================-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const openPopupButton = document.getElementById('openPopupButtonEmail');
+        const customPopupemail = document.getElementById('customPopupEmail');
+        const customPopupClose = document.getElementById('customPopupCloseEmail');
 
-        <!--================== POPUP EDIT DATA DIRI ==================-->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const openPopupButton = document.getElementById('openPopupButtonEmail');
-                const customPopupemail = document.getElementById('customPopupEmail');
-                const customPopupClose = document.getElementById('customPopupCloseEmail');
+        // Show popup when the pencil icon is clicked
+        openPopupButton.addEventListener('click', function() {
+            customPopupemail.style.display = 'block';
+        });
 
-                // Show popup when the pencil icon is clicked
-                openPopupButton.addEventListener('click', function() {
-                    customPopupemail.style.display = 'block';
-                });
+        // Hide popup when the close button is clicked
+        customPopupClose.addEventListener('click', function() {
+            customPopupemail.style.display = 'none';
+        });
 
-                // Hide popup when the close button is clicked
-                customPopupClose.addEventListener('click', function() {
-                    customPopupemail.style.display = 'none';
-                });
+        // Hide popup when clicking outside the popup content
+        window.addEventListener('click', function(event) {
+            if (event.target === customPopupemail) {
+                customPopupemail.style.display = 'none';
+            }
+        });
+    });
 
-                // Hide popup when clicking outside the popup content
-                window.addEventListener('click', function(event) {
-                    if (event.target === customPopupemail) {
-                        customPopupemail.style.display = 'none';
-                    }
-                });
-            });
+    document.addEventListener('DOMContentLoaded', function() {
+        const openPopupButton = document.getElementById('openPopupButtonJobdesk');
+        const customPopupemail = document.getElementById('customPopupJobdesk');
+        const customPopupClose = document.getElementById('customPopupCloseJobdesk');
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const openPopupButton = document.getElementById('openPopupButtonJobdesk');
-                const customPopupemail = document.getElementById('customPopupJobdesk');
-                const customPopupClose = document.getElementById('customPopupCloseJobdesk');
+        // Show popup when the pencil icon is clicked
+        openPopupButton.addEventListener('click', function() {
+            customPopupemail.style.display = 'block';
+        });
 
-                // Show popup when the pencil icon is clicked
-                openPopupButton.addEventListener('click', function() {
-                    customPopupemail.style.display = 'block';
-                });
+        // Hide popup when the close button is clicked
+        customPopupClose.addEventListener('click', function() {
+            customPopupemail.style.display = 'none';
+        });
 
-                // Hide popup when the close button is clicked
-                customPopupClose.addEventListener('click', function() {
-                    customPopupemail.style.display = 'none';
-                });
+        // Hide popup when clicking outside the popup content
+        window.addEventListener('click', function(event) {
+            if (event.target === customPopupemail) {
+                customPopupemail.style.display = 'none';
+            }
+        });
+    });
 
-                // Hide popup when clicking outside the popup content
-                window.addEventListener('click', function(event) {
-                    if (event.target === customPopupemail) {
-                        customPopupemail.style.display = 'none';
-                    }
-                });
-            });
+    document.addEventListener('DOMContentLoaded', function() {
+        const openPopupButton = document.getElementById('openPopupButtonTelp');
+        const customPopupemail = document.getElementById('customPopupTelp');
+        const customPopupClose = document.getElementById('customPopupCloseTelp');
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const openPopupButton = document.getElementById('openPopupButtonTelp');
-                const customPopupemail = document.getElementById('customPopupTelp');
-                const customPopupClose = document.getElementById('customPopupCloseTelp');
+        // Show popup when the pencil icon is clicked
+        openPopupButton.addEventListener('click', function() {
+            customPopupemail.style.display = 'block';
+        });
 
-                // Show popup when the pencil icon is clicked
-                openPopupButton.addEventListener('click', function() {
-                    customPopupemail.style.display = 'block';
-                });
+        // Hide popup when the close button is clicked
+        customPopupClose.addEventListener('click', function() {
+            customPopupemail.style.display = 'none';
+        });
 
-                // Hide popup when the close button is clicked
-                customPopupClose.addEventListener('click', function() {
-                    customPopupemail.style.display = 'none';
-                });
+        // Hide popup when clicking outside the popup content
+        window.addEventListener('click', function(event) {
+            if (event.target === customPopupemail) {
+                customPopupemail.style.display = 'none';
+            }
+        });
+    });
+</script>
+<!--================== END ==================-->
 
-                // Hide popup when clicking outside the popup content
-                window.addEventListener('click', function(event) {
-                    if (event.target === customPopupemail) {
-                        customPopupemail.style.display = 'none';
-                    }
-                });
-            });
-        </script>
-        <!--================== END ==================-->
-
-        <!--================== SWEET ALERT HARUS VERIFIKASI EMAIL DAHULU ==================-->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const button = document.getElementById('edit-jobdesk-button');
-                if (button) {
-                    button.addEventListener('click', function(event) {
-                        // Check the data-action attribute to determine if the email is verified
-                        if (button.getAttribute('data-action') === 'verify-email') {
-                            event.preventDefault(); // Prevent default action
-                            Swal.fire({
-                                title: 'Harus verifikasi Email',
-                                text: 'Anda harus memverifikasi email Anda sebelum mengedit jobdesk Anda.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            });
-                        }
+<!--================== SWEET ALERT HARUS VERIFIKASI EMAIL DAHULU ==================-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const button = document.getElementById('edit-jobdesk-button');
+        if (button) {
+            button.addEventListener('click', function(event) {
+                // Check the data-action attribute to determine if the email is verified
+                if (button.getAttribute('data-action') === 'verify-email') {
+                    event.preventDefault(); // Prevent default action
+                    Swal.fire({
+                        title: 'Harus verifikasi Email',
+                        text: 'Anda harus memverifikasi email Anda sebelum mengedit jobdesk Anda.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
                     });
                 }
             });
-            document.addEventListener('DOMContentLoaded', function() {
-                const button = document.getElementById('edit-telp-button');
-                if (button) {
-                    button.addEventListener('click', function(event) {
-                        // Check the data-action attribute to determine if the email is verified
-                        if (button.getAttribute('data-action') === 'verify-email') {
-                            event.preventDefault(); // Prevent default action
-                            Swal.fire({
-                                title: 'Harus verifikasi Email',
-                                text: 'Anda harus memverifikasi email Anda sebelum mengedit No Telp Anda.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            });
-                        }
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const button = document.getElementById('edit-telp-button');
+        if (button) {
+            button.addEventListener('click', function(event) {
+                // Check the data-action attribute to determine if the email is verified
+                if (button.getAttribute('data-action') === 'verify-email') {
+                    event.preventDefault(); // Prevent default action
+                    Swal.fire({
+                        title: 'Harus verifikasi Email',
+                        text: 'Anda harus memverifikasi email Anda sebelum mengedit No Telp Anda.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
                     });
                 }
             });
-        </script>
-        <!--================== END ==================-->
+        }
+    });
+</script>
+<!--================== END ==================-->
 
-        <!--================== FORMAT NO REKENING ==================-->
-        <script>
-            function formatNoRek(input) {
-                // Menghapus semua karakter non-digit
-                var NoRek = input.value.replace(/\D/g, '');
+<!--================== FORMAT NO REKENING ==================-->
+<script>
+    function formatNoRek(input) {
+        // Menghapus semua karakter non-digit
+        var NoRek = input.value.replace(/\D/g, '');
 
-                // Menggunakan ekspresi reguler untuk memformat nomor telepon
-                NoRek = NoRek.replace(/(\d{4})(\d{2})(\d{6})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5');
+        // Menggunakan ekspresi reguler untuk memformat nomor telepon
+        NoRek = NoRek.replace(/(\d{4})(\d{2})(\d{6})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5');
 
-                // Mengatur nilai input dengan nomor telepon yang diformat
-                input.value = NoRek;
-            }
-        </script>
-        <!--================== END ==================-->
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = NoRek;
+    }
+</script>
+<!--================== END ==================-->
 
-        <!--================== FOTO PROFIL ==================-->
-        <script>
-            function toggleSubmitButton() {
-                var fileInput = document.getElementById('foto');
-                var submitButton = document.getElementById('updateButton');
-                submitButton.disabled = !fileInput.files.length; // Disable button if no file selected
-            }
+<!--================== FOTO PROFIL ==================-->
+<script>
+    function toggleSubmitButton() {
+        var fileInput = document.getElementById('foto');
+        var submitButton = document.getElementById('updateButton');
+        submitButton.disabled = !fileInput.files.length; // Disable button if no file selected
+    }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session("success") }}',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
-                });
-                @endif
-            });
-        </script>
-        <!--================== END ==================-->
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session("success") }}',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
+    });
+</script>
+<!--================== END ==================-->
 
-        <!--================== MAKSIMAL UPLOAD GAMBAR & FILE YANG DI PERBOLEHKAN ==================-->
-        <script>
-            document.getElementById('foto').addEventListener('change', function() {
-                const maxFileSizeInBytes = 3 * 1024 * 1024;
-                const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-                const fileInput = this;
+<!--================== MAKSIMAL UPLOAD GAMBAR & FILE YANG DI PERBOLEHKAN ==================-->
+<script>
+    document.getElementById('foto').addEventListener('change', function() {
+        const maxFileSizeInBytes = 3 * 1024 * 1024;
+        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        const fileInput = this;
 
-                if (fileInput.files.length > 0) {
-                    const selectedFile = fileInput.files[0];
-                    const fileSize = selectedFile.size; // Get the file size in bytes
-                    const fileName = selectedFile.name.toLowerCase();
+        if (fileInput.files.length > 0) {
+            const selectedFile = fileInput.files[0];
+            const fileSize = selectedFile.size; // Get the file size in bytes
+            const fileName = selectedFile.name.toLowerCase();
 
-                    // Check file size
-                    if (fileSize > maxFileSizeInBytes) {
-                        // Display a SweetAlert error message
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Ukuran File Melebihi Batas',
-                            text: 'Ukuran File Yang Diperbolehkan Dibawah 3MB.',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
-                        fileInput.value = ''; // Clear the file input
-                        return;
-                    }
-
-                    // Check file extension
-                    const fileExtension = fileName.split('.').pop();
-                    if (!allowedExtensions.includes(fileExtension)) {
-                        // Display a SweetAlert error message
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Jenis File Tidak Valid',
-                            text: 'Hanya File JPG, JPEG, PNG, dan GIF Yang Diperbolehkan.',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
-                        fileInput.value = ''; // Clear the file input
-                    }
-                }
-            });
-        </script>
-        <!--================== END ==================-->
-
-        <!--================== DATA PROFIL ==================-->
-        <script>
-            // Function to show SweetAlert messages
-            document.addEventListener('DOMContentLoaded', function() {
-                @if(session('statusauthorized'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'You are not authorized to update the email',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
-                });
-                @endif
-
-                @if(session('statusdataprofil'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Data profil berhasil diperbarui',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
-                });
-                @endif
-
-                @if(session('statusdatabank'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Data bank berhasil diperbarui',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
-                });
-                @endif
-
-                @if(session('erroremailterpakai'))
+            // Check file size
+            if (fileSize > maxFileSizeInBytes) {
+                // Display a SweetAlert error message
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal!',
-                    text: 'Email sudah terdaftar silahkan gunakan email yang lain',
+                    title: 'Ukuran File Melebihi Batas',
+                    text: 'Ukuran File Yang Diperbolehkan Dibawah 3MB.',
                     showConfirmButton: false,
                     timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
+                    // timerProgressBar: true
                 });
-                @endif
+                fileInput.value = ''; // Clear the file input
+                return;
+            }
 
-                @if(session('statusverifikasiemail'))
+            // Check file extension
+            const fileExtension = fileName.split('.').pop();
+            if (!allowedExtensions.includes(fileExtension)) {
+                // Display a SweetAlert error message
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Email berhasil di verifikasi',
+                    icon: 'error',
+                    title: 'Jenis File Tidak Valid',
+                    text: 'Hanya File JPG, JPEG, PNG, dan GIF Yang Diperbolehkan.',
                     showConfirmButton: false,
                     timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload(); // Automatically refresh the page after the alert
+                    // timerProgressBar: true
                 });
-                @endif
-            });
-        </script>
-        <!--================== END ==================-->
-
-        <!--================== FORMAT NO TELP ==================-->
-        <script>
-            function formatPhoneNumber(input) {
-                // Menghapus semua karakter non-digit
-                var phoneNumber = input.value.replace(/\D/g, '');
-
-                // Menentukan panjang nomor telepon
-                var phoneNumberLength = phoneNumber.length;
-
-                // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
-                if (phoneNumberLength === 11) {
-                    phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-                } else if (phoneNumberLength === 12) {
-                    phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
-                } else if (phoneNumberLength === 13) {
-                    phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
-                }
-
-                // Mengatur nilai input dengan nomor telepon yang diformat
-                input.value = phoneNumber;
+                fileInput.value = ''; // Clear the file input
             }
-        </script>
-        <!--================== END ==================-->
+        }
+    });
+</script>
+<!--================== END ==================-->
 
-        <!--================== SHOW & HIDE PASSWORD ==================-->
-        <script>
-            // Validasi konfirmasi password saat submit
-            document.getElementById('register-form').addEventListener('submit', function(event) {
-                const password = document.getElementById('password').value;
-                const passwordConfirmation = document.getElementById('password_confirmation').value;
+<!--================== DATA PROFIL ==================-->
+<script>
+    // Function to show SweetAlert messages
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('statusauthorized'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'You are not authorized to update the email',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
 
-                if (password !== passwordConfirmation) {
-                    event.preventDefault(); // Cegah pengiriman form
+        @if(session('statusdataprofil'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Data profil berhasil diperbarui',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
+
+        @if(session('statusdatabank'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Data bank berhasil diperbarui',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
+
+        @if(session('erroremailterpakai'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: 'Email sudah terdaftar silahkan gunakan email yang lain',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
+
+        @if(session('statusverifikasiemail'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Email berhasil di verifikasi',
+            showConfirmButton: false,
+            timer: 3000,
+            // timerProgressBar: true
+        }).then(() => {
+            location.reload(); // Automatically refresh the page after the alert
+        });
+        @endif
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== FORMAT NO TELP ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menentukan panjang nomor telepon
+        var phoneNumberLength = phoneNumber.length;
+
+        // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+        if (phoneNumberLength === 11) {
+            phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 12) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 13) {
+            phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== END ==================-->
+
+<!--================== SHOW & HIDE PASSWORD ==================-->
+<script>
+    // Validasi konfirmasi password saat submit
+    document.getElementById('register-form').addEventListener('submit', function(event) {
+        const password = document.getElementById('password').value;
+        const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+        if (password !== passwordConfirmation) {
+            event.preventDefault(); // Cegah pengiriman form
+            Swal.fire({
+                icon: 'error',
+                title: 'Passwords Tidak Sesuai',
+                text: 'Harap pastikan password dan konfirmasi password cocok.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+
+    // Fungsi untuk menampilkan atau menyembunyikan password dan mengubah border warna
+    function togglePasswordVisibility(inputId, toggleId) {
+        const passwordInput = document.getElementById(inputId);
+        const passwordToggle = document.getElementById(toggleId);
+
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            // Toggle the icon
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+
+            // Toggle the border color
+            passwordInput.classList.toggle('border-danger');
+        });
+    }
+
+    // Panggil fungsi togglePasswordVisibility untuk setiap input password
+    togglePasswordVisibility('old-password', 'old-password-toggle');
+    togglePasswordVisibility('password', 'password-toggle');
+    togglePasswordVisibility('password_confirmation', 'password-confirmation-toggle');
+</script>
+<!--================== END ==================-->
+
+<!--================== RESET PASSWORD ==================-->
+<script>
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        // Get form data
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.statuserrorreset === 'error') {
+                    // Show SweetAlert if old password does not match
                     Swal.fire({
                         icon: 'error',
-                        title: 'Passwords Tidak Sesuai',
-                        text: 'Harap pastikan password dan konfirmasi password cocok.',
+                        title: 'Error',
+                        text: data.message,
                         confirmButtonText: 'OK'
                     });
-                }
-            });
-
-            // Fungsi untuk menampilkan atau menyembunyikan password dan mengubah border warna
-            function togglePasswordVisibility(inputId, toggleId) {
-                const passwordInput = document.getElementById(inputId);
-                const passwordToggle = document.getElementById(toggleId);
-
-                passwordToggle.addEventListener('click', function() {
-                    const type = passwordInput.type === 'password' ? 'text' : 'password';
-                    passwordInput.type = type;
-
-                    // Toggle the icon
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
-
-                    // Toggle the border color
-                    passwordInput.classList.toggle('border-danger');
-                });
-            }
-
-            // Panggil fungsi togglePasswordVisibility untuk setiap input password
-            togglePasswordVisibility('old-password', 'old-password-toggle');
-            togglePasswordVisibility('password', 'password-toggle');
-            togglePasswordVisibility('password_confirmation', 'password-confirmation-toggle');
-        </script>
-        <!--================== END ==================-->
-
-        <!--================== RESET PASSWORD ==================-->
-        <script>
-            document.getElementById('register-form').addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent the default form submission
-
-                // Get form data
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData);
-
-                fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.statuserrorreset === 'error') {
-                            // Show SweetAlert if old password does not match
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.message,
-                                confirmButtonText: 'OK'
-                            });
-                        } else if (data.statussuksesreset === 'success') {
-                            // Show SweetAlert if password is successfully changed
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: data.message,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                showConfirmButton: false,
-                                willClose: () => {
-                                    window.location.href = "{{ route('account.profil.show', ['id' => $user->id]) }}";
-                                }
-                            });
+                } else if (data.statussuksesreset === 'success') {
+                    // Show SweetAlert if password is successfully changed
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message,
+                        timer: 3000,
+                        // timerProgressBar: true,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            window.location.href = "{{ route('account.profil.show', ['id' => $user->id]) }}";
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            });
-        </script>
-
-
-        <!-- JIKA KONFIRMASI PASSWORD TIDAK SAMA -->
-        <script>
-            document.getElementById('register-form').addEventListener('submit', function(event) {
-                const password = document.getElementById('password').value;
-                const passwordConfirmation = document.getElementById('password_confirmation').value;
-
-                if (password !== passwordConfirmation) {
-                    event.preventDefault(); // Cegah pengiriman form
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Passwords Tidak Sesuai',
-                        text: 'Harap pastikan password dan konfirmasi password cocok.',
-                        confirmButtonText: 'OK'
                     });
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
-        </script>
-        <!-- END -->
-        <!--================== END ==================-->
-        @stop
+    });
+</script>
+
+
+<!-- JIKA KONFIRMASI PASSWORD TIDAK SAMA -->
+<script>
+    document.getElementById('register-form').addEventListener('submit', function(event) {
+        const password = document.getElementById('password').value;
+        const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+        if (password !== passwordConfirmation) {
+            event.preventDefault(); // Cegah pengiriman form
+            Swal.fire({
+                icon: 'error',
+                title: 'Passwords Tidak Sesuai',
+                text: 'Harap pastikan password dan konfirmasi password cocok.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+</script>
+<!-- END -->
+<!--================== END ==================-->
+
+<!--================== LOADER BUTTON ==================-->
+<script>
+    // <!-- BUTTON SUBMIT -->
+    $(".btn-submit").click(function() {
+        $(".btn-submit").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-submit").removeClass('btn-progress');
+
+        }, 1000);
+    });
+    // <!-- END -->
+
+    // <!-- BUTTON RESET -->
+    $(".btn-reset").click(function() {
+        $(".btn-reset").addClass('btn-progress');
+        if (timeoutHandler) clearTimeout(timeoutHandler);
+
+        timeoutHandler = setTimeout(function() {
+            $(".btn-reset").removeClass('btn-progress');
+            $("#full_name").val('');
+            $("#email").val('');
+            $("#company").val('');
+            $("#telp").val('');
+            $("#level").val('');
+            $("#jenis").val('');
+            $("#password").val('');
+            $("#nik").val('');
+            $("#norek").val('');
+            $("#bank").val('');
+        }, 500);
+    })
+    // <!-- END -->
+</script>
+<!--================== END ==================-->
+@stop

@@ -134,10 +134,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         <img src="{{ asset('assets/img/logo-pwa.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
-                        <li class="menu-header">MAIN MENU</li>
 
                         <!--================== DASBOARD ==================-->
-                        <h6 style="font-weight: bold; margin-bottom: -5px; margin-left: 15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-2">DASBOARD</h6>
+                        <li class="menu-header">DASHBOARD</li>
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
                         <!--================== END ==================-->
 
@@ -153,7 +152,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--==================PERUSAHAAN==================-->
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PERUSAHAAN</h6>
+                                <li class="menu-header">PERUSAHAAN</li>
                                 <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
                                     <a class="nav-link" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
                                         <i class="fas fa-building"></i> <span>Company</span>
@@ -163,7 +162,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 <!--================== KARYAWAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KARYAWAN</h6>
+                                <li class="menu-header">KARYAWAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
@@ -223,7 +222,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== PAPER ==================-->
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                <li class="menu-header">PAPER</li>
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
@@ -250,7 +249,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 @if (Auth::user()->level !== 'manager')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                <li class="menu-header">PAPER</li>
                                 @endif
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
@@ -263,7 +262,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== BLOG ==================-->
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 83 || Auth::user()->id === 87)
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">BLOG</h6>
+                                <li class="menu-header">BLOG</li>
                                 <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-newspaper"></i><span>Artikel</span>
@@ -279,7 +278,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
                                 <!--================== SCOPUS CAMP ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">SCOPUS CAMP</h6>
+                                <li class="menu-header">SCOPUS CAMP</li>
                                 <!-- <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-user-cog"></i><span>PESERTA</span>
@@ -312,7 +311,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 <!--================== KEUANGAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KEUANGAN</h6>
+                                <li class="menu-header">KEUANGAN</li>
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
                                     <ul class="dropdown-menu">
@@ -341,8 +340,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif -->
 
                                 <!--================== LAPORAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">LAPORAN</h6>
-
+                                <li class="menu-header">LAPORAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff')
                                 <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
                                     <a class="nav-link" href="{{ route('account.camp.index') }}">

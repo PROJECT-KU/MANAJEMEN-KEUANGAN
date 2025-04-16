@@ -129,7 +129,8 @@ Dashboard | MIS
     }
 </style>
 
-
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 
 @section('content')
 
@@ -311,6 +312,8 @@ Dashboard | MIS
                                 ->whereDate('created_at', now()->toDateString())
                                 ->first();
                                 @endphp
+
+                                <!-- Jika sudah presensi masuk, belum pulang -->
                                 @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
                                     <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
                                         MASUK
@@ -318,12 +321,16 @@ Dashboard | MIS
                                     <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                                         PULANG
                                     </a>
+                                    <!-- end -->
                             </div>
-                            <div class="d-flex align-items-center">
+
+                            <div class="d-flex align-items-center" style="width: 100%;">
                                 <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
                                     Selamat Bekerja!
                                 </span>
                             </div>
+
+                            <!-- Jika belum presensi sama sekali -->
                             @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
                                 <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
                                     MASUK
@@ -331,13 +338,18 @@ Dashboard | MIS
                                 <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
                                     PULANG
                                 </button>
+                                <!-- end -->
                         </div>
-                        <div class="d-flex align-items-center">
+
+                        <div class="d-flex align-items-center" style="width: 100%;">
                             <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
                                 Anda Belum Melakukan Presensi Pada Hari Ini!
                             </span>
                         </div>
+
                         @else
+
+                        <!-- Di luar jam kerja atau presensi selesai -->
                         <div class="d-flex mx-1 mt-2 mb-2">
                             <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
                                 MASUK
@@ -346,7 +358,9 @@ Dashboard | MIS
                                 PULANG
                             </button>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <!-- end -->
+
+                        <div class="d-flex align-items-center" style="width: 100%;">
                             <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
                                 Selesai Bekerja!
                             </span>
@@ -404,31 +418,39 @@ Dashboard | MIS
         </div>
         <!--================== END ==================-->
 
+        <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
+                </div>
 
-        <!--================== TAMPILAN ARTIKEL ==================-->
-        <!-- <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; background-color:#6495ED">
-                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="artikel-list mt-4">
-                            @foreach ($artikel as $item)
-                            <div class="artikel-item mb-3">
-                                <h5>{{ $item->judul }}</h5>
-                                <p>Jumlah Dilihat: {{ $item->dilihat }}</p>
+                <div class="card-body">
+                    <!-- Swiper Container -->
+                    <div class="swiper mySwiper">
+                        <div class="swiper-wrapper">
+                            @foreach($artikel->take(6) as $item)
+                            <div class="swiper-slide">
+                                <div class="card h-100">
+                                    <img src="{{ asset('storage/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title" style="text-align: center;">
+                                            <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
+                                                {{ $item->judul }}
+                                            </a>
+                                        </h5>
+                                    </div>
+                                </div>
                             </div>
                             @endforeach
                         </div>
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $artikel->links() }}
-                        </div>
                     </div>
                 </div>
+                <div class="swiper-pagination"></div>
             </div>
-        </div> -->
-        <!--================== END ==================-->
+        </div>
+        <!-- ================== END SLIDER ARTIKEL ================== -->
+
         @endif
 
         <!--================== CHART GAJI PERBULAN SELAMA SETAHUN ==================-->
@@ -538,6 +560,45 @@ Dashboard | MIS
 
 </section>
 </div>
+
+<!--================== SLIDER ==================-->
+<!-- Swiper JS -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    var swiper = new Swiper(".mySwiper", {
+        slidesPerView: 3,
+        spaceBetween: 20,
+        slidesPerGroup: 1,
+        loop: true,
+        autoplay: {
+            delay: 3000, // Geser otomatis setiap 3 detik
+            disableOnInteraction: false, // Tetap autoplay meskipun user swipe manual
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+        breakpoints: {
+            0: {
+                slidesPerView: 1
+            },
+            576: {
+                slidesPerView: 1
+            },
+            768: {
+                slidesPerView: 2
+            },
+            992: {
+                slidesPerView: 3
+            }
+        }
+    });
+</script>
+<!--================== END ==================-->
 
 <!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
 <!-- <script>
