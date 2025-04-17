@@ -155,7 +155,7 @@
                                         </div> -->
                                         <div class="form-group col-md-6">
                                             <label for="posisi">Posisi yang Kamu Lamar</label>
-                                            <select id="posisi" class="form-control" name="posisi" required>
+                                            <select id="posisi" class="form-control" name="posisi" style="height: 42px;" required>
                                                 <option value="" disabled selected>Pilih Posisi</option>
                                                 <option value="Digital Marketing" {{ old('posisi') == 'Digital Marketing' ? 'selected' : '' }}>Digital Marketing</option>
                                                 <option value="Assisten Trainer" {{ old('posisi') == 'Asisten Trainer' ? 'selected' : '' }}>Asisten Trainer</option>
