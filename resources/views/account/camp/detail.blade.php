@@ -4,6 +4,8 @@
 Detail Laporan Camp | MIS
 @stop
 
+<link rel="stylesheet" href="{{ asset('assets/artikel/summernote/summernote-bs4.css') }}">
+
 @section('content')
 <div class="main-content">
     <section class="section">
@@ -1512,7 +1514,7 @@ Detail Laporan Camp | MIS
                             <div class="form-group">
                                 <label>Persentase Keuntungan</label>
                                 <div class="input-group">
-                                    <input type="text" name="persentase_keuntungan" style="border-color: red;" value="{{ number_format($camp->persentase_keuntungan, 0, ',', ',') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
+                                    <input type="text" name="persentase_keuntungan" style="border-color: red;" value="{{ rtrim(rtrim(number_format($camp->persentase_keuntungan, 1, ',', '.'), '0'), ',') }}%" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency7" readonly>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" style="border-color: red;">%</span>
                                     </div>
@@ -1522,7 +1524,7 @@ Detail Laporan Camp | MIS
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label>Status Pembayaran</label>
                                 <select class="form-control" name="status" disabled>
@@ -1532,20 +1534,24 @@ Detail Laporan Camp | MIS
                                 </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Catatan</label>
-                                <div class="input-group">
-                                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;" readonly>{{ $camp->note }}</textarea>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Catatan</label>
+                            <div class="card card-outline card-info">
+                                <div class="card-body pad">
+                                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="textarea" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" readonly>{{ $camp->note }}</textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <a href="{{ route('account.camp.index') }}" class="btn btn-info">
-                        <i class="fa fa-undo"></i> KEMBALI
-                    </a>
+                    <div class="d-flex m-3">
+                        <a href="{{ route('account.camp.index') }}" class="btn btn-info btn-reset rounded-pill" style="width: 100%; font-size: 14px;">
+                            <i class="fa fa-redo"></i> KEMBALI
+                        </a>
+                    </div>
 
                     </form>
 
@@ -1555,12 +1561,27 @@ Detail Laporan Camp | MIS
     </section>
 </div>
 
-<!-- Include CKEditor JS -->
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<!--================== SUMMERNOTE ==================-->
+<script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>
 <script>
-    CKEDITOR.replace('note');
+    $(function() {
+        // Initialize Summernote
+        $('.textarea').summernote({
+            height: 300, // Set the height of the editor to 300px
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['fontname', ['fontname']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']], // Only keep the link button
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+    })
 </script>
-<!-- end ckeditor -->
+<!--================== END ==================-->
 
 <script>
     // datepicker

@@ -41,84 +41,43 @@ Data Gaji Karyawan | MIS
       <div class="card">
         <div class="card-header  text-right">
           <h4><i class="fas fa-filter"></i> FILTER</h4>
-          <!-- @if (Auth::user()->level == 'karyawan')
-            @else
-            <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
-            </div>
-            @endif -->
         </div>
 
         <div class="card-body">
-          @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
-          <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
-            <div class="form-group">
-              <div class="input-group mb-3">
-                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
-                <div class="input-group-append">
-                  <!-- Remove the button if it's not needed -->
-                  <!-- <button type="button" class="btn btn-info rounded-pill" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
-                </div>
-                @if(request()->has('q'))
-                <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1">
-                  <i class="fa fa-trash mt-2"></i>
-                </a>
-                @endif
-              </div>
-            </div>
-          </form>
-          @else
-          <form action="{{ route('account.gaji.searchkaryawan') }}" method="GET" id="searchForm">
-            <div class="form-group">
-              <div class="input-group mb-3">
-                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}" id="searchInput">
-                <div class="input-group-append">
-                  <!-- Remove the button if it's not needed -->
-                  <!-- <button type="button" class="btn btn-info rounded-pill" id="searchButton"><i class="fa fa-search"></i> CARI</button> -->
-                </div>
-                @if(request()->has('q'))
-                <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1">
-                  <i class="fa fa-trash mt-2"></i>
-                </a>
-                @endif
-              </div>
-            </div>
-          </form>
-          @endif
 
-          @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
-          <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>TANGGAL AWAL</label>
-                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker rounded-pill">
-                </div>
-              </div>
-              <div class="col-md-2" style="text-align: center">
-                <label style="margin-top: 38px;">S/D</label>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>TANGGAL AKHIR</label>
-                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker rounded-pill">
-                </div>
-              </div>
-              <div class="col-md-2">
-                @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                <div class="btn-group" style="width: 100%;">
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill" style="margin-top: 30px; font-size:15px;"">
-                    <i class=" fa fa-trash mt-2"></i>
+          <!--====== SEARCH ======-->
+          <form action="{{ route('account.gaji.search') }}" method="GET" id="searchForm">
+            <div class="form-group position-relative">
+              <div class="input-group">
+
+                <!-- Input Pencarian -->
+                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN"
+                  value="{{ app('request')->input('q') }}"
+                  style="height: 45px; padding-right: 110px; border-right: 0;">
+
+                <!-- Tombol di dalam Input -->
+                <div class="position-absolute d-flex align-items-center"
+                  style="right: 10px; height: 45px; z-index: 10; border-radius: 40px; padding-left: 5px;">
+
+                  <button type="submit" class="btn btn-info rounded-pill"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-search"></i>
+                  </button>
+
+                  @if(request()->has('q'))
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-trash"></i>
                   </a>
+                  @endif
                 </div>
-                @else
-                <button class="btn btn-info mr-1 btn-block rounded-pill" type="submit" style="margin-top: 30px; font-size:15px;" id="filterButton"><i class="fa fa-filter"></i> FILTER</button>
-                @endif
               </div>
             </div>
           </form>
-          @else
-          <!-- <form action="{{ route('account.gaji.filterkaryawan') }}" method="GET">
+          <!--====== END ======-->
+
+          <!--====== FILTER ======-->
+          <form action="{{ route('account.gaji.filter') }}" method="GET">
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
@@ -132,7 +91,7 @@ Data Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>TANGGAL AKHIR</label>
-                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_kahir') }}" class="form-control datepicker">
+                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker">
                 </div>
               </div>
               <div class="col-md-2">
@@ -140,7 +99,7 @@ Data Gaji Karyawan | MIS
                 <div class="btn-group" style="width: 100%;">
                   <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                   <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                    <i class="fa fa-times-circle mt-2"></i> HAPUS
+                    <i class="fa fa-trash mt-2"></i> HAPUS
                   </a>
                 </div>
                 @else
@@ -148,21 +107,21 @@ Data Gaji Karyawan | MIS
                 @endif
               </div>
             </div>
-          </form> -->
-          @endif
+          </form>
+          <!--====== END ======-->
 
-          @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer')
-          @else
+          <!--====== BUTTON TAMBAH DATA ======-->
+          @if (Auth::user()->level == 'manager')
           <div class="row">
             <div class="col-12 mt-3">
               <div class="form-group text-center">
                 <div class="input-group mb-3">
                   @if ($presensiExist)
-                  <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;">
+                  <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;">
                     <i class="fa fa-plus-circle"></i> TAMBAH GAJI
                   </a>
                   @else
-                  <a href="#" class="btn btn-primary btn-block" style="padding-top: 10px;" id="tambahGajiBtn">
+                  <a href="#" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;" id="tambahGajiBtn">
                     <i class="fa fa-plus-circle"></i> TAMBAH GAJI
                   </a>
                   @endif
@@ -171,6 +130,7 @@ Data Gaji Karyawan | MIS
             </div>
           </div>
           @endif
+          <!--====== END ======-->
 
         </div>
       </div>
@@ -186,10 +146,11 @@ Data Gaji Karyawan | MIS
               <i class="fas fa-download"></i> DOWNLOAD
             </button>
             <div class="dropdown-menu dropdown-menu-right">
-              <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+              <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="dropdown-item has-icon">
                 <i class="far fa-file-pdf"></i> PDF
               </a>
-              <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="dropdown-item has-icon">
+
+              <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="dropdown-item has-icon">
                 <i class="far fa-file-excel"></i> EXCEL
               </a>
             </div>
@@ -399,10 +360,22 @@ Data Gaji Karyawan | MIS
 
       </div>
 
+      @if (Auth::user()->level == 'manager')
       <table class="table table-bordered mt-5" style="border: 2px solid red;">
         <thead>
           <tr>
-            <th scope="col" rowspan="2" style="text-align: center; font-weight: bold;"><b>TOTAL GAJI</b></th>
+            <th colspan="2" style="text-align: center; font-weight: bold;">
+              TOTAL GAJI KARYAWAN
+              <br>
+              <small>
+                Periode:
+                @if ($startDate && $endDate)
+                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
+                @else
+                {{ date('F Y') }}
+                @endif
+              </small>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -411,6 +384,7 @@ Data Gaji Karyawan | MIS
           </tr>
         </tbody>
       </table>
+      @endif
 
     </div>
   </section>

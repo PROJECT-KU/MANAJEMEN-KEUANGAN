@@ -16,7 +16,7 @@
   <form action="{{ route('account.camp.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <!-- <img src="{{ asset('images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;"> -->
+      <img src="{{ asset('images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;">
       <section class="invoice">
         <div class="row">
           <div class="col-12">
@@ -55,11 +55,11 @@
                     Phone: {{ $user->telp_company }}<br>
                     Email: {{ $user->email_company }}
                   </td>
-                  <td style="margin-top: -200px;"><strong>{{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
-                    Mulai: {{ date('d F Y', strtotime($camp->tanggal)) }}<br>
-                    Sampai : {{ date('d F Y', strtotime($camp->tanggal_akhir)) }}<br>
-                    Peserta : {{ $camp->peserta }}<br>
-                    Keuntungan : {{ number_format($camp->persentase_keuntungan, 0, ',', '.') }}%<br>
+                  <td style="margin-top: -200px;"><strong>Camp {{ $camp->title }} #{{ $camp->camp_ke }}</strong><br>
+                    Mulai Camp: {{ date('d F Y', strtotime($camp->tanggal)) }}<br>
+                    Selesai Camp: {{ date('d F Y', strtotime($camp->tanggal_akhir)) }}<br>
+                    Jumlah Peserta : {{ $camp->peserta }}<br>
+                    Keuntungan : {{ rtrim(rtrim(number_format($camp->persentase_keuntungan, 1, ',', '.'), '0'), ',') }}%<br>
                     Tanggal : {{ date('d F Y') }}
                   </td>
                   <td>
@@ -89,14 +89,14 @@
                   <td style="text-align: left; width:145px">Rp. {{ number_format($camp->uang_masuk, 0, ',', '.') }}</td>
 
                   <td style="text-align: left; width:145px">Gaji Trainer</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->gaji_trainer, 0, ',', '.') }}</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_gaji_trainer, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px">Uang Masuk Lain-lain</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($camp->lain_lain, 0, ',', '.') }}</td>
 
                   <td style="text-align: left; width:145px">Gaji Team</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->gaji_team, 0, ',', '.') }}</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_gaji_team, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"></td>
@@ -118,6 +118,27 @@
 
                   <td style="text-align: left; width:145px">Grammarly</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($camp->grammarly, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"></td>
+                  <td style="text-align: left; width:145px"></td>
+
+                  <td style="text-align: left; width:145px">Hotel</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->Hotel, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"></td>
+                  <td style="text-align: left; width:145px"></td>
+
+                  <td style="text-align: left; width:145px">Konsumsi Tambahan</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->konsumsi_tambahan, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; width:145px"></td>
+                  <td style="text-align: left; width:145px"></td>
+
+                  <td style="text-align: left; width:145px">Lain-Lain</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->lainnya, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"></td>
@@ -146,27 +167,6 @@
 
                   <td style="text-align: left; width:145px">total Tiket Team Pulang</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($camp->total_tiket_team_pulang, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                  <td style="text-align: left; width:145px"></td>
-                  <td style="text-align: left; width:145px"></td>
-
-                  <td style="text-align: left; width:145px">Hotel</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->Hotel, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                  <td style="text-align: left; width:145px"></td>
-                  <td style="text-align: left; width:145px"></td>
-
-                  <td style="text-align: left; width:145px">Konsumsi Tambahan</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->konsumsi_tambahan, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                  <td style="text-align: left; width:145px"></td>
-                  <td style="text-align: left; width:145px"></td>
-
-                  <td style="text-align: left; width:145px">Lain-Lain</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->lainnya, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"><b>Total Uang Masuk</b></td>

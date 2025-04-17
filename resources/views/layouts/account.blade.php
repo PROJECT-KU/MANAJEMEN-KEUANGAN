@@ -62,7 +62,16 @@
         }
     </script>
     <!--================== END ==================-->
-</head>
+    <style>
+        .navbar {
+            position: fixed;
+            z-index: 1050;
+            /* Agar navbar tetap di atas */
+            background: linear-gradient(to right, #ff3131, #ff914d);
+            width: auto;
+            height: auto;
+        }
+    </style>
 </head>
 @php
 $isStatusnonactive = (Auth::user()->status === 'nonactive');
@@ -71,23 +80,28 @@ $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
 $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg" style="background: linear-gradient(to right, #ff3131, #ff914d); height: 100px;"></div>
+            <div class="navbar-bg"></div>
 
             <nav class="navbar navbar-expand-lg main-navbar">
-                <form class="form-inline mr-auto">
-                    <ul class="navbar-nav mr-3 mb-3">
-                        <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                <form class="form-inline mr-auto d-flex align-items-center">
+                    <ul class="navbar-nav mr-3">
+                        <li>
+                            <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg d-flex align-items-center">
+                                <i class="fas fa-bars"></i>
+                            </a>
+                        </li>
                     </ul>
-                    <p id="greeting" style="color: #ffffff; font-size:13px; width:150px; font-weight: bold;" class="mt-2"></p>
+                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-2" style="font-size:13px; width:150px;"></p>
                 </form>
 
-                <!--================== dropdown profil ==================-->
+                <!-- Dropdown Profil -->
                 <ul class="navbar-nav navbar-right">
-                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user d-flex align-items-center">
                             @if (Auth::user()->gambar == null)
-                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @else
-                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle mb-2" style="width: 50px; height:50px;">
+                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -99,12 +113,8 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
-                            <!-- <a href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
-                                <i class="fas fa-sign-out-alt"></i> KELUAR
-                            </a> -->
                             <a href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                    document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
+                document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
                                 <i class="fas fa-sign-out-alt"></i> KELUAR
                             </a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -113,9 +123,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         </div>
                     </li>
                 </ul>
-                <!--================== end ==================-->
             </nav>
-            <div class="main-sidebar sidebar-style-2" id="SidebarPwa">
+
+            <div class="main-sidebar sidebar-style-2" id="SidebarPwa" style="position: fixed;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
                         <img src="{{ asset('assets/img/logo-header.png') }}" alt="logo" width="150">
@@ -124,10 +134,9 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                         <img src="{{ asset('assets/img/logo-pwa.png') }}" alt="logo" width="50px">
                     </div>
                     <ul class="sidebar-menu">
-                        <li class="menu-header">MAIN MENU</li>
 
                         <!--================== DASBOARD ==================-->
-                        <h6 style="font-weight: bold; margin-bottom: -5px; margin-left: 15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-2">DASBOARD</h6>
+                        <li class="menu-header">DASHBOARD</li>
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
                         <!--================== END ==================-->
 
@@ -143,7 +152,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--==================PERUSAHAAN==================-->
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PERUSAHAAN</h6>
+                                <li class="menu-header">PERUSAHAAN</li>
                                 <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
                                     <a class="nav-link" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
                                         <i class="fas fa-building"></i> <span>Company</span>
@@ -153,11 +162,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 <!--================== KARYAWAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KARYAWAN</h6>
+                                <li class="menu-header">KARYAWAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
-                                        <i class="fas fa-user"></i> <span>Pengguna</span>
+                                        <i class="fas fa-users"></i> <span>Data Karyawan</span>
                                     </a>
                                 </li>
                                 @endif
@@ -213,7 +222,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== PAPER ==================-->
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                <li class="menu-header">PAPER</li>
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-coffee"></i><span>Scopus Kafe</span>
@@ -240,7 +249,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 @if (Auth::user()->level !== 'manager')
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">PAPER</h6>
+                                <li class="menu-header">PAPER</li>
                                 @endif
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
@@ -253,7 +262,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 <!--================== BLOG ==================-->
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 83 || Auth::user()->id === 87)
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">BLOG</h6>
+                                <li class="menu-header">BLOG</li>
                                 <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-newspaper"></i><span>Artikel</span>
@@ -269,7 +278,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
                                 <!--================== SCOPUS CAMP ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">SCOPUS CAMP</h6>
+                                <li class="menu-header">SCOPUS CAMP</li>
                                 <!-- <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
                                         <i class="fas fa-user-cog"></i><span>PESERTA</span>
@@ -302,7 +311,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif
 
                                 <!--================== KEUANGAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">KEUANGAN</h6>
+                                <li class="menu-header">KEUANGAN</li>
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
                                     <ul class="dropdown-menu">
@@ -331,8 +340,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                                 @endif -->
 
                                 <!--================== LAPORAN ==================-->
-                                <h6 style="font-weight: bold; margin-bottom:-5px; margin-left:15px; background: linear-gradient(to right, #ff7f50, #ff914d); -webkit-background-clip: text; color: transparent;" class="mt-3">LAPORAN</h6>
-
+                                <li class="menu-header">LAPORAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff')
                                 <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
                                     <a class="nav-link" href="{{ route('account.camp.index') }}">
@@ -386,11 +394,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
                 </aside>
             </div>
 
-            <!-- Main Content -->
-            @yield('content')
-
-            @extends('layouts.version')
         </div>
+        <!-- Main Content -->
+        @yield('content')
+
+        @extends('layouts.version')
     </div>
 
     <!--================== UCAPAN SELAMAT ==================-->

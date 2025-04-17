@@ -19,6 +19,8 @@ class PenggunaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    // <!--================== TAMPILAN DATA ==================-->
     public function index()
     {
         $user = Auth::user();
@@ -43,7 +45,9 @@ class PenggunaController extends Controller
 
         return view('account.pengguna.index', compact('users', 'maintenances'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== SEARCH ==================-->
     public function search(Request $request)
     {
         $search = $request->get('q');
@@ -78,7 +82,9 @@ class PenggunaController extends Controller
 
         return view('account.pengguna.index', compact('users', 'maintenances'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== CREATE DATA ==================-->
     public function create()
     {
         return view('account.pengguna.create');
@@ -161,6 +167,9 @@ class PenggunaController extends Controller
         // Redirect with success message
         return redirect()->route('account.pengguna.index')->with('success', 'Data pengguna berhasil ditambahkan!');
     }
+    // <!--================== END ==================-->
+
+    // <!--================== UPDATE DATA ==================-->
     public function edit($id)
     {
         $user = User::findOrFail($id);
@@ -192,13 +201,16 @@ class PenggunaController extends Controller
 
         return view('account.pengguna.edit', compact('user', 'workDuration'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== DETAIL DATA ==================-->
     public function detail($id)
     {
         $user = User::findOrFail($id);
 
         return view('account.pengguna.detail', compact('user'));
     }
+    // <!--================== END ==================-->
 
     // <!--================== UPDATE FOTO PROFIL ==================-->
     public function updatePhoto(Request $request, $id)
@@ -305,6 +317,7 @@ class PenggunaController extends Controller
 
     // <!--================== END ==================-->
 
+    // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
         // Find the user by ID
@@ -321,7 +334,9 @@ class PenggunaController extends Controller
         // Redirect with success message
         return redirect()->route('account.pengguna.index')->with('success', 'Data pengguna berhasil dihapus!');
     }
+    // <!--================== END ==================-->
 
+    // <!--================== RESET PASSWORD ==================-->
     public function resetPassword(Request $request)
     {
         // Validate the request data
@@ -351,7 +366,9 @@ class PenggunaController extends Controller
 
         return view('account.profil.resetpassword', compact('user', 'maintenances'));
     }
+    // <!--================== END ==================-->
 
+    // <!--================== UPDATE COMPANY ==================-->
     public function company($id)
     {
         $user = User::findOrFail($id);
@@ -416,4 +433,5 @@ class PenggunaController extends Controller
         // Redirect with success message
         return redirect()->route('account.company.edit', $user->id)->with('success', 'Data pengguna berhasil diperbarui!');
     }
+    // <!--================== END ==================-->
 }

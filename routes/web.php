@@ -168,10 +168,8 @@ Route::prefix('account')->group(
         Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
         Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
         Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
-        Route::get('/gaji/searchmanager', 'account\GajiController@searchmanager')->name('account.gaji.searchmanager');
-        Route::get('/gaji/searchkaryawan', 'account\GajiController@searchkaryawan')->name('account.gaji.searchkaryawan');
-        Route::get('/gaji/filtermanager', 'account\GajiController@filtermanager')->name('account.gaji.filtermanager');
-        Route::get('/gaji/filterkaryawan', 'account\GajiController@filterkaryawan')->name('account.gaji.filterkaryawan');
+        Route::get('/gaji/search', 'account\GajiController@searchGaji')->name('account.gaji.search');
+        Route::get('/gaji/filter', 'account\GajiController@filterGaji')->name('account.gaji.filter');
         Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
         Route::get('/laporan_gaji/download-excel', 'account\GajiController@downloadExcel')->name('account.laporan_gaji.download-excel');
         Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
@@ -228,6 +226,7 @@ Route::prefix('account')->group(
         Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
         Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
         Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
+        Route::get('/laporan_camp/download-excel', 'account\CampController@downloadExcel')->name('account.laporan_camp.download-excel');
         Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 
         // Laporan peserta

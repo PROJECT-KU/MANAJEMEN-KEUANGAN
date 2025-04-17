@@ -1,7 +1,7 @@
 @extends('layouts.account')
 
 @section('title')
-Tambah Pengguna | MIS
+Tambah Karyawan | MIS
 @stop
 
 <style>
@@ -21,16 +21,11 @@ Tambah Pengguna | MIS
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>TAMBAH PENGGUNA</h1>
+            <h1>TAMBAH DATA KARYAWAN</h1>
         </div>
 
         <div class="section-body">
-
             <div class="card">
-                <!-- <div class="card-header">
-                    <h4><i class="fas fa-user-plus"></i> TAMBAH PENGGUNA</h4>
-                </div> -->
-
                 <div class="card-body">
 
                     <form action="{{ route('account.pengguna.store') }}" method="POST">
@@ -90,13 +85,12 @@ Tambah Pengguna | MIS
                             </div>
                         </div>
 
-                        @if (Auth::user()->level == 'manager')
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Level</label>
-                                    <select class="form-control" id="level" name="level" required>
-                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                    <select class="form-control" id="level" name="level" style="height:max-content" required>
+                                        <option value="">-- Silahkan Pilih Level --</option>
                                         <option value="manager">Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="karyawan">Karyawan</option>
@@ -113,8 +107,8 @@ Tambah Pengguna | MIS
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Jenis</label>
-                                    <select class="form-control" id="jenis" name="jenis" required>
-                                        <option value="" disabled selected>Silahkan Pilih</option>
+                                    <select class="form-control" id="jenis" name="jenis" style="height:max-content" required>
+                                        <option value="">-- Silahkan Pilih Level --</option>
                                         <option value="bisnis">Bisnis</option>
                                     </select>
 
@@ -126,49 +120,6 @@ Tambah Pengguna | MIS
                                 </div>
                             </div>
                         </div>
-                        @else
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Level</label>
-                                    <select class="form-control" id="level" name="level" required>
-                                        <option value="" disabled selected>Silahkan Pilih</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="users">Users</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="staff">Staff</option>
-                                        <option value="karyawan">Karyawan</option>
-                                        <option value="trainer">Trainer</option>
-                                    </select>
-
-                                    @error('level')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Jenis</label>
-                                    <select class="form-control" id="jenis" name="jenis" required>
-                                        <option value="" disabled selected>Silahkan Pilih</option>
-                                        <option value="bisnis">Bisnis</option>
-                                        <option value="penyewaan">Penyewaan</option>
-                                        <option value="kasir">Kasir</option>
-                                        <option value="perorangan">Perorangan</option>
-                                    </select>
-
-                                    @error('jenis')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
 
                         <div class="row">
                             <div class="col-md-6">
@@ -225,7 +176,7 @@ Tambah Pengguna | MIS
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Bank</label>
-                                    <select class="form-control bank" id="bank" name="bank" required>
+                                    <select class="form-control bank" id="bank" name="bank" style="height:max-content" required>
                                         <option value="" disabled selected>Silahkan Pilih</option>
                                         <option value="002">BRI</option>
                                         <option value="008">BANK MANDIRI</option>

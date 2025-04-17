@@ -2,14 +2,14 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Pengguna | MIS
+Data Karyawan | MIS
 @stop
 
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA PENGGUNA</h1>
+      <h1>DATA KARYAWAN</h1>
     </div>
 
     <div class="section-body">
@@ -21,22 +21,29 @@ Data Pengguna | MIS
 
         <div class="card-body">
           <form action="{{ route('account.pengguna.search') }}" method="GET" id="searchForm">
-            <div class="form-group">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <!-- <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary" style="padding-top: 10px;">
-                      <i class="fa fa-plus-circle"></i> TAMBAH
-                    </a> -->
+            <div class="form-group position-relative">
+              <div class="input-group">
+                <!-- Input Pencarian -->
+                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN"
+                  value="{{ app('request')->input('q') }}"
+                  style="height: 45px; padding-right: 110px; border-right: 0;">
+
+                <!-- Tombol di dalam Input -->
+                <div class="position-absolute d-flex align-items-center"
+                  style="right: 10px; height: 45px; z-index: 10; border-radius: 40px; padding-left: 5px;">
+
+                  <button type="submit" class="btn btn-info rounded-pill"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-search"></i>
+                  </button>
+
+                  @if(request()->has('q'))
+                  <a href="{{ route('account.pengguna.index') }}" class="btn btn-danger rounded-pill ml-1"
+                    style="height: 40px; display: flex; align-items: center;">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                  @endif
                 </div>
-                <input type="text" class="form-control" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                <div class="input-group-append">
-                  <button type="button" class="btn btn-info" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                </div>
-                @if(request()->has('q'))
-                <a href="{{ route('account.pengguna.index') }}" class="btn btn-danger ml-1">
-                  <i class="fa fa-times-circle mt-2"></i> HAPUS PENCARIAN
-                </a>
-                @endif
               </div>
             </div>
           </form>
@@ -45,8 +52,8 @@ Data Pengguna | MIS
             <div class="col-12 mt-3">
               <div class="form-group text-center">
                 <div class="input-group mb-3">
-                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary btn-block" style="padding-top: 10px;">
-                    <i class="fa fa-plus-circle"></i> TAMBAH PENGGUNA
+                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;">
+                    <i class="fa fa-plus-circle"></i> TAMBAH DATA KARYAWAN
                   </a>
                 </div>
               </div>
@@ -59,7 +66,7 @@ Data Pengguna | MIS
 
       <div class="card">
         <div class="card-header">
-          <h4><i class="fas fa-list"></i> DATA PENGGUNA</h4>
+          <h4><i class="fas fa-list"></i> DATA KARYAWAN</h4>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -67,11 +74,9 @@ Data Pengguna | MIS
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
-                  <!-- <th scope="col" rowspan="2" style="text-align: center;">NAMA</th> -->
                   <th scope="col" rowspan="2" style="text-align: center;">EMAIL</th>
                   <th scope="col" rowspan="2" style="text-align: center;">USERNAME</th>
                   <th scope="col" rowspan="2" style="text-align: center;">VERIFIKASI EMAIL</th>
-                  <!--<th scope="col" rowspan="2" style="text-align: center;">TANGGAL DI BUAT</th>-->
                   <th scope="col" rowspan="2" style="text-align: center;">JENIS</th>
                   <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
                   <th scope="col" rowspan="2" style="text-align: center;">STATUS</th>
@@ -85,8 +90,14 @@ Data Pengguna | MIS
                 @foreach ($users as $item)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <!-- <td style="text-align: center;">{{ $item->full_name }}</td> -->
-                  <td style="text-align: center;">{{ $item->email }}</td>
+                  <td style="display: flex; align-items: center; gap: 10px;">
+                    <img
+                      src="{{ $item->gambar ? asset('assets/img/profil/' . $item->gambar) : asset('assets/img/profil/no-image.jpg') }}"
+                      alt="Foto Profil"
+                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <span>{{ $item->email }}</span>
+                  </td>
+
                   <td style="text-align: center;">{{ $item->username }}</td>
                   <td style="text-align: center;">
                     @if ($item->email_verified_at)
@@ -95,14 +106,6 @@ Data Pengguna | MIS
                     <button class="btn btn-danger" disabled>Belum Diverifikasi</button>
                     @endif
                   </td>
-                  <!--<td style="text-align: center;">
-                    @if ($item->avatar)
-                    <img src="{{ asset('assets/img/avatar/' . $item->avatar) }}" alt="Avatar" width="50">
-                    @else
-                    No Avatar
-                    @endif
-                  </td>-->
-                  <!--<td style="text-align: center;">{{ date('d-m-Y H:i', strtotime($item->created_at)) }}</td>-->
                   <td style="text-align: center;">{{ $item->jenis }}</td>
                   <td style="text-align: center;">{{ $item->level }}</td>
                   <td style="text-align: center;">
@@ -112,25 +115,19 @@ Data Pengguna | MIS
                     <button class="btn btn-danger" disabled>NON ACTIVE</button>
                     @endif
                   </td>
-                  @if ( Auth::user()->level == 'ceo')
                   <td class="text-center">
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning mt-2">
-                      <i class="fa fa-eye"></i>
-                    </a>
-                  </td>
-                  @else
-                  <td class="text-center">
-                    <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-primary mt-2">
-                      <i class="fa fa-pencil-alt"></i>
-                    </a>
-                    <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-warning mt-2">
+                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-pencil-alt"></i>
+                      </a>
+                      <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-info mt-2">
                       <i class="fa fa-eye"></i>
                     </a> -->
-                    <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                      <i class="fa fa-trash"></i>
-                    </button>
+                      <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
-                  @endif
                 </tr>
                 @php
                 $no++;
