@@ -432,7 +432,7 @@ Dashboard | MIS
                             @foreach($artikel->take(6) as $item)
                             <div class="swiper-slide">
                                 <div class="card h-100">
-                                    <img src="{{ asset('storage/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
+                                    <img src="{{ asset('assets/img/profil/' .  $item->gambar) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title" style="text-align: center;">
                                             <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
