@@ -155,11 +155,12 @@
                                         </div> -->
                                         <div class="form-group col-md-6">
                                             <label for="posisi">Posisi yang Kamu Lamar</label>
-                                            <select id="posisi" class="form-control" name="posisi" required>
+                                            <select id="posisi" class="form-control" name="posisi" style="height: max-content;" required>
                                                 <option value="" disabled selected>Pilih Posisi</option>
                                                 <option value="Digital Marketing" {{ old('posisi') == 'Digital Marketing' ? 'selected' : '' }}>Digital Marketing</option>
                                                 <option value="Assisten Trainer" {{ old('posisi') == 'Asisten Trainer' ? 'selected' : '' }}>Asisten Trainer</option>
                                                 <option value="Socmed Analysis" {{ old('posisi') == 'Socmed Analysis' ? 'selected' : '' }}>Socmed Analysis</option>
+                                                <option value="Guru Paud" {{ old('posisi') == 'Guru Paud' ? 'selected' : '' }}>Guru Paud</option>
                                             </select>
                                             @error('posisi')
                                             <div class="invalid-feedback" style="display: block">

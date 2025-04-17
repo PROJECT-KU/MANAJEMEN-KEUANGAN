@@ -27,12 +27,8 @@
     <hr><br><br>
 
     <div class="section-body">
-
       <div class="card">
-
-
         <div class="card-body">
-
 
           <table class="table table-bordered">
             <thead>
@@ -40,12 +36,10 @@
                 <th scope="col" style="text-align: center;width: 6%">NO.</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">ID TRANSAKSI</th>
                 <th scope="col" class="column-width" style="text-align: center; width:200px">NAMA KARYAWAN</th>
-                <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                 <th scope="col" class="column-width" style="text-align: center; width:250px">NO REKENING</th>
                 <th scope="col" class="column-width" style="text-align: center;">BANK</th>
                 <th scope="col" class="column-width" style="text-align: center; width:200px">TOTAL GAJI</th>
                 <th scope="col" class="column-width" style="text-align: center; width:150px">TANGGAL PEMBAYARAN</th>
-                <!-- <th scope="col" class="column-width" style="text-align: center; width:150px">STATUS PEMBAYARAN</th> -->
               </tr>
             </thead>
             <tbody>
@@ -63,7 +57,6 @@
                 <th scope="row" style="text-align: center">{{ $no }}</th>
                 <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                 <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                 <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
                 <td class="column-width" style="text-align: center;">
                   @php
@@ -137,13 +130,6 @@
                 </td>
                 <td class="column-width" style="text-align: center;">Rp. {{ number_format($hasil->total, 0, ',', '.') }}</td>
                 <td class="column-width" style="text-align: center;">{{ date('d-m-Y H:i', strtotime($hasil->tanggal)) }}</td>
-                <!-- <td class="column-width" style="text-align: center;">
-                  @if($hasil->status == 'pending')
-                  <button type="button" class="btn btn-warning">PENDING</button>
-                  @else
-                  <button type="button" class="btn btn-success">TERBAYAR</button>
-                  @endif
-                </td> -->
               </tr>
               @endif
               @php
@@ -161,8 +147,6 @@
             <div class="mt-5">
               <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGajiTerbayar, 0, ',', ',') }}</h3>
               <p><i>{{ $terbilangterbayar }}</i></p>
-              <!-- <h3><b>TOTAL GAJI KARYAWAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($totalGaji, 0, ',', ',') }}</h3>
-              <p><i>{{ $terbilang }}</i></p> -->
             </div>
           </center>
           <hr>
@@ -172,92 +156,3 @@
   </section>
 </div>
 @extends('layouts.version')
-<script>
-  //@if($message = Session::get('success'))
-  //swal({
-  //  type: "success",
-  //  icon: "success",
-  //  title: "BERHASIL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@elseif($message = Session::get('error'))
-  //swal({
-  //  type: "error",
-  //  icon: "error",
-  //  title: "GAGAL!",
-  //  text: "{{ $message }}",
-  //  timer: 1500,
-  //  showConfirmButton: false,
-  //  showCancelButton: false,
-  //  buttons: false,
-  //});
-  //@endif
-
-  // delete
-  // delete
-  function Delete(id) {
-    var token = $("meta[name='csrf-token']").attr("content");
-
-    swal({
-      title: "APAKAH KAMU YAKIN?",
-      text: "INGIN MENGHAPUS DATA INI!",
-      icon: "warning",
-      buttons: {
-        cancel: {
-          text: "TIDAK",
-          value: null,
-          visible: true,
-          className: "",
-          closeModal: true,
-        },
-        confirm: {
-          text: "YA",
-          value: true,
-          visible: true,
-          className: "",
-          closeModal: true
-        }
-      },
-      dangerMode: true,
-    }).then(function(isConfirm) {
-      if (isConfirm) {
-        // ajax delete
-        $.ajax({
-          url: "/account/gaji/" + id,
-          data: {
-            "_token": token,
-            "_method": "DELETE"
-          },
-          type: 'POST',
-          success: function(response) {
-            if (response.status === "success") {
-              swal({
-                title: 'BERHASIL!',
-                text: response.message,
-                icon: 'success',
-                timer: 1000,
-                buttons: false,
-              }).then(function() {
-                location.reload();
-              });
-            } else {
-              swal({
-                title: 'GAGAL!',
-                text: response.message,
-                icon: 'error',
-                timer: 1000,
-                buttons: false,
-              }).then(function() {
-                location.reload();
-              });
-            }
-          }
-        });
-      }
-    });
-  }
-</script>

@@ -2,50 +2,47 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Riskihajar\Terbilang\Facades\Terbilang;
 
-class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents, WithCustomStartCell
 {
     protected $gaji;
+    protected $totalGaji;
 
     public function __construct($gaji)
     {
         $this->gaji = $gaji;
+        $this->totalGaji = collect($gaji)->sum('total');
     }
 
     public function collection()
     {
-        $user = Auth::user();
-        // Filter gaji berdasarkan status
         return collect($this->gaji)->filter(function ($gaji) {
-            return $gaji->status !== 'pending'; // Sesuaikan dengan properti status gaji Anda
+            return $gaji->status !== 'pending';
         });
     }
 
     public function headings(): array
     {
         return [
-            'NO',
-            'ID TRANSAKSI',
-            'NAMA KARYAWAN',
-            'NO REKENING',
-            'BANK',
-            'TOTAL GAJI',
-            'TANGGAL PEMBAYARAN'
+            ['NO', 'ID TRANSAKSI', 'NAMA KARYAWAN', 'NO REKENING', 'BANK', 'TOTAL GAJI', 'TANGGAL PEMBAYARAN']
         ];
     }
 
     public function map($gaji): array
     {
-        // Mengatur nomor urut secara otomatis
         static $row = 0;
         $row++;
 
@@ -109,12 +106,8 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             '135' => 'BPD SULAWESI TENGGARA',
             '137' => 'BPD BANTEN'
         ];
-        $nama_bank = array_key_exists($gaji->bank, $bankNames) ? $bankNames[$gaji->bank] : 'Bank Name Not Found';
-
-        // Format total gaji ke dalam format mata uang rupiah
+        $nama_bank = $bankNames[$gaji->bank] ?? 'Bank Name Not Found';
         $formatted_total = number_format($gaji->total, 0, ',', '.');
-
-        // Format tanggal ke dalam format yang diminta (dd-nama bulan-yyyy jam-menit)
         $formatted_date = date('d-F-Y H:i', strtotime($gaji->tanggal));
 
         return [
@@ -130,16 +123,97 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function styles(Worksheet $sheet)
     {
+        return [];
+    }
+
+    public function startCell(): string
+    {
+        return 'A8'; // Heading kolom mulai dari A8, data mulai dari A9
+    }
+
+    public function registerEvents(): array
+    {
         return [
-            1 => ['font' => ['bold' => true]],
-            'A1:G1' => ['alignment' => ['horizontal' => 'center']],
-            'A' => ['alignment' => ['horizontal' => 'center']],
-            'B' => ['alignment' => ['horizontal' => 'center']],
-            'C' => ['alignment' => ['horizontal' => 'center']],
-            'D' => ['alignment' => ['horizontal' => 'center']],
-            'E' => ['alignment' => ['horizontal' => 'center']],
-            'F' => ['alignment' => ['horizontal' => 'center']],
-            'G' => ['alignment' => ['horizontal' => 'center']]
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Periode dari filter (jika ada), jika tidak ambil bulan ini
+                $tanggal_awal = request('tanggal_awal');
+                $tanggal_akhir = request('tanggal_akhir');
+
+                if ($tanggal_awal && $tanggal_akhir) {
+                    $periode = 'Periode: ' . date('d-m-Y', strtotime($tanggal_awal)) . ' s.d. ' . date('d-m-Y', strtotime($tanggal_akhir));
+                } else {
+                    $firstDay = date('01-m-Y');
+                    $lastDay = date('t-m-Y');
+                    $periode = 'Periode: ' . $firstDay . ' s.d. ' . $lastDay;
+                }
+
+                // Judul
+                $sheet->mergeCells('A1:G1');
+                $sheet->setCellValue('A1', 'LAPORAN GAJI KARYAWAN');
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+
+                // Periode
+                $sheet->mergeCells('A2:G2');
+                $sheet->setCellValue('A2', $periode);
+                $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+                // Garis separator
+                $sheet->getStyle('A3:G3')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+                // Alamat
+                $sheet->mergeCells('A4:G4');
+                $sheet->setCellValue('A4', 'Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman, Yogyakarta 55551');
+                $sheet->getStyle('A4')->getAlignment()->setHorizontal('center');
+
+                // Kontak
+                $sheet->mergeCells('A5:G5');
+                $sheet->setCellValue('A5', 'Email : info@rumahscopusfoundation.com Telp : 0812-2688-3280');
+                $sheet->getStyle('A5')->getAlignment()->setHorizontal('center');
+
+                // Garis separator kedua
+                $sheet->getStyle('A6:G6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+                // Heading kolom
+                $sheet->getStyle('A8:G8')->getFont()->setBold(true);
+                $sheet->getStyle('A8:G8')->getAlignment()->setHorizontal('center');
+
+                // Hitung jumlah data yang ditampilkan
+                $dataCount = $this->collection()->count();
+                $lastDataRow = 8 + $dataCount;
+                $totalRow = $lastDataRow + 2; // beri 1 baris kosong sebelum total
+                $terbilangRow = $totalRow + 1;
+
+                // Format total angka
+                $formattedTotal = 'Rp ' . number_format($this->totalGaji, 0, ',', '.');
+
+                // Garis pemisah di atas total
+                $sheet->getStyle('A' . ($totalRow - 1) . ':G' . ($totalRow - 1))->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+                // TOTAL - merge kolom A sampai E
+                $sheet->mergeCells("A{$totalRow}:E{$totalRow}");
+                $sheet->setCellValue("A{$totalRow}", 'TOTAL');
+                $sheet->getStyle("A{$totalRow}")->getFont()->setBold(true);
+                $sheet->getStyle("A{$totalRow}")->getAlignment()->setHorizontal('center');
+
+                // NILAI TOTAL - merge kolom F sampai G
+                $sheet->mergeCells("F{$totalRow}:G{$totalRow}");
+                $sheet->setCellValue("F{$totalRow}", $formattedTotal);
+                $sheet->getStyle("F{$totalRow}:G{$totalRow}")->getFont()->setBold(true);
+                $sheet->getStyle("F{$totalRow}:G{$totalRow}")->getAlignment()->setHorizontal('center');
+
+                // Garis pemisah di bawah total
+                $sheet->getStyle('A' . ($totalRow + 1) . ':G' . ($totalRow + 1))->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+                // TERBILANG - merge kolom A sampai G
+                $terbilang = \Riskihajar\Terbilang\Facades\Terbilang::make($this->totalGaji);
+                $sheet->mergeCells("A{$terbilangRow}:G{$terbilangRow}");
+                $sheet->setCellValue("A{$terbilangRow}", ucwords($terbilang) . ' Rupiah');
+                $sheet->getStyle("A{$terbilangRow}")->getAlignment()->setHorizontal('center');
+                $sheet->getStyle("A{$terbilangRow}")->getFont()->setItalic(true);
+            },
         ];
     }
 }
