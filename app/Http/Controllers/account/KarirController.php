@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\KarirCreateMail;
 use App\Mail\KarirUpdateMail;
+use Carbon\Carbon;
 
 class KarirController extends Controller
 {
@@ -37,6 +38,8 @@ class KarirController extends Controller
     }
 
     // <!--================== ADMIN ==================-->
+
+    // <!--====== TAMPILAN DATA ======-->
     public function list(Request $request)
     {
         $user = Auth::user();
@@ -63,7 +66,9 @@ class KarirController extends Controller
 
         return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate'));
     }
+    // <!--====== END ======-->
 
+    // <!--====== DETAIL DATA ======-->
     public function detail(Request $request, $id, $token)
     {
         $karir = DB::table('karir')
@@ -77,7 +82,9 @@ class KarirController extends Controller
 
         return view('karir.detail', compact('karir', 'maintenances'));
     }
+    // <!--====== END ======-->
 
+    // <!--====== UPDATE DATA ======-->
     public function edit(Request $request, $id, $token)
     {
         $karir = DB::table('karir')
@@ -175,7 +182,9 @@ class KarirController extends Controller
             return redirect()->route('karir.list')->with('error', 'Gagal Menyimpan Data Karir!');
         }
     }
+    // <!--====== END ======-->
 
+    // <!--====== SEARCH ======-->
     public function search(Request $request)
     {
         $search = $request->get('q');
@@ -219,8 +228,58 @@ class KarirController extends Controller
         }
         return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate', 'karirExist'));
     }
+    // <!--====== END ======-->
 
-    // <!-- DELETE DATA -->
+    // <!--====== FILTER ======-->
+    public function filter(Request $request)
+    {
+        $user = Auth::user();
+
+        $startDate = $request->input('tanggal_awal');
+        $endDate   = $request->input('tanggal_akhir');
+
+        // Jika tidak ada input, default bulan ini
+        $from = $startDate
+            ? Carbon::parse($startDate)->startOfDay()
+            : Carbon::now()->startOfMonth();
+
+        $to = $endDate
+            ? Carbon::parse($endDate)->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        // Query filter berdasarkan tanggal created_at
+        $karir = DB::table('karir')
+            ->select([
+                'karir.id',
+                'karir.token',
+                'karir.nama',
+                'karir.telp',
+                'karir.email',
+                'karir.cv',
+                'karir.lamaran',
+                'karir.lainnya',
+                'karir.pendidikan',
+                'karir.posisi',
+                'karir.desc',
+                'karir.status',
+                'karir.tanggal_interview',
+                'karir.lokasi_interview',
+                'karir.created_at',
+                'karir.updated_at'
+            ])
+            ->whereBetween('karir.created_at', [$from, $to])
+            ->orderBy('karir.created_at', 'DESC')
+            ->paginate(10)
+            ->appends([
+                'tanggal_awal'  => $startDate,
+                'tanggal_akhir' => $endDate
+            ]);
+
+        return view('karir.list', compact('karir', 'startDate', 'endDate'));
+    }
+    // <!--====== END ======-->
+
+    // <!--====== DELETE DATA ======-->
     public function destroy(Request $request, $id)
     {
         $karirData = Karir::findOrFail($id);
@@ -246,7 +305,7 @@ class KarirController extends Controller
         // Return a JSON response with a status and message
         return response()->json(['statusdatadeleted' => 'success', 'message' => 'Data berhasil dihapus.']);
     }
-    // <!-- END -->
+    // <!--====== END ======-->
 
     // <!--================== END ==================-->
 
