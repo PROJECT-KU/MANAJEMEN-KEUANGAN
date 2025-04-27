@@ -21,6 +21,8 @@ class CreateGaji extends Migration
             $table->string('email', 100)->nullable();
             $table->string('id_transaksi', 100)->nullable();
             $table->string('gaji_pokok', 100)->nullable();
+            $table->string('gaji_pokok_ethes_digital', 100)->nullable();
+            $table->string('total_gaji_pokok', 100)->nullable();
 
             // <!-- JUMLAH NOMINAL LEMBUR -->
             $table->string('lembur', 100)->nullable();

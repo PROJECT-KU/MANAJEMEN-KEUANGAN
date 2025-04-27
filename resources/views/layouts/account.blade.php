@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
+@php
+use Jenssegers\Agent\Agent;
+$agent = new Agent();
+@endphp
+
 <head>
     <!-- cdn sweet alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -65,23 +70,73 @@
     <style>
         .navbar {
             position: fixed;
-            z-index: 1050;
-            /* Agar navbar tetap di atas */
             background: linear-gradient(to right, #ff3131, #ff914d);
             width: auto;
             height: auto;
+            z-index: 1001;
+        }
+
+        body.is-mobile .navbar {
+            background: #ffffff !important;
+            width: 100%;
+            margin-top: -2px;
         }
     </style>
+
 </head>
 @php
 $isStatusnonactive = (Auth::user()->status === 'nonactive');
 $tenggatDate = strtotime(Auth::user()->tenggat);
 $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
-$isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="background-color: #f3f3f3;">
+$isTenggatExpired = ($tenggatDate < $currentDate); @endphp
+    <body style="background-color: #F5F5F5;" class="{{ $agent->isMobile() ? 'is-mobile' : '' }}">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg"></div>
+            <!--==================UNTUK DIVACE MOBILE==================-->
+            @if ($agent->isMobile())
+            <nav class="navbar navbar-expand-lg main-navbar shadow-sm">
+                <form class="form-inline mr-auto d-flex align-items-center">
+                    <p id="greeting" class="text-dark font-weight-bold mb-0 ml-4 mt-3" style="font-size:13px;"></p>
+                </form>
 
+                <!-- Dropdown Profil -->
+                <ul class="navbar-nav navbar-right mr-2">
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user d-flex align-items-center text-dark">
+                            @if (Auth::user()->gambar == null)
+                            <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
+                            @else
+                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
+                            @endif
+                            <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong>
+                                <hr>
+                            </div>
+                            <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                                <i class="far fa-user"></i> PROFIL SAYA
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ route('logout') }}" onclick="event.preventDefault();
+                document.getElementById('logout-form').submit();" class="dropdown-item has-icon text-danger">
+                                <i class="fas fa-sign-out-alt"></i> KELUAR
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            @yield('content')
+
+            @extends('layouts.version')
+            <!--================== UNTUK DIVACE SELAIN MOBILE ==================-->
+            @else
+
+            <div class="navbar-bg"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto d-flex align-items-center">
                     <ul class="navbar-nav mr-3">
@@ -400,6 +455,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp <body style="backgrou
 
         @extends('layouts.version')
     </div>
+    @endif
 
     <!--================== UCAPAN SELAMAT ==================-->
     <script>

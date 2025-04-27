@@ -282,7 +282,7 @@ Tambah Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Bank</label>
-                  <select class="form-control bank" name="bank" id="bank" disabled="true">
+                  <select class="form-control bank" name="bank" id="bank" disabled="true" style="height: auto;">
                     <option value="" disabled selected></option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -367,7 +367,7 @@ Tambah Gaji Karyawan | MIS
           </div>
 
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Gaji Pokok</label>
                 <div class="input-group">
@@ -377,6 +377,23 @@ Tambah Gaji Karyawan | MIS
                   <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" required>
                 </div>
                 @error('gaji_pokok')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Gaji Pokok Ethes Digital</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ old('gaji_pokok_ethes_digital') }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes" required>
+                </div>
+                @error('gaji_pokok_ethes_digital')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1225,7 +1242,7 @@ Tambah Gaji Karyawan | MIS
             <div class="col-md-6">
               <div class="form-group">
                 <label>Status Pembayaran</label>
-                <select class="form-control" name="status" required>
+                <select class="form-control" name="status" style="height: auto;" required>
                   <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                   <option value="pending">PENDING</option>
                   <option value="terbayar">TERBAYAR</option>
@@ -1278,13 +1295,13 @@ Tambah Gaji Karyawan | MIS
             </div>
           </div>
 
+          <div class="d-flex mt-3">
+            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+            <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-redo"></i> RESET</button>
+          </div>
         </div>
       </div>
 
-      <div class="d-flex mt-3">
-        <button class="btn btn-primary mr-1 btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-        <button class="btn btn-warning btn-reset" type="reset" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-redo"></i> RESET</button>
-      </div>
 
       </form>
 
@@ -1652,6 +1669,11 @@ Tambah Gaji Karyawan | MIS
     numeralThousandsGroupStyle: 'thousand'
   });
 
+  var cleaveC = new Cleave('.currency_ethes', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+
   var timeoutHandler = null;
   // end
 
@@ -1731,6 +1753,10 @@ Tambah Gaji Karyawan | MIS
 <!--================== FORMAT RUPIAH ==================-->
 <script>
   var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_ethes', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

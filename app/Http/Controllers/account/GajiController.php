@@ -87,7 +87,7 @@ class GajiController extends Controller
         ->first()->total_gaji ?? 0;
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.gaji_pokok_ethes_digital', 'gaji.total_gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -103,7 +103,7 @@ class GajiController extends Controller
         ->first()->total_gaji ?? 0;
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.gaji_pokok_ethes_digital', 'gaji.total_gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
         // ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -154,6 +154,8 @@ class GajiController extends Controller
         'gaji.id_transaksi',
         'gaji.token',
         'gaji.gaji_pokok',
+        'gaji.gaji_pokok_ethes_digital',
+        'gaji.total_gaji_pokok',
         'gaji.lembur',
         'gaji.bonus',
         'gaji.tunjangan',
@@ -248,6 +250,8 @@ class GajiController extends Controller
         'gaji.id_transaksi',
         'gaji.token',
         'gaji.gaji_pokok',
+        'gaji.gaji_pokok_ethes_digital',
+        'gaji.total_gaji_pokok',
         'gaji.lembur',
         'gaji.bonus',
         'gaji.tunjangan',
@@ -402,7 +406,10 @@ class GajiController extends Controller
     );
 
     $gaji_pokok = $request->input('gaji_pokok');
+    $gaji_pokok_ethes_digital = $request->input('gaji_pokok_ethes_digital');
     $gaji_pokok = empty($gaji_pokok) ? 0 : str_replace(",", "", $gaji_pokok); // Convert to numeric value or set to 0 if empty
+    $gaji_pokok_ethes_digital = empty($gaji_pokok_ethes_digital) ? 0 : str_replace(",", "", $gaji_pokok_ethes_digital);
+    $total_gaji_pokok = $gaji_pokok +  $gaji_pokok_ethes_digital;
 
     //lembur
     $lembur = $request->input('lembur');
@@ -591,8 +598,8 @@ class GajiController extends Controller
 
     // <!-- POTONGAN JIKA ALPHA -->
     $subalpha = $jumlah_bonus5 * 0.005;
-    $subhasil = $gaji_pokok * $subalpha;
-    $totalalpha = $gaji_pokok - $subhasil;
+    $subhasil = $total_gaji_pokok * $subalpha;
+    $totalalpha = $total_gaji_pokok - $subhasil;
     // <!-- END -->
 
     // <!-- TOTAL -->
@@ -618,6 +625,8 @@ class GajiController extends Controller
       'token'             => $token,
       'user_id' => $request->input('user_id'),
       'gaji_pokok' => $gaji_pokok,
+      'gaji_pokok_ethes_digital' => $gaji_pokok_ethes_digital,
+      'total_gaji_pokok' => $total_gaji_pokok,
       'lembur' => $lembur,
       'lembur1' => $lembur1,
       'lembur2' => $lembur2,
@@ -781,7 +790,10 @@ class GajiController extends Controller
     );
 
     $gaji_pokok = $request->input('gaji_pokok');
+    $gaji_pokok_ethes_digital = $request->input('gaji_pokok_ethes_digital');
     $gaji_pokok = empty($gaji_pokok) ? 0 : str_replace(",", "", $gaji_pokok); // Convert to numeric value or set to 0 if empty
+    $gaji_pokok_ethes_digital = empty($gaji_pokok_ethes_digital) ? 0 : str_replace(",", "", $gaji_pokok_ethes_digital);
+    $total_gaji_pokok = $gaji_pokok +  $gaji_pokok_ethes_digital;
 
     //lembur
     $lembur = $request->input('lembur');
@@ -970,8 +982,8 @@ class GajiController extends Controller
 
     // <!-- POTONGAN JIKA ALPHA -->
     $subalpha = $jumlah_bonus5 * 0.005;
-    $subhasil = $gaji_pokok * $subalpha;
-    $totalalpha = $gaji_pokok - $subhasil;
+    $subhasil = $total_gaji_pokok * $subalpha;
+    $totalalpha = $total_gaji_pokok - $subhasil;
     // <!-- END -->
 
     // <!-- TOTAL -->
@@ -999,6 +1011,8 @@ class GajiController extends Controller
       //'id_transaksi' => $id_transaksi,
       'user_id' => $existingUserId,
       'gaji_pokok' => $gaji_pokok,
+      'gaji_pokok_ethes_digital' => $gaji_pokok_ethes_digital,
+      'total_gaji_pokok' => $total_gaji_pokok,
       'lembur' => $lembur,
       'lembur1' => $lembur1,
       'lembur2' => $lembur2,
@@ -1190,6 +1204,8 @@ class GajiController extends Controller
         'gaji.id_transaksi',
         'gaji.token',
         'gaji.gaji_pokok',
+        'gaji.gaji_pokok_ethes_digital',
+        'gaji.total_gaji_pokok',
         'gaji.lembur',
         'gaji.bonus',
         'gaji.tunjangan',
@@ -1290,6 +1306,8 @@ class GajiController extends Controller
         'gaji.id_transaksi',
         'gaji.token',
         'gaji.gaji_pokok',
+        'gaji.gaji_pokok_ethes_digital',
+        'gaji.total_gaji_pokok',
         'gaji.lembur',
         'gaji.bonus',
         'gaji.tunjangan',
