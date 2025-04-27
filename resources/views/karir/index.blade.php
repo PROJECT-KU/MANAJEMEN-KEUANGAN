@@ -161,6 +161,8 @@
                                                 <option value="Assisten Trainer" {{ old('posisi') == 'Asisten Trainer' ? 'selected' : '' }}>Asisten Trainer</option>
                                                 <option value="Socmed Analysis" {{ old('posisi') == 'Socmed Analysis' ? 'selected' : '' }}>Socmed Analysis</option>
                                                 <option value="Guru Paud" {{ old('posisi') == 'Guru Paud' ? 'selected' : '' }}>Guru Paud</option>
+                                                <option value="Graphic Design" {{ old('posisi') == 'Graphic Design' ? 'selected' : '' }}>Graphic Design</option>
+                                                <option value="Programmer" {{ old('posisi') == 'Programmer' ? 'selected' : '' }}>Programmer</option>
                                             </select>
                                             @error('posisi')
                                             <div class="invalid-feedback" style="display: block">
