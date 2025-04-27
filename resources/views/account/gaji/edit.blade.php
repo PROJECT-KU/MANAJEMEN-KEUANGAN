@@ -230,7 +230,7 @@ Update Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Bank</label>
-                  <select class="form-control bank" name="bank" id="bank" disabled="true">
+                  <select class="form-control bank" name="bank" id="bank" disabled="true" style="height: auto;">
                     <option value="" disabled selected></option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -314,7 +314,7 @@ Update Gaji Karyawan | MIS
           </div>
 
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Gaji Pokok</label>
                 <div class="input-group">
@@ -328,6 +328,35 @@ Update Gaji Karyawan | MIS
                   {{ $message }}
                 </div>
                 @enderror
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Gaji Pokok Ethes Digital</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ $gaji->gaji_pokok_ethes_digital }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes">
+                </div>
+                @error('gaji_pokok_ethes_digital')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>Total Gaji Pokok</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" style="border-color: red;  font-weight: bold;">Rp.</span>
+                </div>
+                <input type="text" name="total_gaji_pokok" id="total_gaji_pokok" value="{{ number_format($gaji->total_gaji_pokok, 0, ',', ',') }}" placeholder="Masukkan Total Potongan" class="form-control currency6 text-bold" style="border-color: red;  font-weight: bold;" readonly>
               </div>
             </div>
           </div>
@@ -1361,7 +1390,7 @@ Update Gaji Karyawan | MIS
             <!-- END -->
 
             <!-- IZIN -->
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
               <div class="form-group">
                 <label>Bonus Izin</label>
                 <div class="input-group">
@@ -1371,9 +1400,9 @@ Update Gaji Karyawan | MIS
                   <input type="text" name="bonus7" value="{{ $gaji->bonus7 }}" placeholder="Bonus Izin" class="form-control currency_izin">
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Total Izin</label>
                 <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
@@ -1533,7 +1562,7 @@ Update Gaji Karyawan | MIS
             <div class="col-md-6">
               <div class="form-group">
                 <label>Status Pembayaran</label>
-                <select class="form-control" name="status">
+                <select class="form-control" name="status" style="height: auto;">
                   <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                   <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
                   <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
@@ -1602,15 +1631,15 @@ Update Gaji Karyawan | MIS
             </div>
           </div>
 
+          <div class="d-flex mt-3">
+            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+            <a href="{{ route('account.gaji.index') }}" class="btn btn-info rounded-pill" style="flex: 1; height:40px; font-size: 15px;">
+              <i class="fa fa-undo"></i> KEMBALI
+            </a>
+          </div>
         </div>
       </div>
 
-      <div class="d-flex mt-3">
-        <button class="btn btn-primary mr-1 btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-        <a href="{{ route('account.gaji.index') }}" class="btn btn-info" style="flex: 1; height:40px; font-size: 15px;">
-          <i class="fa fa-undo"></i> KEMBALI
-        </a>
-      </div>
 
       </form>
     </div>
@@ -1707,6 +1736,10 @@ Update Gaji Karyawan | MIS
 <!--================== format rupiah gaji pokok ==================-->
 <script>
   var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_ethes', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
@@ -2065,6 +2098,10 @@ Update Gaji Karyawan | MIS
 <!--================== FORMAT RUPIAH ==================-->
 <script>
   var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_ethes', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

@@ -302,6 +302,9 @@ Data Gaji Karyawan | MIS
                         <i class="fa fa-eye" style="margin-top: 6px;"></i>
                       </a> -->
                       @endif
+                      <a style="margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
+                        <i class="fa fa-eye" style="margin-top: 6px;"></i>
+                      </a>
                       <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mb-2">
                         <i class="fa fa-download"></i> Slip Gaji
                       </a>
@@ -310,9 +313,6 @@ Data Gaji Karyawan | MIS
                       <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
                         <i class="fa fa-pencil-alt" style="margin-top: 6px;"></i>
                       </a>
-                      <!-- <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-eye" style="margin-top: 6px;"></i>
-                      </a> -->
                       @endif
                       <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-eye" style="margin-top: 6px;"></i>

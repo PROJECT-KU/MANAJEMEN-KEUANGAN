@@ -230,7 +230,7 @@ Detail Gaji Karyawan | MIS
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Bank</label>
-                  <select class="form-control bank" name="bank" id="bank" disabled="true">
+                  <select class="form-control bank" name="bank" id="bank" disabled="true" style="height: auto;">
                     <option value="" disabled selected></option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -314,7 +314,7 @@ Detail Gaji Karyawan | MIS
           </div>
 
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Gaji Pokok</label>
                 <div class="input-group">
@@ -328,6 +328,35 @@ Detail Gaji Karyawan | MIS
                   {{ $message }}
                 </div>
                 @enderror
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Gaji Pokok Ethes Digital</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>
+                  </div>
+                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ $gaji->gaji_pokok_ethes_digital }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes" readonly>
+                </div>
+                @error('gaji_pokok_ethes_digital')
+                <div class="invalid-feedback" style="display: block">
+                  {{ $message }}
+                </div>
+                @enderror
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>Total Gaji Pokok</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" style="border-color: red;  font-weight: bold;">Rp.</span>
+                </div>
+                <input type="text" name="total_gaji_pokok" id="total_gaji_pokok" value="{{ number_format($gaji->total_gaji_pokok, 0, ',', ',') }}" placeholder="Masukkan Total Potongan" class="form-control currency6 text-bold" style="border-color: red;  font-weight: bold;" readonly>
               </div>
             </div>
           </div>
@@ -1363,12 +1392,9 @@ Detail Gaji Karyawan | MIS
           <!-- IZIN -->
           <div class="col-md-6">
             <div class="form-group">
-              <label>Jumlah Izin</label>
+              <label>Total Izin</label>
               <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Rp.</span>
-                </div>
-                <input type="text" name="bonus7" value="{{ $gaji->jumlah_bonus7 ?? 0}}" placeholder="Bonus Izin" class="form-control currency_izin" readonly>
+                <input type="text" name="bonus7" value="{{ $gaji->jumlah_bonus7 ?? 0}}" placeholder="Bonus Izin" class="form-control" readonly>
               </div>
             </div>
           </div>
@@ -1396,7 +1422,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="webinar" id="webinar" value="{{ $gaji->webinar }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar" readonly>
+                <input type="text" name="webinar" id="webinar" value="{{ number_format($gaji->webinar, 0, ',', ',') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar" readonly>
               </div>
             </div>
           </div>
@@ -1407,7 +1433,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="kinerja" id="kinerja" value="{{ $gaji->kinerja }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja" readonly>
+                <input type="text" name="kinerja" id="kinerja" value="{{ number_format($gaji->kinerja, 0, ',', ',') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja" readonly>
               </div>
             </div>
           </div>
@@ -1421,7 +1447,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ $gaji->tunjangan_bpjs }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS" readonly>
+                <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ number_format($gaji->tunjangan_bpjs, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS" readonly>
               </div>
             </div>
           </div>
@@ -1433,7 +1459,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ $gaji->tunjangan_thr }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR" readonly>
+                <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ number_format($gaji->tunjangan_thr, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR" readonly>
               </div>
             </div>
           </div>
@@ -1447,7 +1473,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ $gaji->tunjangan_pulsa }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa" readonly>
+                <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ number_format($gaji->tunjangan_pulsa, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa" readonly>
               </div>
             </div>
           </div>
@@ -1458,7 +1484,7 @@ Detail Gaji Karyawan | MIS
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <input type="text" name="tunjangan" id="tunjangan" value="{{ $gaji->tunjangan }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya" readonly>
+                <input type="text" name="tunjangan" id="tunjangan" value="{{ number_format($gaji->tunjangan, 0, ',', ',') }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya" readonly>
               </div>
             </div>
           </div>
@@ -1527,7 +1553,7 @@ Detail Gaji Karyawan | MIS
           <div class="col-md-6">
             <div class="form-group">
               <label>Status Pembayaran</label>
-              <select class="form-control" name="status" disabled>
+              <select class="form-control" name="status" style="height: auto;" disabled>
                 <option value="" disabled selected>Silahkan Pilih</option>
                 <option value="pending" {{ $gaji->status == 'pending' ? 'selected' : '' }}>PENDING</option>
                 <option value="terbayar" {{ $gaji->status == 'terbayar' ? 'selected' : '' }}>TERBAYAR</option>
@@ -1596,14 +1622,14 @@ Detail Gaji Karyawan | MIS
           </div>
         </div>
 
+        <div class="d-flex mt-3">
+          <a href="{{ route('account.gaji.index') }}" class="btn btn-info rounded-pill" style="flex: 1; height:40px; font-size: 15px;">
+            <i class="fa fa-undo"></i> KEMBALI
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="d-flex mt-3">
-      <a href="{{ route('account.gaji.index') }}" class="btn btn-info" style="flex: 1; height:40px; font-size: 15px;">
-        <i class="fa fa-undo"></i> KEMBALI
-      </a>
-    </div>
 
     </form>
 
@@ -1701,6 +1727,10 @@ Detail Gaji Karyawan | MIS
 <!--================== format rupiah gaji pokok ==================-->
 <script>
   var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_ethes', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });
@@ -2059,6 +2089,10 @@ Detail Gaji Karyawan | MIS
 <!--================== FORMAT RUPIAH ==================-->
 <script>
   var cleaveC = new Cleave('.currency', {
+    numeral: true,
+    numeralThousandsGroupStyle: 'thousand'
+  });
+  var cleaveC = new Cleave('.currency_ethes', {
     numeral: true,
     numeralThousandsGroupStyle: 'thousand'
   });

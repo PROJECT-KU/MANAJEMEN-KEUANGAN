@@ -162,6 +162,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        Jenssegers\Agent\AgentServiceProvider::class,
 
 
         /*
@@ -234,6 +235,7 @@ return [
         'Terbilang' => Riskihajar\Terbilang\Facades\Terbilang::class,
         'SnappyPdf' => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
+        'Agent' => Jenssegers\Agent\Facades\Agent::class,
 
         // PWA
         'LaravelPwa' => \Ladumor\LaravelPwa\LaravelPwa::class,
