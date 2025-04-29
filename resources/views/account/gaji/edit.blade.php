@@ -333,7 +333,7 @@ Update Gaji Karyawan | MIS
 
             <div class="col-md-6">
               <div class="form-group">
-                <label>Gaji Pokok Ethes Digital</label>
+                <label>Bonus Ethes Digital</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>

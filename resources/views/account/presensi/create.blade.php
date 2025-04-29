@@ -113,7 +113,7 @@ Tambah Presensi Karyawan | MIS
             </div>
             @endif
 
-            <div id="catatan-section" style="display: none;">
+            <!-- <div id="catatan-section" style="display: none;">
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -145,7 +145,7 @@ Tambah Presensi Karyawan | MIS
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <div class="row">
               <div class="col-md-12">
