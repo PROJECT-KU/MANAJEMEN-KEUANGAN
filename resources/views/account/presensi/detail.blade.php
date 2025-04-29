@@ -192,7 +192,7 @@ Detail Presensi Karyawan | MIS
               </div>
             </div>
 
-            <div id="catatan-section" style="display: none;">
+            <!-- <div id="catatan-section" style="display: none;">
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
@@ -208,7 +208,7 @@ Detail Presensi Karyawan | MIS
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <a href="{{ route('account.presensi.index') }}" class="btn btn-info">
               <i class="fa fa-undo"></i> KEMBALI

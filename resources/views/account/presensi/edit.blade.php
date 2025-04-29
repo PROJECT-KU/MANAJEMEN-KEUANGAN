@@ -208,7 +208,7 @@ Update Presensi Karyawan | MIS
               </div>
             </div>
 
-            <div id="catatan-section" style="display: none;">
+            <!-- <div id="catatan-section" style="display: none;">
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
@@ -224,7 +224,7 @@ Update Presensi Karyawan | MIS
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!--================== END ==================-->
 
             <!--================== menampilkan button berdasarkan level ==================-->
