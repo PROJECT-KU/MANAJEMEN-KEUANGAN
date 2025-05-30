@@ -44,6 +44,8 @@
                 <tr>
                   <!-- <th scope="col" style="text-align: left; width:300px">Dari</th>
                   <th scope="col" style="text-align: left; width:250px">Untuk</th> -->
+                  <th scope="col" style="text-align: left; width:300px"></th>
+                  <th scope="col" style="text-align: left; width:250px"></th>
                   <th scope="col" style="text-align: left;  width:250px"><b>ID Transaksi : {{ $camp->id_transaksi }}</b>
                   </th>
                 </tr>
