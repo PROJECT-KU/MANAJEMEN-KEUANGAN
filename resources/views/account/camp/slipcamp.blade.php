@@ -16,7 +16,7 @@
   <form action="{{ route('account.camp.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <img src="{{ public_path('assets/img/logo3.png') }}" alt="Company Logo" style="max-width: 100px;">
+      <img src="data:image/png;base64,{{ base64_encode(file_get_contents($userLogoPath)) }}" alt="Logo" height="45px">
       <section class="invoice">
         <div class="row">
           <div class="col-12">

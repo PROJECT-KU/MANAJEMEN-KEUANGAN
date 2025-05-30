@@ -1048,8 +1048,7 @@ class CampController extends Controller
         $userWithNorekBank = User::find($employee->id);
 
         // Get the HTML content of the view
-        $userLogoPath = public_path('images/' . $user->logo_company);
-
+        $userLogoPath = public_path('assets/img/logo3.png');
         if (!file_exists($userLogoPath)) {
             // Handle the case where the image file does not exist.
             return response('Image not found', 404);
