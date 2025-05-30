@@ -349,6 +349,9 @@ Route::prefix('account')->group(
         Route::post('/todolist/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
         Route::post('/todolist/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
         Route::delete('/todolist/data/delete/{id}', 'account\ToDoListController@destroy')->name('account.todolist.delete');
+
+        // cuti karyawan
+        Route::get('/cuti/data', 'account\CutiController@index')->name('account.cuti.index');
     }
 
 

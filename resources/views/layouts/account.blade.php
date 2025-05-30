@@ -234,6 +234,11 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
                                         <i class="fas fa-dollar-sign"></i> <span>Gaji Karyawan</span>
                                     </a>
                                 </li>
+                                <li class="{{ setActive('account/cuti') }}">
+                                    <a class="nav-link" href="{{ route('account.cuti.index') }}">
+                                        <i class="fas fa-calendar-alt"></i> <span>Cuti Karyawan</span>
+                                    </a>
+                                </li>
                                 <li class="{{ setActive('account/presensi') }}">
                                     <a class="nav-link" href="{{ route('account.presensi.index') }}">
                                         <i class="fas fa-user-clock"></i> <span>Presensi</span>
