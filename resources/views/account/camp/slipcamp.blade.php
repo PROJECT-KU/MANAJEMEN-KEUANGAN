@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Slip Laporan Percamp | MANAGEMENT</title>
+  <title>Slip Laporan Percamp | MIS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
@@ -16,7 +16,7 @@
   <form action="{{ route('account.camp.store') }}" method="GET" enctype="multipart/form-data">
     @csrf
     <div class="wrapper">
-      <img src="{{ asset('images/' . $user->logo_company) }}" alt="Company Logo" style="max-width: 100px;">
+      <img src="{{ asset('assets/img/logo3.png') }}" alt="Company Logo" style="max-width: 100px;">
       <section class="invoice">
         <div class="row">
           <div class="col-12">
@@ -60,7 +60,7 @@
                     Selesai Camp: {{ date('d F Y', strtotime($camp->tanggal_akhir)) }}<br>
                     Jumlah Peserta : {{ $camp->peserta }}<br>
                     Keuntungan : {{ rtrim(rtrim(number_format($camp->persentase_keuntungan, 1, ',', '.'), '0'), ',') }}%<br>
-                    Tanggal : {{ date('d F Y') }}
+                    <!-- Tanggal : {{ date('d F Y') }} -->
                   </td>
                   <td>
 
@@ -124,7 +124,7 @@
                   <td style="text-align: left; width:145px"></td>
 
                   <td style="text-align: left; width:145px">Hotel</td>
-                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->Hotel, 0, ',', '.') }}</td>
+                  <td style="text-align: left; width:145px">Rp. {{ number_format($camp->hotel, 0, ',', ',') }}</td>
                 </tr>
                 <tr>
                   <td style="text-align: left; width:145px"></td>

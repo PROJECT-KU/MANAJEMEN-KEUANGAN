@@ -131,242 +131,150 @@ Dashboard | MIS
 
 <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
 
 @section('content')
 
 <div class="main-content">
     <section class="section">
         <div class="section-body">
-            <!--================== ASSIGN TASK ==================-->
-            @php
-            $user = Auth::user();
-            $userId = $user->id;
 
-            if ($user->level === 'manager') {
-            $tasks = DB::table('todolist')->where('status', 'Assign Task')->get();
-            $taskCount = $tasks->count();
-            } else {
-            $tasks = DB::table('todolist')
-            ->where('status', 'Assign Task')
-            ->where(function ($query) use ($userId) {
-            $query->where('user_id', $userId)->orWhere('user_id_kedua', $userId);
-            })
-            ->get();
-            $taskCount = $tasks->count();
-            }
-            @endphp
-
-            @if ($taskCount > 0)
-            <div class="alert alert-info mt-3" role="alert" style="text-align: center;">
-                <h5 class="text-center">Notifikasi Tugas</h5>
-                <p style="font-size: 20px;">Anda memiliki Jumlah tugas yang harus dikerjakan sebanyak: {{ $taskCount }}<br>Anda bisa melihat tugas di menu To Do List</p>
-            </div>
-            @endif
+            <!--================== NOTIFIKASI ==================-->
+            @include('account.dashboard.task-slider-mobile')
             <!--================== END ==================-->
 
-            <!--================== AKUN BELUM DI VERIFIKASI ==================-->
-            @if (Auth::user()->status == "nonactive")
-            <div class="alert alert-danger mt-5" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">Akun Anda Telah Di Non Active kan</b><br>Silahkan Hubungin Admin Untuk meng Active kan Akun!
-            </div>
-            @endif
-            <!--================== END ==================-->
-
-            <!--================== AKUN DINONAKTIFKAN ==================-->
-            @if (Auth::user()->status === 'off')
-            <div class="alert alert-danger" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">Akun Anda Telah Di Nonaktifkan!</b><br>Silahkan Hubungin Admin Untuk Aktifkan Akun!
-            </div>
-            @endif
-            <!--================== END ==================-->
-
-            <!--================== PERJALANAN DINAS AJUKAN ==================-->
-            <!-- @if ($hasAjukan)
-            <div class="alert alert-danger" role="alert" style="text-align: center; padding: 15px 0 0 0; width: 100%; box-sizing: border-box; border-radius: 10px;">
-                <b style="font-size: 20px;">Terdapat Perjalanan Dinas dengan status "PENGAJUAN"!</b>
-                <br>Silahkan periksa dan ambil tindakan yang diperlukan.<br>
-                <a href="{{ route('account.PerjalananDinas.index') }}" style="text-align: center; text-decoration: none; display: block; width: 100%; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                    <button type="button" class="btn btn-info" style="width: 100%; border-radius: 0 0 10px 10px; text-decoration: none; color: white; margin-top:10px; font-size:15px;">
-                        LIHAT PENGAJUAN
-                    </button>
-                </a>
-            </div>
-            @endif -->
-            <!--================== END ==================-->
-
-            <!--================== MASA SEWA AKUN AKAN HABIS ==================-->
-            @if (Auth::user()->tenggat === null)
-            @elseif (now() > Auth::user()->tenggat)
-            <div class="alert alert-danger" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">MASA SEWA TELAH HABIS</b><br>
-                <p style="font-size: 15px;">Masa sewa anda telah berakhir.</p>
-                TELAH HABIS SEJAK TANGGAL {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
-            </div>
-            @elseif (now()->addDays(3) >= Auth::user()->tenggat)
-            <div class="alert alert-warning" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">MASA SEWA SEGERA HABIS</b><br>
-                <p style="font-size: 15px;">Masa sewa anda akan segera habis.</p>
-                HABIS PADA TANGGAL {{ date('d-m-Y', strtotime(Auth::user()->tenggat)) }}
-            </div>
-            @endif
-            <!--================== END ==================-->
-
-            <!--================== JIKA DATA DIRI MASIH ADA YANG KOSONG ==================-->
-            @if (Auth::user()->company === null || Auth::user()->telp === null || Auth::user()->nik === null || Auth::user()->norek === null || Auth::user()->bank === null || Auth::user()->gambar == null || Auth::user()->jobdesk == null)
-            <div class="alert alert-warning" role="alert" style="text-align: center;">
-                <b style="font-size: 20px;">DATA DIRI</b><br>
-                <p style="font-size: 15px;">Data diri anda masih ada yang kosong! Silahkan Lengkapi data diri anda terlebih dahulu!</p>
-            </div>
-            @endif
-            <!--================== END ==================-->
-
-            <!--================== MAINTENANCE ==================-->
-            @if (!$maintenances->isEmpty())
-            @foreach($maintenances as $maintenance)
-            @if ($maintenance->status === 'aktif' && (now() <= Carbon\Carbon::parse($maintenance->end_date)->endOfDay()))
-                <div class="alert alert-danger" role="alert" style="text-align: center;">
-                    <b style="font-size: 25px; text-transform:uppercase">{{ $maintenance->title }}</b><br>
-                    <!-- <img style="width: 100px; height:100px;" src="{{ asset('images/' . $maintenance->gambar) }}" alt="Gambar Presensi" class="img-thumbnail"> -->
-                    <p style="font-size: 20px;" class="mt-2">{{ $maintenance->note }}</p>
-                    @if ($maintenance->start_date !== null)
-                    <p style="font-size: 15px;">Dari Tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }} - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}</p>
-                    @endif
-                </div>
-                @endif
-                @endforeach
-                @endif
-                <!--================== END ==================-->
-
-                <!--================== TOTAL KARYAWAN ==================-->
-                @if (Auth::user()->level === 'manager')
-                <div class="row"> <!-- Tambahkan row untuk mengatur tata letak grid -->
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanCard">
-                        <div class="card card-statistic-2">
-                            <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                                <i class="fas fa-users" style="margin-top: 13px;"></i>
-                            </div>
-                            <div class="card-wrap flex-column">
-                                <div class="card-header">
-                                    <h4>Total Karyawan</h4>
-                                </div>
-                                <div class="card-body">
-                                    <h5>{{ $totalKaryawan }} Karyawan</h5> <!-- Menampilkan jumlah total karyawan -->
-                                </div>
-                            </div>
+            <!--================== TOTAL KARYAWAN ==================-->
+            @if (Auth::user()->level === 'manager')
+            <div class="row"> <!-- Tambahkan row untuk mengatur tata letak grid -->
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanCard">
+                    <div class="card card-statistic-2">
+                        <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+                            <i class="fas fa-users" style="margin-top: 13px;"></i>
                         </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanAktifCard">
-                        <div class="card card-statistic-2">
-                            <div class="card-icon shadow-primary" style="background-color: #008000;">
-                                <i class="fas fa-user-check" style="margin-top: 13px;"></i>
+                        <div class="card-wrap flex-column">
+                            <div class="card-header">
+                                <h4>Total Karyawan</h4>
                             </div>
-                            <div class="card-wrap flex-column">
-                                <div class="card-header">
-                                    <h4>Total Karyawan Aktif</h4>
-                                </div>
-                                <div class="card-body">
-                                    <h5>{{ $totalKaryawanAktif }} Karyawan Aktif</h5> <!-- Menampilkan jumlah total karyawan aktif -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanNonAktifCard">
-                        <div class="card card-statistic-2">
-                            <div class="card-icon shadow-primary" style="background-color: #800000;">
-                                <i class="fas fa-user-times" style="margin-top: 13px;"></i>
-                            </div>
-                            <div class="card-wrap flex-column">
-                                <div class="card-header">
-                                    <h4>Total Karyawan Non Aktif</h4>
-                                </div>
-                                <div class="card-body">
-                                    <h5>{{ $totalKaryawanNonAktif }} Karyawan Non Aktif</h5> <!-- Menampilkan jumlah total karyawan nonaktif -->
-                                </div>
+                            <div class="card-body">
+                                <h5>{{ $totalKaryawan }} Karyawan</h5> <!-- Menampilkan jumlah total karyawan -->
                             </div>
                         </div>
                     </div>
                 </div>
-                @endif
-                <!--================== END ==================-->
 
-                @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
-                @else
-                <!--================== PRESENSI KARYAWAN ==================-->
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <div class="card card-statistic-2">
-                            <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
-                                <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanAktifCard">
+                    <div class="card card-statistic-2">
+                        <div class="card-icon shadow-primary" style="background-color: #008000;">
+                            <i class="fas fa-user-check" style="margin-top: 13px;"></i>
+                        </div>
+                        <div class="card-wrap flex-column">
+                            <div class="card-header">
+                                <h4>Total Karyawan Aktif</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>{{ $totalKaryawanAktif }} Karyawan Aktif</h5> <!-- Menampilkan jumlah total karyawan aktif -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanNonAktifCard">
+                    <div class="card card-statistic-2">
+                        <div class="card-icon shadow-primary" style="background-color: #800000;">
+                            <i class="fas fa-user-times" style="margin-top: 13px;"></i>
+                        </div>
+                        <div class="card-wrap flex-column">
+                            <div class="card-header">
+                                <h4>Total Karyawan Non Aktif</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>{{ $totalKaryawanNonAktif }} Karyawan Non Aktif</h5> <!-- Menampilkan jumlah total karyawan nonaktif -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+            <!--================== END ==================-->
+
+            @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
+            @else
+            <!--================== PRESENSI KARYAWAN ==================-->
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <div class="card card-statistic-2">
+                        <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
+                            <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
+                        </div>
+
+                        <div class="card-wrap" style="box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+                            <div class="card-header">
+                                <h4>PRESENSI KEHADIRAN</h4>
                             </div>
 
-                            <div class="card-wrap" style="box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-                                <div class="card-header">
-                                    <h4>PRESENSI KEHADIRAN</h4>
-                                </div>
+                            @php
+                            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                            ->whereDate('created_at', now()->toDateString())
+                            ->first();
+                            @endphp
 
-                                @php
-                                $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                                ->whereDate('created_at', now()->toDateString())
-                                ->first();
-                                @endphp
-
-                                <!-- Jika sudah presensi masuk, belum pulang -->
-                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                    <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
-                                        MASUK
-                                    </button>
-                                    <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                                        PULANG
-                                    </a>
-                                    <!-- end -->
-                            </div>
-
-                            <div class="d-flex align-items-center" style="width: 100%;">
-                                <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                                    Selamat Bekerja!
-                                </span>
-                            </div>
-
-                            <!-- Jika belum presensi sama sekali -->
-                            @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
+                            <!-- Jika sudah presensi masuk, belum pulang -->
+                            @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
+                                <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
                                     MASUK
-                                </a>
-                                <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                    PULANG
                                 </button>
+                                <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                                    PULANG
+                                </a>
                                 <!-- end -->
                         </div>
 
                         <div class="d-flex align-items-center" style="width: 100%;">
-                            <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                                Anda Belum Melakukan Presensi Pada Hari Ini!
+                            <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
+                                Selamat Bekerja!
                             </span>
                         </div>
 
-                        @else
-
-                        <!-- Di luar jam kerja atau presensi selesai -->
-                        <div class="d-flex mx-1 mt-2 mb-2">
-                            <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
+                        <!-- Jika belum presensi sama sekali -->
+                        @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
+                            <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
                                 MASUK
-                            </button>
+                            </a>
                             <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
                                 PULANG
                             </button>
-                        </div>
-                        <!-- end -->
-
-                        <div class="d-flex align-items-center" style="width: 100%;">
-                            <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                                Selesai Bekerja!
-                            </span>
-                        </div>
-                        @endif
+                            <!-- end -->
                     </div>
+
+                    <div class="d-flex align-items-center" style="width: 100%;">
+                        <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
+                            Anda Belum Melakukan Presensi Pada Hari Ini!
+                        </span>
+                    </div>
+
+                    @else
+
+                    <!-- Di luar jam kerja atau presensi selesai -->
+                    <div class="d-flex mx-1 mt-2 mb-2">
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
+                            MASUK
+                        </button>
+                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
+                            PULANG
+                        </button>
+                    </div>
+                    <!-- end -->
+
+                    <div class="d-flex align-items-center" style="width: 100%;">
+                        <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                            Selesai Bekerja!
+                        </span>
+                    </div>
+                    @endif
                 </div>
+            </div>
         </div>
         <!--================== END ==================-->
 
@@ -418,7 +326,7 @@ Dashboard | MIS
         <!--================== END ==================-->
 
         <!--================== MENU ==================-->
-        <div class="card akses-cepat mb-4 ml-3 mr-3 col-lg-12">
+        <div class="card akses-cepat col-lg-6 col-md-6 col-sm-6 col-xs-6">
             <style>
                 .akses-cepat .menu-grid {
                     display: flex;
@@ -780,6 +688,70 @@ Dashboard | MIS
                 <button id="toggleBtn" class="btn">
                     <i class="fa fa-chevron-down"></i> <span id="toggleText">Lainnya</span>
                 </button>
+            </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== JUMLAH IZIN BULAN INI ==================-->
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="izinBulanIniCard">
+            <div class="card card-statistic-2">
+                <div class="card-icon shadow-danger" style="background-color: #DC143C;">
+                    <i class="fas fa-user-clock" style="margin-top: 13px;"></i>
+                </div>
+                <div class="card-wrap flex-column">
+                    <div class="card-header">
+                        <h4>Izin Bulan Ini</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ $jumlahIzinBulanIni }} / 3 Izin</h5>
+                    </div>
+                    <div class="d-flex" style="width: 100%;">
+                        @if ($jumlahIzinBulanIni >= 3)
+                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
+                            Anda telah mencapai batas maksimal izin bulan ini.
+                        </div>
+                        @else
+                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                            Anda masih memiliki {{ 3 - $jumlahIzinBulanIni }} izin bulan ini.
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== HAK CUTI ==================-->
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="cutiCard">
+            <div class="card card-statistic-2">
+                <div class="card-icon shadow-primary" style="background-color: #4169E1;">
+                    <i class="fas fa-calendar-check" style="margin-top: 13px;"></i>
+                </div>
+                <div class="card-wrap flex-column">
+                    <div class="card-header">
+                        <h4>Hak Cuti</h4>
+                    </div>
+                    <div class="card-body">
+                        @if ($bolehCuti)
+                        <h5>Anda memenuhi syarat cuti.</h5>
+                        @else
+                        <h5>Belum memenuhi syarat cuti.</h5>
+                        @endif
+                    </div>
+                    <div class="d-flex" style="width: 100%;">
+                        @if ($bolehCuti)
+                        <button class="alert alert-primary mb-0 d-flex align-items-center justify-content-center" style="flex-grow: 1; height: 48px;">
+                            <a href="" style="text-decoration: none;">
+                                Ajukan Cuti
+                            </a>
+                        </button>
+                        @else
+                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
+                            Minimal 1 tahun bekerja untuk dapat mengajukan cuti.
+                        </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
         <!--================== END ==================-->

@@ -551,6 +551,76 @@ class DashboardController extends Controller
         }
         // <!--================== END ==================-->
 
-        return view('account.dashboard.index', compact('salaryData', 'currentYear',  'totalKaryawan', 'totalKaryawanAktif', 'totalKaryawanNonAktif', 'saldo_selama_ini', 'saldo_bulan_ini', 'saldo_bulan_lalu', 'pengeluaran_bulan_ini', 'pengeluaran_hari_ini', 'Pemasukan_hari_ini', 'pemasukan_bulan_ini', 'pemasukan_tahun_ini', 'pengeluaran_tahun_ini', 'total_pemasukan', 'total_pengeluaran', 'debit', 'credit', 'latestUsers', 'users', 'maintenances', 'totalGaji', 'gaji', 'artikel', 'Ajukan', 'hasAjukan'));
+
+        // <!--================== DATA IZIN & CUTI ==================-->
+        $user = Auth::user();
+        $now = Carbon::now();
+
+        // Hitung durasi kerja
+        $workDuration = '';
+        $diff = $user->created_at->diff($now);
+        $years = $diff->y;
+        $months = $diff->m;
+        $days = $diff->d;
+
+        if ($user->email_verified_at && $user->status === 'active') {
+            if ($years > 0) {
+                $workDuration .= $years . ' tahun ';
+            }
+            if ($months > 0 || $years > 0) {
+                $workDuration .= $months . ' bulan ';
+            }
+            if ($days > 0 || $months == 0 || $years == 0) {
+                $workDuration .= $days . ' hari';
+            }
+        } else {
+            $workDuration = 'Email belum diverifikasi atau status tidak aktif';
+        }
+
+        // Ambil jumlah izin bulan ini
+        $jumlahIzinBulanIni = DB::table('presensi')
+            ->where('user_id', $user->id)
+            ->whereMonth('created_at', $now->month)
+            ->whereYear('created_at', $now->year)
+            ->sum('izin');
+
+        $maksimalIzin = 3;
+
+        // Apakah sudah memenuhi syarat cuti? (≥ 1 tahun)
+        $bolehCuti = $user->created_at->diffInYears($now) >= 1;
+        // <!--================== END ==================-->
+
+        return view('account.dashboard.index', compact(
+            'workDuration',
+            'jumlahIzinBulanIni',
+            'maksimalIzin',
+            'bolehCuti',
+            'salaryData',
+            'currentYear',
+            'totalKaryawan',
+            'totalKaryawanAktif',
+            'totalKaryawanNonAktif',
+            'saldo_selama_ini',
+            'saldo_bulan_ini',
+            'saldo_bulan_lalu',
+            'pengeluaran_bulan_ini',
+            'pengeluaran_hari_ini',
+            'Pemasukan_hari_ini',
+            'pemasukan_bulan_ini',
+            'pemasukan_tahun_ini',
+            'pengeluaran_tahun_ini',
+            'total_pemasukan',
+            'total_pengeluaran',
+            'debit',
+            'credit',
+            'latestUsers',
+            'users',
+            'maintenances',
+            'totalGaji',
+            'gaji',
+            'artikel',
+            'Ajukan',
+            'hasAjukan'
+        ));
     }
 }

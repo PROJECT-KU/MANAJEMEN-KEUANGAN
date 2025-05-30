@@ -170,7 +170,7 @@ $agent = new Agent();
   }
 </style>
 
-<?php $version = "4.0.0"; ?>
+<?php $version = "4.0.1"; ?>
 <footer class="main-footer" id="PwaFooter">
   <div class="footer-left">
     © <strong>Rumah Scopus Foundation</strong> {{ date("Y") }}
