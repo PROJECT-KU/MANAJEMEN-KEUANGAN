@@ -1,0 +1,227 @@
+<?php
+
+namespace App\Http\Controllers\account;
+
+use App\AnalisisBibliometrik;
+use App\CategoriesAnalisisBibliometrik;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AnalisisBibliometrikUpdateDiterimaMail;
+use App\Mail\AnalisisBibliometrikUpdateResheduleMail;
+
+class AnalisisBibliometrikController extends Controller
+{
+    /**
+     * PenyewaanController constructor.
+     */
+    function generateRandomToken($length)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
+        $token = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $token;
+    }
+
+    public function generateRandomId($length)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $id;
+    }
+
+    // <!--================== MENAMPILKAN DATA ==================-->
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('tanggal_awal');
+        $endDate = $request->input('tanggal_akhir');
+
+        if (!$startDate || !$endDate) {
+            $currentMonth = date('Y-m-01 00:00:00');
+            $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        } else {
+            $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+            $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
+        }
+        $datas = DB::table('analisis_bibliometrik')
+            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
+            ->select(
+                'analisis_bibliometrik.*',
+                'categories_analisis_bibliometrik.nama as kategori_nama',
+                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
+                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
+                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
+                'categories_analisis_bibliometrik.id as kategori_id'
+            )
+            ->latest('analisis_bibliometrik.created_at')
+            ->paginate(10);
+
+
+        return view('account.analisis_bibliometrik.index', compact('datas', 'startDate', 'endDate'));
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== UPDATE DATA ==================-->
+    public function edit($id, $token)
+    {
+        $data = AnalisisBibliometrik::findOrFail($id);
+        $category = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
+        $categories = CategoriesAnalisisBibliometrik::all();
+
+        // Inject mulai dan selesai manual jika category ditemukan
+        if ($category) {
+            $data->mulai = $category->mulai;
+            $data->selesai = $category->selesai;
+            $data->sisa_kuota = $category->sisa_kuota;
+            $data->biaya = $category->biaya;
+            $data->kode_diskon = $category->kode_diskon;
+            $data->group_wa = $category->group_wa;
+        } else {
+            $data->mulai = null;
+            $data->selesai = null;
+            $data->sisa_kuota = null;
+            $data->biaya = null;
+            $data->kode_diskon = null;
+            $data->group_wa = null;
+        }
+
+        return view('account.analisis_bibliometrik.edit', compact('data', 'categories'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        $analisisbibliometrik = AnalisisBibliometrik::findOrFail($id);
+
+        // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
+        $kategoriBaruId = $request->input('categories_analisis_bibliometrik_id');
+        $kategoriLamaId = $analisisbibliometrik->categories_analisis_bibliometrik_id;
+        $kategori = CategoriesAnalisisBibliometrik::findOrFail($kategoriBaruId);
+        // END
+
+        // MENENTUKAN SISA KUOTA YANG SAMA DENGAN JUMLAH TOTAL KUOTA
+        $jumlahPendaftarLama = $analisisbibliometrik->jumlah_pendaftar;
+        $jumlahPendaftarBaru = (int) $request->input('jumlah_pendaftar', 0);
+
+        if ($kategoriLamaId != $kategoriBaruId) {
+            $kategoriLama = CategoriesAnalisisBibliometrik::find($kategoriLamaId);
+            if ($kategoriLama) {
+                $kategoriLama->sisa_kuota += $jumlahPendaftarLama;
+                $kategoriLama->save();
+            }
+        }
+        // END
+
+        // CLEAR FORMAT RUPIAH
+        $cleanPPN = str_replace('.', '', $request->input('ppn'));
+        $cleanKodeUnik = str_replace('.', '', $request->input('kode_unik'));
+        $cleanNominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
+        $cleanTotalPembayaran = str_replace('.', '', $request->input('total_pembayaran'));
+        // END
+
+        $analisisbibliometrik->update([
+            'categories_analisis_bibliometrik_id'                     => $request->input('categories_analisis_bibliometrik_id'),
+            'nama'                                                    => $request->input('nama'),
+            'email'                                                   => $request->input('email'),
+            'affiliasi'                                               => $request->input('affiliasi'),
+            'telp'                                                    => $request->input('telp'),
+            'jumlah_pendaftar'                                        => $jumlahPendaftarBaru,
+            'ppn'                                                     => $cleanPPN,
+            'kode_unik'                                               => $cleanKodeUnik,
+            'nominal_diskon'                                          => $cleanNominalDiskon,
+            'total_pembayaran'                                        => $cleanTotalPembayaran,
+            'status'                                                  => $request->input('status'),
+            'tanggal_reschedule'                                      => $request->input('tanggal_reschedule'),
+            'group_wa'                                                => $request->input('group_wa'),
+            'note'                                                    => $request->input('note'),
+        ]);
+
+        if ($analisisbibliometrik) {
+
+            // UPDATE SISA KUOTA
+            $totalTerdaftar = AnalisisBibliometrik::where('categories_analisis_bibliometrik_id', $kategoriBaruId)
+                ->sum('jumlah_pendaftar');
+
+            $kategori->sisa_kuota = max(0, $kategori->total_kuota - $totalTerdaftar);
+            $kategori->save();
+            // END
+
+            $appName = 'Rumah Scopus Foundation';
+            $emailTo = $request->input('email');
+
+            if ($analisisbibliometrik->status == 'Pendaftaran Diterima') {
+                Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateDiterimaMail($analisisbibliometrik, $kategori, $appName));
+            } elseif ($analisisbibliometrik->status === 'Pendaftaran Reschedule') {
+                Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateResheduleMail($analisisbibliometrik, $kategori, $appName));
+            } else {
+                Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateDiterimaMail($analisisbibliometrik, $kategori, $appName));
+            }
+            return redirect()->route('account.analisisbibliometrik.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
+        } else {
+            return redirect()->route('account.analisisbibliometrik.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
+        }
+    }
+
+    // <!--================== END ==================-->
+
+    // <!--================== DELETE DATA ==================-->
+    public function destroy($id)
+    {
+        try {
+            $data = AnalisisBibliometrik::find($id);
+
+            if ($data) {
+                // Ambil data kategori terkait
+                $kategori = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
+
+                // Tambahkan jumlah pendaftar ke sisa kuota kategori
+                if ($kategori) {
+                    $kategori->sisa_kuota = $kategori->sisa_kuota + $data->jumlah_pendaftar;
+
+                    // Pastikan sisa_kuota tidak melebihi total_kuota
+                    if ($kategori->sisa_kuota > $kategori->total_kuota) {
+                        $kategori->sisa_kuota = $kategori->total_kuota;
+                    }
+
+                    $kategori->save();
+                }
+
+                // Hapus gambar jika ada
+                if ($data->gambar && file_exists(public_path('bibliometrik/' . $data->gambar))) {
+                    unlink(public_path('bibliometrik/' . $data->gambar));
+                }
+
+                // Hapus data dari database
+                $data->delete();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Data dan gambar berhasil dihapus!'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan!'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    // <!--================== END ==================-->
+}

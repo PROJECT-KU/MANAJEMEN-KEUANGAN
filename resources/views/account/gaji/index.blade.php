@@ -37,148 +37,86 @@ Data Gaji Karyawan | MIS
       @endif
       <!--================== END ==================-->
 
-      <!--================== FILTER ==================-->
       <div class="card">
-        <div class="card-header  text-right">
-          <h4><i class="fas fa-filter"></i> FILTER</h4>
-        </div>
-
-        <div class="card-body">
-
-          <!--====== SEARCH ======-->
-          <form action="{{ route('account.gaji.search') }}" method="GET" id="searchForm">
-            <div class="form-group position-relative">
-              <div class="input-group">
-
-                <!-- Input Pencarian -->
-                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN"
-                  value="{{ app('request')->input('q') }}"
-                  style="height: 45px; padding-right: 110px; border-right: 0;">
-
-                <!-- Tombol di dalam Input -->
-                <div class="position-absolute d-flex align-items-center"
-                  style="right: 10px; height: 45px; z-index: 10; border-radius: 40px; padding-left: 5px;">
-
-                  <button type="submit" class="btn btn-info rounded-pill"
-                    style="height: 40px; display: flex; align-items: center;">
-                    <i class="fa fa-search"></i>
-                  </button>
-
-                  @if(request()->has('q'))
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger rounded-pill ml-1"
-                    style="height: 40px; display: flex; align-items: center;">
-                    <i class="fa fa-trash"></i>
-                  </a>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </form>
-          <!--====== END ======-->
-
-          <!--====== FILTER ======-->
-          <form action="{{ route('account.gaji.filter') }}" method="GET">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>TANGGAL AWAL</label>
-                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control datepicker">
-                </div>
-              </div>
-              <div class="col-md-2" style="text-align: center">
-                <label style="margin-top: 38px;">S/D</label>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>TANGGAL AKHIR</label>
-                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control datepicker">
-                </div>
-              </div>
-              <div class="col-md-2">
-                @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                <div class="btn-group" style="width: 100%;">
-                  <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                    <i class="fa fa-trash mt-2"></i> HAPUS
-                  </a>
-                </div>
-                @else
-                <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                @endif
-              </div>
-            </div>
-          </form>
-          <!--====== END ======-->
-
-          <!--====== BUTTON TAMBAH DATA ======-->
-          @if (Auth::user()->level == 'manager')
-          <div class="row">
-            <div class="col-12 mt-3">
-              <div class="form-group text-center">
-                <div class="input-group mb-3">
-                  @if ($presensiExist)
-                  <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;">
-                    <i class="fa fa-plus-circle"></i> TAMBAH GAJI
-                  </a>
-                  @else
-                  <a href="#" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;" id="tambahGajiBtn">
-                    <i class="fa fa-plus-circle"></i> TAMBAH GAJI
-                  </a>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </div>
-          @endif
-          <!--====== END ======-->
-
-        </div>
-      </div>
-      <!--================== END ==================-->
-
-      <div class="card">
-        <div class="card-header">
+        <div class="card-header  d-flex justify-content-between align-items-center">
           <h4><i class="fas fa-list"></i> DATA GAJI KARYAWAN</h4>
 
-          @if (Auth::user()->level == 'manager' || Auth::user()->level == 'ceo')
-          <div class="dropdown card-header-action">
-            <button href="#" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-              <i class="fas fa-download"></i> DOWNLOAD
-            </button>
-            <div class="dropdown-menu dropdown-menu-right">
-              <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="dropdown-item has-icon">
-                <i class="far fa-file-pdf"></i> PDF
-              </a>
+          <!--================== FILTER ==================-->
+          <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
-              <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="dropdown-item has-icon">
-                <i class="far fa-file-excel"></i> EXCEL
-              </a>
+            <!-- CREATE DATA -->
+            @if ($presensiExist)
+            <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block rounded-pill">
+              <i class="fa fa-plus-circle"></i> TAMBAH GAJI
+            </a>
+            @else
+            <a href="#" class="btn btn-primary btn-block rounded-pill" id="tambahGajiBtn">
+              <i class="fa fa-plus-circle"></i> TAMBAH GAJI
+            </a>
+            @endif
+            <!-- END -->
+
+            <div class="dropdown card-header-action">
+              <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                <i class="fas fa-download"></i> FILTER
+              </button>
+              <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
+
+                <!-- FILTER TANGGAL -->
+                <form action="{{ route('account.gaji.filter') }}" method="GET">
+                  <div class="form-group">
+                    <label>Tanggal Awal</label>
+                    <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control">
+                  </div>
+
+                  <div class="form-group">
+                    <label>Tanggal Akhir</label>
+                    <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control">
+                  </div>
+
+                  <button class="btn btn-info btn-block mb-2" type="submit">
+                    <i class="fa fa-filter"></i> FILTER
+                  </button>
+
+                  @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger btn-block">
+                    <i class="fa fa-trash"></i> HAPUS FILTER
+                  </a>
+                  @endif
+                </form>
+                <!-- END -->
+
+                <!-- DOWNLOAD DATA GAJI -->
+                @if (Auth::user()->level == 'manager')
+                <hr class="my-2">
+
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="btn btn-primary mr-2" style="flex: 1 1 auto; max-width: 180px;">
+                    <i class="far fa-file-pdf"></i> Unduh PDF
+                  </a>
+
+                  <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="btn btn-info" style="flex: 1 1 auto; max-width: 180px;">
+                    <i class="far fa-file-excel"></i> Unduh EXCEL
+                  </a>
+                </div>
+
+                @endif
+                <!-- END -->
+
+              </div>
             </div>
+
+            <!-- SEARCH -->
+            <div style="max-width: 250px; width: 100%;">
+              <input type="text" id="liveSearch" class="form-control" placeholder="Pencarian..." autocomplete="off">
+            </div>
+            <!-- END -->
+
           </div>
-          @endif
-
-          <!-- <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-                <i class="fas fa-file-pdf"></i> Download PDF
-              </a>
-            </div> -->
-          <!-- <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate]) }}" class="btn btn-primary">
-                <i class="fas fa-file-pdf"></i> Download EXCEL
-              </a>
-            </div> -->
+          <!--================== END FILTER ==================-->
 
         </div>
-        <div class="card-header">
-          <p style="margin-top: -3px; font-size: 15px"><strong>Periode
-              @if ($startDate && $endDate)
-              {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-              @else
-              {{ date('F Y') }}
-              @endif
-            </strong>
-          </p>
-        </div>
+
         <div class="card-body">
           <div class="table-responsive">
             <div class="table-responsive">
@@ -188,7 +126,6 @@ Data Gaji Karyawan | MIS
                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
                     <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
                     <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                    <!--<th scope="col" class="column-width" style="text-align: center;">NIK</th>-->
                     <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
                     <th scope="col" class="column-width" style="text-align: center;">BANK</th>
                     <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
@@ -197,7 +134,7 @@ Data Gaji Karyawan | MIS
                     <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="gajiTable">
                   @php
                   $no = 1;
                   $terbayarCount = 0; // Count of terbayar records
@@ -210,7 +147,6 @@ Data Gaji Karyawan | MIS
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td class="column-width" style="text-align: center;">{{ $hasil->id_transaksi }}</td>
                     <td class="column-width" style="text-align: center;">{{ $hasil->full_name }}</td>
-                    <!--<td class="column-width" style="text-align: center;">{{ $hasil->nik }}</td>-->
                     <td class="column-width" style="text-align: center;">{{ $hasil->norek }}</td>
                     <td class="column-width" style="text-align: center; width:100px">
                       @php
@@ -296,34 +232,33 @@ Data Gaji Karyawan | MIS
                     </td>
 
                     <td class="text-center">
-                      @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
-                      @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                      <!-- <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-eye" style="margin-top: 6px;"></i>
-                      </a> -->
-                      @endif
-                      <a style="margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-eye" style="margin-top: 6px;"></i>
-                      </a>
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mb-2">
-                        <i class="fa fa-download"></i> Slip Gaji
-                      </a>
-                      @else
-                      @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                      <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary mt-2">
-                        <i class="fa fa-pencil-alt" style="margin-top: 6px;"></i>
-                      </a>
-                      @endif
-                      <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-eye" style="margin-top: 6px;"></i>
-                      </a>
-                      <button style="margin-right: 5px; margin-bottom:4px; width:30px; height:30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2 mb-2">
-                        <i class="fa fa-download"></i> Slip Gaji
-                      </a>
-                      @endif
+                      <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                        @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
+                        @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
+                        @endif
+                        <a style="margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-secondary mt-2">
+                          <i class="fa fa-eye" style="margin-top: 6px;"></i>
+                        </a>
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mb-2">
+                          <i class="fa fa-download"></i> Slip Gaji
+                        </a>
+                        @else
+                        @if(now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
+                        <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning mt-2">
+                          <i class="fa fa-pencil-alt" style="margin-top: 6px;"></i>
+                        </a>
+                        @endif
+                        <a style="margin-right: 5px; margin-bottom:4px; height: 30px; width: 30px;" href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-secondary mt-2">
+                          <i class="fa fa-eye" style="margin-top: 6px;"></i>
+                        </a>
+                        <button style="margin-right: 5px; margin-bottom:4px; width:30px; height:30px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2 mb-2">
+                          <i class="fa fa-download"></i> Slip Gaji
+                        </a>
+                        @endif
+                      </div>
                     </td>
 
                   </tr>
@@ -390,23 +325,26 @@ Data Gaji Karyawan | MIS
   </section>
 </div>
 
-<!--================== SEARCH WITH JQUERY ==================-->
+<!--================== LIVE SEARCH ==================-->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    let searchInput = document.getElementById('searchInput');
-    let searchForm = document.getElementById('searchForm');
-    let debounceTimeout;
+  let timer;
 
-    searchInput.addEventListener('keyup', function() {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(function() {
-        if (searchInput.value.trim() === '') {
-          window.location.href = "{{ route('account.gaji.index') }}";
-        } else {
-          searchForm.submit();
-        }
-      }, 500); // Adjust the debounce delay as needed
-    });
+  document.getElementById('liveSearch').addEventListener('keyup', function() {
+    clearTimeout(timer);
+    const query = this.value;
+
+    timer = setTimeout(() => {
+      fetch(`{{ route('account.gaji.search') }}?q=${encodeURIComponent(query)}`)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newTableBody = doc.querySelector('#gajiTable');
+          if (newTableBody) {
+            document.getElementById('gajiTable').innerHTML = newTableBody.innerHTML;
+          }
+        });
+    }, 300); // debounce 300ms
   });
 </script>
 <!--================== END ==================-->

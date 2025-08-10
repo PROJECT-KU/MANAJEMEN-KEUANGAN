@@ -5,6 +5,53 @@
 Company | MIS
 @stop
 
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
+<style>
+    .custom-file-upload {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .inputfile {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .file-upload {
+        cursor: pointer;
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .file-upload:hover {
+        background-color: #0056b3;
+    }
+
+    #file-selected {
+        margin-top: 5px;
+        color: #888;
+        font-size: 14px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+    }
+</style>
+
+<!--================== END ==================-->
+
 @section('content')
 <div class="main-content">
     <section class="section">
@@ -14,10 +61,6 @@ Company | MIS
 
         <div class="section-body">
             <div class="card">
-                <!-- <div class="card-header">
-                        <h4><i class="fas fa-building"></i> UPDATE COMPANY</h4>
-                    </div> -->
-
                 <div class="card-body">
 
                     <form action="{{ route('account.company.update', $user->id) }}" method="POST" enctype="multipart/form-data">
@@ -59,37 +102,47 @@ Company | MIS
                             </div>
                         </div>
 
-
-
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="form-group custom-file-upload">
                                     <label>Logo Perusahaan</label>
                                     <div class="input-group">
-                                        <input type="file" name="logo_company" id="logo_company" class="form-control" accept="image/*" capture="camera">
+                                        <input
+                                            type="file"
+                                            name="logo_company"
+                                            id="logo_company"
+                                            class="inputfile"
+                                            accept="image/*"
+                                            capture="environment">
+                                        <label for="logo_company" class="file-upload">
+                                            <i class="fas fa-cloud-upload-alt"></i> Pilih Gambar
+                                        </label>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="thumbnail-circle" style="width: 12rem;">
-                                        @if (Auth::user()->logo_company == null)
-                                        <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 100px; height:100px;">
-                                        @else
-                                        <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('images/' .  Auth::user()->logo_company) }}" alt="Preview Image" style="width: 100px; height:100px;">
-                                        @endif
-                                    </div>
+                                <div id="imagePreview" class="image-preview">
+                                    @php
+                                    $logoPath = Auth::user()->logo_company
+                                    ? asset('images/' . Auth::user()->logo_company)
+                                    : asset('assets/img/avatar/no-image.jpg');
+                                    @endphp
+
+                                    <img
+                                        id="previewImage"
+                                        src="{{ $logoPath }}"
+                                        alt="Preview Logo"
+                                        class="img-thumbnail">
                                 </div>
+                                <span id="file-selected" class="d-block mt-2 text-muted"></span>
                             </div>
                         </div>
-                        @if ( Auth::user()->level == 'ceo')
-                        @else
-                        <div class="d-flex">
-                            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 100%; font-size: 14px;">
-                                <i class="fa fa-paper-plane"></i> UPDATE
-                            </button>
+
+
+                        <div class="d-flex mt-5">
+                            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
                         </div>
-                        @endif
 
                     </form>
 
@@ -99,7 +152,7 @@ Company | MIS
     </section>
 </div>
 
-<!--================== format telp ==================-->
+<!--================== FORMAT TELP ==================-->
 <script>
     function formatPhoneNumber(input) {
         // Menghapus semua karakter non-digit
@@ -112,103 +165,56 @@ Company | MIS
         input.value = phoneNumber;
     }
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!-- maksimal upload gambar & jenis file yang di perbolehkan -->
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.getElementById('logo_company').addEventListener('change', function() {
-        const maxFileSizeInBytes = 5024 * 5024; // 5MB
-        const allowedExtensions = ['jpg', 'jpeg', 'png'];
-        const fileInput = this;
+    document.getElementById('logo_company').addEventListener('change', function(event) {
+        const fileInput = event.target;
+        const file = fileInput.files[0];
 
-        if (fileInput.files.length > 0) {
-            const selectedFile = fileInput.files[0];
-            const fileSize = selectedFile.size; // Get the file size in bytes
-            const fileName = selectedFile.name.toLowerCase();
+        if (!file) return;
 
-            // Check file size
-            if (fileSize > maxFileSizeInBytes) {
-                // Display a SweetAlert error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Ukuran File Melebihi Batas',
-                    text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
-                });
-                fileInput.value = ''; // Clear the file input
-                return;
-            }
+        const fileName = file.name;
+        const fileSizeKB = (file.size / 1024).toFixed(2);
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
 
-            // Check file extension
-            const fileExtension = fileName.split('.').pop();
-            if (!allowedExtensions.includes(fileExtension)) {
-                // Display a SweetAlert error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Jenis File Tidak Valid',
-                    text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
-                });
-                fileInput.value = ''; // Clear the file input
-            }
+        if (!allowedTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Tidak Valid',
+                text: 'Hanya file PNG, JPG, dan JPEG yang diperbolehkan.',
+            });
+            fileInput.value = '';
+            return;
         }
+
+        if (file.size > 3 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ukuran Terlalu Besar',
+                text: 'Maksimum ukuran file adalah 3MB.',
+            });
+            fileInput.value = '';
+            return;
+        }
+
+        document.getElementById('file-selected').textContent = `${fileName} (${fileSizeKB} KB)`;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewImage = document.getElementById('previewImage');
+            previewImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 </script>
-<!-- end -->
 
-<!-- upload image -->
+<!--================== END ==================-->
+
+<!--================== BUTTON LOADER ==================-->
 <script>
-    const imageInput = document.getElementById('logo_company');
-    const imagePreview = document.getElementById('image-preview');
-
-    imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block'; // Show the preview
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-<!-- end upload image -->
-
-<!-- waktu untuk menampilkan alerts -->
-<!--<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var successAlert = document.getElementById('successAlert');
-    if (successAlert) {
-      setTimeout(function() {
-        successAlert.style.display = 'none';
-      }, 3000);
-    }
-  });
-</script>-->
-<!-- end -->
-
-<script>
-    if ($(".datetimepicker").length) {
-        $('.datetimepicker').daterangepicker({
-            locale: {
-                format: 'YYYY-MM-DD hh:mm'
-            },
-            singleDatePicker: true,
-            timePicker: true,
-            timePicker24Hour: true,
-        });
-    }
-
-    var cleaveC = new Cleave('.currency', {
-        numeral: true,
-        numeralThousandsGroupStyle: 'thousand'
-    });
-
-    var timeoutHandler = null;
-
-    /**
-     * btn submit loader
-     */
     $(".btn-submit").click(function() {
         $(".btn-submit").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
@@ -219,26 +225,15 @@ Company | MIS
         }, 1000);
     });
 
-    /**
-     * btn reset loader
-     */
     $(".btn-reset").click(function() {
         $(".btn-reset").addClass('btn-progress');
         if (timeoutHandler) clearTimeout(timeoutHandler);
 
         timeoutHandler = setTimeout(function() {
             $(".btn-reset").removeClass('btn-progress');
-            $("#company").val('');
-            $("#email_company").val('');
-            $("#pj_company").val('');
-            $("#telp").val('');
-            $("#level").val('');
-            $("#jenis").val('');
-            $("#password").val('');
-            $("#nik").val('');
-            $("#norek").val('');
-            $("#bank").val('');
+
         }, 500);
     })
 </script>
+<!--================== END ==================-->
 @stop

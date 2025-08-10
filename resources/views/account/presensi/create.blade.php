@@ -24,12 +24,7 @@ Tambah Presensi Karyawan | MIS
     </div>
 
     <div class="section-body">
-
       <div class="card">
-        <!-- <div class="card-header">
-          <h4><i class="fas fa-user-clock"></i> TAMBAH PRESENSI KARYAWAN</h4>
-        </div> -->
-
         <div class="card-body">
 
           <form action="{{ route('account.presensi.store') }}" method="POST" enctype="multipart/form-data">
@@ -41,7 +36,7 @@ Tambah Presensi Karyawan | MIS
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Status Presensi</label>
-                  <select class="form-control" name="status" id="status" required>
+                  <select class="form-control" name="status" id="status" style="height: auto;" required>
                     <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                     @php
                     $currentDay = date('N'); // Mendapatkan kode hari (1 untuk Senin, 2 untuk Selasa, dst.)
@@ -72,7 +67,7 @@ Tambah Presensi Karyawan | MIS
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Nama Karyawan</label>
-                  <select class="form-control" name="user_id" id="user_id">
+                  <select class="form-control" name="user_id" id="user_id" style="height: auto;">
                     <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                     @foreach($users as $user)
                     <option value="{{ $user->id }}">{{ $user->full_name }}</option>
@@ -86,7 +81,7 @@ Tambah Presensi Karyawan | MIS
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Status Presensi Kehadiran</label>
-                  <select class="form-control" name="status" id="status">
+                  <select class="form-control" name="status" id="status" style="height: auto;">
                     <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                     <option value="alpha">ALPHA</option>
                     <option value="hadir">HADIR</option>
@@ -104,7 +99,7 @@ Tambah Presensi Karyawan | MIS
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Status Presensi Pulang</label>
-                  <select class="form-control" name="status_pulang" id="status_pulang">
+                  <select class="form-control" name="status_pulang" id="status_pulang" style="height: auto;">
                     <option value="" disabled selected>-- PILIH STATUS PRESENSI --</option>
                     <option value="pulang">PULANG</option>
                   </select>
@@ -156,13 +151,19 @@ Tambah Presensi Karyawan | MIS
                 </div>
               </div>
             </div>
-            <div class="d-flex">
-              <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+
+            <div class="d-flex mt-3" style="gap: 10px;">
+              <button class="btn btn-primary btn-submit rounded-pill"
+                type="submit"
+                style="flex: 0 0 80%; height:35px; font-size: 15px;">
                 <i class="fa fa-paper-plane"></i> SIMPAN
               </button>
-              <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
-                <i class="fa fa-redo"></i> RESET
-              </button>
+
+              <a href="{{ route('account.dashboard.index') }}"
+                class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
+                style="flex: 0 0 20%; height:35px; font-size: 15px;">
+                <i class="fa fa-undo"></i> KEMBALI
+              </a>
             </div>
 
           </form>

@@ -131,11 +131,7 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
+    return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function filter(Request $request)
@@ -224,11 +220,7 @@ class PresensiController extends Controller
         ->paginate(10);
     }
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
+    return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function search(Request $request)
@@ -330,14 +322,10 @@ class PresensiController extends Controller
 
     $presensi->appends(['q' => $search, 'start_date' => $startDate, 'end_date' => $endDate]);
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
     if ($presensi->isEmpty()) {
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi tidak ditemukan.');
     }
-    return view('account.presensi.index', compact('presensi', 'maintenances', 'startDate', 'endDate', 'presensihariini'));
+    return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
 
   public function create()
@@ -592,10 +580,7 @@ class PresensiController extends Controller
       ->orderBy('presensi.created_at', 'DESC')
       ->get();
 
-    // Additional data retrieval for 'maintenance'
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
+    // Additional data retrieval for 'maintenance
 
     $html = view('account.presensi.pdf', compact('presensi', 'user', 'startDate', 'endDate'))->render();
 

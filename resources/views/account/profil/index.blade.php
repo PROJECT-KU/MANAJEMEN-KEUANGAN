@@ -197,8 +197,8 @@ Profil | MANAGEMENT
                   <p class="text-muted">
                     {{ Auth::user()->email }}
                     @if (Auth::user()->level === 'manager' || Auth::user()->level === 'admin')
-                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail">
-                      <i class="fas fa-pencil-alt"></i>
+                    <button style="height: 24px; width: 24px;" class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail">
+                      <i class="fas fa-pencil-alt" style="font-size: 15px;"></i>
                     </button>
                     @endif
                   </p>
@@ -209,12 +209,12 @@ Profil | MANAGEMENT
                   <p class="text-muted">
                     {{ Auth::user()->jobdesk }}
                     @if (Auth::user()->email_verified_at == null)
-                    <button id="edit-jobdesk-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
-                      <i class="fas fa-pencil-alt"></i>
+                    <button style="height: 24px; width: 24px;" id="edit-jobdesk-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
+                      <i class="fas fa-pencil-alt" style="font-size: 15px;"></i>
                     </button>
                     @else
-                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonJobdesk">
-                      <i class="fas fa-pencil-alt"></i>
+                    <button style="height: 24px; width: 24px;" class="btn btn-sm btn-warning float-right" id="openPopupButtonJobdesk">
+                      <i class="fas fa-pencil-alt" style="font-size: 15px;"></i>
                     </button>
                     @endif
                   </p>
@@ -225,12 +225,12 @@ Profil | MANAGEMENT
                   <p class="text-muted">
                     {{ Auth::user()->telp }}
                     @if (Auth::user()->email_verified_at == null)
-                    <button id="edit-telp-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
-                      <i class="fas fa-pencil-alt"></i>
+                    <button style="height: 24px; width: 24px;" id="edit-telp-button" class="btn btn-sm btn-warning float-right" data-action="verify-email" style="width: fit-content;">
+                      <i class="fas fa-pencil-alt" style="font-size: 15px;"></i>
                     </button>
                     @else
-                    <button class="btn btn-sm btn-warning float-right" id="openPopupButtonTelp">
-                      <i class="fas fa-pencil-alt"></i>
+                    <button style="height: 24px; width: 24px;" class="btn btn-sm btn-warning float-right" id="openPopupButtonTelp">
+                      <i class="fas fa-pencil-alt" style="font-size: 15px;"></i>
                     </button>
                     @endif
                   </p>
@@ -334,11 +334,11 @@ Profil | MANAGEMENT
                         <div class="row mt-3">
                           <div class="col-md-6">
                             <label>Nama Lengkap</label>
-                            <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->full_name }}" placeholder="Nama" readonly>
+                            <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->full_name }}" placeholder="Nama" readonly>
                           </div>
                           <div class="col-md-6">
                             <label>Username</label>
-                            <input class="form-control form-control-sm" type="text" placeholder="Username" value="{{ Auth::user()->username }}" readonly>
+                            <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Username" value="{{ Auth::user()->username }}" readonly>
                           </div>
                         </div>
 
@@ -353,7 +353,7 @@ Profil | MANAGEMENT
                                 <div class="col-md-12 d-flex align-items-center mb-3">
                                   <div class="w-100 input-container">
                                     <label>Email</label>
-                                    <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
                                     <div class="icon-container">
                                       <i class="fas fa-check icon"></i>
                                     </div>
@@ -363,11 +363,11 @@ Profil | MANAGEMENT
                                 <div class="col-md-8 d-flex align-items-center mb-3">
                                   <div class="w-100 input-container">
                                     <label>Email</label>
-                                    <input class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
                                   </div>
                                 </div>
-                                <div class="col-md-4 d-flex align-items-center mt-3">
-                                  <button type="submit" class="btn btn-info w-100">Verifikasi</button>
+                                <div class="col-md-4 d-flex align-items-center mt-4">
+                                  <button style="height: 42px; font-size: 14px;" type="submit" class="btn btn-info w-100">Verifikasi</button>
                                 </div>
                                 @endif
                               </div>
@@ -377,7 +377,7 @@ Profil | MANAGEMENT
 
                           <div class="col-md-12 col-lg-6">
                             <label>Nama Perusahaan</label>
-                            <input class="form-control form-control-sm" type="text" placeholder="Nama Perusahaan" value="{{ Auth::user()->company }}" readonly>
+                            <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Nama Perusahaan" value="{{ Auth::user()->company }}" readonly>
                           </div>
                         </div>
 
@@ -406,15 +406,27 @@ Profil | MANAGEMENT
                           <div class="row">
                             <div class="col-md-6">
                               <label>Role Akun</label>
-                              <input class="form-control form-control-sm" type="text" placeholder="Role" value="{{ strtoupper(Auth::user()->level) }}" readonly>
+                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Role" value="{{ strtoupper(Auth::user()->level) }}" readonly>
                             </div>
                             <div class="col-md-6">
                               <label>Status Akun</label>
+                              @php
+                              $status = Auth::user()->status;
+                              $verified = Auth::user()->email_verified_at;
+
+                              if (is_null($status)) {
+                              $finalStatus = $verified ? 'ACTIVE' : 'NONACTIVE';
+                              } else {
+                              $finalStatus = strtoupper($status);
+                              }
+
+                              $bgClass = $finalStatus === 'ACTIVE' ? 'bg-success text-white' : 'bg-danger text-white';
+                              @endphp
+
                               <input
-                                class="form-control form-control-sm {{ Auth::user()->status === 'nonactive' ? 'bg-danger text-white' : 'bg-success text-white' }} text-uppercase"
+                                style="height: 42px; font-size: 14px;" class="form-control form-control-sm {{ $bgClass }} text-uppercase"
                                 type="text"
-                                placeholder="Username"
-                                value="{{ Auth::user()->status === null ? 'nonactive' : strtoupper(Auth::user()->status) }}"
+                                value="{{ $finalStatus }}"
                                 readonly>
                             </div>
                           </div>
@@ -422,11 +434,11 @@ Profil | MANAGEMENT
                           <div class="row mt-3">
                             <div class="col-md-6">
                               <label>No Telp</label>
-                              <input type="text" class="form-control form-control-sm" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
+                              <input style="height: 42px; font-size: 14px;" type="text" class="form-control form-control-sm" id="telp" name="telp" value="{{ Auth::user()->telp }}" maxlength="15" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" readonly>
                             </div>
                             <div class="col-md-6">
                               <label>Jenis Akun</label>
-                              <input class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ strtoupper(Auth::user()->jenis) }}" readonly>
+                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ strtoupper(Auth::user()->jenis) }}" readonly>
                             </div>
                           </div>
 
@@ -441,7 +453,7 @@ Profil | MANAGEMENT
                             </div>
                             <div class="col-md-4">
                               <label>Bank</label>
-                              <select class="form-control bank" name="bank" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }} required>
+                              <select style="height: auto;" class="form-control bank" name="bank" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }} required>
                                 <option value="" disabled selected>-- PILIH NAMA BANK --</option>
                                 <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                                 <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
@@ -504,9 +516,11 @@ Profil | MANAGEMENT
                               </select>
                             </div>
                           </div>
-                          <div class="col-md-12 mt-4">
-                            <button type="submit" class="btn btn-info" style="width: 100%;" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }}>SIMPAN</button>
+
+                          <div class="d-flex mt-3">
+                            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }}><i class="fa fa-paper-plane"></i> SIMPAN</button>
                           </div>
+
                       </form>
 
                     </div>
@@ -926,6 +940,10 @@ Profil | MANAGEMENT
       countdownSpan.className = 'btn btn-warning w-100';
       countdownSpan.style.height = 'max-content';
       countdownSpan.style.margin = '0 auto';
+      countdownSpan.style.whiteSpace = 'nowrap';
+      countdownSpan.style.overflow = 'hidden';
+      countdownSpan.style.textOverflow = 'ellipsis';
+      countdownSpan.style.maxWidth = '100%';
       countdownSpan.textContent = `Wait ${countdown} seconds`;
 
       parentDiv.replaceChild(countdownSpan, button);

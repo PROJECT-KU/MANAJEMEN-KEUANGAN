@@ -5,6 +5,7 @@
 Data Karyawan | MIS
 @stop
 
+
 @section('content')
 <div class="main-content">
   <section class="section">
@@ -13,67 +14,32 @@ Data Karyawan | MIS
     </div>
 
     <div class="section-body">
-      <!--================== FILTER ==================-->
+
       <div class="card">
-        <div class="card-header">
-          <h4><i class="fas fa-filter"></i> FILTER</h4>
-        </div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-list"></i> DATA KARYAWAN</h4>
 
-        <div class="card-body">
-          <form action="{{ route('account.pengguna.search') }}" method="GET" id="searchForm">
-            <div class="form-group position-relative">
-              <div class="input-group">
-                <!-- Input Pencarian -->
-                <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN"
-                  value="{{ app('request')->input('q') }}"
-                  style="height: 45px; padding-right: 110px; border-right: 0;">
+          <!--================== FILTER ==================-->
+          <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
+            <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary rounded-pill d-flex align-items-center" style="white-space: nowrap;">
+              <i class="fa fa-plus-circle mr-1"></i> TAMBAH DATA KARYAWAN
+            </a>
 
-                <!-- Tombol di dalam Input -->
-                <div class="position-absolute d-flex align-items-center"
-                  style="right: 10px; height: 45px; z-index: 10; border-radius: 40px; padding-left: 5px;">
-
-                  <button type="submit" class="btn btn-info rounded-pill"
-                    style="height: 40px; display: flex; align-items: center;">
-                    <i class="fa fa-search"></i>
-                  </button>
-
-                  @if(request()->has('q'))
-                  <a href="{{ route('account.pengguna.index') }}" class="btn btn-danger rounded-pill ml-1"
-                    style="height: 40px; display: flex; align-items: center;">
-                    <i class="fa fa-trash"></i>
-                  </a>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </form>
-
-          <div class="row">
-            <div class="col-12 mt-3">
-              <div class="form-group text-center">
-                <div class="input-group mb-3">
-                  <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary btn-block rounded-pill" style="padding-top: 10px;">
-                    <i class="fa fa-plus-circle"></i> TAMBAH DATA KARYAWAN
-                  </a>
-                </div>
-              </div>
+            <div style="max-width: 250px; width: 100%;">
+              <input type="text" id="liveSearch" class="form-control" placeholder="Pencarian..." autocomplete="off">
             </div>
           </div>
+          <!--================== END FILTER ==================-->
 
         </div>
-      </div>
-      <!--================== END ==================-->
 
-      <div class="card">
-        <div class="card-header">
-          <h4><i class="fas fa-list"></i> DATA KARYAWAN</h4>
-        </div>
+
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
                 <tr>
-                  <th scope="col" style="text-align: center;width: 6%" rowspan="2">NO.</th>
+                  <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
                   <th scope="col" rowspan="2" style="text-align: center;">EMAIL</th>
                   <th scope="col" rowspan="2" style="text-align: center;">USERNAME</th>
                   <th scope="col" rowspan="2" style="text-align: center;">VERIFIKASI EMAIL</th>
@@ -83,7 +49,7 @@ Data Karyawan | MIS
                   <th scope="col" style="width: 10%;text-align: center">AKSI</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="userTable">
                 @php
                 $no = 1;
                 @endphp
@@ -110,9 +76,9 @@ Data Karyawan | MIS
                   <td style="text-align: center;">{{ $item->level }}</td>
                   <td style="text-align: center;">
                     @if ($item->status == 'active')
-                    <button class="btn btn-success" disabled>ACTIVE</button>
+                    <button class="btn btn-success" disabled>Active</button>
                     @else
-                    <button class="btn btn-danger" disabled>NON ACTIVE</button>
+                    <button class="btn btn-danger" disabled>Non Active</button>
                     @endif
                   </td>
                   <td class="text-center">
@@ -155,10 +121,35 @@ Data Karyawan | MIS
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 </div>
+
+<!--================== LIVE SEARCH ==================-->
+<script>
+  let timer;
+
+  document.getElementById('liveSearch').addEventListener('keyup', function() {
+    clearTimeout(timer);
+    const query = this.value;
+
+    timer = setTimeout(() => {
+      fetch(`{{ route('account.pengguna.search') }}?q=${encodeURIComponent(query)}`)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newTableBody = doc.querySelector('#userTable');
+          if (newTableBody) {
+            document.getElementById('userTable').innerHTML = newTableBody.innerHTML;
+          }
+        });
+    }, 300); // debounce 300ms
+  });
+</script>
+<!--================== END ==================-->
 
 <!--================== RELOAD DATA KETIKA SUKSES ==================-->
 <script>

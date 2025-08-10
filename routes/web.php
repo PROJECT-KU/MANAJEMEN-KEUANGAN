@@ -46,6 +46,14 @@ Route::get('/Refrensi-Paper', 'Publict\PublicRefrensiPaperController@PublicRefre
 Route::get('/Refrensi-Paper/selengkapnya/{id}', 'Publict\PublicRefrensiPaperController@Selengkapnya')->name('public.refrensi-paper.Selengkapnya');
 Route::get('/Refrensi-Paper/Search', 'Publict\PublicRefrensiPaperController@searchpublic')->name('public.refrensi-paper.SearchPublic');
 
+// ANALASIS BIBLIOMETRIK PUBLIC
+Route::get('/Analisis-Bibliometrik', 'Publict\PublicAnalisisBibliometrikController@public')->name('public.analisisbibliometrik.index');
+Route::get('/Analisis-Bibliometrik/selengkapnya/{id}/{token}', 'Publict\PublicAnalisisBibliometrikController@Selengkapnya')->name('public.analisisbibliometrik.Selengkapnya');
+Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}/{token}', 'Publict\PublicAnalisisBibliometrikController@FormPendaftaran')->name('public.analisisbibliometrik.formpendaftaran');
+Route::get('/cek-kode-diskon/{id}', 'Publict\PublicAnalisisBibliometrikController@cekKodeDiskon')->name('public.cekkodediskon.formpendaftaran');
+Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikController@store')->name('public.analisisbibliometrik.store');
+
+
 Auth::routes();
 
 /**
@@ -84,7 +92,6 @@ Route::prefix('account')->group(
         Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
         Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
         Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
-
 
         // routes/web.php
 
@@ -242,24 +249,23 @@ Route::prefix('account')->group(
         Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
         Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 
-        // Pendaftaran Scopus Camp
-        Route::get('/Scopus-Camp', 'account\ScopusCampController@form')->name('account.scopuscamp.form');
-        Route::post('/Scopus-Camp/store', 'account\ScopusCampController@store')->name('account.scopuscamp.store');
-        Route::get('/Scopus-Camp/Data-Pendaftaran', 'account\ScopusCampController@index')->name('account.scopuscamp.index');
-        Route::get('/Scopus-Camp/Edit/{id}{token}', 'account\ScopusCampController@edit')->name('account.scopuscamp.edit');
-        Route::post('/Scopus-Camp/update/{id}', 'account\ScopusCampController@update')->name('account.scopuscamp.update');
-        Route::delete('/Scopus-Camp/delete/{id}', 'account\ScopusCampController@destroy')->name('account.scopuscamp.delete');
+        // Pendaftaran Analisis Bibliometrik
+        Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
+        Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
+        Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
+        Route::delete('/Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
 
-
-        // Kategori Pendaftaran Scopus Camp
-        Route::get('/kategori/ScopusCamp', 'account\CategoriesScopusCampController@index')->name('account.kategori.index');
-        Route::get('/kategori/ScopusCamp/create', 'account\CategoriesScopusCampController@create')->name('account.kategori.create');
-        Route::post('/kategori/ScopusCamp/store', 'account\CategoriesScopusCampController@store')->name('account.kategori.store');
-        Route::get('/kategori/ScopusCamp/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategori.edit');
-        Route::post('/kategori/ScopusCamp/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategori.update');
-        Route::delete('/kategori/ScopusCamp/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategori.destroy');
-        Route::get('/kategori/ScopusCamp/search', 'account\CategoriesScopusCampController@search')->name('account.ketegori.search');
-        Route::get('/kategori/ScopusCamp/filter', 'account\CategoriesScopusCampController@filter')->name('account.ketegori.filter');
+        // Kategori Analisis Bibliometrik
+        Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');
+        Route::get('/kategori/analisis-bibliometrik/create', 'account\CategoriesAnalisisBibliometrikController@create')->name('account.kategori.create');
+        Route::post('/kategori/analisis-bibliometrik/store', 'account\CategoriesAnalisisBibliometrikController@store')->name('account.kategori.store');
+        Route::get('/kategori/analisis-bibliometrik/edit/{id}/{token}', 'account\CategoriesAnalisisBibliometrikController@edit')->name('account.kategori.edit');
+        Route::post('/kategori/analisis-bibliometrik/update/{id}', 'account\CategoriesAnalisisBibliometrikController@update')->name('account.kategori.update');
+        Route::delete('/kategori/analisis-bibliometrik/delete/{id}', 'account\CategoriesAnalisisBibliometrikController@destroy')->name('account.kategori.destroy');
+        Route::get('/kategori/analisis-bibliometrik/search', 'account\CategoriesAnalisisBibliometrikController@search')->name('account.ketegori.search');
+        Route::get('/kategori/analisis-bibliometrik/filter', 'account\CategoriesAnalisisBibliometrikController@filter')->name('account.ketegori.filter');
+        Route::get('/kategori/analisis-bibliometrik/download-pdf', 'account\CategoriesAnalisisBibliometrikController@downloadPdf')->name('account.ketegori.download-pdf');
+        Route::get('/kategori/analisis-bibliometrik/download-excel', 'account\CategoriesAnalisisBibliometrikController@downloadExcel')->name('account.ketegori.download-excel');
 
         // kategori artikel
         Route::get('/artikel-kategori', 'account\CategoriesArtikelController@index')->name('account.Kategori-Artikel.index');

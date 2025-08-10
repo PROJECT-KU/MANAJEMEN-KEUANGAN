@@ -125,16 +125,12 @@ class GajiController extends Controller
         ->paginate(10);
     }
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
     $presensiExist = Presensi::where('status', '<>', null)
       ->whereBetween('created_at', [$currentMonth, $nextMonth])
       ->exists();
 
 
-    return view('account.gaji.index', compact('gaji', 'maintenances', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
+    return view('account.gaji.index', compact('gaji', 'startDate', 'endDate', 'totalGaji', 'presensiExist'));
   }
   // <!--================== END ==================-->
 
@@ -210,7 +206,6 @@ class GajiController extends Controller
       ]);
 
     // 7) Data pendukung lain
-    $maintenances  = DB::table('maintenance')->orderBy('created_at', 'desc')->get();
     $presensiExist = false;
     if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
       $presensiExist = Presensi::whereNotNull('status')
@@ -220,7 +215,6 @@ class GajiController extends Controller
 
     return view('account.gaji.index', compact(
       'gaji',
-      'maintenances',
       'startDate',
       'endDate',
       'totalGaji',
@@ -306,9 +300,6 @@ class GajiController extends Controller
       'tanggal_akhir' => $endDate
     ]);
 
-    // Data tambahan
-    $maintenances = DB::table('maintenance')->orderBy('created_at', 'DESC')->get();
-
     $presensiExist = false;
     if ($user->level === 'manager') {
       $presensiExist = Presensi::where('status', '<>', null)
@@ -323,7 +314,6 @@ class GajiController extends Controller
 
     return view('account.gaji.index', compact(
       'gaji',
-      'maintenances',
       'startDate',
       'endDate',
       'totalGaji',

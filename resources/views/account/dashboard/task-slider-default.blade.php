@@ -53,23 +53,4 @@ $taskCount = $tasks->count();
         <p style="font-size: 14px;">Beberapa data diri Anda masih kosong.<br>Silakan lengkapi terlebih dahulu.</p>
     </div>
     @endif
-
-    {{-- MAINTENANCE --}}
-    @if (!$maintenances->isEmpty())
-    @foreach($maintenances as $maintenance)
-    @if ($maintenance->status === 'aktif' && now() <= Carbon::parse($maintenance->end_date)->endOfDay())
-        <div class="alert alert-danger m-2 d-flex flex-column justify-content-center align-items-center text-center"
-            style="max-width: 400px; min-height: 150px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <b style="font-size: 18px; text-transform: uppercase;">{{ $maintenance->title }}</b>
-            <hr class="w-100">
-            <p style="font-size: 14px;">{{ $maintenance->note }}</p>
-            <p style="font-size: 12px;">
-                Dari tanggal {{ \Carbon\Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm') }}
-                - {{ \Carbon\Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm') }}
-            </p>
-        </div>
-        @break
-        @endif
-        @endforeach
-        @endif
 </div>

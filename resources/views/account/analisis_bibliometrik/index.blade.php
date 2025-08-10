@@ -2,14 +2,14 @@
 @extends('layouts.loader')
 
 @section('title')
-Kategori Scopus Camp | MIS
+Data Pendaftaran Analisis Bibliometrik | MIS
 @stop
 
 @section('content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>KATEGORI SCOPUS CAMP</h1>
+            <h1>DATA SCOPUS CAMP</h1>
         </div>
 
         <div class="section-body">
@@ -17,12 +17,6 @@ Kategori Scopus Camp | MIS
             <div class="card">
                 <div class="card-header  text-right">
                     <h4><i class="fas fa-filter"></i> FILTER</h4>
-                    <!-- @if (Auth::user()->level == 'karyawan')
-            @else
-            <div class="card-header-action">
-              <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
-            </div>
-            @endif -->
                 </div>
 
                 <div class="card-body">
@@ -73,20 +67,13 @@ Kategori Scopus Camp | MIS
                             </div>
                         </div>
                     </form>
-
-                    @if ( Auth::user()->level == 'ceo')
-                    @else
-                    <a href="{{ route('account.kategori.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
-                        <i class="fa fa-plus-circle"></i> TAMBAH KATEGORI
-                    </a>
-                    @endif
                 </div>
             </div>
             <!--================== END ==================-->
 
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-list"></i> DATA KATEGORI SCOPUS CAMP</h4>
+                    <h4><i class="fas fa-list"></i> DATA PENDAFTARAN ANALISIS BIBLIOMETRIK</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -95,16 +82,17 @@ Kategori Scopus Camp | MIS
                                 <thead>
                                     <tr>
                                         <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SCOPUS CAMP</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TEMPAT</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">BATCH</th>
                                         <th scope="col" colspan="2" class="column-width" style="text-align: center;">TANGGAL</th>
-                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">KUOTA</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TOTAL</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
                                         <th scope="col" rowspan="2" style="width: 15%;text-align: center">AKSI</th>
                                     </tr>
                                     <tr>
-                                        <th scope="col" class="column-width" style="text-align: center;">MULAI</th>
-                                        <th scope="col" class="column-width" style="text-align: center;">SELESAI</th>
+                                        <th scope="col" class="column-width" style="text-align: center;">MULAI PELAKSANAAN</th>
+                                        <th scope="col" class="column-width" style="text-align: center;">SELESAI PELAKSANAAN</th>
                                     </tr>
                                 </thead>
 
@@ -113,29 +101,41 @@ Kategori Scopus Camp | MIS
                                     $no = 1;
                                     $terbayarCount = 0; // Count of terbayar records
                                     @endphp
-                                    @foreach ($categories_scopuscamp as $hasil)
+                                    @foreach ($datas as $data)
 
                                     <tr>
                                         <th scope="row" style="text-align: center">{{ $no }}</th>
-                                        <td class="column-width" style="text-align: center;">{{ strtoupper($hasil->camp) }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ $hasil->tempat }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($hasil->mulai)) }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($hasil->selesai)) }}</td>
-                                        <td class="column-width" style="text-align: center;">{{ $hasil->kuota }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $data->id_transaksi }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $data->nama }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $data->kategori_nama }} #{{ $data->kategori_nama_ke }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($data->kategori_tanggal_mulai)) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($data->kategori_tanggal_selesai)) }}</td>
+                                        <td class="column-width" style="text-align: center;">Rp. {{ number_format($data->total_pembayaran, 0, ',', '.') }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if($hasil->status == 'AKTIF')
-                                            <span class="badge badge-success">AKTIF</i></span>
+                                            @if($data->status == 'diproses')
+                                            <span class="badge badge-warning">Dalam Proses Pengecekan</i></span>
+                                            @elseif($data->status == 'Pendaftaran Diterima')
+                                            <span class="badge badge-success">Pendaftaran Diterima</span>
+                                            @elseif($data->status == 'Pendaftaran Reschedule')
+                                            <span class="badge badge-warning">Pendaftaran Reschedule</span>
+                                            @elseif($data->status == 'Pendaftaran Refund')
+                                            <span class="badge badge-warning">Pendaftaran Refund</span>
+                                            @elseif($data->status == 'Pendaftaran Dibatalkan')
+                                            <span class="badge badge-danger">Pendaftaran Dibatalkan</span>
                                             @else
-                                            <span class="badge badge-danger">TIDAK AKTIF</span>
+                                            <span class="badge badge-danger">Pendaftaran Ditolak</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: center;">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.kategori.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
-                                                <i class="fa fa-pencil-alt"></i>
-                                            </a>
-                                            <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
+
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center" style="gap: 6px;">
+                                                <a href="{{ route('account.analisisbibliometrik.edit', ['id' => $data->id, 'token' => $data->token]) }}" class="btn btn-sm btn-warning">
+                                                    <i class="fa fa-pencil-alt"></i>
+                                                </a>
+                                                <button onclick="Delete('{{ $data->id }}')" class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     @php
@@ -160,7 +160,7 @@ Kategori Scopus Camp | MIS
                                         }
                                     }
                                 </style>
-                                {{ $categories_scopuscamp->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
+                                {{ $datas->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
                             </div>
 
                         </div>
@@ -238,7 +238,7 @@ Kategori Scopus Camp | MIS
             if (isConfirm) {
                 // ajax delete
                 $.ajax({
-                    url: "/account/kategori/ScopusCamp/delete/" + id,
+                    url: "/account/Analisis-Bibliometrik/delete/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

@@ -1,0 +1,191 @@
+@extends('public.layout.header')
+
+@section('title')
+Analisis Bibliometrik Selengkapnya | Rumah Scopus
+@stop
+
+<style>
+    /* GAMBAR COVER */
+    .entry-img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: auto;
+        /* Adjust the height as needed */
+    }
+
+    /* END */
+
+    /* SHARE */
+    .entry-footer {
+        display: flex;
+        justify-content: space-between;
+        /* Menyusun konten secara bersebelahan */
+        align-items: center;
+        /* Memusatkan konten secara vertikal */
+    }
+
+    .author-social {
+        display: flex;
+        align-items: center;
+        /* Memusatkan konten secara vertikal */
+    }
+
+    .social-links {
+        display: flex;
+    }
+
+    .social-links a {
+        margin-right: 5px;
+    }
+
+    .social-links a:last-child {
+        margin-right: 0;
+    }
+
+    /* END */
+</style>
+
+@section('konten')
+@csrf
+<main id="main">
+
+    <!--================== BREADCRUMBS ==================-->
+    <section class="breadcrumbs" style="background: linear-gradient(to right, #ff3131, #ff914d);">
+        <div class="container">
+
+            <ol>
+                <li><a href="{{ url('/') }}">Home</a></li>
+                <li><a href="">Analisis Bibliometrik</a></li>
+            </ol>
+
+            <h2>Analisis Bibliometrik</h2>
+
+        </div>
+    </section>
+    <!--================== END ==================-->
+
+    <!--================== CONTENT ==================-->
+    <section id="blog" class="blog">
+        <div class="container" data-aos="fade-up">
+
+            <div class="row">
+                <div class="col-lg-8 entries">
+
+                    <article class="entry entry-single">
+                        {{-- Carousel --}}
+                        <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel" style="max-width: 100%; max-height: 400px; overflow: hidden;">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="{{ asset('assets/img/public/cover.png') }}" class="d-block w-100" alt="Cover 1" style="object-fit: cover; height: 400px;">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="{{ asset('assets/img/public/cover1.png') }}" class="d-block w-100" alt="Cover 2" style="object-fit: cover; height: 400px;">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        {{-- Judul --}}
+                        <h2 class="entry-title text-center" style="font-size: 30px;">
+                            <a href="">{{ $item->nama }} #{{ $item->nama_ke }}</a>
+                        </h2>
+
+                        {{-- Metadata --}}
+                        <div class="entry-meta d-flex justify-content-between flex-wrap mb-4" style="gap: 10px;">
+                            <div class="d-flex align-items-center" style="gap: 20px;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span>{{ date('d M Y', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}</span>
+                                </div>
+                                <div class="d-flex align-items-center" style="gap: 5px;">
+                                    <i class="fas fa-user-check me-1"></i>
+                                    <span>Sisa Kuota: {{ $item->sisa_kuota ?? 0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Deskripsi --}}
+                        <div class="entry-content mb-4">
+                            <h5 style="font-weight: bold;">Deskripsi</h5>
+                            <div class="article-container">
+                                {!! $item->desc !!}
+                            </div>
+
+                            <style>
+                                .article-container {
+                                    font-size: 1rem;
+                                    line-height: 1.7;
+                                    color: #333;
+                                    text-align: justify;
+                                }
+
+                                .article-container p {
+                                    margin-bottom: 1rem;
+                                }
+
+                                .article-container img {
+                                    max-width: 100%;
+                                    height: auto;
+                                    display: block;
+                                    margin: 1rem auto;
+                                    border-radius: 8px;
+                                }
+                            </style>
+                        </div>
+
+                        {{-- Tombol Daftar --}}
+                        @php
+                        $kuotaHabis = $item->sisa_kuota === null || $item->sisa_kuota <= 0;
+                            @endphp
+
+                            <div class="mt-4">
+                            <a href="{{ $kuotaHabis ? '#' :route('public.analisisbibliometrik.formpendaftaran', ['id' => $item->id, 'token' => $item->token]) }}">
+                                <button class="btn btn-info w-100 {{ $kuotaHabis ? 'btn-danger' : 'btn-info' }}" style="{{ $kuotaHabis ? '' : 'background-color: #6495ED; color:white;' }} font-size: 16px;" {{ $kuotaHabis ? 'disabled' : '' }}>
+                                    <i class="fa {{ $kuotaHabis ? 'fa-lock' : 'fa-paper-plane' }}"></i>
+                                    {{ $kuotaHabis ? ' Pendaftaran Ditutup' : ' Daftar Sekarang' }}
+                                </button>
+                            </a>
+                    </article>
+                </div>
+
+                <!--================== END ==================-->
+                <div class="col-lg-4">
+                    <div class="sidebar">
+                        <h3 class="sidebar-title">Jadwal Terbaru</h3>
+                        <hr>
+                        <div class="sidebar-item recent-posts">
+                            <ul class="list-unstyled">
+                                @foreach($terbaru as $data)
+                                <li class="mb-3 d-flex align-items-start">
+                                    {{-- Gambar kecil lingkaran --}}
+                                    <img src="{{ !empty($data->gambar) ? asset('bibliometrik/' . basename($data->gambar)) : asset('bibliometrik/no-image.jpg') }}"
+                                        alt="Gambar"
+                                        class="rounded-circle me-2"
+                                        style="width: 45px; height: 45px; object-fit: cover;">
+
+                                    {{-- Info Jadwal --}}
+                                    <div>
+                                        <a href="{{ route('public.analisisbibliometrik.Selengkapnya', ['id' => $data->id, 'token' => $data->token]) }}" class="text-decoration-none text-dark">
+                                            <strong style="font-size: 18px;">{{ $data->nama }} #{{ $data->nama_ke }}</strong><br>
+                                            <small><i class="fa fa-calendar-alt"></i> {{ date('d M Y', strtotime($data->mulai)) }} s/d {{ date('d M Y', strtotime($data->selesai)) }}</small>
+                                        </a>
+                                    </div>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+@stop
