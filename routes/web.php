@@ -193,7 +193,7 @@ Route::prefix('account')->group(
         Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
         Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
         Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
-
+        Route::get('/laporan_presensi/download-excel', 'account\PresensiController@downloadExcel')->name('account.laporan_presensi.download-excel');
 
         //email
         Route::get('/email', 'account\EmailController@index')->name('account.email.index');
@@ -254,6 +254,9 @@ Route::prefix('account')->group(
         Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
         Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
         Route::delete('/Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
+        Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
+        Route::get('/Analisis-Bibliometrik/filter', 'account\AnalisisBibliometrikController@filter')->name('account.analisisbibliometrik.filter');
+        Route::get('/Analisis-Bibliometrik/download-excel', 'account\AnalisisBibliometrikController@downloadExcel')->name('account.analisisbibliometrik-excel');
 
         // Kategori Analisis Bibliometrik
         Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');

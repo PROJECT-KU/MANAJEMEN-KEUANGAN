@@ -169,6 +169,7 @@ Kategori Analisis Bibliometrik | MIS
     </section>
 </div>
 
+<!--================== GET DATA SERACH UNTUK DI EXPORT KE EXCEL ==================-->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const downloadBtn = document.getElementById('downloadExcelBtn');
@@ -187,7 +188,7 @@ Kategori Analisis Bibliometrik | MIS
         });
     });
 </script>
-
+<!--================== END ==================-->
 
 <!--================== LIVE SEARCH ==================-->
 <script>

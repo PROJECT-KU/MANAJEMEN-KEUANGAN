@@ -72,10 +72,6 @@ class DebitController extends Controller
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
         $totalGaji = 0;
         if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
 
@@ -119,7 +115,7 @@ class DebitController extends Controller
                 ->paginate(10);
         }
 
-        return view('account.debit.index', compact('debit', 'maintenances', 'totalGaji', 'gaji'));
+        return view('account.debit.index', compact('debit', 'totalGaji', 'gaji'));
     }
 
 
@@ -180,11 +176,7 @@ class DebitController extends Controller
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.debit.index', compact('debit', 'maintenances'));
+        return view('account.debit.index', compact('debit'));
     }
 
     public function create()

@@ -52,12 +52,7 @@ class CategoriesCreditController extends Controller
                 ->paginate(10);
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-
-        return view('account.categories_credit.index', compact('categories', 'maintenances'));
+        return view('account.categories_credit.index', compact('categories'));
         //$categories = CategoriesCredit::where('user_id', Auth::user()->id)
         //    ->orderBy('created_at', 'DESC')
         //    ->paginate(10);
@@ -117,11 +112,7 @@ class CategoriesCreditController extends Controller
             }
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.categories_credit.index', compact('categories', 'maintenances'));
+        return view('account.categories_credit.index', compact('categories'));
     }
 
     public function create()

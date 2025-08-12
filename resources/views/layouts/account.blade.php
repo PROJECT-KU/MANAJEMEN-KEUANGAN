@@ -362,11 +362,11 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                     </a>
                                 </li>
 
-                                <li class="{{ setActive('account/Laporan-Peserta') }}">
+                                <!-- <li class="{{ setActive('account/Laporan-Peserta') }}">
                                     <a class="nav-link" href="{{ route('account.peserta.list') }}">
                                         <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
                                     </a>
-                                </li>
+                                </li> -->
                                 <!--================== END ==================-->
                                 @endif
 

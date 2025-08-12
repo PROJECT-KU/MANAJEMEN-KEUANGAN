@@ -55,11 +55,7 @@ class ArtikelController extends Controller
             ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.artikel.index', compact('artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('artikel', 'startDate', 'endDate'));
     }
 
     public function create()
@@ -259,17 +255,13 @@ class ArtikelController extends Controller
 
         $artikel->appends(['q' => $search, 'start_date' => $startDate, 'end_date' => $endDate]);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
         $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
         $endDate = $request->get('end_date');
 
         if ($artikel->isEmpty()) {
             return redirect()->route('account.Artikel.index')->with('error', 'Data Laporan Peserta tidak ditemukan.');
         }
-        return view('account.artikel.index', compact('artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('artikel', 'startDate', 'endDate'));
     }
 
     public function filter(Request $request)
@@ -294,12 +286,7 @@ class ArtikelController extends Controller
             ->orderBy('artikel.created_at', 'DESC')
             ->paginate(10);
 
-
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.artikel.index', compact('artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('artikel', 'startDate', 'endDate'));
     }
     // <!--================== END ==================-->
 }

@@ -9,6 +9,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
     .custom-file-upload {
         position: relative;
         overflow: hidden;
+        margin-top: 10px;
     }
 
     .inputfile {
@@ -42,45 +43,27 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         color: #888;
     }
 
+    .image-preview-container {
+        margin-top: 10px;
+    }
+
     .image-preview {
-        display: inline-block;
-        /* atau flex jika ingin responsif */
-        padding: 5px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-        max-width: 100%;
-    }
-
-    .image-preview img {
-        display: block;
-        height: auto;
-        width: auto;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        border-radius: 5px;
-        cursor: zoom-in;
-    }
-
-    #zoomOverlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.85);
+        max-width: 150px;
+        max-height: 150px;
+        overflow: hidden;
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
-        cursor: zoom-out;
+        border: 2px dashed orange;
+        /* Added dashed white border */
+        border-radius: 5px;
     }
 
-    #zoomOverlay img {
-        max-width: 90%;
-        max-height: 90%;
-        border-radius: 10px;
-        box-shadow: 0 0 20px #000;
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 5px;
     }
 </style>
 <!--================== END ==================-->
@@ -129,12 +112,9 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Sisa Kuota</label>
+                                    <label>Tanggal Pemesanan</label>
                                     <div class="input-group">
-                                        <input type="text" name="sisa_kuota" id="sisa_kuota" value="{{ $data->sisa_kuota }}" class="form-control" readonly>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">Orang</span>
-                                        </div>
+                                        <input type="text" name="sisa_kuota" id="sisa_kuota" value="{{ $data->created_at ? \Carbon\Carbon::parse($data->created_at)->translatedFormat('d F Y') : '' }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -354,15 +334,19 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div id="imagePreview" class="image-preview">
-                                    <img
-                                        id="clickableImage"
-                                        src="{{ !empty($data->gambar) ? asset('bibliometrik/' . basename($data->gambar)) : asset('bibliometrik/no-image.jpg') }}"
-                                        alt="Current Image" style="max-width:100%; height:auto; cursor: zoom-in;">
+                                <label class="form-label mb-1">Bukti Pembayaran</label>
+                                <div class="image-preview-container mt-2">
+                                    <div id="imagePreview" class="image-preview">
+                                        <img
+                                            id="clickableImage"
+                                            src="{{ !empty($data->gambar) ? asset('bibliometrik/' . basename($data->gambar)) : asset('bibliometrik/no-image.jpg') }}"
+                                            alt="Bukti Transaksi"
+                                            style="max-width:100%; height:auto; border-radius: 5px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: zoom-in;">
+                                    </div>
+                                    <span id="file-selected" class="mt-1 d-block text-muted small">
+                                        {{ !empty($data->gambar) ? basename($data->gambar) : 'no-image.jpg' }}
+                                    </span>
                                 </div>
-                                <span id="file-selected">
-                                    {{ !empty($data->gambar) ? basename($data->gambar) : 'no-image.jpg' }}
-                                </span>
                             </div>
                         </div>
 
@@ -401,18 +385,21 @@ Update Pendaftaran Analisis Bibliometrik | MIS
 </div>
 
 <!--================== ZOOM IMAGE ==================-->
+{{-- Script Zoom --}}
 <script>
-    const clickableImage = document.getElementById('clickableImage');
-    const zoomOverlay = document.getElementById('zoomOverlay');
-    const zoomOverlayImg = document.getElementById('zoomOverlayImg');
-
-    clickableImage.addEventListener('click', function() {
-        zoomOverlayImg.src = this.src;
-        zoomOverlay.style.display = 'flex';
-    });
-
-    zoomOverlay.addEventListener('click', function() {
-        zoomOverlay.style.display = 'none';
+    document.getElementById('clickableImage').addEventListener('click', function() {
+        Swal.fire({
+            imageUrl: this.src,
+            imageAlt: 'Bukti Transaksi',
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: 'auto',
+            background: 'rgba(0,0,0,0.8)',
+            customClass: {
+                popup: 'p-0 rounded',
+                image: 'rounded shadow-lg'
+            }
+        });
     });
 </script>
 <!--================== END ==================-->

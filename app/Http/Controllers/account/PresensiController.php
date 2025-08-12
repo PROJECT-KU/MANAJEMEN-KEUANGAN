@@ -17,6 +17,8 @@ use App\Mail\CreatePresensiMail;
 use App\Mail\UpdatePresensiMail;
 use App\Mail\NotifPresensiMail;
 use Illuminate\Support\Facades\Mail;
+use App\Exports\PresensiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PresensiController extends Controller
 {
@@ -248,6 +250,7 @@ class PresensiController extends Controller
             ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
             ->orWhere(function ($subquery) use ($search) {
               $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.time_pulang, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         })
         ->orderBy('presensi.created_at', 'DESC')
@@ -606,4 +609,80 @@ class PresensiController extends Controller
     ];
     return Response::make($dompdf->output(), 200, $headers);
   }
+
+  // <!--================== DOWNLOAD ==================-->
+  public function downloadExcel(Request $request)
+  {
+    $user = Auth::user();
+    $search = $request->input('q');
+    $startDate = $request->input('tanggal_awal');
+    $endDate = $request->input('tanggal_akhir');
+
+    // Default tanggal bulan ini jika tidak ada filter
+    if (!$startDate && !$endDate) {
+      $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
+      $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
+    } else {
+      $currentMonth = $startDate ? date('Y-m-d 00:00:00', strtotime($startDate)) : '2000-01-01 00:00:00';
+      $nextMonth = $endDate ? date('Y-m-d 23:59:59', strtotime($endDate)) : now()->format('Y-m-d 23:59:59');
+    }
+
+    $presensiQuery = DB::table('presensi')
+      ->select(
+        'presensi.id',
+        'presensi.user_id',
+        'presensi.status',
+        'presensi.status_pulang',
+        'presensi.note',
+        'presensi.lokasi',
+        'presensi.time_pulang',
+        'presensi.latitude',
+        'presensi.longitude',
+        'presensi.hadir',
+        'presensi.alpha',
+        'presensi.camp_jogja',
+        'presensi.perjalanan_jawa',
+        'presensi.perjalanan_luar_jawa',
+        'presensi.camp_luar_kota',
+        'presensi.remote',
+        'presensi.izin',
+        'presensi.created_at',
+        'users.id as user_id',
+        'users.full_name as full_name',
+      )
+      ->leftJoin('users', 'presensi.user_id', '=', 'users.id');
+
+    // Role-based filter
+    if ($user->level === 'manager') {
+      // Manager: semua karyawan di company yang sama
+      $presensiQuery->where('users.company', $user->company);
+    } elseif ($user->level === 'karyawan') {
+      // Karyawan: hanya data dirinya
+      $presensiQuery->where('presensi.user_id', $user->id);
+    } else {
+      // Role lain (opsional, misal admin) -> bisa semua data
+    }
+
+    // Search filter
+    if (!empty($search)) {
+      $presensiQuery->where(function ($q) use ($search) {
+        $q->where('users.full_name', 'LIKE', "%{$search}%")
+          ->orWhere('presensi.status', 'LIKE', "%{$search}%")
+          ->orWhere('presensi.status_pulang', 'LIKE', "%{$search}%")
+          ->orWhereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%'])
+          ->orWhereRaw('LOWER(DATE_FORMAT(presensi.time_pulang, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+      });
+    }
+
+    // Filter tanggal
+    $presensi = $presensiQuery
+      ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
+      ->orderBy('presensi.created_at', 'DESC')
+      ->get();
+
+    // Export Excel
+    $excelFileName = 'List-Presensi_' . date('d-m-Y') . '.xlsx';
+    return Excel::download(new PresensiExport($presensi), $excelFileName);
+  }
+  // <!--================== END ==================-->
 }

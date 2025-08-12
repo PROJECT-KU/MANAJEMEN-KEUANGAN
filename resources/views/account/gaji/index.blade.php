@@ -66,22 +66,23 @@ Data Gaji Karyawan | MIS
                 <form action="{{ route('account.gaji.filter') }}" method="GET">
                   <div class="form-group">
                     <label>Tanggal Awal</label>
-                    <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal') }}" class="form-control">
+                    <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
                   </div>
 
                   <div class="form-group">
                     <label>Tanggal Akhir</label>
-                    <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir') }}" class="form-control">
+                    <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
                   </div>
 
-                  <button class="btn btn-info btn-block mb-2" type="submit">
-                    <i class="fa fa-filter"></i> FILTER
-                  </button>
-
                   @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                  <a href="{{ route('account.gaji.index') }}" class="btn btn-danger btn-block">
-                    <i class="fa fa-trash"></i> HAPUS FILTER
-                  </a>
+                  <div class="btn-group" style="width: 100%;">
+                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <a href="{{ route('account.gaji.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                      <i class="fa fa-trash mt-2"></i> HAPUS
+                    </a>
+                  </div>
+                  @else
+                  <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
                   @endif
                 </form>
                 <!-- END -->
@@ -91,11 +92,7 @@ Data Gaji Karyawan | MIS
                 <hr class="my-2">
 
                 <div class="d-flex flex-wrap gap-2">
-                  <a href="{{ route('account.laporan_gaji.download-pdf', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="btn btn-primary mr-2" style="flex: 1 1 auto; max-width: 180px;">
-                    <i class="far fa-file-pdf"></i> Unduh PDF
-                  </a>
-
-                  <a href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="btn btn-info" style="flex: 1 1 auto; max-width: 180px;">
+                  <a id="downloadExcelBtn" href="{{ route('account.laporan_gaji.download-excel', ['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate, 'q' => request('q')]) }}" class="btn btn-info" style="flex: 1 1 auto;">
                     <i class="far fa-file-excel"></i> Unduh EXCEL
                   </a>
                 </div>
@@ -325,6 +322,27 @@ Data Gaji Karyawan | MIS
   </section>
 </div>
 
+<!--================== GET DATA SERACH UNTUK DI EXPORT KE EXCEL ==================-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const downloadBtn = document.getElementById('downloadExcelBtn');
+    const searchInput = document.getElementById('liveSearch');
+
+    downloadBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      const tanggal_awal = "{{ request('tanggal_awal') }}";
+      const tanggal_akhir = "{{ request('tanggal_akhir') }}";
+      const q = searchInput.value;
+
+      const url = `{{ route('account.laporan_gaji.download-excel') }}?tanggal_awal=${tanggal_awal}&tanggal_akhir=${tanggal_akhir}&q=${encodeURIComponent(q)}`;
+
+      window.location.href = url;
+    });
+  });
+</script>
+<!--================== END ==================-->
+
 <!--================== LIVE SEARCH ==================-->
 <script>
   let timer;
@@ -334,6 +352,22 @@ Data Gaji Karyawan | MIS
     const query = this.value;
 
     timer = setTimeout(() => {
+      const newUrl = new URL(window.location.href);
+      if (query) {
+        newUrl.searchParams.set('q', query);
+      } else {
+        newUrl.searchParams.delete('q');
+      }
+      window.history.pushState({}, '', newUrl);
+
+      // Update tombol PDF supaya ikut query terbaru
+      const pdfButton = document.getElementById("pdfDownloadButton");
+      if (pdfButton) {
+        const pdfUrl = `{{ route('account.ketegori.download-pdf') }}?tanggal_awal=${encodeURIComponent(newUrl.searchParams.get('tanggal_awal') || '')}&tanggal_akhir=${encodeURIComponent(newUrl.searchParams.get('tanggal_akhir') || '')}&q=${encodeURIComponent(query)}`;
+        pdfButton.setAttribute('href', pdfUrl);
+      }
+
+      // Fetch data tabel
       fetch(`{{ route('account.gaji.search') }}?q=${encodeURIComponent(query)}`)
         .then(response => response.text())
         .then(html => {
@@ -344,7 +378,7 @@ Data Gaji Karyawan | MIS
             document.getElementById('gajiTable').innerHTML = newTableBody.innerHTML;
           }
         });
-    }, 300); // debounce 300ms
+    }, 300);
   });
 </script>
 <!--================== END ==================-->

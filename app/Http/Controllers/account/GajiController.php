@@ -1170,110 +1170,6 @@ class GajiController extends Controller
   // <!--================== END ==================-->
 
   // <!--================== DOWNLOAD ==================-->
-  public function downloadPdf(Request $request)
-  {
-    $user = Auth::user();
-    $search = $request->input('q');
-
-    $startDate = $request->input('tanggal_awal');
-    $endDate = $request->input('tanggal_akhir');
-
-    // Jika tidak ada filter tanggal dan search, ambil data bulan ini
-    if (!$startDate && !$endDate && !$search) {
-      $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
-      $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
-    } else {
-      $currentMonth = $startDate ? date('Y-m-d 00:00:00', strtotime($startDate)) : '2000-01-01 00:00:00';
-      $nextMonth = $endDate ? date('Y-m-d 23:59:59', strtotime($endDate)) : now()->format('Y-m-d 23:59:59');
-    }
-
-    // Query gaji
-    $gajiQuery = DB::table('gaji')
-      ->select(
-        'gaji.id',
-        'gaji.id_transaksi',
-        'gaji.token',
-        'gaji.gaji_pokok',
-        'gaji.gaji_pokok_ethes_digital',
-        'gaji.total_gaji_pokok',
-        'gaji.lembur',
-        'gaji.bonus',
-        'gaji.tunjangan',
-        'gaji.tanggal',
-        'gaji.pph',
-        'gaji.total',
-        'gaji.status',
-        'users.id as user_id',
-        'users.full_name as full_name',
-        'users.nik as nik',
-        'users.norek as norek',
-        'users.bank as bank'
-      )
-      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
-
-    // Filter role
-    if ($user->level === 'manager') {
-      $gajiQuery->where('users.company', $user->company);
-    } else {
-      $gajiQuery->where('gaji.user_id', $user->id);
-    }
-
-    // Filter pencarian
-    if ($search) {
-      $gajiQuery->where(function ($query) use ($search) {
-        $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
-          ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
-          ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
-          ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
-          ->orWhere(DB::raw("DATE_FORMAT(gaji.tanggal, '%d %M %Y')"), 'LIKE', '%' . $search . '%');
-      });
-    }
-
-    // Ambil data berdasarkan tanggal
-    $gaji = $gajiQuery
-      ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
-      ->orderBy('gaji.created_at', 'DESC')
-      ->get();
-
-    // Hitung total dan data terbayar
-    $totalGaji = $gaji->sum('total');
-    $terbilang = Terbilang::make($totalGaji, ' rupiah');
-
-    $gajiTerbayar = $gaji->where('status', 'terbayar');
-    $totalGajiTerbayar = $gajiTerbayar->sum('total');
-    $terbilangterbayar = Terbilang::make($totalGajiTerbayar, ' rupiah');
-
-    // Logo untuk PDF
-    $logoPath = public_path('assets/img/LogoRSC.png');
-    $imageData = base64_encode(file_get_contents($logoPath));
-    $src = 'data:image/png;base64,' . $imageData;
-
-    // Generate PDF
-    $html = view('account.gaji.pdf', compact(
-      'gaji',
-      'totalGaji',
-      'user',
-      'terbilang',
-      'startDate',
-      'endDate',
-      'totalGajiTerbayar',
-      'terbilangterbayar',
-      'src'
-    ))->render();
-
-    $dompdf = new Dompdf();
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'landscape');
-    $dompdf->render();
-
-    $headers = [
-      'Content-Type' => 'application/pdf',
-      'Content-Disposition' => 'inline; filename="List-Gaji-Karyawan_' . date('d-m-Y') . '.pdf"',
-    ];
-
-    return Response::make($dompdf->output(), 200, $headers);
-  }
-
   public function downloadExcel(Request $request)
   {
     $user = Auth::user();
@@ -1321,9 +1217,9 @@ class GajiController extends Controller
     }
 
     // Filter pencarian jika ada
-    if ($search) {
-      $gajiQuery->where(function ($query) use ($search) {
-        $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
+    if (!empty($search)) {
+      $gajiQuery->where(function ($q) use ($search) {
+        $q->where('gaji.id_transaksi', 'LIKE', "%{$search}%")
           ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
           ->orWhere('users.norek', 'LIKE', '%' . $search . '%')
           ->orWhere(DB::raw("CAST(REPLACE(gaji.total, 'Rp', '') AS DECIMAL(10, 2))"), '=', str_replace(['Rp', '.', ','], '', $search))
@@ -1333,8 +1229,8 @@ class GajiController extends Controller
 
     // Filter tanggal
     $gaji = $gajiQuery
-      ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
-      ->orderBy('gaji.created_at', 'DESC')
+      ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+      ->orderBy('gaji.tanggal', 'DESC')
       ->get();
 
     // Export Excel

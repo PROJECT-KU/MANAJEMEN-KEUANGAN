@@ -162,6 +162,7 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                         <div class="sidebar-item recent-posts">
                             <ul class="list-unstyled">
                                 @foreach($terbaru as $data)
+                                @if($data->status === 'publish')
                                 <li class="mb-3 d-flex align-items-start">
                                     {{-- Gambar kecil lingkaran --}}
                                     <img src="{{ !empty($data->gambar) ? asset('bibliometrik/' . basename($data->gambar)) : asset('bibliometrik/no-image.jpg') }}"
@@ -173,10 +174,14 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                                     <div>
                                         <a href="{{ route('public.analisisbibliometrik.Selengkapnya', ['id' => $data->id, 'token' => $data->token]) }}" class="text-decoration-none text-dark">
                                             <strong style="font-size: 18px;">{{ $data->nama }} #{{ $data->nama_ke }}</strong><br>
-                                            <small><i class="fa fa-calendar-alt"></i> {{ date('d M Y', strtotime($data->mulai)) }} s/d {{ date('d M Y', strtotime($data->selesai)) }}</small>
+                                            <small>
+                                                <i class="fa fa-calendar-alt"></i>
+                                                {{ date('d M Y', strtotime($data->mulai)) }} s/d {{ date('d M Y', strtotime($data->selesai)) }}
+                                            </small><br>
                                         </a>
                                     </div>
                                 </li>
+                                @endif
                                 @endforeach
                             </ul>
                         </div>

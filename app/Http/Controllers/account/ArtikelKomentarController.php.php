@@ -47,10 +47,6 @@ class ArtikelKomentarController extends Controller
             ->orderBy('artikel_komentar.created_at', 'DESC')
             ->paginate(10);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.artikel.index', compact('komentar', 'maintenances', 'startDate', 'endDate'));
+        return view('account.artikel.index', compact('komentar', 'startDate', 'endDate'));
     }
 }

@@ -52,11 +52,7 @@ class CategoriesDebitController extends Controller
                 ->paginate(10);
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.categories_debit.index', compact('categories', 'maintenances'));
+        return view('account.categories_debit.index', compact('categories'));
     }
 
     public function search(Request $request)
@@ -112,11 +108,7 @@ class CategoriesDebitController extends Controller
             }
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.categories_debit.index', compact('categories', 'maintenances'));
+        return view('account.categories_debit.index', compact('categories'));
     }
 
     public function create()
