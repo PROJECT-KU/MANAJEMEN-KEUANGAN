@@ -391,7 +391,7 @@ Tambah Gaji Karyawan | MIS
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ old('gaji_pokok_ethes_digital') }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes" required>
+                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ old('gaji_pokok_ethes_digital') }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes">
                 </div>
                 @error('gaji_pokok_ethes_digital')
                 <div class="invalid-feedback" style="display: block">
@@ -1295,10 +1295,20 @@ Tambah Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="d-flex mt-3">
-            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
-            <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-redo"></i> RESET</button>
+          <div class="d-flex mt-3" style="gap: 10px;">
+            <button class="btn btn-primary btn-submit rounded-pill"
+              type="submit"
+              style="flex: 0 0 80%; height:35px; font-size: 15px;">
+              <i class="fa fa-paper-plane"></i> SIMPAN
+            </button>
+
+            <a href="{{ route('account.gaji.index') }}"
+              class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
+              style="flex: 0 0 20%; height:35px; font-size: 15px;">
+              <i class="fa fa-undo"></i> KEMBALI
+            </a>
           </div>
+
         </div>
       </div>
 

@@ -85,10 +85,18 @@ $agent = new Agent();
 
 </head>
 @php
-$isStatusnonactive = (Auth::user()->status === 'nonactive');
+$isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
+
+$tenggatDate = null;
+$currentDate = strtotime(date('Y-m-d'));
+$isTenggatExpired = false;
+
+if (Auth::check() && Auth::user()->tenggat) {
 $tenggatDate = strtotime(Auth::user()->tenggat);
-$currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
-$isTenggatExpired = ($tenggatDate < $currentDate); @endphp
+$isTenggatExpired = $tenggatDate < $currentDate;
+    }
+    @endphp
+
     <body style="background-color: #F5F5F5;" class="{{ $agent->isMobile() ? 'is-mobile' : '' }}">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
@@ -150,6 +158,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
                 </form>
 
                 <!-- Dropdown Profil -->
+                @if (Auth::check())
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown">
                         <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user d-flex align-items-center">
@@ -177,6 +186,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
                             </form>
                         </div>
                     </li>
+                    @endif
                 </ul>
             </nav>
 
@@ -196,7 +206,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
                         <!--================== END ==================-->
 
 
-                        @if (Auth::user()->email_verified_at)
+                        @if (Auth::check() && Auth::user()->email_verified_at)
                         @php
                         $tenggatDate = Auth::user()->tenggat;
                         $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @php $isStatusnonactive=(Auth::user()->status === 'nonactive');
@@ -337,36 +347,26 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
                                 <!--================== END ==================-->
 
                                 @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                                <!--================== SCOPUS CAMP ==================-->
-                                <li class="menu-header">SCOPUS CAMP</li>
-                                <!-- <li class="dropdown {{ setActive('account/Laporan-Peserta'). setActive('account/Scopus-Camp'). setActive('account/kategori') }}">
-                                    <a href="#" class="nav-link has-dropdown">
-                                        <i class="fas fa-user-cog"></i><span>PESERTA</span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/kategori') }}"><a class="nav-link" href="{{ route('account.kategori.index') }}"><i class="fas fa-dice-d6"></i>KATEGORI CAMP</a></li>
-                                        <li class="{{ setActive('account/Scopus-Camp') }}"><a class="nav-link" href="{{ route('account.scopuscamp.index') }}"><i class="fas fa-file-signature"></i>PENDAFTARAN CAMP</a></li>
-                                        <li class="{{ setActive('account/Laporan-Peserta') }}"><a class="nav-link" href="{{ route('account.peserta.list') }}"><i class="fas fa-user-edit"></i>EVALUASI CAMP</a></li>
-                                    </ul>
-                                </li> -->
+                                <!--================== ANALISIS BIBLIOMETRIK ==================-->
+                                <li class="menu-header">ANALISIS BIBLIOMETRIK</li>
 
                                 <li class="{{ setActive('account/kategori') }}">
                                     <a class="nav-link" href="{{ route('account.kategori.index') }}">
-                                        <i class="fas fa-dice-d6"></i> <span>Kategori Camp</span>
+                                        <i class="fas fa-dice-d6"></i> <span>Kategori </span>
                                     </a>
                                 </li>
 
-                                <li class="{{ setActive('account/Scopus-Camp') }}">
-                                    <a class="nav-link" href="{{ route('account.scopuscamp.index') }}">
-                                        <i class="fas fa-file-signature"></i> <span>Pendaftaran Camp</span>
+                                <li class="{{ setActive('account/Analisis-Bibliometrik') }}">
+                                    <a class="nav-link" href="{{ route('account.analisisbibliometrik.index') }}">
+                                        <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
                                     </a>
                                 </li>
 
-                                <li class="{{ setActive('account/Laporan-Peserta') }}">
+                                <!-- <li class="{{ setActive('account/Laporan-Peserta') }}">
                                     <a class="nav-link" href="{{ route('account.peserta.list') }}">
                                         <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
                                     </a>
-                                </li>
+                                </li> -->
                                 <!--================== END ==================-->
                                 @endif
 
@@ -467,7 +467,7 @@ $isTenggatExpired = ($tenggatDate < $currentDate); @endphp
         function getGreeting() {
             const currentTime = new Date();
             const currentHour = currentTime.getHours();
-            let fullName = "{{ Auth::user()->full_name }}"; // Ganti ini dengan cara Anda mendapatkan nama lengkap pengguna
+            let fullName = "{{ Auth::check() ? Auth::user()->full_name : '' }}";
 
             // Ambil hanya kata pertama dari nama lengkap
             fullName = fullName.split(' ')[0]; // Mengambil kata pertama saja

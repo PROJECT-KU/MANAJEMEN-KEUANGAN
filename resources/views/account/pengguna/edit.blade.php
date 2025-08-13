@@ -345,7 +345,7 @@ Update Karyawan | MIS
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 mt-4" id="submit-container" style="display: none;">
-                                                        <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"><i class="fa fa-paper-plane"></i> UPDATE DATA</button>
+                                                        <button type="submit" class="btn btn-primary btn-submit rounded-pill" style="width: 100%;"><i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                     </div>
                                                 </form>
 
@@ -389,7 +389,7 @@ Update Karyawan | MIS
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 mt-2" id="submit-container-company" style="display: none;">
-                                                    <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
+                                                    <button type="submit" class="btn btn-primary btn-submit rounded-pill" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                 </div>
                                                 </form>
                                             </div>
@@ -504,7 +504,7 @@ Update Karyawan | MIS
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 mt-4" id="submit-container-bank" style="display: none;">
-                                                    <button type="submit" class="btn btn-primary btn-submit" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
+                                                    <button type="submit" class="btn btn-primary btn-submit rounded-pill" style="width: 100%;"> <i class="fa fa-paper-plane"></i> UPDATE DATA</button>
                                                 </div>
                                             </form>
                                         </div>

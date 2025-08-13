@@ -73,10 +73,6 @@ class CreditController extends Controller
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
         $totalGaji = 0;
         if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
 
@@ -120,7 +116,7 @@ class CreditController extends Controller
                 ->paginate(10);
         }
 
-        return view('account.credit.index', compact('credit', 'maintenances', 'totalGaji', 'gaji'));
+        return view('account.credit.index', compact('credit', 'totalGaji', 'gaji'));
     }
 
     public function search(Request $request)
@@ -180,11 +176,7 @@ class CreditController extends Controller
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.credit.index', compact('credit', 'maintenances'));
+        return view('account.credit.index', compact('credit'));
     }
 
     public function create()

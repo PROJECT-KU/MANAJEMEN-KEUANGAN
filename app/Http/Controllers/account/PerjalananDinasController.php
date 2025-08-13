@@ -135,11 +135,7 @@ class PerjalananDinasController extends Controller
     ]);
     // <!-- END -->
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
-    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'maintenances', 'startDate', 'endDate', 'countAjukan'));
+    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'startDate', 'endDate', 'countAjukan'));
   }
 
   public function filter(Request $request)
@@ -174,12 +170,7 @@ class PerjalananDinasController extends Controller
         ->paginate(10);
     }
 
-
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
-    return view('account.camp.index', compact('camp', 'maintenances', 'startDate', 'endDate'));
+    return view('account.camp.index', compact('camp', 'startDate', 'endDate'));
   }
 
   public function search(Request $request)
@@ -244,10 +235,6 @@ class PerjalananDinasController extends Controller
     $DatasDitolak = $Ditolak->paginate(10);
     // <!-- END -->
 
-    $maintenances = DB::table('maintenance')
-      ->orderBy('created_at', 'DESC')
-      ->get();
-
     $startDate = $request->get('start_date');
     $endDate = $request->get('end_date');
 
@@ -257,7 +244,7 @@ class PerjalananDinasController extends Controller
     }
 
     // Mengembalikan tampilan
-    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'maintenances', 'startDate', 'endDate'));
+    return view('account.perjalanan_dinas.index', compact('DatasAjukan', 'DatasDiterima', 'DatasDitolak', 'startDate', 'endDate'));
   }
 
 

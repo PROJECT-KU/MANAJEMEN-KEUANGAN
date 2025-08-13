@@ -182,7 +182,6 @@
                                     <div class="signup-form">
                                         <h2 class="form-title"><strong>Sign up</strong></h2>
 
-
                                         <div class="row">
                                             <div class="form-group col-6 ">
                                                 <input type="text" name="full_name" id="first_name" class="form-control" placeholder="Nama Lengkap" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
@@ -232,7 +231,7 @@
                                             </div>
 
                                             <div class="form-group col-md-6" id="namaPerusahaanContainer" style="display: none;">
-                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)" style="text-transform:uppercase">
+                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)">
                                                 @error('company')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}

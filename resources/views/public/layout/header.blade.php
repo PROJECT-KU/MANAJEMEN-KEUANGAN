@@ -85,16 +85,17 @@
                     <li>
                         <a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }} || Request::is('blog/topic/blog-single/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a class="nav-link scrollto {{ Request::is('Scopus-Kafe') || Request::is('Scopus-Kafe/Form-Pendaftaran') ? 'active' : '' }}"
                             href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a>
-                    </li>
+                    </li> -->
                     <li class="dropdown">
                         <a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
-                            <!-- <li><a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li> -->
                             <li><a href="https://rumahscopus.com/event/" target="_blank">Class Offline</a></li>
+                            <li><a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
+                            <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
                         </ul>
                     </li>
                     <li>

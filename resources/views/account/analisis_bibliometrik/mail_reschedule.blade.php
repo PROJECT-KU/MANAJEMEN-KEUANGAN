@@ -74,30 +74,33 @@
                         <center>
                             <div class="card mt-5 mb-5" style="width: 35rem;">
                                 <div style="text-align: center;" class="login-brand">
-                                    <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
+                                    <a href="https://rumahscopusfoundation.com/">
+                                        <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250">
+                                    </a>
                                 </div>
                                 <div class="card-body">
-                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $scopuscamp->nama }}</p>
-                                    <p style="font-size: 15px;">Mohon Maaf Pendaftaran Scopus Camp anda kami <b>TOLAK</b>, berikut rinciannya:</p>
+                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $analisisbibliometrik->nama }}</p>
+                                    <p style="font-size: 15px;">Terima kasih sudah melakukan pendaftaran Analisis Bibliometrik! Pendaftaran Analisis Bibliometrik anda di <b>RESCHEDULE</b>, berikut rinciannya:</p>
                                     <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
                                         <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
                                             <p>Kode Transaksi </p>
-                                            <p>Scopus Camp </p>
-                                            @if ($scopuscamp->note !== null)
-                                            <p>Catatan </p>
-                                            @endif
+                                            <p>Tanggal Mulai Pelaksanaan</p>
+                                            <p>Tanggal selesai Pelaksanaan</p>
+                                            <p>Batch </p>
+                                            <p>Total Pembayaran </p>
                                         </div>
                                         <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:180px;">
                                             <div style="text-align: right;">
-                                                <p>{{ strtoupper($scopuscamp->id_transaksi) }}</p>
-                                                <p>{{ strtoupper($scopuscamp->camp) }}</p>
-                                                @if ($scopuscamp->note !== null)
-                                                <p>{{ $scopuscamp->note }}</p>
-                                                @endif
+                                                <p>{{ strtoupper($analisisbibliometrik->id_transaksi) }}</p>
+                                                <p>{{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->mulai)) }}</p>
+                                                <p>{{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->selesai)) }}</p>
+                                                <p>{{ $categoriesanalisisbibliometrik->nama }} #{{ $categoriesanalisisbibliometrik->nama_ke }} </p>
+                                                <p>Rp. {{ number_format($analisisbibliometrik->total_pembayaran, 0, ',', '.') }}</p>
                                             </div>
                                         </div>
                                     </div>
-
+                                    <p style="font-size: 15px;">Status pendaftaran Analisis Bibliometrik anda saat ini <b>RESCHEDULE</b>. Silahkan masuk ke dalam WhatsApp Grup yang telah kami sedikan, dengan mengklik link berikut</p>
+                                    <p style="font-size: 18px;">{{ $analisisbibliometrik->group_wa }}</p>
                                     <p style="font-size:15px">Salam Q1!</p>
 
                                     <p>Salam,<br>

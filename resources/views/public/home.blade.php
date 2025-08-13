@@ -186,6 +186,24 @@ Beranda | Rumah Scopus
                         </div>
                     </div>
                 </div>
+                <div class="col-md-3 mb-2" data-aos="fade-left">
+                    <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
+                        <div>
+                            <img src="{{ asset('assets/img/public/analisisbibliometrik.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <h5 style="font-weight: bold;">Analisis Bibliometrik</h5>
+                            <p style="text-align: justify;">
+                                Pendampingan secara online <b>selama 8 kali pertemuan</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>.
+                            </p>
+                        </div>
+                        <div class="mt-auto" style="text-align: center;">
+                            <a href="{{ url('/Analisis-Bibliometrik') }}">
+                                <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -1622,11 +1622,14 @@ Detail Gaji Karyawan | MIS
           </div>
         </div>
 
-        <div class="d-flex mt-3">
-          <a href="{{ route('account.gaji.index') }}" class="btn btn-info rounded-pill" style="flex: 1; height:40px; font-size: 15px;">
+        <div class="d-flex mt-3" style="gap: 10px;">
+          <a href="{{ route('account.gaji.index') }}"
+            class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
+            style="flex: 0 0 100%; height:35px; font-size: 15px;">
             <i class="fa fa-undo"></i> KEMBALI
           </a>
         </div>
+
       </div>
     </div>
 

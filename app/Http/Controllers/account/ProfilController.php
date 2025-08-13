@@ -135,6 +135,7 @@ class ProfilController extends Controller
       if (now()->diffInMinutes($user->code_verified_mail_sent_at) <= 2) {
         // Mark email as verified
         $user->email_verified_at = now();
+        $user->status = 'active';
         $user->code_verified_mail = null;
         $user->code_verified_mail_sent_at = null;
         $user->save();

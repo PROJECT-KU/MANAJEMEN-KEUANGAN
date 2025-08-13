@@ -46,11 +46,7 @@ class CategoriesArtikelController extends Controller
             ->groupBy('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori') // Include all non-aggregated columns from categories_artikel in GROUP BY
             ->paginate(10);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.kategori_artikel.index', compact('categories_artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.kategori_artikel.index', compact('categories_artikel', 'startDate', 'endDate'));
     }
 
 
@@ -146,18 +142,13 @@ class CategoriesArtikelController extends Controller
             ->paginate(10);
         $categories_artikel->appends(['q' => $search]);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-
         $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
         $endDate = $request->get('end_date');
 
         if ($categories_artikel->isEmpty()) {
             return redirect()->route('account.Kategori-Artikel.index')->with('error', 'Data Laporan Peserta tidak ditemukan.');
         }
-        return view('account.kategori_artikel.index', compact('categories_artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.kategori_artikel.index', compact('categories_artikel', 'startDate', 'endDate'));
     }
 
     public function filter(Request $request)
@@ -180,10 +171,6 @@ class CategoriesArtikelController extends Controller
             ->orderBy('categories_artikel.created_at', 'DESC')
             ->paginate(10);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.kategori_artikel.index', compact('categories_artikel', 'maintenances', 'startDate', 'endDate'));
+        return view('account.kategori_artikel.index', compact('categories_artikel', 'startDate', 'endDate'));
     }
 }

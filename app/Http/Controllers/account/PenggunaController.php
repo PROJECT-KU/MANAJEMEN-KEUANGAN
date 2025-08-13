@@ -39,11 +39,7 @@ class PenggunaController extends Controller
                 ->paginate(10);
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.pengguna.index', compact('users', 'maintenances'));
+        return view('account.pengguna.index', compact('users'));
     }
     // <!--================== END ==================-->
 
@@ -75,12 +71,7 @@ class PenggunaController extends Controller
             return redirect()->route('account.pengguna.index')->with('error', 'Data Pengguna tidak ditemukan.');
         }
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-
-        return view('account.pengguna.index', compact('users', 'maintenances'));
+        return view('account.pengguna.index', compact('users'));
     }
     // <!--================== END ==================-->
 
@@ -156,9 +147,9 @@ class PenggunaController extends Controller
         $user->email_verified_at = $request->input('email_verified_at') ? now() : null;
 
         if ($request->input('status')) {
-            $user->status = 'on';
+            $user->status = 'active';
         } else {
-            $user->status = 'off';
+            $user->status = 'nonactive';
         }
 
         // Save the new user
@@ -309,6 +300,7 @@ class PenggunaController extends Controller
     {
         $user = User::findOrFail($id);
         $user->email_verified_at = now(); // Mark email as verified
+        $user->status = 'active';
         $user->save();
 
         // Redirect with success message
@@ -360,11 +352,7 @@ class PenggunaController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.profil.resetpassword', compact('user', 'maintenances'));
+        return view('account.profil.resetpassword', compact('user'));
     }
     // <!--================== END ==================-->
 
@@ -373,27 +361,12 @@ class PenggunaController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('account.company.index', compact('user', 'maintenances'));
+        return view('account.company.index', compact('user'));
     }
     public function updateCompany(Request $request, $id)
     {
         // Find the user by ID
         $user = User::findOrFail($id);
-
-        // Validate the request data (uncomment and modify as needed)
-        // $request->validate([
-        //     'full_name' => 'required',
-        //     'company' => '',
-        //     'email' => 'required|email',
-        //     'username' => 'required',
-        //     'level' => 'required',
-        //     'jenis' => 'required',
-        //     'telp' => 'required',
-        // ]);
 
         // Save image to path if provided
         if ($request->hasFile('logo_company')) {
@@ -431,7 +404,7 @@ class PenggunaController extends Controller
         }
 
         // Redirect with success message
-        return redirect()->route('account.company.edit', $user->id)->with('success', 'Data pengguna berhasil diperbarui!');
+        return redirect()->route('account.company.edit', $user->id)->with('success', 'Data Perusahaan berhasil diperbarui!');
     }
     // <!--================== END ==================-->
 }

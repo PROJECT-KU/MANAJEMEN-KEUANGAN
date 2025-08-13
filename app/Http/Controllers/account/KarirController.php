@@ -59,12 +59,7 @@ class KarirController extends Controller
             ->orderBy('karir.created_at', 'DESC')
             ->paginate(10);
 
-
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate'));
+        return view('karir.list', compact('karir', 'startDate', 'endDate'));
     }
     // <!--====== END ======-->
 
@@ -76,11 +71,7 @@ class KarirController extends Controller
             ->where('karir.id', $id)
             ->first();
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('karir.detail', compact('karir', 'maintenances'));
+        return view('karir.detail', compact('karir'));
     }
     // <!--====== END ======-->
 
@@ -92,11 +83,7 @@ class KarirController extends Controller
             ->where('karir.id', $id)
             ->first();
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('karir.edit', compact('karir', 'maintenances'));
+        return view('karir.edit', compact('karir'));
     }
 
     public function update(Request $request, $id)
@@ -212,10 +199,6 @@ class KarirController extends Controller
             ->paginate(10);
         $karir->appends(['q' => $search]);
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
         $startDate = $request->get('start_date'); // Example, replace with your actual start_date input field
         $endDate = $request->get('end_date');
 
@@ -226,7 +209,7 @@ class KarirController extends Controller
         if ($karir->isEmpty()) {
             return redirect()->route('gaji.list')->with('error', 'Data Karir tidak ditemukan.');
         }
-        return view('karir.list', compact('karir', 'maintenances', 'startDate', 'endDate', 'karirExist'));
+        return view('karir.list', compact('karir', 'startDate', 'endDate', 'karirExist'));
     }
     // <!--====== END ======-->
 

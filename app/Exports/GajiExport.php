@@ -107,16 +107,15 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             '137' => 'BPD BANTEN'
         ];
         $nama_bank = $bankNames[$gaji->bank] ?? 'Bank Name Not Found';
-        $formatted_total = number_format($gaji->total, 0, ',', '.');
-        $formatted_date = date('d-F-Y H:i', strtotime($gaji->tanggal));
+        $formatted_date = date('d F Y H:i', strtotime($gaji->tanggal));
 
         return [
             $row,
             $gaji->id_transaksi,
             $gaji->full_name,
-            $gaji->norek,
+            "'" . $gaji->norek,
             $nama_bank,
-            'Rp ' . $formatted_total,
+            'Rp. ' . number_format($gaji->total ?? 0, 0, ',', '.'),
             $formatted_date
         ];
     }

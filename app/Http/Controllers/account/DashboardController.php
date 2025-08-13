@@ -322,11 +322,6 @@ class DashboardController extends Controller
         }
         // end
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-
         //saldo bulan ini
         $saldo_bulan_ini = $uang_masuk_bulan_ini->nominal - $uang_keluar_bulan_ini->nominal;
 
@@ -423,10 +418,6 @@ class DashboardController extends Controller
                 ->orderBy('gaji.created_at', 'DESC')
                 ->paginate(10);
         }
-
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
 
         $presensiExist = Presensi::where('status', '<>', null)
             ->whereBetween('created_at', [$currentMonth, $nextMonth])
@@ -615,7 +606,6 @@ class DashboardController extends Controller
             'credit',
             'latestUsers',
             'users',
-            'maintenances',
             'totalGaji',
             'gaji',
             'artikel',

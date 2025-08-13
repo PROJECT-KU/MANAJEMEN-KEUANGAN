@@ -291,13 +291,18 @@ Tambah Karyawan | MIS
                             </div>
                         </div>
 
-                        <div class="d-flex">
-                            <button class="btn btn-primary btn-submit mr-1 rounded-pill" type="submit" style="width: 50%; font-size: 14px;">
+                        <div class="d-flex mt-3" style="gap: 10px;">
+                            <button class="btn btn-primary btn-submit rounded-pill"
+                                type="submit"
+                                style="flex: 0 0 80%; height:35px; font-size: 15px;">
                                 <i class="fa fa-paper-plane"></i> SIMPAN
                             </button>
-                            <button class="btn btn-warning btn-reset rounded-pill" type="reset" style="width: 50%; font-size: 14px;">
-                                <i class="fa fa-redo"></i> RESET
-                            </button>
+
+                            <a href="{{ route('account.pengguna.index') }}"
+                                class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
+                                style="flex: 0 0 20%; height:35px; font-size: 15px;">
+                                <i class="fa fa-undo"></i> KEMBALI
+                            </a>
                         </div>
 
                     </form>
