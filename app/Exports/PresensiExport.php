@@ -41,29 +41,36 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping, WithS
         static $no = 0;
         $no++;
 
-        // Format tanggal dan jam
-        $tanggalPresensi = Carbon::parse($row->created_at)->translatedFormat('l d F Y H:i');
-        $waktuHadir = date('H:i', strtotime($row->created_at));
-        $waktuPulang = $row->time_pulang ? date('H:i', strtotime($row->time_pulang)) : '-';
-
-        // Hitung lama kerja (jika ada waktu pulang)
-        $lamaKerja = '-';
-        if ($row->time_pulang) {
-            $start = strtotime($row->created_at);
-            $end = strtotime($row->time_pulang);
-            $lamaKerja = gmdate('H:i', $end - $start);
+        // Pastikan created_at valid
+        $tanggalPresensi = '-';
+        $waktuHadir = '-';
+        if (!empty($row->created_at) && strtotime($row->created_at)) {
+            $tanggalPresensi = Carbon::parse($row->created_at)->translatedFormat('l d F Y H:i');
+            $waktuHadir = date('H:i', strtotime($row->created_at));
         }
 
-        // Lokasi Presensi sebagai link klik
+        $waktuPulang = '-';
+        $lamaKerja = '-';
+        if (!empty($row->time_pulang) && strtotime($row->time_pulang)) {
+            $waktuPulang = date('H:i', strtotime($row->time_pulang));
+            if (!empty($row->created_at) && strtotime($row->created_at)) {
+                $start = strtotime($row->created_at);
+                $end = strtotime($row->time_pulang);
+                if ($end > $start) {
+                    $lamaKerja = gmdate('H:i', $end - $start);
+                }
+            }
+        }
+
         $lokasi = '-';
-        if (!empty($row->latitude) && !empty($row->longitude)) {
+        if (!empty($row->latitude) && !empty($row->longitude) && is_numeric($row->latitude) && is_numeric($row->longitude)) {
             $link = "https://www.google.com/maps?q={$row->latitude},{$row->longitude}";
             $lokasi = '=HYPERLINK("' . $link . '","Lihat di Google Maps")';
         }
 
         return [
             $no,
-            $row->full_name,
+            $row->full_name ?? '-',
             $tanggalPresensi,
             $waktuHadir,
             $waktuPulang,

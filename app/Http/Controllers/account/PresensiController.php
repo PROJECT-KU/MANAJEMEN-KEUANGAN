@@ -614,6 +614,10 @@ class PresensiController extends Controller
   public function downloadExcel(Request $request)
   {
     $user = Auth::user();
+    if (!$user) {
+      abort(403, 'Unauthorized');
+    }
+
     $search = $request->input('q');
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
@@ -623,8 +627,13 @@ class PresensiController extends Controller
       $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
       $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
     } else {
-      $currentMonth = $startDate ? date('Y-m-d 00:00:00', strtotime($startDate)) : '2000-01-01 00:00:00';
-      $nextMonth = $endDate ? date('Y-m-d 23:59:59', strtotime($endDate)) : now()->format('Y-m-d 23:59:59');
+      $currentMonth = $startDate
+        ? date('Y-m-d 00:00:00', strtotime($startDate))
+        : '2000-01-01 00:00:00';
+
+      $nextMonth = $endDate
+        ? date('Y-m-d 23:59:59', strtotime($endDate))
+        : now()->format('Y-m-d 23:59:59');
     }
 
     $presensiQuery = DB::table('presensi')
@@ -647,20 +656,16 @@ class PresensiController extends Controller
         'presensi.remote',
         'presensi.izin',
         'presensi.created_at',
-        'users.id as user_id',
-        'users.full_name as full_name',
+        'users.id as user_id_ref',
+        'users.full_name'
       )
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id');
 
     // Role-based filter
     if ($user->level === 'manager') {
-      // Manager: semua karyawan di company yang sama
       $presensiQuery->where('users.company', $user->company);
     } elseif ($user->level === 'karyawan') {
-      // Karyawan: hanya data dirinya
       $presensiQuery->where('presensi.user_id', $user->id);
-    } else {
-      // Role lain (opsional, misal admin) -> bisa semua data
     }
 
     // Search filter
@@ -680,9 +685,17 @@ class PresensiController extends Controller
       ->orderBy('presensi.created_at', 'DESC')
       ->get();
 
-    // Export Excel
+    if ($presensi->isEmpty()) {
+      return back()->with('error', 'Tidak ada data presensi untuk diexport.');
+    }
+
+    // Pastikan jadi collection Laravel
+    $presensiCollection = collect($presensi);
+
     $excelFileName = 'List-Presensi_' . date('d-m-Y') . '.xlsx';
-    return Excel::download(new PresensiExport($presensi), $excelFileName);
+
+    // Pastikan PresensiExport menerima parameter yang benar
+    return Excel::download(new \App\Exports\PresensiExport($presensiCollection), $excelFileName);
   }
   // <!--================== END ==================-->
 }
