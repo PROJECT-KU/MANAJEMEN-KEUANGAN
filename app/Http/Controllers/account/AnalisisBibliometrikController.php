@@ -318,49 +318,6 @@ class AnalisisBibliometrikController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== DOWNLOAD ==================-->
-    public function downloadExcel(Request $request)
-    {
-        $search = $request->input('q');
-        $startDate = $request->input('tanggal_awal');
-        $endDate = $request->input('tanggal_akhir');
 
-        $tanggal_awal = $startDate ? Carbon::parse($startDate)->startOfDay() : Carbon::now()->startOfMonth();
-        $tanggal_akhir = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::now()->endOfMonth();
-
-        // Query dasar dengan JOIN (supaya kategori_nama, kategori_nama_ke, group_wa selalu ada)
-        $query = DB::table('analisis_bibliometrik')
-            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
-            ->select(
-                'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama as kategori_nama',
-                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
-                'categories_analisis_bibliometrik.group_wa as kategori_group_wa',
-                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
-                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.biaya as biaya',
-                'analisis_bibliometrik.ppn',
-                'analisis_bibliometrik.kode_unik',
-                'analisis_bibliometrik.nominal_diskon',
-            )
-            ->whereBetween('analisis_bibliometrik.created_at', [$tanggal_awal, $tanggal_akhir]);
-
-        // Filter pencarian jika ada
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('analisis_bibliometrik.id_transaksi', 'LIKE', "%{$search}%")
-                    ->orWhere('analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama_ke', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.mulai', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.selesai', 'LIKE', "%{$search}%")
-                    ->orWhere('analisis_bibliometrik.total_pembayaran', 'LIKE', "%{$search}%")
-                    ->orWhere('analisis_bibliometrik.status', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $data = $query->orderBy('analisis_bibliometrik.created_at', 'desc')->get();
-
-        return Excel::download(new PendaftaranAnalisisBibliometrikExport($data), 'Pendaftaran-Analisis-Bibliometrik_' . now()->format('Ymd_His') . '.xlsx');
-    }
     // <!--================== END ==================-->
 }
