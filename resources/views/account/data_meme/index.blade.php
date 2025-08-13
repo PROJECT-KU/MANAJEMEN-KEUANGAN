@@ -19,7 +19,7 @@ Data Scopus Kafe | MIS
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('account.gaji.searchmanager') }}" method="GET" id="searchForm">
+                    <form action="#" method="GET" id="searchForm">
                         <div class="form-group">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control rounded-pill" name="q" placeholder="Pencarian" value="{{ app('request')->input('q') }}" id="searchInput">
@@ -34,7 +34,7 @@ Data Scopus Kafe | MIS
                         </div>
                     </form>
 
-                    <form action="{{ route('account.gaji.filtermanager') }}" method="GET">
+                    <form action="#" method="GET">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
