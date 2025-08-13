@@ -623,10 +623,13 @@ class PresensiController extends Controller
     $endDate = $request->input('tanggal_akhir');
 
     // Default tanggal bulan ini jika tidak ada filter
-    if (!$startDate && !$endDate) {
+    // Default tanggal
+    if (!$startDate && !$endDate && empty($search)) {
+      // Kalau tidak ada filter tanggal & tidak ada search → bulan ini saja
       $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
       $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
     } else {
+      // Kalau ada search atau ada filter tanggal → ambil sesuai tanggal
       $currentMonth = $startDate
         ? date('Y-m-d 00:00:00', strtotime($startDate))
         : '2000-01-01 00:00:00';
