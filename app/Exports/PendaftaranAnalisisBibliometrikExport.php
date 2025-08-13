@@ -111,7 +111,7 @@ class PendaftaranAnalisisBibliometrikExport implements FromCollection, WithHeadi
                 }
 
                 // Tentukan kolom terakhir sesuai jumlah kolom headings/map
-                $lastColumn = 'R'; // Karena ada 18 kolom dari A sampai R
+                $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->headings()[0]));
 
                 // Judul
                 $sheet->mergeCells("A1:{$lastColumn}1");
