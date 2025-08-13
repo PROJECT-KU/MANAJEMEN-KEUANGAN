@@ -13,38 +13,74 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
-class PendaftaranAnalisisBibliometrikExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents, WithCustomStartCell
+class PendaftaranAnalisisBibliometrikExport implements
+    FromCollection,
+    WithHeadings,
+    WithMapping,
+    WithStyles,
+    ShouldAutoSize,
+    WithEvents,
+    WithCustomStartCell
 {
-    protected $datas;
+    /** @var \Illuminate\Support\Collection */
+    protected Collection $datas;
 
-    public function __construct($datas)
+    /** @var Carbon|null */
+    protected ?Carbon $tanggalAwal;
+
+    /** @var Carbon|null */
+    protected ?Carbon $tanggalAkhir;
+
+    public function __construct($datas, $tanggalAwal = null, $tanggalAkhir = null)
     {
-        $this->datas = $datas;
+        // pastikan menjadi Collection
+        $this->datas        = collect($datas);
+        $this->tanggalAwal  = $tanggalAwal ? Carbon::parse($tanggalAwal) : null;
+        $this->tanggalAkhir = $tanggalAkhir ? Carbon::parse($tanggalAkhir) : null;
     }
 
     public function collection()
     {
-        $tanggal_awal = request('tanggal_awal');
-        $tanggal_akhir = request('tanggal_akhir');
-
-        return collect($this->datas)->filter(function ($datas) use ($tanggal_awal, $tanggal_akhir) {
-            $created_at = Carbon::parse($datas->created_at);
-
-            if ($tanggal_awal && $tanggal_akhir) {
-                return $created_at->between(Carbon::parse($tanggal_awal), Carbon::parse($tanggal_akhir));
-            }
-
-            return true; // Jika tidak ada filter tanggal, semua data selain draft dikembalikan
-        });
+        // Filtering tanggal sudah dilakukan di controller.
+        // Kalau tetap ingin jaga-jaga, aktifkan blok di bawah:
+        /*
+        if ($this->tanggalAwal && $this->tanggalAkhir) {
+            return $this->datas->filter(function ($row) {
+                if (empty($row->created_at)) return false;
+                $created = Carbon::parse($row->created_at);
+                return $created->betweenIncluded($this->tanggalAwal, $this->tanggalAkhir);
+            });
+        }
+        */
+        return $this->datas;
     }
 
     public function headings(): array
     {
-        return [
-            ['NO', 'ID TRANSAKSI', 'NAMA BATCH', 'TANGGAL PEMESANAN', 'NAMA PENDAFTAR', 'EMAIL', 'AFFILIASI', 'NOMOR WHATSAPP', 'JUMLAH PENDAFTAR', 'BIAYA', 'PPN', 'KODE UNIK PEMBAYARAN', 'NOMINAL DISKON', 'TOTAL PEMBAYARAN', 'TANGGAL RESCHEDULE', 'LINK GRUP WHATSAPP', 'NOTE', 'STATUS']
-        ];
+        return [[
+            'NO',
+            'ID TRANSAKSI',
+            'NAMA BATCH',
+            'TANGGAL PEMESANAN',
+            'NAMA PENDAFTAR',
+            'EMAIL',
+            'AFFILIASI',
+            'NOMOR WHATSAPP',
+            'JUMLAH PENDAFTAR',
+            'BIAYA',
+            'PPN',
+            'KODE UNIK PEMBAYARAN',
+            'NOMINAL DISKON',
+            'TOTAL PEMBAYARAN',
+            'TANGGAL RESCHEDULE',
+            'LINK GRUP WHATSAPP',
+            'NOTE',
+            'STATUS',
+        ]];
     }
 
     public function map($item): array
@@ -52,41 +88,55 @@ class PendaftaranAnalisisBibliometrikExport implements FromCollection, WithHeadi
         static $row = 0;
         $row++;
 
+        // Tanggal pemesanan
+        $tglPemesanan = '-';
+        if (!empty($item->created_at) && strtotime($item->created_at)) {
+            // gunakan translatedFormat jika ingin bahasa Indonesia (butuh Carbon locale)
+            $tglPemesanan = Carbon::parse($item->created_at)->translatedFormat('d F Y');
+        }
+
+        // Tanggal reschedule (opsional)
+        $tglReschedule = '-';
+        if (!empty($item->tanggal_reschedule) && strtotime($item->tanggal_reschedule)) {
+            $tglReschedule = Carbon::parse($item->tanggal_reschedule)->translatedFormat('d F Y');
+        }
+
+        // Link group WA
+        $groupWa = $item->kategori_group_wa ?? ($item->group_wa ?? '-');
+
         return [
-            $row, // NO
-            $item->id_transaksi, // ID TRANSAKSI
-            ($item->kategori_nama ?? '-') . ' #' . ($item->kategori_nama_ke ?? '-'), // NAMA BATCH
-            Carbon::parse($item->created_at)->translatedFormat('d F Y'), // TANGGAL PEMESANAN
-            $item->nama, // NAMA PENDAFTAR
-            $item->email, // EMAIL
-            $item->affiliasi, // AFFILIASI
-            $item->telp, // NOMOR WHATSAPP
-            $item->jumlah_pendaftar, // JUMLAH PENDAFTAR
+            $row,
+            $item->id_transaksi ?? '-',
+            trim(($item->kategori_nama ?? '-') . ' #' . ($item->kategori_nama_ke ?? '-')),
+            $tglPemesanan,
+            $item->nama       ?? '-',
+            $item->email      ?? '-',
+            $item->affiliasi  ?? '-',
+            $item->telp       ?? '-',
+            (int)($item->jumlah_pendaftar ?? 0),
 
-            'Rp. ' . number_format($item->biaya ?? 0, 0, ',', '.'), // BIAYA
-            'Rp. ' . number_format($item->ppn ?? 0, 0, ',', '.'), // PPN
-            'Rp. ' . number_format($item->kode_unik ?? 0, 0, ',', '.'), // KODE UNIK PEMBAYARAN
-            'Rp. ' . number_format($item->nominal_diskon ?? 0, 0, ',', '.'), // NOMINAL DISKON
-            'Rp. ' . number_format($item->total_pembayaran ?? 0, 0, ',', '.'), // TOTAL PEMBAYARAN
+            'Rp. ' . number_format((float)($item->biaya ?? 0), 0, ',', '.'),
+            'Rp. ' . number_format((float)($item->ppn ?? 0), 0, ',', '.'),
+            'Rp. ' . number_format((float)($item->kode_unik ?? 0), 0, ',', '.'),
+            'Rp. ' . number_format((float)($item->nominal_diskon ?? 0), 0, ',', '.'),
+            'Rp. ' . number_format((float)($item->total_pembayaran ?? 0), 0, ',', '.'),
 
-            $item->tanggal_reschedule
-                ? Carbon::parse($item->tanggal_reschedule)->translatedFormat('d F Y')
-                : '-', // TANGGAL RESCHEDULE
-
-            $item->kategori_group_wa ?? $item->group_wa, // LINK GRUP WA
-            $item->note, // NOTE
-            strtoupper($item->status), // STATUS
+            $tglReschedule,
+            $groupWa,
+            $item->note   ?? '-',
+            strtoupper((string)($item->status ?? '-')),
         ];
     }
 
-
     public function styles(Worksheet $sheet)
     {
+        // Bisa tambahkan style tambahan jika perlu.
         return [];
     }
 
     public function startCell(): string
     {
+        // Header tabel akan mulai di row 8
         return 'A8';
     }
 
@@ -96,22 +146,20 @@ class PendaftaranAnalisisBibliometrikExport implements FromCollection, WithHeadi
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $tanggal_awal = request('tanggal_awal');
-                $tanggal_akhir = request('tanggal_akhir');
-
-                if ($tanggal_awal && $tanggal_akhir) {
+                // Teks periode berdasarkan tanggal yang DIKIRIM dari controller
+                if ($this->tanggalAwal && $this->tanggalAkhir) {
                     $periode = 'Periode: ' .
-                        Carbon::parse($tanggal_awal)->translatedFormat('d F Y') .
+                        $this->tanggalAwal->translatedFormat('d F Y') .
                         ' s.d. ' .
-                        Carbon::parse($tanggal_akhir)->translatedFormat('d F Y');
+                        $this->tanggalAkhir->translatedFormat('d F Y');
                 } else {
                     $firstDay = Carbon::now()->startOfMonth()->translatedFormat('d F Y');
-                    $lastDay = Carbon::now()->endOfMonth()->translatedFormat('d F Y');
-                    $periode = 'Periode: ' . $firstDay . ' s.d. ' . $lastDay;
+                    $lastDay  = Carbon::now()->endOfMonth()->translatedFormat('d F Y');
+                    $periode  = 'Periode: ' . $firstDay . ' s.d. ' . $lastDay;
                 }
 
-                // Tentukan kolom terakhir sesuai jumlah kolom headings/map
-                $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->headings()[0]));
+                // Hitung kolom terakhir otomatis dari headings
+                $lastColumn = Coordinate::stringFromColumnIndex(count($this->headings()[0]));
 
                 // Judul
                 $sheet->mergeCells("A1:{$lastColumn}1");

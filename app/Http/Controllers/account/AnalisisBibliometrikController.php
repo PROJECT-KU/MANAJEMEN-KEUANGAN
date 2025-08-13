@@ -320,31 +320,38 @@ class AnalisisBibliometrikController extends Controller
     // <!--================== DOWNLOAD ==================-->
     public function downloadExcel(Request $request)
     {
-        $search = $request->input('q');
+        // (Opsional) kalau data besar
+        ini_set('memory_limit', '512M');
+        set_time_limit(0);
+
+        $search    = $request->input('q');
         $startDate = $request->input('tanggal_awal');
-        $endDate = $request->input('tanggal_akhir');
+        $endDate   = $request->input('tanggal_akhir');
 
-        $tanggal_awal = $startDate ? Carbon::parse($startDate)->startOfDay() : Carbon::now()->startOfMonth();
-        $tanggal_akhir = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::now()->endOfMonth();
+        $tanggal_awal  = $startDate ? Carbon::parse($startDate)->startOfDay() : Carbon::now()->startOfMonth();
+        $tanggal_akhir = $endDate   ? Carbon::parse($endDate)->endOfDay()   : Carbon::now()->endOfMonth();
 
-        // Query dasar dengan JOIN (supaya kategori_nama, kategori_nama_ke, group_wa selalu ada)
         $query = DB::table('analisis_bibliometrik')
-            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
+            ->join(
+                'categories_analisis_bibliometrik',
+                'analisis_bibliometrik.categories_analisis_bibliometrik_id',
+                '=',
+                'categories_analisis_bibliometrik.id'
+            )
             ->select(
                 'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama as kategori_nama',
+                'categories_analisis_bibliometrik.nama   as kategori_nama',
                 'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
                 'categories_analisis_bibliometrik.group_wa as kategori_group_wa',
-                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
+                'categories_analisis_bibliometrik.mulai  as kategori_tanggal_mulai',
                 'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.biaya as biaya',
+                'categories_analisis_bibliometrik.biaya  as biaya',
                 'analisis_bibliometrik.ppn',
                 'analisis_bibliometrik.kode_unik',
-                'analisis_bibliometrik.nominal_diskon',
+                'analisis_bibliometrik.nominal_diskon'
             )
             ->whereBetween('analisis_bibliometrik.created_at', [$tanggal_awal, $tanggal_akhir]);
 
-        // Filter pencarian jika ada
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('analisis_bibliometrik.id_transaksi', 'LIKE', "%{$search}%")
@@ -360,7 +367,17 @@ class AnalisisBibliometrikController extends Controller
 
         $data = $query->orderBy('analisis_bibliometrik.created_at', 'desc')->get();
 
-        return Excel::download(new PendaftaranAnalisisBibliometrikExport($data, $tanggal_awal, $tanggal_akhir), 'Pendaftaran-Analisis-Bibliometrik_' . now()->format('Ymd_His') . '.xlsx');
+        if ($data->isEmpty()) {
+            return back()->with('error', 'Tidak ada data untuk diexport pada periode/keyword tersebut.');
+        }
+
+        $filename = 'Pendaftaran-Analisis-Bibliometrik_' . now()->format('Ymd_His') . '.xlsx';
+
+        // ⤵️ sekarang constructor export menerima tanggal juga
+        return Excel::download(
+            new PendaftaranAnalisisBibliometrikExport($data, $tanggal_awal, $tanggal_akhir),
+            $filename
+        );
     }
     // <!--================== END ==================-->
 }
