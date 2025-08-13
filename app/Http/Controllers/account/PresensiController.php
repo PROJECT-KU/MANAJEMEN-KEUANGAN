@@ -685,15 +685,17 @@ class PresensiController extends Controller
       ->orderBy('presensi.created_at', 'DESC')
       ->get();
 
-    // Pastikan data tidak kosong agar tidak error
     if ($presensi->isEmpty()) {
       return back()->with('error', 'Tidak ada data presensi untuk diexport.');
     }
 
+    // Pastikan jadi collection Laravel
+    $presensiCollection = collect($presensi);
+
     $excelFileName = 'List-Presensi_' . date('d-m-Y') . '.xlsx';
 
     // Pastikan PresensiExport menerima parameter yang benar
-    return Excel::download(new \App\Exports\PresensiExport($presensi), $excelFileName);
+    return Excel::download(new \App\Exports\PresensiExport($presensiCollection), $excelFileName);
   }
   // <!--================== END ==================-->
 }
