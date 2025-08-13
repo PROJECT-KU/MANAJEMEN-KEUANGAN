@@ -219,9 +219,9 @@ Data Presensi Karyawan | MIS
                         <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                           <i class="fa fa-pencil-alt"></i>
                         </a>
-                        <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-secondary mt-2">
+                        <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn btn-sm btn-secondary mt-2">
                           <i class="fa fa-eye"></i>
-                        </a>
+                        </a> -->
                         <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
                           <i class="fa fa-trash"></i>
                         </button>
