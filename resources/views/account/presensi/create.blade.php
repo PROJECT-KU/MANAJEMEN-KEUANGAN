@@ -159,7 +159,7 @@ Tambah Presensi Karyawan | MIS
                 <i class="fa fa-paper-plane"></i> SIMPAN
               </button>
 
-              <a href="{{ route('account.dashboard.index') }}"
+              <a href="{{ route('account.presensi.index') }}"
                 class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
                 style="flex: 0 0 20%; height:35px; font-size: 15px;">
                 <i class="fa fa-undo"></i> KEMBALI
