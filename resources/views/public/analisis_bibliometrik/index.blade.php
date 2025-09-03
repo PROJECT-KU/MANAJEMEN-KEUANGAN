@@ -66,10 +66,10 @@ Analisis Bibliometrik | Rumah Scopus
                                         <i class="fas fa-clock me-1"></i>
                                         {{ date('d M Y', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}
                                     </span>
-                                    <span style="display: flex; align-items: center;">
+                                    <!-- <span style="display: flex; align-items: center;">
                                         <i class="fas fa-users me-1"></i>
                                         Sisa: {{ $item->sisa_kuota ?? 0 }}
-                                    </span>
+                                    </span> -->
                                 </div>
                             </div>
                         </div>

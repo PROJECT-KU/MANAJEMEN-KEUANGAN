@@ -287,10 +287,10 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                                 </h2>
                                                 <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                                                     <div class="accordion-body">
-                                                        <p class="card-text">Nomor Rekening : <b><span id="nomor-rekening">1381 0100 0107 564</span></b>
-                                                            <button onclick="copyToClipboard('nomor-rekening')" class="btn btn-primary"><i class="fas fa-copy"></i></button>
+                                                        <p class="card-text">Nomor Rekening : <b><span id="nomor-rekening">𝟮𝟭𝟲𝟰 𝟬𝟭 𝟬𝟬𝟬𝟰𝟲𝟳 𝟱𝟲 𝟯</span></b>
+                                                            <button onclick="copyToClipboard('nomor-rekening')" class="btn btn-primary"><i class="fas fa-copy"></i> Salin</button>
                                                             <br>
-                                                            Atas Nama : <b>Rumah Scopus Indonesia</b>
+                                                            Atas Nama : <b>Rumah Scopus Akademi</b>
                                                         </p>
                                                     </div>
                                                 </div>

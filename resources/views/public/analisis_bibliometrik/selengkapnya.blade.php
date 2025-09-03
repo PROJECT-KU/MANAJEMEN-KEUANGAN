@@ -77,7 +77,7 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                         <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel" style="max-width: 100%; max-height: 400px; overflow: hidden;">
                             <div class="carousel-inner">
                                 <div class="carousel-item active">
-                                    <img src="{{ asset('assets/img/public/cover.png') }}" class="d-block w-100" alt="Cover 1" style="object-fit: cover; height: 400px;">
+                                    <img src="{{ asset('assets/img/public/cover2.png') }}" class="d-block w-100" alt="Cover 1" style="object-fit: cover; height: 400px;">
                                 </div>
                                 <div class="carousel-item">
                                     <img src="{{ asset('assets/img/public/cover1.png') }}" class="d-block w-100" alt="Cover 2" style="object-fit: cover; height: 400px;">
@@ -103,10 +103,10 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                                     <i class="fas fa-clock me-1"></i>
                                     <span>{{ date('d M Y', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}</span>
                                 </div>
-                                <div class="d-flex align-items-center" style="gap: 5px;">
+                                <!-- <div class="d-flex align-items-center" style="gap: 5px;">
                                     <i class="fas fa-user-check me-1"></i>
                                     <span>Sisa Kuota: {{ $item->sisa_kuota ?? 0 }}</span>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
