@@ -546,7 +546,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
     }
 
     function generateUniqueCode() {
-        return Math.floor(Math.random() * 1000) + 1;
+        return Math.floor(Math.random() * 100) + 1;
     }
 
     function hitungTotalPembayaran() {
