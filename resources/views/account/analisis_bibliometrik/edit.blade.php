@@ -281,8 +281,12 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="total_pembayaran" id="total_pembayaran" class="form-control" value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}" style=" font-weight: bold;" readonly>
+                                        <input type="text" name="total_pembayaran" id="total_pembayaran" class="form-control" value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}" style="font-weight: bold;" readonly>
                                         <input type="hidden" id="total_pembayaran_asli" value="{{ $data->total_pembayaran }}">
+                                        <input type="hidden" id="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}">
+                                        <input type="hidden" id="ppn" value="{{ $data->ppn }}">
+                                        <input type="hidden" id="kode_unik" value="{{ $data->kode_unik }}">
+                                        <input type="hidden" id="nominal_diskon" value="{{ $data->nominal_diskon }}">
                                         <input type="hidden" id="refund" name="refund" value="0">
                                     </div>
                                 </div>
@@ -411,12 +415,16 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         const kategoriSelect = document.getElementById("kategoriSelect");
         const totalInput = document.getElementById("total_pembayaran");
         const totalAsliInput = document.getElementById("total_pembayaran_asli");
-        const diskonInput = document.getElementById("nominal_diskon");
 
-        const biayaAwalInput = document.getElementById("biaya_awal");
+        const jumlahPendaftarInput = document.getElementById("jumlah_pendaftar");
+        const ppnInput = document.getElementById("ppn");
+        const kodeUnikInput = document.getElementById("kode_unik");
+        const diskonInput = document.getElementById("nominal_diskon");
         const refundInput = document.getElementById("refund");
 
-        // Format angka ke format Rupiah (tanpa Rp)
+        const biayaAwal = parseInt(totalAsliInput.value) || 0;
+        let batchAwal = kategoriSelect.value;
+
         function formatRupiah(angka) {
             return new Intl.NumberFormat("id-ID", {
                 style: "decimal",
@@ -424,50 +432,35 @@ Update Pendaftaran Analisis Bibliometrik | MIS
             }).format(angka);
         }
 
-        // Update total pembayaran (pakai diskon)
-        function updateTotal() {
-            const totalAsli = parseInt(totalAsliInput.value) || 0;
-            let diskonRaw = diskonInput ? diskonInput.value.replace(/\./g, "").replace(/[^0-9]/g, "") : "0";
-            let diskon = parseInt(diskonRaw || 0);
-            let totalSetelahDiskon = Math.max(totalAsli - diskon, 0);
+        function hitungTotal(biaya) {
+            const jumlahPendaftar = parseInt(jumlahPendaftarInput.value) || 0;
+            const ppn = parseInt(ppnInput.value) || 0;
+            const kodeUnik = parseInt(kodeUnikInput.value) || 0;
+            const diskon = parseInt(diskonInput.value) || 0;
 
-            totalInput.value = formatRupiah(totalSetelahDiskon);
+            return (biaya * jumlahPendaftar) + ppn + kodeUnik - diskon;
         }
 
-        // Event: ubah batch → update biaya + total + refund
         kategoriSelect.addEventListener("change", function() {
             let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
             let biayaBaru = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
+            let batchBaru = kategoriSelect.value;
 
-            // Update hidden total asli
-            totalAsliInput.value = biayaBaru;
+            if (batchBaru === batchAwal) {
+                // Batch tidak berubah → tetap pakai total lama
+                totalInput.value = formatRupiah(biayaAwal);
+                refundInput.value = 0;
+            } else {
+                // Batch berubah → hitung ulang total
+                let totalBaru = hitungTotal(biayaBaru);
 
-            // Hitung refund
-            let biayaAwal = parseInt(biayaAwalInput.value) || 0;
-            let refund = Math.max(biayaAwal - biayaBaru, 0);
-            refundInput.value = refund;
+                // Hitung refund jika biaya awal > biaya baru
+                let refund = Math.max(biayaAwal - totalBaru, 0);
+                refundInput.value = refund;
 
-            if (refund > 0) {
-                alert("Anda mendapatkan refund sebesar Rp " + formatRupiah(refund));
+                totalInput.value = formatRupiah(totalBaru);
             }
-
-            // Update tampilan total
-            updateTotal();
         });
-
-        // Event: input diskon → hitung ulang total
-        if (diskonInput) {
-            diskonInput.addEventListener("input", function(e) {
-                let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
-                if (!value) value = "0";
-
-                e.target.value = formatRupiah(value);
-                updateTotal();
-            });
-        }
-
-        // Jalankan sekali saat pertama load
-        updateTotal();
     });
 </script>
 <!--================== END ==================-->
