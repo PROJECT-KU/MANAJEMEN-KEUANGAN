@@ -384,6 +384,46 @@ Update Pendaftaran Analisis Bibliometrik | MIS
     </section>
 </div>
 
+<!--================== UBAH NAMA BATCH TOTAL PEMBAYARAN BERUBAH ==================-->
+<script>
+    $(document).ready(function() {
+        function formatRupiah(angka) {
+            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Fungsi hitung ulang total pembayaran
+        function hitungTotal() {
+            let jumlah_pendaftar = parseInt($("input[name='jumlah_pendaftar']").val().replace(/\./g, '')) || 0;
+            let biaya = parseInt($("#biaya").val().replace(/\./g, '')) || 0;
+            let ppn = parseInt($("input[name='ppn']").val().replace(/\./g, '')) || 0;
+            let kode_unik = parseInt($("input[name='kode_unik']").val().replace(/\./g, '')) || 0;
+            let nominal_diskon = parseInt($("#nominal_diskon").val().replace(/\./g, '')) || 0;
+
+            let total = (jumlah_pendaftar * biaya) + ppn + kode_unik - nominal_diskon;
+
+            $("#total_pembayaran").val(formatRupiah(total));
+            $("#total_pembayaran_asli").val(total);
+        }
+
+        // Event saat pilih batch
+        $("#kategoriSelect").on("change", function() {
+            let selected = $(this).find(":selected");
+
+            let biaya = selected.data("biaya");
+            $("#biaya").val(formatRupiah(biaya));
+
+            // Hitung ulang total pembayaran
+            hitungTotal();
+        });
+
+        // Event jika diskon diubah manual
+        $("#nominal_diskon").on("keyup", function() {
+            hitungTotal();
+        });
+    });
+</script>
+<!--================== END ==================-->
+
 <!--================== ZOOM IMAGE ==================-->
 {{-- Script Zoom --}}
 <script>
@@ -407,95 +447,42 @@ Update Pendaftaran Analisis Bibliometrik | MIS
 <!--================== TOTAL PEMBAYARAN AKAN TERKURANG OTOMATIS JIKA DI KETIKAN NOMINAL DISKON ==================-->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const kategoriSelect = document.getElementById("kategoriSelect");
-        const biayaInput = document.getElementById("biaya");
-        const jumlahPendaftar = document.querySelector("[name='jumlah_pendaftar']");
-        const ppnInput = document.querySelector("[name='ppn']");
-        const kodeUnikInput = document.querySelector("[name='kode_unik']");
-        const diskonInput = document.getElementById("nominal_diskon");
+        const diskonInput = document.getElementById('nominal_diskon');
+        const totalInput = document.getElementById('total_pembayaran');
+        const totalAsliInput = document.getElementById('total_pembayaran_asli');
 
-        const totalInput = document.getElementById("total_pembayaran");
-        const totalAsliInput = document.getElementById("total_pembayaran_asli");
-
-        let batchAwal = "{{ $data->categories_analisis_bibliometrik_id }}";
-        let biayaAwal = {
-            {
-                $data - > biaya
-            }
-        };
-        let totalDb = {
-            {
-                $data - > total_pembayaran
-            }
-        };
-
-        // Format angka ke Rupiah
+        // Format angka ke format Rupiah (tanpa simbol Rp)
         function formatRupiah(angka) {
-            return new Intl.NumberFormat("id-ID", {
-                style: "decimal",
+            return new Intl.NumberFormat('id-ID', {
+                style: 'decimal',
                 minimumFractionDigits: 0
             }).format(angka);
         }
 
-        // Hitung total pembayaran formula
-        function hitungTotal(biaya) {
-            let jml = parseInt(jumlahPendaftar.value) || 0;
-            let ppn = parseInt(ppnInput.value.replace(/\./g, "")) || 0;
-            let kode = parseInt(kodeUnikInput.value.replace(/\./g, "")) || 0;
-            let diskonRaw = diskonInput.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+        // Fungsi update total pembayaran
+        function updateTotal() {
+            const totalAsli = parseInt(totalAsliInput.value);
+            let diskonRaw = diskonInput.value.replace(/\./g, '').replace(/[^0-9]/g, '');
             let diskon = parseInt(diskonRaw || 0);
+            let totalSetelahDiskon = Math.max(totalAsli - diskon, 0);
 
-            let total = (jml * biaya) + ppn + kode - diskon;
-            return Math.max(total, 0);
+            totalInput.value = formatRupiah(totalSetelahDiskon);
         }
 
-        // Saat ganti batch
-        kategoriSelect.addEventListener("change", function() {
-            let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
-            let batchSekarang = selectedOption.value;
-            let biayaSekarang = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
+        // Format input diskon sambil mengetik
+        diskonInput.addEventListener('input', function(e) {
+            // Ambil angka mentah
+            let value = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+            if (!value) value = '0';
 
-            // if else cek batch
-            if (batchSekarang == batchAwal) {
-                // batch sama → pakai total dari DB
-                totalInput.value = formatRupiah(totalDb);
-                totalAsliInput.value = totalDb;
-            } else {
-                // batch beda → hitung ulang
-                biayaInput.value = formatRupiah(biayaSekarang);
-                let totalBaru = hitungTotal(biayaSekarang);
-                totalInput.value = formatRupiah(totalBaru);
-                totalAsliInput.value = totalBaru;
-            }
-        });
-
-        // Saat ketik diskon
-        diskonInput.addEventListener("input", function(e) {
-            let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
-            if (!value) value = "0";
+            // Format ke Rupiah dan tampilkan kembali
             e.target.value = formatRupiah(value);
 
-            let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
-            let batchSekarang = selectedOption.value;
-            let biayaSekarang = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
-
-            // if else cek batch
-            if (batchSekarang == batchAwal) {
-                let totalBaru = totalDb - parseInt(value);
-                totalInput.value = formatRupiah(Math.max(totalBaru, 0));
-                totalAsliInput.value = Math.max(totalBaru, 0);
-            } else {
-                let totalBaru = hitungTotal(biayaSekarang);
-                totalInput.value = formatRupiah(totalBaru);
-                totalAsliInput.value = totalBaru;
-            }
+            // Update total pembayaran
+            updateTotal();
         });
-
-        // load awal → total dari DB
-        totalInput.value = formatRupiah(totalDb);
     });
 </script>
-
 <!--================== END ==================-->
 
 <!--================== KETIKA UPDATE NAMA BATCH TANGGAL BATCH JUGA TERGANTI ==================-->
