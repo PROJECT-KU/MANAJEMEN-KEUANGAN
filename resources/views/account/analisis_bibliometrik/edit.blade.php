@@ -281,14 +281,23 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="total_pembayaran" id="total_pembayaran" class="form-control" value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}" style="font-weight: bold;" readonly>
+                                        <input type="text" name="total_pembayaran" id="total_pembayaran"
+                                            class="form-control"
+                                            value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}"
+                                            style="font-weight: bold;" readonly>
+
+                                        {{-- Simpan angka asli dari DB --}}
                                         <input type="hidden" id="total_pembayaran_asli" value="{{ $data->total_pembayaran }}">
+                                        <input type="hidden" id="biaya_awal" value="{{ $data->total_pembayaran }}">
+                                        <input type="hidden" id="refund" name="refund" value="0">
                                         <input type="hidden" id="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}">
                                         <input type="hidden" id="ppn" value="{{ $data->ppn }}">
                                         <input type="hidden" id="kode_unik" value="{{ $data->kode_unik }}">
                                         <input type="hidden" id="nominal_diskon" value="{{ $data->nominal_diskon }}">
-                                        <input type="hidden" id="refund" name="refund" value="0">
                                     </div>
+                                    <small id="refund_text" style="color:red; font-weight:bold; display:none;">
+                                        Refund: Rp. 0
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -415,16 +424,17 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         const kategoriSelect = document.getElementById("kategoriSelect");
         const totalInput = document.getElementById("total_pembayaran");
         const totalAsliInput = document.getElementById("total_pembayaran_asli");
+        const refundInput = document.getElementById("refund");
+        const refundText = document.getElementById("refund_text");
 
+        // Field pendukung
         const jumlahPendaftarInput = document.getElementById("jumlah_pendaftar");
         const ppnInput = document.getElementById("ppn");
         const kodeUnikInput = document.getElementById("kode_unik");
         const diskonInput = document.getElementById("nominal_diskon");
-        const refundInput = document.getElementById("refund");
+        const biayaAwalInput = document.getElementById("biaya_awal");
 
-        const biayaAwal = parseInt(totalAsliInput.value) || 0;
-        let batchAwal = kategoriSelect.value;
-
+        // Format angka ke Rupiah
         function formatRupiah(angka) {
             return new Intl.NumberFormat("id-ID", {
                 style: "decimal",
@@ -432,6 +442,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
             }).format(angka);
         }
 
+        // Hitung total pembayaran baru
         function hitungTotal(biaya) {
             const jumlahPendaftar = parseInt(jumlahPendaftarInput.value) || 0;
             const ppn = parseInt(ppnInput.value) || 0;
@@ -441,24 +452,29 @@ Update Pendaftaran Analisis Bibliometrik | MIS
             return (biaya * jumlahPendaftar) + ppn + kodeUnik - diskon;
         }
 
+        // Event ganti batch
         kategoriSelect.addEventListener("change", function() {
             let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
             let biayaBaru = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
-            let batchBaru = kategoriSelect.value;
 
-            if (batchBaru === batchAwal) {
-                // Batch tidak berubah → tetap pakai total lama
-                totalInput.value = formatRupiah(biayaAwal);
-                refundInput.value = 0;
+            // Hitung total baru
+            let totalBaru = hitungTotal(biayaBaru);
+
+            // Update input total pembayaran
+            totalInput.value = formatRupiah(totalBaru);
+            totalAsliInput.value = totalBaru;
+
+            // Hitung refund
+            let biayaAwal = parseInt(biayaAwalInput.value) || 0;
+            let refund = Math.max(biayaAwal - totalBaru, 0);
+
+            refundInput.value = refund;
+
+            if (refund > 0) {
+                refundText.style.display = "block";
+                refundText.innerText = "Refund: Rp. " + formatRupiah(refund);
             } else {
-                // Batch berubah → hitung ulang total
-                let totalBaru = hitungTotal(biayaBaru);
-
-                // Hitung refund jika biaya awal > biaya baru
-                let refund = Math.max(biayaAwal - totalBaru, 0);
-                refundInput.value = refund;
-
-                totalInput.value = formatRupiah(totalBaru);
+                refundText.style.display = "none";
             }
         });
     });
