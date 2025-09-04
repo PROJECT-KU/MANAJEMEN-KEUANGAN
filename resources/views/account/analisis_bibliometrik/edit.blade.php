@@ -407,40 +407,52 @@ Update Pendaftaran Analisis Bibliometrik | MIS
 <!--================== TOTAL PEMBAYARAN AKAN TERKURANG OTOMATIS JIKA DI KETIKAN NOMINAL DISKON ==================-->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const diskonInput = document.getElementById('nominal_diskon');
-        const totalInput = document.getElementById('total_pembayaran');
-        const totalAsliInput = document.getElementById('total_pembayaran_asli');
+        const kategoriSelect = document.getElementById("kategoriSelect");
+        const totalInput = document.getElementById("total_pembayaran");
+        const totalAsliInput = document.getElementById("total_pembayaran_asli");
+        const diskonInput = document.getElementById("nominal_diskon");
 
-        // Format angka ke format Rupiah (tanpa simbol Rp)
+        // Format angka ke format Rupiah (tanpa Rp)
         function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'decimal',
+            return new Intl.NumberFormat("id-ID", {
+                style: "decimal",
                 minimumFractionDigits: 0
             }).format(angka);
         }
 
-        // Fungsi update total pembayaran
+        // Update total pembayaran (pakai diskon)
         function updateTotal() {
-            const totalAsli = parseInt(totalAsliInput.value);
-            let diskonRaw = diskonInput.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+            const totalAsli = parseInt(totalAsliInput.value) || 0;
+            let diskonRaw = diskonInput.value.replace(/\./g, "").replace(/[^0-9]/g, "");
             let diskon = parseInt(diskonRaw || 0);
             let totalSetelahDiskon = Math.max(totalAsli - diskon, 0);
 
             totalInput.value = formatRupiah(totalSetelahDiskon);
         }
 
-        // Format input diskon sambil mengetik
-        diskonInput.addEventListener('input', function(e) {
-            // Ambil angka mentah
-            let value = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '');
-            if (!value) value = '0';
+        // Event: ubah batch → update biaya + total
+        kategoriSelect.addEventListener("change", function() {
+            let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
+            let biaya = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
 
-            // Format ke Rupiah dan tampilkan kembali
-            e.target.value = formatRupiah(value);
+            // Update hidden (angka asli)
+            totalAsliInput.value = biaya;
 
-            // Update total pembayaran
+            // Update tampilan total (langsung hitung diskon kalau ada)
             updateTotal();
         });
+
+        // Event: input diskon → hitung ulang total
+        diskonInput.addEventListener("input", function(e) {
+            let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+            if (!value) value = "0";
+
+            e.target.value = formatRupiah(value);
+            updateTotal();
+        });
+
+        // Jalankan sekali saat pertama load (biar total awal konsisten)
+        updateTotal();
     });
 </script>
 <!--================== END ==================-->
