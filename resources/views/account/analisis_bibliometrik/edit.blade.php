@@ -217,7 +217,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                 <div class="form-group">
                                     <label>Jumlah Pendaftar</label>
                                     <div class="input-group">
-                                        <input type="text" name="jumlah_pendaftar" id="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}" class="form-control" readonly>
+                                        <input type="text" name="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}" class="form-control" readonly>
                                         <div class="input-group-append">
                                             <span class="input-group-text">Orang</span>
                                         </div>
@@ -245,7 +245,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="ppn" id="ppn" value="{{ number_format($data->ppn, 0, ',', '.') }}" class="form-control" readonly>
+                                        <input type="text" name="ppn" value="{{ number_format($data->ppn, 0, ',', '.') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -256,7 +256,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="kode_unik" id="kode_unik" value="{{ number_format($data->kode_unik, 0, ',', '.') }}" class="form-control" readonly>
+                                        <input type="text" name="kode_unik" value="{{ number_format($data->kode_unik, 0, ',', '.') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -281,23 +281,9 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="total_pembayaran" id="total_pembayaran"
-                                            class="form-control"
-                                            value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}"
-                                            style="font-weight: bold;" readonly>
-
-                                        {{-- Simpan angka asli dari DB --}}
+                                        <input type="text" name="total_pembayaran" id="total_pembayaran" class="form-control" value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}" style=" font-weight: bold;" readonly>
                                         <input type="hidden" id="total_pembayaran_asli" value="{{ $data->total_pembayaran }}">
-                                        <input type="hidden" id="biaya_awal" value="{{ $data->total_pembayaran }}">
-                                        <input type="hidden" id="refund" name="refund" value="0">
-                                        <input type="hidden" id="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}">
-                                        <input type="hidden" id="ppn" value="{{ $data->ppn }}">
-                                        <input type="hidden" id="kode_unik" value="{{ $data->kode_unik }}">
-                                        <input type="hidden" id="nominal_diskon" value="{{ $data->nominal_diskon }}">
                                     </div>
-                                    <small id="refund_text" style="color:red; font-weight:bold; display:none;">
-                                        Refund: Rp. 0
-                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -421,61 +407,39 @@ Update Pendaftaran Analisis Bibliometrik | MIS
 <!--================== TOTAL PEMBAYARAN AKAN TERKURANG OTOMATIS JIKA DI KETIKAN NOMINAL DISKON ==================-->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const kategoriSelect = document.getElementById("kategoriSelect");
-        const totalInput = document.getElementById("total_pembayaran");
-        const totalAsliInput = document.getElementById("total_pembayaran_asli");
-        const refundInput = document.getElementById("refund");
-        const refundText = document.getElementById("refund_text");
+        const diskonInput = document.getElementById('nominal_diskon');
+        const totalInput = document.getElementById('total_pembayaran');
+        const totalAsliInput = document.getElementById('total_pembayaran_asli');
 
-        // Field pendukung
-        const jumlahPendaftarInput = document.getElementById("jumlah_pendaftar");
-        const ppnInput = document.getElementById("ppn");
-        const kodeUnikInput = document.getElementById("kode_unik");
-        const diskonInput = document.getElementById("nominal_diskon");
-        const biayaAwalInput = document.getElementById("biaya_awal");
-
-        // Format angka ke Rupiah
+        // Format angka ke format Rupiah (tanpa simbol Rp)
         function formatRupiah(angka) {
-            return new Intl.NumberFormat("id-ID", {
-                style: "decimal",
+            return new Intl.NumberFormat('id-ID', {
+                style: 'decimal',
                 minimumFractionDigits: 0
             }).format(angka);
         }
 
-        // Hitung total pembayaran baru
-        function hitungTotal(biaya) {
-            const jumlahPendaftar = parseInt(jumlahPendaftarInput.value) || 0;
-            const ppn = parseInt(ppnInput.value) || 0;
-            const kodeUnik = parseInt(kodeUnikInput.value) || 0;
-            const diskon = parseInt(diskonInput.value) || 0;
+        // Fungsi update total pembayaran
+        function updateTotal() {
+            const totalAsli = parseInt(totalAsliInput.value);
+            let diskonRaw = diskonInput.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+            let diskon = parseInt(diskonRaw || 0);
+            let totalSetelahDiskon = Math.max(totalAsli - diskon, 0);
 
-            return (biaya * jumlahPendaftar) + ppn + kodeUnik - diskon;
+            totalInput.value = formatRupiah(totalSetelahDiskon);
         }
 
-        // Event ganti batch
-        kategoriSelect.addEventListener("change", function() {
-            let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
-            let biayaBaru = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
+        // Format input diskon sambil mengetik
+        diskonInput.addEventListener('input', function(e) {
+            // Ambil angka mentah
+            let value = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+            if (!value) value = '0';
 
-            // Hitung total baru
-            let totalBaru = hitungTotal(biayaBaru);
+            // Format ke Rupiah dan tampilkan kembali
+            e.target.value = formatRupiah(value);
 
-            // Update input total pembayaran
-            totalInput.value = formatRupiah(totalBaru);
-            totalAsliInput.value = totalBaru;
-
-            // Hitung refund
-            let biayaAwal = parseInt(biayaAwalInput.value) || 0;
-            let refund = Math.max(biayaAwal - totalBaru, 0);
-
-            refundInput.value = refund;
-
-            if (refund > 0) {
-                refundText.style.display = "block";
-                refundText.innerText = "Refund: Rp. " + formatRupiah(refund);
-            } else {
-                refundText.style.display = "none";
-            }
+            // Update total pembayaran
+            updateTotal();
         });
     });
 </script>
