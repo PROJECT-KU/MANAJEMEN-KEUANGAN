@@ -110,7 +110,7 @@ Data Pendaftaran Analisis Bibliometrik | MIS
                                         <td class="column-width" style="text-align: center;">{{ $data->kategori_nama }} #{{ $data->kategori_nama_ke }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($data->kategori_tanggal_mulai)) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($data->kategori_tanggal_selesai)) }}</td>
-                                        <td class="column-width" style="text-align: center;">Rp. {{ number_format($data->total_pembayaran, 0, ',', '.') }}</td>
+                                        <td class="column-width" style="text-align: center;">Rp. {{ number_format((float) $data->total_pembayaran, 0, ',', '.') }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             @if($data->status == 'diproses')
                                             <span class="badge badge-warning">Dalam Proses Pengecekan</i></span>
