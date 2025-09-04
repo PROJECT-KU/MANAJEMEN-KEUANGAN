@@ -283,6 +283,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         </div>
                                         <input type="text" name="total_pembayaran" id="total_pembayaran" class="form-control" value="{{ number_format($data->total_pembayaran, 0, ',', '.') }}" style=" font-weight: bold;" readonly>
                                         <input type="hidden" id="total_pembayaran_asli" value="{{ $data->total_pembayaran }}">
+                                        <input type="hidden" id="refund" name="refund" value="0">
                                     </div>
                                 </div>
                             </div>
