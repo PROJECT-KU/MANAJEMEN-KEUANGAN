@@ -412,6 +412,9 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         const totalAsliInput = document.getElementById("total_pembayaran_asli");
         const diskonInput = document.getElementById("nominal_diskon");
 
+        const biayaAwalInput = document.getElementById("biaya_awal");
+        const refundInput = document.getElementById("refund");
+
         // Format angka ke format Rupiah (tanpa Rp)
         function formatRupiah(angka) {
             return new Intl.NumberFormat("id-ID", {
@@ -423,35 +426,46 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         // Update total pembayaran (pakai diskon)
         function updateTotal() {
             const totalAsli = parseInt(totalAsliInput.value) || 0;
-            let diskonRaw = diskonInput.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+            let diskonRaw = diskonInput ? diskonInput.value.replace(/\./g, "").replace(/[^0-9]/g, "") : "0";
             let diskon = parseInt(diskonRaw || 0);
             let totalSetelahDiskon = Math.max(totalAsli - diskon, 0);
 
             totalInput.value = formatRupiah(totalSetelahDiskon);
         }
 
-        // Event: ubah batch → update biaya + total
+        // Event: ubah batch → update biaya + total + refund
         kategoriSelect.addEventListener("change", function() {
             let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
-            let biaya = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
+            let biayaBaru = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
 
-            // Update hidden (angka asli)
-            totalAsliInput.value = biaya;
+            // Update hidden total asli
+            totalAsliInput.value = biayaBaru;
 
-            // Update tampilan total (langsung hitung diskon kalau ada)
+            // Hitung refund
+            let biayaAwal = parseInt(biayaAwalInput.value) || 0;
+            let refund = Math.max(biayaAwal - biayaBaru, 0);
+            refundInput.value = refund;
+
+            if (refund > 0) {
+                alert("Anda mendapatkan refund sebesar Rp " + formatRupiah(refund));
+            }
+
+            // Update tampilan total
             updateTotal();
         });
 
         // Event: input diskon → hitung ulang total
-        diskonInput.addEventListener("input", function(e) {
-            let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
-            if (!value) value = "0";
+        if (diskonInput) {
+            diskonInput.addEventListener("input", function(e) {
+                let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+                if (!value) value = "0";
 
-            e.target.value = formatRupiah(value);
-            updateTotal();
-        });
+                e.target.value = formatRupiah(value);
+                updateTotal();
+            });
+        }
 
-        // Jalankan sekali saat pertama load (biar total awal konsisten)
+        // Jalankan sekali saat pertama load
         updateTotal();
     });
 </script>
