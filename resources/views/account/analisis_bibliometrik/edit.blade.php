@@ -417,9 +417,19 @@ Update Pendaftaran Analisis Bibliometrik | MIS
         const totalInput = document.getElementById("total_pembayaran");
         const totalAsliInput = document.getElementById("total_pembayaran_asli");
 
-        let totalFromDb = parseInt(totalAsliInput.value); // simpan nilai awal dari DB
+        let batchAwal = "{{ $data->categories_analisis_bibliometrik_id }}";
+        let biayaAwal = {
+            {
+                $data - > biaya
+            }
+        };
+        let totalDb = {
+            {
+                $data - > total_pembayaran
+            }
+        };
 
-        // Format angka ke format Rupiah
+        // Format angka ke Rupiah
         function formatRupiah(angka) {
             return new Intl.NumberFormat("id-ID", {
                 style: "decimal",
@@ -427,7 +437,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
             }).format(angka);
         }
 
-        // Hitung total pembayaran
+        // Hitung total pembayaran formula
         function hitungTotal(biaya) {
             let jml = parseInt(jumlahPendaftar.value) || 0;
             let ppn = parseInt(ppnInput.value.replace(/\./g, "")) || 0;
@@ -439,51 +449,53 @@ Update Pendaftaran Analisis Bibliometrik | MIS
             return Math.max(total, 0);
         }
 
-        // Saat ubah batch → pakai biaya baru
+        // Saat ganti batch
         kategoriSelect.addEventListener("change", function() {
             let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
-            let biayaBaru = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
+            let batchSekarang = selectedOption.value;
+            let biayaSekarang = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
 
-            // Update field biaya
-            biayaInput.value = formatRupiah(biayaBaru);
-
-            // Hitung ulang total
-            let totalBaru = hitungTotal(biayaBaru);
-
-            totalInput.value = formatRupiah(totalBaru);
-            totalAsliInput.value = totalBaru;
+            // if else cek batch
+            if (batchSekarang == batchAwal) {
+                // batch sama → pakai total dari DB
+                totalInput.value = formatRupiah(totalDb);
+                totalAsliInput.value = totalDb;
+            } else {
+                // batch beda → hitung ulang
+                biayaInput.value = formatRupiah(biayaSekarang);
+                let totalBaru = hitungTotal(biayaSekarang);
+                totalInput.value = formatRupiah(totalBaru);
+                totalAsliInput.value = totalBaru;
+            }
         });
 
-        // Saat ketik diskon → hitung ulang
+        // Saat ketik diskon
         diskonInput.addEventListener("input", function(e) {
             let value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
             if (!value) value = "0";
             e.target.value = formatRupiah(value);
 
-            // cek apakah batch diganti atau masih asli
             let selectedOption = kategoriSelect.options[kategoriSelect.selectedIndex];
+            let batchSekarang = selectedOption.value;
             let biayaSekarang = parseInt(selectedOption.getAttribute("data-biaya")) || 0;
 
-            if (biayaSekarang && biayaSekarang != {
-                    {
-                        $data - > biaya
-                    }
-                }) {
-                // batch sudah diganti → hitung ulang pakai formula
+            // if else cek batch
+            if (batchSekarang == batchAwal) {
+                let totalBaru = totalDb - parseInt(value);
+                totalInput.value = formatRupiah(Math.max(totalBaru, 0));
+                totalAsliInput.value = Math.max(totalBaru, 0);
+            } else {
                 let totalBaru = hitungTotal(biayaSekarang);
                 totalInput.value = formatRupiah(totalBaru);
                 totalAsliInput.value = totalBaru;
-            } else {
-                // batch tidak diganti → pakai total DB - diskon
-                let totalBaru = totalFromDb - (parseInt(value) || 0);
-                totalInput.value = formatRupiah(Math.max(totalBaru, 0));
             }
         });
 
-        // Awal halaman → tetap pakai total dari DB
-        totalInput.value = formatRupiah(totalFromDb);
+        // load awal → total dari DB
+        totalInput.value = formatRupiah(totalDb);
     });
 </script>
+
 <!--================== END ==================-->
 
 <!--================== KETIKA UPDATE NAMA BATCH TANGGAL BATCH JUGA TERGANTI ==================-->
