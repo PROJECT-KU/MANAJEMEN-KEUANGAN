@@ -217,7 +217,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                 <div class="form-group">
                                     <label>Jumlah Pendaftar</label>
                                     <div class="input-group">
-                                        <input type="text" name="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}" class="form-control" readonly>
+                                        <input type="text" name="jumlah_pendaftar" id="jumlah_pendaftar" value="{{ $data->jumlah_pendaftar }}" class="form-control" readonly>
                                         <div class="input-group-append">
                                             <span class="input-group-text">Orang</span>
                                         </div>
@@ -245,7 +245,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="ppn" value="{{ number_format($data->ppn, 0, ',', '.') }}" class="form-control" readonly>
+                                        <input type="text" name="ppn" id="ppn" value="{{ number_format($data->ppn, 0, ',', '.') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -256,7 +256,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                         <div class="input-group-append">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="kode_unik" value="{{ number_format($data->kode_unik, 0, ',', '.') }}" class="form-control" readonly>
+                                        <input type="text" name="kode_unik" id="kode_unik" value="{{ number_format($data->kode_unik, 0, ',', '.') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
