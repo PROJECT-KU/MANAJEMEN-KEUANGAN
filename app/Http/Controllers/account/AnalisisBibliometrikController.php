@@ -167,9 +167,8 @@ class AnalisisBibliometrikController extends Controller
                 Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateDiterimaMail($analisisbibliometrik, $kategori, $appName));
             } elseif ($analisisbibliometrik->status === 'Pendaftaran Reschedule') {
                 Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateResheduleMail($analisisbibliometrik, $kategori, $appName));
-            } else {
-                Mail::to($emailTo)->send(new AnalisisBibliometrikUpdateDiterimaMail($analisisbibliometrik, $kategori, $appName));
             }
+
             return redirect()->route('account.analisisbibliometrik.index')->with('success', 'Data Presensi Karyawan Berhasil Disimpan!');
         } else {
             return redirect()->route('account.analisisbibliometrik.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
