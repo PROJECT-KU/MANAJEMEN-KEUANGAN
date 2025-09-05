@@ -63,12 +63,7 @@ class PublicArticleController extends Controller
             ->orderBy('categories_artikel.created_at', 'DESC')
             ->get();
 
-
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('public.article.public', compact('artikel', 'maintenances', 'startDate', 'endDate', 'categories_artikel'));
+        return view('public.article.public', compact('artikel', 'startDate', 'endDate', 'categories_artikel'));
     }
 
     // MENAMPILKAN ARTIKEL BERDASARKAN KATEGORI
@@ -106,11 +101,7 @@ class PublicArticleController extends Controller
             ->groupBy('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
             ->get();
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return view('public.article.publickategori', compact('articles', 'maintenances', 'startDate', 'endDate', 'categories_artikel', 'totalArticles'));
+        return view('public.article.publickategori', compact('articles', 'startDate', 'endDate', 'categories_artikel', 'totalArticles'));
     }
 
     // MENAMPILKAN DATA ARTIKEL 
@@ -141,14 +132,10 @@ class PublicArticleController extends Controller
             ->groupBy('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
             ->get();
 
-        $maintenances = DB::table('maintenance')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
         $artikel->dilihat += 1;
         $artikel->save();
 
-        return view('public.article.blogsingle', compact('artikel', 'datas', 'maintenances', 'categories_artikel', 'artikel_komentar'));
+        return view('public.article.blogsingle', compact('artikel', 'datas', 'categories_artikel', 'artikel_komentar'));
     }
 
     // MENAMBAH DATA KOMENTAR
