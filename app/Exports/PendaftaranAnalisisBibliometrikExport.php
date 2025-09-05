@@ -26,18 +26,23 @@ class PendaftaranAnalisisBibliometrikExport implements
     WithEvents,
     WithCustomStartCell
 {
-    /** @var \Illuminate\Support\Collection */
-    protected Collection $datas;
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    protected $datas;
 
-    /** @var Carbon|null */
-    protected ?Carbon $tanggalAwal;
+    /**
+     * @var Carbon|null
+     */
+    protected $tanggalAwal;
 
-    /** @var Carbon|null */
-    protected ?Carbon $tanggalAkhir;
+    /**
+     * @var Carbon|null
+     */
+    protected $tanggalAkhir;
 
     public function __construct($datas, $tanggalAwal = null, $tanggalAkhir = null)
     {
-        // pastikan menjadi Collection
         $this->datas        = collect($datas);
         $this->tanggalAwal  = $tanggalAwal ? Carbon::parse($tanggalAwal) : null;
         $this->tanggalAkhir = $tanggalAkhir ? Carbon::parse($tanggalAkhir) : null;
