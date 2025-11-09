@@ -361,6 +361,12 @@ Route::prefix('account')->group(
 
         // cuti karyawan
         Route::get('/cuti/data', 'account\CutiController@index')->name('account.cuti.index');
+
+        // data cutomer
+        Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
+        Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
+        Route::get('/customer/data/filter', 'account\CustomerController@filter')->name('account.customer.filter');
+        Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
     }
 
 

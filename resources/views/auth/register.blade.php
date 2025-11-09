@@ -62,110 +62,163 @@
         }
 
         /* // <!-- END --> */
+    </style>
 
-        /* // <!-- GAYA SAAT INPUT DALAM KEADAAN FOKUS --> */
-        .form-control:focus {
-            border-color: #007bff;
-            /* Warna biru */
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
-            /* Efek bayangan */
-        }
-
-        /* Transisi untuk perubahan warna */
-        .form-control {
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        /* // <!-- END --> */
-
-        /* // <!-- IMAGE --> */
-        /* Tampilan desktop */
-        .signin-content {
+    <style>
+        /* Pusatkan seluruh isi card */
+        .signup-content,
+        .signup-form,
+        .container {
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
-        .signup-form {
-            margin-right: 20px;
-            /* Untuk memberikan ruang antara form dan gambar */
+        /* 🔹 Gaya input Bootstrap-style dengan garis bawah */
+        .form-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 25px;
         }
-
-        .signup-image {
-            margin-left: 20px;
-            /* Untuk memberikan ruang antara form dan gambar */
-        }
-
-        /* Gaya saat input dalam keadaan fokus */
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
-        }
-
-        .form-control {
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        /* // <!-- END --> */
-
-        /* // <!-- TAMPILAN PERANGKAT SELULER --> */
-        @media (max-width: 768px) {
-            .signin-content {
-                flex-direction: column;
-                /* Mengubah tata letak menjadi satu kolom */
-                align-items: center;
-                /* Pusatkan elemen secara horizontal */
-                text-align: center;
-                /* Pusatkan teks */
-            }
-
-            .signup-form,
-            .signup-image {
-                margin: 0;
-                /* Hapus margin di sekitar form dan gambar */
-            }
-
-            .signup-image {
-                order: -1;
-                /* Mengubah urutan gambar menjadi pertama */
-            }
-        }
-
-        /* // <!-- END --> */
 
         .form-group label {
-            margin-bottom: 5px;
-            /* Add some space between label and input */
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
             display: block;
-            /* Display labels as block elements */
+            margin-bottom: 6px;
         }
 
-        /* Additional styles for smaller screens */
+        .form-control {
+            border: none;
+            border-bottom: 2px solid #ccc;
+            border-radius: 0;
+            width: 100%;
+            padding: 10px 6px;
+            font-size: 15px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: none;
+            border-bottom-color: #007bff;
+        }
+
+        /* 🔹 Placeholder sedikit transparan */
+        .form-control::placeholder {
+            color: #aaa;
+            font-style: italic;
+        }
+
+        /* 🔹 Card otomatis menyesuaikan layar */
+        @media (max-width: 992px) {
+
+            .signup-content,
+            .signup-form,
+            .container {
+                width: 90%;
+                padding: 30px 15px;
+            }
+        }
+
+        /* 🔹 Tampilan di layar kecil */
         @media (max-width: 768px) {
-            .form-group label {
-                margin-bottom: 10px;
-                /* Adjust the space between label and input for smaller screens */
-            }
-        }
 
-        /* // <!-- MENAMPILKAN & MENYEMBUNYIKAN GAMBAR --> */
-        /* CSS untuk menyembunyikan gambar pada perangkat mobile */
-        @media (max-width: 767px) {
-            .signup-image {
-                display: none;
+            .signup-content,
+            .signup-form,
+            .container {
+                width: 100%;
+                padding: 20px 10px;
+                flex-direction: column;
             }
-        }
 
-        /* CSS untuk menampilkan gambar pada desktop atau tablet */
-        @media (min-width: 768px) {
-            .signup-image {
+            .row {
+                flex-direction: column !important;
+                gap: 20px;
+                /* ✅ Jarak antar input dalam satu row */
+                width: 100%;
+            }
+
+            .form-group {
+                max-width: 100%;
+                width: 100%;
                 display: block;
+                margin-bottom: 0;
+            }
+
+            .form-control {
+                font-size: 14px;
+                width: 100%;
+            }
+
+            /* ✅ Tambahkan jarak antar kelompok input */
+            .row+.row {
+                margin-top: 25px;
+                /* 🔹 Jarak antar baris (antara username→telp, email→password) */
             }
         }
 
-        /* // <!-- END --> */
+        /* 🔹 Tambahan untuk layar sangat kecil (HP mini) */
+        @media (max-width: 480px) {
+
+            .signup-content,
+            .signup-form,
+            .container {
+                padding: 15px 10px;
+                flex-direction: column;
+            }
+
+            .row {
+                flex-direction: column !important;
+                gap: 18px;
+                width: 100%;
+            }
+
+            .form-group {
+                width: 100%;
+                display: block;
+                flex: 0 0 100%;
+                margin-bottom: 0;
+            }
+
+            .form-control {
+                font-size: 13px;
+                padding: 8px 4px;
+                width: 100%;
+            }
+
+            .form-group label {
+                font-size: 13px;
+            }
+
+            .form-row {
+                display: flex;
+                flex-direction: column !important;
+                width: 100%;
+                gap: 18px;
+            }
+
+            .form-row .form-group {
+                width: 100% !important;
+            }
+
+            /* ✅ Tambahan agar jarak antar baris tetap seragam di HP mini */
+            .row+.row {
+                margin-top: 20px;
+                /* 🔹 Sedikit lebih kecil untuk layar kecil */
+            }
+        }
     </style>
 </head>
-
-<!-- <body style="background: #f3f3f3"> -->
 
 <body>
     <div id="app">
@@ -184,6 +237,7 @@
 
                                         <div class="row">
                                             <div class="form-group col-6 ">
+                                                <label for="username"><i class="zmdi zmdi-account material-icons-name"></i></label>
                                                 <input type="text" name="full_name" id="first_name" class="form-control" placeholder="Nama Lengkap" value="{{ old('full_name') }}" autofocus maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
                                                 @error('full_name')
                                                 <div class="invalid-feedback" style="display: block">
@@ -192,7 +246,7 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="form-group col-6 ">
+                                            <div class="form-group col-6">
                                                 <input type="text" name="username" id="last_name" class="form-control" placeholder="Username" value="{{ old('username') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9 ]/i.test(event.key)" required>
                                                 @error('username')
                                                 <div class="invalid-feedback" style="display: block">
@@ -203,54 +257,15 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="form-group col-md-6 ">
-                                                <select class="form-control" name="jenis" id="jenis" required>
-                                                    <option value="" disabled selected>Silahkan Pilih</option>
-                                                    <option value="bisnis">Bisnis</option>
-                                                    <option value="perorangan">Perorangan</option>
-                                                </select>
-                                                @error('jenis')
-                                                <div class="invalid-feedback" style="display: block">
-                                                    {{ $message }}
-                                                </div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group col-md-6" id="levelDropdown" style="display: none;">
-                                                <select class="form-control" name="level">
-                                                    <option value="" disabled selected>Silahkan Pilih</option>
-                                                    <option value="staff">Staff</option>
-                                                    <option value="karyawan">Karyawan</option>
-                                                    <option value="trainer">Trainer</option>
-                                                </select>
-                                                @error('level')
-                                                <div class="invalid-feedback" style="display: block">
-                                                    {{ $message }}
-                                                </div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group col-md-6" id="namaPerusahaanContainer" style="display: none;">
-                                                <input type="text" name="company" class="form-control" placeholder="Nama Company" value="{{ old('company') }}" maxlength="30" minlength="5" onkeypress="return /[A-Z ]/i.test(event.key)">
-                                                @error('company')
-                                                <div class="invalid-feedback" style="display: block">
-                                                    {{ $message }}
-                                                </div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group col-md-6" id="telpContainer" style="display: block;">
-                                                <input type="text" name="telp" id="telp" class="form-control" placeholder="No Telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)">
+                                            <div class="form-group col-6" id="telpContainer">
+                                                <input type="text" name="telp" id="telp" class="form-control" placeholder="No Telp" value="{{ old('telp') }}" maxlength="20 minlength=" 8" onkeypress="return event.charCode >= 48 && event.charCode <= 57" oninput="formatPhoneNumber(this)" required>
                                                 @error('telp')
                                                 <div class="invalid-feedback" style="display: block">
                                                     {{ $message }}
                                                 </div>
                                                 @enderror
                                             </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="form-group col-12 mt-3">
+                                            <div class="form-group col-6">
                                                 <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{ old('email') }}" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
                                                 @error('email')
                                                 <div class="invalid-feedback" style="display: block">
@@ -260,7 +275,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" style="margin-top: 20px">
+                                        <div class="row">
                                             <div class="form-group col-6">
                                                 <input type="password" name="password" id="password" placeholder="Password" class="form-control" pwstrength" data-indicator="pwindicator" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Harus berisi setidaknya satu angka dan satu huruf besar dan kecil, dan setidaknya 8 karakter atau lebih" required>
                                                 <i class="fas fa-eye password-toggle" id="password-toggle" style="margin-right: 10px;"></i>
@@ -306,10 +321,6 @@
 
                                     </div>
 
-                                    <div class="signup-image">
-                                        <figure><img src="{{ asset('assets/login/images/signup-image.jpg') }}" alt="sing up image"></figure>
-                                    </div>
-
                                 </div>
                             </div>
                         </section>
@@ -317,135 +328,134 @@
 
                     </form>
                 </div>
+            </section>
         </div>
-        </section>
     </div>
-
-    </div>
-
-    <!--================== FORMAT NO TELP ==================-->
-    <script>
-        function formatPhoneNumber(input) {
-            // Menghapus semua karakter non-digit
-            var phoneNumber = input.value.replace(/\D/g, '');
-
-            // Menentukan panjang nomor telepon
-            var phoneNumberLength = phoneNumber.length;
-
-            // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
-            if (phoneNumberLength === 11) {
-                phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else if (phoneNumberLength === 12) {
-                phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else if (phoneNumberLength === 13) {
-                phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
-            }
-
-            // Mengatur nilai input dengan nomor telepon yang diformat
-            input.value = phoneNumber;
-        }
-    </script>
-    <!--================== END ==================-->
-
-
-    <!--================== CHANGE JENIS AKUN ==================-->
-    <script>
-        // Get the elements
-        const jenisDropdown = document.getElementById('jenis');
-        const namaPerusahaanContainer = document.getElementById('namaPerusahaanContainer');
-        const levelDropdown = document.getElementById('levelDropdown');
-        const telpContainer = document.getElementById('telpContainer');
-        const levelSelect = document.querySelector('[name="level"]');
-
-        // Function to handle the visibility of "Nama Perusahaan", "Level", and "No Telp" fields
-        function handleVisibility() {
-            const selectedValue = jenisDropdown.value;
-            if (selectedValue === 'bisnis' || selectedValue === 'penyewaan' || selectedValue === 'kasir') {
-                namaPerusahaanContainer.style.display = 'block';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'block';
-                // If "bisnis" is selected, set the width of "Level" to col-md-6
-                levelDropdown.classList.remove('col-md-4');
-                levelDropdown.classList.add('col-md-6');
-            } else if (selectedValue === 'perorangan') {
-                namaPerusahaanContainer.style.display = 'none';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'block';
-                // If "perorangan" is selected, set the width of "Level" to col-md-4
-                telpContainer.classList.remove('col-6');
-                telpContainer.classList.add('col-6');
-            } else {
-                // In case "Silahkan Pilih" or an unexpected value is selected, hide all extra fields
-                namaPerusahaanContainer.style.display = 'none';
-                telpContainer.style.display = 'block';
-                levelDropdown.style.display = 'none';
-            }
-
-            // When "Perorangan" is selected, show only "Users" in the level dropdown
-            if (selectedValue === 'perorangan') {
-                levelSelect.innerHTML = '<option value="users">Users</option>';
-            } else if (selectedValue === 'bisnis') {
-                levelSelect.innerHTML = '<option value="">Silahkan Pilih</option> <option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
-            }
-        }
-
-        // Attach the event listener to the dropdown
-        jenisDropdown.addEventListener('change', handleVisibility);
-
-        // Call the function once on page load to initialize the visibility
-        handleVisibility();
-    </script>
-    <!--================== END ==================-->
-
-    <!--================== SHOW & HIDE PASSWORD ==================-->
-    <script>
-        const passwordInput = document.getElementById('password');
-        const passwordToggle = document.getElementById('password-toggle');
-
-        passwordToggle.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordToggle.classList.remove('fa-eye');
-                passwordToggle.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordToggle.classList.remove('fa-eye-slash');
-                passwordToggle.classList.add('fa-eye');
-            }
-        });
-        const passwordInput2 = document.getElementById('password2');
-        const passwordToggle2 = document.getElementById('password-toggle2');
-
-        passwordToggle2.addEventListener('click', function() {
-            if (passwordInput2.type === 'password') {
-                passwordInput2.type = 'text';
-                passwordToggle2.classList.remove('fa-eye');
-                passwordToggle2.classList.add('fa-eye-slash');
-            } else {
-                passwordInput2.type = 'password';
-                passwordToggle2.classList.remove('fa-eye-slash');
-                passwordToggle2.classList.add('fa-eye');
-            }
-        });
-    </script>
-    <!--================== END ==================-->
-
-    <!--================== GENERAL JS ==================-->
-    <script src="{{ asset('assets/login/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/login/js/main.js') }}"></script>
-
-
-
-    <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/modules/popper.js') }}"></script>
-    <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
-    <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
-    <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
-    <script src="{{ asset('assets/js/stisla.js') }}"></script>
-    <script src="{{ asset('assets/js/scripts.js') }}"></script>
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
-    <!--================== END ==================-->
 </body>
+
+<!--================== FORMAT NO TELP ==================-->
+<script>
+    function formatPhoneNumber(input) {
+        // Menghapus semua karakter non-digit
+        var phoneNumber = input.value.replace(/\D/g, '');
+
+        // Menentukan panjang nomor telepon
+        var phoneNumberLength = phoneNumber.length;
+
+        // Memeriksa panjang nomor telepon dan menerapkan format yang sesuai
+        if (phoneNumberLength === 11) {
+            phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 12) {
+            phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (phoneNumberLength === 13) {
+            phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+
+        // Mengatur nilai input dengan nomor telepon yang diformat
+        input.value = phoneNumber;
+    }
+</script>
+<!--================== END ==================-->
+
+
+<!--================== CHANGE JENIS AKUN ==================-->
+<script>
+    // Get the elements
+    const jenisDropdown = document.getElementById('jenis');
+    const namaPerusahaanContainer = document.getElementById('namaPerusahaanContainer');
+    const levelDropdown = document.getElementById('levelDropdown');
+    const telpContainer = document.getElementById('telpContainer');
+    const levelSelect = document.querySelector('[name="level"]');
+
+    // Function to handle the visibility of "Nama Perusahaan", "Level", and "No Telp" fields
+    function handleVisibility() {
+        const selectedValue = jenisDropdown.value;
+        if (selectedValue === 'bisnis' || selectedValue === 'penyewaan' || selectedValue === 'kasir') {
+            namaPerusahaanContainer.style.display = 'block';
+            telpContainer.style.display = 'block';
+            levelDropdown.style.display = 'block';
+            // If "bisnis" is selected, set the width of "Level" to col-md-6
+            levelDropdown.classList.remove('col-md-4');
+            levelDropdown.classList.add('col-md-6');
+        } else if (selectedValue === 'perorangan') {
+            namaPerusahaanContainer.style.display = 'none';
+            telpContainer.style.display = 'block';
+            levelDropdown.style.display = 'block';
+            // If "perorangan" is selected, set the width of "Level" to col-md-4
+            telpContainer.classList.remove('col-6');
+            telpContainer.classList.add('col-6');
+        } else {
+            // In case "Silahkan Pilih" or an unexpected value is selected, hide all extra fields
+            namaPerusahaanContainer.style.display = 'none';
+            telpContainer.style.display = 'block';
+            levelDropdown.style.display = 'none';
+        }
+
+        // When "Perorangan" is selected, show only "Users" in the level dropdown
+        if (selectedValue === 'perorangan') {
+            levelSelect.innerHTML = '<option value="users">Users</option>';
+        } else if (selectedValue === 'bisnis') {
+            levelSelect.innerHTML = '<option value="">Silahkan Pilih</option> <option value="staff">Staff</option> <option value="karyawan">Karyawan</option> <option value="trainer">Trainer</option>';
+        }
+    }
+
+    // Attach the event listener to the dropdown
+    jenisDropdown.addEventListener('change', handleVisibility);
+
+    // Call the function once on page load to initialize the visibility
+    handleVisibility();
+</script>
+<!--================== END ==================-->
+
+<!--================== SHOW & HIDE PASSWORD ==================-->
+<script>
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('password-toggle');
+
+    passwordToggle.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordToggle.classList.remove('fa-eye');
+            passwordToggle.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('fa-eye-slash');
+            passwordToggle.classList.add('fa-eye');
+        }
+    });
+    const passwordInput2 = document.getElementById('password2');
+    const passwordToggle2 = document.getElementById('password-toggle2');
+
+    passwordToggle2.addEventListener('click', function() {
+        if (passwordInput2.type === 'password') {
+            passwordInput2.type = 'text';
+            passwordToggle2.classList.remove('fa-eye');
+            passwordToggle2.classList.add('fa-eye-slash');
+        } else {
+            passwordInput2.type = 'password';
+            passwordToggle2.classList.remove('fa-eye-slash');
+            passwordToggle2.classList.add('fa-eye');
+        }
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== GENERAL JS ==================-->
+<script src="{{ asset('assets/login/vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/login/js/main.js') }}"></script>
+
+
+
+<script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/modules/popper.js') }}"></script>
+<script src="{{ asset('assets/modules/tooltip.js') }}"></script>
+<script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
+<script src="{{ asset('assets/modules/moment.min.js') }}"></script>
+<script src="{{ asset('assets/js/stisla.js') }}"></script>
+<script src="{{ asset('assets/js/scripts.js') }}"></script>
+<script src="{{ asset('assets/js/custom.js') }}"></script>
+<!--================== END ==================-->
+
 
 </html>
