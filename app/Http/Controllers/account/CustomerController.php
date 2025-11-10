@@ -136,8 +136,8 @@ class CustomerController extends Controller
         $status = $request->get('status');
         $verified = $request->get('verified');
         $email = $request->get('email');
-        $start = $request->get('start');
-        $end = $request->get('end');
+        $start = $request->get('datestart'); // dari input id="dateStart"
+        $end = $request->get('dateend');     // dari input id="dateEnd"
         $perPage = $request->get('per_page', 10);
 
         $users = DB::table('users')
@@ -161,8 +161,8 @@ class CustomerController extends Controller
                 }
             })
             ->when($email, fn($q, $email) => $q->where('email', $email))
-            ->when($start, fn($q, $start) => $q->whereDate('created_at', '>=', $start))
-            ->when($end, fn($q, $end) => $q->whereDate('created_at', '<=', $end))
+            ->when($start, fn($q, $start) => $q->whereDate('users.created_at', '>=', $start))
+            ->when($end, fn($q, $end) => $q->whereDate('users.created_at', '<=', $end))
             ->orderBy('users.created_at', 'DESC')
             ->paginate($perPage)
             ->appends($request->all());
