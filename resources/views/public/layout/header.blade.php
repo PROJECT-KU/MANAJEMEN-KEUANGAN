@@ -73,24 +73,19 @@
     <header id="header" class="header fixed-top">
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
+            <!-- Logo -->
             <a href="{{ url('/') }}" class="logo d-flex align-items-center">
-                <img style="width: 180px;" src="{{ asset('assets/img/LogoRSC.png') }}" alt="">
+                <img style="width: 180px;" src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus">
             </a>
 
+            <!-- Navbar -->
             <nav id="navbar" class="navbar">
                 <ul>
-                    <li>
-                        <a class="nav-link scrollto {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a>
-                    </li>
-                    <li>
-                        <a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }} || Request::is('blog/topic/blog-single/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a>
-                    </li>
-                    <!-- <li>
-                        <a class="nav-link scrollto {{ Request::is('Scopus-Kafe') || Request::is('Scopus-Kafe/Form-Pendaftaran') ? 'active' : '' }}"
-                            href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a>
-                    </li> -->
+                    <li><a class="nav-link scrollto {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('blog') || Request::is('blog/topic/*') ? 'active' : '' }}" href="{{ url('/blog') }}">Blog</a></li>
+
                     <li class="dropdown">
-                        <a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>
+                        <a href="#"><span>Class</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
                             <li><a href="https://rumahscopus.com/event/" target="_blank">Class Offline</a></li>
@@ -98,24 +93,55 @@
                             <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
                         </ul>
                     </li>
+
+                    <li><a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('Refrensi-Paper') ? 'active' : '' }}" href="{{ url('/Refrensi-Paper') }}">Referensi Paper</a></li>
+                    <li><a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a></li>
+
+                    <!-- Tombol Login/Register -->
                     <li>
-                        <a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }} || {{ Request::is('paperisasi/public/data/search') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a>
+                        <div class="d-flex gap-2 ms-lg-3 mt-2 mt-lg-0">
+                            @auth
+                            @php
+                            // Ambil dua kata pertama dari full_name
+                            $nameParts = explode(' ', trim(Auth::user()->full_name));
+                            $shortName = implode(' ', array_slice($nameParts, 0, 2));
+
+                            // Tentukan gambar profil (default jika null)
+                            $userImage = Auth::user()->gambar
+                            ? asset('assets/img/profil/' . Auth::user()->gambar)
+                            : asset('assets/img/avatar/avatar-1.png');
+                            @endphp
+
+                            <a href="{{ url('/account/dashboard') }}"
+                                class="btn btn-success d-flex align-items-center"
+                                style="padding: 6px 12px; color: white; font-size: 14px;">
+
+                                <img src="{{ $userImage }}"
+                                    alt="Profile"
+                                    class="rounded-circle me-2"
+                                    style="width: 26px; height: 26px; object-fit: cover; border: 2px solid white;">
+
+                                Hi, {{ $shortName }}
+                            </a>
+                            @else
+                            <a href="{{ url('/login') }}"
+                                class="btn btn-info"
+                                style="padding: 8px 12px; color: white; font-size: 14px;">
+                                Login / Register
+                            </a>
+                            @endauth
+                        </div>
                     </li>
-                    <li>
-                        <a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a>
-                    </li>
-                    <li>
-                        <a class="nav-link scrollto {{ Request::is('Refrensi-Paper') || Request::is('Refrensi-Paper/selengkapnya/*') ? 'active' : '' }}" href="{{ url('/Refrensi-Paper') }}">Referensi Paper</a>
-                    </li>
-                    <li>
-                        <a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a>
-                    </li>
+
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
-            </nav><!-- .navbar -->
+            </nav>
 
         </div>
-    </header><!-- End Header -->
+    </header>
+    <!-- ======= End Header ======= -->
 
     @yield('konten')
 
