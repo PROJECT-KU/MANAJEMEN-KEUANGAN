@@ -38,6 +38,7 @@ $agent = new Agent();
     <!-- zoom image -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- end -->
     <style>
@@ -141,6 +142,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             @yield('content')
 
             @extends('layouts.version')
+
+
             <!--================== UNTUK DIVACE SELAIN MOBILE ==================-->
             @else
 
@@ -223,11 +226,20 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <i class="fas fa-building"></i> <span>Company</span>
                                     </a>
                                 </li>
-                                <!--================== END ==================-->
+
+                                <li class="{{ setActive('account/customer') }} . {{ setActive('account/pengguna/search') }}">
+                                    <a class="nav-link" href="{{ route('account.customer.index') }}">
+                                        <i class="fas fa-users"></i> <span>Data Customer</span>
+                                    </a>
+                                </li>
                                 @endif
+                                <!--================== END ==================-->
 
                                 <!--================== KARYAWAN ==================-->
+                                @if (Auth::user()->level !== 'user')
                                 <li class="menu-header">KARYAWAN</li>
+                                @endif
+
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                                 <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
@@ -238,7 +250,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
 
                                 @if ($isStatusnonactive)
                                 @else
-                                @if (Auth::user()->level !== 'staff')
+                                @if (Auth::user()->level !== 'user')
                                 <li class="{{ setActive('account/gaji') }}">
                                     <a class="nav-link" href="{{ route('account.gaji.index') }}">
                                         <i class="fas fa-dollar-sign"></i> <span>Gaji Karyawan</span>
@@ -262,7 +274,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level !== 'karyawan')
+                                @if (Auth::user()->level !== 'karyawan' && Auth::user()->level !== 'user')
                                 <li class="{{ setActive('account/karir') }}">
                                     <a class="nav-link" href="{{ route('karir.list') }}">
                                         <i class="fas fa-user-tie"></i> <span>Karir</span>
@@ -278,6 +290,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 </li>
                                 @endif
 
+                                @if (Auth::user()->level !== 'user')
                                 <li class="{{ setActive('account/todolist') }}">
                                     <a class="nav-link" href="{{ route('account.todolist.index') }}">
                                         <i class="fas fa-list-alt"></i> <span>To Do List</span>
@@ -287,11 +300,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         @endif
                                     </a>
                                 </li>
+                                @endif
                                 <!--================== END ==================-->
 
 
                                 <!--================== PAPER ==================-->
-                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager' )
                                 <li class="menu-header">PAPER</li>
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
@@ -318,7 +332,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level !== 'manager')
+                                @if (Auth::user()->level !== 'manager' && Auth::user()->level !== 'karyawan' && Auth::user()->level !== 'user')
                                 <li class="menu-header">PAPER</li>
                                 @endif
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
@@ -346,8 +360,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif
                                 <!--================== END ==================-->
 
-                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
                                 <!--================== ANALISIS BIBLIOMETRIK ==================-->
+                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
                                 <li class="menu-header">ANALISIS BIBLIOMETRIK</li>
 
                                 <li class="{{ setActive('account/kategori') }}">
@@ -367,10 +381,11 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
                                     </a>
                                 </li> -->
-                                <!--================== END ==================-->
                                 @endif
+                                <!--================== END ==================-->
 
                                 <!--================== KEUANGAN ==================-->
+                                @if (Auth::user()->level !== 'user')
                                 <li class="menu-header">KEUANGAN</li>
                                 <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
@@ -386,6 +401,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Keluar</a></li>
                                     </ul>
                                 </li>
+                                @endif
                                 <!--================== END ==================-->
 
                                 <!-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
@@ -400,6 +416,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif -->
 
                                 <!--================== LAPORAN ==================-->
+                                @if (Auth::user()->level !== 'user' && Auth::user()->level !== 'karyawan')
                                 <li class="menu-header">LAPORAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff')
                                 <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
@@ -423,6 +440,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         </li>
                                     </ul>
                                 </li>
+                                @endif
                                 <!--================== END ==================-->
 
                                 <!-- <li class="dropdown show">
@@ -505,6 +523,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!--================== END ==================-->
 
     @extends('layouts.alerts')

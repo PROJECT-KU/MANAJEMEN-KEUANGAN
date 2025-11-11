@@ -145,6 +145,15 @@ Profil | MANAGEMENT
     cursor: pointer;
   }
 </style>
+
+<style>
+  /* ✅ Jarak antar input saat layar kecil */
+  @media (max-width: 768px) {
+    .row.mt-3.g-3>[class*="col-"] {
+      margin-bottom: 15px;
+    }
+  }
+</style>
 <!--================== END ==================-->
 
 <div class="main-content">
@@ -205,6 +214,7 @@ Profil | MANAGEMENT
                   <hr>
 
                   <!-- Jobdesk Section -->
+                  @if (Auth::user()->level !== 'user')
                   <strong><i class="fas fa-briefcase"></i> Job Desk</strong>
                   <p class="text-muted">
                     {{ Auth::user()->jobdesk }}
@@ -219,6 +229,7 @@ Profil | MANAGEMENT
                     @endif
                   </p>
                   <hr>
+                  @endif
 
                   <!-- No Telp Section -->
                   <strong><i class="fas fa-phone mr-1"></i> No Telp</strong>
@@ -237,10 +248,13 @@ Profil | MANAGEMENT
                   <hr>
 
                   <!-- Lama Kerja Section -->
+                  @if (Auth::user()->level !== 'user')
                   <strong><i class="far fa-file-alt mr-1"></i> Lama Kerja</strong>
                   <p class="text-muted">
                     {{ $workDuration }}
                   </p>
+                  @endif
+
                 </div>
               </div>
               <!--================== END ==================-->
@@ -331,20 +345,24 @@ Profil | MANAGEMENT
 
                         </div>
 
-                        <div class="row mt-3">
-                          <div class="col-md-6">
+                        <div class="row mt-3 g-3">
+                          <div class="col-md-6 col-12">
                             <label>Nama Lengkap</label>
                             <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->full_name }}" placeholder="Nama" readonly>
                           </div>
-                          <div class="col-md-6">
+                          <div class="col-md-6 col-12">
                             <label>Username</label>
                             <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Username" value="{{ Auth::user()->username }}" readonly>
                           </div>
                         </div>
 
-                        <div class="row mt-3">
+                        <div class="row">
                           <!-- BUTTON VERIFIKASI EMAIL -->
-                          <div class="col-md-12 col-lg-6 mb-3">
+                          @php
+                          $isUser = Auth::user()->level === 'user';
+                          @endphp
+
+                          <div class="col-md-12 {{ $isUser ? 'col-lg-12' : 'col-lg-6' }} mb-3">
                             <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST">
                               @csrf
                               <input type="hidden" name="code_verified_mail" value="{{ Auth::user()->code_verified_mail }}">
@@ -353,7 +371,11 @@ Profil | MANAGEMENT
                                 <div class="col-md-12 d-flex align-items-center mb-3">
                                   <div class="w-100 input-container">
                                     <label>Email</label>
-                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                    <input style="height: 42px; font-size: 14px;"
+                                      class="form-control form-control-sm"
+                                      type="text"
+                                      value="{{ Auth::user()->email }}"
+                                      readonly>
                                     <div class="icon-container">
                                       <i class="fas fa-check icon"></i>
                                     </div>
@@ -363,11 +385,19 @@ Profil | MANAGEMENT
                                 <div class="col-md-8 d-flex align-items-center mb-3">
                                   <div class="w-100 input-container">
                                     <label>Email</label>
-                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ Auth::user()->email }}" readonly>
+                                    <input style="height: 42px; font-size: 14px;"
+                                      class="form-control form-control-sm"
+                                      type="text"
+                                      value="{{ Auth::user()->email }}"
+                                      readonly>
                                   </div>
                                 </div>
                                 <div class="col-md-4 d-flex align-items-center mt-4">
-                                  <button style="height: 42px; font-size: 14px;" type="submit" class="btn btn-info w-100">Verifikasi</button>
+                                  <button style="height: 42px; font-size: 14px;"
+                                    type="submit"
+                                    class="btn btn-info w-100">
+                                    Verifikasi
+                                  </button>
                                 </div>
                                 @endif
                               </div>
@@ -375,12 +405,14 @@ Profil | MANAGEMENT
                           </div>
                           <!-- END -->
 
+                          @if (Auth::user()->level !== 'user')
                           <div class="col-md-12 col-lg-6">
                             <label>Nama Perusahaan</label>
                             <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Nama Perusahaan" value="{{ Auth::user()->company }}" readonly>
                           </div>
-                        </div>
+                          @endif
 
+                        </div>
                       </div>
 
                       <!--================== MODAL VERIFIKASI EMAIL ==================-->
@@ -406,29 +438,34 @@ Profil | MANAGEMENT
                           <div class="row">
                             <div class="col-md-6">
                               <label>Role Akun</label>
-                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Role" value="{{ strtoupper(Auth::user()->level) }}" readonly>
+                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Role" value="{{ ucfirst(strtolower(Auth::user()->level)) }}" readonly>
                             </div>
                             <div class="col-md-6">
                               <label>Status Akun</label>
                               @php
-                              $status = Auth::user()->status;
-                              $verified = Auth::user()->email_verified_at;
+                              $user = Auth::user();
 
-                              if (is_null($status)) {
-                              $finalStatus = $verified ? 'ACTIVE' : 'NONACTIVE';
+                              // Tentukan status final
+                              if (is_null($user->status)) {
+                              $finalStatus = $user->email_verified_at ? 'Active' : 'Non Active';
                               } else {
-                              $finalStatus = strtoupper($status);
+                              $finalStatus = ucfirst(strtolower($user->status)); // misal dari DB huruf besar semua
                               }
 
-                              $bgClass = $finalStatus === 'ACTIVE' ? 'bg-success text-white' : 'bg-danger text-white';
+                              // Tentukan warna background berdasarkan status
+                              $bgClass = (strtolower($finalStatus) === 'active')
+                              ? 'bg-success text-white'
+                              : 'bg-danger text-white';
                               @endphp
 
                               <input
-                                style="height: 42px; font-size: 14px;" class="form-control form-control-sm {{ $bgClass }} text-uppercase"
+                                style="height: 42px; font-size: 14px;"
+                                class="form-control form-control-sm {{ $bgClass }}"
                                 type="text"
                                 value="{{ $finalStatus }}"
                                 readonly>
                             </div>
+
                           </div>
 
                           <div class="row mt-3">
@@ -438,10 +475,11 @@ Profil | MANAGEMENT
                             </div>
                             <div class="col-md-6">
                               <label>Jenis Akun</label>
-                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ strtoupper(Auth::user()->jenis) }}" readonly>
+                              <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="jenis" value="{{ ucfirst(strtolower(Auth::user()->jenis)) }}" readonly>
                             </div>
                           </div>
 
+                          @if (Auth::user()->level !== 'user')
                           <div class="row mt-3">
                             <div class="col-md-4">
                               <label>NIK</label>
@@ -520,6 +558,7 @@ Profil | MANAGEMENT
                           <div class="d-flex mt-3">
                             <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;" {{ Auth::user()->email_verified_at === null ? 'disabled' : '' }}><i class="fa fa-paper-plane"></i> SIMPAN</button>
                           </div>
+                          @endif
 
                       </form>
 
