@@ -193,7 +193,7 @@ Data Customer | MIS
                       style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
 
                       <!-- Tombol Edit -->
-                      <a href="{{ route('account.pengguna.edit', $item->id) }}"
+                      <a href="{{ route('account.customer.edit', $item->id) }}"
                         class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
                         style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
                         <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
@@ -374,40 +374,43 @@ Data Customer | MIS
 <!--==================  SWEET ALERT DELETET  ==================-->
 <script>
   function Delete(id) {
-    var token = $("meta[name='csrf-token']").attr("content");
+    const token = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 
-    swal({
-      title: "APAKAH KAMU YAKIN ?",
+    Swal.fire({
+      title: "APAKAH KAMU YAKIN?",
       text: "INGIN MENGHAPUS DATA INI!",
       icon: "warning",
-      buttons: ['TIDAK', 'YA'],
-      dangerMode: true,
-    }).then(function(isConfirm) {
-      if (isConfirm) {
-        // Ajax delete
+      showCancelButton: true,
+      confirmButtonText: 'YA',
+      cancelButtonText: 'TIDAK',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
         $.ajax({
-          url: "{{ route('account.pengguna.destroy', '') }}/" + id,
-          data: {
-            "_token": token,
-            "_method": "DELETE"
-          },
+          url: "{{ route('account.customer.destroy', '') }}/" + id,
           type: 'POST',
+          data: {
+            _token: token,
+            _method: 'DELETE'
+          },
           success: function(response) {
-            swal({
+            Swal.fire({
               title: 'BERHASIL!',
-              text: 'DATA BERHASIL DIHAPUS!',
+              text: response.message || 'Data berhasil dihapus!',
               icon: 'success',
               timer: 1000,
               showConfirmButton: false,
-              showCancelButton: false,
-              buttons: false,
-            }).then(function() {
-              location.reload();
+              willClose: () => location.reload()
             });
+          },
+          error: function(xhr) {
+            let msg = 'Terjadi kesalahan saat menghapus data.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+              msg = xhr.responseJSON.message;
+            }
+            Swal.fire('Gagal!', msg, 'error');
           }
         });
-      } else {
-        return true;
       }
     });
   }

@@ -367,6 +367,8 @@ Route::prefix('account')->group(
         Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
         Route::get('/customer/data/filter', 'account\CustomerController@filter')->name('account.customer.filter');
         Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
+        Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
+        Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
     }
 
 
