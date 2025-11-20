@@ -207,8 +207,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <li class="menu-header">DASHBOARD</li>
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
                         <!--================== END ==================-->
-
-
+                        <!--================== Clinik Scopus ==================-->
+                        @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                        <li class="menu-header">Clinik Scopus</li>
+                        <li class="{{ setActive('account/clinikscopus') }}"><a class="nav-link" href="{{ route('account.clinikscopus.index') }}"><i class="fas fa-home"></i> <span>Clinik Scopus</span></a></li>
+@endif
+                <!--================== END ==================-->
                         @if (Auth::check() && Auth::user()->email_verified_at)
                         @php
                         $tenggatDate = Auth::user()->tenggat;
