@@ -208,6 +208,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
                         <!--================== END ==================-->
 
+                        <!--================== REDIRECT TO BERANDA ==================-->
+                        @if (Auth::user()->level === 'user')
+                        <li><a class="nav-link" href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Beranda</span></a></li>
+                        @endif
+                        <!--================== END ==================-->
+
 
                         @if (Auth::check() && Auth::user()->email_verified_at)
                         @php
