@@ -31,7 +31,7 @@ Beranda | Rumah Scopus
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <h1 data-aos="fade-up">Rumah Scopus: Pelatihan Jurnal Bereputasi untuk Mewujudkan Impian Publikasi Internasional</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Jelajahi Hutan Ilmu Pengetahuan Bersama Kami, Temukan Jalan Mudah Menuju Scopus dengan Pelatihan Terbaik dan Terpercaya!</h2>
+                <p data-aos="fade-up" data-aos-delay="400" style="font-size: 15px;">Jelajahi Hutan Ilmu Pengetahuan Bersama Kami, Temukan Jalan Mudah Menuju Scopus dengan Pelatihan Terbaik dan Terpercaya!</->
                 <div data-aos="fade-up" data-aos-delay="600">
                     <div class="text-center text-lg-start">
                         <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">
@@ -195,6 +195,24 @@ Beranda | Rumah Scopus
                             <h5 style="font-weight: bold;">Analisis Bibliometrik</h5>
                             <p style="text-align: justify;">
                                 Pendampingan secara online <b>selama 8 kali pertemuan</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>.
+                            </p>
+                        </div>
+                        <div class="mt-auto" style="text-align: center;">
+                            <a href="{{ url('/Analisis-Bibliometrik') }}">
+                                <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2" data-aos="fade-left">
+                    <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
+                        <div>
+                            <img src="{{ asset('assets/img/public/analisisbibliometrik.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <h5 style="font-weight: bold;">Clinik Scopus</h5>
+                            <p style="text-align: justify;">
+                                Pendampingan secara online <b>melalui chat yang sudah di sediakan selama 50 menit</b>, dengan di dampingi oleh <b>Trainer dari Rumah Scopus</b>.
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">

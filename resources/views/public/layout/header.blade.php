@@ -91,6 +91,7 @@
                             <li><a href="https://rumahscopus.com/event/" target="_blank">Class Offline</a></li>
                             <li><a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
+                            <li><a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>
                         </ul>
                     </li>
 
