@@ -53,6 +53,8 @@ Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}/{token}', 'Publict\Publ
 Route::get('/cek-kode-diskon/{id}', 'Publict\PublicAnalisisBibliometrikController@cekKodeDiskon')->name('public.cekkodediskon.formpendaftaran');
 Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikController@store')->name('public.analisisbibliometrik.store');
 
+// CLINIK SCOPUS
+Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
 
 Auth::routes();
 
