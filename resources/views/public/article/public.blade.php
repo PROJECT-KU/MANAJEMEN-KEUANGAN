@@ -46,7 +46,7 @@ Blog | Rumah Scopus
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <h1 data-aos="fade-up">Artikel</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Janganlah pernah menyerah ketika kamu masih mampu berusaha lagi. Tidak ada kata berakhir sampai kamu berhenti mencoba</h2>
+                <h2 data-aos="fade-up" data-aos-delay="400" style="font-size: 15px;">Janganlah pernah menyerah ketika kamu masih mampu berusaha lagi. Tidak ada kata berakhir sampai kamu berhenti mencoba</h2>
                 <div data-aos="fade-up" data-aos-delay="600">
                     <div class="text-center text-lg-start">
                         <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">

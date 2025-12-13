@@ -152,18 +152,22 @@ Tambah Presensi Karyawan | MIS
               </div>
             </div>
 
-            <div class="d-flex mt-3" style="gap: 10px;">
-              <button class="btn btn-primary btn-submit rounded-pill"
-                type="submit"
-                style="flex: 0 0 80%; height:35px; font-size: 15px;">
-                <i class="fa fa-paper-plane"></i> SIMPAN
-              </button>
+            <div class="mt-3">
+              <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
 
-              <a href="{{ route('account.presensi.index') }}"
-                class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
-                style="flex: 0 0 20%; height:35px; font-size: 15px;">
-                <i class="fa fa-undo"></i> KEMBALI
-              </a>
+                <!-- Tombol Simpan -->
+                <button type="submit"
+                  class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                  <i class="fa fa-paper-plane"></i> SIMPAN
+                </button>
+
+                <!-- Tombol Kembali -->
+                <a href="{{ route('account.presensi.index') }}"
+                  class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                  <i class="fa fa-undo"></i> KEMBALI
+                </a>
+
+              </div>
             </div>
 
           </form>

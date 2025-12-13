@@ -37,11 +37,64 @@ Data Gaji Karyawan | MIS
       @endif
       <!--================== END ==================-->
 
+      <!--================== TOTAL GAJI ==================-->
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+          <div class="card card-statistic-2">
+            <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+              <i class="fas fa-users" style="margin-top: 13px;"></i>
+            </div>
+            <div class="card-wrap flex-column">
+              <div class="card-header">
+                <h4>Periode {{ date('F Y') }}</h4>
+              </div>
+              <div class="card-body">
+                <h5>Rp. {{ number_format($totalBulanIni, 0, ',', '.') }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+          <div class="card card-statistic-2">
+            <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+              <i class="fas fa-users" style="margin-top: 13px;"></i>
+            </div>
+            <div class="card-wrap flex-column">
+              <div class="card-header">
+                <h4>Periode {{ \Carbon\Carbon::now()->subMonth()->format('F Y') }}</h4>
+              </div>
+              <div class="card-body">
+                <h5> Rp. {{ number_format($totalBulanLalu, 0, ',', '.') }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+          <div class="card card-statistic-2">
+            <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
+              <i class="fas fa-users" style="margin-top: 13px;"></i>
+            </div>
+            <div class="card-wrap flex-column">
+              <div class="card-header">
+                <h4>Periode {{ \Carbon\Carbon::now()->subMonths(2)->format('F Y') }}</h4>
+              </div>
+              <div class="card-body">
+                <h5> Rp. {{ number_format($totalDuaBulanLalu, 0, ',', '.') }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--================== END ==================-->
+
       <div class="card">
+
+        <!--================== FILTER ==================-->
         <div class="card-header  d-flex justify-content-between align-items-center">
           <h4><i class="fas fa-list"></i> DATA GAJI KARYAWAN</h4>
 
-          <!--================== FILTER ==================-->
           <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
             <!-- CREATE DATA -->
@@ -110,32 +163,40 @@ Data Gaji Karyawan | MIS
             <!-- END -->
 
           </div>
-          <!--================== END FILTER ==================-->
 
         </div>
+        <!--================== END FILTER ==================-->
 
-        <div class="card-body">
+        <div class="card-body" style="font-size: 11px;">
           <div class="table-responsive">
             <div class="table-responsive">
+
               <table class="table table-bordered">
                 <thead>
                   <tr>
                     <th scope="col" style="text-align: center;width: 6%">NO.</th>
-                    <th scope="col" class="column-width" style="text-align: center;">ID TRANSAKSI</th>
-                    <th scope="col" class="column-width" style="text-align: center;">NAMA KARYAWAN</th>
-                    <th scope="col" class="column-width" style="text-align: center;">NO REKENING</th>
-                    <th scope="col" class="column-width" style="text-align: center;">BANK</th>
-                    <th scope="col" class="column-width" style="text-align: center;">TOTAL GAJI</th>
-                    <th scope="col" class="column-width" style="text-align: center;">TANGGAL PEMBAYARAN</th>
-                    <th scope="col" class="column-width" style="text-align: center;">STATUS PEMBAYARAN</th>
+                    <th scope="col" class="column-width" style="text-align: center;">ID Transaksi</th>
+                    <th scope="col" class="column-width" style="text-align: center;">Nama Karyawan</th>
+                    <th scope="col" class="column-width" style="text-align: center;">No Rekening</th>
+                    <th scope="col" class="column-width" style="text-align: center;">Bank</th>
+                    <th scope="col" class="column-width" style="text-align: center;">Total Gaji</th>
+                    <th scope="col" class="column-width" style="text-align: center;">Tanggal Pembayaran</th>
+                    <th scope="col" class="column-width" style="text-align: center;">Status Pembayaran</th>
                     <th scope="col" style="width: 15%;text-align: center">AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="gajiTable">
                   @php
                   $no = 1;
-                  $terbayarCount = 0; // Count of terbayar records
+                  $terbayarCount = 0;
                   @endphp
+
+                  @if ($gaji->isEmpty())
+                  <tr>
+                    <td colspan="9" class="text-center">Tidak ada data</td>
+                  </tr>
+                  @endif
+
                   @foreach ($gaji as $hasil)
                   @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
                   <!-- Skip displaying records where user is karyawan and status is pending -->
@@ -291,33 +352,6 @@ Data Gaji Karyawan | MIS
         </div>
 
       </div>
-
-      @if (Auth::user()->level == 'manager')
-      <table class="table table-bordered mt-5" style="border: 2px solid red;">
-        <thead>
-          <tr>
-            <th colspan="2" style="text-align: center; font-weight: bold;">
-              TOTAL GAJI KARYAWAN
-              <br>
-              <small>
-                Periode:
-                @if ($startDate && $endDate)
-                {{ date('d F Y', strtotime($startDate)) }} - {{ date('d F Y', strtotime($endDate)) }}
-                @else
-                {{ date('F Y') }}
-                @endif
-              </small>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="text-align: center; font-weight: bold;">
-            <td>Rp. {{ number_format($totalGaji, 0, ',', ',') }}</td>
-          </tr>
-        </tbody>
-      </table>
-      @endif
-
     </div>
   </section>
 </div>

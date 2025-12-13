@@ -123,14 +123,18 @@ Data Customer | MIS
             id="toggleFilterBtn">
             <i class="bi bi-funnel-fill"></i>
             <span class="ms-1" id="toggleFilterText">Tampilkan Filter</span>
-          </button>
 
-          <!-- 🔽 Filter Collapse -->
-          <div class="collapse w-100 mt-2" id="filterCard">
-            @include('account.customer.partials.filter')
-          </div>
+            <!-- 🔽 Filter Collapse -->
+            <div class="collapse w-100 mt-2" id="filterCard">
+              @include('account.clinik_scopus.partials.filter')
+            </div>
         </div>
         <!-- ================== END FILTER ================== -->
+
+        <!-- ================== Tombol Create ================== -->
+        <a href="{{ route('account.clinikscopus.create') }}" class="btn btn-primary btn-block rounded-pill">
+          <i class="fa fa-plus-circle"></i> TAMBAH DATA
+        </a>
 
         <!--================== DATA ==================-->
         <div class="card-body" style="font-size: 11px;">
@@ -139,11 +143,10 @@ Data Customer | MIS
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Email</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Username</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Telp</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Verifikasi</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Role</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Sesi Trainer</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
                   <th scope="col" rowspan="2" style="text-align: center;">Status</th>
                   <th scope="col" style="width: 10%;text-align: center">Action</th>
                 </tr>
@@ -152,43 +155,21 @@ Data Customer | MIS
                 @php
                 $no = 1;
                 @endphp
-                @foreach ($users as $item)
+                @foreach ($datatrainer as $item)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <td style="display: flex; align-items: center; gap: 10px;">
-                    <img
-                      src="{{ $item->gambar ? asset('assets/img/profil/' . $item->gambar) : asset('assets/img/profil/no-image.jpg') }}"
-                      alt="Foto Profil"
-                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-                    <span>{{ $item->email }}</span>
-                  </td>
-
-                  <td style="text-align: center;">{{ $item->username }}</td>
-
-                  <td style="text-align: center;">{{ $item->telp }}</td>
-
+                  <td style="display: flex; align-items: center; gap: 10px;">{{ $item->nama }} </td>
+                  <td style="text-align: center;">{{ $item->sesi }}</td>
+                  <td style="text-align: center;">{{ $item->spesialis }}</td>
+                  <td style="text-align: center;">{{ $item->tanggal }}</td>
                   <td style="text-align: center;">
-                    @if ($item->email_verified_at)
+                    @if ($item->status)
                     <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
-                      Sudah Diverifikasi
+                      Aktif
                     </span>
                     @else
                     <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
-                      Belum Diverifikasi
-                    </span>
-                    @endif
-                  </td>
-
-                  <td style="text-align: center;">{{ $item->level }}</td>
-
-                  <td style="text-align: center;">
-                    @if ($item->status == 'active')
-                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
-                      Active
-                    </span>
-                    @else
-                    <span class=" badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
-                      Non Active
+                      Non aktif
                     </span>
                     @endif
                   </td>
@@ -198,7 +179,7 @@ Data Customer | MIS
                       style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
 
                       <!-- Tombol Edit -->
-                      <a href="{{ route('account.customer.edit', $item->id) }}"
+                      <a href=""
                         class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
                         style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
                         <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
@@ -218,6 +199,7 @@ Data Customer | MIS
                 $no++;
                 @endphp
                 @endforeach
+
               </tbody>
             </table>
             <div style="text-align: center;">
@@ -238,9 +220,6 @@ Data Customer | MIS
               </style>
 
               <div id="paginationWrapper" style="text-align: center;">
-                @if ($users instanceof \Illuminate\Pagination\LengthAwarePaginator && $users->total() > $users->perPage())
-                {{ $users->appends(['q' => request('q')])->links('vendor.pagination.bootstrap-4') }}
-                @endif
               </div>
 
             </div>

@@ -53,6 +53,8 @@ Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}/{token}', 'Publict\Publ
 Route::get('/cek-kode-diskon/{id}', 'Publict\PublicAnalisisBibliometrikController@cekKodeDiskon')->name('public.cekkodediskon.formpendaftaran');
 Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikController@store')->name('public.analisisbibliometrik.store');
 
+// CLINIK SCOPUS
+Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
 
 Auth::routes();
 
@@ -369,6 +371,11 @@ Route::prefix('account')->group(
         Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
         Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
         Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
+
+        //data trainer
+        Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
+        Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
+        Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
     }
 
 

@@ -41,7 +41,6 @@ $agent = new Agent();
     transition: color 0.3s ease;
   }
 
-  /* === AKTIF BIASA (bukan Gaji) === */
   .mobile-bottom-nav a.active:not(:has(.gaji-circle)) i,
   .mobile-bottom-nav a.active:not(:has(.gaji-circle)) span {
     background: linear-gradient(to right, #ff3131, #ff914d);
@@ -49,8 +48,6 @@ $agent = new Agent();
     -webkit-text-fill-color: transparent;
   }
 
-
-  /* === Gaji Circle Style === */
   .gaji-circle {
     position: absolute;
     top: -55px;
@@ -79,7 +76,6 @@ $agent = new Agent();
     background: conic-gradient(from 285deg, #ff914d 0deg 150deg, transparent 60deg 360deg);
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
     mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-    z-index: 0;
   }
 
   .gaji-circle i,
@@ -87,9 +83,9 @@ $agent = new Agent();
     position: relative;
     z-index: 1;
     color: #ff914d;
+    transition: color 0.3s ease;
     display: block;
     text-align: center;
-    transition: color 0.3s ease;
   }
 
   .gaji-circle i {
@@ -97,10 +93,8 @@ $agent = new Agent();
     margin-bottom: 4px;
   }
 
-  /* === Gaji Aktif === */
   .mobile-bottom-nav a.active .gaji-circle {
     background: linear-gradient(to right, #ff3131, #ff914d);
-    color: white !important;
   }
 
   .mobile-bottom-nav a.active .gaji-circle i,
@@ -113,37 +107,66 @@ $agent = new Agent();
   }
 </style>
 
-<!-- Font Awesome CDN -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
-<!-- Mobile Footer -->
+{{-- ================= MOBILE MENU ================== --}}
+@if (Auth::user()->level === 'user')
+
 <div class="mobile-bottom-nav">
   <a href="{{ route('account.dashboard.index') }}" class="{{ Request::routeIs('account.dashboard.index') ? 'active' : '' }}">
-    <i class="fas fa-home"></i>
-    <span>Dashboard</span>
+    <i class="fas fa-chart-line"></i><span>Dashboard</span>
   </a>
-  <a href="{{ route('account.presensi.index') }}" class="{{ Request::routeIs('account.presensi.index') ? 'active' : '' }}">
-    <i class="fas fa-user-check"></i>
-    <span>Presensi</span>
+
+  <a href="{{ route('home') }}" class="{{ Request::routeIs('home') ? 'active' : '' }}">
+    <i class="fas fa-house-chimney"></i><span>Beranda</span>
   </a>
+
   <a href="{{ route('account.gaji.index') }}" class="{{ Request::routeIs('account.gaji.index') ? 'active' : '' }}">
     <div class="gaji-circle">
-      <i class="fas fa-wallet"></i>
-      <span>Gaji</span>
+      <i class="fas fa-list-alt"></i><span>Riwayat</span>
     </div>
   </a>
+
   <a href="{{ route('account.todolist.index') }}" class="{{ Request::routeIs('account.todolist.index') ? 'active' : '' }}">
-    <i class="fas fa-list-check"></i>
-    <span>To Do</span>
+    <i class="fas fa-list-check"></i><span>To Do</span>
   </a>
+
   <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
-    <i class="fas fa-user"></i>
-    <span>Profil</span>
+    <i class="fas fa-user"></i><span>Profil</span>
   </a>
 </div>
 
+@elseif(Auth::user()->level !== 'user')
+
+<div class="mobile-bottom-nav">
+  <a href="{{ route('account.dashboard.index') }}" class="{{ Request::routeIs('account.dashboard.index') ? 'active' : '' }}">
+    <i class="fas fa-home"></i><span>Dashboard</span>
+  </a>
+
+  <a href="{{ route('account.presensi.index') }}" class="{{ Request::routeIs('account.presensi.index') ? 'active' : '' }}">
+    <i class="fas fa-user-check"></i><span>Presensi</span>
+  </a>
+
+  <a href="{{ route('account.gaji.index') }}" class="{{ Request::routeIs('account.gaji.index') ? 'active' : '' }}">
+    <div class="gaji-circle">
+      <i class="fas fa-wallet"></i><span>Gaji</span>
+    </div>
+  </a>
+
+  <a href="{{ route('account.todolist.index') }}" class="{{ Request::routeIs('account.todolist.index') ? 'active' : '' }}">
+    <i class="fas fa-list-check"></i><span>To Do</span>
+  </a>
+
+  <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
+    <i class="fas fa-user"></i><span>Profil</span>
+  </a>
+</div>
+
+@endif {{-- <<<<< INI MENUTUP MOBILE IF YANG BENER --}}
+
 @else
-<!-- Desktop Footer -->
+
+{{-- ================= DESKTOP FOOTER ================== --}}
 <style>
   .main-footer {
     border-top: 4px solid #ff914d;
@@ -175,8 +198,7 @@ $agent = new Agent();
   <div class="footer-left">
     © <strong>Rumah Scopus Foundation</strong> {{ date("Y") }}
   </div>
-  <div class="footer-right">
-    Version {{ $version }}
-  </div>
+  <div class="footer-right">Version {{ $version }}</div>
 </footer>
+
 @endif

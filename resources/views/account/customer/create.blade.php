@@ -18,7 +18,7 @@ Tambah Karyawan | MIS
     }
 </style>
 @section('content')
-<div class="main-content">
+<div class="main-content" style="font-size: 12px;">
     <section class="section">
         <div class="section-header">
             <h1>TAMBAH DATA KARYAWAN</h1>
