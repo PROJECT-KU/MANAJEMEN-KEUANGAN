@@ -147,7 +147,7 @@ Update Data Customer | MIS
 </style>
 <!--================== END ==================-->
 
-<div class="main-content">
+<div class="main-content" style="font-size: 12px;">
     <section class="section">
         <div class="section-header">
             <h1>PROFIL CUSTOMER</h1>

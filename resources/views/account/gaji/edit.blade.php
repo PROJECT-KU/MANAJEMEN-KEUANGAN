@@ -2103,159 +2103,57 @@ Update Gaji Karyawan | MIS
 </script>
 <!--================== end ==================-->
 
-<!--================== FORMAT RUPIAH ==================-->
-<script>
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_ethes', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
+<<!--================== FORMAT RUPIAH==================-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 
-  // <!-- FORMAT RUPIAH LEMBUR -->
-  var cleaveC = new Cleave('.currency_lembur_default', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_1', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_2', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_3', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_4', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_5', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_6', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_7', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_8', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_9', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_10', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  // <!-- END -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-  // <!-- FORMAT RUPIAH BONUS DARI PRESENSI -->
-  var cleaveC = new Cleave('.currency_kehadiran', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_camp_jogja', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_camp_luar_kota', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_perjalanan_jawa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_perjalanan_luar_jawa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_remote', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_izin', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  // <!-- END -->
+      const currencyClasses = [
+        '.currency',
+        '.currency_ethes',
 
-  var cleaveC = new Cleave('.currency_webinar', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_kinerja', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganBPJS', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganTHR', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganPulsa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjangan_lainnya', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_potongan', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_pph', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var timeoutHandler = null;
-</script>
-<!--================== END ==================-->
+        '.currency_lembur_default',
+        '.currency_lembur_1',
+        '.currency_lembur_2',
+        '.currency_lembur_3',
+        '.currency_lembur_4',
+        '.currency_lembur_5',
+        '.currency_lembur_6',
+        '.currency_lembur_7',
+        '.currency_lembur_8',
+        '.currency_lembur_9',
+        '.currency_lembur_10',
 
-<!--================== botton loader ==================-->
-<script>
-  /**
-   * btn submit loader
-   */
-  $(".btn-submit").click(function() {
-    $(".btn-submit").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
+        '.currency_kehadiran',
+        '.currency_camp_jogja',
+        '.currency_camp_luar_kota',
+        '.currency_perjalanan_jawa',
+        '.currency_perjalanan_luar_jawa',
+        '.currency_remote',
+        '.currency_izin',
 
-    timeoutHandler = setTimeout(function() {
-      $(".btn-submit").removeClass('btn-progress');
+        '.currency_webinar',
+        '.currency_kinerja',
+        '.currency_tunjanganBPJS',
+        '.currency_tunjanganTHR',
+        '.currency_tunjanganPulsa',
+        '.currency_tunjangan_lainnya',
+        '.currency_potongan',
+        '.currency_pph',
+      ];
 
-    }, 1000);
-  });
+      currencyClasses.forEach(selector => {
+        document.querySelectorAll(selector).forEach(el => {
+          new Cleave(el, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand'
+          });
+        });
+      });
 
-  /**
-   * btn reset loader
-   */
-  $(".btn-reset").click(function() {
-    $(".btn-reset").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
+    });
+  </script>
+  <!--================== END ==================-->
 
-    timeoutHandler = setTimeout(function() {
-      $(".btn-reset").removeClass('btn-progress');
-
-    }, 500);
-  })
-</script>
-<!--================== end ==================-->
-
-@stop
+  @stop

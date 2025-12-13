@@ -29,7 +29,7 @@ Company | MIS
         background-color: #007bff;
         border: none;
         border-radius: 5px;
-        font-size: 16px;
+        font-size: 12px;
         transition: background-color 0.3s;
     }
 
@@ -40,7 +40,7 @@ Company | MIS
     #file-selected {
         margin-top: 5px;
         color: #888;
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .image-preview img {
@@ -53,7 +53,7 @@ Company | MIS
 <!--================== END ==================-->
 
 @section('content')
-<div class="main-content">
+<div class="main-content" style="font-size: 12px;">
     <section class="section">
         <div class="section-header">
             <h1>COMPANY</h1>
@@ -139,13 +139,11 @@ Company | MIS
                             </div>
                         </div>
 
-
                         <div class="d-flex mt-5">
-                            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1; height:40px; font-size: 15px;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
+                            <button class="btn btn-primary mr-1 btn-submit rounded-pill" type="submit" style="flex: 1;"><i class="fa fa-paper-plane"></i> SIMPAN</button>
                         </div>
 
                     </form>
-
                 </div>
             </div>
         </div>
