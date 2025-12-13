@@ -34,26 +34,26 @@ Data Karyawan | MIS
         </div>
 
 
-        <div class="card-body">
+        <div class="card-body" style="font-size: 11px;">
           <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
                 <tr>
                   <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">EMAIL</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">USERNAME</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">VERIFIKASI EMAIL</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">JENIS</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">LEVEL</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">STATUS</th>
-                  <th scope="col" style="width: 10%;text-align: center">AKSI</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Email</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Username</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Verifikasi Email</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Jenis</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Role</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Status</th>
+                  <th scope="col" style="width: 10%;text-align: center">Action</th>
                 </tr>
               </thead>
               <tbody id="userTable">
                 @php
                 $no = 1;
                 @endphp
-                @foreach ($users as $item)
+                @forelse ($users as $item)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td style="display: flex; align-items: center; gap: 10px;">
@@ -65,42 +65,65 @@ Data Karyawan | MIS
                   </td>
 
                   <td style="text-align: center;">{{ $item->username }}</td>
+
                   <td style="text-align: center;">
                     @if ($item->email_verified_at)
-                    <button class="btn btn-success" disabled>Sudah Diverifikasi</button>
+                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                      Sudah Diverifikasi
+                    </span>
                     @else
-                    <button class="btn btn-danger" disabled>Belum Diverifikasi</button>
+                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                      Belum Diverifikasi
+                    </span>
                     @endif
                   </td>
+
                   <td style="text-align: center;">{{ $item->jenis }}</td>
+
                   <td style="text-align: center;">{{ $item->level }}</td>
+
                   <td style="text-align: center;">
                     @if ($item->status == 'active')
-                    <button class="btn btn-success" disabled>Active</button>
+                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                      Active
+                    </span>
                     @else
-                    <button class="btn btn-danger" disabled>Non Active</button>
+                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                      Non Active
+                    </span>
                     @endif
                   </td>
-                  <td class="text-center">
-                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
-                      <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-sm btn-warning mt-2">
-                        <i class="fa fa-pencil-alt"></i>
+
+                  <td class="text-center align-middle">
+                    <div class="d-flex justify-content-center align-items-center"
+                      style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
+
+                      <!-- Tombol Edit -->
+                      <a href="{{ route('account.pengguna.edit', $item->id) }}" class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
+                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
+                        <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
                       </a>
-                      <!-- <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.pengguna.detail', $item->id) }}" class="btn btn-sm btn-info mt-2">
-                      <i class="fa fa-eye"></i>
-                    </a> -->
-                      <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $item->id }}')" class="btn btn-sm btn-danger mt-2 mb-2">
-                        <i class="fa fa-trash"></i>
+
+                      <!-- Tombol Delete -->
+                      <button onclick="Delete('{{ $item->id }}')" class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm"
+                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
+                        <i class="fa fa-trash" style="font-size: 13px; line-height: 1;"></i>
                       </button>
+
                     </div>
                   </td>
                 </tr>
                 @php
                 $no++;
                 @endphp
-                @endforeach
+                @empty
+                <tr>
+                  <td colspan="8" class="text-center">Tidak ada data</td>
+                </tr>
+                @endforelse
               </tbody>
             </table>
+
             <div style="text-align: center;">
               <style>
                 @media (max-width: 767px) {

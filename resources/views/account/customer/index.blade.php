@@ -164,7 +164,9 @@ Data Customer | MIS
                   </td>
 
                   <td style="text-align: center;">{{ $item->username }}</td>
+
                   <td style="text-align: center;">{{ $item->telp }}</td>
+
                   <td style="text-align: center;">
                     @if ($item->email_verified_at)
                     <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
@@ -176,7 +178,9 @@ Data Customer | MIS
                     </span>
                     @endif
                   </td>
+
                   <td style="text-align: center;">{{ $item->level }}</td>
+
                   <td style="text-align: center;">
                     @if ($item->status == 'active')
                     <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
@@ -188,6 +192,7 @@ Data Customer | MIS
                     </span>
                     @endif
                   </td>
+
                   <td class=" text-center align-middle">
                     <div class="d-flex justify-content-center align-items-center"
                       style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">

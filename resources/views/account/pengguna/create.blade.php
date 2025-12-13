@@ -291,18 +291,22 @@ Tambah Karyawan | MIS
                             </div>
                         </div>
 
-                        <div class="d-flex mt-3" style="gap: 10px;">
-                            <button class="btn btn-primary btn-submit rounded-pill"
-                                type="submit"
-                                style="flex: 0 0 80%; height:35px; font-size: 15px;">
-                                <i class="fa fa-paper-plane"></i> SIMPAN
-                            </button>
+                        <div class="mt-3">
+                            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
 
-                            <a href="{{ route('account.pengguna.index') }}"
-                                class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
-                                style="flex: 0 0 20%; height:35px; font-size: 15px;">
-                                <i class="fa fa-undo"></i> KEMBALI
-                            </a>
+                                <!-- Tombol Simpan -->
+                                <button type="submit"
+                                    class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                                    <i class="fa fa-paper-plane"></i> SIMPAN
+                                </button>
+
+                                <!-- Tombol Kembali -->
+                                <a href="{{ route('account.pengguna.index') }}"
+                                    class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                                    <i class="fa fa-undo"></i> KEMBALI
+                                </a>
+
+                            </div>
                         </div>
 
                     </form>
@@ -384,23 +388,6 @@ Tambah Karyawan | MIS
 </script>
 <!--================== END ==================-->
 
-<!--================== CKEDITOR ==================-->
-<!-- <style>
-    .ckeditor-container {
-        width: 100%;
-    }
-</style>
-
-<script src="//cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script>
-    // Replace 'jobdesk' textarea with CKEditor
-    CKEDITOR.replace('jobdesk', {
-        width: '100%', // Set CKEditor width to 100%
-        height: '300px' // You can adjust the height as needed
-    });
-</script> -->
-<!--================== END ==================-->
-
 <!--================== PREVIEW IMAGE ==================-->
 <script>
     function previewImage(event) {
@@ -411,43 +398,6 @@ Tambah Karyawan | MIS
         };
         reader.readAsDataURL(event.target.files[0]);
     }
-</script>
-<!--================== END ==================-->
-
-<!--================== LOADER BUTTON ==================-->
-<script>
-    // <!-- BUTTON SUBMIT -->
-    $(".btn-submit").click(function() {
-        $(".btn-submit").addClass('btn-progress');
-        if (timeoutHandler) clearTimeout(timeoutHandler);
-
-        timeoutHandler = setTimeout(function() {
-            $(".btn-submit").removeClass('btn-progress');
-
-        }, 1000);
-    });
-    // <!-- END -->
-
-    // <!-- BUTTON RESET -->
-    $(".btn-reset").click(function() {
-        $(".btn-reset").addClass('btn-progress');
-        if (timeoutHandler) clearTimeout(timeoutHandler);
-
-        timeoutHandler = setTimeout(function() {
-            $(".btn-reset").removeClass('btn-progress');
-            $("#full_name").val('');
-            $("#email").val('');
-            $("#company").val('');
-            $("#telp").val('');
-            $("#level").val('');
-            $("#jenis").val('');
-            $("#password").val('');
-            $("#nik").val('');
-            $("#norek").val('');
-            $("#bank").val('');
-        }, 500);
-    })
-    // <!-- END -->
 </script>
 <!--================== END ==================-->
 @stop
