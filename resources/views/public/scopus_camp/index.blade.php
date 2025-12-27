@@ -113,7 +113,7 @@ Scopus Camp | Rumah Scopus
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                html: 'Data Pendaftaran Analisis Bibliometrik Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
+                html: 'Data Pendaftaran Scopus Camp Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
                 confirmButtonText: 'OK'
             });
         });
@@ -126,7 +126,7 @@ Scopus Camp | Rumah Scopus
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',
-                text: 'Data Pendaftaran Analisis Bibliometrik Gagal Terkirim',
+                text: 'Data Pendaftaran Scopus Camp Gagal Terkirim',
                 confirmButtonText: 'OK'
             });
         });
