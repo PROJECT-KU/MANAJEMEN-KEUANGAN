@@ -74,21 +74,15 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
 
                     <article class="entry entry-single">
                         {{-- Carousel --}}
-                        <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel" style="max-width: 100%; max-height: 400px; overflow: hidden;">
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="{{ asset('assets/img/public/cover2.png') }}" class="d-block w-100" alt="Cover 1" style="object-fit: cover; height: 400px;">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="{{ asset('assets/img/public/cover1.png') }}" class="d-block w-100" alt="Cover 2" style="object-fit: cover; height: 400px;">
+                        <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel" style="width: 100%; max-height: 400px; aspect-ratio: 16 / 9; overflow: hidden;">
+                            <div class="carousel-inner h-100">
+                                <div class="carousel-item active h-100">
+                                    <img src="{{ asset('assets/img/public/scopuscamp.png') }}"
+                                        class="d-block w-100 h-100"
+                                        alt="Cover 1"
+                                        style="object-fit: cover;">
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            </button>
                         </div>
 
                         <!-- JUDUL -->
