@@ -113,8 +113,8 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                         {{-- Deskripsi --}}
                         <div class="entry-content mb-4">
                             <h5 style="font-weight: bold;">Deskripsi</h5>
-                            <div class="article-container">
-                                {!! $item->desc !!}
+                            <div class="article-container" style="white-space: pre-line;">
+                                {{ $item->desc }}
                             </div>
 
                             <style>
