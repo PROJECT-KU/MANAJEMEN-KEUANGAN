@@ -30,7 +30,7 @@ class ScopusCampPendaftaran extends Migration
             $table->string('nominal_diskon')->nullable();
             $table->string('total_pembayaran')->nullable();
             $table->string('status')->default('diproses');
-            $table->string('tanggal_eschedule')->nullable();
+            $table->string('tanggal_reschedule')->nullable();
             $table->string('group_wa')->nullable();
             $table->text('note')->nullable();
             $table->timestamps();
