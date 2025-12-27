@@ -75,7 +75,7 @@ Data Pendaftaran Analisis Bibliometrik | MIS
                     <!--================== END FILTER ==================-->
                 </div>
 
-                <div class="card-body">
+                <div class="card-body" style="font-size: 11px;">
                     <div class="table-responsive">
                         <div class="table-responsive">
                             <table class="table table-bordered">
@@ -249,61 +249,38 @@ Data Pendaftaran Analisis Bibliometrik | MIS
 <!--================== SWEET ALERT DELETE ==================-->
 <script>
     function Delete(id) {
-        var token = $("meta[name='csrf-token']").attr("content");
-
-        swal({
+        Swal.fire({
             title: "APAKAH KAMU YAKIN?",
             text: "INGIN MENGHAPUS DATA INI!",
             icon: "warning",
-            buttons: {
-                cancel: {
-                    text: "TIDAK",
-                    value: null,
-                    visible: true,
-                    className: "",
-                    closeModal: true,
-                },
-                confirm: {
-                    text: "YA",
-                    value: true,
-                    visible: true,
-                    className: "",
-                    closeModal: true
-                }
-            },
-            dangerMode: true,
-        }).then(function(isConfirm) {
-            if (isConfirm) {
-                // ajax delete
+            showCancelButton: true,
+            confirmButtonText: "YA",
+            cancelButtonText: "TIDAK",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: "/account/Analisis-Bibliometrik/delete/" + id,
-                    data: {
-                        "_token": token,
-                        "_method": "DELETE"
+                    type: "DELETE",
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    type: 'POST',
                     success: function(response) {
-                        if (response.status === "success") {
-                            swal({
-                                title: 'BERHASIL!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 1000,
-                                buttons: false,
-                            }).then(function() {
-                                location.reload();
-                            });
-                        } else {
-                            swal({
-                                title: 'GAGAL!',
-                                text: response.message,
-                                icon: 'error',
-                                timer: 1000,
-                                buttons: false,
-                            }).then(function() {
-                                location.reload();
-                            });
-                        }
+                        Swal.fire({
+                            icon: "success",
+                            title: "BERHASIL!",
+                            text: response.message,
+                            timer: 1000,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire({
+                            icon: "error",
+                            title: "GAGAL!",
+                            text: xhr.responseJSON?.message || "Terjadi kesalahan pada server"
+                        });
                     }
                 });
             }
