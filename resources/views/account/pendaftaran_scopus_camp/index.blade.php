@@ -113,17 +113,17 @@ Data Pendaftaran Scopus Camp | MIS
                                         <td class="column-width" style="text-align: center;">Rp. {{ number_format((float) $data->total_pembayaran, 0, ',', '.') }}</td>
                                         <td class="column-width" style="text-align: center;">
                                             @if($data->status == 'diproses')
-                                            <span class="badge badge-warning">Di Proses</i></span>
+                                            <span class="badge badge-warning" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Di Proses</i></span>
                                             @elseif($data->status == 'Pendaftaran Diterima')
-                                            <span class="badge badge-success">Di Terima</span>
+                                            <span class="badge badge-success" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Di Terima</span>
                                             @elseif($data->status == 'Pendaftaran Reschedule')
-                                            <span class="badge badge-warning">Reschedule</span>
+                                            <span class="badge badge-warning" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Reschedule</span>
                                             @elseif($data->status == 'Pendaftaran Refund')
-                                            <span class="badge badge-warning">Refund</span>
+                                            <span class="badge badge-warning" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Refund</span>
                                             @elseif($data->status == 'Pendaftaran Dibatalkan')
-                                            <span class="badge badge-danger">Di batalkan</span>
+                                            <span class="badge badge-danger" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Di batalkan</span>
                                             @else
-                                            <span class="badge badge-danger">Di Tolak</span>
+                                            <span class="badge badge-danger" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>Di Tolak</span>
                                             @endif
                                         </td>
 
