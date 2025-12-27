@@ -244,21 +244,7 @@ class CutiController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
-
-        $datas = DB::table('users')
-            ->select(
-                'users.id',
-                'users.full_name'
-            )
-            ->leftJoin('perjalanan_dinas', 'perjalanan_dinas.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
-            ->groupBy('users.id', 'users.full_name')
-            ->orderBy('users.created_at', 'DESC')
-            ->get();
-
-        // dd($datas);
-        return view('account.perjalanan_dinas.create', compact('datas'));
+        return view('account.cuti.create');
     }
 
     public function addcreate($id)

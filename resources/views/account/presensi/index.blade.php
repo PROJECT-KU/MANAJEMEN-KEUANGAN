@@ -150,55 +150,127 @@ Data Presensi Karyawan | MIS
                     @endif
                     <td class="column-width" style="text-align: center;">
                       @if ($hasil->status == 'hadir')
-                      <span class="badge badge-success mt-2">HADIR</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Hadir
+                      </span>
+
                       @elseif ($hasil->status == 'camp jogja')
-                      <span class="badge badge-success mt-2">CAMP JOGJA</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Camp Jogja
+                      </span>
+
                       @elseif ($hasil->status == 'perjalanan luar kota jawa')
-                      <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Perjalanan Luar Kota Dalam Jawa
+                      </span>
+
                       @elseif ($hasil->status == 'perjalanan luar kota luar jawa')
-                      <span class="badge badge-info mt-2">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Perjalanan Luar Kota Luar Jawa
+                      </span>
+
                       @elseif ($hasil->status == 'camp luar kota')
-                      <span class="badge badge-success mt-2">CAMP LUAR KOTA</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Camp Luar Kota
+                      </span>
+
                       @elseif ($hasil->status == 'remote')
-                      <span class="badge badge-info mt-2">REMOTE</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Remote
+                      </span>
+
                       @elseif ($hasil->status == 'izin')
-                      <span class="badge badge-warning mt-2">IZIN</span>
+                      <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Izin
+                      </span>
+
                       @elseif ($hasil->status == 'lembur')
-                      <span class="badge badge-primary mt-2">LEMBUR</span>
+                      <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Lembur
+                      </span>
+
                       @elseif ($hasil->status == 'cuti')
-                      <span class="badge badge-warning mt-2">CUTI</span>
+                      <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Cuti
+                      </span>
+
                       @elseif ($hasil->status == 'terlambat')
-                      <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Terlambat
+                      </span>
+
                       @elseif ($hasil->status == 'alpha')
-                      <span class="badge badge-danger mt-2">ALPHA</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Alpha
+                      </span>
+
                       @elseif ($hasil->status == 'pulang')
-                      <span class="badge badge-danger mt-2">PULANG</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Pulang
+                      </span>
                       @endif
+
                       <br>
+
                       @if ($hasil->status_pulang == 'hadir')
-                      <span class="badge badge-success mt-2">HADIR</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Hadir
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'camp jogja')
-                      <span class="badge badge-success">CAMP JOGJA</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Camp Jogja
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'perjalanan luar kota jawa')
-                      <span class="badge badge-info">PERJALANAN LUAR KOTA DALAM JAWA</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Perjalanan Luar Kota Dalam Jawa
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'perjalanan luar kota luar jawa')
-                      <span class="badge badge-info">PERJALANAN LUAR KOTA LUAR JAWA</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Perjalanan Luar Kota Luar Jawa
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'camp luar kota')
-                      <span class="badge badge-success">CAMP LUAR KOTA</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Camp Luar Kota
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'remote')
-                      <span class="badge badge-info mt-2">REMOTE</span>
+                      <span class="badge bg-info" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Remote
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'izin')
-                      <span class="badge badge-warning mt-2">IZIN</span>
+                      <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Izin
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'lembur')
-                      <span class="badge badge-primary mt-2">LEMBUR</span>
+                      <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Lembur
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'cuti')
-                      <span class="badge badge-warning mt-2">CUTI</span>
+                      <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Cuti
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'terlambat')
-                      <span class="badge badge-danger mt-2">TERLAMBAT</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Terlambat
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'alpha')
-                      <span class="badge badge-danger">ALPHA</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Alpha
+                      </span>
+
                       @elseif ($hasil->status_pulang == 'pulang')
-                      <span class="badge badge-danger mt-2">PULANG</span>
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Pulang
+                      </span>
                       @endif
                     </td>
                     <td class="column-width" style="text-align: center;">

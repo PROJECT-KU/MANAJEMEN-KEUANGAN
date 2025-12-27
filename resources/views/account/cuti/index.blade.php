@@ -57,9 +57,9 @@ Data Cuti Karyawan | MIS
                     <div id="tblDiajukan" class="card-header" style="background-color: #FF7F50; color:white;">
                         <h4 class="d-none d-sm-block"><i class="fas fa-list"></i> DATA CUTI KARYAWAN DIAJUKAN</h4>
                         <h4 class="d-block d-sm-none btn-block"><i class="fas fa-list"></i> DATA DIAJUKAN</h4>
-                        <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-none d-sm-block ml-auto"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
+                        <a href="{{ route('account.cuti.create') }}" class="btn btn-primary d-none d-sm-block ml-auto"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
                         </a>
-                        <a href="{{ route('account.PerjalananDinas.create') }}" class="btn btn-primary d-block d-sm-none btn-block"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
+                        <a href="{{ route('account.cuti.create') }}" class="btn btn-primary d-block d-sm-none btn-block"> <i class="fa fa-plus-circle"></i> TAMBAH DATA
                         </a>
                     </div>
 

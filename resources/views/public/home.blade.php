@@ -144,7 +144,7 @@ Beranda | Rumah Scopus
                             </p>
                         </div>
                         <div class="mt-auto" style="text-align: center;">
-                            <a href="https://rumahscopus.com/event/">
+                            <a href="{{ url('/Scopus-Camp') }}">
                                 <button class="btn" style="width: 100%; color: white; background: linear-gradient(to right, #ff3131, #ff914d); border: none; padding: 10px; border-radius: 5px;">Pesan Sekarang</button>
                             </a>
                         </div>

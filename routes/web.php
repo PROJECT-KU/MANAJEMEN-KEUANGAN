@@ -53,6 +53,13 @@ Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}/{token}', 'Publict\Publ
 Route::get('/cek-kode-diskon/{id}', 'Publict\PublicAnalisisBibliometrikController@cekKodeDiskon')->name('public.cekkodediskon.formpendaftaran');
 Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikController@store')->name('public.analisisbibliometrik.store');
 
+// SCOPUS CAMP PUBLIC
+Route::get('/Scopus-Camp', 'Publict\PublicScopusCampController@public')->name('public.scopuscamp.index');
+Route::get('/Scopus-Camp/selengkapnya/{id}/{token}', 'Publict\PublicScopusCampController@Selengkapnya')->name('public.scopuscamp.Selengkapnya');
+Route::get('/Scopus-Camp/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusCampController@FormPendaftaran')->name('public.scopuscamp.formpendaftaran');
+Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
+Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
+
 // CLINIK SCOPUS
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
 
@@ -119,16 +126,16 @@ Route::prefix('account')->group(
         Route::get('account/laporan_neraca/download-pdf', 'account\NeracaController@downloadPdf')->name('account.laporan_neraca.download-pdf');
 
         //penyewaan
-        Route::get('penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
-        Route::delete('account/penyewaan/{id}', 'PenyewaanController@destroy')->name('account.penyewaan.destroy');
-        Route::get('/account/penyewaan/create', 'account\PenyewaanController@create')->name('account.penyewaan.create');
-        Route::post('/account/penyewaan/store', 'account\PenyewaanController@store')->name('account.penyewaan.store');
-        Route::get('account/penyewaan/{id}/edit', 'account\PenyewaanController@edit')->name('account.penyewaan.edit');
-        Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
-        Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
-        Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
-        Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
-        Route::get('/penyewaan/pdf/{id}', 'account\PenyewaanController@detailPDF')->name('pdf.show');
+        // Route::get('penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
+        // Route::delete('account/penyewaan/{id}', 'PenyewaanController@destroy')->name('account.penyewaan.destroy');
+        // Route::get('/account/penyewaan/create', 'account\PenyewaanController@create')->name('account.penyewaan.create');
+        // Route::post('/account/penyewaan/store', 'account\PenyewaanController@store')->name('account.penyewaan.store');
+        // Route::get('account/penyewaan/{id}/edit', 'account\PenyewaanController@edit')->name('account.penyewaan.edit');
+        // Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
+        // Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
+        // Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
+        // Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
+        // Route::get('/penyewaan/pdf/{id}', 'account\PenyewaanController@detailPDF')->name('pdf.show');
 
         //tambah barang
         Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
@@ -217,11 +224,11 @@ Route::prefix('account')->group(
         Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
 
         // sewa
-        Route::get('/sewa', 'account\SewaController@index')->name('account.sewa.index');
-        Route::get('/sewa/create', 'account\SewaController@create')->name('account.sewa.create');
-        Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
-        Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
-        Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
+        // Route::get('/sewa', 'account\SewaController@index')->name('account.sewa.index');
+        // Route::get('/sewa/create', 'account\SewaController@create')->name('account.sewa.create');
+        // Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
+        // Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
+        // Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
 
         Route::get('/get-user-phone/{userId}', 'account\PresensiController@getUserPhone')->name('account.getUserPhone');
 
@@ -363,6 +370,7 @@ Route::prefix('account')->group(
 
         // cuti karyawan
         Route::get('/cuti/data', 'account\CutiController@index')->name('account.cuti.index');
+        Route::get('/cuti/data/create', 'account\CutiController@create')->name('account.cuti.create');
 
         // data cutomer
         Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
@@ -376,6 +384,16 @@ Route::prefix('account')->group(
         Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
         Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
         Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
+
+        // kategori scopus camp
+        Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');
+        Route::get('scopus-camp/kategori/create', 'account\CategoriesScopusCampController@create')->name('account.kategoriscopuscamp.create');
+        Route::post('scopus-camp/kategori/store', 'account\CategoriesScopusCampController@store')->name('account.kategoriscopuscamp.store');
+        Route::get('scopus-camp/kategori/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategoriscopuscamp.edit');
+        Route::post('scopus-camp/kategori/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategoriscopuscamp.update');
+        Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
+        Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
+        Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
     }
 
 

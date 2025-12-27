@@ -7,8 +7,6 @@ $agent = new Agent();
 @endphp
 
 <head>
-    <!-- cdn sweet alerts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- end -->
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -387,12 +385,24 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
                                     </a>
                                 </li>
+                                @endif
+                                <!--================== END ==================-->
 
-                                <!-- <li class="{{ setActive('account/Laporan-Peserta') }}">
-                                    <a class="nav-link" href="{{ route('account.peserta.list') }}">
-                                        <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
+                                <!--================== SCOPUS CAMP ==================-->
+                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                <li class="menu-header">SCOPUS CAMP</li>
+
+                                <li class="{{ setActive('account/scopus-camp') }}">
+                                    <a class="nav-link" href="{{ route('account.kategoriscopuscamp.index') }}">
+                                        <i class="fas fa-dice-d6"></i> <span>Kategori </span>
                                     </a>
-                                </li> -->
+                                </li>
+
+                                <li class="{{ setActive('account/Analisis-Bibliometrik') }}">
+                                    <a class="nav-link" href="{{ route('account.analisisbibliometrik.index') }}">
+                                        <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
+                                    </a>
+                                </li>
                                 @endif
                                 <!--================== END ==================-->
 
