@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\scopusCampUpdateDiterimaMail;
-use App\Mail\scopusCampUpdateResheduleMail;
+use App\Mail\ScopusCampUpdateDiterimaMail;
+use App\Mail\ScopusCampUpdateResheduleMail;
 use App\Exports\PendaftaranAnalisisBibliometrikExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -185,9 +185,9 @@ class PendaftaranScopusCampController extends Controller
         $emailTo = $dataUpdate->email;
 
         if ($dataUpdate->status === 'Pendaftaran Diterima') {
-            Mail::to($emailTo)->send(new scopusCampUpdateDiterimaMail($dataUpdate, $kategoriBaru, $appName));
+            Mail::to($emailTo)->send(new ScopusCampUpdateDiterimaMail($dataUpdate, $kategoriBaru, $appName));
         } elseif ($dataUpdate->status === 'Pendaftaran Reschedule') {
-            Mail::to($emailTo)->send(new scopusCampUpdateResheduleMail($dataUpdate, $kategoriBaru, $appName));
+            Mail::to($emailTo)->send(new ScopusCampUpdateResheduleMail($dataUpdate, $kategoriBaru, $appName));
         }
 
         return redirect()->route('account.pendaftaranscopuscamp.index')->with('success', 'Data Pendaftaran Scopus Camp Berhasil Disimpan!');
