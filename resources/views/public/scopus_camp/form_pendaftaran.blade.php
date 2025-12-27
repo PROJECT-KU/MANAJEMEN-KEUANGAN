@@ -368,7 +368,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                             <!-- ================== TOMBOL SUBMIT ================== -->
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-primary w-100" id="btnSubmit" style="height:45px; font-size:16px;">
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit" id="btnSubmit" style="height:45px; font-size:16px;">
                                         <i class="fa fa-paper-plane"></i> Konfirmasi Pendaftaran
                                     </button>
                                 </div>
