@@ -394,6 +394,13 @@ Route::prefix('account')->group(
         Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
         Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
         Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
+
+        // pendaftaran scopus camp
+        Route::get('PendaftaranScopusCamp', 'account\PendaftaranScopusCampController@index')->name('account.pendaftaranscopuscamp.index');
+        Route::get('PendaftaranScopusCamp/edit/{id}', 'account\PendaftaranScopusCampController@edit')->name('account.pendaftaranscopuscamp.edit');
+        Route::put('PendaftaranScopusCamp/update/{id}', 'account\PendaftaranScopusCampController@update')->name('account.pendaftaranscopuscamp.update');
+        Route::delete('PendaftaranScopusCamp/delete/{id}', 'account\PendaftaranScopusCampController@destroy')->name('account.pendaftaranscopuscamp.destroy');
+        Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
     }
 
 
