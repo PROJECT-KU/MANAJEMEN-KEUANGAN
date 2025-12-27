@@ -183,20 +183,6 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                 </div>
                             </div>
 
-                            <div class="row mt-3" id="formDiskon" style="display: none;">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>Potongan Diskon</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">Rp.</span>
-                                            </div>
-                                            <input type="text" name="nominal_diskon" value="{{ number_format((float) $item->nominal_diskon, 0, ',', '.') }}" style="background-color:darkgrey;" id="potonganDiskon" class="form-control" readonly>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="row mt-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -343,16 +329,43 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                     $jumlahPPN = ($item->ppn > 0) ? $item->biaya * ($item->ppn / 100) : 0;
                                     @endphp
 
-                                    <div class="card-body" style="color: black; display: flex; justify-content: space-between; align-items: center;">
-                                        <label style="white-space: nowrap; font-weight: bold;">PPN :</label>
-                                        <div style="display: flex; justify-content: flex-end; width: 100%;">
-                                            <span style="margin-right: 5px;">Rp.</span>
-                                            <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
-                                            <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
+                                    <div class="card-body" style="color: black; display: flex; flex-direction: column; gap: 10px;">
+
+                                        <!-- SUBTOTAL -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <label style="white-space: nowrap; font-weight: bold;">Subtotal :</label>
+                                            <div style="display: flex; justify-content: flex-end;">
+                                                <span style="margin-right: 5px;">Rp.</span>
+                                                <span>{{ number_format($item->biaya, 0, ',', '.') }}</span>
+                                                <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->biaya }}">
+                                            </div>
                                         </div>
+
+                                        <!-- PPN -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <label style="white-space: nowrap; font-weight: bold;">PPN :</label>
+                                            <div style="display: flex; justify-content: flex-end;">
+                                                <span style="margin-right: 5px;">Rp.</span>
+                                                <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
+                                                <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
+                                            </div>
+                                        </div>
+
+                                        <!-- DISKON -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center;" id="formDiskon">
+                                            <label style="white-space: nowrap; font-weight: bold;">Diskon :</label>
+                                            <div style="display: flex; justify-content: flex-end;">
+                                                <span style="margin-right: 5px;">Rp.</span>
+                                                <span id="diskonText">0</span>
+                                                <input type="hidden" name="nominal_diskon" id="potonganDiskon" value="0">
+                                            </div>
+                                        </div>
+
                                     </div>
+
                                     <hr style="margin: 10px;">
-                                    <div class="card-body mb-3" style="color: black; display: flex; justify-content: space-between; align-items: center;">
+
+                                    <div class="card-body mb-3" style="color: black; display: flex; justify-content: space-between; align-items: center; font-size: 20px; color: red;">
                                         <label style="white-space: nowrap; font-weight: bold;">Total :</label>
                                         <div style="display: flex; justify-content: flex-end; width: 100%;">
                                             <span style="margin-right: 5px;">Rp.</span>
@@ -361,6 +374,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                         </div>
                                     </div>
                                     <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden" class="form-control" readonly>
+
                                 </strong>
 
 
@@ -458,15 +472,23 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
     document.getElementById('btnCekDiskon').addEventListener('click', function() {
         const id = this.dataset.id;
         const kode = document.getElementById('kodeDiskon').value.trim();
+
         const messageEl = document.getElementById('diskonMessage');
         const hiddenInput = document.getElementById('hiddenKodeDiskon');
         const potonganInput = document.getElementById('potonganDiskon');
-        const formDiskon = document.getElementById('formDiskon');
+        const diskonText = document.getElementById('diskonText');
 
+        // =============================
+        // KODE KOSONG
+        // =============================
         if (!kode) {
             hiddenInput.value = '';
+            potonganInput.value = 0;
+            diskonText.textContent = '0';
             messageEl.textContent = '';
-            formDiskon.style.display = 'none';
+
+            hitungTotalPembayaran();
+
             Swal.fire({
                 icon: 'warning',
                 title: 'Kode kosong',
@@ -475,30 +497,29 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
             return;
         }
 
+        // =============================
+        // FETCH CEK DISKON
+        // =============================
         fetch(`/Scopus-Camp/cek-kode-diskon/${encodeURIComponent(id)}?kode_diskon=${encodeURIComponent(kode)}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Response:', data);
+
+                // =============================
+                // KODE VALID
+                // =============================
                 if (data.status === 'success') {
-                    // Set nilai ke field tersembunyi
+                    const nominalDiskon = Number(data.casted_nominal_diskon) || 0;
+
                     hiddenInput.value = kode;
+                    potonganInput.value = nominalDiskon;
+                    diskonText.textContent = nominalDiskon.toLocaleString('id-ID');
 
-                    // Tampilkan form diskon
-                    formDiskon.style.display = 'block';
-
-                    // Set nilai ke potongan diskon (TANPA "Rp", agar bisa diparsing langsung)
-                    // Set nilai ke potongan diskon dalam format Rupiah
-                    potonganInput.value = `${Number(data.casted_nominal_diskon).toLocaleString('id-ID')}`;
-
-                    // Tampilkan pesan kecil
-                    messageEl.textContent = `Diskon sebesar Rp ${data.casted_nominal_diskon.toLocaleString('id-ID')}`;
+                    messageEl.textContent = `Diskon sebesar Rp ${nominalDiskon.toLocaleString('id-ID')}`;
                     messageEl.classList.remove('text-danger');
                     messageEl.classList.add('text-success');
 
-                    // Hitung ulang total SETELAH semua field diisi
                     hitungTotalPembayaran();
 
-                    // Tampilkan notifikasi
                     Swal.fire({
                         icon: 'success',
                         title: 'Kode Diskon Valid',
@@ -506,17 +527,21 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                         timer: 2000,
                         showConfirmButton: false
                     });
-                } else {
-                    // Reset jika gagal
+
+                }
+                // =============================
+                // KODE TIDAK VALID
+                // =============================
+                else {
                     hiddenInput.value = '';
-                    potonganInput.value = '';
-                    formDiskon.style.display = 'none';
+                    potonganInput.value = 0;
+                    diskonText.textContent = '0';
 
                     messageEl.textContent = data.message || 'Kode tidak valid';
                     messageEl.classList.remove('text-success');
                     messageEl.classList.add('text-danger');
 
-                    hitungTotalPembayaran(); // reset ulang
+                    hitungTotalPembayaran();
 
                     Swal.fire({
                         icon: 'error',
@@ -525,14 +550,18 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                     });
                 }
             })
+            // =============================
+            // ERROR SERVER
+            // =============================
             .catch(error => {
                 console.error('Error:', error);
+
                 hiddenInput.value = '';
-                potonganInput.value = '';
-                formDiskon.style.display = 'none';
+                potonganInput.value = 0;
+                diskonText.textContent = '0';
                 messageEl.textContent = '';
 
-                hitungTotalPembayaran(); // reset ulang
+                hitungTotalPembayaran();
 
                 Swal.fire({
                     icon: 'error',
