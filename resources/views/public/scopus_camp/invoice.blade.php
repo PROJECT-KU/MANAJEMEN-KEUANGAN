@@ -85,7 +85,7 @@
                                     <td style="padding-left: 80px;">Biaya</td>
                                     <td></td>
                                     <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($categoriesScopusCamp->total_biaya, 0, ',', '.') }}
+                                        Rp. {{ number_format($categoriesScopusCamp->biaya, 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 <tr>
