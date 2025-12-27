@@ -283,9 +283,13 @@ Data Gaji Karyawan | MIS
 
                     <td class="column-width" style="text-align: center;">
                       @if($hasil->status == 'pending')
-                      <span class="badge badge-warning">PENDING</span>
+                      <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Pending
+                      </span>
                       @else
-                      <span class="badge badge-success">TERBAYAR</span>
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Terbayar
+                      </span>
                       @endif
                     </td>
 
