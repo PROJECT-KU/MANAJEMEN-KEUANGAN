@@ -262,7 +262,7 @@ Route::prefix('account')->group(
         Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
         Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
         Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
-        Route::delete('/Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
+        Route::delete('Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
         Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
         Route::get('/Analisis-Bibliometrik/filter', 'account\AnalisisBibliometrikController@filter')->name('account.analisisbibliometrik.filter');
         Route::get('/Analisis-Bibliometrik/download-excel', 'account\AnalisisBibliometrikController@downloadExcel')->name('account.analisisbibliometrik-excel');

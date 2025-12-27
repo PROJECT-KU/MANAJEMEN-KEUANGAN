@@ -180,47 +180,44 @@ class AnalisisBibliometrikController extends Controller
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
+        DB::beginTransaction();
+
         try {
-            $data = AnalisisBibliometrik::find($id);
+            $data = AnalisisBibliometrik::findOrFail($id);
 
-            if ($data) {
-                // Ambil data kategori terkait
-                $kategori = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
+            // ===== UPDATE KUOTA =====
+            $kategori = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
 
-                // Tambahkan jumlah pendaftar ke sisa kuota kategori
-                if ($kategori) {
-                    $kategori->sisa_kuota = $kategori->sisa_kuota + $data->jumlah_pendaftar;
+            if ($kategori) {
+                $kategori->sisa_kuota += $data->jumlah_pendaftar;
 
-                    // Pastikan sisa_kuota tidak melebihi total_kuota
-                    if ($kategori->sisa_kuota > $kategori->total_kuota) {
-                        $kategori->sisa_kuota = $kategori->total_kuota;
-                    }
-
-                    $kategori->save();
+                if ($kategori->sisa_kuota > $kategori->total_kuota) {
+                    $kategori->sisa_kuota = $kategori->total_kuota;
                 }
 
-                // Hapus gambar jika ada
-                if ($data->gambar && file_exists(public_path('bibliometrik/' . $data->gambar))) {
-                    unlink(public_path('bibliometrik/' . $data->gambar));
-                }
-
-                // Hapus data dari database
-                $data->delete();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Data dan gambar berhasil dihapus!'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Data tidak ditemukan!'
-                ], 404);
+                $kategori->save();
             }
+
+            // ===== HAPUS GAMBAR TANPA exists =====
+            if (!empty($data->gambar)) {
+                @unlink(public_path('bibliometrik/' . $data->gambar));
+            }
+
+            // ===== HAPUS DATA =====
+            $data->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data dan gambar berhasil dihapus!'
+            ]);
         } catch (\Exception $e) {
+            DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
