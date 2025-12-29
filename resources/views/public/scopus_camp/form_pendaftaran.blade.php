@@ -320,11 +320,14 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                             Ringkasan Pembayaran
                         </div>
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between">
-                                <span>Total</span>
-                                <strong>
-                                    <span style="text-align: center; font-size:21px; font-weight: bold;" class="mt-3">Total yang Harus Dibayarkan</span>
+                                <strong style="width: 100%;">
+                                    <span style="text-align: center; font-size:21px; font-weight: bold;" class="mt-3">
+                                        Total yang Harus Dibayarkan
+                                    </span>
                                     <hr style="margin: 10px;">
+
                                     @php
                                     $jumlahPPN = ($item->ppn > 0) ? $item->biaya * ($item->ppn / 100) : 0;
                                     @endphp
@@ -332,30 +335,30 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                     <div class="card-body" style="color: black; display: flex; flex-direction: column; gap: 10px;">
 
                                         <!-- SUBTOTAL -->
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center;">
                                             <label style="white-space: nowrap; font-weight: bold;">Subtotal :</label>
-                                            <div style="display: flex; justify-content: flex-end;">
-                                                <span style="margin-right: 5px;">Rp.</span>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
                                                 <span>{{ number_format($item->biaya, 0, ',', '.') }}</span>
                                                 <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->biaya }}">
                                             </div>
                                         </div>
 
                                         <!-- PPN -->
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center;">
                                             <label style="white-space: nowrap; font-weight: bold;">PPN :</label>
-                                            <div style="display: flex; justify-content: flex-end;">
-                                                <span style="margin-right: 5px;">Rp.</span>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
                                                 <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
                                                 <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
                                             </div>
                                         </div>
 
                                         <!-- DISKON -->
-                                        <div style="display: flex; justify-content: space-between; align-items: center;" id="formDiskon">
+                                        <div style="display: flex; align-items: center;" id="formDiskon">
                                             <label style="white-space: nowrap; font-weight: bold;">Diskon :</label>
-                                            <div style="display: flex; justify-content: flex-end;">
-                                                <span style="margin-right: 5px;">Rp.</span>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
                                                 <span id="diskonText">0</span>
                                                 <input type="hidden" name="nominal_diskon" id="potonganDiskon" value="0">
                                             </div>
@@ -365,20 +368,25 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 
                                     <hr style="margin: 10px;">
 
-                                    <div class="card-body mb-3" style="color: black; display: flex; justify-content: space-between; align-items: center; font-size: 20px; color: red;">
+                                    <!-- TOTAL -->
+                                    <div class="card-body mb-3"
+                                        style="display:flex; align-items:center; font-size:20px; color:red;">
                                         <label style="white-space: nowrap; font-weight: bold;">Total :</label>
-                                        <div style="display: flex; justify-content: flex-end; width: 100%;">
-                                            <span style="margin-right: 5px;">Rp.</span>
+                                        <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                            <span style="margin-right:5px;">Rp.</span>
                                             <span id="TotalPembayaran">0</span>
                                             <input type="hidden" name="total_pembayaran" id="totalPembayaranInput">
                                         </div>
                                     </div>
-                                    <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden" class="form-control" readonly>
 
+                                    <input type="hidden"
+                                        name="total_keseluruhan_pembayaran"
+                                        id="totalKeseluruhanPembayaranhidden"
+                                        class="form-control"
+                                        readonly>
                                 </strong>
-
-
                             </div>
+
                             <!-- ================== TOMBOL SUBMIT ================== -->
                             <div class="row mt-3">
                                 <div class="col-12">

@@ -7,6 +7,8 @@ $agent = new Agent();
 @endphp
 
 <head>
+    <!-- cdn sweet alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- end -->
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -28,6 +30,7 @@ $agent = new Agent();
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
     <script src="{{ asset('assets/modules/cleave-js/dist/cleave.min.js') }}"></script>
@@ -35,7 +38,6 @@ $agent = new Agent();
     <!-- zoom image -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- end -->
     <style>
@@ -68,19 +70,13 @@ $agent = new Agent();
     <style>
         .navbar {
             position: fixed;
+            z-index: 1050;
+            /* Agar navbar tetap di atas */
             background: linear-gradient(to right, #ff3131, #ff914d);
             width: auto;
             height: auto;
-            z-index: 1001;
-        }
-
-        body.is-mobile .navbar {
-            background: #ffffff !important;
-            width: 100%;
-            margin-top: -2px;
         }
     </style>
-
 </head>
 @php
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
@@ -541,13 +537,13 @@ $isTenggatExpired = $tenggatDate < $currentDate;
         window.$ = window.jQuery;
     </script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
+    <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
+    <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-    <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
-    <script src="{{ asset('assets/modules/nicescroll/jquery.nicescroll.min.js') }}"></script>
-    <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
     <!--================== END ==================-->
