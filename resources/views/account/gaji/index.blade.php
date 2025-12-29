@@ -98,15 +98,22 @@ Data Gaji Karyawan | MIS
           <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
             <!-- CREATE DATA -->
+            @auth
+            @if (Auth::user()->level === 'manager')
             @if ($presensiExist)
-            <a href="{{ route('account.gaji.create') }}" class="btn btn-primary btn-block rounded-pill">
+            <a href="{{ route('account.gaji.create') }}"
+              class="btn btn-primary btn-block rounded-pill">
               <i class="fa fa-plus-circle"></i> TAMBAH GAJI
             </a>
             @else
-            <a href="#" class="btn btn-primary btn-block rounded-pill" id="tambahGajiBtn">
+            <a href="javascript:void(0)"
+              class="btn btn-primary btn-block rounded-pill"
+              id="tambahGajiBtn">
               <i class="fa fa-plus-circle"></i> TAMBAH GAJI
             </a>
             @endif
+            @endif
+            @endauth
             <!-- END -->
 
             <div class="dropdown card-header-action">

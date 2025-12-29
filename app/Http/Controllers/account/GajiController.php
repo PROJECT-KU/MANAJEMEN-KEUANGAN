@@ -73,75 +73,133 @@ class GajiController extends Controller
       $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
     } else {
       $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-      $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate));
+      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    // ✅ INISIALISASI WAJIB
-    $totalBulanIni = 0;
-    $totalBulanLalu = 0;
-    $totalDuaBulanLalu = 0;
     $totalGaji = 0;
+    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
 
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+      // ===== TOTAL GAJI 3 PERIODE =====
 
       // Bulan ini
       $totalBulanIni = DB::table('gaji')
+        ->selectRaw('SUM(total) as total')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [
           \Carbon\Carbon::now()->startOfMonth(),
           \Carbon\Carbon::now()->endOfMonth()
         ])
-        ->sum('gaji.total');
+        ->value('total') ?? 0;
 
-      // Bulan lalu
+      // 1 bulan sebelumnya
       $totalBulanLalu = DB::table('gaji')
+        ->selectRaw('SUM(total) as total')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [
           \Carbon\Carbon::now()->subMonth()->startOfMonth(),
           \Carbon\Carbon::now()->subMonth()->endOfMonth()
         ])
-        ->sum('gaji.total');
+        ->value('total') ?? 0;
 
-      // 2 bulan lalu
+      // 2 bulan sebelumnya
       $totalDuaBulanLalu = DB::table('gaji')
+        ->selectRaw('SUM(total) as total')
         ->join('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [
           \Carbon\Carbon::now()->subMonths(2)->startOfMonth(),
           \Carbon\Carbon::now()->subMonths(2)->endOfMonth()
         ])
-        ->sum('gaji.total');
+        ->value('total') ?? 0;
 
       $gaji = DB::table('gaji')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.gaji_pokok_ethes_digital', 'gaji.total_gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(20);
-    } else {
-      // role selain manager/staff/ceo
-      $gaji = DB::table('gaji')
+    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+
+      // ===== TOTAL GAJI 3 PERIODE (KHUSUS USER LOGIN) =====
+
+      $totalBulanIni = DB::table('gaji')
         ->where('user_id', $user->id)
-        ->orderBy('created_at', 'DESC')
+        ->whereBetween('tanggal', [
+          \Carbon\Carbon::now()->startOfMonth(),
+          \Carbon\Carbon::now()->endOfMonth()
+        ])
+        ->sum('total') ?? 0;
+
+      $totalBulanLalu = DB::table('gaji')
+        ->where('user_id', $user->id)
+        ->whereBetween('tanggal', [
+          \Carbon\Carbon::now()->subMonth()->startOfMonth(),
+          \Carbon\Carbon::now()->subMonth()->endOfMonth()
+        ])
+        ->sum('total') ?? 0;
+
+      $totalDuaBulanLalu = DB::table('gaji')
+        ->where('user_id', $user->id)
+        ->whereBetween('tanggal', [
+          \Carbon\Carbon::now()->subMonths(2)->startOfMonth(),
+          \Carbon\Carbon::now()->subMonths(2)->endOfMonth()
+        ])
+        ->sum('total') ?? 0;
+
+      // ===== LIST GAJI =====
+      $gaji = DB::table('gaji')
+        ->select(
+          'gaji.id',
+          'gaji.id_transaksi',
+          'gaji.token',
+          'gaji.gaji_pokok',
+          'gaji.gaji_pokok_ethes_digital',
+          'gaji.total_gaji_pokok',
+          'gaji.lembur',
+          'gaji.bonus',
+          'gaji.tunjangan',
+          'gaji.tanggal',
+          'gaji.pph',
+          'gaji.total',
+          'gaji.status',
+          'users.id as user_id',
+          'users.full_name',
+          'users.nik',
+          'users.norek',
+          'users.bank'
+        )
+        ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
+        ->orderBy('gaji.created_at', 'DESC')
+        ->paginate(10);
+
+      // optional (kalau masih dipakai)
+      $totalGaji = $totalBulanIni;
+    } else {
+
+      $totalGaji = DB::table('gaji')
+        ->selectRaw('SUM(total) as total_gaji')
+        ->where('user_id', $user->id)
+        ->whereBetween('tanggal', [$currentMonth, $nextMonth])
+        ->first()->total_gaji ?? 0;
+
+      $gaji = Gaji::select('gaji.*', 'users.name as full_name')
+        ->join('users', 'gaji.user_id', '=', 'users.id')
+        ->where('gaji.user_id', $user->id)
+        ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
+        ->orderBy('gaji.created_at', 'DESC')
         ->paginate(10);
     }
 
-    $presensiExist = Presensi::whereNotNull('status')
+    $presensiExist = Presensi::where('status', '<>', null)
       ->whereBetween('created_at', [$currentMonth, $nextMonth])
       ->exists();
 
-    return view('account.gaji.index', compact(
-      'gaji',
-      'startDate',
-      'endDate',
-      'totalGaji',
-      'presensiExist',
-      'totalBulanIni',
-      'totalBulanLalu',
-      'totalDuaBulanLalu'
-    ));
+
+    return view('account.gaji.index', compact('gaji', 'startDate', 'endDate', 'totalGaji', 'presensiExist', 'totalBulanIni', 'totalBulanLalu', 'totalDuaBulanLalu'));
   }
   // <!--================== END ==================-->
 
