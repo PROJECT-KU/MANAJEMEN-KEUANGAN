@@ -24,46 +24,32 @@ class ClinikScopusTrainerController extends Controller
     // <!--================== TAMPILAN DATA ==================-->
     public function index(Request $request)
     {
+        $user = Auth::user();
         $status = $request->get('status');
-        $nama = $request->get('nama');
+        // $nama = $request->get('nama');
         $sesi = $request->get('sesi');
-        $start = $request->get('start');
-        $end = $request->get('end');
-        $perPage = $request->get('per_page', 10);
+        $sesi2 = $request->get('sesi2');
+        $sesi3 = $request->get('sesi3');
+        $sesi4 = $request->get('sesi4');
+        $sesi5 = $request->get('sesi5');
+        $sesi6 = $request->get('sesi6');
+        $sesi7 = $request->get('sesi7');
 
-        $datatrainer = DB::table('clinikscopus')
-            ->when($status, function ($q, $status) {
-                if ($status === 'aktif') {
-                    $q->where('status', 'aktif');
-                } elseif ($status === 'non aktif') {
-                    $q->whereNull('status')->orWhere('status', 'non aktif');
-                }
-            })
-            ->when($nama, function ($q, $nama) {
-                if ($nama === 'nama') {
-                    $q->whereNotNull('nama');
-                } elseif ($nama === 'nama') {
-                    $q->whereNull('nama');
-                }
-            })
-            ->when($sesi, fn($q, $sesi) => $q->where('sesi', $sesi))
-            ->when($start, fn($q, $start) => $q->whereDate('created_at', '>=', $start))
-            ->when($end, fn($q, $end) => $q->whereDate('created_at', '<=', $end))
-            ->orderBy('created_at', 'DESC')
-            ->paginate($perPage)
-            ->appends($request->all());
+        $perPage = $request->get('per_page', 10);
 
         $data = DB::table('clinikscopus')->get();
 
         return view('account.clinik_scopus.index', compact(
-            'datatrainer',
             'data',
             'status',
-            'nama',
+            // 'nama',
             'sesi',
-            'start',
-            'end',
-            'perPage'
+            'sesi2',
+            'sesi3',
+            'sesi4',
+            'sesi5',
+            'sesi6',
+            'sesi7',
         ));
     }
     // <!--================== END ==================-->
@@ -71,26 +57,38 @@ class ClinikScopusTrainerController extends Controller
     // <!--================== create DATA ==================-->
     public function create(Request $request)
     {
-
         return view('account.clinik_scopus.create');
     }
     // <!--================== END ==================-->
     public function store(Request $request)
     {
         $user = Auth::user();
+        return view('account.user.index', compact('users'));
 
         $this->validate(
             $request,
             [
-                'nama' => 'required',
+                'user_id' => 'users.id',
                 'sesi' => 'required',
+                'sesi2' => 'required',
+                'sesi3' => 'required',
+                'sesi4' => 'required',
+                'sesi5' => 'required',
+                'sesi6' => 'required',
+                'sesi7' => 'required',
                 'spesialis' => 'required',
                 'status' => 'required',
                 'tanggal' => 'required',
             ],
             [
-                'nama.required' => 'Masukkan Nama Trainer!',
+                'user_id' => 'users.id',
                 'sesi.required' => 'Masukkan sesi!',
+                'sesi2.required' => 'Masukkan sesi!',
+                'sesi3.required' => 'Masukkan sesi!',
+                'sesi4.required' => 'Masukkan sesi!',
+                'sesi5.required' => 'Masukkan sesi!',
+                'sesi6.required' => 'Masukkan sesi!',
+                'sesi7.required' => 'Masukkan sesi!',
                 'spesialis.required' => 'Masukan spesialis',
                 'status.required' => 'Masukan status',
                 'tanggal.required' => 'Masukan tanggal',
@@ -112,6 +110,12 @@ class ClinikScopusTrainerController extends Controller
         $save = Clinikscopus::create([
             'nama' => $request->input('nama'),
             'sesi' => $request->input('sesi'),
+            'sesi2' => $request->input('sesi2'),
+            'sesi3' => $request->input('sesi3'),
+            'sesi4' => $request->input('sesi4'),
+            'sesi5' => $request->input('sesi5'),
+            'sesi6' => $request->input('sesi6'),
+            'sesi7' => $request->input('sesi7'),
             'spesialis' => $request->input('spesialis'),
             'status' => $request->input('status'),
             'tanggal' => $request->input('tanggal'),
@@ -125,4 +129,101 @@ class ClinikScopusTrainerController extends Controller
             return redirect()->route('account.clinikscopus.index')->with('error', 'Data Trainer Gagal Disimpan!');
         }
     }
+
+
+    // <!--================== EDIT DATA ==================-->
+    public function edit($id)
+    {
+        $datas = Clinikscopus::findOrFail($id);
+        return view('account.clinik_scopus.edit', compact('datas'));
+    }
+    public function update(Request $request, $id)
+    {
+        $datas = Clinikscopus::findOrFail($id);
+
+        // Validasi (opsional tapi disarankan)
+        $request->validate([
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+        ]);
+
+        // Default pakai foto lama
+        $imagePath = $datas->foto;
+
+        // Jika upload foto baru
+        if ($request->hasFile('foto')) {
+
+            // 🔥 HAPUS FOTO LAMA (JIKA ADA)
+            if ($datas->foto && file_exists(public_path('images/' . $datas->foto))) {
+                unlink(public_path('images/' . $datas->foto));
+            }
+
+            // SIMPAN FOTO BARU
+            $image = $request->file('foto');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+
+            // Set path foto baru
+            $imagePath = $imageName;
+        }
+
+        // Update data
+        $datas->update([
+            'nama'       => $request->nama,
+            'sesi'       => $request->sesi,
+            'sesi2'       => $request->sesi2,
+            'sesi3'       => $request->sesi3,
+            'sesi4'       => $request->sesi4,
+            'sesi5'       => $request->sesi5,
+            'sesi6'       => $request->sesi6,
+            'sesi7'       => $request->sesi7,
+            'spesialis'  => $request->spesialis,
+            'status'     => $request->status,
+            'tanggal'    => $request->tanggal,
+            'foto'       => $imagePath,
+        ]);
+
+        return redirect()
+            ->route('account.clinikscopus.index')
+            ->with('success', 'Data Trainer Berhasil Diperbarui!');
+    }
+
+
+    // <!--================== END ==================-->
+
+
+    // <!--================== DELETE DATA ==================-->
+    public function destroy($id)
+    {
+        try {
+            $data = Clinikscopus::find($id);
+
+            if (!$data) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan!'
+                ], 404);
+            }
+
+            // 🔥 HAPUS FOTO (JIKA ADA)
+            if ($data->foto && file_exists(public_path('images/' . $data->foto))) {
+                unlink(public_path('images/' . $data->foto));
+            }
+
+            // Hapus data dari database
+            $data->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data dan gambar berhasil dihapus!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // <!--================== END ==================-->
+
 }

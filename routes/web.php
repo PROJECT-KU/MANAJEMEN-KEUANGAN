@@ -374,6 +374,9 @@ Route::prefix('account')->group(
         Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
         Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
         Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
+        Route::get('/clinikscopus/data/edit/{id}', 'account\ClinikScopusTrainerController@edit')->name('account.clinikscopus.edit');
+        Route::post('/clinikscopus/data/update-data/{id}', 'account\ClinikScopusTrainerController@update')->name('account.clinikscopus.update');
+        Route::delete('/clinikscopus/data/{id}', 'account\ClinikScopusTrainerController@destroy')->name('account.clinikscopus.destroy');
     }
 
 

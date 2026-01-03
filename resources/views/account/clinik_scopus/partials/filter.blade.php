@@ -26,6 +26,7 @@
                 </div>
             </div>
 
+
             <!-- Verifikasi Email -->
             <div class="col-6 col-sm-6 col-md-4 col-lg-2 px-1 verified-col">
                 <div class="mb-2">
@@ -38,18 +39,6 @@
                 </div>
             </div>
 
-            <!-- Email -->
-            <div class="col-6 col-sm-6 col-md-4 col-lg-2 email-col">
-                <div class="mb-2">
-                    <label for="verifiedFilter" class="form-label fw-semibold mb-1">Verifikasi Email</label>
-                    <select id="userEmailFilter" class="form-select form-select-sm rounded-pill">
-                        <option value="">Semua Email</option>
-                        @foreach($users as $user)
-                        <option value="{{ $user->email }}">{{ $user->email }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
 
             <!-- Jarak Tanggal -->
             <div class="col-12 col-md-6 col-lg-4 date-col">

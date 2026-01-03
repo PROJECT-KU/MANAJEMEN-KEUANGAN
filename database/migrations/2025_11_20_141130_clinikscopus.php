@@ -15,13 +15,24 @@ class Clinikscopus extends Migration
     {
         Schema::create('clinikscopus', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('nama')->nullable();
+            $table->unsignedBigInteger('user_id');
             $table->string('sesi')->nullable();
+            $table->string('sesi2')->nullable();
+            $table->string('sesi3')->nullable();
+            $table->string('sesi4')->nullable();
+            $table->string('sesi5')->nullable();
+            $table->string('sesi6')->nullable();
+            $table->string('sesi7')->nullable();
             $table->string('spesialis')->nullable();
             $table->string('status')->nullable();
             $table->dateTime('tanggal')->nullable();
             $table->string('foto')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('RESTRICT')
+                ->onUpdate('CASCADE');
         });
         //
     }

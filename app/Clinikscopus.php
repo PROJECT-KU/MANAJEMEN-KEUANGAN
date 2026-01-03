@@ -18,8 +18,14 @@ class Clinikscopus extends Model
      */
     protected $fillable = [
 
-        'nama',
+        'user_id',
         'sesi',
+        'sesi2',
+        'sesi3',
+        'sesi4',
+        'sesi5',
+        'sesi6',
+        'sesi7',
         'spesialis',
         'status',
         'tanggal',

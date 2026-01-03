@@ -91,45 +91,6 @@ Data Customer | MIS
 
       <div class="card">
 
-        <!-- ================== FILTER ================== -->
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-          <div class="search-wrapper flex-grow-1 me-2">
-            <!-- 🔍 Search Input -->
-            <input
-              type="text"
-              id="liveSearch"
-              class="form-control"
-              placeholder="Pencarian..."
-              autocomplete="off">
-
-            <!-- ❌ Tombol Clear di dalam input -->
-            <button
-              type="button"
-              id="clearSearch"
-              title="Hapus pencarian">
-              <i class="fas fa-times-circle"></i>
-            </button>
-          </div>
-
-          <!-- 🔘 Tombol Filter -->
-          <button
-            class="btn btn-outline-primary rounded-pill flex-fill flex-sm-grow-0"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#filterCard"
-            aria-expanded="false"
-            aria-controls="filterCard"
-            id="toggleFilterBtn">
-            <i class="bi bi-funnel-fill"></i>
-            <span class="ms-1" id="toggleFilterText">Tampilkan Filter</span>
-
-            <!-- 🔽 Filter Collapse -->
-            <div class="collapse w-100 mt-2" id="filterCard">
-              @include('account.clinik_scopus.partials.filter')
-            </div>
-        </div>
-        <!-- ================== END FILTER ================== -->
 
         <!-- ================== Tombol Create ================== -->
         <a href="{{ route('account.clinikscopus.create') }}" class="btn btn-primary btn-block rounded-pill">
@@ -144,26 +105,41 @@ Data Customer | MIS
                 <tr>
                   <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
                   <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Sesi Trainer</th>
+                  <th scope="col" colspan="7" class="column-width" style="text-align: center;">Sesi Trainer</th>
                   <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
                   <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
                   <th scope="col" rowspan="2" style="text-align: center;">Status</th>
                   <th scope="col" style="width: 10%;text-align: center">Action</th>
+                </tr>
+                <tr>
+                  <th scope="col" style="text-align: center;">1</th>
+                  <th scope="col" style="text-align: center;">2</th>
+                  <th scope="col" style="text-align: center;">3</th>
+                  <th scope="col" style="text-align: center;">4</th>
+                  <th scope="col" style="text-align: center;">5</th>
+                  <th scope="col" style="text-align: center;">6</th>
+                  <th scope="col" style="text-align: center;">7</th>
                 </tr>
               </thead>
               <tbody id="customerTable">
                 @php
                 $no = 1;
                 @endphp
-                @foreach ($datatrainer as $item)
+                @foreach ($data as $item)
                 <tr>
                   <th scope="row" style="text-align: center">{{ $no }}</th>
                   <td style="display: flex; align-items: center; gap: 10px;">{{ $item->nama }} </td>
                   <td style="text-align: center;">{{ $item->sesi }}</td>
+                  <td style="text-align: center;">{{ $item->sesi2 }}</td>
+                  <td style="text-align: center;">{{ $item->sesi3 }}</td>
+                  <td style="text-align: center;">{{ $item->sesi4 }}</td>
+                  <td style="text-align: center;">{{ $item->sesi5 }}</td>
+                  <td style="text-align: center;">{{ $item->sesi6 }}</td>
+                  <td style="text-align: center;">{{ $item->sesi7 }}</td>
                   <td style="text-align: center;">{{ $item->spesialis }}</td>
                   <td style="text-align: center;">{{ $item->tanggal }}</td>
                   <td style="text-align: center;">
-                    @if ($item->status)
+                    @if ($item->status == "aktif")
                     <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
                       Aktif
                     </span>
@@ -179,7 +155,7 @@ Data Customer | MIS
                       style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
 
                       <!-- Tombol Edit -->
-                      <a href=""
+                      <a href="{{ route('account.clinikscopus.edit', $item->id) }}"
                         class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
                         style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
                         <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
@@ -371,7 +347,7 @@ Data Customer | MIS
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: "{{ route('account.customer.destroy', '') }}/" + id,
+          url: "{{ route('account.clinikscopus.index') }}/" + id,
           type: 'POST',
           data: {
             _token: token,

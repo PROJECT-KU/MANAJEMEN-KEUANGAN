@@ -246,23 +246,8 @@ Tambah Gaji Karyawan | MIS
 
             <!--================== DETAIL KARYAWAN ==================-->
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Nama Karyawan</label>
-                  <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
-                    <option value="">-- PILIH NAMA KARYAWAN --</option>
-                    @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
-                    @endforeach
-                  </select>
 
-                  @error('user_id')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
+
 
               <div class="col-md-6">
                 <div class="form-group">

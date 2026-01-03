@@ -51,7 +51,7 @@
 </style>
 <!--================== END ==================-->
 @section('title')
-Tambah Nama Trainer |
+Update data Trainer|
 @stop
 
 <style>
@@ -71,30 +71,22 @@ Tambah Nama Trainer |
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>TAMBAH DATA TRAINER</h1>
+            <h1>Edit Data Trainer</h1>
         </div>
-
-        @if(session('status') === 'error')
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <b>{{ session('message') }}</b>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        @endif
 
         <div class="section-body">
             <div class="card">
                 <div class="card-body">
 
-                    <form action="{{ route('account.clinikscopus.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('account.clinikscopus.update', $datas->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama</label>
-                                    <input type="text" id="nama" name="nama" style="text-transform:uppercase;" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
+                                    <input type="text" id="nama" name="nama" value="{{$datas->nama}}" style="text-transform:uppercase;" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
+
                                     @error('nama')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
@@ -105,7 +97,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi</label>
-                                    <input type="sesi" id="sesi" class="form-control" name="sesi" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi" id="sesi" class="form-control" name="sesi" value="{{$datas->sesi}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi')
                                     <div class="invalid-feedback" style="display: block">
@@ -117,7 +109,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 2</label>
-                                    <input type="sesi2" id="sesi2" class="form-control" name="sesi2" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi2" id="sesi2" class="form-control" name="sesi2" value="{{$datas->sesi2}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi2')
                                     <div class="invalid-feedback" style="display: block">
@@ -129,7 +121,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 3</label>
-                                    <input type="sesi3" id="sesi3" class="form-control" name="sesi3" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi3" id="sesi3" class="form-control" name="sesi3" value="{{$datas->sesi3}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi3')
                                     <div class="invalid-feedback" style="display: block">
@@ -141,7 +133,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 4</label>
-                                    <input type="sesi4" id="sesi4" class="form-control" name="sesi4" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi4" id="sesi4" class="form-control" name="sesi4" value="{{$datas->sesi4}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi4')
                                     <div class="invalid-feedback" style="display: block">
@@ -153,7 +145,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 5</label>
-                                    <input type="sesi5" id="sesi5" class="form-control" name="sesi5" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi5" id="sesi5" class="form-control" name="sesi5" value="{{$datas->sesi5}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi5')
                                     <div class="invalid-feedback" style="display: block">
@@ -165,7 +157,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 6</label>
-                                    <input type="sesi6" id="sesi6" class="form-control" name="sesi6" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi6" id="sesi6" class="form-control" name="sesi6" value="{{$datas->sesi6}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi6')
                                     <div class="invalid-feedback" style="display: block">
@@ -177,7 +169,7 @@ Tambah Nama Trainer |
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi 7</label>
-                                    <input type="sesi7" id="sesi7" class="form-control" name="sesi7" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
+                                    <input type="sesi7" id="sesi7" class="form-control" name="sesi7" value="{{$datas->sesi7}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
 
                                     @error('Sesi7')
                                     <div class="invalid-feedback" style="display: block">
@@ -188,12 +180,11 @@ Tambah Nama Trainer |
                             </div>
                         </div>
 
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Spesialis</label>
-                                    <input type="text" id="spesialis" name="spesialis" placeholder="Masukkan Spesialis" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
+                                    <input type="text" id="spesialis" name="spesialis" value="{{$datas->spesialis}}" placeholder="Masukkan Spesialis" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
 
                                     @error('spesialis')
                                     <div class="invalid-feedback" style="display: block">
@@ -204,8 +195,14 @@ Tambah Nama Trainer |
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>tanggal</label>
-                                    <input type="date" id="tanggal" name="tanggal" placeholder="Masukkan tanggal" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
+                                    <label>Tanggal</label>
+                                    <input
+                                        type="date"
+                                        id="tanggal"
+                                        name="tanggal"
+                                        value="{{ old('tanggal', \Carbon\Carbon::parse($datas->tanggal)->format('Y-m-d')) }}"
+                                        class="form-control"
+                                        required>
 
                                     @error('tanggal')
                                     <div class="invalid-feedback" style="display: block">
@@ -214,16 +211,17 @@ Tambah Nama Trainer |
                                     @enderror
                                 </div>
                             </div>
+
                         </div>
 
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Status</label>
-                                    <select class="form-control" name="status" style="height: auto;" required>
+                                    <select class="form-control" name="status" value="{{$datas->status}}" style="height: auto;" required>
                                         <option value="" disabled selected>-- PILIH STATUS TRAINER --</option>
-                                        <option value="aktif">Aktif</option>
-                                        <option value="non aktif">Non Aktif</option>
+                                        <option value="aktif" {{ $datas->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="non aktif" {{ $datas->status == 'non aktif' ? 'selected' : '' }}>Non Aktif</option>
                                     </select>
                                     @error('Status')
                                     <div class="invalid-feedback" style="display: block">
@@ -236,25 +234,29 @@ Tambah Nama Trainer |
 
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group custom-file-upload" style="margin-top: -3px;">
+                                <div class="form-group">
                                     <label>Foto Trainer</label>
                                     <div class="input-group">
-                                        <input type="file" name="foto" id="foto" class="inputfile" accept="image/*">
-                                        <label for="foto" class="file-upload">
-                                            <i class="fas fa-cloud-upload-alt"></i> Choose Image
-                                        </label>
+                                        <input type="file" name="foto" id="foto" class="form-control" accept="image/*" capture="camera">
                                     </div>
+                                    @error('foto')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
                                 </div>
-                                @error('foto')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
                             </div>
                             <div class="col-md-6">
-                                <div class="image-preview-container">
-                                    <div id="imagePreview" class="image-preview"></div>
-                                    <span id="file-selected"></span>
+                                <div class="form-group">
+                                    <a href="{{ asset('images/' . $datas->foto) }}" data-lightbox="{{ $datas->id }}">
+                                        <div class="card" style="width: 18rem; height: 250px; overflow: hidden; border: 2px dashed #000;">
+                                            @if ($datas->foto == null)
+                                            <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                            @else
+                                            <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" class="card-img-top" src="{{ asset('images/' . $datas->foto) }}" alt="Preview Image">
+                                            @endif
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -266,7 +268,7 @@ Tambah Nama Trainer |
                                 <i class="fa fa-paper-plane"></i> SIMPAN
                             </button>
 
-                            <a href="{{ route('account.pengguna.index') }}"
+                            <a href="{{ route('account.clinikscopus.index') }}"
                                 class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
                                 style="flex: 0 0 20%; height:35px; font-size: 15px;">
                                 <i class="fa fa-undo"></i> KEMBALI
@@ -281,44 +283,62 @@ Tambah Nama Trainer |
 </div>
 
 
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!--================== maksimal upload foto & jenis file yang di perbolehkan ==================-->
 <script>
-    document.getElementById('foto').addEventListener('change', function(event) {
-        var fileInput = event.target;
-        var file = fileInput.files[0];
-        var fileName = file.name;
-        var fileSize = (file.size / 1024).toFixed(2); // in KB
-        var allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    document.getElementById('foto').addEventListener('change', function() {
+        const maxFileSizeInBytes = 5024 * 5024; // 5MB
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const fileInput = this;
 
-        if (!allowedTypes.includes(file.type)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Only PNG, JPEG, and JPG files are allowed. Please choose a valid file type.'
-            });
-            return;
+        if (fileInput.files.length > 0) {
+            const selectedFile = fileInput.files[0];
+            const fileSize = selectedFile.size; // Get the file size in bytes
+            const fileName = selectedFile.name.toLowerCase();
+
+            // Check file size
+            if (fileSize > maxFileSizeInBytes) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Melebihi Batas',
+                    text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
+                });
+                fileInput.value = ''; // Clear the file input
+                return;
+            }
+
+            // Check file extension
+            const fileExtension = fileName.split('.').pop();
+            if (!allowedExtensions.includes(fileExtension)) {
+                // Display a SweetAlert error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jenis File Tidak Valid',
+                    text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
+                });
+                fileInput.value = ''; // Clear the file input
+            }
         }
-
-        if (fileSize > 3000) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'File size exceeds the maximum limit of 3MB. Please choose a smaller file.'
-            });
-            return;
-        }
-
-        document.getElementById('file-selected').innerHTML = fileName + ' (' + fileSize + ' KB)';
-
-        var reader = new FileReader();
-        reader.onload = function() {
-            var output = document.getElementById('imagePreview');
-            output.innerHTML = `<img src="${reader.result}">`;
-            output.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
     });
 </script>
-<!--================== END ==================-->
+<!--================== end ==================-->
+
+<!--================== upload image ==================-->
+<script>
+    const imageInput = document.getElementById('foto');
+    const imagePreview = document.getElementById('image-preview');
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block'; // Show the preview
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+<!--================== end ==================-->
 @stop
