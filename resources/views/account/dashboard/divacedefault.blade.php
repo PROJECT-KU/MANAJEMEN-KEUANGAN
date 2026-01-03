@@ -201,6 +201,45 @@ Dashboard | MIS
             @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
             @else
             <!--================== PRESENSI KARYAWAN ==================-->
+
+            <!-- tampilan untuk role user -->
+            @if (Auth::user()->level === 'user')
+            <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Swiper Container -->
+                        <div class="swiper mySwiper">
+                            <div class="swiper-wrapper">
+                                @foreach($artikel->take(6) as $item)
+                                <div class="swiper-slide">
+                                    <div class="card h-100">
+                                        <img src="{{ asset('images/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h5 class="card-title" style="text-align: center;">
+                                                <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
+                                                    {{ $item->judul }}
+                                                </a>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            <!-- ================== END SLIDER ARTIKEL ================== -->
+            <!-- end tampilan untuk role user -->
+
+            <!-- tampilan untuk role selain user -->
+            @else
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                     <div class="card card-statistic-2">
@@ -421,8 +460,6 @@ Dashboard | MIS
         </div>
         <!-- ================== END SLIDER ARTIKEL ================== -->
 
-        @endif
-
         <!--================== CHART GAJI PERBULAN SELAMA SETAHUN ==================-->
         <div class="col-lg-12">
             <div class="card">
@@ -476,6 +513,8 @@ Dashboard | MIS
                 </div>
             </div>
         </div>
+        @endif
+        @endif
         <!--================== END ==================-->
 
     </section>

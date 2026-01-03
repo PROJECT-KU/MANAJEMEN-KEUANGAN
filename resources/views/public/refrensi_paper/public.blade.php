@@ -79,7 +79,7 @@ Refrensi Paper | Rumah Scopus
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <h1 data-aos="fade-up">Wujudkan Penelitian Anda dengan Referensi Paper Terbaik!</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Akses jurnal berkualitas tinggi untuk meningkatkan kredibilitas penelitian Anda. Kami menyediakan informasi lengkap, mulai dari subjek area jurnal hingga rincian DOI</h2>
+                <h2 data-aos="fade-up" data-aos-delay="400" style="font-size: 15px;">Akses jurnal berkualitas tinggi untuk meningkatkan kredibilitas penelitian Anda. Kami menyediakan informasi lengkap, mulai dari subjek area jurnal hingga rincian DOI</h2>
                 <div data-aos="fade-up" data-aos-delay="600">
                     <div class="text-center text-lg-start">
                         <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">

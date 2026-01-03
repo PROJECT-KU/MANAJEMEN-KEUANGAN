@@ -84,16 +84,29 @@ Update data Trainer|
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Nama</label>
-                                    <input type="text" id="nama" name="nama" value="{{$datas->nama}}" style="text-transform:uppercase;" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
+                                    <label>Nama Karyawan</label>
 
-                                    @error('nama')
+                                    <select class="form-control select2" disabled>
+                                        @foreach ($users as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ $user->id == $datas->user_id ? 'selected' : '' }}>
+                                            {{ $user->full_name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+
+                                    <!-- 🔥 WAJIB: agar user_id tetap terkirim -->
+                                    <input type="hidden" name="user_id" value="{{ $datas->user_id }}">
+
+
+                                    @error('user_id')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Sesi</label>

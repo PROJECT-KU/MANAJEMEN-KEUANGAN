@@ -93,9 +93,15 @@ Tambah Nama Trainer |
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Nama</label>
-                                    <input type="text" id="nama" name="nama" style="text-transform:uppercase;" placeholder="Masukkan Nama" class="form-control" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-                                    @error('nama')
+                                    <label>Nama Karyawan</label>
+                                    <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
+                                        <option value="">-- PILIH NAMA KARYAWAN --</option>
+                                        @foreach ($datas as $user)
+                                        <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}">{{ $user->full_name }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    @error('user_id')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>

@@ -38,7 +38,6 @@ $agent = new Agent();
     <!-- zoom image -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- end -->
     <style>
@@ -71,19 +70,13 @@ $agent = new Agent();
     <style>
         .navbar {
             position: fixed;
+            z-index: 1050;
+            /* Agar navbar tetap di atas */
             background: linear-gradient(to right, #ff3131, #ff914d);
             width: auto;
             height: auto;
-            z-index: 1001;
-        }
-
-        body.is-mobile .navbar {
-            background: #ffffff !important;
-            width: 100%;
-            margin-top: -2px;
         }
     </style>
-
 </head>
 @php
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
@@ -207,12 +200,26 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <li class="menu-header">DASHBOARD</li>
                         <li class="{{ setActive('account/dashboard') }}"><a class="nav-link" href="{{ route('account.dashboard.index') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
                         <!--================== END ==================-->
-                        <!--================== Clinik Scopus ==================-->
+
+                        <!--================== CLINIC SCOPUS ==================-->
                         @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                         <li class="menu-header">Clinik Scopus</li>
                         <li class="{{ setActive('account/clinikscopus') }}"><a class="nav-link" href="{{ route('account.clinikscopus.index') }}"><i class="fas fa-home"></i> <span>Clinik Scopus</span></a></li>
-@endif
-                <!--================== END ==================-->
+
+                        <li class="{{ setActive('account/customer') . setActive('account/pengguna/search') }}">
+                            <a class="nav-link" href="{{ route('account.customer.index') }}">
+                                <i class="fas fa-users"></i> <span>Data Customer</span>
+                            </a>
+                        </li>
+                        @endif
+                        <!--================== END ==================-->
+
+                        <!--================== REDIRECT TO BERANDA ==================-->
+                        @if (Auth::user()->level === 'user')
+                        <li><a class="nav-link" href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Beranda</span></a></li>
+                        @endif
+                        <!--================== END ==================-->
+
                         @if (Auth::check() && Auth::user()->email_verified_at)
                         @php
                         $tenggatDate = Auth::user()->tenggat;
@@ -230,12 +237,6 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <i class="fas fa-building"></i> <span>Company</span>
                                     </a>
                                 </li>
-
-                                <li class="{{ setActive('account/customer') }} . {{ setActive('account/pengguna/search') }}">
-                                    <a class="nav-link" href="{{ route('account.customer.index') }}">
-                                        <i class="fas fa-users"></i> <span>Data Customer</span>
-                                    </a>
-                                </li>
                                 @endif
                                 <!--================== END ==================-->
 
@@ -245,7 +246,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif
 
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
-                                <li class="{{ setActive('account/pengguna') }} . {{ setActive('account/pengguna/search') }}">
+                                <li class="{{ setActive('account/pengguna') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-users"></i> <span>Data Karyawan</span>
                                     </a>
@@ -379,12 +380,24 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
                                     </a>
                                 </li>
+                                @endif
+                                <!--================== END ==================-->
 
-                                <!-- <li class="{{ setActive('account/Laporan-Peserta') }}">
-                                    <a class="nav-link" href="{{ route('account.peserta.list') }}">
-                                        <i class="fas fa-user-edit"></i> <span>Evaluasi Camp</span>
+                                <!--================== SCOPUS CAMP ==================-->
+                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                <li class="menu-header">SCOPUS CAMP</li>
+
+                                <li class="{{ setActive('account/scopus-camp') }}">
+                                    <a class="nav-link" href="{{ route('account.kategoriscopuscamp.index') }}">
+                                        <i class="fas fa-dice-d6"></i> <span>Kategori </span>
                                     </a>
-                                </li> -->
+                                </li>
+
+                                <li class="{{ setActive('account/PendaftaranScopusCamp') }}">
+                                    <a class="nav-link" href="{{ route('account.pendaftaranscopuscamp.index') }}">
+                                        <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
+                                    </a>
+                                </li>
                                 @endif
                                 <!--================== END ==================-->
 
@@ -423,19 +436,19 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @if (Auth::user()->level !== 'user' && Auth::user()->level !== 'karyawan')
                                 <li class="menu-header">LAPORAN</li>
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff')
-                                <li class="{{ setActive('account/camp') }} . {{ setActive('account/camp/search') }}">
+                                <li class="{{ setActive('account/camp') . setActive('account/camp/search') }}">
                                     <a class="nav-link" href="{{ route('account.camp.index') }}">
                                         <i class="fas fa-campground"></i> <span>Laporan Camp</span>
                                     </a>
                                 </li>
                                 @endif
 
-                                <li class="dropdown mb-5 {{ setActive('account/laporan_debit') }} {{ setActive('account/laporan_credit') }} {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
+                                <li class="dropdown mb-5 {{ setActive('account/laporan_debit') . setActive('account/laporan_credit') . setActive('account/laporan_semua') . setActive('account/neraca') }} show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>Laporan</span></a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/laporan_debit') }}"><a class="nav-link" href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line"></i> Uang Masuk</a></li>
                                         <li class="{{ setActive('account/laporan_credit') }}"><a class="nav-link" href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area"></i> Uang Keluar</a></li>
-                                        <li class="dropdown {{ setActive('account/laporan_semua') }} {{ setActive('account/neraca') }} show">
+                                        <li class="dropdown {{ setActive('account/laporan_semua') . setActive('account/neraca') }} show">
                                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-pie"></i><span>Semua</span></a>
                                             <ul class="dropdown-menu">
                                                 <li class="{{ setActive('account/laporan_semua') }}"><a class="nav-link" href="{{ route('account.laporan_semua.index') }}"><i class="fas fa-chart-area"></i>Catatan</a></li>
@@ -457,12 +470,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
 
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->
                                 @if (Auth::user()->level === 'admin')
-                                <li class="{{ setActive('account/maintenance') }} . {{ setActive('account/pengguna/search') }}">
+                                <li class="{{ setActive('account/maintenance') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
                                         <i class="fas fa-users-cog"></i> <span>MAINTENANCE</span>
                                     </a>
                                 </li>
-                                <li class="{{ setActive('account/sewa') }} . {{ setActive('account/pengguna/search') }}">
+                                <li class="{{ setActive('account/sewa') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.sewa.index') }}">
                                         <i class="fas fa-bell"></i> <span>NOTIF SEWA</span>
                                     </a>
@@ -519,6 +532,10 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <!--================== END ==================-->
 
     <!--================== GENERAL JS ==================-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        window.$ = window.jQuery;
+    </script>
     <script src="{{ asset('assets/modules/popper.js') }}"></script>
     <script src="{{ asset('assets/modules/tooltip.js') }}"></script>
     <script src="{{ asset('assets/modules/bootstrap/js/bootstrap.min.js') }}"></script>
@@ -528,6 +545,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @stack('scripts')
     <!--================== END ==================-->
 
     @extends('layouts.alerts')

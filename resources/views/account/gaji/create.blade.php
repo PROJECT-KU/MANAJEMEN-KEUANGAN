@@ -246,8 +246,23 @@ Tambah Gaji Karyawan | MIS
 
             <!--================== DETAIL KARYAWAN ==================-->
             <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Nama Karyawan</label>
+                  <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
+                    <option value="">-- PILIH NAMA KARYAWAN --</option>
+                    @foreach ($datas as $user)
+                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
+                    @endforeach
+                  </select>
 
-
+                  @error('user_id')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
 
               <div class="col-md-6">
                 <div class="form-group">
@@ -354,7 +369,7 @@ Tambah Gaji Karyawan | MIS
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label>Gaji Pokok</label>
+                <label>Gaji Pokok <span style="color: red;">*</span></label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
@@ -1008,19 +1023,6 @@ Tambah Gaji Karyawan | MIS
             </div>
             <!-- END -->
 
-            <!-- IZIN -->
-            <!-- <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Izin</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus7" value="{{ old('bonus7') }}" placeholder="Bonus Izin" class="form-control currency_izin">
-                </div>
-              </div>
-            </div> -->
-
             <div class="col-md-6">
               <div class="form-group">
                 <label>Total Izin</label>
@@ -1050,7 +1052,7 @@ Tambah Gaji Karyawan | MIS
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>
                   </div>
-                  <input type="text" name="webinar" id="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
+                  <input type="text" name="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
                 </div>
                 @error('webinar')
                 <div class="invalid-feedback" style="display: block">
@@ -1199,7 +1201,7 @@ Tambah Gaji Karyawan | MIS
 
             <div class="col-md-4">
               <div class="form-group">
-                <label>Tanggal Dibayarkan</label>
+                <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
                 <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
               </div>
               @error('tanggal')
@@ -1226,7 +1228,7 @@ Tambah Gaji Karyawan | MIS
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label>Status Pembayaran</label>
+                <label>Status Pembayaran <span style="color: red;">*</span></label>
                 <select class="form-control" name="status" style="height: auto;" required>
                   <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                   <option value="pending">PENDING</option>
@@ -1280,18 +1282,22 @@ Tambah Gaji Karyawan | MIS
             </div>
           </div>
 
-          <div class="d-flex mt-3" style="gap: 10px;">
-            <button class="btn btn-primary btn-submit rounded-pill"
-              type="submit"
-              style="flex: 0 0 80%; height:35px; font-size: 15px;">
-              <i class="fa fa-paper-plane"></i> SIMPAN
-            </button>
+          <div class="mt-3">
+            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
 
-            <a href="{{ route('account.gaji.index') }}"
-              class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
-              style="flex: 0 0 20%; height:35px; font-size: 15px;">
-              <i class="fa fa-undo"></i> KEMBALI
-            </a>
+              <!-- Tombol Simpan -->
+              <button type="submit"
+                class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                <i class="fa fa-paper-plane"></i> SIMPAN
+              </button>
+
+              <!-- Tombol Kembali -->
+              <a href="{{ route('account.gaji.index') }}"
+                class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                <i class="fa fa-undo"></i> KEMBALI
+              </a>
+
+            </div>
           </div>
 
         </div>
@@ -1480,174 +1486,8 @@ Tambah Gaji Karyawan | MIS
 </script>
 <!-- end add dan remove field lembur -->
 
-<!-- add dan remove field bonus -->
-<script>
-  $(document).ready(function() {
-
-    var bonusCounter = 0;
-
-    $('#addBonus').on('click', function() {
-      if (bonusCounter === 0) {
-        $('.bonus-field1').show();
-        $('#removeAddedBonus1').show();
-        $('#removeAddedBonus2').show();
-        $('#removeAddedBonus3').show();
-        $('#removeAddedBonus4').show();
-        $('#removeAddedBonus5').show();
-        $('#removeAddedBonus6').show();
-        $('#removeAddedBonus7').show();
-        $('#removeAddedBonus8').show();
-        $('#removeAddedBonus9').show();
-        $('#removeAddedBonus10').show();
-      } else if (bonusCounter === 1) {
-        $('.bonus-field2').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus2').show();
-      } else if (bonusCounter === 2) {
-        $('.bonus-field3').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus3').show();
-      } else if (bonusCounter === 3) {
-        $('.bonus-field4').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus4').show();
-      } else if (bonusCounter === 4) {
-        $('.bonus-field5').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus5').show();
-      } else if (bonusCounter === 5) {
-        $('.bonus-field6').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus6').show();
-      } else if (bonusCounter === 6) {
-        $('.bonus-field7').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus7').show();
-      } else if (bonusCounter === 7) {
-        $('.bonus-field8').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus8').show();
-      } else if (bonusCounter === 8) {
-        $('.bonus-field9').show();
-        $('#addBonus').show();
-        $('#removeAddedBonus9').show();
-      } else if (bonusCounter === 9) {
-        $('.bonus-field10').show();
-        $('#addBonus').hide();
-        $('#removeAddedBonus10').show();
-      }
-      bonusCounter++;
-    });
-
-    // Remove additional bonus fields
-    $('#removeAddedBonus1').on('click', function() {
-      $('.bonus-field1').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus1').val('');
-      $('.currency_bonus_luar1').val('');
-      $('[name="jumlah_bonus1"]').val('');
-      $('[name="jumlah_bonus_luar1"]').val('');
-    });
-    $('#removeAddedBonus2').on('click', function() {
-      $('.bonus-field2').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus2').val('');
-      $('.currency_bonus_luar2').val('');
-      $('[name="jumlah_bonus2"]').val('');
-      $('[name="jumlah_bonus_luar2"]').val('');
-    });
-    $('#removeAddedBonus3').on('click', function() {
-      $('.bonus-field3').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus3').val('');
-      $('.currency_bonus_luar3').val('');
-      $('[name="jumlah_bonus3"]').val('');
-      $('[name="jumlah_bonus_luar3"]').val('');
-    });
-    $('#removeAddedBonus4').on('click', function() {
-      $('.bonus-field4').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus4').val('');
-      $('.currency_bonus_luar4').val('');
-      $('[name="jumlah_bonus4"]').val('');
-      $('[name="jumlah_bonus_luar4"]').val('');
-    });
-    $('#removeAddedBonus5').on('click', function() {
-      $('.bonus-field5').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus5').val('');
-      $('.currency_bonus_luar5').val('');
-      $('[name="jumlah_bonus5"]').val('');
-      $('[name="jumlah_bonus_luar5"]').val('');
-    });
-    $('#removeAddedBonus6').on('click', function() {
-      $('.bonus-field6').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus6').val('');
-      $('.currency_bonus_luar6').val('');
-      $('[name="jumlah_bonus6"]').val('');
-      $('[name="jumlah_bonus_luar6"]').val('');
-    });
-    $('#removeAddedBonus7').on('click', function() {
-      $('.bonus-field7').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus7').val('');
-      $('.currency_bonus_luar7').val('');
-      $('[name="jumlah_bonus7"]').val('');
-      $('[name="jumlah_bonus_luar7"]').val('');
-    });
-    $('#removeAddedBonus8').on('click', function() {
-      $('.bonus-field8').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus8').val('');
-      $('.currency_bonus_luar8').val('');
-      $('[name="jumlah_bonus8"]').val('');
-      $('[name="jumlah_bonus_luar8"]').val('');
-    });
-    $('#removeAddedBonus9').on('click', function() {
-      $('.bonus-field9').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus9').val('');
-      $('.currency_bonus_luar9').val('');
-      $('[name="jumlah_bonus9"]').val('');
-      $('[name="jumlah_bonus_luar9"]').val('');
-    });
-    $('#removeAddedBonus10').on('click', function() {
-      $('.bonus-field10').hide();
-      $('#addBonus').show();
-      bonusCounter--;
-      $('.currency_bonus10').val('');
-      $('.currency_bonus_luar10').val('');
-      $('[name="jumlah_bonus10"]').val('');
-      $('[name="jumlah_bonus_luar10"]').val('');
-    });
-  });
-</script>
-<!-- end add dan remove field bonus -->
 
 <script>
-  // datepicker
-
-  // if ($(".datetimepicker").length) {
-  //   $('.datetimepicker').daterangepicker({
-  //     locale: {
-  //       format: 'YYYY-MM-DD hh:mm'
-  //     },
-  //     singleDatePicker: true,
-  //     timePicker: true,
-  //     timePicker24Hour: true,
-  //   });
-  // }
-
   if ($(".datetimepicker").length) {
     $('.datetimepicker').daterangepicker({
       locale: {
@@ -1746,156 +1586,57 @@ Tambah Gaji Karyawan | MIS
 </script>
 
 <!--================== FORMAT RUPIAH ==================-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
+
 <script>
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_ethes', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
+  document.addEventListener('DOMContentLoaded', function() {
 
-  // <!-- FORMAT RUPIAH LEMBUR -->
-  var cleaveC = new Cleave('.currency_lembur_default', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_1', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_2', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_3', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_4', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_5', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_6', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_7', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_8', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_9', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_lembur_10', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  // <!-- END -->
+    const currencyClasses = [
+      '.currency',
+      '.currency_ethes',
 
-  // <!-- FORMAT RUPIAH BONUS DARI PRESENSI -->
-  var cleaveC = new Cleave('.currency_kehadiran', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_camp_jogja', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_camp_luar_kota', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_perjalanan_jawa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_perjalanan_luar_jawa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_remote', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_izin', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  // <!-- END -->
+      '.currency_lembur_default',
+      '.currency_lembur_1',
+      '.currency_lembur_2',
+      '.currency_lembur_3',
+      '.currency_lembur_4',
+      '.currency_lembur_5',
+      '.currency_lembur_6',
+      '.currency_lembur_7',
+      '.currency_lembur_8',
+      '.currency_lembur_9',
+      '.currency_lembur_10',
 
-  var cleaveC = new Cleave('.currency_webinar', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
+      '.currency_kehadiran',
+      '.currency_camp_jogja',
+      '.currency_camp_luar_kota',
+      '.currency_perjalanan_jawa',
+      '.currency_perjalanan_luar_jawa',
+      '.currency_remote',
+      '.currency_izin',
+
+      '.currency_webinar',
+      '.currency_kinerja',
+      '.currency_tunjanganBPJS',
+      '.currency_tunjanganTHR',
+      '.currency_tunjanganPulsa',
+      '.currency_tunjangan_lainnya',
+      '.currency_potongan',
+      '.currency_pph',
+    ];
+
+    currencyClasses.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        new Cleave(el, {
+          numeral: true,
+          numeralThousandsGroupStyle: 'thousand'
+        });
+      });
+    });
+
   });
-  var cleaveC = new Cleave('.currency_kinerja', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganBPJS', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganTHR', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjanganPulsa', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_tunjangan_lainnya', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_potongan', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var cleaveC = new Cleave('.currency_pph', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
-  var timeoutHandler = null;
 </script>
 <!--================== END ==================-->
 
-<script>
-  /**
-   * btn submit loader
-   */
-  $(".btn-submit").click(function() {
-    $(".btn-submit").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
-
-    timeoutHandler = setTimeout(function() {
-      $(".btn-submit").removeClass('btn-progress');
-
-    }, 1000);
-  });
-
-  /**
-   * btn reset loader
-   */
-  $(".btn-reset").click(function() {
-    $(".btn-reset").addClass('btn-progress');
-    if (timeoutHandler) clearTimeout(timeoutHandler);
-
-    timeoutHandler = setTimeout(function() {
-      $(".btn-reset").removeClass('btn-progress');
-      $("#karyawanSelect").val('');
-    }, 500);
-  })
-</script>
 
 @stop
