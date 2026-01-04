@@ -380,10 +380,16 @@ Route::prefix('account')->group(
         Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
         Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 
-        //data trainer
+        //clinikscopus
         Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
         Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
         Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
+        Route::get('/clinikscopus/data/edit/{id}', 'account\ClinikScopusTrainerController@edit')->name('account.clinikscopus.edit');
+        Route::post('/clinikscopus/data/update-data/{id}', 'account\ClinikScopusTrainerController@update')->name('account.clinikscopus.update');
+        Route::delete('/clinikscopus/data/{id}', 'account\ClinikScopusTrainerController@destroy')->name('account.clinikscopus.destroy');
+        Route::get('/clinikscopus/search', 'account\ClinikScopusTrainerController@search')->name('account.clinikscopus.search');
+        Route::get('/clinikscopus/filter', 'account\ClinikScopusTrainerController@filter')->name('account.clinikscopus.filter');
+
 
         // kategori scopus camp
         Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');

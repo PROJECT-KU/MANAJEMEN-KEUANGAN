@@ -91,144 +91,183 @@ Data Customer | MIS
 
       <div class="card">
 
-        <!-- ================== FILTER ================== -->
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-          <div class="search-wrapper flex-grow-1 me-2">
-            <!-- 🔍 Search Input -->
-            <input
-              type="text"
-              id="liveSearch"
-              class="form-control"
-              placeholder="Pencarian..."
-              autocomplete="off">
+        <div class="card">
 
-            <!-- ❌ Tombol Clear di dalam input -->
-            <button
-              type="button"
-              id="clearSearch"
-              title="Hapus pencarian">
-              <i class="fas fa-times-circle"></i>
-            </button>
-          </div>
+          <!--================== FILTER ==================-->
+          <div class="card-header  d-flex justify-content-between align-items-center">
+            <h4><i class="fas fa-list"></i> DATA TRAINER</h4>
 
-          <!-- 🔘 Tombol Filter -->
-          <button
-            class="btn btn-outline-primary rounded-pill flex-fill flex-sm-grow-0"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#filterCard"
-            aria-expanded="false"
-            aria-controls="filterCard"
-            id="toggleFilterBtn">
-            <i class="bi bi-funnel-fill"></i>
-            <span class="ms-1" id="toggleFilterText">Tampilkan Filter</span>
+            <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
-            <!-- 🔽 Filter Collapse -->
-            <div class="collapse w-100 mt-2" id="filterCard">
-              @include('account.clinik_scopus.partials.filter')
-            </div>
-        </div>
-        <!-- ================== END FILTER ================== -->
+              <!-- CREATE DATA -->
+              <a href="{{ route('account.clinikscopus.create') }}"
+                class="btn btn-primary btn-block rounded-pill">
+                <i class="fa fa-plus-circle"></i> Tambah Data
+              </a>
 
-        <!-- ================== Tombol Create ================== -->
-        <a href="{{ route('account.clinikscopus.create') }}" class="btn btn-primary btn-block rounded-pill">
-          <i class="fa fa-plus-circle"></i> TAMBAH DATA
-        </a>
 
-        <!--================== DATA ==================-->
-        <div class="card-body" style="font-size: 11px;">
-          <div class="table-responsive" id="customerTableWrapper">
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Sesi Trainer</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Status</th>
-                  <th scope="col" style="width: 10%;text-align: center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="customerTable">
-                @php
-                $no = 1;
-                @endphp
-                @foreach ($datatrainer as $item)
-                <tr>
-                  <th scope="row" style="text-align: center">{{ $no }}</th>
-                  <td style="display: flex; align-items: center; gap: 10px;">{{ $item->nama }} </td>
-                  <td style="text-align: center;">{{ $item->sesi }}</td>
-                  <td style="text-align: center;">{{ $item->spesialis }}</td>
-                  <td style="text-align: center;">{{ $item->tanggal }}</td>
-                  <td style="text-align: center;">
-                    @if ($item->status)
-                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
-                      Aktif
-                    </span>
-                    @else
-                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
-                      Non aktif
-                    </span>
-                    @endif
-                  </td>
+              <!-- END -->
 
-                  <td class=" text-center align-middle">
-                    <div class="d-flex justify-content-center align-items-center"
-                      style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
+              <div class="dropdown card-header-action">
+                <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                  <i class="fas fa-download"></i> FILTER
+                </button>
+                <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
 
-                      <!-- Tombol Edit -->
-                      <a href=""
-                        class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
-                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
-                        <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
-                      </a>
-
-                      <!-- Tombol Delete -->
-                      <button onclick="Delete('{{ $item->id }}')"
-                        class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm"
-                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
-                        <i class="fa fa-trash" style="font-size: 13px; line-height: 1;"></i>
-                      </button>
-
+                  <!-- FILTER TANGGAL -->
+                  <form action="{{ route('account.clinikscopus.filter') }}" method="GET">
+                    <div class="form-group">
+                      <label>Tanggal Awal</label>
+                      <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
                     </div>
-                  </td>
-                </tr>
-                @php
-                $no++;
-                @endphp
-                @endforeach
 
-              </tbody>
-            </table>
-            <div style="text-align: center;">
-              <style>
-                @media (max-width: 767px) {
-                  .pagination {
-                    margin-left: 480px;
-                    /* Adjust the margin value as needed for mobile devices */
-                  }
-                }
+                    <div class="form-group">
+                      <label>Tanggal Akhir</label>
+                      <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
+                    </div>
 
-                @media (min-width: 768px) and (max-width: 991px) {
-                  .pagination {
-                    margin-left: 300px;
-                    /* Adjust the margin value as needed for iPads */
-                  }
-                }
-              </style>
+                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                    <div class="btn-group" style="width: 100%;">
+                      <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                      <a href="{{ route('account.clinikscopus.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                        <i class="fa fa-trash mt-2"></i> HAPUS
+                      </a>
+                    </div>
+                    @else
+                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    @endif
+                  </form>
+                  <!-- END -->
 
-              <div id="paginationWrapper" style="text-align: center;">
+                </div>
               </div>
 
+              <!-- SEARCH -->
+              <div style="max-width: 250px; width: 100%;">
+                <input type="text" id="liveSearch" class="form-control" placeholder="Pencarian..." autocomplete="off">
+              </div>
+              <button id="clearSearch"
+                class="btn btn-sm btn-secondary"
+                style="display:none;">
+                ✕
+              </button>
+              <!-- END -->
+
+
+            </div>
+
+          </div>
+          <!--================== END FILTER ==================-->
+
+          <!--================== DATA ==================-->
+          <div class="card-body" style="font-size: 11px;">
+            <div class="table-responsive" id="customerTableWrapper">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
+                    <th scope="col" colspan="7" class="column-width" style="text-align: center;">Sesi Trainer</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">Status</th>
+                    <th scope="col" style="width: 10%;text-align: center">Action</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" style="text-align: center;">1</th>
+                    <th scope="col" style="text-align: center;">2</th>
+                    <th scope="col" style="text-align: center;">3</th>
+                    <th scope="col" style="text-align: center;">4</th>
+                    <th scope="col" style="text-align: center;">5</th>
+                    <th scope="col" style="text-align: center;">6</th>
+                    <th scope="col" style="text-align: center;">7</th>
+                  </tr>
+                </thead>
+                <tbody id="customerTable">
+                  @php
+                  $no = 1;
+                  @endphp
+                  @foreach ($data as $item)
+                  <tr>
+                    <th scope="row" style="text-align: center">{{ $no }}</th>
+                    <td style="display: flex; align-items: center; gap: 10px;">{{ $item->full_name }} </td>
+                    <td style="text-align: center;">{{ $item->sesi }}</td>
+                    <td style="text-align: center;">{{ $item->sesi2 }}</td>
+                    <td style="text-align: center;">{{ $item->sesi3 }}</td>
+                    <td style="text-align: center;">{{ $item->sesi4 }}</td>
+                    <td style="text-align: center;">{{ $item->sesi5 }}</td>
+                    <td style="text-align: center;">{{ $item->sesi6 }}</td>
+                    <td style="text-align: center;">{{ $item->sesi7 }}</td>
+                    <td style="text-align: center;">{{ $item->spesialis }}</td>
+                    <td style="text-align: center;">{{ $item->tanggal }}</td>
+                    <td style="text-align: center;">
+                      @if ($item->status == "aktif")
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
+                        Aktif
+                      </span>
+                      @else
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
+                        Non aktif
+                      </span>
+                      @endif
+                    </td>
+
+                    <td class=" text-center align-middle">
+                      <div class="d-flex justify-content-center align-items-center"
+                        style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
+
+                        <!-- Tombol Edit -->
+                        <a href="{{ route('account.clinikscopus.edit', $item->id) }}"
+                          class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
+                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
+                          <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
+                        </a>
+
+                        <!-- Tombol Delete -->
+                        <button onclick="Delete('{{ $item->id }}')"
+                          class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm"
+                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
+                          <i class="fa fa-trash" style="font-size: 13px; line-height: 1;"></i>
+                        </button>
+
+                      </div>
+                    </td>
+                  </tr>
+                  @php
+                  $no++;
+                  @endphp
+                  @endforeach
+
+                </tbody>
+              </table>
+              <div style="text-align: center;">
+                <style>
+                  @media (max-width: 767px) {
+                    .pagination {
+                      margin-left: 480px;
+                      /* Adjust the margin value as needed for mobile devices */
+                    }
+                  }
+
+                  @media (min-width: 768px) and (max-width: 991px) {
+                    .pagination {
+                      margin-left: 300px;
+                      /* Adjust the margin value as needed for iPads */
+                    }
+                  }
+                </style>
+
+                <div id="paginationWrapper" style="text-align: center;">
+                </div>
+
+              </div>
             </div>
           </div>
-        </div>
-        <!--================== END DATA ==================-->
+          <!--================== END DATA ==================-->
 
+        </div>
       </div>
-    </div>
   </section>
 </div>
 
@@ -274,7 +313,7 @@ Data Customer | MIS
       timer = setTimeout(() => {
         if (query === "") {
           // Jika input kosong → reload semua data
-          fetch(`{{ route('account.customer.index') }}`)
+          fetch(`{{ route('account.clinikscopus.index') }}`)
             .then(response => response.text())
             .then(html => {
               const parser = new DOMParser();
@@ -290,7 +329,7 @@ Data Customer | MIS
         }
 
         // Jika ada teks → jalankan pencarian AJAX
-        fetch(`{{ route('account.customer.search') }}?q=${encodeURIComponent(query)}`)
+        fetch(`{{ route('account.clinikscopus.search') }}?q=${encodeURIComponent(query)}`)
           .then(response => response.text())
           .then(html => {
             const parser = new DOMParser();
@@ -327,7 +366,7 @@ Data Customer | MIS
     clearSearchBtn.addEventListener('click', function() {
       liveSearchInput.value = '';
       this.style.display = 'none';
-      fetch(`{{ route('account.customer.index') }}`)
+      fetch(`{{ route('account.clinikscopus.index') }}`)
         .then(response => response.text())
         .then(html => {
           const parser = new DOMParser();
@@ -342,6 +381,7 @@ Data Customer | MIS
     });
   });
 </script>
+
 <!-- ================== END ================== -->
 
 <!--================== RELOAD DATA KETIKA SUKSES ==================-->
@@ -371,7 +411,7 @@ Data Customer | MIS
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: "{{ route('account.customer.destroy', '') }}/" + id,
+          url: "{{ route('account.clinikscopus.index') }}/" + id,
           type: 'POST',
           data: {
             _token: token,
