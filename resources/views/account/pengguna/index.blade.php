@@ -21,7 +21,7 @@ Data Karyawan | MIS
 
           <!--================== FILTER ==================-->
           <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
-            <a href="{{ route('account.pengguna.crphpeate') }}" class="btn btn-primary rounded-pill d-flex align-items-center" style="white-space: nowrap;">
+            <a href="{{ route('account.pengguna.create') }}" class="btn btn-primary rounded-pill d-flex align-items-center" style="white-space: nowrap;">
               <i class="fa fa-plus-circle mr-1"></i> TAMBAH DATA KARYAWAN
             </a>
 

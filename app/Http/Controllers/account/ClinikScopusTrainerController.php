@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ClinikScopusTrainerController extends Controller
 {
@@ -22,17 +23,25 @@ class ClinikScopusTrainerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    // <!--================== MENAMPILKAN DATA ==================-->
     public function index(Request $request)
     {
         $user = Auth::user();
+        $today = Carbon::today();
 
+        // 🔥 AUTO UPDATE STATUS JIKA TANGGAL SUDAH LEWAT
+        DB::table('clinikscopus')
+            ->whereDate('tanggal', '<', $today)
+            ->where('status', 'active')
+            ->update([
+                'status' => 'non active'
+            ]);
+
+        // 🔽 AMBIL DATA SETELAH UPDATE
         $data = DB::table('clinikscopus')
             ->select(
                 'clinikscopus.*',
-                'users.full_name',
-                'users.nik',
-                'users.norek',
-                'users.bank'
+                'users.full_name'
             )
             ->leftJoin('users', 'clinikscopus.user_id', '=', 'users.id')
             ->where('users.company', $user->company)
@@ -41,32 +50,6 @@ class ClinikScopusTrainerController extends Controller
 
         return view('account.clinik_scopus.index', compact('data'));
     }
-
-    // <!--================== END ==================-->
-
-
-    // <!--================== create DATA ==================-->
-    public function create(Request $request)
-    {
-        $auth = Auth::user();
-
-        $datas = DB::table('users')
-            ->select(
-                'id',
-                'full_name',
-                'nik',
-                'norek',
-                'bank',
-                'telp',
-                'email'
-            )
-            ->where('company', $auth->company)
-            ->orderBy('full_name', 'ASC')
-            ->get();
-
-        return view('account.clinik_scopus.create', compact('datas'));
-    }
-
     // <!--================== END ==================-->
 
     // <!--================== FILTER ==================-->
@@ -136,6 +119,15 @@ class ClinikScopusTrainerController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(users.full_name) LIKE ?', ["%{$search}%"])
                     ->orWhereRaw('LOWER(clinikscopus.spesialis) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi2) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi3) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi4) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi5) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi6) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi7) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi8) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(clinikscopus.sesi9) LIKE ?', ["%{$search}%"])
                     ->orWhereRaw('LOWER(clinikscopus.status) LIKE ?', ["%{$search}%"]);
             });
         }
@@ -146,10 +138,27 @@ class ClinikScopusTrainerController extends Controller
 
         return view('account.clinik_scopus.index', compact('data'));
     }
-
-
-
     // <!--================== END ==================-->
+
+    // <!--================== CREATE DATA ==================-->
+    public function create(Request $request)
+    {
+        $auth = Auth::user();
+
+        $datas = DB::table('users')
+            ->select('id', 'full_name')
+            ->where('company', $auth->company)
+            ->orderBy('full_name', 'ASC')
+            ->get();
+
+        // 🔹 Ambil biaya persesi yang ACTIVE
+        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::where('status', 'active')->first();
+
+        return view(
+            'account.clinik_scopus.create',
+            compact('datas', 'biayaPersesiAktif')
+        );
+    }
 
     public function store(Request $request)
     {
@@ -157,59 +166,60 @@ class ClinikScopusTrainerController extends Controller
             $request,
             [
                 'user_id'   => 'required|exists:users,id',
-                'sesi'      => 'required',
-                'sesi2'     => 'required',
-                'sesi3'     => 'required',
-                'sesi4'     => 'required',
-                'sesi5'     => 'required',
-                'sesi6'     => 'required',
-                'sesi7'     => 'required',
                 'spesialis' => 'required',
                 'status'    => 'required',
                 'tanggal'   => 'required|date',
+                'foto'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // 2 MB
             ],
             [
-                'user_id.required' => 'Nama karyawan wajib dipilih',
-                'user_id.exists'   => 'Nama karyawan tidak valid',
-
-                'sesi.required'    => 'Masukkan sesi!',
-                'sesi2.required'   => 'Masukkan sesi!',
-                'sesi3.required'   => 'Masukkan sesi!',
-                'sesi4.required'   => 'Masukkan sesi!',
-                'sesi5.required'   => 'Masukkan sesi!',
-                'sesi6.required'   => 'Masukkan sesi!',
-                'sesi7.required'   => 'Masukkan sesi!',
+                'user_id.required'   => 'Nama karyawan wajib dipilih',
+                'user_id.exists'     => 'Nama karyawan tidak valid',
 
                 'spesialis.required' => 'Masukkan spesialis',
                 'status.required'    => 'Masukkan status',
+
                 'tanggal.required'   => 'Masukkan tanggal',
                 'tanggal.date'       => 'Format tanggal tidak valid',
+
+                // Pesan khusus foto
+                'foto.image' => 'File harus berupa gambar',
+                'foto.mimes' => 'Format foto harus JPG, JPEG, atau PNG',
+                'foto.max'   => 'Ukuran foto maksimal 2 MB',
             ]
         );
 
-        // ================= SIMPAN FOTO =================
+        // simpan gambar
         $imagePath = null;
+
         if ($request->hasFile('foto')) {
             $image = $request->file('foto');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
+
+            // Generate UUID filename
+            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+            // Move to public/ClinikScopusTrainer
+            $image->move(public_path('ClinikScopusTrainer'), $imageName);
+
+            // Save filename (or path if needed)
             $imagePath = $imageName;
         }
 
-        // ================= SIMPAN DATA =================
         $save = Clinikscopus::create([
-            'user_id'   => $request->user_id,
-            'sesi'      => $request->sesi,
-            'sesi2'     => $request->sesi2,
-            'sesi3'     => $request->sesi3,
-            'sesi4'     => $request->sesi4,
-            'sesi5'     => $request->sesi5,
-            'sesi6'     => $request->sesi6,
-            'sesi7'     => $request->sesi7,
-            'spesialis' => $request->spesialis,
-            'status'    => $request->status,
-            'tanggal'   => $request->tanggal,
-            'foto'      => $imagePath,
+            'user_id'           => $request->user_id,
+            'sesi'              => $request->sesi,
+            'sesi2'             => $request->sesi2,
+            'sesi3'             => $request->sesi3,
+            'sesi4'             => $request->sesi4,
+            'sesi5'             => $request->sesi5,
+            'sesi6'             => $request->sesi6,
+            'sesi7'             => $request->sesi7,
+            'sesi8'             => $request->sesi8,
+            'sesi9'             => $request->sesi9,
+            'spesialis'         => $request->spesialis,
+            'status'            => $request->status,
+            'tanggal'           => $request->tanggal,
+            'biaya_persesi_id'  => $request->biaya_persesi_id,
+            'foto'              => $imagePath,
         ]);
 
         return redirect()
@@ -219,7 +229,7 @@ class ClinikScopusTrainerController extends Controller
                 $save ? 'Data Trainer Berhasil Disimpan!' : 'Data Trainer Gagal Disimpan!'
             );
     }
-
+    // <!--================== END ==================-->
 
     // <!--================== EDIT DATA ==================-->
     public function edit($id)
@@ -227,13 +237,16 @@ class ClinikScopusTrainerController extends Controller
         $datas = Clinikscopus::findOrFail($id);
 
         $users = DB::table('users')
-            ->select('id', 'full_name', 'nik', 'norek', 'bank', 'email')
+            ->select('id', 'full_name')
             ->orderBy('full_name', 'ASC')
             ->get();
 
+        // 🔹 Ambil biaya persesi yang ACTIVE
+        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::where('status', 'active')->first();
+
         return view(
             'account.clinik_scopus.edit',
-            compact('datas', 'users')
+            compact('datas', 'users', 'biayaPersesiAktif')
         );
     }
     public function update(Request $request, $id)
@@ -249,39 +262,47 @@ class ClinikScopusTrainerController extends Controller
         $imagePath = $datas->foto;
 
         if ($request->hasFile('foto')) {
-            if ($datas->foto && file_exists(public_path('images/' . $datas->foto))) {
-                unlink(public_path('images/' . $datas->foto));
+
+            // Hapus foto lama jika ada
+            if ($datas->foto && file_exists(public_path('ClinikScopusTrainer/' . $datas->foto))) {
+                unlink(public_path('ClinikScopusTrainer/' . $datas->foto));
             }
 
             $image = $request->file('foto');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
+
+            // Nama file UUID
+            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+            // Simpan ke public/ClinikScopusTrainer
+            $image->move(public_path('ClinikScopusTrainer'), $imageName);
+
             $imagePath = $imageName;
         }
 
         // UPDATE DATA
         $datas->update([
-            'user_id'   => $request->user_id, // 🔥 BENAR
-            'sesi'      => $request->sesi,
-            'sesi2'     => $request->sesi2,
-            'sesi3'     => $request->sesi3,
-            'sesi4'     => $request->sesi4,
-            'sesi5'     => $request->sesi5,
-            'sesi6'     => $request->sesi6,
-            'sesi7'     => $request->sesi7,
-            'spesialis' => $request->spesialis,
-            'status'    => $request->status,
-            'tanggal'   => $request->tanggal,
-            'foto'      => $imagePath,
+            'user_id'           => $request->user_id,
+            'sesi'              => $request->sesi,
+            'sesi2'             => $request->sesi2,
+            'sesi3'             => $request->sesi3,
+            'sesi4'             => $request->sesi4,
+            'sesi5'             => $request->sesi5,
+            'sesi6'             => $request->sesi6,
+            'sesi7'             => $request->sesi7,
+            'sesi8'             => $request->sesi8,
+            'sesi9'             => $request->sesi9,
+            'spesialis'         => $request->spesialis,
+            'status'            => $request->status,
+            'tanggal'           => $request->tanggal,
+            'biaya_persesi_id' => $request->biaya_persesi_id,
+            'foto'              => $imagePath,
         ]);
 
         return redirect()
             ->route('account.clinikscopus.index')
             ->with('success', 'Data Trainer Berhasil Diperbarui!');
     }
-
     // <!--================== END ==================-->
-
 
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)

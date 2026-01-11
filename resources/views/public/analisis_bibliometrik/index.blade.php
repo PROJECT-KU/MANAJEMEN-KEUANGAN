@@ -45,7 +45,9 @@ Analisis Bibliometrik | Rumah Scopus
         </div>
 
         <div class="row d-flex justify-content-center flex-wrap">
-            @foreach($categories as $item)
+
+            <!--================== JIKA CLASS ADA ==================-->
+            @forelse($categories as $item)
             <div class="col-md-3 mb-2 d-flex" data-aos="fade-up" style="margin: 10px; text-align: center; min-height: 100%;">
                 <div class="inner-card d-flex flex-column justify-content-between"
                     style="border-radius: 10px; padding: 20px; padding-bottom: 60px; background-color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; width: 100%;">
@@ -113,7 +115,36 @@ Analisis Bibliometrik | Rumah Scopus
                         </div>
                 </div>
             </div>
-            @endforeach
+
+            <!--================== END ==================-->
+
+            <!--================== JIKA CLASS TIDAK ADA ==================-->
+            @empty
+            <div class="col-lg-12 d-flex justify-content-center py-5" data-aos="fade-up">
+                <div
+                    style="background: #ffffff; border-radius: 16px; padding: 40px 32px; max-width: 720px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 20px 40px rgba(0, 0, 0, 0.08);">
+
+                    <!-- TITLE -->
+                    <h4 style="font-weight: 700; color: #0f172a; font-size: clamp(20px, 3vw, 26px); margin-bottom: 14px;">
+                        Kelas Analisis Bibliometrik Belum Tersedia
+                    </h4>
+
+                    <!-- DESCRIPTION -->
+                    <p style="color: #64748b; font-size: clamp(14px, 2.5vw, 16px); max-width: 560px; margin: 0 auto 28px; line-height: 1.6;">
+                        Saat ini belum ada kelas Analisis Bibliometrik yang dibuka.
+                        Silakan cek kembali dalam waktu dekat atau hubungi kami untuk informasi terbaru.
+                    </p>
+
+                    <!-- CTA BUTTON -->
+                    <a href="{{ route('blog.contact.kontak') }}"
+                        style="display: inline-block; background: linear-gradient(to right, #ff3131, #ff914d); color: #fff; border-radius: 10px; padding: 12px 30px; font-weight: 600; font-size: 15px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        Hubungi Admin
+                    </a>
+                </div>
+            </div>
+            <!--================== END ==================-->
+            @endempty
+
         </div>
     </div>
 </section>

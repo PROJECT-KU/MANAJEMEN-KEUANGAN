@@ -39,3 +39,29 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     encrypted: true
 // });
+
+import Echo from 'laravel-echo';
+window.Pusher = require('pusher-js');
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: 'local',
+    wsHost: window.location.hostname,
+    wsPort: 6001,
+    forceTLS: false,
+    disableStats: true,
+});
+
+window.Echo.channel('promo-status')
+    .listen('.updated', (e) => {
+        const promo = e.promo;
+        console.log('Promo updated', promo);
+
+        // Update tabel di front-end tanpa reload
+        const row = document.querySelector(`#promo-${promo.id}`);
+        if (row) {
+            const statusCell = row.querySelector('.status-cell');
+            statusCell.innerHTML = `<span class="badge badge-secondary">NON ACTIVE</span>`;
+        }
+    });
+

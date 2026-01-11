@@ -13,6 +13,7 @@
 
 use App\Http\Middleware\CheckTestimoniToken;
 
+
 Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
 
 Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
@@ -62,352 +63,371 @@ Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->n
 
 // CLINIK SCOPUS
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
+Route::get('/Clinik-Scopus/Sesi/{id}', 'Publict\PublicClinikScopusController@sesi')->name('public.clinikscopus.sesi');
+Route::post('/cek-diskon-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@cekDiskon')->name('public.CekDiskonclinikscopus.CekKodeDiskon');
 
 Auth::routes();
-
 /**
  * account
  */
-Route::prefix('account')->group(
-    function () {
-        // karir
-        Route::get('/karir', 'account\KarirController@index')->name('karir.index');
-        Route::get('/karir/list', 'account\KarirController@list')->name('karir.list');
-        Route::get('/karir/detail/{id}{token}', 'account\KarirController@detail')->name('karir.detail');
-        Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
-        Route::get('/karir/edit/{id}{token}', 'account\KarirController@edit')->name('karir.edit');
-        Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
-        Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
-        Route::get('/karir/filter', 'account\KarirController@filter')->name('karir.filter');
-        Route::delete('/karir/{id}', 'account\KarirController@destroy')->name('account.karir.destroy');
+Route::prefix('account')
+    ->middleware(['auth'])
+    ->group(
+        function () {
 
-        //reset password
-        Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
-        Route::get('newpassword/reset', 'Auth\ResetPasswordController@formpassword')->name('newpassword.reset');
-        Route::post('cekemail/reset', 'Auth\ResetPasswordController@resetPassword')->name('cekemail.reset');
+            // karir
+            Route::get('/karir', 'account\KarirController@index')->name('karir.index');
+            Route::get('/karir/list', 'account\KarirController@list')->name('karir.list');
+            Route::get('/karir/detail/{id}{token}', 'account\KarirController@detail')->name('karir.detail');
+            Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
+            Route::get('/karir/edit/{id}{token}', 'account\KarirController@edit')->name('karir.edit');
+            Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
+            Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
+            Route::get('/karir/filter', 'account\KarirController@filter')->name('karir.filter');
+            Route::delete('/karir/{id}', 'account\KarirController@destroy')->name('account.karir.destroy');
 
-        //dashboard account
-        Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
+            //reset password
+            Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
+            Route::get('newpassword/reset', 'Auth\ResetPasswordController@formpassword')->name('newpassword.reset');
+            Route::post('cekemail/reset', 'Auth\ResetPasswordController@resetPassword')->name('cekemail.reset');
 
-        // pengguna
-        Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');
-        Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
-        Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
-        Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
-        Route::post('/pengguna/update/foto/{id}', 'account\PenggunaController@updatePhoto')->name('account.pengguna.update.updatePhoto');
-        Route::post('/pengguna/update/data-diri/{id}', 'account\PenggunaController@updatediri')->name('account.pengguna.update.datadiri');
-        Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
-        Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
-        Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
-        Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
-        Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
+            //dashboard account
+            Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
 
-        // routes/web.php
+            // pengguna
+            Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');
+            Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
+            Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
+            Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
+            Route::post('/pengguna/update/foto/{id}', 'account\PenggunaController@updatePhoto')->name('account.pengguna.update.updatePhoto');
+            Route::post('/pengguna/update/data-diri/{id}', 'account\PenggunaController@updatediri')->name('account.pengguna.update.datadiri');
+            Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
+            Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
+            Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
+            Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
+            Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
 
-        //download excel
-        //Route::get('/account/laporan-semua/download-excel', 'account\LaporanSemuaController@downloadExcel')->name('account.laporan-semua.download-excel');
-        //Route::get('/account/laporan-semua/export-users-to-excel', 'account\LaporanSemuaController@exportUsersToExcel')->name('account.laporan-semua.export-users-to-excel');
+            // routes/web.php
 
-        //profil
-        Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
-        Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
-        Route::post('/profil/update/foto/{id}', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
-        Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
-        Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
-        Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
-        Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
-        Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');
-        Route::post('/profil/reset-password', 'account\ProfilController@resetPassword')->name('account.profil.reset.password');
+            //download excel
+            //Route::get('/account/laporan-semua/download-excel', 'account\LaporanSemuaController@downloadExcel')->name('account.laporan-semua.download-excel');
+            //Route::get('/account/laporan-semua/export-users-to-excel', 'account\LaporanSemuaController@exportUsersToExcel')->name('account.laporan-semua.export-users-to-excel');
 
-        // download pdf
-        Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
-        Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
-        Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
-        Route::get('account/laporan_neraca/download-pdf', 'account\NeracaController@downloadPdf')->name('account.laporan_neraca.download-pdf');
+            //profil
+            Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
+            Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
+            Route::post('/profil/update/foto/{id}', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
+            Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
+            Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
+            Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
+            Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
+            Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');
+            Route::post('/profil/reset-password', 'account\ProfilController@resetPassword')->name('account.profil.reset.password');
 
-        //penyewaan
-        // Route::get('penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
-        // Route::delete('account/penyewaan/{id}', 'PenyewaanController@destroy')->name('account.penyewaan.destroy');
-        // Route::get('/account/penyewaan/create', 'account\PenyewaanController@create')->name('account.penyewaan.create');
-        // Route::post('/account/penyewaan/store', 'account\PenyewaanController@store')->name('account.penyewaan.store');
-        // Route::get('account/penyewaan/{id}/edit', 'account\PenyewaanController@edit')->name('account.penyewaan.edit');
-        // Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
-        // Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
-        // Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
-        // Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
-        // Route::get('/penyewaan/pdf/{id}', 'account\PenyewaanController@detailPDF')->name('pdf.show');
+            // download pdf
+            Route::get('account/laporan_semua/download-pdf', 'account\LaporanSemuaController@downloadPdf')->name('account.laporan_semua.download-pdf');
+            Route::get('/account/laporan-credit/download-pdf', 'account\LaporanCreditController@downloadPdf')->name('account.laporan_credit.download-pdf');
+            Route::get('/account/laporan-debit/download-pdf', 'account\LaporanDebitController@downloadPdf')->name('account.laporan_debit.download-pdf');
+            Route::get('account/laporan_neraca/download-pdf', 'account\NeracaController@downloadPdf')->name('account.laporan_neraca.download-pdf');
 
-        //tambah barang
-        Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
-        Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
-        Route::delete('account/tambah_barang/{id}', 'TambahBarangController@destroy')->name('account.tambah_barang.destroy');
+            //penyewaan
+            // Route::get('penyewaan/search', 'account\PenyewaanController@search')->name('account.penyewaan.search');
+            // Route::delete('account/penyewaan/{id}', 'PenyewaanController@destroy')->name('account.penyewaan.destroy');
+            // Route::get('/account/penyewaan/create', 'account\PenyewaanController@create')->name('account.penyewaan.create');
+            // Route::post('/account/penyewaan/store', 'account\PenyewaanController@store')->name('account.penyewaan.store');
+            // Route::get('account/penyewaan/{id}/edit', 'account\PenyewaanController@edit')->name('account.penyewaan.edit');
+            // Route::put('account/penyewaan/{id}', 'account\PenyewaanController@update')->name('account.penyewaan.update');
+            // Route::Resource('/penyewaan', 'account\PenyewaanController', ['as' => 'account']);
+            // Route::get('penyewaan/{id}/detail', 'account\PenyewaanController@detail')->name('account.penyewaan.detail');
+            // Route::get('/account/laporan_penyewaan/download-pdf', 'account\PenyewaanController@downloadPdf')->name('account.laporan_penyewaan.download-pdf');
+            // Route::get('/penyewaan/pdf/{id}', 'account\PenyewaanController@detailPDF')->name('pdf.show');
 
-        //categories debit
-        Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
-        Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account']);
-        Route::delete('account/categories_debit/{id}', 'CategoriesDebitController@destroy')->name('account.categories_debit.destroy');
+            //tambah barang
+            Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
+            Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
+            Route::delete('account/tambah_barang/{id}', 'TambahBarangController@destroy')->name('account.tambah_barang.destroy');
 
-        //debit
-        Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
-        Route::Resource('/debit', 'account\DebitController', ['as' => 'account']);
+            //categories debit
+            Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
+            Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account']);
+            Route::delete('account/categories_debit/{id}', 'CategoriesDebitController@destroy')->name('account.categories_debit.destroy');
 
-        //categories credit
-        Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
-        Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
-        Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
+            //debit
+            Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
+            Route::Resource('/debit', 'account\DebitController', ['as' => 'account']);
 
-        //credit
-        Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
-        Route::Resource('/credit', 'account\CreditController', ['as' => 'account']);
+            //categories credit
+            Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
+            Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
+            Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
 
-        //laporan debit
-        Route::get('/laporan_debit', 'account\LaporanDebitController@index')->name('account.laporan_debit.index');
-        Route::get('/laporan_debit/check', 'account\LaporanDebitController@check')->name('account.laporan_debit.check');
+            //credit
+            Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
+            Route::Resource('/credit', 'account\CreditController', ['as' => 'account']);
 
-        //laporan credit
-        Route::get('/laporan_credit', 'account\LaporanCreditController@index')->name('account.laporan_credit.index');
-        Route::get('/laporan_credit/check', 'account\LaporanCreditController@check')->name('account.laporan_credit.check');
+            //laporan debit
+            Route::get('/laporan_debit', 'account\LaporanDebitController@index')->name('account.laporan_debit.index');
+            Route::get('/laporan_debit/check', 'account\LaporanDebitController@check')->name('account.laporan_debit.check');
 
-        //laporan semua
-        Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
-        Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
-        Route::get('/account/laporan-semua/filter', [LaporanSemuaController::class, 'filterByDate'])->name('laporan_semua.filter');
+            //laporan credit
+            Route::get('/laporan_credit', 'account\LaporanCreditController@index')->name('account.laporan_credit.index');
+            Route::get('/laporan_credit/check', 'account\LaporanCreditController@check')->name('account.laporan_credit.check');
 
-        //laporan neraca
-        Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');
-        Route::Resource('/neraca', 'account\NeracaController', ['as' => 'account']);
+            //laporan semua
+            Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
+            Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
+            Route::get('/account/laporan-semua/filter', [LaporanSemuaController::class, 'filterByDate'])->name('laporan_semua.filter');
 
-        //gaji
-        Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
-        Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
-        Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
-        Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
-        Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
-        Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
-        Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
-        Route::get('/gaji/search', 'account\GajiController@searchGaji')->name('account.gaji.search');
-        Route::get('/gaji/filter', 'account\GajiController@filterGaji')->name('account.gaji.filter');
-        Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
-        Route::get('/laporan_gaji/download-excel', 'account\GajiController@downloadExcel')->name('account.laporan_gaji.download-excel');
-        Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
+            //laporan neraca
+            Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');
+            Route::Resource('/neraca', 'account\NeracaController', ['as' => 'account']);
 
-        //presensi
-        Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
-        Route::get('/presensi/create', 'account\PresensiController@create')->name('account.presensi.create');
-        Route::post('/account/presensi/store', 'account\PresensiController@store')->name('account.presensi.store');
-        Route::get('/presensi/detail/{id}', 'account\PresensiController@detail')->name('account.presensi.detail');
-        Route::get('/presensi/edit/{id}', 'account\PresensiController@edit')->name('account.presensi.edit');
-        Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
-        Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
-        Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
-        Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
-        Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
-        Route::get('/laporan_presensi/download-excel', 'account\PresensiController@downloadExcel')->name('account.laporan_presensi.download-excel');
+            //gaji
+            Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
+            Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
+            Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
+            Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
+            Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
+            Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
+            Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
+            Route::get('/gaji/search', 'account\GajiController@searchGaji')->name('account.gaji.search');
+            Route::get('/gaji/filter', 'account\GajiController@filterGaji')->name('account.gaji.filter');
+            Route::get('/laporan_gaji/download-pdf', 'account\GajiController@downloadPdf')->name('account.laporan_gaji.download-pdf');
+            Route::get('/laporan_gaji/download-excel', 'account\GajiController@downloadExcel')->name('account.laporan_gaji.download-excel');
+            Route::get('/laporan_gaji/{id}/Slip-Gaji', 'account\GajiController@SlipGaji')->name('account.laporan_gaji.Slip-Gaji');
 
-        //email
-        Route::get('/email', 'account\EmailController@index')->name('account.email.index');
+            //presensi
+            Route::get('/presensi', 'account\PresensiController@index')->name('account.presensi.index');
+            Route::get('/presensi/create', 'account\PresensiController@create')->name('account.presensi.create');
+            Route::post('/account/presensi/store', 'account\PresensiController@store')->name('account.presensi.store');
+            Route::get('/presensi/detail/{id}', 'account\PresensiController@detail')->name('account.presensi.detail');
+            Route::get('/presensi/edit/{id}', 'account\PresensiController@edit')->name('account.presensi.edit');
+            Route::post('account/presensi/{id}', 'account\PresensiController@update')->name('account.presensi.update');
+            Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
+            Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
+            Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
+            Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
+            Route::get('/laporan_presensi/download-excel', 'account\PresensiController@downloadExcel')->name('account.laporan_presensi.download-excel');
 
-        // company
-        Route::get('/company/{id}/edit', 'account\PenggunaController@company')->name('account.company.edit');
-        Route::put('/company/{id}', 'account\PenggunaController@updateCompany')->name('account.company.update');
+            //email
+            Route::get('/email', 'account\EmailController@index')->name('account.email.index');
 
-        // notifikasi
-        Route::get('/notifikasi', 'account\NotifikasiController@showNotifications')->name('account.notifikasi.index');
+            // company
+            Route::get('/company/{id}/edit', 'account\PenggunaController@company')->name('account.company.edit');
+            Route::put('/company/{id}', 'account\PenggunaController@updateCompany')->name('account.company.update');
 
-        // maintenance
-        Route::get('/maintenance', 'account\MaintenanceController@index')->name('account.maintenance.index');
-        Route::get('/maintenance/create', 'account\MaintenanceController@create')->name('account.maintenance.create');
-        Route::post('/maintenance', 'account\MaintenanceController@store')->name('account.maintenance.store');
-        Route::get('/maintenance/{id}/edit', 'account\MaintenanceController@edit')->name('account.maintenance.edit');
-        Route::post('/maintenance/{id}', 'account\MaintenanceController@update')->name('account.maintenance.update');
-        Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
-        Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
+            // notifikasi
+            Route::get('/notifikasi', 'account\NotifikasiController@showNotifications')->name('account.notifikasi.index');
 
-        // sewa
-        // Route::get('/sewa', 'account\SewaController@index')->name('account.sewa.index');
-        // Route::get('/sewa/create', 'account\SewaController@create')->name('account.sewa.create');
-        // Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
-        // Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
-        // Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
+            // maintenance
+            Route::get('/maintenance', 'account\MaintenanceController@index')->name('account.maintenance.index');
+            Route::get('/maintenance/create', 'account\MaintenanceController@create')->name('account.maintenance.create');
+            Route::post('/maintenance', 'account\MaintenanceController@store')->name('account.maintenance.store');
+            Route::get('/maintenance/{id}/edit', 'account\MaintenanceController@edit')->name('account.maintenance.edit');
+            Route::post('/maintenance/{id}', 'account\MaintenanceController@update')->name('account.maintenance.update');
+            Route::get('/maintenance/blank', 'account\MaintenanceController@maintenance')->name('account.maintenance.blank');
+            Route::delete('/maintenance/{id}', 'account\MaintenanceController@destroy')->name('account.maintenance.destroy');
 
-        Route::get('/get-user-phone/{userId}', 'account\PresensiController@getUserPhone')->name('account.getUserPhone');
+            // sewa
+            // Route::get('/sewa', 'account\SewaController@index')->name('account.sewa.index');
+            // Route::get('/sewa/create', 'account\SewaController@create')->name('account.sewa.create');
+            // Route::post('/sewa', 'account\SewaController@store')->name('account.sewa.store');
+            // Route::get('/sewa/{id}/edit', 'account\SewaController@edit')->name('account.sewa.edit');
+            // Route::put('/sewa/{id}', 'account\SewaController@update')->name('account.sewa.update');
 
-        // laporan camp
-        Route::get('/camp', 'account\CampController@index')->name('account.camp.index');
-        Route::get('/camp/create', 'account\CampController@create')->name('account.camp.create');
-        Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
-        Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
-        Route::get('/camp/filter', 'account\CampController@filter')->name('account.camp.filter');
-        Route::get('/camp/detail/{id}{token}', 'account\CampController@detail')->name('account.camp.detail');
-        Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
-        Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
-        Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
-        Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
-        Route::get('/laporan_camp/download-excel', 'account\CampController@downloadExcel')->name('account.laporan_camp.download-excel');
-        Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
+            Route::get('/get-user-phone/{userId}', 'account\PresensiController@getUserPhone')->name('account.getUserPhone');
 
-        // Laporan peserta
-        Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
-        Route::get('/Laporan-Peserta/detail/{id}{token}', 'account\PesertaController@detail')->name('account.peserta.detail');
-        Route::delete('/Laporan-Peserta/{id}', 'account\PesertaController@destroy')->name('account.peserta.destroy');
-        Route::get('/Laporan-Peserta/search', 'account\PesertaController@search')->name('account.peserta.search');
-        Route::get('/Laporan-Peserta/filter', 'account\PesertaController@filter')->name('account.peserta.filter');
-        Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
-        // Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
-        Route::get('/Laporan-Peserta/testimoni/{id}{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
-        Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
-        Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
+            // laporan camp
+            Route::get('/camp', 'account\CampController@index')->name('account.camp.index');
+            Route::get('/camp/create', 'account\CampController@create')->name('account.camp.create');
+            Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
+            Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
+            Route::get('/camp/filter', 'account\CampController@filter')->name('account.camp.filter');
+            Route::get('/camp/detail/{id}{token}', 'account\CampController@detail')->name('account.camp.detail');
+            Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
+            Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
+            Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
+            Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
+            Route::get('/laporan_camp/download-excel', 'account\CampController@downloadExcel')->name('account.laporan_camp.download-excel');
+            Route::get('/laporan_camp/{id}/Slip-Camp', 'account\CampController@SlipCamp')->name('account.laporan_Camp.Slip-Camp');
 
-        // Pendaftaran Analisis Bibliometrik
-        Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
-        Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
-        Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
-        Route::delete('Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
-        Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
-        Route::get('/Analisis-Bibliometrik/filter', 'account\AnalisisBibliometrikController@filter')->name('account.analisisbibliometrik.filter');
-        Route::get('/Analisis-Bibliometrik/download-excel', 'account\AnalisisBibliometrikController@downloadExcel')->name('account.analisisbibliometrik-excel');
+            // Laporan peserta
+            Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
+            Route::get('/Laporan-Peserta/detail/{id}{token}', 'account\PesertaController@detail')->name('account.peserta.detail');
+            Route::delete('/Laporan-Peserta/{id}', 'account\PesertaController@destroy')->name('account.peserta.destroy');
+            Route::get('/Laporan-Peserta/search', 'account\PesertaController@search')->name('account.peserta.search');
+            Route::get('/Laporan-Peserta/filter', 'account\PesertaController@filter')->name('account.peserta.filter');
+            Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
+            // Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
+            Route::get('/Laporan-Peserta/testimoni/{id}{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
+            Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
+            Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 
-        // Kategori Analisis Bibliometrik
-        Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');
-        Route::get('/kategori/analisis-bibliometrik/create', 'account\CategoriesAnalisisBibliometrikController@create')->name('account.kategori.create');
-        Route::post('/kategori/analisis-bibliometrik/store', 'account\CategoriesAnalisisBibliometrikController@store')->name('account.kategori.store');
-        Route::get('/kategori/analisis-bibliometrik/edit/{id}/{token}', 'account\CategoriesAnalisisBibliometrikController@edit')->name('account.kategori.edit');
-        Route::post('/kategori/analisis-bibliometrik/update/{id}', 'account\CategoriesAnalisisBibliometrikController@update')->name('account.kategori.update');
-        Route::delete('/kategori/analisis-bibliometrik/delete/{id}', 'account\CategoriesAnalisisBibliometrikController@destroy')->name('account.kategori.destroy');
-        Route::get('/kategori/analisis-bibliometrik/search', 'account\CategoriesAnalisisBibliometrikController@search')->name('account.ketegori.search');
-        Route::get('/kategori/analisis-bibliometrik/filter', 'account\CategoriesAnalisisBibliometrikController@filter')->name('account.ketegori.filter');
-        Route::get('/kategori/analisis-bibliometrik/download-pdf', 'account\CategoriesAnalisisBibliometrikController@downloadPdf')->name('account.ketegori.download-pdf');
-        Route::get('/kategori/analisis-bibliometrik/download-excel', 'account\CategoriesAnalisisBibliometrikController@downloadExcel')->name('account.ketegori.download-excel');
+            // Pendaftaran Analisis Bibliometrik
+            Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
+            Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
+            Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
+            Route::delete('Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
+            Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
+            Route::get('/Analisis-Bibliometrik/filter', 'account\AnalisisBibliometrikController@filter')->name('account.analisisbibliometrik.filter');
+            Route::get('/Analisis-Bibliometrik/download-excel', 'account\AnalisisBibliometrikController@downloadExcel')->name('account.analisisbibliometrik-excel');
 
-        // kategori artikel
-        Route::get('/artikel-kategori', 'account\CategoriesArtikelController@index')->name('account.Kategori-Artikel.index');
-        Route::get('/artikel-kategori/create', 'account\CategoriesArtikelController@create')->name('account.Kategori-Artikel.create');
-        Route::post('/artikel-kategori/store', 'account\CategoriesArtikelController@store')->name('account.Kategori-Artikel.store');
-        Route::get('/artikel-kategori/edit/{id}{token}', 'account\CategoriesArtikelController@edit')->name('account.Kategori-Artikel.edit');
-        Route::post('/artikel-kategori/update/{id}', 'account\CategoriesArtikelController@update')->name('account.Kategori-Artikel.update');
-        Route::delete('/artikel-kategori/delete/{id}', 'account\CategoriesArtikelController@destroy')->name('account.Kategori-Artikel.destroy');
-        Route::get('/artikel-kategori/search', 'account\CategoriesArtikelController@search')->name('account.Kategori-Artikel.search');
-        Route::get('/artikel-kategori/filter', 'account\CategoriesArtikelController@filter')->name('account.Kategori-Artikel.filter');
+            // Kategori Analisis Bibliometrik
+            Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');
+            Route::get('/kategori/analisis-bibliometrik/create', 'account\CategoriesAnalisisBibliometrikController@create')->name('account.kategori.create');
+            Route::post('/kategori/analisis-bibliometrik/store', 'account\CategoriesAnalisisBibliometrikController@store')->name('account.kategori.store');
+            Route::get('/kategori/analisis-bibliometrik/edit/{id}/{token}', 'account\CategoriesAnalisisBibliometrikController@edit')->name('account.kategori.edit');
+            Route::post('/kategori/analisis-bibliometrik/update/{id}', 'account\CategoriesAnalisisBibliometrikController@update')->name('account.kategori.update');
+            Route::delete('/kategori/analisis-bibliometrik/delete/{id}', 'account\CategoriesAnalisisBibliometrikController@destroy')->name('account.kategori.destroy');
+            Route::get('/kategori/analisis-bibliometrik/search', 'account\CategoriesAnalisisBibliometrikController@search')->name('account.ketegori.search');
+            Route::get('/kategori/analisis-bibliometrik/filter', 'account\CategoriesAnalisisBibliometrikController@filter')->name('account.ketegori.filter');
+            Route::get('/kategori/analisis-bibliometrik/download-pdf', 'account\CategoriesAnalisisBibliometrikController@downloadPdf')->name('account.ketegori.download-pdf');
+            Route::get('/kategori/analisis-bibliometrik/download-excel', 'account\CategoriesAnalisisBibliometrikController@downloadExcel')->name('account.ketegori.download-excel');
 
-        // ARRIKEL ADMIN
-        Route::get('/article', 'account\ArtikelController@index')->name('account.Artikel.index');
-        Route::get('/article/create', 'account\ArtikelController@create')->name('account.Artikel.create');
-        Route::post('/article/store', 'account\ArtikelController@store')->name('account.Artikel.store');
-        Route::get('/article/edit/{id}{token}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
-        Route::put('/article/update/{id}', 'account\ArtikelController@update')->name('account.Artikel.update');
-        Route::post('/article/upload/', 'account\ArtikelController@upload')->name('account.Artikel.upload');
-        Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
-        Route::get('/article/search', 'account\ArtikelController@search')->name('account.Artikel.search');
-        Route::get('/article/filter', 'account\ArtikelController@filter')->name('account.Artikel.filter');
+            // kategori artikel
+            Route::get('/artikel-kategori', 'account\CategoriesArtikelController@index')->name('account.Kategori-Artikel.index');
+            Route::get('/artikel-kategori/create', 'account\CategoriesArtikelController@create')->name('account.Kategori-Artikel.create');
+            Route::post('/artikel-kategori/store', 'account\CategoriesArtikelController@store')->name('account.Kategori-Artikel.store');
+            Route::get('/artikel-kategori/edit/{id}{token}', 'account\CategoriesArtikelController@edit')->name('account.Kategori-Artikel.edit');
+            Route::post('/artikel-kategori/update/{id}', 'account\CategoriesArtikelController@update')->name('account.Kategori-Artikel.update');
+            Route::delete('/artikel-kategori/delete/{id}', 'account\CategoriesArtikelController@destroy')->name('account.Kategori-Artikel.destroy');
+            Route::get('/artikel-kategori/search', 'account\CategoriesArtikelController@search')->name('account.Kategori-Artikel.search');
+            Route::get('/artikel-kategori/filter', 'account\CategoriesArtikelController@filter')->name('account.Kategori-Artikel.filter');
 
-        // more
-        Route::get('/more', 'account\MoreController@index')->name('account.more.index');
+            // ARRIKEL ADMIN
+            Route::get('/article', 'account\ArtikelController@index')->name('account.Artikel.index');
+            Route::get('/article/create', 'account\ArtikelController@create')->name('account.Artikel.create');
+            Route::post('/article/store', 'account\ArtikelController@store')->name('account.Artikel.store');
+            Route::get('/article/edit/{id}{token}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
+            Route::put('/article/update/{id}', 'account\ArtikelController@update')->name('account.Artikel.update');
+            Route::post('/article/upload/', 'account\ArtikelController@upload')->name('account.Artikel.upload');
+            Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
+            Route::get('/article/search', 'account\ArtikelController@search')->name('account.Artikel.search');
+            Route::get('/article/filter', 'account\ArtikelController@filter')->name('account.Artikel.filter');
 
-        // perjalanan dinas
-        Route::get('/Perjalanan-Dinas', 'account\PerjalananDinasController@index')->name('account.PerjalananDinas.index');
-        Route::get('/Perjalanan-Dinas/create', 'account\PerjalananDinasController@create')->name('account.PerjalananDinas.create');
-        Route::get('/Perjalanan-Dinas/addcreate/{id}', 'account\PerjalananDinasController@addcreate')->name('account.PerjalananDinas.addcreate');
-        Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
-        Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
-        Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
-        Route::get('/Perjalanan-Dinas/Detail-Ajukan/{id}', 'account\PerjalananDinasController@DetailAjukan')->name('account.PerjalananDinas.DetailAjukan');
-        Route::get('/Perjalanan-Dinas/Detail-Diterima/{id}', 'account\PerjalananDinasController@DetailDiterima')->name('account.PerjalananDinas.DetailDiterima');
-        Route::get('/Perjalanan-Dinas/Detail-Ditolak/{id}', 'account\PerjalananDinasController@DetailDitolak')->name('account.PerjalananDinas.DetailDitolak');
-        Route::get('/Perjalanan-Dinas/Edit/{id}', 'account\PerjalananDinasController@Edit')->name('account.PerjalananDinas.Edit');
-        Route::get('/Perjalanan-Dinas/AddEdit/{id}', 'account\PerjalananDinasController@AddEdit')->name('account.PerjalananDinas.AddEdit');
-        Route::post('/Perjalanan-Dinas/Update-Edit/{id}', 'account\PerjalananDinasController@UpdateEdit')->name('account.PerjalananDinas.UpdateEdit');
-        Route::post('/Perjalanan-Dinas/Update-Manager/{id}', 'account\PerjalananDinasController@PengajuanManager')->name('account.PerjalananDinas.PengajuanManager');
-        Route::post('/Perjalanan-Dinas/Update-AddEdit/{id}', 'account\PerjalananDinasController@UpdateAddEdit')->name('account.PerjalananDinas.UpdateAddEdit');
-        Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
+            // more
+            Route::get('/more', 'account\MoreController@index')->name('account.more.index');
 
-        // meme
-        Route::get('/meme/data', 'account\DataMemeController@index')->name('account.meme.index');
-        Route::get('/meme/create-data', 'account\DataMemeController@create')->name('account.meme.create');
-        Route::post('/meme/store-data', 'account\DataMemeController@store')->name('account.meme.store');
-        Route::get('/meme/edit-data/{id}', 'account\DataMemeController@edit')->name('account.meme.edit');
-        Route::post('/meme/update-data/{id}', 'account\DataMemeController@update')->name('account.meme.update');
-        Route::delete('/meme/delete/{id}', 'account\DataMemeController@destroy')->name('account.meme.delete');
+            // perjalanan dinas
+            Route::get('/Perjalanan-Dinas', 'account\PerjalananDinasController@index')->name('account.PerjalananDinas.index');
+            Route::get('/Perjalanan-Dinas/create', 'account\PerjalananDinasController@create')->name('account.PerjalananDinas.create');
+            Route::get('/Perjalanan-Dinas/addcreate/{id}', 'account\PerjalananDinasController@addcreate')->name('account.PerjalananDinas.addcreate');
+            Route::post('/Perjalanan-Dinas/store', 'account\PerjalananDinasController@store')->name('account.PerjalananDinas.store');
+            Route::post('/Perjalanan-Dinas/addstore/{id}', 'account\PerjalananDinasController@addstore')->name('account.PerjalananDinas.addstore');
+            Route::get('/Perjalanan-Dinas/search', 'account\PerjalananDinasController@search')->name('account.PerjalananDinas.search');
+            Route::get('/Perjalanan-Dinas/Detail-Ajukan/{id}', 'account\PerjalananDinasController@DetailAjukan')->name('account.PerjalananDinas.DetailAjukan');
+            Route::get('/Perjalanan-Dinas/Detail-Diterima/{id}', 'account\PerjalananDinasController@DetailDiterima')->name('account.PerjalananDinas.DetailDiterima');
+            Route::get('/Perjalanan-Dinas/Detail-Ditolak/{id}', 'account\PerjalananDinasController@DetailDitolak')->name('account.PerjalananDinas.DetailDitolak');
+            Route::get('/Perjalanan-Dinas/Edit/{id}', 'account\PerjalananDinasController@Edit')->name('account.PerjalananDinas.Edit');
+            Route::get('/Perjalanan-Dinas/AddEdit/{id}', 'account\PerjalananDinasController@AddEdit')->name('account.PerjalananDinas.AddEdit');
+            Route::post('/Perjalanan-Dinas/Update-Edit/{id}', 'account\PerjalananDinasController@UpdateEdit')->name('account.PerjalananDinas.UpdateEdit');
+            Route::post('/Perjalanan-Dinas/Update-Manager/{id}', 'account\PerjalananDinasController@PengajuanManager')->name('account.PerjalananDinas.PengajuanManager');
+            Route::post('/Perjalanan-Dinas/Update-AddEdit/{id}', 'account\PerjalananDinasController@UpdateAddEdit')->name('account.PerjalananDinas.UpdateAddEdit');
+            Route::delete('/Perjalanan-Dinas/delete/{id}', 'account\PerjalananDinasController@destroy')->name('account.PerjalananDinas.destroy');
 
-        // paperisasi
-        Route::get('/paperisasi/data', 'account\PaperisasiController@index')->name('account.paperisasi.index');
-        Route::get('/paperisasi/data/search', 'account\PaperisasiController@search')->name('account.paperisasi.search');
-        Route::get('/paperisasi/data/filter', 'account\PaperisasiController@filter')->name('account.paperisasi.filter');
-        Route::get('/paperisasi/data/create', 'account\PaperisasiController@create')->name('account.paperisasi.create');
-        Route::post('/paperisasi/data/store', 'account\PaperisasiController@store')->name('account.paperisasi.store');
-        Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
-        Route::post('/paperisasi/data/update-data/{id}', 'account\PaperisasiController@update')->name('account.paperisasi.update');
-        Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
+            // meme
+            Route::get('/meme/data', 'account\DataMemeController@index')->name('account.meme.index');
+            Route::get('/meme/create-data', 'account\DataMemeController@create')->name('account.meme.create');
+            Route::post('/meme/store-data', 'account\DataMemeController@store')->name('account.meme.store');
+            Route::get('/meme/edit-data/{id}', 'account\DataMemeController@edit')->name('account.meme.edit');
+            Route::post('/meme/update-data/{id}', 'account\DataMemeController@update')->name('account.meme.update');
+            Route::delete('/meme/delete/{id}', 'account\DataMemeController@destroy')->name('account.meme.delete');
 
-        // pendaftaran scopuS kafe
-        Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendaftaran-scopus-kafe.index');
-        Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendaftaran-scopus-kafe.filter');
-        Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendaftaran-scopus-kafe.search');
-        Route::get('/pendaftaran-scopus-kafe/data/edit/{id}', 'account\PendaftaranScopusKafeController@edit')->name('account.pendaftaran-scopus-kafe.edit');
-        Route::post('/pendaftaran-scopus-kafe/data/update-data/{id}', 'account\PendaftaranScopusKafeController@update')->name('account.pendaftaran-scopus-kafe.update');
-        Route::delete('/pendaftaran-scopus-kafe/data/delete/{id}', 'account\PendaftaranScopusKafeController@destroy')->name('account.pendaftaran-scopus-kafe.delete');
+            // paperisasi
+            Route::get('/paperisasi/data', 'account\PaperisasiController@index')->name('account.paperisasi.index');
+            Route::get('/paperisasi/data/search', 'account\PaperisasiController@search')->name('account.paperisasi.search');
+            Route::get('/paperisasi/data/filter', 'account\PaperisasiController@filter')->name('account.paperisasi.filter');
+            Route::get('/paperisasi/data/create', 'account\PaperisasiController@create')->name('account.paperisasi.create');
+            Route::post('/paperisasi/data/store', 'account\PaperisasiController@store')->name('account.paperisasi.store');
+            Route::get('/paperisasi/data/edit/{id}', 'account\PaperisasiController@edit')->name('account.paperisasi.editdata');
+            Route::post('/paperisasi/data/update-data/{id}', 'account\PaperisasiController@update')->name('account.paperisasi.update');
+            Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
 
-        // refrensi paper
-        Route::get('/refrensi-paper/data', 'account\RefrensiPaperController@index')->name('account.refrensi-paper.index');
-        Route::get('/refrensi-paper/data/filter', 'account\RefrensiPaperController@filter')->name('account.refrensi-paper.filter');
-        Route::get('/refrensi-paper/data/search', 'account\RefrensiPaperController@search')->name('account.refrensi-paper.search');
-        Route::get('/refrensi-paper/data/create', 'account\RefrensiPaperController@create')->name('account.refrensi-paper.create');
-        Route::post('/refrensi-paper/data/store', 'account\RefrensiPaperController@store')->name('account.refrensi-paper.store');
-        Route::get('/refrensi-paper/data/edit/{id}', 'account\RefrensiPaperController@edit')->name('account.refrensi-paper.edit');
-        Route::post('/refrensi-paper/data/update-data/{id}', 'account\RefrensiPaperController@update')->name('account.refrensi-paper.update');
-        Route::delete('/refrensi-paper/data/delete/{id}', 'account\RefrensiPaperController@destroy')->name('account.refrensi-paper.delete');
+            // pendaftaran scopuS kafe
+            Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendaftaran-scopus-kafe.index');
+            Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendaftaran-scopus-kafe.filter');
+            Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendaftaran-scopus-kafe.search');
+            Route::get('/pendaftaran-scopus-kafe/data/edit/{id}', 'account\PendaftaranScopusKafeController@edit')->name('account.pendaftaran-scopus-kafe.edit');
+            Route::post('/pendaftaran-scopus-kafe/data/update-data/{id}', 'account\PendaftaranScopusKafeController@update')->name('account.pendaftaran-scopus-kafe.update');
+            Route::delete('/pendaftaran-scopus-kafe/data/delete/{id}', 'account\PendaftaranScopusKafeController@destroy')->name('account.pendaftaran-scopus-kafe.delete');
 
-        // to do list
-        Route::get('/todolist/data', 'account\ToDoListController@index')->name('account.todolist.index');
-        Route::get('/todolist/data/create', 'account\ToDoListController@create')->name('account.todolist.create');
-        Route::post('/todolist/data/store', 'account\ToDoListController@store')->name('account.todolist.store');
-        Route::post('/todolist/data/UpdateStatusTaskOto', 'account\ToDoListController@updateStatus')->name('account.updatestatusoto.updatestatus');
-        Route::get('/todolist/data/edit/{id}', 'account\ToDoListController@edit')->name('account.todolist.edit');
-        Route::post('/todolist/data/update-data/{id}', 'account\ToDoListController@update')->name('account.todolist.update');
-        Route::post('/todolist/data/update-checklist', 'account\ToDoListController@updateChecklist')->name('account.todolist.updateChecklist');
-        Route::post('/todolist/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
-        Route::post('/todolist/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
-        Route::delete('/todolist/data/delete/{id}', 'account\ToDoListController@destroy')->name('account.todolist.delete');
+            // refrensi paper
+            Route::get('/refrensi-paper/data', 'account\RefrensiPaperController@index')->name('account.refrensi-paper.index');
+            Route::get('/refrensi-paper/data/filter', 'account\RefrensiPaperController@filter')->name('account.refrensi-paper.filter');
+            Route::get('/refrensi-paper/data/search', 'account\RefrensiPaperController@search')->name('account.refrensi-paper.search');
+            Route::get('/refrensi-paper/data/create', 'account\RefrensiPaperController@create')->name('account.refrensi-paper.create');
+            Route::post('/refrensi-paper/data/store', 'account\RefrensiPaperController@store')->name('account.refrensi-paper.store');
+            Route::get('/refrensi-paper/data/edit/{id}', 'account\RefrensiPaperController@edit')->name('account.refrensi-paper.edit');
+            Route::post('/refrensi-paper/data/update-data/{id}', 'account\RefrensiPaperController@update')->name('account.refrensi-paper.update');
+            Route::delete('/refrensi-paper/data/delete/{id}', 'account\RefrensiPaperController@destroy')->name('account.refrensi-paper.delete');
 
-        // cuti karyawan
-        Route::get('/cuti/data', 'account\CutiController@index')->name('account.cuti.index');
-        Route::get('/cuti/data/create', 'account\CutiController@create')->name('account.cuti.create');
+            // to do list
+            Route::get('/todolist/data', 'account\ToDoListController@index')->name('account.todolist.index');
+            Route::get('/todolist/data/create', 'account\ToDoListController@create')->name('account.todolist.create');
+            Route::post('/todolist/data/store', 'account\ToDoListController@store')->name('account.todolist.store');
+            Route::post('/todolist/data/UpdateStatusTaskOto', 'account\ToDoListController@updateStatus')->name('account.updatestatusoto.updatestatus');
+            Route::get('/todolist/data/edit/{id}', 'account\ToDoListController@edit')->name('account.todolist.edit');
+            Route::post('/todolist/data/update-data/{id}', 'account\ToDoListController@update')->name('account.todolist.update');
+            Route::post('/todolist/data/update-checklist', 'account\ToDoListController@updateChecklist')->name('account.todolist.updateChecklist');
+            Route::post('/todolist/data/add-tasklist', 'account\ToDoListController@addTask')->name('account.todolist.addTask');
+            Route::post('/todolist/data/removeTask', 'account\ToDoListController@removeTask')->name('account.todolist.removeTask');
+            Route::delete('/todolist/data/delete/{id}', 'account\ToDoListController@destroy')->name('account.todolist.delete');
 
-        // data cutomer
-        Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
-        Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
-        Route::get('/customer/data/filter', 'account\CustomerController@filter')->name('account.customer.filter');
-        Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
-        Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
-        Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
+            // cuti karyawan
+            Route::get('/cuti/data', 'account\CutiController@index')->name('account.cuti.index');
+            Route::get('/cuti/data/create', 'account\CutiController@create')->name('account.cuti.create');
 
-        //clinikscopus
-        Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
-        Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
-        Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
-        Route::get('/clinikscopus/data/edit/{id}', 'account\ClinikScopusTrainerController@edit')->name('account.clinikscopus.edit');
-        Route::post('/clinikscopus/data/update-data/{id}', 'account\ClinikScopusTrainerController@update')->name('account.clinikscopus.update');
-        Route::delete('/clinikscopus/data/{id}', 'account\ClinikScopusTrainerController@destroy')->name('account.clinikscopus.destroy');
-        Route::get('/clinikscopus/search', 'account\ClinikScopusTrainerController@search')->name('account.clinikscopus.search');
-        Route::get('/clinikscopus/filter', 'account\ClinikScopusTrainerController@filter')->name('account.clinikscopus.filter');
+            // data cutomer
+            Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
+            Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
+            Route::get('/customer/data/filter', 'account\CustomerController@filter')->name('account.customer.filter');
+            Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
+            Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
+            Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 
+            //clinik scopus trainer
+            Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');
+            Route::get('/clinikscopus/data/create', 'account\ClinikScopusTrainerController@create')->name('account.clinikscopus.create');
+            Route::post('/clinikscopus/data/store', 'account\ClinikScopusTrainerController@store')->name('account.clinikscopus.store');
+            Route::get('/clinikscopus/data/edit/{id}', 'account\ClinikScopusTrainerController@edit')->name('account.clinikscopus.edit');
+            Route::post('/clinikscopus/data/update-data/{id}', 'account\ClinikScopusTrainerController@update')->name('account.clinikscopus.update');
+            Route::delete('/clinikscopus/data/{id}', 'account\ClinikScopusTrainerController@destroy')->name('account.clinikscopus.destroy');
+            Route::get('/clinikscopus/search', 'account\ClinikScopusTrainerController@search')->name('account.clinikscopus.search');
+            Route::get('/clinikscopus/filter', 'account\ClinikScopusTrainerController@filter')->name('account.clinikscopus.filter');
 
-        // kategori scopus camp
-        Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');
-        Route::get('scopus-camp/kategori/create', 'account\CategoriesScopusCampController@create')->name('account.kategoriscopuscamp.create');
-        Route::post('scopus-camp/kategori/store', 'account\CategoriesScopusCampController@store')->name('account.kategoriscopuscamp.store');
-        Route::get('scopus-camp/kategori/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategoriscopuscamp.edit');
-        Route::post('scopus-camp/kategori/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategoriscopuscamp.update');
-        Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
-        Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
-        Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
+            // kategori scopus camp
+            Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');
+            Route::get('scopus-camp/kategori/create', 'account\CategoriesScopusCampController@create')->name('account.kategoriscopuscamp.create');
+            Route::post('scopus-camp/kategori/store', 'account\CategoriesScopusCampController@store')->name('account.kategoriscopuscamp.store');
+            Route::get('scopus-camp/kategori/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategoriscopuscamp.edit');
+            Route::post('scopus-camp/kategori/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategoriscopuscamp.update');
+            Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
+            Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
+            Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
 
-        // pendaftaran scopus camp
-        Route::get('PendaftaranScopusCamp', 'account\PendaftaranScopusCampController@index')->name('account.pendaftaranscopuscamp.index');
-        Route::get('PendaftaranScopusCamp/edit/{id}', 'account\PendaftaranScopusCampController@edit')->name('account.pendaftaranscopuscamp.edit');
-        Route::put('PendaftaranScopusCamp/update/{id}', 'account\PendaftaranScopusCampController@update')->name('account.pendaftaranscopuscamp.update');
-        Route::delete('PendaftaranScopusCamp/delete/{id}', 'account\PendaftaranScopusCampController@destroy')->name('account.pendaftaranscopuscamp.destroy');
-        Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
-    }
+            // pendaftaran scopus camp
+            Route::get('PendaftaranScopusCamp', 'account\PendaftaranScopusCampController@index')->name('account.pendaftaranscopuscamp.index');
+            Route::get('PendaftaranScopusCamp/edit/{id}', 'account\PendaftaranScopusCampController@edit')->name('account.pendaftaranscopuscamp.edit');
+            Route::put('PendaftaranScopusCamp/update/{id}', 'account\PendaftaranScopusCampController@update')->name('account.pendaftaranscopuscamp.update');
+            Route::delete('PendaftaranScopusCamp/delete/{id}', 'account\PendaftaranScopusCampController@destroy')->name('account.pendaftaranscopuscamp.destroy');
+            Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
 
+            //clinik scopus promo
+            Route::get('/Clinik-Scopus-Promo/data', 'account\ClinikScopusPromoController@index')->name('account.Clinik-Scopus-Promo.index');
+            Route::get('/Clinik-Scopus-Promo/data/create', 'account\ClinikScopusPromoController@create')->name('account.Clinik-Scopus-Promo.create');
+            Route::post('/Clinik-Scopus-Promo/data/store', 'account\ClinikScopusPromoController@store')->name('account.Clinik-Scopus-Promo.store');
+            Route::get('/Clinik-Scopus-Promo/data/edit/{id}', 'account\ClinikScopusPromoController@edit')->name('account.Clinik-Scopus-Promo.edit');
+            Route::post('/Clinik-Scopus-Promo/data/update-data/{id}', 'account\ClinikScopusPromoController@update')->name('account.Clinik-Scopus-Promo.update');
+            Route::delete('/Clinik-Scopus-Promo/data/{id}', 'account\ClinikScopusPromoController@destroy')->name('account.Clinik-Scopus-Promo.destroy');
+            Route::get('/Clinik-Scopus-Promo/search', 'account\ClinikScopusPromoController@search')->name('account.Clinik-Scopus-Promo.search');
+            Route::get('/Clinik-Scopus-Promo/filter', 'account\ClinikScopusPromoController@filter')->name('account.Clinik-Scopus-Promo.filter');
 
-);
+            //clinik scopus biaya persesi
+            Route::get('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@index')->name('account.Clinik-Scopus-Biaya-Persesi.index');
+            Route::get('/Clinik-Scopus-Biaya-Persesi/data/create', 'account\ClinikScopusBiayaPersesiController@create')->name('account.Clinik-Scopus-Biaya-Persesi.create');
+            Route::post('/Clinik-Scopus-Biaya-Persesi/data/store', 'account\ClinikScopusBiayaPersesiController@store')->name('account.Clinik-Scopus-Biaya-Persesi.store');
+            Route::get('/Clinik-Scopus-Biaya-Persesi/data/edit/{id}', 'account\ClinikScopusBiayaPersesiController@edit')->name('account.Clinik-Scopus-Biaya-Persesi.edit');
+            Route::post('/Clinik-Scopus-Biaya-Persesi/data/update-data/{id}', 'account\ClinikScopusBiayaPersesiController@update')->name('account.Clinik-Scopus-Biaya-Persesi.update');
+            Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{id}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
+        }
+    );

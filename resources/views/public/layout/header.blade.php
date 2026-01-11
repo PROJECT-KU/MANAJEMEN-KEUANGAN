@@ -8,7 +8,7 @@
     <title>@yield('title')</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicons -->
     <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="icon">
     <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="apple-touch-icon">
@@ -91,7 +91,7 @@
                             <li><a href="{{ url('/Scopus-Camp') }}">Class Offline</a></li>
                             <li><a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
-                            <li><a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>
+                            <li><a href="{{ url('/Clinik-Scopus') }}">Klinik Scopus</a></li>
                         </ul>
                     </li>
 
@@ -116,8 +116,8 @@
                             @endphp
 
                             <a href="{{ url('/account/dashboard') }}"
-                                class="btn btn-success d-flex align-items-center"
-                                style="padding: 6px 12px; color: white; font-size: 14px;">
+                                class="btn d-flex align-items-center"
+                                style="padding: 6px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d)">
 
                                 <img src="{{ $userImage }}"
                                     alt="Profile"
@@ -128,8 +128,8 @@
                             </a>
                             @else
                             <a href="{{ url('/login') }}"
-                                class="btn btn-info"
-                                style="padding: 8px 12px; color: white; font-size: 14px;">
+                                class="btn"
+                                style="padding: 8px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d);">
                                 Login / Register
                             </a>
                             @endauth
