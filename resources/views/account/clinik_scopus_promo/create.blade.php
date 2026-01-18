@@ -110,20 +110,6 @@ Tambah Promo | MIS
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>PPN</label>
-                                    <div class="input-group">
-                                        <input type="number" name="ppn" id="ppn" value="{{ old('ppn') }}" placeholder="Masukkan Total PPN" class="form-control">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <div class="form-group">
                                     <label>Tipe Diskon</label>
                                     <div class="input-group">
                                         <select class="form-control" name="tipe_diskon" id="tipe_diskon" style="height: auto;" onchange="handleDiskonTypeChange()">
@@ -135,7 +121,10 @@ Tambah Promo | MIS
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Diskon Persentase</label>
                                     <div class="input-group">
@@ -146,10 +135,7 @@ Tambah Promo | MIS
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Nominal Diskon</label>
                                     <div class="input-group">
@@ -160,7 +146,7 @@ Tambah Promo | MIS
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Kode Diskon</label>
                                     <div class="input-group">
@@ -351,7 +337,7 @@ Tambah Promo | MIS
         persenField.value = '';
 
         if (cardBundling) {
-            cardBundling.style.display = 'none';
+            cardBundling.style.display = 'block';
         }
 
         if (tipe === 'persentase') {
@@ -365,11 +351,7 @@ Tambah Promo | MIS
         } else if (tipe === 'bundling') {
             persenField.disabled = true;
             nominalField.readOnly = false;
-            kodeDiskonField.readOnly = true; // 🔥 TAMBAHAN SAJA
-
-            if (cardBundling) {
-                cardBundling.style.display = 'block';
-            }
+            kodeDiskonField.readOnly = true;
         }
 
         updateNominalDiskon();

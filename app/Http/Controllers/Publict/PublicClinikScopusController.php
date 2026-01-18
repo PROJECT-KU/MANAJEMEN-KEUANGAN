@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Clinikscopus;
 use App\User;
+use App\ClinikscopusPromoSesi;
+use App\ClinikScopusBiayaPersesi;
 use App\AnalisisBibliometrik;
 use App\Mail\AnalisisBibliometrikMail;
 use Illuminate\Support\Facades\Mail;
@@ -124,8 +126,9 @@ class PublicClinikScopusController extends Controller
         $kode = strtoupper($request->kode ?? '');
         $harga = $request->harga ?? 0;
         $clinik_id = $request->clinik_id ?? null;
+        $sesi_key = $request->sesi_key ?? null; // 🔹 sesi yang dipilih user
 
-        $now = now(); // waktu sekarang (tanggal + jam)
+        $now = now();
 
         // Ambil promo aktif dengan kode diskon
         $promo = DB::table('clinikscopus_promo')
@@ -133,15 +136,7 @@ class PublicClinikScopusController extends Controller
             ->where('status', 'active')
             ->where('tanggal_mulai_promo', '<=', $now)
             ->where('tanggal_selesai_promo', '>=', $now)
-            ->whereIn('tipe_diskon', ['persentase', 'nominal']) // hanya kode diskon
-            ->when($clinik_id, function ($query, $clinik_id) {
-                $query->whereExists(function ($q) use ($clinik_id) {
-                    $q->select(DB::raw(1))
-                        ->from('clinikscopus_promo_sesi as ps')
-                        ->whereColumn('ps.promo_id', 'clinikscopus_promo.id')
-                        ->where('ps.clinikscopus_id', $clinik_id);
-                });
-            })
+            ->whereIn('tipe_diskon', ['persentase', 'nominal'])
             ->first();
 
         if (!$promo) {
@@ -151,18 +146,56 @@ class PublicClinikScopusController extends Controller
             ]);
         }
 
-        // Hitung nominal diskon
-        $potongan = $promo->tipe_diskon === 'persentase'
-            ? floor($harga * ($promo->nominal_diskon / 100))
-            : $promo->nominal_diskon;
+        // 🔹 Cek apakah promo punya pembatasan sesi
+        $totalSesiTerdaftar = DB::table('clinikscopus_promo_sesi')
+            ->where('promo_id', $promo->id)
+            ->count();
+
+        // 🔹 Cek apakah sesi yang dipilih ADA di promo_sesi
+        $adaDiPromoSesi = DB::table('clinikscopus_promo_sesi')
+            ->where('promo_id', $promo->id)
+            ->where('sesi_key', $sesi_key)
+            ->exists();
+
+        // ===== LOGIKA SESUAI PERMINTAAN ANDA =====
+
+        // ❌ Jika promo MEMILIKI pembatasan sesi,
+        // tapi sesi ini TIDAK termasuk → TOLAK
+        if ($totalSesiTerdaftar > 0 && !$adaDiPromoSesi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode diskon tidak berlaku untuk sesi ini'
+            ]);
+        }
+
+        // ✅ BOLEH PAKAI DISKON (semua kondisi lain)
+        if ($promo->tipe_diskon === 'persentase') {
+            // Jika persentase → langsung ambil nominal_diskon apa adanya
+            $potongan = $promo->nominal_diskon;
+        } else {
+            $potongan = $promo->nominal_diskon;
+        }
 
         $totalBaru = max($harga - $potongan, 0);
 
         return response()->json([
             'success' => true,
-            'potongan' => $potongan,
+            'potongan' => $potongan, // tetap angka (untuk hitungan)
+            'potongan_rupiah' => number_format($potongan, 0, ',', '.'),
             'totalBaru' => $totalBaru,
             'message' => "Diskon '{$kode}' berhasil diterapkan!"
+        ]);
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== CEK PPN ==================-->
+    public function cekPpn()
+    {
+        $biaya = ClinikScopusBiayaPersesi::select('ppn')->first();
+
+        return response()->json([
+            'ppn' => $biaya ? (int) $biaya->ppn : 0,
+            'source' => 'clinikscopus_biaya_persesi'
         ]);
     }
     // <!--================== END ==================-->

@@ -220,16 +220,13 @@ Data Promo | MIS
 
                     {{-- SESI 1–9 --}}
                     @php
-                    $sesiAktif = [];
-
-                    if ($promo->tipe_diskon === 'bundling') {
-                    // 🔹 AMBIL DARI TABEL clinikscopus_promo_sesi
+                    // 🔹 AMBIL SESI AKTIF UNTUK SEMUA TIPE DISKON
                     $sesiAktif = $promo->sesi
                     ->pluck('sesi_key')
                     ->map(fn($v) => (int) $v)
                     ->toArray();
-                    }
                     @endphp
+
 
                     @for ($i = 1; $i <= 9; $i++)
                       <td class="text-center">

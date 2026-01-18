@@ -260,6 +260,47 @@ Sesi Klinik Scopus | Rumah Scopus
 </style>
 <!--================== END ==================-->
 
+<!--================== HEMAT BERAPA PERSEN PADA CLASS REGULER ==================-->
+<style>
+    /* Pastikan kotaknya jadi reference point */
+    .sesi-item {
+        position: relative;
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+
+    /* Badge duduk TEPAT di garis border atas */
+    .badge-hemat {
+        position: absolute;
+        top: 0;
+        /* titik acuan di garis border */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* setengah di atas, setengah di bawah garis */
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #ff3131;
+        background: #ffffff;
+        /* putih supaya jelas di atas garis */
+        padding: 3px 10px;
+        border-radius: 20px;
+        border: 1px solid #ffd6cc;
+        box-shadow: 0 2px 6px rgba(255, 49, 49, 0.12);
+        white-space: nowrap;
+        z-index: 2;
+
+    }
+
+    /* efek hover tetap halus */
+    .sesi-item:hover .badge-hemat {
+        transform: translate(-50%, -52%);
+    }
+</style>
+<!--================== END ==================-->
+
 @section('konten')
 <section class="hero-bg">
     <div class="container">
@@ -296,7 +337,7 @@ Sesi Klinik Scopus | Rumah Scopus
 
                                 <!-- SESI -->
                                 <div class="sesi-box">
-                                    <h6 class="fw-bold mb-2">Jadwal Sesi</h6>
+                                    <h6 class="fw-bold mb-2 mb-4">Jadwal Sesi</h6>
 
                                     <div class="row g-2">
                                         @foreach(['sesi','sesi2','sesi3','sesi4','sesi5','sesi6','sesi7','sesi8','sesi9'] as $index => $field)
@@ -304,11 +345,42 @@ Sesi Klinik Scopus | Rumah Scopus
                                         $value = $clinik->$field ?? null;
                                         $biaya = $clinik->biayaPersesi->biaya_persesi ?? null;
                                         $diskon = 0;
+
+                                        // 🔹 CARI PROMO YANG TERKAIT DENGAN SESI INI DI clinikscopus_promo_sesi
+                                        $promoSesi = $promo
+                                        ->filter(fn($p) => in_array((string)($index+1),
+                                        $p->sesi_bundling->pluck('sesi_key')->map(fn($v) => (string)$v)->toArray()
+                                        ))
+                                        ->whereIn('tipe_diskon', ['nominal','persentase'])
+                                        ->first();
+
+                                        // 🔹 HITUNG PERSEN HEMAT KHUSUS SESI INI
+                                        $persenHemat = 0;
+                                        if ($promoSesi && ($promoSesi->harga_normal ?? 0) > 0) {
+                                        $persenHemat = round(
+                                        ($promoSesi->nominal_diskon / $promoSesi->harga_normal) * 100
+                                        );
+                                        }
                                         @endphp
 
+
                                         <div class="col-6 col-md-4">
-                                            <div class="sesi-item {{ $value ? 'sesi-clickable' : '' }}" @if($value) data-sesi="Sesi {{ $index + 1 }}" data-jadwal="{{ $value }}" data-trainer="{{ $clinik->full_name ?? '' }}" data-harga="{{ $biaya }}" data-diskon="{{ $diskon }}"
-                                                data-klinik-id="{{ $clinik->id }}" @endif>
+                                            <div class="sesi-item {{ $value ? 'sesi-clickable' : '' }}"
+                                                data-sesi="Sesi {{ $index + 1 }}"
+                                                data-sesi-key="{{ $index + 1 }}"
+                                                data-jadwal="{{ $value }}"
+                                                data-trainer="{{ $clinik->full_name ?? '' }}"
+                                                data-harga="{{ $biaya }}"
+                                                data-diskon="{{ $diskon }}"
+                                                data-klinik-id="{{ $clinik->id }}">
+
+                                                @if($promoSesi && $persenHemat > 0)
+                                                <span class="badge-hemat">
+                                                    <i class="fas fa-bolt me-1"></i>
+                                                    HEMAT {{ $persenHemat }}%
+                                                </span>
+                                                @endif
+
                                                 Sesi {{ $index + 1 }}
 
                                                 <div class="fw-semibold">
@@ -327,8 +399,11 @@ Sesi Klinik Scopus | Rumah Scopus
                             <div class="row g-3 mt-3">
 
                                 @foreach($promo as $item)
-                                @if(now()->between($item->tanggal_mulai_promo, $item->tanggal_selesai_promo))
-                                <div class="col-12 {{ $promo->count() > 1 ? 'col-md-6' : '' }}">
+                                @if(
+                                now()->between($item->tanggal_mulai_promo, $item->tanggal_selesai_promo)
+                                && $item->tipe_diskon === 'bundling'
+                                )
+                                <div class="col-12 {{ $promo->count() > 1 ? 'col-md-12' : '' }}">
 
                                     <div class="promo-box promo-bundling shadow-sm h-100">
                                         <span class="promo-bundling-label">
@@ -550,10 +625,17 @@ Sesi Klinik Scopus | Rumah Scopus
                                         </div>
                                         <div class="col-7 fw-semibold text-dark" id="modalHarga">Rp 100.000</div>
 
+                                        <!-- Diskon -->
                                         <div class="col-5 d-flex align-items-center text-muted fw-medium">
                                             Diskon
                                         </div>
                                         <div class="col-7 fw-semibold text-dark" id="modalDiskon">Rp 100.000</div>
+
+                                        <!-- PPN -->
+                                        <div class="col-5 d-flex align-items-center text-muted fw-medium">
+                                            PPN
+                                        </div>
+                                        <div class="col-7 fw-semibold text-dark" id="modalPpn">Rp 0</div>
 
                                         <!-- Kode Unik -->
                                         <div class="col-5 d-flex align-items-center text-muted fw-medium">
@@ -787,6 +869,7 @@ Sesi Klinik Scopus | Rumah Scopus
                 sesiTimeEl.textContent = item.dataset.jadwal || '-';
 
                 modalElement.dataset.klinikId = item.dataset.klinikId;
+                modalElement.dataset.sesiKey = item.dataset.sesiKey;
 
                 // GENERATE KODE BOOKING & KODE UNIK
                 document.getElementById('modalKode').textContent = generateKodeBooking();
@@ -801,6 +884,22 @@ Sesi Klinik Scopus | Rumah Scopus
                 document.getElementById('modalHarga').textContent = formatRupiah(harga);
                 document.getElementById('modalDiskon').textContent = formatRupiah(diskon);
                 document.getElementById('modalTotalHeader').textContent = formatRupiah(total);
+
+                // <!--====== AMBIL PPN DARI DB & TAMPILKAN KE BLADE ======-->
+                fetch('/cek-ppn-sesi/Clinik-Scopus')
+                    .then(res => res.json())
+                    .then(data => {
+                        const ppnPersen = Number(data.ppn) || 0;
+
+                        // Hitung PPN dari (harga - diskon)
+                        const nominalPpn = Math.round((harga - diskon) * (ppnPersen / 100));
+
+                        document.getElementById('modalPpn').textContent = formatRupiah(nominalPpn);
+
+                        const totalBaru = (harga - diskon) + nominalPpn + kodeUnik;
+                        document.getElementById('modalTotalHeader').textContent = formatRupiah(totalBaru);
+                    });
+                // <!--====== END ======-->
 
                 // Reset input kode diskon
                 kodeDiskonInput.value = '';
@@ -818,6 +917,7 @@ Sesi Klinik Scopus | Rumah Scopus
             const harga = parseInt(document.getElementById('modalHarga').textContent.replace(/[^\d]/g, '')) || 0;
             const kodeUnik = parseInt(document.getElementById('modalKodeUnik').textContent.replace(/[^\d]/g, '')) || 0;
             const klinik_id = modalElement.dataset.klinikId;
+            const sesi_key = modalElement.dataset.sesiKey;
 
             if (!kode) {
                 diskonInfo.textContent = 'Masukkan kode diskon terlebih dahulu';
@@ -834,7 +934,8 @@ Sesi Klinik Scopus | Rumah Scopus
                     body: JSON.stringify({
                         kode,
                         harga,
-                        klinik_id
+                        klinik_id,
+                        sesi_key
                     })
                 })
                 .then(res => res.json())
@@ -844,14 +945,47 @@ Sesi Klinik Scopus | Rumah Scopus
                         diskonInfo.className = 'd-block mt-2 fw-semibold text-success';
 
                         // tampilkan nominal diskon & total baru
-                        document.getElementById('modalDiskon').textContent = formatRupiah(data.potongan);
+                        document.getElementById('modalDiskon').textContent = formatRupiah(data.potongan_rupiah);
                         document.getElementById('modalTotalHeader').textContent = formatRupiah(data.totalBaru + kodeUnik); // tambahkan kode unik
+
+                        // <!--====== HITUNG ULANG PPN SETELAH DISKON ======-->
+                        fetch('/cek-ppn-sesi/Clinik-Scopus')
+                            .then(res => res.json())
+                            .then(ppnData => {
+                                const ppnPersen = Number(ppnData.ppn) || 0;
+
+                                const hargaSetelahDiskon = data.totalBaru;
+                                const nominalPpnBaru = Math.round(hargaSetelahDiskon * (ppnPersen / 100));
+
+                                document.getElementById('modalPpn').textContent = formatRupiah(nominalPpnBaru);
+
+                                document.getElementById('modalTotalHeader').textContent =
+                                    formatRupiah(hargaSetelahDiskon + nominalPpnBaru + kodeUnik);
+                            });
+                        // <!--====== END ======-->
+
                     } else {
                         diskonInfo.textContent = data.message;
                         diskonInfo.className = 'd-block mt-2 fw-semibold text-danger';
+
+                        // reset diskon ke 0
                         document.getElementById('modalDiskon').textContent = formatRupiah(0);
-                        document.getElementById('modalTotalHeader').textContent = formatRupiah(harga + kodeUnik);
+
+                        // HITUNG ULANG PPN (MESKIPUN KODE SALAH)
+                        fetch('/cek-ppn-sesi/Clinik-Scopus')
+                            .then(res => res.json())
+                            .then(ppnData => {
+                                const ppnPersen = Number(ppnData.ppn) || 0;
+
+                                const nominalPpn = Math.round(harga * (ppnPersen / 100));
+
+                                document.getElementById('modalPpn').textContent = formatRupiah(nominalPpn);
+
+                                const totalFinal = harga + nominalPpn + kodeUnik;
+                                document.getElementById('modalTotalHeader').textContent = formatRupiah(totalFinal);
+                            });
                     }
+
                 });
         });
 

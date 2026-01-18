@@ -65,6 +65,7 @@ Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->n
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
 Route::get('/Clinik-Scopus/Sesi/{id}', 'Publict\PublicClinikScopusController@sesi')->name('public.clinikscopus.sesi');
 Route::post('/cek-diskon-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@cekDiskon')->name('public.CekDiskonclinikscopus.CekKodeDiskon');
+Route::get('/cek-ppn-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@cekPpn')->name('public.CekPpnclinikscopus.CekPpn');
 
 Auth::routes();
 /**

@@ -81,6 +81,25 @@ Tambah Biaya Persesi | MIS
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    <label>PPN</label>
+                                    <div class="input-group">
+                                        <input type="number" id="ppn" name="ppn" placeholder="Masukkan PPN" class="form-control">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+
+                                    @error('ppn')
+                                    <div class="invalid-feedback d-block">{{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label>Status <span style="color: red;">*</span></label>
                                     <select class="form-control" name="status" style="height: auto;" required>
                                         <option value="" disabled selected>-- PILIH STATUS --</option>

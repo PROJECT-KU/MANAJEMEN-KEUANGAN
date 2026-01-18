@@ -123,24 +123,6 @@ Edit Promo | MIS
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>PPN</label>
-                                    <div class="input-group">
-                                        <input type="number"
-                                            name="ppn"
-                                            id="ppn"
-                                            class="form-control"
-                                            value="{{ $promo->ppn ?? 0 }}">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <div class="form-group">
                                     <label>Tipe Diskon</label>
                                     <select class="form-control"
                                         name="tipe_diskon"
@@ -157,8 +139,10 @@ Edit Promo | MIS
                                     </select>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-6">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Diskon Persentase</label>
                                     <div class="input-group">
@@ -173,10 +157,8 @@ Edit Promo | MIS
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Nominal Diskon</label>
                                     <div class="input-group">
@@ -193,7 +175,7 @@ Edit Promo | MIS
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Kode Diskon</label>
                                     <input type="text"
@@ -385,7 +367,6 @@ Edit Promo | MIS
         const hargaNormal = toNumber(document.getElementById('harga_normal')?.value);
         const persenDiskon = parseFloat(document.getElementById('diskon_persentase')?.value) || 0;
         const nominalDiskonField = document.getElementById('nominal_diskon');
-        const ppn = parseFloat(document.getElementById('ppn')?.value) || 0;
         const tipe = document.getElementById('tipe_diskon')?.value;
 
         let diskon = 0;
@@ -404,10 +385,6 @@ Edit Promo | MIS
         let subtotal = hargaNormal - diskon;
         if (subtotal < 0) subtotal = 0;
 
-        // 🔹 HITUNG PPN
-        let ppnValue = subtotal * ppn / 100;
-        let total = subtotal + ppnValue;
-
         // 🔹 SET TOTAL
         document.querySelector('[name="total_biaya"]').value = formatRupiah(Math.round(total));
     }
@@ -416,7 +393,7 @@ Edit Promo | MIS
 
         updateNominalDiskon();
 
-        ['harga_normal', 'diskon_persentase', 'nominal_diskon', 'ppn', 'tipe_diskon']
+        ['harga_normal', 'diskon_persentase', 'nominal_diskon', 'tipe_diskon']
         .forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -494,12 +471,9 @@ Edit Promo | MIS
         persenField.disabled = true;
         nominalField.readOnly = true;
 
-        if (reset) {
-            persenField.value = '';
-            nominalField.value = '';
+        if (cardBundling) {
+            cardBundling.style.display = 'block';
         }
-
-        if (cardBundling) cardBundling.style.display = 'none';
 
         if (tipe === 'persentase') {
             persenField.disabled = false;
@@ -512,8 +486,7 @@ Edit Promo | MIS
         } else if (tipe === 'bundling') {
             persenField.disabled = true;
             nominalField.readOnly = false;
-
-            if (cardBundling) cardBundling.style.display = 'block';
+            kodeDiskonField.readOnly = true;
         }
 
         updateNominalDiskon();
@@ -591,7 +564,6 @@ Edit Promo | MIS
         const hargaNormal = toNumber(document.getElementById('harga_normal')?.value);
         const persen = parseFloat(document.getElementById('diskon_persentase')?.value) || 0;
         const nominalField = document.getElementById('nominal_diskon');
-        const ppn = parseFloat(document.getElementById('ppn')?.value) || 0;
         const tipe = document.getElementById('tipe_diskon')?.value;
 
         let nominalDiskon = 0;
@@ -615,8 +587,7 @@ Edit Promo | MIS
 
         // 🔹 TOTAL
         let subtotal = hargaNormal - nominalDiskon;
-        const ppnValue = subtotal * ppn / 100;
-        const total = subtotal + ppnValue;
+        const total = subtotal;
 
         document.querySelector('[name="total_biaya"]').value =
             formatRupiah(Math.round(total));

@@ -26,6 +26,7 @@ class ClinikScopusBiayaPersesi extends Model
 
     protected $fillable = [
         'biaya_persesi',
+        'ppn',
         'status',
 
     ];

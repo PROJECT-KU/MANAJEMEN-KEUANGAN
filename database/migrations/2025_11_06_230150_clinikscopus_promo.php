@@ -25,7 +25,6 @@ class ClinikscopusPromo extends Migration
             $table->integer('total_kuota_promo')->nullable();
 
             $table->string('harga_normal');
-            $table->string('ppn')->nullable();
 
             $table->enum('tipe_diskon', ['persentase', 'nominal', 'bundling'])->nullable();
             $table->string('diskon_persentase')->nullable();

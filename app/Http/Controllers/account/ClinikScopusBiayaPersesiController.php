@@ -53,6 +53,7 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         ClinikScopusBiayaPersesi::create([
             'biaya_persesi' => $biayaPersesi,
+            'ppn' => $request->ppn,
             'status' => $request->status,
         ]);
 
@@ -85,6 +86,7 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         $datas->update([
             'biaya_persesi' => $biayaPersesi,
+            'ppn' => $request->ppn,
             'status' => $request->status,
         ]);
 

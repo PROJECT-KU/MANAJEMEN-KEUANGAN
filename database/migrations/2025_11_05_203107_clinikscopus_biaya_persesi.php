@@ -16,6 +16,7 @@ class ClinikscopusBiayaPersesi extends Migration
         Schema::create('clinikscopus_biaya_persesi', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('biaya_persesi')->nullable();
+            $table->string('ppn')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
         });

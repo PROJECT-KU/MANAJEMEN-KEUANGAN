@@ -166,6 +166,7 @@ Data Biaya Persesi | MIS
                   <tr>
                     <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Biaya Persesi</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">PPN</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Status</th>
                     <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
                   </tr>
@@ -179,6 +180,9 @@ Data Biaya Persesi | MIS
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td style="text-align: center; vertical-align: middle;">
                       Rp {{ number_format($item->biaya_persesi, 0, ',', '.') }}
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      {{ $item->ppn }} %
                     </td>
                     <td style="text-align: center;">
                       @if ($item->status == "active")

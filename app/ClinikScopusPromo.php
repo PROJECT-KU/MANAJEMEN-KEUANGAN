@@ -32,7 +32,6 @@ class ClinikscopusPromo extends Model
         'tanggal_selesai_promo',
         'total_kuota_promo',
         'harga_normal',
-        'ppn',
         'tipe_diskon',
         'diskon_persentase',
         'nominal_diskon',
