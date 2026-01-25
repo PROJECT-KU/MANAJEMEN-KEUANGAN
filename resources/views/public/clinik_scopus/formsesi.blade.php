@@ -403,7 +403,7 @@ Sesi Klinik Scopus | Rumah Scopus
                                 now()->between($item->tanggal_mulai_promo, $item->tanggal_selesai_promo)
                                 && $item->tipe_diskon === 'bundling'
                                 )
-                                <div class="col-12 {{ $promo->count() > 1 ? 'col-md-12' : '' }}">
+                                <div class="col-12 {{ $promo->count() > 1 ? 'col-md-6' : '' }}">
 
                                     <div class="promo-box promo-bundling shadow-sm h-100">
                                         <span class="promo-bundling-label">
