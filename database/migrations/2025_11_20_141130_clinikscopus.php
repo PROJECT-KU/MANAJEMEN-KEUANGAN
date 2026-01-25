@@ -43,7 +43,6 @@ class Clinikscopus extends Migration
                 ->onDelete('restrict')
                 ->onUpdate('cascade');
         });
-        //
     }
 
     /**

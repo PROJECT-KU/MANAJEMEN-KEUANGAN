@@ -182,7 +182,7 @@ Data Biaya Persesi | MIS
                       Rp {{ number_format($item->biaya_persesi, 0, ',', '.') }}
                     </td>
                     <td style="text-align: center; vertical-align: middle;">
-                      {{ $item->ppn }} %
+                      {{ $item->ppn ?? '-' }} {{ $item->ppn !== null ? '%' : '' }}
                     </td>
                     <td style="text-align: center;">
                       @if ($item->status == "active")

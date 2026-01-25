@@ -5,41 +5,6 @@
 Refrensi Paper | Rumah Scopus
 @stop
 
-<style>
-    /* Remove border when hovering over the image */
-    #image-preview {
-        border: none !important;
-        /* Hapus border pada gambar */
-    }
-
-    #image-preview:hover {
-        border: none;
-        /* Hapus border pada gambar saat dihover */
-    }
-
-    .container {
-        width: 100%;
-        max-width: 1200px;
-        /* Sesuaikan lebar container sesuai kebutuhan */
-        margin: 0 auto;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .more-text {
-        font-size: 15px;
-        margin: 0;
-        text-align: right;
-        background: linear-gradient(to right, #ff3131, #ff914d);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-</style>
-
 <!--================== ANIMASI CARD PAPER ==================-->
 <style>
     /* Animasi saat hover pada card */
@@ -72,89 +37,152 @@ Refrensi Paper | Rumah Scopus
 </style>
 <!--================== END ==================-->
 
+<!--================== BACKGOUND IMAGE ==================-->
+<style>
+    .hero-bg {
+        position: relative;
+        background-image: url('/assets/artikel/img/hero-bg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding-top: 120px;
+        padding-bottom: 80px;
+    }
+
+    .hero-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+    }
+
+    .hero-bg>.container {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+<!--================== END ==================-->
+
+<!--================== SEARCH STYLE ==================-->
+<style>
+    .search-wrapper {
+        max-width: 700px;
+        margin: 0 auto 25px auto;
+    }
+
+    .search-input {
+        border: none;
+        padding: 14px 20px;
+        font-size: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-search {
+        background: linear-gradient(to right, #ff3131, #ff914d);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(255, 49, 49, 0.3);
+    }
+</style>
+<!--================== END ==================-->
+
 @section('konten')
 <!-- ======= Hero Section ======= -->
-<section id="hero" class="hero d-flex align-items-center">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 d-flex flex-column justify-content-center">
-                <h1 data-aos="fade-up">Wujudkan Penelitian Anda dengan Referensi Paper Terbaik!</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400" style="font-size: 15px;">Akses jurnal berkualitas tinggi untuk meningkatkan kredibilitas penelitian Anda. Kami menyediakan informasi lengkap, mulai dari subjek area jurnal hingga rincian DOI</h2>
-                <div data-aos="fade-up" data-aos-delay="600">
-                    <div class="text-center text-lg-start">
-                        <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">
-                            <span>Get Started</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
-                <img src="{{ asset('assets/artikel/img/TinyPNG.png') }}" class="img-fluid" alt="">
-            </div>
+<section id="hero" class="hero-bg d-flex align-items-center">
+    <div class="container mb-5">
+
+        <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center text-center"
+            style="font-family:'Poppins','Inter',sans-serif;">
+            <h1 data-aos="fade-down" style="font-size:48px; font-weight:700; line-height:1.3; color:#0f172a; max-width:900px;">
+                Referensi Paper Ilmiah
+                <span style="background: linear-gradient(to right, #ff3131, #ff914d); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Terpercaya
+                </span>
+                untuk Publikasi
+                <span style="background: linear-gradient(to right, #ff3131, #ff914d); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Scopus
+                </span>
+            </h1>
         </div>
-    </div>
-</section>
+
+        <div class="row d-flex justify-content-center flex-wrap">
 
 
-<div class="container mt-5 mb-5">
-    <div class="main-card" data-aos="fade-right">
-        <div class="card-body">
-            <form action="{{ route('public.refrensi-paper.SearchPublic') }}" method="GET" id="searchForm">
-                <div class="form-group">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                        </div>
-                        <input type="text" class="form-control rounded-pill" name="q" placeholder="PENCARIAN" value="{{ app('request')->input('q') }}">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-info rounded-pill ml-1" id="searchButton"><i class="fa fa-search"></i> CARI</button>
-                        </div>
-                        @if(request()->has('q'))
-                        <a href="{{ route('public.refrensi-paper.PublicRefrensiPaper') }}" class="btn btn-danger rounded-pill ml-1">
-                            <i class="fa fa-trash mt-2"></i>
-                        </a>
-                        @endif
-                    </div>
-                </div>
-            </form>
-            <div class="row">
-                @foreach ($datas as $data)
-                <div class="col-md-3 mb-2" data-aos="fade-up">
-                    <div class="inner-card" style="background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; justify-content: space-between; height: 100%; border-radius: 10px; padding: 20px;">
-                        <div style="width: 100%;">
-                            <div class="d-flex align-items-center" style="width: 100%;">
-                                <div style="margin-left: 0; width: 100%;">
-                                    <h5 style="font-weight: bold; width: 100%;">{{ $data->judul_paper }}</h5>
-                                    <p style="width: 100%;">{{ $data->nama_journal }}</p>
-                                    <p style="width: 100%;">Q-{{ $data->quartile_journal }}</p>
-                                    <hr style="width: 100%; margin: 10px 0;">
-                                    <h5 style="font-weight: bold; width: 100%;">Abstrak</h5>
-                                    <span style="width: 100%; display: inline-block;">
-                                        {{ implode(' ', array_slice(explode(' ', strip_tags($data->abstrak)), 0, 5)) }}
-                                        @if(str_word_count(strip_tags($data->abstrak)) > 5)
-                                        ...
+            <div class="container mt-5 mb-5">
+                <div class="main-card" data-aos="fade-right">
+                    <div class="card-body">
+                        <div class="search-wrapper">
+                            <form action="{{ route('public.refrensi-paper.SearchPublic') }}" method="GET" id="searchForm">
+                                <div class="input-group">
+                                    <input type="text"
+                                        class="form-control rounded-pill search-input"
+                                        name="q"
+                                        placeholder="Cari Judul, Jurnal, atau Topik..."
+                                        value="{{ app('request')->input('q') }}">
+
+                                    <div class="input-group-append">
+                                        <button type="button"
+                                            class="btn btn-search rounded-pill ml-2"
+                                            id="searchButton">
+                                            <i class="fa fa-search"></i> CARI
+                                        </button>
+
+                                        @if(request()->has('q'))
+                                        <a href="{{ route('public.refrensi-paper.PublicRefrensiPaper') }}"
+                                            class="btn btn-danger rounded-pill ml-2">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
                                         @endif
-                                    </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="row">
+                            @foreach ($datas as $data)
+                            <div class="col-md-3 mb-2" data-aos="fade-up">
+                                <div class="inner-card" style="background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; justify-content: space-between; height: 100%; border-radius: 10px; padding: 20px;">
+                                    <div style="width: 100%;">
+                                        <div class="d-flex align-items-center" style="width: 100%;">
+                                            <div style="margin-left: 0; width: 100%;">
+                                                <h5 style="font-weight: bold; width: 100%;">{{ $data->judul_paper }}</h5>
+                                                <p style="width: 100%;">{{ $data->nama_journal }}</p>
+                                                <p style="width: 100%;">Q-{{ $data->quartile_journal }}</p>
+                                                <hr style="width: 100%; margin: 10px 0;">
+                                                <h5 style="font-weight: bold; width: 100%;">Abstrak</h5>
+                                                <span style="width: 100%; display: inline-block;">
+                                                    {{ implode(' ', array_slice(explode(' ', strip_tags($data->abstrak)), 0, 5)) }}
+                                                    @if(str_word_count(strip_tags($data->abstrak)) > 5)
+                                                    ...
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%; margin-top: 15px;">
+                                        <a href="{{ route('public.refrensi-paper.Selengkapnya', $data->id) }}" style="text-decoration: none; width: 100%; display: inline-block;">
+                                            <button class="btn btn-submit rounded-pill" style="color: white; font-size: 14px; width: 100%; background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                                                <i class="fa fa-paper-plane"></i> SELENGKAPNYA
+                                            </button>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
+                            @endforeach
                         </div>
-                        <div style="width: 100%; margin-top: 15px;">
-                            <a href="{{ route('public.refrensi-paper.Selengkapnya', $data->id) }}" style="text-decoration: none; width: 100%; display: inline-block;">
-                                <button class="btn btn-submit rounded-pill" style="color: white; font-size: 14px; width: 100%; background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                                    <i class="fa fa-paper-plane"></i> SELENGKAPNYA
-                                </button>
-                            </a>
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $datas->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links('vendor.pagination.bootstrap-4') }}
                         </div>
                     </div>
                 </div>
-                @endforeach
-            </div>
-            <div class="d-flex justify-content-center mt-4">
-                {{ $datas->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links('vendor.pagination.bootstrap-4') }}
             </div>
         </div>
-    </div>
-</div>
+</section>
 
 <!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
 <script>

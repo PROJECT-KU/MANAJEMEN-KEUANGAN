@@ -131,7 +131,7 @@ class RefrensiPaperController extends Controller
 
         $save = RefrensiPaper::create([
             'token'                         => $token,
-            'subjek_area_journal'           => $request->input('kata_kunci_tags'),
+            'subjek_area_journal'           => $request->input('subjek_area_journal'),
             'nama_journal'                  => $request->input('nama_journal'),
             'quartile_journal'              => $request->input('quartile_journal'),
             'nama_author'                   => $request->input('nama_author'),
