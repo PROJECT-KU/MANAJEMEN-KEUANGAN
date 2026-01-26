@@ -168,7 +168,7 @@ Data Trainer | MIS
                     <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
                     <th scope="col" colspan="9" class="column-width" style="text-align: center;">Sesi Trainer</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
+                    <th scope="col" colspan="2" class="column-width" style="text-align: center;">Tanggal</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Status</th>
                     <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
                   </tr>
@@ -182,6 +182,8 @@ Data Trainer | MIS
                     <th scope="col" style="text-align: center;">7</th>
                     <th scope="col" style="text-align: center;">8</th>
                     <th scope="col" style="text-align: center;">9</th>
+                    <th scope="col" style="text-align: center;">Online</th>
+                    <th scope="col" style="text-align: center;">Offline</th>
                   </tr>
                 </thead>
                 <tbody id="customerTable">
@@ -215,7 +217,8 @@ Data Trainer | MIS
                     @endforeach
 
                     <td style="text-align: center;">{{ $item->spesialis }}</td>
-                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_online)->translatedFormat('d F Y') }}</td>
+                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_offline)->translatedFormat('d F Y') }}</td>
                     <td style="text-align: center;">
                       @if ($item->status == "active")
                       <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>

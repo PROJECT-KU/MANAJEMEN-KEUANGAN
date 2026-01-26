@@ -15,6 +15,7 @@ class ClinikscopusPemesanan extends Migration
     {
         Schema::create('clinikscopus_pemesanan', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('clinikscopus_id');
             $table->unsignedBigInteger('user_id');
             $table->string('id_transaksi')->nullable();
             $table->string('kode_booking')->nullable();
@@ -26,21 +27,26 @@ class ClinikscopusPemesanan extends Migration
             $table->string('telp_pemesan')->nullable();
             $table->string('kendala')->nullable();
             $table->string('desc_kendala')->nullable();
-            $table->string('harga_persesi')->nullable();
-            $table->string('diskon')->nullable();
-            $table->string('ppn')->nullable();
-            $table->string('kode_unik')->nullable();
+            $table->integer('harga_persesi')->nullable();
+            $table->integer('diskon')->nullable();
+            $table->integer('ppn')->nullable();
+            $table->integer('kode_unik')->nullable();
             $table->string('kode_diskon')->nullable();
             $table->string('tipe_promo')->nullable();
-            $table->string('total_pembaya ran')->nullable();
+            $table->integer('total_pembayaran')->nullable();
             $table->string('status')->nullable();
             $table->dateTime('tanggal')->nullable();
+            $table->dateTime('tanggal_booking')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')->on('users')
                 ->onDelete('RESTRICT')
                 ->onUpdate('CASCADE');
+
+            $table->foreign('clinikscopus_id')
+                ->references('id')->on('clinikscopus')
+                ->onDelete('CASCADE');
         });
     }
 

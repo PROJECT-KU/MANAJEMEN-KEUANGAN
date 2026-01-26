@@ -28,7 +28,8 @@ class Clinikscopus extends Migration
             $table->string('sesi9')->nullable();
             $table->string('spesialis')->nullable();
             $table->string('status')->nullable();
-            $table->dateTime('tanggal')->nullable();
+            $table->dateTime('tanggal_online')->nullable();
+            $table->dateTime('tanggal_offline')->nullable();
             $table->string('foto')->nullable();
             $table->timestamps();
 

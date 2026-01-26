@@ -151,17 +151,27 @@ Update Nama Trainer | MIS
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Tanggal</label>
-                                    <input type="date" name="tanggal" class="form-control" value="{{ old('tanggal', \Carbon\Carbon::parse($datas->tanggal)->format('Y-m-d')) }}">
+                                    <label>Tanggal Online</label>
+                                    <input type="date" name="tanggal_online" class="form-control" value="{{ old('tanggal_online', \Carbon\Carbon::parse($datas->tanggal_online)->format('Y-m-d')) }}">
 
-                                    @error('tanggal')
+                                    @error('tanggal_online')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tanggal Offline</label>
+                                    <input type="date" name="tanggal_offline" class="form-control" value="{{ old('tanggal_offline', \Carbon\Carbon::parse($datas->tanggal_offline)->format('Y-m-d')) }}">
+
+                                    @error('tanggal_offline')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Biaya Per Sesi</label>
 

@@ -31,7 +31,7 @@ class ClinikScopusTrainerController extends Controller
 
         // 🔥 AUTO UPDATE STATUS JIKA TANGGAL SUDAH LEWAT
         DB::table('clinikscopus')
-            ->whereDate('tanggal', '<', $today)
+            ->whereDate('tanggal_offline', '<', $today)
             ->where('status', 'active')
             ->update([
                 'status' => 'non active'
@@ -88,7 +88,7 @@ class ClinikScopusTrainerController extends Controller
         }
 
         $data = $query
-            ->orderBy('clinikscopus.tanggal', 'desc')
+            ->orderBy('clinikscopus.tanggal_online', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
@@ -133,7 +133,7 @@ class ClinikScopusTrainerController extends Controller
         }
 
         $data = $query
-            ->orderBy('clinikscopus.tanggal', 'DESC') // 🔴 GANTI created_at
+            ->orderBy('clinikscopus.tanggal_online', 'DESC') // 🔴 GANTI created_at
             ->paginate(10);
 
         return view('account.clinik_scopus.index', compact('data'));
@@ -168,7 +168,8 @@ class ClinikScopusTrainerController extends Controller
                 'user_id'   => 'required|exists:users,id',
                 'spesialis' => 'required',
                 'status'    => 'required',
-                'tanggal'   => 'required|date',
+                'tanggal_online' => 'required|date',
+                'tanggal_offline' => 'required|date',
                 'foto'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // 2 MB
             ],
             [
@@ -178,8 +179,10 @@ class ClinikScopusTrainerController extends Controller
                 'spesialis.required' => 'Masukkan spesialis',
                 'status.required'    => 'Masukkan status',
 
-                'tanggal.required'   => 'Masukkan tanggal',
-                'tanggal.date'       => 'Format tanggal tidak valid',
+                'tanggal_online.required'   => 'Masukkan tanggal online',
+                'tanggal_online.date'       => 'Format tanggal online tidak valid',
+                'tanggal_offline.required'   => 'Masukkan tanggal offline',
+                'tanggal_offline.date'       => 'Format tanggal offline tidak valid',
 
                 // Pesan khusus foto
                 'foto.image' => 'File harus berupa gambar',
@@ -217,7 +220,8 @@ class ClinikScopusTrainerController extends Controller
             'sesi9'             => $request->sesi9,
             'spesialis'         => $request->spesialis,
             'status'            => $request->status,
-            'tanggal'           => $request->tanggal,
+            'tanggal_online'    => $request->tanggal_online,
+            'tanggal_offline'   => $request->tanggal_offline,
             'biaya_persesi_id'  => $request->biaya_persesi_id,
             'foto'              => $imagePath,
         ]);
@@ -293,7 +297,8 @@ class ClinikScopusTrainerController extends Controller
             'sesi9'             => $request->sesi9,
             'spesialis'         => $request->spesialis,
             'status'            => $request->status,
-            'tanggal'           => $request->tanggal,
+            'tanggal_online'    => $request->tanggal_online,
+            'tanggal_offline'   => $request->tanggal_offline,
             'biaya_persesi_id' => $request->biaya_persesi_id,
             'foto'              => $imagePath,
         ]);

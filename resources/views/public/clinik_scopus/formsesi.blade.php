@@ -298,6 +298,12 @@ Sesi Klinik Scopus | Rumah Scopus
     .sesi-item:hover .badge-hemat {
         transform: translate(-50%, -52%);
     }
+
+    /* sesi sudah di pesan */
+    .sesi-item.active {
+        border: 2px solid #ff914d;
+        background: #fff5f0;
+    }
 </style>
 <!--================== END ==================-->
 
@@ -363,11 +369,17 @@ Sesi Klinik Scopus | Rumah Scopus
                                         }
                                         @endphp
 
+                                        @php
+                                        $sesiKey = $index + 1;
+                                        $sesiName = 'Sesi ' . $sesiKey;
+                                        @endphp
 
                                         <div class="col-6 col-md-4">
-                                            <div class="sesi-item {{ $value ? 'sesi-clickable' : '' }}"
+                                            <div class="sesi-item sesi-clickable"
+                                                data-type="reguler"
                                                 data-sesi="Sesi {{ $index + 1 }}"
                                                 data-sesi-key="{{ $index + 1 }}"
+
                                                 data-jadwal="{{ $value }}"
                                                 data-trainer="{{ $clinik->full_name ?? '' }}"
                                                 data-harga="{{ $biaya }}"
@@ -386,6 +398,7 @@ Sesi Klinik Scopus | Rumah Scopus
                                                 <div class="fw-semibold">
                                                     {{ $value ?: '-' }}
                                                 </div>
+
                                             </div>
                                         </div>
                                         @endforeach
@@ -508,6 +521,7 @@ Sesi Klinik Scopus | Rumah Scopus
                                                     data-harga="{{ $item->harga_normal }}"
                                                     data-diskon="{{ $item->nominal_diskon ?? 0 }}"
                                                     data-klinik-id="{{ $clinik->id }}"
+                                                    data-type="promo"
                                                     style="background:linear-gradient(to right,#ff3131,#ff914d); color:#fff; font-weight:600; border-radius:10px; padding:10px 16px;">
                                                     <i class="fas fa-calendar-check me-1"></i>
                                                     Pesan Sekarang
@@ -716,6 +730,22 @@ Sesi Klinik Scopus | Rumah Scopus
                             <small class="text-danger error-msg"></small>
                         </div>
 
+                        <!-- Tanggal Periode -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Booking Tanggal <span class="text-danger">*</span>
+                            </label>
+                            <select name="booking" id="booking" class="form-control rounded-3" required>
+                                <option value="">-- Pilih Tanggal --</option>
+                                @foreach($rangeTanggal as $date)
+                                <option value="{{ $date->format('Y-m-d') }}">
+                                    {{ $date->translatedFormat('l, d F Y') }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <small class="text-danger error-msg"></small>
+                        </div>
+
                         <!-- NAMA -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
@@ -787,6 +817,71 @@ Sesi Klinik Scopus | Rumah Scopus
         </div>
     </div>
 </div>
+<!--================== END ==================-->
+
+<!--================== MEMASTIKAN TIDAK BISA MEMILIH SESI & TANGGAL YANG SUDAH DI PESAN ==================-->
+<script>
+    const sesiTerpakai = @json($sesiTerpakai);
+</script>
+<script>
+    let tipeDipilih = null; // reguler | promo
+    let sesiDipilih = null;
+
+    document.querySelectorAll('.sesi-clickable, [data-type="promo"]').forEach(el => {
+        el.addEventListener('click', function() {
+
+            // reguler / promo (bundling)
+            tipeDipilih = this.dataset.type || 'reguler';
+
+            // hanya relevan untuk reguler
+            sesiDipilih = this.dataset.sesi || null;
+
+            updateTanggalBooking();
+        });
+    });
+
+    function updateTanggalBooking() {
+        const select = document.getElementById('booking');
+
+        Array.from(select.options).forEach(option => {
+            if (!option.value) return;
+
+            const tanggal = option.value;
+
+            const bentrok = sesiTerpakai.some(item => {
+
+                // beda tanggal → aman
+                if (item.tanggal !== tanggal) return false;
+
+                // =========================
+                // 🔵 REGULER (JANGAN DIUBAH)
+                // =========================
+                if (tipeDipilih === 'reguler') {
+                    return (
+                        item.tipe_promo !== 'promo' && // hanya reguler
+                        item.sesi === sesiDipilih
+                    );
+                }
+
+                // =========================
+                // 🔴 PROMO BUNDLING (FIX)
+                // =========================
+                if (tipeDipilih === 'promo') {
+                    return item.tipe_promo === 'promo';
+                }
+
+                return false;
+            });
+
+            option.disabled = bentrok;
+        });
+
+        // reset value kalau sudah terpilih tapi ternyata disabled
+        if (select.value && select.selectedOptions[0]?.disabled) {
+            select.value = '';
+        }
+    }
+</script>
 <!--================== END ==================-->
 
 <!--================== MEMASTIKAN USER SUDAH LOGIN ==================-->
@@ -1010,16 +1105,18 @@ Sesi Klinik Scopus | Rumah Scopus
 
             const kendala = document.getElementById('kendala');
             const kendalaDesc = document.getElementById('kendala_desc');
+            const booking = document.getElementById('booking');
             const nama = document.getElementById('nama');
             const afiliasi = document.getElementById('afiliasi');
             const email = document.getElementById('email');
             const whatsapp = document.getElementById('whatsapp');
 
-            [kendala, kendalaDesc, nama, afiliasi, email, whatsapp].forEach(clearError);
+            [kendala, kendalaDesc, booking, nama, afiliasi, email, whatsapp].forEach(clearError);
 
             if (!kendala.value) showError(kendala, 'Kendala wajib dipilih');
             if (!kendalaDesc.value.trim() || kendalaDesc.value.trim().length < 5)
                 showError(kendalaDesc, 'Jelaskan kendala minimal 5 karakter');
+            if (!booking.value) showError(booking, 'Tanggal booking wajib dipilih');
 
             if (nama.value.trim().length < 3) showError(nama, 'Nama minimal 3 karakter');
             if (afiliasi.value.trim().length < 5) showError(afiliasi, 'Afiliasi minimal 5 karakter');
@@ -1037,12 +1134,54 @@ Sesi Klinik Scopus | Rumah Scopus
                 showError(whatsapp, 'Nomor WA harus 8–15 digit');
 
             if (isValid) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Data valid, siap dikirim!',
-                    confirmButtonColor: '#ff914d'
-                });
+
+                const payload = {
+                    klinik_id: modalElement.dataset.klinikId,
+                    sesi: sesiNameEl.textContent,
+                    jam_sesi: sesiTimeEl.textContent,
+                    kendala: kendala.value,
+                    kendala_desc: kendalaDesc.value,
+                    booking: booking.value,
+                    nama: nama.value,
+                    afiliasi: afiliasi.value,
+                    email: email.value,
+                    whatsapp: whatsapp.value,
+                    harga: parseInt(document.getElementById('modalHarga').textContent.replace(/[^\d]/g, '')),
+                    diskon: parseInt(document.getElementById('modalDiskon').textContent.replace(/[^\d]/g, '')),
+                    ppn: parseInt(document.getElementById('modalPpn').textContent.replace(/[^\d]/g, '')),
+                    kode_unik: parseInt(document.getElementById('modalKodeUnik').textContent.replace(/[^\d]/g, '')),
+                    total: parseInt(document.getElementById('modalTotalHeader').textContent.replace(/[^\d]/g, '')),
+                    kode_booking: document.getElementById('modalKode').textContent,
+                    kode_diskon: kodeDiskonInput.value || null,
+                    tipe_promo: promoEl.textContent ? 'promo' : 'reguler'
+                };
+
+                fetch('/Clinik-Scopus/Pemesanan', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: 'Pemesanan konsultasi berhasil disimpan',
+                                confirmButtonColor: '#ff914d'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Gagal', 'Terjadi kesalahan', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire('Error', 'Server tidak merespon', 'error');
+                    });
             }
         });
 

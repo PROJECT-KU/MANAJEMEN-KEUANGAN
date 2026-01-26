@@ -408,19 +408,31 @@ Tambah Nama Trainer | MIS
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Tanggal Aktif <span style="color: red;">*</span></label>
-                                    <input type="date" id="tanggal" name="tanggal" placeholder="Masukkan tanggal" class="form-control" required>
+                                    <label>Tanggal Online <span style="color: red;">*</span></label>
+                                    <input type="date" id="tanggal_online" name="tanggal_online" placeholder="Masukkan tanggal_online" class="form-control" required>
 
-                                    @error('tanggal')
+                                    @error('tanggal_online')
                                     <div class="invalid-feedback" style="display: block">
                                         {{ $message }}
                                     </div>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tanggal Offline <span style="color: red;">*</span></label>
+                                    <input type="date" id="tanggal_offline" name="tanggal_offline" placeholder="Masukkan tanggal_offline" class="form-control" required>
+
+                                    @error('tanggal_offline')
+                                    <div class="invalid-feedback" style="display: block">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Biaya Per Sesi</label>
 

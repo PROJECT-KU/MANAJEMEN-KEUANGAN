@@ -53,7 +53,7 @@ class ClinikScopusPromoController extends Controller
                     $q->where('status', 'active');
                 }
             ])
-            ->orderBy('tanggal')
+            ->orderBy('tanggal_online', 'asc')
             ->get();
 
         return view('account.clinik_scopus_promo.create', compact('events'));
@@ -70,7 +70,6 @@ class ClinikScopusPromoController extends Controller
                 'status' => $request->status,
                 'tanggal_mulai_promo' => $request->tanggal_mulai_promo,
                 'tanggal_selesai_promo' => $request->tanggal_selesai_promo,
-                'total_kuota_promo' => $request->total_kuota_promo,
                 'harga_normal' => str_replace('.', '', $request->harga_normal),
                 'tipe_diskon' => $request->tipe_diskon,
                 'diskon_persentase' => $request->diskon_persentase,
@@ -118,7 +117,7 @@ class ClinikScopusPromoController extends Controller
 
         $events = Clinikscopus::activeToday()
             ->with('user')
-            ->orderBy('tanggal')
+            ->orderBy('tanggal_online', 'asc')
             ->get();
 
         return view(
@@ -137,7 +136,6 @@ class ClinikScopusPromoController extends Controller
                 'status' => $request->status,
                 'tanggal_mulai_promo' => $request->tanggal_mulai_promo,
                 'tanggal_selesai_promo' => $request->tanggal_selesai_promo,
-                'total_kuota_promo' => $request->total_kuota_promo,
                 'harga_normal' => str_replace('.', '', $request->harga_normal),
                 'tipe_diskon' => $request->tipe_diskon,
                 'diskon_persentase' => $request->diskon_persentase,

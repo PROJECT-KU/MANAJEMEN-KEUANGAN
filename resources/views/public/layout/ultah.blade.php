@@ -124,6 +124,37 @@
             transform: translateY(110vh) rotate(360deg);
         }
     }
+
+    .age-wrapper {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        gap: 10px;
+    }
+
+    #age-number {
+        font-size: 80px;
+        font-weight: 900;
+        animation: glow 1.5s infinite alternate;
+    }
+
+    .age-text {
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    @keyframes glow {
+        from {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            transform: scale(1);
+        }
+
+        to {
+            text-shadow: 0 0 25px rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+        }
+    }
 </style>
 
 
@@ -132,6 +163,10 @@
 <div id="birthday-overlay">
     <div class="birthday-card">
         <h1>🎂 Happy Birthday</h1>
+        <div class="age-wrapper">
+            <span id="age-number">0</span>
+            <span class="age-text">Tahun</span>
+        </div>
         <h2>Rumah Scopus 🎉</h2>
         <p>Terus Menjadi Rumah Para Peneliti Hebat 🚀</p>
         <button onclick="closeBirthday()">Tutup</button>
@@ -183,5 +218,31 @@
     document.addEventListener("DOMContentLoaded", function() {
         createBalloons();
         createConfetti();
+    });
+</script>
+
+<script>
+    function animateAge(target = 7) {
+        const el = document.getElementById('age-number');
+        let current = 0;
+
+        const interval = setInterval(() => {
+            current++;
+            el.textContent = current;
+
+            if (current >= target) {
+                clearInterval(interval);
+            }
+        }, 250);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        createBalloons();
+        createConfetti();
+
+        // delay dikit biar sinkron dengan popUp card
+        setTimeout(() => {
+            animateAge(7);
+        }, 800);
     });
 </script>

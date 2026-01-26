@@ -11,10 +11,13 @@ use App\Clinikscopus;
 use App\User;
 use App\ClinikscopusPromoSesi;
 use App\ClinikScopusBiayaPersesi;
+use App\ClinikScopusPemesanan;
 use App\AnalisisBibliometrik;
 use App\Mail\AnalisisBibliometrikMail;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Carbon\CarbonPeriod;
 
 class PublicClinikScopusController extends Controller
 {
@@ -27,7 +30,7 @@ class PublicClinikScopusController extends Controller
 
         // Nonaktifkan event yang sudah lewat
         DB::table('clinikscopus')
-            ->whereDate('tanggal', '<', $today)
+            ->whereDate('tanggal_offline', '<', $today)
             ->where('status', 'active')
             ->update([
                 'status' => 'non active'
@@ -36,9 +39,9 @@ class PublicClinikScopusController extends Controller
         $categories = DB::table('clinikscopus')
             ->join('users', 'users.id', '=', 'clinikscopus.user_id')
             ->where('clinikscopus.status', 'active')
-            ->whereDate('clinikscopus.tanggal', '=', $today)
+            ->whereDate('clinikscopus.tanggal_online', '=', $today)
             ->whereRaw(
-                "TIMESTAMP(clinikscopus.tanggal, '00:01:00') <= ?",
+                "TIMESTAMP(clinikscopus.tanggal_online, '00:01:00') <= ?",
                 [$now]
             )
             ->select(
@@ -46,7 +49,7 @@ class PublicClinikScopusController extends Controller
                 'users.full_name as full_name',
                 'users.jobdesk as jobdesk'
             )
-            ->orderBy('clinikscopus.tanggal', 'ASC')
+            ->orderBy('clinikscopus.tanggal_online', 'ASC')
             ->paginate(6);
 
         return view('public.clinik_scopus.index', compact('categories'));
@@ -70,6 +73,18 @@ class PublicClinikScopusController extends Controller
 
         if (!$clinik) {
             abort(404);
+        }
+
+        // ambil data klinik tanggal periode online - offline trainer
+        $tanggalOnline  = Carbon::parse($clinik->tanggal_online)->startOfDay();
+        $tanggalOffline = Carbon::parse($clinik->tanggal_offline)->startOfDay();
+
+        $rangeTanggal = [];
+
+        $period = CarbonPeriod::create($tanggalOnline, $tanggalOffline);
+
+        foreach ($period as $date) {
+            $rangeTanggal[] = $date; // SIMPAN OBJECT
         }
 
         /**
@@ -113,9 +128,20 @@ class PublicClinikScopusController extends Controller
             $spesialis = array_map('trim', explode(',', $clinik->spesialis));
         }
 
+        $sesiTerpakai = ClinikScopusPemesanan::where('clinikscopus_id', $clinik->id)
+            ->whereIn('status', ['pending', 'paid'])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'sesi'    => $item->sesi, // contoh: "Sesi 1"
+                    'tanggal' => Carbon::parse($item->tanggal_booking)->format('Y-m-d'),
+                    'tipe_promo' => $item->tipe_promo
+                ];
+            });
+
         return view(
             'public.clinik_scopus.formsesi',
-            compact('clinik', 'spesialis', 'promo')
+            compact('clinik', 'spesialis', 'promo', 'sesiTerpakai', 'rangeTanggal')
         );
     }
     // <!--================== END ==================-->
@@ -200,4 +226,64 @@ class PublicClinikScopusController extends Controller
     }
     // <!--================== END ==================-->
 
+    // <!--================== PEMESANAN ==================-->
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'klinik_id' => 'required|exists:clinikscopus,id',
+                'nama'      => 'required|min:3',
+                'email'     => 'required|email',
+                'whatsapp'  => 'required|min:8',
+                'total'     => 'required|numeric|min:1',
+                'booking'   => 'required|date',
+
+            ]);
+
+            // Ambil klinik + trainer
+            $clinik = Clinikscopus::select('id', 'user_id')->findOrFail($request->klinik_id);
+
+            $pemesanan = ClinikScopusPemesanan::create([
+                'clinikscopus_id'  => $clinik->id,
+                'user_id'          => $clinik->user_id, // ✅ TRAINER
+                'id_transaksi'     => 'BOOK-' . now()->format('dmYHis') . '-' . strtoupper(Str::random(5)),
+                'kode_booking'     => $request->kode_booking,
+                'sesi'             => $request->sesi,
+                'jam_sesi'         => $request->jam_sesi,
+                'nama_pemesan'     => $request->nama,
+                'afiliasi_pemesan' => $request->afiliasi,
+                'email_pemesan'    => $request->email,
+                'telp_pemesan'     => $request->whatsapp,
+                'kendala'          => $request->kendala,
+                'desc_kendala'     => $request->kendala_desc,
+                'harga_persesi'    => $request->harga,
+                'diskon'           => $request->diskon ?? 0,
+                'ppn'              => $request->ppn ?? 0,
+                'kode_unik'        => $request->kode_unik ?? 0,
+                'kode_diskon'      => $request->kode_diskon,
+                'tipe_promo'       => $request->tipe_promo,
+                'total_pembayaran' => $request->total,
+                'tanggal_booking'  => Carbon::parse($request->booking)->format('Y-m-d H:i:s'),
+                'status'           => 'pending',
+                'tanggal'          => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pemesanan berhasil dibuat',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('ERROR STORE PEMESANAN', [
+                'error' => $e->getMessage(),
+                'line'  => $e->getLine(),
+                'file'  => $e->getFile(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server',
+            ], 500);
+        }
+    }
+    // <!--================== END ==================-->
 }

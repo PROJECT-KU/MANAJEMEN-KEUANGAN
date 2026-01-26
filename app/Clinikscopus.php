@@ -26,7 +26,8 @@ class Clinikscopus extends Model
     }
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal_online'  => 'datetime',
+        'tanggal_offline' => 'datetime',
     ];
 
     protected $fillable = [
@@ -43,7 +44,8 @@ class Clinikscopus extends Model
         'sesi9',
         'spesialis',
         'status',
-        'tanggal',
+        'tanggal_online',
+        'tanggal_offline',
         'foto'
     ];
 
@@ -69,7 +71,12 @@ class Clinikscopus extends Model
 
     public function scopeActiveToday($query)
     {
-        return $query->whereDate('tanggal', Carbon::today());
+        $today = Carbon::today();
+
+        return $query
+            ->where('status', 'active')
+            ->whereDate('tanggal_online', '<=', $today)
+            ->whereDate('tanggal_offline', '>=', $today);
     }
 
     // Trainer

@@ -30,7 +30,6 @@ class ClinikscopusPromo extends Model
         'status',
         'tanggal_mulai_promo',
         'tanggal_selesai_promo',
-        'total_kuota_promo',
         'harga_normal',
         'tipe_diskon',
         'diskon_persentase',

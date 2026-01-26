@@ -76,20 +76,6 @@ Tambah Promo | MIS
                 <div class="card">
                     <div class="card-body">
 
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        Total Kuota Promo
-                                    </label>
-                                    <input type="number"
-                                        name="total_kuota_promo"
-                                        class="form-control"
-                                        placeholder="Kosongkan jika tidak dibatasi">
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="row align-items-center">
                             @php
                             $firstEvent = $events->first();
@@ -188,7 +174,7 @@ Tambah Promo | MIS
                                     <thead class="bg-light">
                                         <tr>
                                             <th width="50">#</th>
-                                            <th>Tanggal</th>
+                                            <th>Tanggal Active</th>
                                             <th>Trainer</th>
                                             <th>Sesi</th>
                                         </tr>
@@ -204,7 +190,7 @@ Tambah Promo | MIS
                                                     name="clinikscopus_ids[]"
                                                     value="{{ $event->id }}">
                                             </td>
-                                            <td>{{ $event->tanggal->format('d M Y') }}</td>
+                                            <td>{{ $event->tanggal_online->format('d M Y') }} - {{ $event->tanggal_offline->format('d M Y') }}</td>
                                             <td>{{ $event->user->full_name }}</td>
                                             <td>
                                                 @php

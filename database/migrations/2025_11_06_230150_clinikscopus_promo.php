@@ -22,8 +22,6 @@ class ClinikscopusPromo extends Migration
             $table->dateTime('tanggal_mulai_promo');
             $table->dateTime('tanggal_selesai_promo');
 
-            $table->integer('total_kuota_promo')->nullable();
-
             $table->string('harga_normal');
 
             $table->enum('tipe_diskon', ['persentase', 'nominal', 'bundling'])->nullable();
