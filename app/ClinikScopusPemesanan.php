@@ -11,7 +11,8 @@ class ClinikScopusPemesanan extends Model
 
     protected $fillable = [
         'clinikscopus_id',
-        'user_id',
+        'trainer_id',
+        'customer_id',
         'id_transaksi',
         'kode_booking',
         'sesi',
@@ -32,6 +33,8 @@ class ClinikScopusPemesanan extends Model
         'status',
         'tanggal',
         'tanggal_booking',
+        'ip_address',
+        'browser',
     ];
 
     protected $keyType = 'string';
@@ -46,5 +49,10 @@ class ClinikScopusPemesanan extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
     }
 }

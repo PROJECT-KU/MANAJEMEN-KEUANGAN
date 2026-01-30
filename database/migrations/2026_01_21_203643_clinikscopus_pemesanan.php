@@ -16,7 +16,8 @@ class ClinikscopusPemesanan extends Migration
         Schema::create('clinikscopus_pemesanan', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('clinikscopus_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('trainer_id');
+            $table->unsignedBigInteger('customer_id');
             $table->string('id_transaksi')->nullable();
             $table->string('kode_booking')->nullable();
             $table->string('sesi')->nullable();
@@ -37,10 +38,19 @@ class ClinikscopusPemesanan extends Migration
             $table->string('status')->nullable();
             $table->dateTime('tanggal')->nullable();
             $table->dateTime('tanggal_booking')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->string('browser')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')
-                ->references('id')->on('users')
+            $table->foreign('trainer_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('RESTRICT')
+                ->onUpdate('CASCADE');
+
+            $table->foreign('customer_id')
+                ->references('id')
+                ->on('users')
                 ->onDelete('RESTRICT')
                 ->onUpdate('CASCADE');
 

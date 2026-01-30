@@ -25,10 +25,9 @@ class PublicClinikScopusController extends Controller
     // <!--================== MENAMPILKAN DAFTAR TRAINER ==================-->
     public function index(Request $request)
     {
-        $now = Carbon::now();
         $today = Carbon::today();
 
-        // Nonaktifkan event yang sudah lewat
+        // 🔴 Nonaktifkan event yang sudah lewat
         DB::table('clinikscopus')
             ->whereDate('tanggal_offline', '<', $today)
             ->where('status', 'active')
@@ -36,14 +35,12 @@ class PublicClinikScopusController extends Controller
                 'status' => 'non active'
             ]);
 
+        // 🟢 Ambil event yang sedang berlangsung
         $categories = DB::table('clinikscopus')
             ->join('users', 'users.id', '=', 'clinikscopus.user_id')
             ->where('clinikscopus.status', 'active')
-            ->whereDate('clinikscopus.tanggal_online', '=', $today)
-            ->whereRaw(
-                "TIMESTAMP(clinikscopus.tanggal_online, '00:01:00') <= ?",
-                [$now]
-            )
+            ->whereDate('clinikscopus.tanggal_online', '<=', $today)
+            ->whereDate('clinikscopus.tanggal_offline', '>=', $today)
             ->select(
                 'clinikscopus.*',
                 'users.full_name as full_name',
@@ -139,9 +136,27 @@ class PublicClinikScopusController extends Controller
                 ];
             });
 
+        // ============================
+        // HITUNG SESI PENUH
+        // ============================
+        $totalHari = count($rangeTanggal);
+
+        $sesiPenuh = collect();
+
+        foreach (range(1, 9) as $sesi) {
+
+            $jumlahBooking = collect($sesiTerpakai)
+                ->where('sesi', 'Sesi ' . $sesi)
+                ->count();
+
+            if ($jumlahBooking >= $totalHari) {
+                $sesiPenuh->push('Sesi ' . $sesi);
+            }
+        }
+
         return view(
             'public.clinik_scopus.formsesi',
-            compact('clinik', 'spesialis', 'promo', 'sesiTerpakai', 'rangeTanggal')
+            compact('clinik', 'spesialis', 'promo', 'sesiTerpakai', 'rangeTanggal', 'sesiPenuh')
         );
     }
     // <!--================== END ==================-->
@@ -230,6 +245,7 @@ class PublicClinikScopusController extends Controller
     public function store(Request $request)
     {
         try {
+
             $request->validate([
                 'klinik_id' => 'required|exists:clinikscopus,id',
                 'nama'      => 'required|min:3',
@@ -237,51 +253,89 @@ class PublicClinikScopusController extends Controller
                 'whatsapp'  => 'required|min:8',
                 'total'     => 'required|numeric|min:1',
                 'booking'   => 'required|date',
-
+                'tipe_promo' => 'required|in:reguler,promo',
             ]);
 
-            // Ambil klinik + trainer
-            $clinik = Clinikscopus::select('id', 'user_id')->findOrFail($request->klinik_id);
+            $result = DB::transaction(function () use ($request) {
 
-            $pemesanan = ClinikScopusPemesanan::create([
-                'clinikscopus_id'  => $clinik->id,
-                'user_id'          => $clinik->user_id, // ✅ TRAINER
-                'id_transaksi'     => 'BOOK-' . now()->format('dmYHis') . '-' . strtoupper(Str::random(5)),
-                'kode_booking'     => $request->kode_booking,
-                'sesi'             => $request->sesi,
-                'jam_sesi'         => $request->jam_sesi,
-                'nama_pemesan'     => $request->nama,
-                'afiliasi_pemesan' => $request->afiliasi,
-                'email_pemesan'    => $request->email,
-                'telp_pemesan'     => $request->whatsapp,
-                'kendala'          => $request->kendala,
-                'desc_kendala'     => $request->kendala_desc,
-                'harga_persesi'    => $request->harga,
-                'diskon'           => $request->diskon ?? 0,
-                'ppn'              => $request->ppn ?? 0,
-                'kode_unik'        => $request->kode_unik ?? 0,
-                'kode_diskon'      => $request->kode_diskon,
-                'tipe_promo'       => $request->tipe_promo,
-                'total_pembayaran' => $request->total,
-                'tanggal_booking'  => Carbon::parse($request->booking)->format('Y-m-d H:i:s'),
-                'status'           => 'pending',
-                'tanggal'          => now(),
-            ]);
+                $tanggal = Carbon::parse($request->booking)->format('Y-m-d');
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pemesanan berhasil dibuat',
-            ]);
+                $bentrok = DB::table('clinikscopus_pemesanan')
+                    ->where('clinikscopus_id', $request->klinik_id)
+                    ->whereDate('tanggal_booking', $tanggal)
+                    ->where(function ($q) use ($request) {
+
+                        if ($request->tipe_promo === 'reguler') {
+                            $q->where('tipe_promo', 'reguler')
+                                ->where('sesi', $request->sesi);
+                        }
+
+                        if ($request->tipe_promo === 'promo') {
+                            $q->where('tipe_promo', 'promo');
+                        }
+                    })
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($bentrok) {
+                    return [
+                        'status' => 409,
+                        'type'   => 'bentrok',
+                        'title'  => 'Sesi Tidak Tersedia',
+                        'message' => 'Maaf, sesi ini baru saja dibooking peserta lain.'
+                    ];
+                }
+
+                $clinik = Clinikscopus::select('id', 'user_id')->findOrFail($request->klinik_id);
+
+                ClinikScopusPemesanan::create([
+                    'clinikscopus_id'  => $clinik->id,
+                    'trainer_id'       => $clinik->user_id,
+                    'customer_id'      => auth()->id(),
+                    'id_transaksi'     => 'BOOK-' . now()->format('dmYHis') . '-' . strtoupper(Str::random(5)),
+                    'kode_booking'     => $request->kode_booking,
+                    'sesi'             => $request->sesi,
+                    'jam_sesi'         => $request->jam_sesi,
+                    'nama_pemesan'     => $request->nama,
+                    'afiliasi_pemesan' => $request->afiliasi,
+                    'email_pemesan'    => $request->email,
+                    'telp_pemesan'     => $request->whatsapp,
+                    'kendala'          => $request->kendala,
+                    'desc_kendala'     => $request->kendala_desc,
+                    'harga_persesi'    => $request->harga,
+                    'diskon'           => $request->diskon ?? 0,
+                    'ppn'              => $request->ppn ?? 0,
+                    'kode_unik'        => $request->kode_unik ?? 0,
+                    'kode_diskon'      => $request->kode_diskon,
+                    'tipe_promo'       => $request->tipe_promo,
+                    'total_pembayaran' => $request->total,
+                    'tanggal_booking'  => Carbon::parse($request->booking),
+                    'status'           => 'pending',
+                    'tanggal'          => now(),
+                    'ip_address'       => $request->ip(),
+                    'browser'          => $request->userAgent(),
+                ]);
+
+                return [
+                    'status' => 200,
+                    'success' => true,
+                    'title'  => 'Berhasil 🎉',
+                    'message' => 'Pemesanan berhasil dibuat. Silakan lanjutkan pembayaran.'
+                ];
+            });
+
+            return response()->json($result, $result['status']);
         } catch (\Throwable $e) {
+
             \Log::error('ERROR STORE PEMESANAN', [
-                'error' => $e->getMessage(),
-                'line'  => $e->getLine(),
-                'file'  => $e->getFile(),
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan server',
+                'title'   => 'Server Error',
+                'message' => 'Terjadi kesalahan server.'
             ], 500);
         }
     }
