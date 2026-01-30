@@ -260,29 +260,29 @@ class PublicClinikScopusController extends Controller
 
                 $tanggal = Carbon::parse($request->booking)->format('Y-m-d');
 
+                $sesiDiminta = collect(explode(',', $request->sesi))
+                    ->map(fn($s) => trim($s));
+
                 $bentrok = DB::table('clinikscopus_pemesanan')
                     ->where('clinikscopus_id', $request->klinik_id)
                     ->whereDate('tanggal_booking', $tanggal)
-                    ->where(function ($q) use ($request) {
+                    ->whereIn('status', ['pending', 'paid'])
+                    ->where(function ($q) use ($sesiDiminta) {
 
-                        if ($request->tipe_promo === 'reguler') {
-                            $q->where('tipe_promo', 'reguler')
-                                ->where('sesi', $request->sesi);
-                        }
-
-                        if ($request->tipe_promo === 'promo') {
-                            $q->where('tipe_promo', 'promo');
+                        foreach ($sesiDiminta as $sesi) {
+                            $q->orWhere('sesi', 'LIKE', "%$sesi%");
                         }
                     })
                     ->lockForUpdate()
                     ->exists();
+
 
                 if ($bentrok) {
                     return [
                         'status' => 409,
                         'type'   => 'bentrok',
                         'title'  => 'Sesi Tidak Tersedia',
-                        'message' => 'Maaf, sesi ini baru saja dibooking peserta lain.'
+                        'message' => 'Maaf, sesi dan tanggal ini baru saja dibooking peserta lain.'
                     ];
                 }
 

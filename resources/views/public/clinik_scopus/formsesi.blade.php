@@ -396,9 +396,22 @@ Sesi Klinik Scopus | Rumah Scopus
                                         @endphp
 
                                         @php
-                                        $sesiKey = $index + 1;
+                                        $sesiKey = 'Sesi '.($index + 1);
                                         $sesiName = 'Sesi ' . $sesiKey;
-                                        $isFull = in_array('Sesi '.($index+1), $sesiPenuh->toArray());
+                                        $isFull = collect($rangeTanggal)->every(function ($date) use ($sesiTerpakai, $sesiKey) {
+
+                                        return collect($sesiTerpakai)->contains(function ($booking) use ($date, $sesiKey) {
+
+                                        if ($booking['tanggal'] !== $date->format('Y-m-d')) {
+                                        return false;
+                                        }
+
+                                        $sesiBooked = collect(explode(',', $booking['sesi']))
+                                        ->map(fn($s) => trim($s));
+
+                                        return $sesiBooked->contains($sesiKey);
+                                        });
+                                        });
                                         @endphp
 
                                         <div class="col-6 col-md-4">
@@ -540,19 +553,20 @@ Sesi Klinik Scopus | Rumah Scopus
                                             @php
                                             $jadwalBundling = $item->sesi_bundling
                                             ->filter(fn($s) => !empty($s->jam))
-                                            ->map(fn($s) => strtoupper($s->sesi_key).' ('.$s->jam.')')
+                                            ->map(fn($s) => 'Sesi '.$s->sesi_key)
                                             ->implode(', ');
-                                            $bundlingFull = $item->sesi_bundling->contains(fn($s) =>
-                                            in_array('Sesi '.str_replace('SESI ', '', $s->sesi_key), $sesiPenuh->toArray())
+
+                                            $bundlingFull = $item->sesi_bundling->every(fn($s) =>
+                                            in_array('Sesi '.$s->sesi_key, $sesiPenuh->toArray())
                                             );
                                             @endphp
 
                                             <div class="mt-3 text-center">
                                                 <button type="button"
-                                                    class="btn w-100 
-                                                    {{ $bundlingFull ? 'disabled' : '' }}"
+                                                    class="btn w-100 promo-btn {{ $bundlingFull ? 'disabled promo-full' : '' }}"
                                                     data-type="promo"
                                                     {{ $bundlingFull ? 'disabled' : '' }}
+
                                                     data-trainer="{{ $clinik->full_name ?? '' }}"
                                                     data-promo="{{ $item->nama_promo }}"
                                                     data-sesi="{{ $item->sesi_bundling->pluck('sesi_key')->join(', ') }}"
@@ -562,8 +576,12 @@ Sesi Klinik Scopus | Rumah Scopus
                                                     data-klinik-id="{{ $clinik->id }}"
 
                                                     style="background:linear-gradient(to right,#ff3131,#ff914d); color:#fff; font-weight:600; border-radius:10px; padding:10px 16px;">
-                                                    <i class="fas fa-calendar-check me-1"></i>
-                                                    {{ $bundlingFull ? 'SESI PENUH' : 'Pesan Sekarang' }}
+
+                                                    <i class="fas {{ $bundlingFull ? 'fa-ban' : 'fa-calendar-check' }} me-1"></i>
+
+                                                    <span class="promo-text">
+                                                        {{ $bundlingFull ? 'SESI PENUH' : 'Pesan Sekarang' }}
+                                                    </span>
                                                 </button>
 
                                                 <small class="d-block text-muted mt-2">
@@ -867,56 +885,57 @@ Sesi Klinik Scopus | Rumah Scopus
 <!--================== MEMASTIKAN TIDAK BISA MEMILIH SESI & TANGGAL YANG SUDAH DI PESAN ==================-->
 <script>
     const sesiTerpakai = @json($sesiTerpakai);
+
     let tipeDipilih = null; // reguler | promo
     let sesiDipilih = null;
     let bundlingSesiDipilih = [];
 
+    // =====================
+    // NORMALISASI SESI
+    // =====================
     function normalizeSesi(sesi) {
         if (!sesi) return '';
 
-        const match = sesi.match(/sesi\s*\d+/i); // 🔥 case-insensitive
-        return match ? match[0].replace(/\s+/g, ' ').trim().replace(/^sesi/i, 'Sesi') : '';
+        const match = sesi.match(/sesi\s*\d+/i);
+        return match ?
+            match[0].replace(/\s+/g, ' ').trim().replace(/^sesi/i, 'Sesi') :
+            '';
     }
 
-    function parseBundlingJadwal(text) {
-        // contoh input:
-        // "SESI 2 (20.10 - 21.00), SESI 3 (15.10 - 16.00)"
-
-        const sesi = [];
-        const jam = [];
-
-        const regex = /sesi\s*(\d+)\s*\(([^)]+)\)/gi;
-        let match;
-
-        while ((match = regex.exec(text)) !== null) {
-            sesi.push(`Sesi ${match[1]}`);
-            jam.push(match[2]);
-        }
-
-        return {
-            sesi: sesi.join(', '),
-            jam: jam.join(', ')
-        };
-    }
-
+    // =====================
+    // CLICK SESI / PROMO
+    // =====================
     document.querySelectorAll('.sesi-clickable, [data-type="promo"]').forEach(el => {
-        el.addEventListener('click', function() {
+        el.addEventListener('click', function(e) {
+
+            // 🔒 HARD BLOCK kalau promo full
+            if (this.classList.contains('promo-full') || this.disabled) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
 
             tipeDipilih = this.dataset.type || 'reguler';
 
+            // =====================
+            // REGULER
+            // =====================
             if (tipeDipilih === 'reguler') {
                 sesiDipilih = normalizeSesi(this.dataset.sesi);
                 bundlingSesiDipilih = [];
             }
 
+            // =====================
+            // PROMO BUNDLING
+            // =====================
             if (tipeDipilih === 'promo') {
                 sesiDipilih = null;
 
-                // 🔥 AMBIL SEMUA SESI DI DALAM PROMO (Sesi 2, Sesi 3, dst)
-                const raw = this.dataset.jadwal || '';
-                bundlingSesiDipilih = raw
+                // 🔥 AMBIL DARI data-sesi (BUKAN data-jadwal)
+                const rawSesi = this.dataset.sesi || '';
+                bundlingSesiDipilih = rawSesi
                     .split(',')
-                    .map(s => normalizeSesi(s))
+                    .map(s => `Sesi ${s.trim()}`)
                     .filter(Boolean);
             }
 
@@ -924,6 +943,9 @@ Sesi Klinik Scopus | Rumah Scopus
         });
     });
 
+    // =====================
+    // DISABLE TANGGAL
+    // =====================
     function updateTanggalBooking() {
         const select = document.getElementById('booking');
 
@@ -932,56 +954,99 @@ Sesi Klinik Scopus | Rumah Scopus
 
             const tanggal = option.value;
 
-            // Semua booking pada tanggal ini
             const bookingTanggal = sesiTerpakai.filter(
                 item => item.tanggal === tanggal
             );
 
             let bentrok = false;
 
-            // ============================
-            // 🔵 JIKA USER PILIH REGULER
-            // ============================
+            // =====================
+            // REGULER
+            // =====================
             if (tipeDipilih === 'reguler' && sesiDipilih) {
                 bentrok = bookingTanggal.some(item => {
                     const sesiBooked = normalizeSesi(item.sesi);
 
-                    // ❌ bentrok reguler vs reguler
                     if (item.tipe_promo === 'reguler') {
                         return sesiBooked === sesiDipilih;
                     }
 
-                    // ❌ bentrok reguler vs promo bundling
                     if (item.tipe_promo === 'promo') {
-                        const sesiDalamPromo = item.sesi.split(',').map(s => normalizeSesi(s));
-                        return sesiDalamPromo.includes(sesiDipilih);
+                        const sesiPromo = item.sesi
+                            .split(',')
+                            .map(s => normalizeSesi(s));
+                        return sesiPromo.includes(sesiDipilih);
                     }
 
                     return false;
                 });
             }
 
-            // ============================
-            // 🔴 JIKA USER PILIH PROMO BUNDLING
-            // ============================
+            // =====================
+            // PROMO BUNDLING
+            // =====================
             if (tipeDipilih === 'promo' && bundlingSesiDipilih.length) {
-                // Periksa setiap sesi bundling yang terkait
                 bentrok = bookingTanggal.some(item => {
-                    const sesiBooked = normalizeSesi(item.sesi);
-                    const sesiDalamPromo = item.sesi.split(',').map(s => normalizeSesi(s));
+                    const sesiTerbooking = item.sesi
+                        .split(',')
+                        .map(s => normalizeSesi(s))
+                        .filter(Boolean);
 
-                    // Cek jika salah satu sesi dalam bundling sudah dipesan
-                    return bundlingSesiDipilih.some(bundlingSesi => sesiDalamPromo.includes(bundlingSesi));
+                    // 🔥 SATU SESI SAMA = BLOK
+                    return bundlingSesiDipilih.some(s =>
+                        sesiTerbooking.includes(s)
+                    );
                 });
             }
 
-            // Disable tanggal jika ada sesi yang sudah dipesan dalam bundling
             option.disabled = bentrok;
         });
 
-        // Reset jika user sudah pilih tanggal tapi ternyata bentrok
+        // reset kalau sudah kepilih tapi bentrok
         if (select.value && select.selectedOptions[0]?.disabled) {
             select.value = '';
+        }
+
+        updatePromoButtonState();
+    }
+
+    // =====================
+    // DISABLED BUTTON
+    // =====================
+    function updatePromoButtonState() {
+        const promoBtn = document.querySelector('[data-type="promo"].promo-btn');
+        if (!promoBtn) return;
+
+        const select = document.getElementById('booking');
+
+        // hitung tanggal yang masih bisa dipilih
+        const availableDates = Array.from(select.options).filter(opt =>
+            opt.value && !opt.disabled
+        );
+
+        const promoText = promoBtn.querySelector('.promo-text');
+        const promoIcon = promoBtn.querySelector('i');
+
+        if (availableDates.length === 0) {
+            // 🔴 PROMO FULL
+            promoBtn.classList.add('promo-full', 'disabled');
+            promoBtn.disabled = true;
+
+            if (promoText) promoText.textContent = 'SESI PENUH';
+            if (promoIcon) {
+                promoIcon.classList.remove('fa-calendar-check');
+                promoIcon.classList.add('fa-ban');
+            }
+        } else {
+            // 🟢 PROMO AVAILABLE
+            promoBtn.classList.remove('promo-full', 'disabled');
+            promoBtn.disabled = false;
+
+            if (promoText) promoText.textContent = 'Pesan Sekarang';
+            if (promoIcon) {
+                promoIcon.classList.remove('fa-ban');
+                promoIcon.classList.add('fa-calendar-check');
+            }
         }
     }
 </script>
@@ -1035,11 +1100,45 @@ Sesi Klinik Scopus | Rumah Scopus
             return 'Rp ' + number.toLocaleString('id-ID');
         }
 
+        // =======================
+        // NORMALISASI SESI REGULER
+        // =======================
+        function parseSesiReguler(rawSesi) {
+            if (!rawSesi) return [];
+            return rawSesi
+                .split(',')
+                .map(s => s.trim()) // reguler biasanya sudah ada "Sesi X"
+                .filter(Boolean);
+        }
+
+        // =======================
+        // NORMALISASI SESI PROMO BUNDLING
+        // =======================
+        function parseSesiPromo(rawSesi) {
+            if (!rawSesi) return [];
+            return rawSesi
+                .split(',')
+                .map(s => 'Sesi ' + s.trim()) // tambahkan prefix "Sesi "
+                .filter(Boolean);
+        }
+
         // =============================
         // HANDLER UNTUK SESI & PROMO
         // =============================
         document.querySelectorAll('.sesi-clickable, [data-type="promo"]').forEach(item => {
+
             item.addEventListener('click', function() {
+
+                // 🔒 BLOK JIKA PROMO SUDAH PENUH
+                if (this.disabled || this.classList.contains('disabled')) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Promo Tidak Tersedia',
+                        text: 'Semua tanggal untuk promo bundling ini sudah penuh'
+                    });
+                    return;
+                }
+
                 // Pastikan pengguna sudah login
                 if (!IS_LOGGED_IN) {
                     Swal.fire({
@@ -1066,11 +1165,13 @@ Sesi Klinik Scopus | Rumah Scopus
                 promoEl.textContent = item.dataset.promo || '';
 
                 // Untuk promo bundling, parsing sesi dan jadwal
-                const sesi = item.dataset.sesi ? item.dataset.sesi.split(', ') : [];
-                const jadwal = item.dataset.jadwal ? item.dataset.jadwal.split(', ') : [];
+                const sesi = isPromo ? parseSesiPromo(item.dataset.sesi) : parseSesiReguler(item.dataset.sesi);
 
-                // Menambahkan kata "Sesi" pada setiap sesi
-                document.getElementById('modalSesiName').textContent = sesi.length ? 'Sesi ' + sesi.join(', Sesi ') : 'Sesi Tidak Tersedia';
+                const jadwal = item.dataset.jadwal ?
+                    item.dataset.jadwal.split(',').map(s => s.trim()) : [];
+
+                // Set modal content
+                document.getElementById('modalSesiName').textContent = sesi.length ? sesi.join(', ') : 'Sesi Tidak Tersedia';
                 document.getElementById('modalSesiTime').textContent = jadwal.length ? jadwal.join(', ') : 'Jadwal Tidak Tersedia';
 
                 // Atur data klinik dan sesi key untuk digunakan di form
