@@ -226,6 +226,11 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             </a>
                         </li>
                         @endif
+                        <li class="{{ setActive('account/customer') . setActive('account/pengguna/search') }}">
+                            <a class="nav-link" href="{{ route('account.customer.index') }}">
+                                <i class="fas fa-users"></i> <span>Riwayat Pemesanan</span>
+                            </a>
+                        </li>
                         <!--================== END ==================-->
 
                         <!--================== REDIRECT TO BERANDA ==================-->

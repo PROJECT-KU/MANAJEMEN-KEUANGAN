@@ -1,8 +1,10 @@
+@extends('layouts.account')
+@extends('layouts.loader')
+
 @section('title')
-Tambah Nama Trainer | MIS
+Clinik Scopus Create Trainer | MIS
 @stop
 
-@extends('layouts.account')
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <style>
     .custom-file-upload {

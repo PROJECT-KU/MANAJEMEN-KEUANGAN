@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Biaya Persesi | MIS
+Clinik Scopus Data Biaya Per Sesi | MIS
 @stop
 
 <!-- ================== FILTER ================== -->

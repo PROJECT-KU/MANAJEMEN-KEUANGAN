@@ -1,8 +1,10 @@
+@extends('layouts.account')
+@extends('layouts.loader')
+
 @section('title')
-Tambah Biaya Persesi | MIS
+Clinik Scopus Create Biaya Per Sesi | MIS
 @stop
 
-@extends('layouts.account')
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <style>
     .custom-file-upload {

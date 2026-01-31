@@ -1,7 +1,8 @@
 @extends('layouts.account')
+@extends('layouts.loader')
 
 @section('title')
-Edit Promo | MIS
+Clinik Scopus Edit Promo | MIS
 @stop
 
 @section('content')

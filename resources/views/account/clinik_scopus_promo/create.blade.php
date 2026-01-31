@@ -1,8 +1,9 @@
-@section('title')
-Tambah Promo | MIS
-@stop
-
 @extends('layouts.account')
+@extends('layouts.loader')
+
+@section('title')
+Clinik Scopus Create Promo | MIS
+@stop
 
 @section('content')
 <div class="main-content">

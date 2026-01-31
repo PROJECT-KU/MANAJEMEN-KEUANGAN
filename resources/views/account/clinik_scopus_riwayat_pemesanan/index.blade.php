@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Clinik Scopus Data Trainer | MIS
+Clinik Scopus Riwayat Pemesanan | MIS
 @stop
 
 <!-- ================== FILTER ================== -->
@@ -84,7 +84,7 @@ Clinik Scopus Data Trainer | MIS
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA TRAINER</h1>
+      <h1>DATA BIAYA PERSESI</h1>
     </div>
 
     <div class="section-body">
@@ -96,12 +96,12 @@ Clinik Scopus Data Trainer | MIS
 
           <!--================== FILTER ==================-->
           <div class="card-header  d-flex justify-content-between align-items-center">
-            <h4><i class="fas fa-list"></i> DATA TRAINER</h4>
+            <h4><i class="fas fa-list"></i> DATA BIAYA PERSESI</h4>
 
             <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
               <!-- CREATE DATA -->
-              <a href="{{ route('account.clinikscopus.create') }}"
+              <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.create') }}"
                 class="btn btn-primary btn-block rounded-pill">
                 <i class="fa fa-plus-circle"></i> Tambah Data
               </a>
@@ -165,60 +165,25 @@ Clinik Scopus Data Trainer | MIS
                 <thead>
                   <tr>
                     <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
-                    <th scope="col" colspan="9" class="column-width" style="text-align: center;">Sesi Trainer</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
-                    <th scope="col" colspan="2" class="column-width" style="text-align: center;">Tanggal</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">Biaya Persesi</th>
+                    <th scope="col" rowspan="2" style="text-align: center;">PPN</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Status</th>
                     <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
-                  </tr>
-                  <tr>
-                    <th scope="col" style="text-align: center;">1</th>
-                    <th scope="col" style="text-align: center;">2</th>
-                    <th scope="col" style="text-align: center;">3</th>
-                    <th scope="col" style="text-align: center;">4</th>
-                    <th scope="col" style="text-align: center;">5</th>
-                    <th scope="col" style="text-align: center;">6</th>
-                    <th scope="col" style="text-align: center;">7</th>
-                    <th scope="col" style="text-align: center;">8</th>
-                    <th scope="col" style="text-align: center;">9</th>
-                    <th scope="col" style="text-align: center;">Online</th>
-                    <th scope="col" style="text-align: center;">Offline</th>
                   </tr>
                 </thead>
                 <tbody id="customerTable">
                   @php
                   $no = 1;
                   @endphp
-                  @foreach ($data as $item)
+                  @foreach ($biayaPersesi as $item)
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
-                    <td style="display: flex; align-items: center; gap: 10px;">{{ $item->full_name }} </td>
-                    @foreach(['sesi','sesi2','sesi3','sesi4','sesi5','sesi6','sesi7','sesi8','sesi9'] as $field)
-                    <td class="sesi-time" style="text-align: center">
-                      @if(!empty($item->$field))
-                      @php
-                      $s = explode(' - ', $item->$field);
-                      $mulai = $s[0] ?? null;
-                      $selesai = $s[1] ?? null;
-                      @endphp
-
-                      @if($mulai && $selesai)
-                      {{ $mulai }} <br>
-                      <span>s/d</span><br>
-                      {{ $selesai }}
-                      @else
-                      -
-                      @endif
-                      @else
-                      -
-                      @endif
+                    <td style="text-align: center; vertical-align: middle;">
+                      Rp {{ number_format($item->biaya_persesi, 0, ',', '.') }}
                     </td>
-                    @endforeach
-
-                    <td style="text-align: center;">{{ $item->spesialis }}</td>
-                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_online)->translatedFormat('d F Y') }}</td>
-                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_offline)->translatedFormat('d F Y') }}</td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      {{ $item->ppn ?? '-' }} {{ $item->ppn !== null ? '%' : '' }}
+                    </td>
                     <td style="text-align: center;">
                       @if ($item->status == "active")
                       <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
@@ -236,7 +201,7 @@ Clinik Scopus Data Trainer | MIS
                         style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
 
                         <!-- Tombol Edit -->
-                        <a href="{{ route('account.clinikscopus.edit', $item->id) }}"
+                        <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.edit', $item->id) }}"
                           class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
                           style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
                           <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
@@ -429,7 +394,7 @@ Clinik Scopus Data Trainer | MIS
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: "{{ route('account.clinikscopus.index') }}/" + id,
+          url: "{{ route('account.Clinik-Scopus-Biaya-Persesi.destroy', ':id') }}".replace(':id', id),
           type: 'POST',
           data: {
             _token: token,
@@ -437,20 +402,21 @@ Clinik Scopus Data Trainer | MIS
           },
           success: function(response) {
             Swal.fire({
-              title: 'BERHASIL!',
-              text: response.message || 'Data berhasil dihapus!',
               icon: 'success',
-              timer: 1000,
-              showConfirmButton: false,
-              willClose: () => location.reload()
+              title: 'BERHASIL!',
+              text: response.message,
+              timer: 1200,
+              showConfirmButton: false
             });
+
+            setTimeout(() => location.reload(), 1200);
           },
           error: function(xhr) {
-            let msg = 'Terjadi kesalahan saat menghapus data.';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-              msg = xhr.responseJSON.message;
-            }
-            Swal.fire('Gagal!', msg, 'error');
+            Swal.fire(
+              'Gagal!',
+              xhr.responseJSON?.message || 'Terjadi kesalahan.',
+              'error'
+            );
           }
         });
       }

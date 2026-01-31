@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Promo | MIS
+Clinik Scopus Data Promo | MIS
 @stop
 
 <!-- ================== FILTER ================== -->
