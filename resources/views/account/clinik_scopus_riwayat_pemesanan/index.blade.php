@@ -80,179 +80,364 @@ Clinik Scopus Riwayat Pemesanan | MIS
 </style>
 <!-- ================== END ================== -->
 
+<!-- ================== TAB STATUS CUSTOM ================== -->
+<style>
+  /* Posisi relatif untuk anchor tab */
+  #statusTabs .nav-link {
+    position: relative;
+    color: #555;
+    border-radius: 30px;
+    padding: 8px 18px;
+    transition: all 0.3s ease;
+  }
+
+  /* 🔢 Badge naik ke atas garis tab */
+  #statusTabs .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 11px;
+    padding: 4px 7px;
+    border-radius: 50%;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* 🔥 ACTIVE TAB GRADIENT */
+  #statusTabs .nav-link.active {
+    background: linear-gradient(to right, #ff3131, #ff914d) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(255, 49, 49, 0.35);
+  }
+
+  /* Badge tetap kontras saat aktif */
+  #statusTabs .nav-link.active .badge {
+    background: #fff !important;
+    color: #ff3131 !important;
+  }
+
+  /* Icon ikut putih saat aktif */
+  #statusTabs .nav-link.active i {
+    color: #fff !important;
+  }
+
+  /* Hover efek */
+  #statusTabs .nav-link:hover {
+    background: rgba(255, 49, 49, 0.1);
+  }
+</style>
+<!-- ================== END ================== -->
+
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA BIAYA PERSESI</h1>
+      <h1>DATA RIWAYAT PEMESANAN CLINIK SCOPUS</h1>
     </div>
 
     <div class="section-body">
 
       <div class="card">
 
+        <!--================== FILTER ==================-->
+        <div class="card-header  d-flex justify-content-between align-items-center">
+          <h4><i class="fas fa-list"></i> DATA RIWAYAT PEMESANAN</h4>
 
-        <div class="card">
+          <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
-          <!--================== FILTER ==================-->
-          <div class="card-header  d-flex justify-content-between align-items-center">
-            <h4><i class="fas fa-list"></i> DATA BIAYA PERSESI</h4>
+            <div class="dropdown card-header-action">
+              <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                <i class="fas fa-download"></i> FILTER
+              </button>
+              <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
 
-            <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
+                <!-- FILTER TANGGAL -->
+                <form action="{{ route('account.clinikscopus.filter') }}" method="GET">
+                  <div class="form-group">
+                    <label>Tanggal Awal</label>
+                    <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
+                  </div>
 
-              <!-- CREATE DATA -->
-              <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.create') }}"
-                class="btn btn-primary btn-block rounded-pill">
-                <i class="fa fa-plus-circle"></i> Tambah Data
-              </a>
-              <!-- END -->
+                  <div class="form-group">
+                    <label>Tanggal Akhir</label>
+                    <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
+                  </div>
 
-              <div class="dropdown card-header-action">
-                <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-                  <i class="fas fa-download"></i> FILTER
-                </button>
-                <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
-
-                  <!-- FILTER TANGGAL -->
-                  <form action="{{ route('account.clinikscopus.filter') }}" method="GET">
-                    <div class="form-group">
-                      <label>Tanggal Awal</label>
-                      <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                      <label>Tanggal Akhir</label>
-                      <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
-                    </div>
-
-                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                    <div class="btn-group" style="width: 100%;">
-                      <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                      <a href="{{ route('account.clinikscopus.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                        <i class="fa fa-trash mt-2"></i> HAPUS
-                      </a>
-                    </div>
-                    @else
-                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                    @endif
-                  </form>
-                  <!-- END -->
-
-                </div>
-              </div>
-
-              <!-- SEARCH -->
-              <div style="max-width:250px; width:100%; position:relative;">
-                <input type="text" id="liveSearch" class="form-control pe-4" placeholder="Pencarian..." autocomplete="off">
-
-                <button
-                  type="button"
-                  id="clearSearch"
-                  style="position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:transparent; display:none; cursor:pointer; font-size:14px;">
-                  ✕
-                </button>
-              </div>
-              <!-- END -->
-
-            </div>
-          </div>
-          <!--================== END FILTER ==================-->
-
-          <!--================== DATA ==================-->
-          <div class="card-body" style="font-size: 11px;">
-            <div class="table-responsive" id="customerTableWrapper">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Biaya Persesi</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">PPN</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Status</th>
-                    <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="customerTable">
-                  @php
-                  $no = 1;
-                  @endphp
-                  @foreach ($biayaPersesi as $item)
-                  <tr>
-                    <th scope="row" style="text-align: center">{{ $no }}</th>
-                    <td style="text-align: center; vertical-align: middle;">
-                      Rp {{ number_format($item->biaya_persesi, 0, ',', '.') }}
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                      {{ $item->ppn ?? '-' }} {{ $item->ppn !== null ? '%' : '' }}
-                    </td>
-                    <td style="text-align: center;">
-                      @if ($item->status == "active")
-                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
-                        Active
-                      </span>
-                      @else
-                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
-                        Non Active
-                      </span>
-                      @endif
-                    </td>
-
-                    <td class=" text-center align-middle">
-                      <div class="d-flex justify-content-center align-items-center"
-                        style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
-
-                        <!-- Tombol Edit -->
-                        <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.edit', $item->id) }}"
-                          class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
-                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
-                          <i class="fa fa-pencil-alt" style="font-size: 13px; line-height: 1;"></i>
-                        </a>
-
-                        <!-- Tombol Delete -->
-                        <button onclick="Delete('{{ $item->id }}')"
-                          class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm"
-                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
-                          <i class="fa fa-trash" style="font-size: 13px; line-height: 1;"></i>
-                        </button>
-
-                      </div>
-                    </td>
-                  </tr>
-                  @php
-                  $no++;
-                  @endphp
-                  @endforeach
-
-                </tbody>
-              </table>
-              <div style="text-align: center;">
-                <style>
-                  @media (max-width: 767px) {
-                    .pagination {
-                      margin-left: 480px;
-                      /* Adjust the margin value as needed for mobile devices */
-                    }
-                  }
-
-                  @media (min-width: 768px) and (max-width: 991px) {
-                    .pagination {
-                      margin-left: 300px;
-                      /* Adjust the margin value as needed for iPads */
-                    }
-                  }
-                </style>
-
-                <div id="paginationWrapper" style="text-align: center;">
-                </div>
+                  @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                  <div class="btn-group" style="width: 100%;">
+                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                    <a href="{{ route('account.clinikscopus.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                      <i class="fa fa-trash mt-2"></i> HAPUS
+                    </a>
+                  </div>
+                  @else
+                  <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                  @endif
+                </form>
+                <!-- END -->
 
               </div>
             </div>
-          </div>
-          <!--================== END DATA ==================-->
 
+            <!-- SEARCH -->
+            <div style="max-width:250px; width:100%; position:relative;">
+              <input type="text" id="liveSearch" class="form-control pe-4" placeholder="Pencarian..." autocomplete="off">
+
+              <button
+                type="button"
+                id="clearSearch"
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:transparent; display:none; cursor:pointer; font-size:14px;">
+                ✕
+              </button>
+            </div>
+            <!-- END -->
+
+          </div>
         </div>
+        <!--================== END FILTER ==================-->
+
+        {{-- ================== TABS STATUS ================== --}}
+        <ul class="nav nav-pills mb-3 justify-content-center" id="statusTabs">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-status="all">
+              <i class="fas fa-list"></i> Semua
+              <span class="badge badge-light ml-1" data-count="all">0</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="pending">
+              <i class="fas fa-clock text-warning"></i> Pending
+              <span class="badge badge-warning ml-1" data-count="pending">0</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="paid">
+              <i class="fas fa-check-circle text-success"></i> Paid
+              <span class="badge badge-success ml-1" data-count="paid">0</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="canceled">
+              <i class="fas fa-times-circle text-danger"></i> Canceled
+              <span class="badge badge-danger ml-1" data-count="canceled">0</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="completed">
+              <i class="fas fa-check-circle text-primary"></i> Completed
+              <span class="badge badge-primary ml-1" data-count="completed">0</span>
+            </a>
+          </li>
+        </ul>
+        {{-- ================== END TABS ================== --}}
+
+        <!--================== DATA ==================-->
+        <div class="card-body" style="font-size: 11px;">
+          <div class="table-responsive" id="riwayatPemesananTableWrapper">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Kode Booking</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Sesi</th>
+                  <th scope="col" rowspan="2" style="text-align: center; width:150px">Jam Sesi</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Nama Customer</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Kendala</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Tanggal Booking</th>
+                  <th scope="col" rowspan="2" style="text-align: center;">Status Pembayaran</th>
+                  <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="customerTable">
+                @php
+                $no = 1;
+                @endphp
+                @foreach ($datas as $item)
+                <tr data-status="{{ $item->status }}">
+                  <th scope="row" class="row-number" style="text-align: center">{{ $no }}</th>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->kode_booking ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->sesi ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->jam_sesi ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->customer->full_name ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->trainer->full_name ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->kendala ?? '-' }}
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ $item->tanggal_booking ? \Carbon\Carbon::parse($item->tanggal_booking)->translatedFormat('d F Y') : '-' }}
+                  </td>
+                  <td style="text-align:center;">
+                    @if ($item->status === 'pending')
+                    <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;">
+                      Pending
+                    </span>
+
+                    @elseif ($item->status === 'paid')
+                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
+                      Paid
+                    </span>
+
+                    @elseif ($item->status === 'canceled')
+                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
+                      Canceled
+                    </span>
+
+                    @else
+                    <span class="badge bg-secondary px-3 py-2 rounded">
+                      Unknown
+                    </span>
+                    @endif
+                  </td>
+
+                  <td class=" text-center align-middle">
+                    <div class="d-flex justify-content-center align-items-center"
+                      style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
+
+                      <!-- Tombol detail -->
+                      <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.detail', $item->id) }}"
+                        class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
+                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
+                        <i class="fa fa-clipboard-list" style="font-size: 13px; line-height: 1;"></i>
+                      </a>
+
+                      <!-- Tombol mulai chat -->
+                      <button onclick="MulaiKonsultasi('{{ $item->id }}')"
+                        class="btn btn-info d-inline-flex align-items-center shadow-sm"
+                        style="padding: 4px 10px; border-radius: 6px;">
+
+                        <i class="fas fa-comment-dots mr-1"></i>
+                        <span>Konsultasi</span>
+                      </button>
+
+                    </div>
+                  </td>
+
+                </tr>
+                @php
+                $no++;
+                @endphp
+                @endforeach
+
+              </tbody>
+            </table>
+            <div style="text-align: center;">
+              <style>
+                @media (max-width: 767px) {
+                  .pagination {
+                    margin-left: 480px;
+                    /* Adjust the margin value as needed for mobile devices */
+                  }
+                }
+
+                @media (min-width: 768px) and (max-width: 991px) {
+                  .pagination {
+                    margin-left: 300px;
+                    /* Adjust the margin value as needed for iPads */
+                  }
+                }
+              </style>
+
+              <div id="paginationWrapper" style="text-align: center;">
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!--================== END DATA ==================-->
+
       </div>
+    </div>
   </section>
 </div>
+
+<!--================== TABS STATUS DATA ==================-->
+<script>
+  function updateStatusCounts() {
+    const rows = document.querySelectorAll('#customerTable tr');
+    const counts = {
+      all: 0,
+      pending: 0,
+      paid: 0,
+      canceled: 0,
+      completed: 0
+    };
+
+    rows.forEach(row => {
+      const status = row.dataset.status;
+      if (!status) return;
+
+      counts.all++;
+
+      if (counts.hasOwnProperty(status)) {
+        counts[status]++;
+      }
+    });
+
+    // Update badge angka
+    Object.keys(counts).forEach(status => {
+      const badge = document.querySelector(`[data-count="${status}"]`);
+      if (badge) {
+        badge.textContent = counts[status];
+      }
+    });
+  }
+
+  // Hitung saat halaman pertama kali load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateStatusCounts();
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('#statusTabs .nav-link');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // aktifkan tab
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        const status = this.dataset.status;
+        const rows = document.querySelectorAll('#customerTable tr');
+
+        let nomor = 1;
+
+        rows.forEach(row => {
+          if (status === 'all' || row.dataset.status === status) {
+            row.style.display = '';
+
+            // 🔢 reset nomor
+            const numberCell = row.querySelector('.row-number');
+            if (numberCell) {
+              numberCell.textContent = nomor++;
+            }
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+<!--================== END ==================-->
 
 <!--================== SHOW & HIDE FILTER ==================-->
 <script>

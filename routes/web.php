@@ -432,5 +432,9 @@ Route::prefix('account')
             Route::get('/Clinik-Scopus-Biaya-Persesi/data/edit/{id}', 'account\ClinikScopusBiayaPersesiController@edit')->name('account.Clinik-Scopus-Biaya-Persesi.edit');
             Route::post('/Clinik-Scopus-Biaya-Persesi/data/update-data/{id}', 'account\ClinikScopusBiayaPersesiController@update')->name('account.Clinik-Scopus-Biaya-Persesi.update');
             Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{id}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
+
+            // riwayat pemesanan clinik scopus
+            Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
+            Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
         }
     );

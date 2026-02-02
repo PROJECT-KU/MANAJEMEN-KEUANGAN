@@ -202,8 +202,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <!--================== END ==================-->
 
                         <!--================== CLINIC SCOPUS ==================-->
-                        @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                         <li class="menu-header">Clinik Scopus</li>
+                        @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
                         <li class="{{ setActive('account/Clinik-Scopus-Biaya-Persesi') }}">
                             <a class="nav-link" href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}">
                                 <i class="fas fa-coins"></i> <span>Biaya Persesi</span>
@@ -226,8 +226,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             </a>
                         </li>
                         @endif
-                        <li class="{{ setActive('account/customer') . setActive('account/pengguna/search') }}">
-                            <a class="nav-link" href="{{ route('account.customer.index') }}">
+                        <li class="{{ setActive('account/Clinik-Scopus-Riwayat-Pemesanan') . setActive('account/pengguna/search') }}">
+                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}">
                                 <i class="fas fa-users"></i> <span>Riwayat Pemesanan</span>
                             </a>
                         </li>

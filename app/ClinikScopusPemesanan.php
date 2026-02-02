@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\User;
 
 class ClinikScopusPemesanan extends Model
 {
@@ -49,6 +50,11 @@ class ClinikScopusPemesanan extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    public function trainer()
+    {
+        return $this->belongsTo(User::class, 'trainer_id');
     }
 
     public function customer()
