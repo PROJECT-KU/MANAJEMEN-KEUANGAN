@@ -11,6 +11,8 @@
 |
 */
 
-Broadcast::channel('App.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+// Broadcast::channel('clinik-scopus-chat.{pemesananId}', function ($user, $pemesananId) {
+//     $pemesanan = \App\ClinikScopusPemesanan::find($pemesananId);
+//     if (!$pemesanan) return false;
+//     return new PrivateChannel('clinik-scopus-chat.' . $pemesanan->id);
+// });

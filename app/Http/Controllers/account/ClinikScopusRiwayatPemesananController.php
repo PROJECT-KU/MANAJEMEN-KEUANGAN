@@ -61,6 +61,10 @@ class ClinikScopusRiwayatPemesananController extends Controller
 
         $datas = $query->latest()->get();
 
+        $datas->each(function ($item) {
+            $this->autoUpdateStatus($item);
+        });
+
         return view(
             'account.clinik_scopus_riwayat_pemesanan.index',
             compact('datas')
@@ -68,11 +72,14 @@ class ClinikScopusRiwayatPemesananController extends Controller
     }
     // <!--================== END ==================-->
 
-    // <!--================== UPDATE DATA ==================-->
+    // <!--================== DETAIL DATA ==================-->
     public function detail($id)
     {
         $user = Auth::user();
+
         $datas = ClinikScopusPemesanan::findOrFail($id);
+
+        $this->autoUpdateStatus($datas);
 
         return view(
             'account.clinik_scopus_riwayat_pemesanan.detail',
@@ -80,4 +87,59 @@ class ClinikScopusRiwayatPemesananController extends Controller
         );
     }
     // <!--================== END ==================-->
+
+    private function autoUpdateStatus(ClinikScopusPemesanan $pemesanan)
+    {
+        $now = now('Asia/Jakarta');
+
+        /**
+         * =====================================
+         * 1️⃣ AUTO COMPLETED (PAID)
+         * =====================================
+         */
+        if ($pemesanan->status === 'paid' && $pemesanan->tanggal_booking) {
+
+            // ambil jam sesi (AMAN)
+            preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $pemesanan->jam_sesi, $match);
+
+            $end = $match[2] ?? null;
+
+            if ($end) {
+                $endTime = Carbon::createFromFormat(
+                    'Y-m-d H:i',
+                    Carbon::parse($pemesanan->tanggal_booking)->format('Y-m-d')
+                        . ' '
+                        . str_replace('.', ':', $end),
+                    'Asia/Jakarta'
+                );
+
+                // 🔥 tanggal hari ini ATAU sudah lewat & jam sesi lewat
+                if ($now->greaterThanOrEqualTo($endTime)) {
+                    $pemesanan->update([
+                        'status' => 'completed'
+                    ]);
+                    return;
+                }
+            }
+        }
+
+        /**
+         * =====================================
+         * 2️⃣ AUTO CANCELED (PENDING)
+         * =====================================
+         */
+        if ($pemesanan->status === 'pending' && $pemesanan->tanggal_booking) {
+
+            $tanggalBooking = Carbon::parse($pemesanan->tanggal_booking)
+                ->startOfDay()
+                ->timezone('Asia/Jakarta');
+
+            // lewat 1 hari penuh
+            if ($now->greaterThanOrEqualTo($tanggalBooking->addDay())) {
+                $pemesanan->update([
+                    'status' => 'canceled'
+                ]);
+            }
+        }
+    }
 }

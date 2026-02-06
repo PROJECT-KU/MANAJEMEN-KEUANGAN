@@ -12,6 +12,7 @@
 */
 
 use App\Http\Middleware\CheckTestimoniToken;
+use Illuminate\Support\Facades\Broadcast;
 
 
 Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
@@ -436,5 +437,11 @@ Route::prefix('account')
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
+
+            // clinik scopus chat
+            Route::get('/clinik-scopus/chat/{pemesanan}', 'account\ClinikScopusChatController@index')->name('chat.index');
+            Route::post('/clinik-scopus/chat/send', 'account\ClinikScopusChatController@send')->name('chat.send');
+            Route::get('/clinik-scopus/chat/load/{pemesanan}', 'account\ClinikScopusChatController@load')->name('chat.load');
+            Route::post('/clinik-scopus/chat/clear/{pemesanan}', 'account\ClinikScopusChatController@clearChat')->name('chat.clear');
         }
     );

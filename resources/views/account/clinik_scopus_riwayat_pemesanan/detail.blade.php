@@ -108,6 +108,11 @@ Profil | MANAGEMENT
                                             Canceled
                                         </span>
 
+                                        @elseif ($datas->status === 'completed')
+                                        <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
+                                            Completed
+                                        </span>
+
                                         @else
                                         <span class="badge bg-secondary px-3 py-2 rounded">
                                             Unknown

@@ -414,19 +414,28 @@ Sesi Klinik Scopus | Rumah Scopus
                                         });
                                         @endphp
 
+                                        @php
+                                        // Cek apakah sesi disabled
+                                        $isDisabled = empty($value) || $value === '-' || strtolower((string)$value) === 'null';
+                                        @endphp
+
                                         <div class="col-6 col-md-4">
-                                            <div class="sesi-item sesi-clickable {{ $isFull ? 'sesi-full' : '' }}"
-                                                {{ $isFull ? '' : 'data-type=reguler' }}
+                                            <div class="sesi-item 
+                {{ $isDisabled ? 'sesi-disabled' : 'sesi-clickable' }} 
+                {{ $isFull ? 'sesi-full' : '' }}"
+                                                {{-- Hanya beri data-type jika sesi aktif --}}
+                                                @if(!$isDisabled && !$isFull)
                                                 data-type="reguler"
                                                 data-sesi="Sesi {{ $index + 1 }}"
                                                 data-sesi-key="{{ $index + 1 }}"
-
                                                 data-jadwal="{{ $value }}"
                                                 data-trainer="{{ $clinik->full_name ?? '' }}"
                                                 data-harga="{{ $biaya }}"
                                                 data-diskon="{{ $diskon }}"
-                                                data-klinik-id="{{ $clinik->id }}">
+                                                data-klinik-id="{{ $clinik->id }}"
+                                                @endif>
 
+                                                {{-- Badge Hemat --}}
                                                 @if($promoSesi && $persenHemat > 0)
                                                 <span class="badge-hemat">
                                                     <i class="fas fa-bolt me-1"></i>
@@ -434,12 +443,17 @@ Sesi Klinik Scopus | Rumah Scopus
                                                 </span>
                                                 @endif
 
-                                                Sesi {{ $index + 1 }}
-
-                                                <div class="fw-semibold">
-                                                    {{ $value ?: '-' }}
+                                                {{-- Nama Sesi --}}
+                                                <div class="fw-bold mb-1">
+                                                    Sesi {{ $index + 1 }}
                                                 </div>
 
+                                                {{-- Jadwal / Status --}}
+                                                <div class="fw-semibold">
+                                                    {{ $isDisabled ? 'TIDAK TERSEDIA' : $value }}
+                                                </div>
+
+                                                {{-- Badge Full --}}
                                                 @if($isFull)
                                                 <span class="badge-full">SESI PENUH</span>
                                                 @endif
@@ -1126,10 +1140,9 @@ Sesi Klinik Scopus | Rumah Scopus
         // HANDLER UNTUK SESI & PROMO
         // =============================
         document.querySelectorAll('.sesi-clickable, [data-type="promo"]').forEach(item => {
-
             item.addEventListener('click', function() {
 
-                // 🔒 BLOK JIKA PROMO SUDAH PENUH
+                // BLOK JIKA PROMO SUDAH PENUH
                 if (this.disabled || this.classList.contains('disabled')) {
                     Swal.fire({
                         icon: 'warning',

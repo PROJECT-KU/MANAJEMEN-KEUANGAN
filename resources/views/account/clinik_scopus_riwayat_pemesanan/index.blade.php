@@ -7,7 +7,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
 
 <!-- ================== FILTER ================== -->
 <style>
-  /* 🔹 Responsive behavior */
+  /*  Responsive behavior */
   @media (max-width: 576px) {
     .card-header {
       flex-direction: column;
@@ -37,7 +37,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
     }
   }
 
-  /* 🔹 Tambahkan jarak input → tombol di laptop/desktop */
+  /*  Tambahkan jarak input → tombol di laptop/desktop */
   @media (min-width: 577px) {
     .search-wrapper {
       margin-right: 10px !important;
@@ -47,18 +47,18 @@ Clinik Scopus Riwayat Pemesanan | MIS
 </style>
 
 <style>
-  /* 🔹 Wrapper agar posisi relatif terhadap tombol */
+  /*  Wrapper agar posisi relatif terhadap tombol */
   .search-wrapper {
     position: relative;
     min-width: 200px;
   }
 
-  /* 🔹 Tambahkan ruang di kanan agar teks tidak menabrak ikon */
+  /*  Tambahkan ruang di kanan agar teks tidak menabrak ikon */
   #liveSearch {
     padding-right: 36px;
   }
 
-  /* 🔹 Tombol clear di dalam input */
+  /*  Tombol clear di dalam input */
   #clearSearch {
     position: absolute;
     right: 10px;
@@ -293,8 +293,13 @@ Clinik Scopus Riwayat Pemesanan | MIS
                     </span>
 
                     @elseif ($item->status === 'canceled')
-                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
+                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
                       Canceled
+                    </span>
+
+                    @elseif ($item->status === 'completed')
+                    <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
+                      Completed
                     </span>
 
                     @else
@@ -316,13 +321,15 @@ Clinik Scopus Riwayat Pemesanan | MIS
                       </a>
 
                       <!-- Tombol mulai chat -->
-                      <button onclick="MulaiKonsultasi('{{ $item->id }}')"
+                      @if ($item->status === 'paid')
+                      <button onclick="window.location.href='{{ route('chat.index',$item->id) }}'"
                         class="btn btn-info d-inline-flex align-items-center shadow-sm"
                         style="padding: 4px 10px; border-radius: 6px;">
 
                         <i class="fas fa-comment-dots mr-1"></i>
                         <span>Konsultasi</span>
                       </button>
+                      @endif
 
                     </div>
                   </td>
@@ -424,7 +431,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
           if (status === 'all' || row.dataset.status === status) {
             row.style.display = '';
 
-            // 🔢 reset nomor
+            // reset nomor
             const numberCell = row.querySelector('.row-number');
             if (numberCell) {
               numberCell.textContent = nomor++;
@@ -473,7 +480,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
       clearSearchBtn.style.display = 'none';
     }
 
-    // 🔹 Event keyup untuk Live Search
+    //  Event keyup untuk Live Search
     liveSearchInput.addEventListener('keyup', function() {
       clearTimeout(timer);
       const query = this.value.trim();
@@ -525,12 +532,12 @@ Clinik Scopus Riwayat Pemesanan | MIS
       }, 300); // debounce 300ms
     });
 
-    // 🔹 Tampilkan / sembunyikan tombol clear sesuai input
+    //  Tampilkan / sembunyikan tombol clear sesuai input
     liveSearchInput.addEventListener('input', function() {
       clearSearchBtn.style.display = this.value.trim() ? 'block' : 'none';
     });
 
-    // 🔹 Klik tombol clear → hapus teks & reload semua data
+    //  Klik tombol clear → hapus teks & reload semua data
     clearSearchBtn.addEventListener('click', function() {
       liveSearchInput.value = '';
       this.style.display = 'none';
