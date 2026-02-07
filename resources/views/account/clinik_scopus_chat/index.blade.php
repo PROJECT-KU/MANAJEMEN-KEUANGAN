@@ -6,6 +6,7 @@ Clinik Scopus Chat Konsultasi | MIS
 @stop
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="user-level" content="{{ Auth::user()->level }}">
 <!-- ================== STYLE COUNT DOWN ================== -->
 <style>
     /* ===== COUNTDOWN CARD ===== */
@@ -721,6 +722,7 @@ Clinik Scopus Chat Konsultasi | MIS
                 document.getElementById('send-btn').classList.add('d-none');
                 document.getElementById('back-btn').classList.remove('d-none');
 
+                showTestimoniPopup();
                 updateRing(ringHour, 0, 1);
                 updateRing(ringMinute, 0, 1);
                 updateRing(ringSecond, 0, 1);
@@ -809,6 +811,130 @@ Clinik Scopus Chat Konsultasi | MIS
     }
 
     startCountdown();
+</script>
+// <!--================== END ==================-->
+
+// <!--================== POP UP TESTIMONI ==================-->
+<script>
+    let testimonialShown = false;
+
+    function showTestimoniPopup() {
+        // Ambil level user dari meta
+        const userLevel = document.querySelector('meta[name="user-level"]').content;
+
+        // Hanya tampilkan untuk level 'user'
+        if (userLevel !== 'user') return;
+
+        if (testimonialShown) return;
+        testimonialShown = true;
+
+        Swal.fire({
+            title: 'Terima Kasih 🙏',
+            html: `
+            <form id="form-testimoni">
+                <h6 class="text-left mt-2">⭐ Testimoni Trainer</h6>
+                <select id="rating_trainer" class="form-control mb-2" required>
+                    <option value="">Pilih Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+                    <option value="4">⭐⭐⭐⭐ Puas</option>
+                    <option value="3">⭐⭐⭐ Cukup</option>
+                    <option value="2">⭐⭐ Kurang</option>
+                    <option value="1">⭐ Tidak Puas</option>
+                </select>
+                <textarea id="komentar_trainer" class="form-control mb-3"
+                    placeholder="Komentar untuk trainer (opsional)"></textarea>
+
+                <hr>
+
+                <h6 class="text-left mt-2">⭐ Testimoni Aplikasi (Web)</h6>
+                <select id="rating_aplikasi" class="form-control mb-2" required>
+                    <option value="">Pilih Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Sangat Baik</option>
+                    <option value="4">⭐⭐⭐⭐ Baik</option>
+                    <option value="3">⭐⭐⭐ Cukup</option>
+                    <option value="2">⭐⭐ Kurang</option>
+                    <option value="1">⭐ Buruk</option>
+                </select>
+                <textarea id="komentar_aplikasi" class="form-control"
+                    placeholder="Komentar untuk aplikasi (opsional)"></textarea>
+
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="anonymous">
+                    <label class="form-check-label">
+                        Kirim sebagai anonim
+                    </label>
+                </div>
+            </form>
+        `,
+            confirmButtonText: 'Kirim Testimoni',
+            confirmButtonColor: '#28a745',
+            allowOutsideClick: false,
+            preConfirm: () => {
+                const ratingTrainer = document.getElementById('rating_trainer').value;
+                const ratingApp = document.getElementById('rating_aplikasi').value;
+
+                if (!ratingTrainer || !ratingApp) {
+                    Swal.showValidationMessage('Rating trainer dan aplikasi wajib diisi');
+                    return false;
+                }
+
+                return {
+                    rating: ratingTrainer,
+                    komentar: document.getElementById('komentar_trainer').value,
+                    rating_aplikasi: ratingApp,
+                    komentar_aplikasi: document.getElementById('komentar_aplikasi').value,
+                    is_anonymous: document.getElementById('anonymous').checked
+                };
+            }
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            const data = result.value;
+
+            fetch("{{ route('account.Clinik-Scopus-Testimoni.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pemesanan_id: "{{ $pemesanan->id }}",
+                        rating: data.rating,
+                        komentar: data.komentar,
+                        rating_aplikasi: data.rating_aplikasi,
+                        komentar_aplikasi: data.komentar_aplikasi,
+                        is_anonymous: data.is_anonymous
+                    })
+                })
+                .then(response => response.json())
+                .then(resp => {
+                    if (resp.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Terima kasih!',
+                            text: resp.message,
+                            confirmButtonColor: '#ff3131'
+                        }).then(() => {
+                            window.location.href =
+                                "{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: resp.message,
+                        });
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi kesalahan',
+                        text: 'Coba lagi nanti'
+                    });
+                });
+        });
+    }
 </script>
 // <!--================== END ==================-->
 @stop

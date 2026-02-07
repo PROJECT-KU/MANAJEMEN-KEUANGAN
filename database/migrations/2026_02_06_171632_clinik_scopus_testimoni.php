@@ -21,9 +21,6 @@ class ClinikScopusTestimoni extends Migration
             $table->unsignedBigInteger('trainer_id');
             $table->unsignedBigInteger('customer_id');
 
-            // ================== TIPE TESTIMONI ==================
-            $table->enum('tipe_testimoni', ['trainer', 'aplikasi']);
-
             // ================== DATA TRANSAKSI (TRAINER) ==================
             $table->string('id_transaksi')->nullable();
             $table->string('kode_booking')->nullable();
@@ -37,7 +34,6 @@ class ClinikScopusTestimoni extends Migration
             // ================== TESTIMONI APLIKASI (WEB ONLY) ==================
             $table->tinyInteger('rating_aplikasi')->nullable()->comment('1-5');
             $table->text('komentar_aplikasi')->nullable();
-            $table->enum('platform', ['web'])->default('web');
 
             // ================== PROPERTI UMUM ==================
             $table->boolean('is_anonymous')->default(false);

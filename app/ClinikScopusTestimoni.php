@@ -29,7 +29,6 @@ class ClinikScopusTestimoni extends Model
         'clinikscopus_id',
         'trainer_id',
         'customer_id',
-        'tipe_testimoni',
         'id_transaksi',
         'kode_booking',
         'sesi',
@@ -38,7 +37,6 @@ class ClinikScopusTestimoni extends Model
         'komentar',
         'rating_aplikasi',
         'komentar_aplikasi',
-        'platform',
         'is_anonymous',
         'status',
     ];

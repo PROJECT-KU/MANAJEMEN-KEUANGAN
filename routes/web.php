@@ -443,5 +443,9 @@ Route::prefix('account')
             Route::post('/clinik-scopus/chat/send', 'account\ClinikScopusChatController@send')->name('chat.send');
             Route::get('/clinik-scopus/chat/load/{pemesanan}', 'account\ClinikScopusChatController@load')->name('chat.load');
             Route::post('/clinik-scopus/chat/clear/{pemesanan}', 'account\ClinikScopusChatController@clearChat')->name('chat.clear');
+
+            // clinik scopus testimoni
+            Route::get('/Clinik-Scopus-Testimoni/data', 'account\ClinikScopusTestimoniController@index')->name('account.Clinik-Scopus-Testimoni.index');
+            Route::post('/Clinik-Scopus-Testimoni/data/store', 'account\ClinikScopusTestimoniController@store')->name('account.Clinik-Scopus-Testimoni.store');
         }
     );
