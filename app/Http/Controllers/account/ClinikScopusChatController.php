@@ -14,7 +14,6 @@ use App\Events\ClinikScopusChatEvent;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Str;
 
-
 class ClinikScopusChatController extends Controller
 {
 
@@ -24,12 +23,12 @@ class ClinikScopusChatController extends Controller
         $user = Auth::user();
         $pemesanan = ClinikScopusPemesanan::findOrFail($pemesananId);
 
-        // 🔐 Proteksi akses
+        //  Proteksi akses
         if (!in_array($user->id, [$pemesanan->customer_id, $pemesanan->trainer_id])) {
             abort(403);
         }
 
-        // ✅ AUTO COMPLETE CHECK
+        //  AUTO COMPLETE CHECK
         $this->autoCompleteIfEnded($pemesanan);
 
         // Ambil jam sesi
@@ -126,12 +125,12 @@ class ClinikScopusChatController extends Controller
     {
         if ($pemesanan->status === 'completed') return;
         if (!$pemesanan->tanggal_booking) return;
-        if (!$pemesanan->jam_sesi) return; // 🔹 tambahkan ini
+        if (!$pemesanan->jam_sesi) return; //  tambahkan ini
 
         preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $pemesanan->jam_sesi, $match);
         $start = $match[1] ?? null;
         $end   = $match[2] ?? null;
-        if (!$end) return; // 🔹 tambahkan ini
+        if (!$end) return; //  tambahkan ini
 
         $endTime = Carbon::createFromFormat(
             'Y-m-d H:i',
@@ -150,7 +149,7 @@ class ClinikScopusChatController extends Controller
     {
         $userId = Auth::id();
 
-        // 🔐 Proteksi akses
+        //  Proteksi akses
         if (!in_array($userId, [$pemesanan->customer_id, $pemesanan->trainer_id])) {
             return response()->json([
                 'success' => false,
@@ -172,7 +171,7 @@ class ClinikScopusChatController extends Controller
             }
         }
 
-        // 🔥 DELETE SEMUA CHAT BERDASARKAN PEMESANAN
+        //  DELETE SEMUA CHAT BERDASARKAN PEMESANAN
         ClinikScopusChat::where('pemesanan_id', $pemesanan->id)->delete();
 
         return response()->json([
