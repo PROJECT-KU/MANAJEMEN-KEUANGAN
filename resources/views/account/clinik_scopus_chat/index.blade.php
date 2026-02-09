@@ -499,10 +499,41 @@ Clinik Scopus Chat Konsultasi | MIS
     });
 
     function parseTime(time) {
-        const [h, m] = time.split('.').map(Number);
+        // jika jam_sesi berupa bundling (ada koma)
+        if (time.includes(',')) {
+            const sessions = time.split(',');
+            const first = sessions[0].trim().split(' - ')[0];
+            const last = sessions[sessions.length - 1].trim().split(' - ')[1];
+
+            const [sh, sm] = first.split(/[:.]/).map(Number);
+            const [eh, em] = last.split(/[:.]/).map(Number);
+
+            return {
+                start: {
+                    h: sh,
+                    m: sm
+                },
+                end: {
+                    h: eh,
+                    m: em
+                }
+            };
+        }
+
+        // reguler: hanya 1 sesi
+        const [startStr, endStr] = time.split(' - ');
+        const [sh, sm] = startStr.split(/[:.]/).map(Number);
+        const [eh, em] = endStr.split(/[:.]/).map(Number);
+
         return {
-            h,
-            m
+            start: {
+                h: sh,
+                m: sm
+            },
+            end: {
+                h: eh,
+                m: em
+            }
         };
     }
 
@@ -675,14 +706,31 @@ Clinik Scopus Chat Konsultasi | MIS
     // end
 
     function startCountdown() {
-        const startT = parseTime("{{ $start }}");
-        const endT = parseTime("{{ $end }}");
+        // parsing jam_sesi
+        const parsed = parseTime("{{ $jam_sesi ?? $start.' - '.$end }}");
+
+        const startT = parsed.start;
+        const endT = parsed.end;
 
         const bookingDate = new Date("{{ $pemesanan->tanggal_booking }}");
 
-        const start = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate(), startT.h, startT.m, 0);
+        const start = new Date(
+            bookingDate.getFullYear(),
+            bookingDate.getMonth(),
+            bookingDate.getDate(),
+            startT.h,
+            startT.m,
+            0
+        );
 
-        const end = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate(), endT.h, endT.m, 0);
+        const end = new Date(
+            bookingDate.getFullYear(),
+            bookingDate.getMonth(),
+            bookingDate.getDate(),
+            endT.h,
+            endT.m,
+            0
+        );
 
         const totalSessionSeconds = Math.floor((end - start) / 1000);
         const label = document.getElementById('countdown-label');
@@ -694,11 +742,10 @@ Clinik Scopus Chat Konsultasi | MIS
             /* BELUM MULAI */
             if (now < start) {
                 setChatDisabled(true);
-
                 const diff = start - now;
                 const h = Math.floor(diff / 3600000);
-                const m = Math.floor(diff % 3600000 / 60000);
-                const s = Math.floor(diff % 60000 / 1000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
 
                 label.innerText = 'Sesi konsultasi akan dimulai dalam (WIB)';
                 note.innerText = 'Silakan menunggu sesuai jadwal';
@@ -714,14 +761,12 @@ Clinik Scopus Chat Konsultasi | MIS
             /* SELESAI */
             if (now >= end) {
                 setChatDisabled(true);
-
                 document.getElementById('message').placeholder =
                     'Waktu konsultasi telah berakhir';
 
                 label.innerText = 'Status Konsultasi';
                 note.innerText = 'WAKTU KONSULTASI TELAH BERAKHIR';
 
-                // 🔥 GANTI TOMBOL
                 document.getElementById('send-btn').classList.add('d-none');
                 document.getElementById('back-btn').classList.remove('d-none');
 
@@ -732,9 +777,7 @@ Clinik Scopus Chat Konsultasi | MIS
                 return;
             }
 
-            /* ======================
-             DALAM SESI
-            ====================== */
+            /* DALAM SESI */
             setChatDisabled(false);
             const remainMs = end - now;
             const remainSeconds = Math.max(0, Math.floor(remainMs / 1000));
@@ -743,9 +786,6 @@ Clinik Scopus Chat Konsultasi | MIS
             const m = Math.floor((remainSeconds % 3600) / 60);
             const s = remainSeconds % 60;
 
-            /* ======================
-               PROGRESS BASED ON SESSION
-            ====================== */
             const progressHour =
                 totalSessionSeconds >= 3600 ?
                 remainSeconds / totalSessionSeconds * 24 :
@@ -754,49 +794,30 @@ Clinik Scopus Chat Konsultasi | MIS
             const progressMinute =
                 remainSeconds / totalSessionSeconds * 60;
 
-            /* ======================
-               RESET EFFECT
-            ====================== */
             [ringHour, ringMinute, ringSecond].forEach(r => {
                 r.classList.remove('pulse');
                 r.classList.remove('shake');
             });
 
-            /* ======================
-               COLOR STATE
-            ====================== */
-            ringHour.style.stroke = '#2ecc71'; // Hijau
-            ringMinute.style.stroke = '#ec8b24'; // Oranye
-            ringSecond.style.stroke = '#e74c3c'; // Merah
+            ringHour.style.stroke = '#2ecc71';
+            ringMinute.style.stroke = '#ec8b24';
+            ringSecond.style.stroke = '#e74c3c';
 
-            /* ======================
-               WARNING STATE
-            ====================== */
-            if (remainSeconds <= 300) { // < 5 menit
-                ringSecond.classList.add('pulse');
-            }
-
+            if (remainSeconds <= 300) ringSecond.classList.add('pulse');
             if (remainSeconds <= 30 && remainSeconds > 0) {
                 beep.currentTime = 0;
                 beep.play().catch(() => {});
             }
-
             if (remainSeconds <= 10 && remainSeconds > 0) {
                 document.querySelector('.countdown-card').classList.add('shake');
             } else {
                 document.querySelector('.countdown-card').classList.remove('shake');
             }
 
-            /* ======================
-               UPDATE RING
-            ====================== */
             updateRing(ringHour, progressHour, 24);
             updateRing(ringMinute, progressMinute, 60);
             updateRing(ringSecond, s, 60);
 
-            /* ======================
-               UPDATE TEXT
-            ====================== */
             updateText(h, m, s);
 
         }, 1000);

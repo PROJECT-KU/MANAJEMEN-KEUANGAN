@@ -31,14 +31,15 @@ class ClinikScopusChatController extends Controller
         //  AUTO COMPLETE CHECK
         $this->autoCompleteIfEnded($pemesanan);
 
-        // Ambil jam sesi
-        [$start, $end] = explode(' - ', $pemesanan->jam_sesi);
+        // Ambil jam_sesi utuh
+        $jam_sesi = $pemesanan->jam_sesi;
+
+        // Optional: ambil lastChatId
         $lastChatId = ClinikScopusChat::where('pemesanan_id', $pemesanan->id)->max('id') ?? 0;
 
         return view('account.clinik_scopus_chat.index', compact(
             'pemesanan',
-            'start',
-            'end',
+            'jam_sesi',
             'lastChatId'
         ));
     }
