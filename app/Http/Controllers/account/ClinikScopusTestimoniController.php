@@ -75,6 +75,7 @@ class ClinikScopusTestimoniController extends Controller
         $data = [
             'id'                => (string) Str::uuid(),
             'clinikscopus_id'   => $pemesanan->clinikscopus_id,
+            'clinikscopus_pemesanan_id' => $pemesanan->id,
             'trainer_id'        => $pemesanan->trainer_id,
             'customer_id'       => $userId,
             'id_transaksi'      => $pemesanan->id_transaksi,

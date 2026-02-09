@@ -18,6 +18,7 @@ class ClinikScopusTestimoni extends Migration
 
             // ================== RELASI ==================
             $table->uuid('clinikscopus_id');
+            $table->uuid('clinikscopus_pemesanan_id');
             $table->unsignedBigInteger('trainer_id');
             $table->unsignedBigInteger('customer_id');
 
@@ -56,6 +57,10 @@ class ClinikScopusTestimoni extends Migration
 
             $table->foreign('clinikscopus_id')
                 ->references('id')->on('clinikscopus')
+                ->onDelete('CASCADE');
+
+            $table->foreign('clinikscopus_pemesanan_id')
+                ->references('id')->on('clinikscopus_pemesanan')
                 ->onDelete('CASCADE');
         });
     }

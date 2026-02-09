@@ -7,6 +7,7 @@ use App\Clinikscopus;
 use App\ClinikScopusPemesanan;
 use App\ClinikScopusPromo;
 use App\ClinikScopusPromoSesi;
+use App\ClinikScopusTestimoni;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
@@ -77,13 +78,18 @@ class ClinikScopusRiwayatPemesananController extends Controller
     {
         $user = Auth::user();
 
+        // Ambil pemesanan
         $datas = ClinikScopusPemesanan::findOrFail($id);
 
+        // Ambil testimoni yang terkait, jika ada
+        $datasTesti = ClinikScopusTestimoni::where('clinikscopus_pemesanan_id', $datas->id)->first();
+
+        // Update status otomatis
         $this->autoUpdateStatus($datas);
 
         return view(
             'account.clinik_scopus_riwayat_pemesanan.detail',
-            compact('datas')
+            compact('datas', 'datasTesti')
         );
     }
     // <!--================== END ==================-->
@@ -99,10 +105,20 @@ class ClinikScopusRiwayatPemesananController extends Controller
          */
         if ($pemesanan->status === 'paid' && $pemesanan->tanggal_booking) {
 
-            // ambil jam sesi (AMAN)
-            preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $pemesanan->jam_sesi, $match);
+            $end = null;
 
-            $end = $match[2] ?? null;
+            // cek jika jam_sesi bundling (dipisah koma)
+            if (strpos($pemesanan->jam_sesi, ',') !== false) {
+                $sessions = explode(',', $pemesanan->jam_sesi);
+                $lastSession = trim(end($sessions));
+
+                preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $lastSession, $match);
+                $end = $match[2] ?? null;
+            } else {
+                // reguler
+                preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $pemesanan->jam_sesi, $match);
+                $end = $match[2] ?? null;
+            }
 
             if ($end) {
                 $endTime = Carbon::createFromFormat(
@@ -113,7 +129,6 @@ class ClinikScopusRiwayatPemesananController extends Controller
                     'Asia/Jakarta'
                 );
 
-                // 🔥 tanggal hari ini ATAU sudah lewat & jam sesi lewat
                 if ($now->greaterThanOrEqualTo($endTime)) {
                     $pemesanan->update([
                         'status' => 'completed'

@@ -9,6 +9,8 @@ use Carbon\Carbon;
 
 class ClinikScopusTestimoni extends Model
 {
+
+
     protected $table = 'clinik_scopus_testimoni';
     protected $primaryKey = 'id';
     public $incrementing = false;
@@ -27,6 +29,7 @@ class ClinikScopusTestimoni extends Model
 
     protected $fillable = [
         'clinikscopus_id',
+        'clinikscopus_pemesanan_id',
         'trainer_id',
         'customer_id',
         'id_transaksi',
@@ -40,4 +43,28 @@ class ClinikScopusTestimoni extends Model
         'is_anonymous',
         'status',
     ];
+
+    // RELASI KE TRAINER
+    public function trainer()
+    {
+        return $this->belongsTo(User::class, 'trainer_id', 'id');
+    }
+
+    // RELASI KE CUSTOMER
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id', 'id');
+    }
+
+    // RELASI KE PEMESANAN
+    public function sesi()
+    {
+        return $this->belongsTo(ClinikScopus::class, 'clinikscopus_id', 'id');
+    }
+
+    // RELASI KE PEMESANAN
+    public function pemesanan()
+    {
+        return $this->belongsTo(ClinikScopusPemesanan::class, 'clinikscopus_pemesanan_id', 'id');
+    }
 }

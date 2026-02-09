@@ -126,12 +126,25 @@ class ClinikScopusChatController extends Controller
     {
         if ($pemesanan->status === 'completed') return;
         if (!$pemesanan->tanggal_booking) return;
-        if (!$pemesanan->jam_sesi) return; //  tambahkan ini
+        if (!$pemesanan->jam_sesi) return;
 
-        preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $pemesanan->jam_sesi, $match);
-        $start = $match[1] ?? null;
-        $end   = $match[2] ?? null;
-        if (!$end) return; //  tambahkan ini
+        $jam_sesi = $pemesanan->jam_sesi;
+
+        $end = null;
+
+        // cek jika ada bundling (dipisah koma)
+        if (strpos($jam_sesi, ',') !== false) {
+            $sessions = explode(',', $jam_sesi);
+            $lastSession = trim(end($sessions));
+            preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $lastSession, $match);
+            $end = $match[2] ?? null;
+        } else {
+            // reguler
+            preg_match('/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/', $jam_sesi, $match);
+            $end = $match[2] ?? null;
+        }
+
+        if (!$end) return;
 
         $endTime = Carbon::createFromFormat(
             'Y-m-d H:i',

@@ -132,6 +132,7 @@ Profil | MANAGEMENT
                                     <ul class="nav nav-pills">
                                         <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Riwayat Pembayaran</a></li>
                                         <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Riwayat Pemesanan</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="#testimoni" data-toggle="tab">Testimoni</a></li>
                                     </ul>
                                 </div>
                                 <div class="card-body">
@@ -252,6 +253,66 @@ Profil | MANAGEMENT
 
                                         </div>
                                         <!--================== END TAB RIWAYAT PEMESANAN ==================-->
+
+                                        <!--================== TAB TESTIMONI ==================-->
+                                        <div class="tab-pane" id="testimoni" style="margin-top: -40px;">
+
+                                            <div class="row mt-3 g-3">
+                                                <div class="col-md-6 col-12">
+                                                    <label>Nama Trainer</label>
+                                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" value="{{ $datasTesti->trainer->full_name ?? '-' }}" readonly>
+                                                </div>
+                                                <div class="col-md-6 col-12">
+                                                    <label>Nama Customer</label>
+                                                    <input style="height: 42px; font-size: 14px;" class="form-control form-control-sm" type="text" placeholder="Username" value="{{ $datasTesti->customer->full_name ?? '-' }}" readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-3 g-3">
+                                                <div class="col-md-6 col-12">
+                                                    <label>Rating Trainer</label>
+                                                    <div style="font-size: 16px; color: #ffbf00;">
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            @if ($i <=($datasTesti->rating ?? 0))
+                                                            <i class="fas fa-star"></i>
+                                                            @else
+                                                            <i class="far fa-star"></i>
+                                                            @endif
+                                                            @endfor
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-12">
+                                                    <label>Rating Aplikasi</label>
+                                                    <div style="font-size: 16px; color: #ffbf00;">
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            @if ($i <=($datasTesti->rating_aplikasi ?? 0))
+                                                            <i class="fas fa-star"></i>
+                                                            @else
+                                                            <i class="far fa-star"></i>
+                                                            @endif
+                                                            @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-3 g-3">
+                                                <div class="col-md-6 col-12">
+                                                    <label>Komentar Trainer</label>
+                                                    <textarea
+                                                        class="form-control form-control-sm"
+                                                        style="height: 80px; font-size: 14px;"
+                                                        readonly>{{ $datasTesti->komentar ?? '-' }}</textarea>
+                                                </div>
+                                                <div class="col-md-6 col-12">
+                                                    <label>Komentar Aplikasi</label>
+                                                    <textarea
+                                                        class="form-control form-control-sm"
+                                                        style="height: 80px; font-size: 14px;"
+                                                        readonly>{{ $datasTesti->komentar_aplikasi ?? '-' }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--================== END TAB TESTIMONI ==================-->
 
                                     </div>
                                 </div>
