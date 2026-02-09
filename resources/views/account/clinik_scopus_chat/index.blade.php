@@ -323,14 +323,9 @@ Clinik Scopus Chat Konsultasi | MIS
                     <!-- BUBLE CHAT -->
                     <div class="card">
                         <div class="card-body" id="chat-box" style="height: 350px; overflow-y: auto;">
-                            @foreach($pemesanan->chats ?? [] as $chat)
-                            <div class="chat-message {{ $chat->sender_id == Auth::id() ? 'me' : 'other' }}">
-                                <div class="bubble">
-                                    <strong>{{ $chat->sender->name }}</strong><br>
-                                    {{ $chat->message }}
-                                </div>
-                            </div>
-                            @endforeach
+                            @php
+                            $lastChatId = optional(optional($pemesanan->chats)->last())->id;
+                            @endphp
                         </div>
 
                         <div class="card-footer">
@@ -403,6 +398,12 @@ Clinik Scopus Chat Konsultasi | MIS
     let lastChatId = @json($lastChatId);
 
     function appendMessage(chat) {
+
+        // 🔒 GUARD ANTI DUPLIKAT (WAJIB)
+        if (document.getElementById(`chat-${chat.id}`)) {
+            return;
+        }
+
         const box = document.getElementById('chat-box');
         const isMe = chat.sender_id == AUTH_ID;
         const senderName = chat.sender?.name ?? '';
@@ -421,6 +422,9 @@ Clinik Scopus Chat Konsultasi | MIS
         }
 
         const div = document.createElement('div');
+
+        // 🆔 SET ID DOM BERDASARKAN CHAT ID
+        div.id = `chat-${chat.id}`;
         div.className = `chat-message ${isMe ? 'me' : 'other'}`;
 
         div.innerHTML = `
@@ -433,8 +437,7 @@ Clinik Scopus Chat Konsultasi | MIS
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
 
-
-        // zoom gambar pakai SweetAlert
+        // zoom gambar pakai SweetAlert (LOGIC TETAP)
         div.querySelectorAll('img').forEach(img => {
             img.addEventListener('click', () => {
                 Swal.fire({
@@ -829,43 +832,131 @@ Clinik Scopus Chat Konsultasi | MIS
         testimonialShown = true;
 
         Swal.fire({
-            title: 'Terima Kasih 🙏',
+            title: 'Terima Kasih atas Konsultasi Anda!',
             html: `
-            <form id="form-testimoni">
-                <h6 class="text-left mt-2">⭐ Testimoni Trainer</h6>
-                <select id="rating_trainer" class="form-control mb-2" required>
-                    <option value="">Pilih Rating</option>
-                    <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
-                    <option value="4">⭐⭐⭐⭐ Puas</option>
-                    <option value="3">⭐⭐⭐ Cukup</option>
-                    <option value="2">⭐⭐ Kurang</option>
-                    <option value="1">⭐ Tidak Puas</option>
-                </select>
-                <textarea id="komentar_trainer" class="form-control mb-3"
-                    placeholder="Komentar untuk trainer (opsional)"></textarea>
+<style>
+    .glass-wrapper {
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        background: rgba(255, 255, 255, 0.65);
+        border-radius: 20px;
+        padding: 18px;
+        border: 1px solid rgba(255,255,255,0.35);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        text-align: left;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
 
-                <hr>
+    .glass-header {
+        text-align: center;
+        font-size: 14px;
+        color: #1f2937;
+        margin-bottom: 16px;
+    }
 
-                <h6 class="text-left mt-2">⭐ Testimoni Aplikasi (Web)</h6>
-                <select id="rating_aplikasi" class="form-control mb-2" required>
-                    <option value="">Pilih Rating</option>
-                    <option value="5">⭐⭐⭐⭐⭐ Sangat Baik</option>
-                    <option value="4">⭐⭐⭐⭐ Baik</option>
-                    <option value="3">⭐⭐⭐ Cukup</option>
-                    <option value="2">⭐⭐ Kurang</option>
-                    <option value="1">⭐ Buruk</option>
-                </select>
-                <textarea id="komentar_aplikasi" class="form-control"
-                    placeholder="Komentar untuk aplikasi (opsional)"></textarea>
+    .glass-section {
+        background: rgba(255,255,255,0.55);
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 14px;
+        border: 1px solid rgba(255,255,255,0.4);
+    }
 
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="anonymous">
-                    <label class="form-check-label">
-                        Kirim sebagai anonim
-                    </label>
-                </div>
-            </form>
-        `,
+    .glass-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .glass-wrapper select,
+    .glass-wrapper textarea {
+        background: rgba(255,255,255,0.75);
+        border-radius: 14px;
+        border: 1px solid rgba(209,213,219,0.7);
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .glass-wrapper textarea {
+        resize: none;
+    }
+
+    .glass-divider {
+        border-top: 1px dashed rgba(156,163,175,0.6);
+        margin: 14px 0;
+    }
+
+    .form-check-label {
+        font-size: 13px;
+        color: #1f2937;
+    }
+
+    .form-check-input {
+        border-radius: 6px;
+    }
+</style>
+
+<div class="glass-wrapper">
+    <div class="glass-header">
+         Kami menghargai feedback Anda untuk meningkatkan kualitas layanan kami.
+    </div>
+
+    <form id="form-testimoni">
+        <div class="glass-section">
+            <div class="glass-title">Testimoni Trainer</div>
+
+            <select id="rating_trainer" class="form-control mb-2" style="height: auto;" required>
+                <option value="">Pilih Rating Trainer</option>
+                <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+                <option value="4">⭐⭐⭐⭐ Puas</option>
+                <option value="3">⭐⭐⭐ Cukup</option>
+                <option value="2">⭐⭐ Kurang</option>
+                <option value="1">⭐ Tidak Puas</option>
+            </select>
+
+            <textarea
+                id="komentar_trainer"
+                class="form-control"
+                rows="3"
+                placeholder="Pengalaman Anda bersama trainer (opsional)">
+            </textarea>
+        </div>
+
+        <div class="glass-divider"></div>
+
+        <div class="glass-section">
+            <div class="glass-title">Testimoni Aplikasi (Web)</div>
+
+            <select id="rating_aplikasi" class="form-control mb-2" style="height: auto;" required>
+                <option value="">Pilih Rating Aplikasi</option>
+                <option value="5">⭐⭐⭐⭐⭐ Sangat Baik</option>
+                <option value="4">⭐⭐⭐⭐ Baik</option>
+                <option value="3">⭐⭐⭐ Cukup</option>
+                <option value="2">⭐⭐ Kurang</option>
+                <option value="1">⭐ Buruk</option>
+            </select>
+
+            <textarea
+                id="komentar_aplikasi"
+                class="form-control"
+                rows="3"
+                placeholder="Pendapat Anda tentang aplikasi (opsional)">
+            </textarea>
+        </div>
+
+        <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" id="anonymous">
+            <label class="form-check-label" for="anonymous">
+                Kirim sebagai anonim
+            </label>
+        </div>
+    </form>
+</div>
+`,
             confirmButtonText: 'Kirim Testimoni',
             confirmButtonColor: '#28a745',
             allowOutsideClick: false,
@@ -915,8 +1006,7 @@ Clinik Scopus Chat Konsultasi | MIS
                             text: resp.message,
                             confirmButtonColor: '#ff3131'
                         }).then(() => {
-                            window.location.href =
-                                "{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}";
+                            goToHistory();
                         });
                     } else {
                         Swal.fire({
