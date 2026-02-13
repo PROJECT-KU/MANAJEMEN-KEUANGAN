@@ -261,7 +261,9 @@ class PublicClinikScopusController extends Controller
                 $tanggal = Carbon::parse($request->booking)->format('Y-m-d');
 
                 $sesiDiminta = collect(explode(',', $request->sesi))
-                    ->map(fn($s) => trim($s));
+                    ->map(function ($s) {
+                        return trim($s);
+                    });
 
                 $bentrok = DB::table('clinikscopus_pemesanan')
                     ->where('clinikscopus_id', $request->klinik_id)
