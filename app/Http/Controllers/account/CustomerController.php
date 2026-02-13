@@ -46,9 +46,15 @@ class CustomerController extends Controller
                     $q->whereNull('email_verified_at');
                 }
             })
-            ->when($email, fn($q, $email) => $q->where('email', $email))
-            ->when($start, fn($q, $start) => $q->whereDate('created_at', '>=', $start))
-            ->when($end, fn($q, $end) => $q->whereDate('created_at', '<=', $end))
+            ->when($email, function ($q, $email) {
+                $q->where('email', $email);
+            })
+            ->when($start, function ($q, $start) {
+                $q->whereDate('created_at', '>=', $start);
+            })
+            ->when($end, function ($q, $end) {
+                $q->whereDate('created_at', '<=', $end);
+            })
             ->orderBy('created_at', 'DESC')
             ->paginate($perPage)
             ->appends($request->all());
@@ -75,7 +81,9 @@ class CustomerController extends Controller
 
         $newUsers = DB::table('users')
             ->where('level', 'user')
-            ->when($lastId, fn($q) => $q->where('id', '>', $lastId))
+            ->when($lastId, function ($q) use ($lastId) {
+                $q->where('id', '>', $lastId);
+            })
             ->orderBy('created_at', 'DESC')
             ->get();
 
@@ -160,9 +168,15 @@ class CustomerController extends Controller
                     $query->whereNull('users.email_verified_at');
                 }
             })
-            ->when($email, fn($q, $email) => $q->where('email', $email))
-            ->when($start, fn($q, $start) => $q->whereDate('users.created_at', '>=', $start))
-            ->when($end, fn($q, $end) => $q->whereDate('users.created_at', '<=', $end))
+            ->when($email, function ($q, $email) {
+                $q->where('email', $email);
+            })
+            ->when($start, function ($q, $start) {
+                $q->whereDate('users.created_at', '>=', $start);
+            })
+            ->when($end, function ($q, $end) {
+                $q->whereDate('users.created_at', '<=', $end);
+            })
             ->orderBy('users.created_at', 'DESC')
             ->paginate($perPage)
             ->appends($request->all());
