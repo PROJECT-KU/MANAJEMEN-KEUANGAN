@@ -384,12 +384,7 @@ Sesi Klinik Scopus | Rumah Scopus
                                         ->filter(function ($p) use ($index) {
                                         return in_array(
                                         (string) ($index + 1),
-                                        $p->sesi_bundling
-                                        ->pluck('sesi_key')
-                                        ->map(function ($v) {
-                                        return (string) $v;
-                                        })
-                                        ->toArray()
+                                        $p->sesi_bundling->pluck('sesi_key')->toArray()
                                         );
                                         })
                                         ->whereIn('tipe_diskon', ['nominal', 'persentase'])
