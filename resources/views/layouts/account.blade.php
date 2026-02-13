@@ -202,21 +202,46 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <!--================== END ==================-->
 
                         <!--================== CLINIC SCOPUS ==================-->
-                        @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                        @php
+                        $level = Auth::user()->level;
+                        @endphp
                         <li class="menu-header">Clinik Scopus</li>
-                        <li class="{{ setActive('account/clinikscopus') }}"><a class="nav-link" href="{{ route('account.clinikscopus.index') }}"><i class="fas fa-home"></i> <span>Clinik Scopus</span></a></li>
-
+                        @if (in_array($level, ['manager', 'ceo']))
                         <li class="{{ setActive('account/customer') . setActive('account/pengguna/search') }}">
                             <a class="nav-link" href="{{ route('account.customer.index') }}">
                                 <i class="fas fa-users"></i> <span>Data Customer</span>
                             </a>
                         </li>
+                        <li class="{{ setActive('account/Clinik-Scopus-Biaya-Persesi') }}">
+                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}">
+                                <i class="fas fa-coins"></i> <span>Biaya Persesi</span>
+                            </a>
+                        </li>
                         @endif
+
+                        @if (in_array($level, ['manager', 'karyawan']))
+                        <li class="{{ setActive('account/Clinik-Scopus-Promo') }}">
+                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Promo.index') }}">
+                                <i class="fas fa-tags"></i> <span>Promo</span>
+                            </a>
+                        </li>
+                        <li class="{{ setActive('account/clinikscopus') }}">
+                            <a class="nav-link" href="{{ route('account.clinikscopus.index') }}">
+                                <i class="fas fa-home"></i> <span>Clinik Scopus</span>
+                            </a>
+                        </li>
+                        @endif
+
+                        <li class="{{ setActive('account/Clinik-Scopus-Riwayat-Pemesanan') . setActive('account/pengguna/search') }}">
+                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}">
+                                <i class="fas fa-users"></i> <span>Riwayat Pemesanan</span>
+                            </a>
+                        </li>
                         <!--================== END ==================-->
 
                         <!--================== REDIRECT TO BERANDA ==================-->
                         @if (Auth::user()->level === 'user')
-                        <li><a class="nav-link" href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Beranda</span></a></li>
+                        <li><a class="nav-link" href="{{ route('public.clinikscopus.index') }}"><i class="fas fa-comment"></i> <span>Konsultasi Sekarang</span></a></li>
                         @endif
                         <!--================== END ==================-->
 

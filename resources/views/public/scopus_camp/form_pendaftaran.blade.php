@@ -1,7 +1,7 @@
 @extends('public.layout.header')
 
 @section('title')
-Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
+Form Pendaftaran Scopus Camp| Rumah Scopus
 @stop
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
@@ -256,8 +256,9 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                             </div>
                         </div>
                     </div>
-
+                    <!-- END -->
                 </div>
+                <!-- ================== END KOLOM KIRI ================== -->
 
                 <!-- ================== KOLOM KANAN ================== -->
                 <div class="col-md-4">
@@ -396,6 +397,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                                 </div>
                             </div>
                             <!-- ================== END ================== -->
+
                         </div>
                     </div>
                 </div>
@@ -430,8 +432,8 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 
                 // Tampilkan SweetAlert loading
                 Swal.fire({
-                    title: 'Sedang Mengirim Invoice...',
-                    html: 'Silakan tunggu, invoice pesanan sedang kami kirim ke email.',
+                    title: 'Sedang Mengirim Kwitansi...',
+                    html: 'Silakan tunggu, kwitansi pesanan sedang kami kirim ke email.',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showConfirmButton: false,

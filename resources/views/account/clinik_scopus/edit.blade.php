@@ -1,4 +1,10 @@
 @extends('layouts.account')
+@extends('layouts.loader')
+
+@section('title')
+Clinik Scopus Edit Trainer | MIS
+@stop
+
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <style>
     .custom-file-upload {
@@ -40,7 +46,6 @@
 
     .image-preview {
         margin-top: 10px;
-        display: none;
     }
 
     .image-preview img {
@@ -50,23 +55,7 @@
     }
 </style>
 <!--================== END ==================-->
-@section('title')
-Update data Trainer|
-@stop
 
-<style>
-    .password-input {
-        position: relative;
-    }
-
-    .password-toggle {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-    }
-</style>
 @section('content')
 <div class="main-content">
     <section class="section">
@@ -94,10 +83,7 @@ Update data Trainer|
                                         </option>
                                         @endforeach
                                     </select>
-
-                                    <!-- 🔥 WAJIB: agar user_id tetap terkirim -->
                                     <input type="hidden" name="user_id" value="{{ $datas->user_id }}">
-
 
                                     @error('user_id')
                                     <div class="invalid-feedback" style="display: block">
@@ -109,132 +95,11 @@ Update data Trainer|
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Sesi</label>
-                                    <input type="sesi" id="sesi" class="form-control" name="sesi" value="{{$datas->sesi}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 2</label>
-                                    <input type="sesi2" id="sesi2" class="form-control" name="sesi2" value="{{$datas->sesi2}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi2')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 3</label>
-                                    <input type="sesi3" id="sesi3" class="form-control" name="sesi3" value="{{$datas->sesi3}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi3')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 4</label>
-                                    <input type="sesi4" id="sesi4" class="form-control" name="sesi4" value="{{$datas->sesi4}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi4')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 5</label>
-                                    <input type="sesi5" id="sesi5" class="form-control" name="sesi5" value="{{$datas->sesi5}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi5')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 6</label>
-                                    <input type="sesi6" id="sesi6" class="form-control" name="sesi6" value="{{$datas->sesi6}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi6')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sesi 7</label>
-                                    <input type="sesi7" id="sesi7" class="form-control" name="sesi7" value="{{$datas->sesi7}}" placeholder="Masukan Sesi" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-
-                                    @error('Sesi7')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Spesialis</label>
-                                    <input type="text" id="spesialis" name="spesialis" value="{{$datas->spesialis}}" placeholder="Masukkan Spesialis" class="form-control" maxlength="30" minlength="5" onkeypress="return/[A-Z]/i.test(event.key)" style="text-transform:uppercase" required>
-
-                                    @error('spesialis')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Tanggal</label>
-                                    <input
-                                        type="date"
-                                        id="tanggal"
-                                        name="tanggal"
-                                        value="{{ old('tanggal', \Carbon\Carbon::parse($datas->tanggal)->format('Y-m-d')) }}"
-                                        class="form-control"
-                                        required>
-
-                                    @error('tanggal')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
                                     <label>Status</label>
-                                    <select class="form-control" name="status" value="{{$datas->status}}" style="height: auto;" required>
+                                    <select class="form-control" name="status" value="{{$datas->status}}" style="height: auto;">
                                         <option value="" disabled selected>-- PILIH STATUS TRAINER --</option>
-                                        <option value="aktif" {{ $datas->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                                        <option value="non aktif" {{ $datas->status == 'non aktif' ? 'selected' : '' }}>Non Aktif</option>
+                                        <option value="active" {{ $datas->status == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="non active" {{ $datas->status == 'non active' ? 'selected' : '' }}>Non Active</option>
                                     </select>
                                     @error('Status')
                                     <div class="invalid-feedback" style="display: block">
@@ -245,28 +110,137 @@ Update data Trainer|
                             </div>
                         </div>
 
+                        @php
+                        use Carbon\Carbon;
+                        @endphp
+
+                        <!--================== ROW 1 : SESI 1–9 ==================-->
                         <div class="row">
-                            <div class="col-md-6">
+                            @foreach(['sesi','sesi2','sesi3','sesi4','sesi5','sesi6','sesi7','sesi8','sesi9'] as $i => $field)
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Foto Trainer</label>
-                                    <div class="input-group">
-                                        <input type="file" name="foto" id="foto" class="form-control" accept="image/*" capture="camera">
-                                    </div>
-                                    @error('foto')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
+                                    <label>Sesi {{ $i + 1 }}</label>
+
+                                    <select name="{{ $field }}" id="{{ $field }}" class="form-control" style="height: auto;">
+                                        <option value="">-- Pilih Sesi --</option>
+
+                                        @php
+                                        $start = Carbon::createFromTime(6, 0);
+                                        $end = Carbon::createFromTime(23, 0);
+                                        @endphp
+
+                                        @while ($start->lt($end))
+                                        @php
+                                        $finish = $start->copy()->addMinutes(50);
+                                        $value = $start->format('H.i').' - '.$finish->format('H.i');
+                                        @endphp
+
+                                        <option value="{{ $value }}"
+                                            {{ ($datas->$field ?? '') === $value ? 'selected' : '' }}>
+                                            {{ $value }}
+                                        </option>
+
+                                        @php $start->addMinutes(50); @endphp
+                                        @endwhile
+                                    </select>
+
+                                    @error($field)
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
+                            @endforeach
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tanggal Online</label>
+                                    <input type="date" name="tanggal_online" class="form-control" value="{{ old('tanggal_online', \Carbon\Carbon::parse($datas->tanggal_online)->format('Y-m-d')) }}">
+
+                                    @error('tanggal_online')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tanggal Offline</label>
+                                    <input type="date" name="tanggal_offline" class="form-control" value="{{ old('tanggal_offline', \Carbon\Carbon::parse($datas->tanggal_offline)->format('Y-m-d')) }}">
+
+                                    @error('tanggal_offline')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Biaya Per Sesi</label>
+
+                                    <input type="text"
+                                        id="biaya_persesi"
+                                        class="form-control"
+                                        value="{{ $biayaPersesiAktif ? 'Rp ' . number_format($biayaPersesiAktif->biaya_persesi, 0, ',', '.') : '-' }}"
+                                        readonly>
+
+                                    <!-- ID disimpan hidden -->
+                                    <input type="hidden"
+                                        name="biaya_persesi_id"
+                                        value="{{ $biayaPersesiAktif->id ?? '' }}">
+
+                                    @error('biaya_persesi_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Spesialis</label>
+
+                                    <div id="tag-container"
+                                        data-value="{{ $datas->spesialis ?? '' }}"
+                                        style="display:flex; flex-wrap:wrap; gap:6px; padding:6px; border:1px solid #ced4da; min-height:38px; cursor:text;">
+
+                                        <input type="text" id="spesialisInput" class="border-0" placeholder="Ketik lalu tekan Enter atau ," style="outline:none; flex:1; min-width:150px;">
+                                    </div>
+
+                                    <input type="hidden" name="spesialis" id="spesialis">
+
+                                    @error('spesialis')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group custom-file-upload" style="margin-top: -3px;">
+                                    <label>Foto Trainer</label>
+                                    <div class="input-group">
+                                        <input type="file" name="foto" id="foto" class="inputfile" accept="image/*">
+                                        <label for="foto" class="file-upload">
+                                            <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                                        </label>
+                                    </div>
+                                </div>
+                                @error('foto')
+                                <div class="invalid-feedback" style="display: block">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <a href="{{ asset('images/' . $datas->foto) }}" data-lightbox="{{ $datas->id }}">
+                                    <a href="{{ asset('ClinikScopusTrainer/' . $datas->foto) }}" data-lightbox="{{ $datas->id }}">
                                         <div class="card" style="width: 18rem; height: 250px; overflow: hidden; border: 2px dashed #000;">
                                             @if ($datas->foto == null)
-                                            <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/no-image.jpg') }}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                            <img alt="image" id="image-preview" src="{{ asset('ClinikScopusTrainer/no-image.jpg') }}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
                                             @else
-                                            <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" class="card-img-top" src="{{ asset('images/' . $datas->foto) }}" alt="Preview Image">
+                                            <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" class="card-img-top" src="{{ asset('ClinikScopusTrainer/' . $datas->foto) }}" alt="Preview Image">
                                             @endif
                                         </div>
                                     </a>
@@ -274,18 +248,22 @@ Update data Trainer|
                             </div>
                         </div>
 
-                        <div class="d-flex mt-3" style="gap: 10px;">
-                            <button class="btn btn-primary btn-submit rounded-pill"
-                                type="submit"
-                                style="flex: 0 0 80%; height:35px; font-size: 15px;">
-                                <i class="fa fa-paper-plane"></i> SIMPAN
-                            </button>
+                        <div class="mt-3">
+                            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
 
-                            <a href="{{ route('account.clinikscopus.index') }}"
-                                class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center"
-                                style="flex: 0 0 20%; height:35px; font-size: 15px;">
-                                <i class="fa fa-undo"></i> KEMBALI
-                            </a>
+                                <!-- Tombol Simpan -->
+                                <button type="submit"
+                                    class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                                    <i class="fa fa-paper-plane"></i> SIMPAN
+                                </button>
+
+                                <!-- Tombol Kembali -->
+                                <a href="{{ route('account.clinikscopus.index') }}"
+                                    class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                                    <i class="fa fa-undo"></i> KEMBALI
+                                </a>
+
+                            </div>
                         </div>
 
                     </form>
@@ -295,63 +273,185 @@ Update data Trainer|
     </section>
 </div>
 
-
-<!--================== maksimal upload foto & jenis file yang di perbolehkan ==================-->
+<!--================== TIDAK BOLEH MEMILIH JAM YANG SAMA ANTAR SESI ==================-->
 <script>
-    document.getElementById('foto').addEventListener('change', function() {
-        const maxFileSizeInBytes = 5024 * 5024; // 5MB
-        const allowedExtensions = ['jpg', 'jpeg', 'png'];
-        const fileInput = this;
+    document.addEventListener('DOMContentLoaded', function() {
 
-        if (fileInput.files.length > 0) {
-            const selectedFile = fileInput.files[0];
-            const fileSize = selectedFile.size; // Get the file size in bytes
-            const fileName = selectedFile.name.toLowerCase();
+        const sessionSelects = document.querySelectorAll(
+            '#sesi, #sesi2, #sesi3, #sesi4, #sesi5, #sesi6, #sesi7, #sesi8, #sesi9'
+        );
 
-            // Check file size
-            if (fileSize > maxFileSizeInBytes) {
-                // Display a SweetAlert error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Ukuran File Melebihi Batas',
-                    text: 'Ukuran File Yang Diperbolehkan Dibawah 5MB.',
+        function updateDisabledOptions() {
+            const selectedValues = Array.from(sessionSelects)
+                .map(select => select.value)
+                .filter(value => value !== '');
+
+            sessionSelects.forEach(select => {
+                Array.from(select.options).forEach(option => {
+
+                    // Jangan disable option kosong
+                    if (option.value === '') {
+                        option.disabled = false;
+                        return;
+                    }
+
+                    // Disable jika dipakai sesi lain
+                    if (
+                        selectedValues.includes(option.value) &&
+                        option.value !== select.value
+                    ) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
                 });
-                fileInput.value = ''; // Clear the file input
-                return;
-            }
-
-            // Check file extension
-            const fileExtension = fileName.split('.').pop();
-            if (!allowedExtensions.includes(fileExtension)) {
-                // Display a SweetAlert error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Jenis File Tidak Valid',
-                    text: 'Hanya File JPG, JPEG, dan PNG Yang Diperbolehkan.',
-                });
-                fileInput.value = ''; // Clear the file input
-            }
+            });
         }
+
+        // 🔥 EVENT CHANGE
+        sessionSelects.forEach(select => {
+            select.addEventListener('change', updateDisabledOptions);
+        });
+
+        // 🔥 PENTING: JALANKAN SAAT LOAD (UNTUK DATA DB)
+        updateDisabledOptions();
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
-<!--================== upload image ==================-->
+<!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <script>
-    const imageInput = document.getElementById('foto');
-    const imagePreview = document.getElementById('image-preview');
+    document.getElementById('foto').addEventListener('change', function(event) {
+        const fileInput = event.target;
+        const file = fileInput.files[0];
 
-    imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block'; // Show the preview
+        if (!file) return;
+
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+
+        const img = document.getElementById('image-preview');
+
+        // ❌ Validasi format
+        if (!allowedTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format Tidak Valid',
+                text: 'Foto harus JPG, JPEG, atau PNG',
+            });
+            fileInput.value = '';
+            img.src = "{{ asset('ClinikScopusTrainer/no-image.jpg') }}";
+            return;
+        }
+
+        // ❌ Validasi ukuran
+        if (fileSizeMB > 2) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ukuran Terlalu Besar',
+                text: 'Ukuran foto maksimal 2 MB',
+            });
+            fileInput.value = '';
+            img.src = "{{ asset('ClinikScopusTrainer/no-image.jpg') }}";
+            return;
+        }
+
+        // ✅ Preview image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result; // 🔥 INI YANG PENTING
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== TAGS SPESIALIS ==================-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('tag-container');
+        const input = document.getElementById('spesialisInput');
+        const hidden = document.getElementById('spesialis');
+
+        let tags = [];
+
+        // ================== CREATE TAG ==================
+        function createTag(text) {
+            if (!text || tags.includes(text)) return;
+
+            tags.push(text);
+
+            const tag = document.createElement('span');
+            tag.style.cssText = `
+            background:#0d6efd;
+            color:#fff;
+            padding:4px 8px;
+            border-radius:12px;
+            font-size:13px;
+            display:flex;
+            align-items:center;
+            gap:6px;
+        `;
+
+            tag.innerHTML = `
+            ${text}
+            <span style="cursor:pointer;font-weight:bold;">×</span>
+        `;
+
+            // Remove tag
+            tag.querySelector('span').onclick = () => {
+                tags = tags.filter(t => t !== text);
+                tag.remove();
+                updateHidden();
             };
-            reader.readAsDataURL(file);
+
+            container.insertBefore(tag, input);
+            updateHidden();
+        }
+
+        function updateHidden() {
+            hidden.value = tags.join(',');
+        }
+
+        // ================== INPUT EVENT ==================
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                createTag(input.value.trim());
+                input.value = '';
+            }
+        });
+
+        // ================== LOAD DATA DB ==================
+        const dbValue = container.dataset.value;
+        if (dbValue) {
+            dbValue.split(',').forEach(item => {
+                createTag(item.trim());
+            });
+        }
+
+        // Klik container fokus ke input
+        container.addEventListener('click', () => input.focus());
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== FORMAT BIAYA SESI ==================-->
+<script>
+    const biayaInput = document.getElementById('biaya_persesi');
+
+    biayaInput.addEventListener('input', function(e) {
+        // Hapus semua karakter selain angka
+        let value = this.value.replace(/\D/g, '');
+
+        if (value) {
+            // Format dengan ribuan
+            value = parseInt(value, 10).toLocaleString('id-ID');
+            this.value = 'Rp ' + value;
+        } else {
+            this.value = '';
         }
     });
 </script>
-<!--================== end ==================-->
+<!--================== END ==================-->
 @stop

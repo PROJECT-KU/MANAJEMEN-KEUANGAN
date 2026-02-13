@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Data Customer | MIS
+Clinik Scopus Data Trainer | MIS
 @stop
 
 <!-- ================== FILTER ================== -->
@@ -84,7 +84,7 @@ Data Customer | MIS
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>DATA CUSTOMER</h1>
+      <h1>DATA TRAINER</h1>
     </div>
 
     <div class="section-body">
@@ -101,12 +101,12 @@ Data Customer | MIS
             <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
               <!-- CREATE DATA -->
+              @if (Auth::user()->level === 'manager')
               <a href="{{ route('account.clinikscopus.create') }}"
                 class="btn btn-primary btn-block rounded-pill">
                 <i class="fa fa-plus-circle"></i> Tambah Data
               </a>
-
-
+              @endif
               <!-- END -->
 
               <div class="dropdown card-header-action">
@@ -144,19 +144,19 @@ Data Customer | MIS
               </div>
 
               <!-- SEARCH -->
-              <div style="max-width: 250px; width: 100%;">
-                <input type="text" id="liveSearch" class="form-control" placeholder="Pencarian..." autocomplete="off">
+              <div style="max-width:250px; width:100%; position:relative;">
+                <input type="text" id="liveSearch" class="form-control pe-4" placeholder="Pencarian..." autocomplete="off">
+
+                <button
+                  type="button"
+                  id="clearSearch"
+                  style="position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:transparent; display:none; cursor:pointer; font-size:14px;">
+                  ✕
+                </button>
               </div>
-              <button id="clearSearch"
-                class="btn btn-sm btn-secondary"
-                style="display:none;">
-                ✕
-              </button>
               <!-- END -->
 
-
             </div>
-
           </div>
           <!--================== END FILTER ==================-->
 
@@ -168,11 +168,11 @@ Data Customer | MIS
                   <tr>
                     <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
-                    <th scope="col" colspan="7" class="column-width" style="text-align: center;">Sesi Trainer</th>
+                    <th scope="col" colspan="9" class="column-width" style="text-align: center;">Sesi Trainer</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Spesialis</th>
-                    <th scope="col" rowspan="2" style="text-align: center;">Tanggal</th>
+                    <th scope="col" colspan="2" class="column-width" style="text-align: center;">Tanggal</th>
                     <th scope="col" rowspan="2" style="text-align: center;">Status</th>
-                    <th scope="col" style="width: 10%;text-align: center">Action</th>
+                    <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
                   </tr>
                   <tr>
                     <th scope="col" style="text-align: center;">1</th>
@@ -182,6 +182,10 @@ Data Customer | MIS
                     <th scope="col" style="text-align: center;">5</th>
                     <th scope="col" style="text-align: center;">6</th>
                     <th scope="col" style="text-align: center;">7</th>
+                    <th scope="col" style="text-align: center;">8</th>
+                    <th scope="col" style="text-align: center;">9</th>
+                    <th scope="col" style="text-align: center;">Online</th>
+                    <th scope="col" style="text-align: center;">Offline</th>
                   </tr>
                 </thead>
                 <tbody id="customerTable">
@@ -192,23 +196,39 @@ Data Customer | MIS
                   <tr>
                     <th scope="row" style="text-align: center">{{ $no }}</th>
                     <td style="display: flex; align-items: center; gap: 10px;">{{ $item->full_name }} </td>
-                    <td style="text-align: center;">{{ $item->sesi }}</td>
-                    <td style="text-align: center;">{{ $item->sesi2 }}</td>
-                    <td style="text-align: center;">{{ $item->sesi3 }}</td>
-                    <td style="text-align: center;">{{ $item->sesi4 }}</td>
-                    <td style="text-align: center;">{{ $item->sesi5 }}</td>
-                    <td style="text-align: center;">{{ $item->sesi6 }}</td>
-                    <td style="text-align: center;">{{ $item->sesi7 }}</td>
+                    @foreach(['sesi','sesi2','sesi3','sesi4','sesi5','sesi6','sesi7','sesi8','sesi9'] as $field)
+                    <td class="sesi-time" style="text-align: center">
+                      @if(!empty($item->$field))
+                      @php
+                      $s = explode(' - ', $item->$field);
+                      $mulai = $s[0] ?? null;
+                      $selesai = $s[1] ?? null;
+                      @endphp
+
+                      @if($mulai && $selesai)
+                      {{ $mulai }} <br>
+                      <span>s/d</span><br>
+                      {{ $selesai }}
+                      @else
+                      -
+                      @endif
+                      @else
+                      -
+                      @endif
+                    </td>
+                    @endforeach
+
                     <td style="text-align: center;">{{ $item->spesialis }}</td>
-                    <td style="text-align: center;">{{ $item->tanggal }}</td>
+                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_online)->translatedFormat('d F Y') }}</td>
+                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal_offline)->translatedFormat('d F Y') }}</td>
                     <td style="text-align: center;">
-                      @if ($item->status == "aktif")
-                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
-                        Aktif
+                      @if ($item->status == "active")
+                      <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Active
                       </span>
                       @else
-                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;">
-                        Non aktif
+                      <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px;" disabled>
+                        Non Active
                       </span>
                       @endif
                     </td>

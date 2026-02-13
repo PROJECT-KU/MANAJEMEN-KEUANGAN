@@ -219,19 +219,29 @@ Tambah Data Refrensi Paper | MIS
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Subjek Area Journal</label>
-                                    <div class="input-group" id="keyword-container">
-                                        <!-- Tempat untuk menampilkan kata kunci -->
+                                    <label>Subjek Area Journal <span style="color:red">*</span></label>
+
+                                    <!-- Container Tag -->
+                                    <div id="tag-container"
+                                        style="display:flex; flex-wrap:wrap; gap:6px; padding:6px; border:1px solid #ced4da; min-height:38px; cursor:text;">
+
+                                        <!-- Input -->
+                                        <input
+                                            type="text"
+                                            id="kata_kunci_input"
+                                            class="border-0"
+                                            placeholder="Ketik lalu tekan Enter atau ,"
+                                            style="outline:none; flex:1; min-width:150px;">
                                     </div>
-                                    <input id="kata_kunci_input" type="text" name="subjek_area_journal" placeholder="Masukkan Subjek Area Journal" class="form-control" onkeypress="return/[a-zA-Z ]/i.test(event.key)">
-                                    <p class="mt-2" style="color: red;"><i class="fas fa-info-circle"></i> Tekan Enter di keyboard setelah memasukan subjek area journal</p>
-                                    @error('kata_kunci')
-                                    <div class="invalid-feedback" style="display: block">
+
+                                    <!-- Hidden input untuk dikirim ke backend -->
+                                    <input type="hidden" name="subjek_area_journal" id="kata_kunci_tags">
+
+                                    @error('subjek_area_journal')
+                                    <div class="invalid-feedback d-block">
                                         {{ $message }}
                                     </div>
                                     @enderror
-                                    <!-- Elemen tersembunyi untuk menyimpan kata kunci sebagai tag -->
-                                    <input type="hidden" id="kata_kunci_tags" name="kata_kunci_tags">
                                 </div>
                             </div>
                         </div>
@@ -431,28 +441,6 @@ Tambah Data Refrensi Paper | MIS
 
 <!--================== END ==================-->
 
-<!--================== SUMMERNOTE ==================-->
-<script src="{{ asset('assets/artikel/summernote/summernote-bs4.min.js') }}"></script>
-<script>
-    $(function() {
-        // Initialize Summernote
-        $('.textarea').summernote({
-            height: 300, // Set the height of the editor to 300px
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
-                ['fontname', ['fontname']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link']], // Only keep the link button
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ]
-        });
-    })
-</script>
-<!--================== END ==================-->
-
 <!--================== SWEET ALERT AUTHOR ==================-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -575,31 +563,63 @@ Tambah Data Refrensi Paper | MIS
 </script>
 <!--================== END ==================-->
 
+<!--================== TAGS SPESIALIS ==================-->
 <script>
-    /**
-     * btn submit loader
-     */
-    $(".btn-submit").click(function() {
-        $(".btn-submit").addClass('btn-progress');
-        if (timeoutHandler) clearTimeout(timeoutHandler);
+    const input = document.getElementById('kata_kunci_input');
+    const container = document.getElementById('tag-container');
+    const hiddenInput = document.getElementById('kata_kunci_tags');
 
-        timeoutHandler = setTimeout(function() {
-            $(".btn-submit").removeClass('btn-progress');
+    let tags = [];
 
-        }, 1000);
+    function updateHiddenInput() {
+        hiddenInput.value = tags.join(', ');
+    }
+
+    function createTag(label) {
+        const tag = document.createElement('span');
+        tag.textContent = label;
+        tag.style.cssText = `
+        background:#0d6efd;
+        color:#fff;
+        padding:4px 8px;
+        border-radius:12px;
+        font-size:13px;
+        display:flex;
+        align-items:center;
+        gap:6px;
+    `;
+
+        const closeBtn = document.createElement('span');
+        closeBtn.textContent = '×';
+        closeBtn.style.cursor = 'pointer';
+
+        closeBtn.onclick = () => {
+            tags = tags.filter(t => t !== label);
+            tag.remove();
+            updateHiddenInput();
+        };
+
+        tag.appendChild(closeBtn);
+        container.insertBefore(tag, input);
+    }
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+
+            const value = input.value.trim().replace(',', '');
+            if (value && !tags.includes(value)) {
+                tags.push(value);
+                createTag(value);
+                updateHiddenInput();
+            }
+            input.value = '';
+        }
     });
 
-    /**
-     * btn reset loader
-     */
-    $(".btn-reset").click(function() {
-        $(".btn-reset").addClass('btn-progress');
-        if (timeoutHandler) clearTimeout(timeoutHandler);
-
-        timeoutHandler = setTimeout(function() {
-            $(".btn-reset").removeClass('btn-progress');
-            $("#karyawanSelect").val('');
-        }, 500);
-    })
+    // klik container → fokus input
+    container.addEventListener('click', () => input.focus());
 </script>
+<!--================== END ==================-->
+
 @stop

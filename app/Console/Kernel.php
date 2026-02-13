@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Run the 'send:email' command daily at 9:46 AM
-        $schedule->command('send:email')->dailyAt('10:02');
+        $schedule->command('send:email')->everyMinute();
+        $schedule->command('promo:expire')->everyMinute();
     }
 
     protected function commands()

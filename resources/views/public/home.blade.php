@@ -24,9 +24,12 @@ Beranda | Rumah Scopus
     }
 </style>
 
+
+
 @section('konten')
 <!-- ======= Hero Section ======= -->
 <section id="hero" class="hero d-flex align-items-center">
+    @include('public.layout.ultah')
     <div class="container">
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
@@ -135,7 +138,7 @@ Beranda | Rumah Scopus
                 <div class="col-md-3 mb-2" data-aos="fade-right">
                     <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
                         <div>
-                            <img src="{{ asset('assets/img/public/camp.jpg') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Camp">
+                            <img src="{{ asset('assets/img/public/HomeScopusCamp.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Camp">
                         </div>
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Scopus Camp</h5>
@@ -153,7 +156,7 @@ Beranda | Rumah Scopus
                 <div class="col-md-3 mb-2" data-aos="fade-down">
                     <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
                         <div>
-                            <img src="{{ asset('assets/img/public/onlinetraining.jpeg') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Online Training">
+                            <img src="{{ asset('assets/img/public/HomeOnlineTraining.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Online Training">
                         </div>
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Online Training</h5>
@@ -171,7 +174,7 @@ Beranda | Rumah Scopus
                 <div class="col-md-3 mb-2" data-aos="fade-left">
                     <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
                         <div>
-                            <img src="{{ asset('assets/img/public/scopuskafe.jpg') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
+                            <img src="{{ asset('assets/img/public/HomeScopusKafe.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
                         </div>
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Scopus Kafe</h5>
@@ -189,7 +192,7 @@ Beranda | Rumah Scopus
                 <div class="col-md-3 mb-2" data-aos="fade-left">
                     <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
                         <div>
-                            <img src="{{ asset('assets/img/public/analisisbibliometrik.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
+                            <img src="{{ asset('assets/img/public/HomeBibliometrik.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
                         </div>
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Analisis Bibliometrik</h5>
@@ -207,7 +210,7 @@ Beranda | Rumah Scopus
                 <div class="col-md-3 mb-2" data-aos="fade-left">
                     <div class="inner-card d-flex flex-column" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
                         <div>
-                            <img src="{{ asset('assets/img/public/analisisbibliometrik.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
+                            <img src="{{ asset('assets/img/public/HomeScopusClinic.png') }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px;" class="img-fluid" alt="Scopus Kafe">
                         </div>
                         <div style="text-align: center; margin-top: 10px;">
                             <h5 style="font-weight: bold;">Clinik Scopus</h5>
