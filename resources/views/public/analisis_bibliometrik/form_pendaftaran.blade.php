@@ -68,309 +68,338 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 </style>
 <!--================== END ==================-->
 
-<!--================== POSISI HEADER TEXT IN CARD ==================-->
+<!--================== BACKGOUND IMAGE ==================-->
 <style>
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .hero-bg {
+        position: relative;
+        background-image: url('/assets/artikel/img/hero-bg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding-bottom: 80px;
     }
 
-    .header-title {
-        font-weight: bold;
-        color: #696969;
-        font-size: 20px;
-        margin: 0;
+    .hero-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
     }
 
-    .current-date {
-        font-size: 16px;
-        color: #696969;
+    .hero-bg>.container {
+        position: relative;
+        z-index: 2;
     }
 </style>
 <!--================== END ==================-->
 
 @section('konten')
 <!-- ======= Hero Section ======= -->
-<section id="hero" class="align-items-center mt-5">
+<section id="blog" class="hero-bg align-items-center mt-5">
     <div class="container">
-        <div class="section-body">
-            <form id="formKonfirmasi" method="POST" action="{{ route('public.analisisbibliometrik.store') }}" enctype="multipart/form-data">
-                @csrf
 
-                <input type="hidden" name="categories_analisis_bibliometrik_id" value="{{ $item->id }}">
+        <form id="formKonfirmasi" method="POST" action="{{ route('public.analisisbibliometrik.store') }}" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="categories_analisis_bibliometrik_id" id="analisisbibliometrikIdvalue" value="{{ $item->id }}">
+            <div class="row mt-4">
 
-                <!-- TAMPILAN BATCH -->
-                <div class="card" style="box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 20px;">
-                    <h1 class="text-center mt-3" style="font-weight: bold; color: black;">
-                        Form Pendaftaran Analisis BiBliometrik
-                    </h1>
-                    <hr>
-                    <div class="card-body" style="color: black;">
-                        <div class="header-container">
-                            <h1 class="header-title mt-3 mb-3">Form Batch</h1>
+                <!-- ================== KOLOM KIRI ================== -->
+                <div class="col-md-8">
+
+                    <!-- FORM BATCH -->
+                    <div class="card mb-4" style="box-shadow: 0 10px 25px rgba(0,0,0,.15);">
+                        <div class="card-header fw-bold">
+                            Detail Batch
                         </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Batch</label>
-                                    <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ $item->nama }} #{{ $item->nama_ke }}" style="background-color:darkgrey;" class="form-control" readonly>
+                        <div class="card-body">
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Batch</label>
+                                        <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ $item->nama }} #{{ $item->nama_ke }}" style="background-color:darkgrey;" class="form-control" readonly>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Sisa Kuota</label>
-                                    <input type="text" name="lokasi" id="lokasi" value="{{ $item->sisa_kuota ?? 0 }}" style="background-color:darkgrey;" class="form-control" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label>Tanggal Mulai Pelaksanaan</label>
-                                    <div class="input-group">
-                                        <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ date('d M Y', strtotime($item->mulai)) }}" style="background-color:darkgrey;" class="form-control" readonly>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Sisa Kuota</label>
+                                        <input type="text" name="lokasi" id="lokasi" value="{{ $item->sisa_kuota ?? 0 }}" style="background-color:darkgrey;" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-2 d-flex align-items-end justify-content-center">
-                                <div class="form-group text-center">
-                                    <span>s/d</span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label>Tanggal Selesai Pelaksanaan</label>
-                                    <div class="input-group">
-                                        <input type="text" name="waktu_selesai" id="waktu_selesai" value="{{ date('d M Y', strtotime($item->selesai)) }}" style="background-color:darkgrey;" class="form-control" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Biaya Per Sesi</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
+                            <div class="row mt-3">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Tanggal Mulai Pelaksanaan</label>
+                                        <div class="input-group">
+                                            <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ date('d M Y', strtotime($item->mulai)) }}" style="background-color:darkgrey;" class="form-control" readonly>
                                         </div>
-                                        <input type="text" name="biaya" id="biaya" value="{{ number_format($item->biaya, 0, ',', '.') }}" style="background-color:darkgrey;" class="form-control currency" readonly>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Kode Unik Pembayaran</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
+
+                                <div class="col-md-2 d-flex align-items-end justify-content-center">
+                                    <div class="form-group text-center">
+                                        <span>s/d</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Tanggal Selesai Pelaksanaan</label>
+                                        <div class="input-group">
+                                            <input type="text" name="waktu_selesai" id="waktu_selesai" value="{{ date('d M Y', strtotime($item->selesai)) }}" style="background-color:darkgrey;" class="form-control" readonly>
                                         </div>
-                                        <input type="text" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}" style="background-color:darkgrey;" placeholder="0" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row mt-3" id="formDiskon" style="display: none;">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Potongan Diskon</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Biaya Per Sesi</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Rp.</span>
+                                            </div>
+                                            <input type="text" name="biaya" id="biaya" value="{{ number_format($item->biaya, 0, ',', '.') }}" style="background-color:darkgrey;" class="form-control currency" readonly>
                                         </div>
-                                        <input type="text" name="nominal_diskon" value="{{ number_format((float) $item->nominal_diskon, 0, ',', '.') }}" style="background-color:darkgrey;" id="potonganDiskon" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Kode Unik Pembayaran</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Rp.</span>
+                                            </div>
+                                            <input type="text" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}" style="background-color:darkgrey;" placeholder="0" class="form-control" readonly>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Jumlah Pendaftar <span style="color: red;">*</span></label>
-                                    <input type="number" name="jumlah_pendaftar" id="jumlahPendaftar"
-                                        class="form-control" required
-                                        max="{{ $item->sisa_kuota ?? 0 }}"
-                                        oninput="cekKuota(this)"
-                                        data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Diskon (jika ada)</label>
-                                    <div class="input-group">
-                                        <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control" placeholder="Masukkan kode diskon">
-                                        <button type="button" class="btn btn-primary" id="btnCekDiskon" data-id="{{ $item->id }}">Cek Diskon</button>
-                                    </div>
-                                    {{-- Hidden input untuk simpan kode diskon valid --}}
-                                    <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
-                                    <small id="diskonMessage" class="text-success"></small>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                <!-- END BATCH -->
-
-                <!-- DATA DIRI -->
-                <div class="card" style="box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 20px;">
-                    <div class="card-body" style="color: black;">
-                        <div class="header-container">
-                            <h1 class="header-title">Form Data Diri</h1>
-                            <p id="currentDate" class="current-date"></p>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Nama Lengkap Beserta Gelar <span style="color: red;">*</span></label>
-                                    <div class="input-group">
-                                        <input type="text" name="nama" id="nama" value="{{ old('nama') }}" placeholder="Masukkan Nama Lengkap" class="form-control" required>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Jumlah Pendaftar <span style="color: red;">*</span></label>
+                                        <input type="number" name="jumlah_pendaftar" id="jumlahPendaftar"
+                                            class="form-control" required
+                                            max="{{ $item->sisa_kuota ?? 0 }}"
+                                            oninput="cekKuota(this)"
+                                            data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Email Aktif <span style="color: red;">*</span></label>
-                                    <div class="input-group">
-                                        <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="Masukkan Email Aktif" class="form-control" maxlength="100" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3 mb-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Affiliasi <span style="color: red;">*</span></label>
-                                    <div class="input-group">
-                                        <input type="text" name="affiliasi" id="affiliasi" value="{{ old('affiliasi') }}" placeholder="Masukkan Affiliasi" class="form-control" minlength="5" onkeypress="return/[a-zA-Z0-9@. ]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Nomor WhatsApp <span style="color: red;">*</span></label>
-                                    <div class="input-group">
-                                        <input type="text" name="telp" id="telp" value="{{ old('telp') }}" placeholder="Masukkan Nomor WhatsApp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Diskon (jika ada)</label>
+                                        <div class="input-group">
+                                            <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control" placeholder="Masukkan kode diskon">
+                                            <button type="button" class="btn btn-primary" id="btnCekDiskon" data-id="{{ $item->id }}">Cek Diskon</button>
+                                        </div>
+                                        {{-- Hidden input untuk simpan kode diskon valid --}}
+                                        <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
+                                        <small id="diskonMessage" class="text-success"></small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- END -->
+                    <!-- END -->
 
-                <div class="card" style="box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 20px;">
-                    <div class="card-body" style="color: black;">
-
-                        <!-- TOTAL KESELURUHAN -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body" style="color: black;">
-                                        <h1 class="header-title mt-3 mb-3">Metode Pembayaran</h1>
-                                        <div class="accordion" id="accordionExample">
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="headingOne">
-                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                        <img src="{{ asset('assets/img/bri.jpg') }}" alt="BRI Image" style="width: 50px; height: 30px; margin-right:10px;"> BRI
-                                                    </button>
-                                                </h2>
-                                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                                                    <div class="accordion-body">
-                                                        <p class="card-text">Nomor Rekening : <b><span id="nomor-rekening">𝟮𝟭𝟲𝟰 𝟬𝟭 𝟬𝟬𝟬𝟰𝟲𝟳 𝟱𝟲 𝟯</span></b>
-                                                            <button onclick="copyToClipboard('nomor-rekening')" class="btn btn-primary"><i class="fas fa-copy"></i> Salin</button>
-                                                            <br>
-                                                            Atas Nama : <b>Rumah Scopus Akademi</b>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    <!-- FORM DATA DIRI -->
+                    <div class="card mb-4" style="box-shadow: 0 10px 25px rgba(0,0,0,.15);">
+                        <div class="card-header fw-bold">
+                            Data Diri Peserta
+                        </div>
+                        <div class="card-body">
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Nama Lengkap Beserta Gelar <span style="color: red;">*</span></label>
+                                        <div class="input-group">
+                                            <input type="text" name="nama" id="nama" value="{{ old('nama') }}" placeholder="Masukkan Nama Lengkap" class="form-control" required>
                                         </div>
-                                        <hr style="width: 100%;">
-                                        <h1 class="header-title mt-3 mb-3">Upload Bukti Pembayaran</h1>
-                                        <div class="row mt-3">
-                                            <div class="col-md-6">
-                                                <div class="form-group custom-file-upload" style="margin-top: -3px;">
-                                                    <label>Bukti Pembayaran</label>
-                                                    <div class="input-group">
-                                                        <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*" required>
-                                                        <label for="gambar" class="file-upload">
-                                                            <i class="fas fa-cloud-upload-alt"></i> Choose Image
-                                                        </label>
-                                                        @error('gambar')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="image-preview-container">
-                                                    <div id="imagePreview" class="image-preview"></div>
-                                                    <span id="file-selected" style="color: black;"></span>
-                                                </div>
-                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Email Aktif <span style="color: red;">*</span></label>
+                                        <div class="input-group">
+                                            <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="Masukkan Email Aktif" class="form-control" maxlength="100" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <span style="text-align: center; font-size:21px; font-weight: bold;" class="mt-3">Total yang Harus Dibayarkan</span>
+                            <div class="row mt-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Affiliasi <span style="color: red;">*</span></label>
+                                        <div class="input-group">
+                                            <input type="text" name="affiliasi" id="affiliasi" value="{{ old('affiliasi') }}" placeholder="Masukkan Affiliasi" class="form-control" minlength="5" onkeypress="return/[a-zA-Z0-9@. ]/i.test(event.key)" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Nomor WhatsApp <span style="color: red;">*</span></label>
+                                        <div class="input-group">
+                                            <input type="text" name="telp" id="telp" value="{{ old('telp') }}" placeholder="Masukkan Nomor WhatsApp" class="form-control" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END -->
+                </div>
+                <!-- ================== END KOLOM KIRI ================== -->
+
+                <!-- ================== KOLOM KANAN ================== -->
+                <div class="col-md-4">
+
+                    <!-- METODE PEMBAYARAN -->
+                    <div class="card mb-4" style="box-shadow: 0 10px 25px rgba(0,0,0,.15);">
+                        <div class="card-header fw-bold">
+                            Metode Pembayaran
+                        </div>
+                        <div class="card-body">
+                            <h1 class="header-title mt-3 mb-3">Metode Pembayaran</h1>
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                            <img src="{{ asset('assets/img/bri.jpg') }}" alt="BRI Image" style="width: 50px; height: 30px; margin-right:10px;"> BRI
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <p class="card-text">Nomor Rekening : <span id="nomor-rekening" style="font-weight: bold;  letter-spacing: 1px;">216401000467563</span>
+                                                <button onclick="copyToClipboard('nomor-rekening')" class="btn btn-primary"><i class="fas fa-copy"></i> Salin</button>
+                                                <br>
+                                                Atas Nama : <b>Rumah Scopus Akademi</b>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr style="width: 100%;">
+                            <h1 class="header-title mt-3 mb-3">Upload Bukti Pembayaran</h1>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group custom-file-upload" style="margin-top: -3px;">
+                                        <label>Bukti Pembayaran</label>
+                                        <div class="input-group">
+                                            <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*" required>
+                                            <label for="gambar" class="file-upload">
+                                                <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                                            </label>
+                                            @error('gambar')
+                                            <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="image-preview-container">
+                                        <div id="imagePreview" class="image-preview"></div>
+                                        <span id="file-selected" style="color: black;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOTAL PEMBAYARAN -->
+                    <div class="card mb-4" style="box-shadow: 0 10px 25px rgba(0,0,0,.15);">
+                        <div class="card-header fw-bold">
+                            Ringkasan Pembayaran
+                        </div>
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+                                <strong style="width: 100%;">
+                                    <span style="text-align: center; font-size:21px; font-weight: bold;" class="mt-3">
+                                        Total yang Harus Dibayarkan
+                                    </span>
                                     <hr style="margin: 10px;">
+
                                     @php
                                     $jumlahPPN = ($item->ppn > 0) ? $item->biaya * ($item->ppn / 100) : 0;
                                     @endphp
 
-                                    <div class="card-body" style="color: black; display: flex; justify-content: space-between; align-items: center;">
-                                        <label style="white-space: nowrap; font-weight: bold;">PPN :</label>
-                                        <div style="display: flex; justify-content: flex-end; width: 100%;">
-                                            <span style="margin-right: 5px;">Rp.</span>
-                                            <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
-                                            <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
+                                    <div class="card-body" style="color: black; display: flex; flex-direction: column; gap: 10px;">
+
+                                        <!-- SUBTOTAL -->
+                                        <div style="display: flex; align-items: center;">
+                                            <label style="white-space: nowrap; font-weight: bold;">Subtotal :</label>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
+                                                <span>{{ number_format($item->biaya, 0, ',', '.') }}</span>
+                                                <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->biaya }}">
+                                            </div>
                                         </div>
+
+                                        <!-- PPN -->
+                                        <div style="display: flex; align-items: center;">
+                                            <label style="white-space: nowrap; font-weight: bold;">PPN :</label>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
+                                                <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
+                                                <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
+                                            </div>
+                                        </div>
+
+                                        <!-- DISKON -->
+                                        <div style="display: flex; align-items: center;" id="formDiskon">
+                                            <label style="white-space: nowrap; font-weight: bold;">Diskon :</label>
+                                            <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                                <span style="margin-right:5px;">Rp.</span>
+                                                <span id="diskonText">0</span>
+                                                <input type="hidden" name="nominal_diskon" id="potonganDiskon" value="0">
+                                            </div>
+                                        </div>
+
                                     </div>
+
                                     <hr style="margin: 10px;">
-                                    <div class="card-body mb-3" style="color: black; display: flex; justify-content: space-between; align-items: center;">
+
+                                    <!-- TOTAL -->
+                                    <div class="card-body mb-3"
+                                        style="display:flex; align-items:center; font-size:20px; color:red;">
                                         <label style="white-space: nowrap; font-weight: bold;">Total :</label>
-                                        <div style="display: flex; justify-content: flex-end; width: 100%;">
-                                            <span style="margin-right: 5px;">Rp.</span>
+                                        <div style="margin-left:auto; display:flex; justify-content:flex-end; width:100%; text-align:right;">
+                                            <span style="margin-right:5px;">Rp.</span>
                                             <span id="TotalPembayaran">0</span>
                                             <input type="hidden" name="total_pembayaran" id="totalPembayaranInput">
                                         </div>
                                     </div>
-                                    <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden" class="form-control" readonly>
+
+                                    <input type="hidden"
+                                        name="total_keseluruhan_pembayaran"
+                                        id="totalKeseluruhanPembayaranhidden"
+                                        class="form-control"
+                                        readonly>
+                                </strong>
+                            </div>
+
+                            <!-- ================== TOMBOL SUBMIT ================== -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary w-100 btn-submit" id="btnSubmit" style="height:45px; font-size:16px;">
+                                        <i class="fa fa-paper-plane"></i> Konfirmasi Pendaftaran
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        <!-- END TOTAL KESELURUHAN -->
+                            <!-- ================== END ================== -->
 
-                        <div class="d-flex">
-                            <button id="btnSubmit" class="btn btn-primary btn-submit" type="submit" style="flex: 1; height:40px; font-size: 15px;">
-                                <i class="fa fa-paper-plane"></i> KONFIRMASI PESANAN
-                            </button>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
+        </form>
 
-        </div>
     </div>
 </section>
-
-<!--================== SWEET ALERT ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!--================== END ==================-->
 
 <!--================== LOADING ==================-->
 <script>
@@ -397,8 +426,8 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 
                 // Tampilkan SweetAlert loading
                 Swal.fire({
-                    title: 'Sedang Mengirim Invoice...',
-                    html: 'Silakan tunggu, invoice pesanan sedang kami kirim ke email.',
+                    title: 'Sedang Mengirim Kwitansi...',
+                    html: 'Silakan tunggu, kwitansi pesanan sedang kami kirim ke email.',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showConfirmButton: false,
@@ -447,15 +476,23 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
     document.getElementById('btnCekDiskon').addEventListener('click', function() {
         const id = this.dataset.id;
         const kode = document.getElementById('kodeDiskon').value.trim();
+
         const messageEl = document.getElementById('diskonMessage');
         const hiddenInput = document.getElementById('hiddenKodeDiskon');
         const potonganInput = document.getElementById('potonganDiskon');
-        const formDiskon = document.getElementById('formDiskon');
+        const diskonText = document.getElementById('diskonText');
 
+        // =============================
+        // KODE KOSONG
+        // =============================
         if (!kode) {
             hiddenInput.value = '';
+            potonganInput.value = 0;
+            diskonText.textContent = '0';
             messageEl.textContent = '';
-            formDiskon.style.display = 'none';
+
+            hitungTotalPembayaran();
+
             Swal.fire({
                 icon: 'warning',
                 title: 'Kode kosong',
@@ -464,30 +501,29 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
             return;
         }
 
+        // =============================
+        // FETCH CEK DISKON
+        // =============================
         fetch(`/cek-kode-diskon/${encodeURIComponent(id)}?kode_diskon=${encodeURIComponent(kode)}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Response:', data);
+
+                // =============================
+                // KODE VALID
+                // =============================
                 if (data.status === 'success') {
-                    // Set nilai ke field tersembunyi
+                    const nominalDiskon = Number(data.casted_nominal_diskon) || 0;
+
                     hiddenInput.value = kode;
+                    potonganInput.value = nominalDiskon;
+                    diskonText.textContent = nominalDiskon.toLocaleString('id-ID');
 
-                    // Tampilkan form diskon
-                    formDiskon.style.display = 'block';
-
-                    // Set nilai ke potongan diskon (TANPA "Rp", agar bisa diparsing langsung)
-                    // Set nilai ke potongan diskon dalam format Rupiah
-                    potonganInput.value = `${Number(data.casted_nominal_diskon).toLocaleString('id-ID')}`;
-
-                    // Tampilkan pesan kecil
-                    messageEl.textContent = `Diskon sebesar Rp ${data.casted_nominal_diskon.toLocaleString('id-ID')}`;
+                    messageEl.textContent = `Diskon sebesar Rp ${nominalDiskon.toLocaleString('id-ID')}`;
                     messageEl.classList.remove('text-danger');
                     messageEl.classList.add('text-success');
 
-                    // Hitung ulang total SETELAH semua field diisi
                     hitungTotalPembayaran();
 
-                    // Tampilkan notifikasi
                     Swal.fire({
                         icon: 'success',
                         title: 'Kode Diskon Valid',
@@ -495,17 +531,21 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                         timer: 2000,
                         showConfirmButton: false
                     });
-                } else {
-                    // Reset jika gagal
+
+                }
+                // =============================
+                // KODE TIDAK VALID
+                // =============================
+                else {
                     hiddenInput.value = '';
-                    potonganInput.value = '';
-                    formDiskon.style.display = 'none';
+                    potonganInput.value = 0;
+                    diskonText.textContent = '0';
 
                     messageEl.textContent = data.message || 'Kode tidak valid';
                     messageEl.classList.remove('text-success');
                     messageEl.classList.add('text-danger');
 
-                    hitungTotalPembayaran(); // reset ulang
+                    hitungTotalPembayaran();
 
                     Swal.fire({
                         icon: 'error',
@@ -514,14 +554,18 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                     });
                 }
             })
+            // =============================
+            // ERROR SERVER
+            // =============================
             .catch(error => {
                 console.error('Error:', error);
+
                 hiddenInput.value = '';
-                potonganInput.value = '';
-                formDiskon.style.display = 'none';
+                potonganInput.value = 0;
+                diskonText.textContent = '0';
                 messageEl.textContent = '';
 
-                hitungTotalPembayaran(); // reset ulang
+                hitungTotalPembayaran();
 
                 Swal.fire({
                     icon: 'error',
@@ -654,21 +698,18 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 <!--================== BUTTOM COPY ==================-->
 <script>
     function copyToClipboard(elementId) {
-        var tempInput = document.createElement("textarea");
-        tempInput.value = document.getElementById(elementId).innerText;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
+        let text = document.getElementById(elementId).innerText;
 
-        // Menggunakan SweetAlert2 untuk menampilkan pesan
-        Swal.fire({
-            icon: 'success',
-            title: 'Nomor rekening berhasil disalin',
-            text: 'Nomor rekening: ' + tempInput.value,
-            showConfirmButton: true, // Menampilkan tombol konfirmasi
-            confirmButtonText: 'OK', // Mengubah teks tombol konfirmasi
-            confirmButtonColor: '#3085d6', // Warna tombol konfirmasi
+        // Normalisasi unicode → angka biasa
+        text = text.normalize('NFKD').replace(/[^\d]/g, '');
+
+        navigator.clipboard.writeText(text).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Nomor rekening berhasil disalin',
+                text: 'Nomor rekening: ' + text,
+                confirmButtonText: 'OK',
+            });
         });
     }
 </script>

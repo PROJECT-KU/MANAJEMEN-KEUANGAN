@@ -61,7 +61,10 @@ class PublicRefrensiPaperController extends Controller
                         ->orWhere('quartile_journal', 'LIKE', "%$search%")
                         ->orWhere('subjek_area_journal', 'LIKE', "%$search%")
                         ->orWhere('judul_paper', 'LIKE', "%$search%")
-                        ->orWhere('type', 'LIKE', "%$search%");
+                        ->orWhere('type', 'LIKE', "%$search%")
+                        ->orWhere('abstrak', 'LIKE', "%$search%")
+                        ->orWhere('doi', 'LIKE', "%$search%")
+                        ->orWhere('apc', 'LIKE', "%$search%");
                 }
             })
             ->whereBetween('created_at', [$startDate, $endDate])

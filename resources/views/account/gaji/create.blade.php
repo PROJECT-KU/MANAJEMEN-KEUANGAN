@@ -248,7 +248,7 @@ Tambah Gaji Karyawan | MIS
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>Nama Karyawan <span style="color: red;">*</span></label>
+                  <label>Nama Karyawan</label>
                   <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)

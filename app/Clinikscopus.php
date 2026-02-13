@@ -4,57 +4,107 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\ClinikScopusPromo;
+use Carbon\Carbon;
 
 class Clinikscopus extends Model
 {
-    /**
-     * @var string
-     */
-
     protected $table = 'clinikscopus';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    /**
-     * @var array
-     */
-    protected $fillable = [
-
-        'nama',
-        'sesi',
-        'spesialis',
-        'status',
-        'tanggal',
-        'foto',
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * The "booted" method of the model.
-     *
-     * @return void
-     */
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
+            if (!$model->id) {
+                $model->id = (string) Str::uuid();
             }
         });
     }
 
-    /**
-     * The data type of the primary key.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
+    protected $casts = [
+        'tanggal_online'  => 'datetime',
+        'tanggal_offline' => 'datetime',
+    ];
 
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
+    protected $fillable = [
+        'user_id',
+        'biaya_persesi_id',
+        'sesi',
+        'sesi2',
+        'sesi3',
+        'sesi4',
+        'sesi5',
+        'sesi6',
+        'sesi7',
+        'sesi8',
+        'sesi9',
+        'spesialis',
+        'status',
+        'tanggal_online',
+        'tanggal_offline',
+        'foto'
+    ];
+
+    // 🔗 Event → Banyak Promo
+    public function promos()
+    {
+        return $this->belongsToMany(
+            ClinikscopusPromo::class,
+            'clinikscopus_promo_items',
+            'clinikscopus_id',
+            'promo_id'
+        )->withTimestamps();
+    }
+
+    // 🔗 Event → Banyak Sesi Promo
+    public function promoSesi()
+    {
+        return $this->hasMany(
+            ClinikscopusPromoSesi::class,
+            'clinikscopus_id'
+        );
+    }
+
+    public function scopeActiveToday($query)
+    {
+        $today = Carbon::today();
+
+        return $query
+            ->where('status', 'active')
+            ->whereDate('tanggal_online', '<=', $today)
+            ->whereDate('tanggal_offline', '>=', $today);
+    }
+
+    // Trainer
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getSesiListAttribute()
+    {
+        return collect([
+            'sesi1' => $this->sesi,
+            'sesi2' => $this->sesi2,
+            'sesi3' => $this->sesi3,
+            'sesi4' => $this->sesi4,
+            'sesi5' => $this->sesi5,
+            'sesi6' => $this->sesi6,
+            'sesi7' => $this->sesi7,
+            'sesi8' => $this->sesi8,
+            'sesi9' => $this->sesi9,
+        ])->filter()->values(); // ⬅️ buang null & rapikan index
+    }
+
+    public function biayaPersesi()
+    {
+        return $this->belongsTo(
+            \App\ClinikScopusBiayaPersesi::class,
+            'biaya_persesi_id'
+        );
+    }
 }

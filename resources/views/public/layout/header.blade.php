@@ -8,7 +8,7 @@
     <title>@yield('title')</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicons -->
     <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="icon">
     <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="apple-touch-icon">
@@ -65,6 +65,34 @@
 
         /* <!-- END --> */
     </style>
+
+    <!-- Facebook Pixel Code -->
+    <script>
+        ! function(f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function() {
+                n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1627568205358582');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" src="https://www.facebook.com/tr?id=1627568205358582&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Facebook Pixel Code -->
+
+
 </head>
 
 <body>
@@ -91,12 +119,12 @@
                             <li><a href="{{ url('/Scopus-Camp') }}">Class Offline</a></li>
                             <li><a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
-                            <li><a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>
+                            <li><a href="{{ url('/Clinik-Scopus') }}">Klinik Scopus</a></li>
                         </ul>
                     </li>
 
                     <li><a class="nav-link scrollto {{ Request::is('paperisasi/public/data') ? 'active' : '' }}" href="{{ url('/paperisasi/public/data') }}">Cek ID</a></li>
-                    <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
+                    <!-- <li><a class="nav-link scrollto {{ Request::is('Cek-Plagiasi') ? 'active' : '' }}" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li> -->
                     <li><a class="nav-link scrollto {{ Request::is('Refrensi-Paper') ? 'active' : '' }}" href="{{ url('/Refrensi-Paper') }}">Referensi Paper</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a></li>
 
@@ -116,8 +144,8 @@
                             @endphp
 
                             <a href="{{ url('/account/dashboard') }}"
-                                class="btn btn-success d-flex align-items-center"
-                                style="padding: 6px 12px; color: white; font-size: 14px;">
+                                class="btn d-flex align-items-center"
+                                style="padding: 6px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d)">
 
                                 <img src="{{ $userImage }}"
                                     alt="Profile"
@@ -128,8 +156,8 @@
                             </a>
                             @else
                             <a href="{{ url('/login') }}"
-                                class="btn btn-info"
-                                style="padding: 8px 12px; color: white; font-size: 14px;">
+                                class="btn"
+                                style="padding: 8px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d);">
                                 Login / Register
                             </a>
                             @endauth
