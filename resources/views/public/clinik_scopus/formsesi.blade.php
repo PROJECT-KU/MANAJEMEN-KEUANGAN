@@ -378,15 +378,25 @@ Sesi Klinik Scopus | Rumah Scopus
                                         $biaya = $clinik->biayaPersesi->biaya_persesi ?? null;
                                         $diskon = 0;
 
-                                        // 🔹 CARI PROMO YANG TERKAIT DENGAN SESI INI DI clinikscopus_promo_sesi
+                                        // CARI PROMO YANG TERKAIT DENGAN SESI INI DI clinikscopus_promo_sesi
+                                        @php
                                         $promoSesi = $promo
-                                        ->filter(fn($p) => in_array((string)($index+1),
-                                        $p->sesi_bundling->pluck('sesi_key')->map(fn($v) => (string)$v)->toArray()
-                                        ))
-                                        ->whereIn('tipe_diskon', ['nominal','persentase'])
+                                        ->filter(function ($p) use ($index) {
+                                        return in_array(
+                                        (string) ($index + 1),
+                                        $p->sesi_bundling
+                                        ->pluck('sesi_key')
+                                        ->map(function ($v) {
+                                        return (string) $v;
+                                        })
+                                        ->toArray()
+                                        );
+                                        })
+                                        ->whereIn('tipe_diskon', ['nominal', 'persentase'])
                                         ->first();
+                                        @endphp
 
-                                        // 🔹 HITUNG PERSEN HEMAT KHUSUS SESI INI
+                                        // HITUNG PERSEN HEMAT KHUSUS SESI INI
                                         $persenHemat = 0;
                                         if ($promoSesi && ($promoSesi->harga_normal ?? 0) > 0) {
                                         $persenHemat = round(
