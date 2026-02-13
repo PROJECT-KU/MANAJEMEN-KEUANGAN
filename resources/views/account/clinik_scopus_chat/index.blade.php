@@ -399,7 +399,7 @@ Clinik Scopus Chat Konsultasi | MIS
 
     function appendMessage(chat) {
 
-        // 🔒 GUARD ANTI DUPLIKAT (WAJIB)
+        //  GUARD ANTI DUPLIKAT (WAJIB)
         if (document.getElementById(`chat-${chat.id}`)) {
             return;
         }
@@ -423,7 +423,7 @@ Clinik Scopus Chat Konsultasi | MIS
 
         const div = document.createElement('div');
 
-        // 🆔 SET ID DOM BERDASARKAN CHAT ID
+        //  SET ID DOM BERDASARKAN CHAT ID
         div.id = `chat-${chat.id}`;
         div.className = `chat-message ${isMe ? 'me' : 'other'}`;
 
@@ -571,7 +571,7 @@ Clinik Scopus Chat Konsultasi | MIS
 
         for (let file of files) {
 
-            // ❌ validasi jumlah
+            //  validasi jumlah
             if (selectedFiles.length >= MAX_FILES) {
                 showAlert(
                     'warning',
@@ -581,7 +581,7 @@ Clinik Scopus Chat Konsultasi | MIS
                 break;
             }
 
-            // ❌ validasi tipe
+            //  validasi tipe
             if (!file.type.startsWith('image/')) {
                 showAlert(
                     'error',
@@ -591,7 +591,7 @@ Clinik Scopus Chat Konsultasi | MIS
                 continue;
             }
 
-            // ❌ validasi ukuran
+            //  validasi ukuran
             if (file.size > MAX_SIZE) {
                 showAlert(
                     'error',
@@ -1034,6 +1034,8 @@ Clinik Scopus Chat Konsultasi | MIS
                             icon: 'error',
                             title: 'Oops!',
                             text: resp.message,
+                        }).then(() => {
+                            goToHistory();
                         });
                     }
                 })

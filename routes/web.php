@@ -68,7 +68,7 @@ Route::get('/Clinik-Scopus/Sesi/{id}', 'Publict\PublicClinikScopusController@ses
 Route::post('/cek-diskon-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@cekDiskon')->name('public.CekDiskonclinikscopus.CekKodeDiskon');
 Route::get('/cek-ppn-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@cekPpn')->name('public.CekPpnclinikscopus.CekPpn');
 Route::post('/Clinik-Scopus/Pemesanan', 'Publict\PublicClinikScopusController@store')->name('public.ClinikScopusPemesanan.store');
-
+Route::post('/Clinik-Scopus/Pemesanan/upload-bukti', 'Publict\PublicClinikScopusController@uploadBukti')->name('public.ClinikScopusPemesanan.uploadBukti');
 
 Auth::routes();
 /**
@@ -437,6 +437,7 @@ Route::prefix('account')
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
+            Route::put('/Clinik-Scopus-Riwayat-Pemesanan/update-status/{id}', 'account\ClinikScopusRiwayatPemesananController@updateStatus')->name('account.Clinik-Scopus-Riwayat-Pemesanan.updateStatus');
 
             // clinik scopus chat
             Route::get('/clinik-scopus/chat/{pemesanan}', 'account\ClinikScopusChatController@index')->name('chat.index');

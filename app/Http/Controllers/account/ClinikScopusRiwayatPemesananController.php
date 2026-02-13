@@ -157,4 +157,26 @@ class ClinikScopusRiwayatPemesananController extends Controller
             }
         }
     }
+    // <!--================== END ==================-->
+
+    // <!--================== UPDATE STATUS ==================-->
+    public function updateStatus(Request $request, $id)
+    {
+        // 🔒 Proteksi role
+        if (Auth::user()->level !== 'manager') {
+            abort(403, 'Unauthorized');
+        }
+
+        $request->validate([
+            'status' => 'required|in:pending,paid,completed,canceled'
+        ]);
+
+        $pemesanan = ClinikScopusPemesanan::findOrFail($id);
+        $pemesanan->update([
+            'status' => $request->status
+        ]);
+
+        return back()->with('success', 'Status booking berhasil diperbarui');
+    }
+    // <!--================== END ==================-->
 }

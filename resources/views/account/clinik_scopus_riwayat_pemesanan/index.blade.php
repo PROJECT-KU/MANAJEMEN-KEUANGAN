@@ -372,6 +372,19 @@ Clinik Scopus Riwayat Pemesanan | MIS
   </section>
 </div>
 
+<!--================== PROTEKSI AKSES SESI CHAT ==================-->
+@if(session('alert'))
+<script>
+  Swal.fire({
+    icon: "{{ session('alert.type') }}",
+    title: "{{ session('alert.title') }}",
+    text: "{{ session('alert.message') }}",
+    confirmButtonColor: '#3085d6'
+  });
+</script>
+@endif
+<!--================== END PROTEKSI AKSES SESI CHAT ==================-->
+
 <!--================== TABS STATUS DATA ==================-->
 <script>
   function updateStatusCounts() {

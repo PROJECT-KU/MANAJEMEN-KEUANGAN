@@ -767,7 +767,45 @@ Sesi Klinik Scopus | Rumah Scopus
                         class="d-block mt-2 fw-semibold"
                         style="font-size:13px;"></small>
                 </div>
+                <!-- END DISKON -->
 
+                <!-- METODE PEMBAYARAN -->
+                <div class="info-sesi-modern mb-3 p-3" style="border-radius:16px; background:linear-gradient(145deg,#ffffff,#fdf6f6); border:1px dashed #ff914d;">
+
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-money-bill-wave me-2 text-danger"></i>
+                        <strong style="font-size:14px;">Metode Pembayaran</strong>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="{{ asset('assets/img/bri.jpg') }}"
+                            alt="BRI Image"
+                            style="width:60px; height:auto; margin-right:12px;">
+                        <h5 class="mb-0 fw-bold">Bank BRI</h5>
+                    </div>
+
+                    <hr style="border-top:1px dashed #ff914d;">
+
+                    <p class="mb-2">
+                        Nomor Rekening:
+                        <span id="nomor-rekening"
+                            style="font-weight:bold; letter-spacing:1px; font-size:15px;">
+                            216401000467563
+                        </span>
+                    </p>
+
+                    <p class="mb-3">
+                        Atas Nama:
+                        <b>Rumah Scopus Akademi</b>
+                    </p>
+
+                    <button onclick="copyToClipboard('nomor-rekening')"
+                        class="btn btn-sm"
+                        style="background:#ff914d; color:#fff; border-radius:20px; padding:6px 16px;">
+                        <i class="fas fa-copy"></i> Salin Nomor Rekening
+                    </button>
+                </div>
+                <!-- END METODE PEMBAYARAN -->
 
                 <hr>
 
@@ -888,6 +926,40 @@ Sesi Klinik Scopus | Rumah Scopus
         </div>
     </div>
 </div>
+<!--================== END ==================-->
+
+<!--================== SALIN NOMOR REKENING ==================-->
+<script>
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).innerText.trim();
+
+        navigator.clipboard.writeText(text).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Nomor rekening berhasil disalin',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }).catch(() => {
+            // fallback browser lama
+            const tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Nomor rekening berhasil disalin',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
+    }
+</script>
 <!--================== END ==================-->
 
 <!--================== CEK SESI PENUH ATAU BELUM DARI RENTANG TANGGAL YANG ADA ==================-->
@@ -1399,14 +1471,17 @@ Sesi Klinik Scopus | Rumah Scopus
                         // SUCCESS
                         // =============================
                         if (res.status === 200 && res.body.success) {
+                            const idPemesanan = res.body.id_pemesanan;
+
                             Swal.fire({
                                 icon: 'success',
-                                title: res.body.title,
+                                title: res.body.title ?? 'Berhasil',
                                 text: res.body.message,
                                 confirmButtonColor: '#ff914d'
                             }).then(() => {
-                                window.location.reload();
+                                showUploadBuktiModal(idPemesanan);
                             });
+
                             return;
                         }
 
@@ -1532,5 +1607,121 @@ Sesi Klinik Scopus | Rumah Scopus
     });
 </script>
 <!--================== END ==================-->
+
+<script>
+    function showUploadBuktiModal(idPemesanan) {
+        Swal.fire({
+            width: 600,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            html: `
+            <h4 class="mb-3">Upload Bukti Pembayaran</h4>
+
+            <input type="file"
+                id="buktiPembayaran"
+                class="form-control mb-2"
+                accept="image/png, image/jpeg">
+
+            <small class="text-muted d-block mb-3">
+                Format: JPG, JPEG, PNG • Maks 2 MB
+            </small>
+
+            <button id="btnUploadBukti"
+                class="btn w-100 text-white"
+                style="background:linear-gradient(to right,#ff3131,#ff914d);">
+                Upload Bukti
+            </button>
+        `,
+            didOpen: () => {
+
+                document.getElementById('btnUploadBukti').onclick = () => {
+
+                    const inputFile = document.getElementById('buktiPembayaran');
+                    const file = inputFile.files[0];
+
+                    /* ================= VALIDASI ================= */
+
+                    // ❌ File kosong
+                    if (!file) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oops...',
+                            text: 'Silakan pilih bukti pembayaran terlebih dahulu'
+                        }).then(() => {
+                            showUploadBuktiModal(idPemesanan);
+                        });
+                        return;
+                    }
+
+                    // ❌ Format file
+                    const allowedTypes = ['image/jpeg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Format Tidak Didukung',
+                            text: 'Gunakan gambar JPG, JPEG, atau PNG'
+                        }).then(() => {
+                            inputFile.value = '';
+                            showUploadBuktiModal(idPemesanan);
+                        });
+                        return;
+                    }
+
+                    // ❌ Ukuran file > 2MB
+                    const maxSize = 2 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ukuran Terlalu Besar',
+                            text: 'Ukuran gambar maksimal 2 MB'
+                        }).then(() => {
+                            inputFile.value = '';
+                            showUploadBuktiModal(idPemesanan);
+                        });
+                        return;
+                    }
+
+                    /* ================= UPLOAD ================= */
+
+                    const data = new FormData();
+                    data.append('gambar', file);
+                    data.append('id_pemesanan', idPemesanan);
+
+                    Swal.fire({
+                        title: 'Mengupload...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    fetch("{{ route('public.ClinikScopusPemesanan.uploadBukti') }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                            },
+                            body: data
+                        })
+                        .then(res => res.json())
+                        .then(resp => {
+                            if (resp.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: resp.message
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire('Gagal', resp.message, 'error')
+                                    .then(() => showUploadBuktiModal(idPemesanan));
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire('Error', 'Terjadi kesalahan server', 'error')
+                                .then(() => showUploadBuktiModal(idPemesanan));
+                        });
+                };
+            }
+        });
+    }
+</script>
 
 @stop

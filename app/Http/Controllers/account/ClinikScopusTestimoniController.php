@@ -42,33 +42,17 @@ class ClinikScopusTestimoniController extends Controller
             ], 403);
         }
 
-        // Cegah dobel testimoni trainer
-        if ($request->rating) {
-            $exists = ClinikScopusTestimoni::where('customer_id', $userId)
-                ->where('id_transaksi', $pemesanan->id_transaksi)
-                ->whereNotNull('rating')
-                ->exists();
+        // Cegah duplikasi testimoni untuk pemesanan yang sama
+        $existsTestimoni = ClinikScopusTestimoni::where(
+            'clinikscopus_pemesanan_id',
+            $pemesanan->id
+        )->exists();
 
-            if ($exists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memberikan testimoni untuk pemesanan ini'
-                ], 409);
-            }
-        }
-
-        // Cegah dobel testimoni aplikasi
-        if ($request->rating_aplikasi) {
-            $existsApp = ClinikScopusTestimoni::where('customer_id', $userId)
-                ->whereNotNull('rating_aplikasi')
-                ->exists();
-
-            if ($existsApp) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memberikan testimoni untuk pemesanan ini'
-                ], 409);
-            }
+        if ($existsTestimoni) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memberikan testimoni untuk pemesanan ini sebelumnya'
+            ], 409);
         }
 
         // Simpan testimoni

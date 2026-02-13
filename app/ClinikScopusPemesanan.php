@@ -34,6 +34,7 @@ class ClinikScopusPemesanan extends Model
         'status',
         'tanggal',
         'tanggal_booking',
+        'gambar',
         'ip_address',
         'browser',
     ];

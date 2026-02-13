@@ -38,6 +38,7 @@ class ClinikscopusPemesanan extends Migration
             $table->string('status')->nullable();
             $table->dateTime('tanggal')->nullable();
             $table->dateTime('tanggal_booking')->nullable();
+            $table->string('gambar')->nullable();
             $table->string('ip_address')->nullable();
             $table->string('browser')->nullable();
             $table->timestamps();

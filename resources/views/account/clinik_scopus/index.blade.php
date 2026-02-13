@@ -101,10 +101,12 @@ Clinik Scopus Data Trainer | MIS
             <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
 
               <!-- CREATE DATA -->
+              @if (Auth::user()->level === 'manager')
               <a href="{{ route('account.clinikscopus.create') }}"
                 class="btn btn-primary btn-block rounded-pill">
                 <i class="fa fa-plus-circle"></i> Tambah Data
               </a>
+              @endif
               <!-- END -->
 
               <div class="dropdown card-header-action">

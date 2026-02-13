@@ -288,7 +288,7 @@ class PublicClinikScopusController extends Controller
 
                 $clinik = Clinikscopus::select('id', 'user_id')->findOrFail($request->klinik_id);
 
-                ClinikScopusPemesanan::create([
+                $pemesanan = ClinikScopusPemesanan::create([
                     'clinikscopus_id'  => $clinik->id,
                     'trainer_id'       => $clinik->user_id,
                     'customer_id'      => auth()->id(),
@@ -319,8 +319,9 @@ class PublicClinikScopusController extends Controller
                 return [
                     'status' => 200,
                     'success' => true,
-                    'title'  => 'Berhasil 🎉',
-                    'message' => 'Pemesanan berhasil dibuat. Silakan lanjutkan pembayaran.'
+                    'id_pemesanan' => $pemesanan->id,
+                    'title' => 'Berhasil 🎉',
+                    'message' => 'Pemesanan berhasil dibuat'
                 ];
             });
 
@@ -340,4 +341,36 @@ class PublicClinikScopusController extends Controller
         }
     }
     // <!--================== END ==================-->
+
+    public function uploadBukti(Request $request)
+    {
+        $request->validate([
+            'id_pemesanan' => 'required|exists:clinikscopus_pemesanan,id',
+            'gambar'       => 'required|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
+
+        $pemesanan = ClinikScopusPemesanan::findOrFail($request->id_pemesanan);
+
+        $path = public_path('ClinikScopusPemesanan');
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        $filename = 'bukti_' . Str::uuid() . '.' .
+            $request->file('gambar')->getClientOriginalExtension();
+
+        $request->file('gambar')->move($path, $filename);
+
+        $pemesanan->update([
+            'gambar' => $filename,
+            'status' => 'pending'
+        ]);
+
+        session()->forget(['show_upload_bukti', 'id_pemesanan']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bukti pembayaran berhasil diupload'
+        ]);
+    }
 }

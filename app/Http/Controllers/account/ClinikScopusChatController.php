@@ -23,9 +23,14 @@ class ClinikScopusChatController extends Controller
         $user = Auth::user();
         $pemesanan = ClinikScopusPemesanan::findOrFail($pemesananId);
 
-        //  Proteksi akses
         if (!in_array($user->id, [$pemesanan->customer_id, $pemesanan->trainer_id])) {
-            abort(403);
+            return redirect()
+                ->route('account.Clinik-Scopus-Riwayat-Pemesanan.index') // sesuaikan tujuan
+                ->with('alert', [
+                    'type' => 'error',
+                    'title' => 'Akses Ditolak',
+                    'message' => 'Anda tidak memiliki izin mengakses sesi konsultasi ini.'
+                ]);
         }
 
         //  AUTO COMPLETE CHECK

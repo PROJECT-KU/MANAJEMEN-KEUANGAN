@@ -92,33 +92,48 @@ Profil | MANAGEMENT
 
                                     <!-- status booking -->
                                     <strong><i class="fas fa-calendar-alt"></i> Status Booking</strong>
-                                    <p class="text-muted">
-                                        @if ($datas->status === 'pending')
-                                        <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">
-                                            Pending
-                                        </span>
+                                    <p class="text-muted mt-2">
 
-                                        @elseif ($datas->status === 'paid')
-                                        <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">
-                                            Paid
-                                        </span>
+                                        @php
+                                        $isManager = Auth::user()->level === 'manager';
+                                        @endphp
 
-                                        @elseif ($datas->status === 'canceled')
-                                        <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">
-                                            Canceled
-                                        </span>
+                                        @if($isManager)
+                                    <form action="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.updateStatus', $datas->id) }}"
+                                        method="POST"
+                                        class="d-inline">
+                                        @csrf
+                                        @method('PUT')
 
-                                        @elseif ($datas->status === 'completed')
-                                        <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
-                                            Completed
-                                        </span>
+                                        <select name="status"
+                                            class="form-select form-select-sm d-inline-block"
+                                            style="width: 200px; border:2px solid #ff914d; font-weight:600;"
+                                            onchange="this.form.submit()">
 
-                                        @else
-                                        <span class="badge bg-secondary px-3 py-2 rounded">
-                                            Unknown
-                                        </span>
-                                        @endif
+                                            <option value="pending" {{ $datas->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="paid" {{ $datas->status == 'paid' ? 'selected' : '' }}>Paid</option>
+                                            <option value="completed" {{ $datas->status == 'completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="canceled" {{ $datas->status == 'canceled' ? 'selected' : '' }}>Canceled</option>
+                                        </select>
+                                    </form>
+
+                                    @else
+                                    {{-- VIEW ONLY --}}
+                                    @if ($datas->status === 'pending')
+                                    <span class="badge bg-warning px-3 py-2" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">Pending</span>
+                                    @elseif ($datas->status === 'paid')
+                                    <span class="badge bg-success px-3 py-2" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">Paid</span>
+                                    @elseif ($datas->status === 'canceled')
+                                    <span class="badge bg-danger px-3 py-2" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">Canceled</span>
+                                    @elseif ($datas->status === 'completed')
+                                    <span class="badge bg-primary px-3 py-2" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">Completed</span>
+                                    @else
+                                    <span class="badge bg-secondary px-3 py-2" style="padding: 6px 12px; border-radius: 6px; color: #ffffff;">Unknown</span>
+                                    @endif
+                                    @endif
+
                                     </p>
+                                    <!-- end status booking -->
                                     <hr>
 
                                 </div>
@@ -132,7 +147,9 @@ Profil | MANAGEMENT
                                     <ul class="nav nav-pills">
                                         <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Riwayat Pembayaran</a></li>
                                         <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Riwayat Pemesanan</a></li>
+                                        @if (Auth::user()->level !== 'user')
                                         <li class="nav-item"><a class="nav-link" href="#testimoni" data-toggle="tab">Testimoni</a></li>
+                                        @endif
                                     </ul>
                                 </div>
                                 <div class="card-body">
@@ -176,6 +193,27 @@ Profil | MANAGEMENT
                                                         <input
                                                             type="text" class="form-control" style="height: 48px; font-size: 16px; font-weight: 700; background-color: #f8f9fa; border: 2px solid #ff914d; color: #000;"
                                                             value="Rp {{ number_format($datas->total_pembayaran, 0, ',', '.') }}" readonly>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-3 g-3">
+                                                    <div class="col-md-12 col-12">
+                                                        <label>Bukti Pembayaran</label>
+
+                                                        @if(!empty($datas->gambar))
+                                                        <div class="mt-2">
+                                                            <img
+                                                                src="{{ asset('ClinikScopusPemesanan/' . $datas->gambar) }}"
+                                                                alt="Bukti Pembayaran"
+                                                                class="img-fluid"
+                                                                style="max-height: 300px; border-radius: 12px; border: 2px solid #ff914d; padding: 6px; background: #f8f9fa;">
+                                                        </div>
+                                                        @else
+                                                        <div class="alert alert-warning mt-2">
+                                                            Bukti pembayaran belum diupload
+                                                        </div>
+                                                        @endif
+
                                                     </div>
                                                 </div>
 
