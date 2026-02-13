@@ -7,7 +7,7 @@ Clinik Scopus Data Promo | MIS
 
 <!-- ================== FILTER ================== -->
 <style>
-  /* 🔹 Responsive behavior */
+  /*  Responsive behavior */
   @media (max-width: 576px) {
     .card-header {
       flex-direction: column;
@@ -37,7 +37,7 @@ Clinik Scopus Data Promo | MIS
     }
   }
 
-  /* 🔹 Tambahkan jarak input → tombol di laptop/desktop */
+  /*  Tambahkan jarak input → tombol di laptop/desktop */
   @media (min-width: 577px) {
     .search-wrapper {
       margin-right: 10px !important;
@@ -47,18 +47,18 @@ Clinik Scopus Data Promo | MIS
 </style>
 
 <style>
-  /* 🔹 Wrapper agar posisi relatif terhadap tombol */
+  /*  Wrapper agar posisi relatif terhadap tombol */
   .search-wrapper {
     position: relative;
     min-width: 200px;
   }
 
-  /* 🔹 Tambahkan ruang di kanan agar teks tidak menabrak ikon */
+  /*  Tambahkan ruang di kanan agar teks tidak menabrak ikon */
   #liveSearch {
     padding-right: 36px;
   }
 
-  /* 🔹 Tombol clear di dalam input */
+  /*  Tombol clear di dalam input */
   #clearSearch {
     position: absolute;
     right: 10px;
@@ -222,13 +222,13 @@ Clinik Scopus Data Promo | MIS
 
                     {{-- SESI 1–9 --}}
                     @php
-                    // 🔹 AMBIL SESI AKTIF UNTUK SEMUA TIPE DISKON
                     $sesiAktif = $promo->sesi
                     ->pluck('sesi_key')
-                    ->map(fn($v) => (int) $v)
+                    ->map(function ($v) {
+                    return (int) $v;
+                    })
                     ->toArray();
                     @endphp
-
 
                     @for ($i = 1; $i <= 9; $i++)
                       <td class="text-center">
@@ -339,7 +339,7 @@ Clinik Scopus Data Promo | MIS
       clearSearchBtn.style.display = 'none';
     }
 
-    // 🔹 Event keyup untuk Live Search
+    //  Event keyup untuk Live Search
     liveSearchInput.addEventListener('keyup', function() {
       clearTimeout(timer);
       const query = this.value.trim();
@@ -391,12 +391,12 @@ Clinik Scopus Data Promo | MIS
       }, 300); // debounce 300ms
     });
 
-    // 🔹 Tampilkan / sembunyikan tombol clear sesuai input
+    //  Tampilkan / sembunyikan tombol clear sesuai input
     liveSearchInput.addEventListener('input', function() {
       clearSearchBtn.style.display = this.value.trim() ? 'block' : 'none';
     });
 
-    // 🔹 Klik tombol clear → hapus teks & reload semua data
+    //  Klik tombol clear → hapus teks & reload semua data
     clearSearchBtn.addEventListener('click', function() {
       liveSearchInput.value = '';
       this.style.display = 'none';
