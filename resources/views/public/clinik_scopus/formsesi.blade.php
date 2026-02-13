@@ -379,17 +379,12 @@ Sesi Klinik Scopus | Rumah Scopus
                                         $diskon = 0;
 
                                         // CARI PROMO YANG TERKAIT DENGAN SESI INI DI clinikscopus_promo_sesi
-                                        @php
                                         $promoSesi = $promo
-                                        ->filter(function ($p) use ($index) {
-                                        return in_array(
-                                        (string) ($index + 1),
-                                        $p->sesi_bundling->pluck('sesi_key')->toArray()
-                                        );
-                                        })
-                                        ->whereIn('tipe_diskon', ['nominal', 'persentase'])
+                                        ->filter(fn($p) => in_array((string)($index+1),
+                                        $p->sesi_bundling->pluck('sesi_key')->map(fn($v) => (string)$v)->toArray()
+                                        ))
+                                        ->whereIn('tipe_diskon', ['nominal','persentase'])
                                         ->first();
-                                        @endphp
 
                                         // HITUNG PERSEN HEMAT KHUSUS SESI INI
                                         $persenHemat = 0;
