@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 
 class ClinikScopusRiwayatPemesananController extends Controller
 {
@@ -177,6 +178,61 @@ class ClinikScopusRiwayatPemesananController extends Controller
         ]);
 
         return back()->with('success', 'Status booking berhasil diperbarui');
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== DELETE DATA ==================-->
+    public function destroy($id)
+    {
+        //  Proteksi role manager
+        if (Auth::user()->level !== 'manager') {
+            abort(403, 'Unauthorized');
+        }
+
+        DB::beginTransaction();
+        try {
+            $pemesanan = ClinikScopusPemesanan::findOrFail($id);
+
+            /**
+             * ===============================
+             * HAPUS FILE GAMBAR (PUBLIC)
+             * ===============================
+             * contoh isi kolom:
+             * bukti_pembayaran = bukti123.jpg
+             */
+            if ($pemesanan->gambar) {
+                $filePath = public_path(
+                    'ClinikScopusPemesanan/' . $pemesanan->gambar
+                );
+
+                if (File::exists($filePath)) {
+                    File::delete($filePath);
+                }
+            }
+
+            /**
+             * ===============================
+             * HAPUS TESTIMONI JIKA ADA
+             * ===============================
+             */
+            ClinikScopusTestimoni::where(
+                'clinikscopus_pemesanan_id',
+                $pemesanan->id
+            )->delete();
+
+            /**
+             * ===============================
+             * HAPUS DATA PEMESANAN
+             * ===============================
+             */
+            $pemesanan->delete();
+
+            DB::commit();
+            return back()->with('success', 'Data dan gambar berhasil dihapus');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus data');
+        }
     }
     // <!--================== END ==================-->
 }

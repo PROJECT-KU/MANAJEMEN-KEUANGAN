@@ -320,6 +320,22 @@ Clinik Scopus Riwayat Pemesanan | MIS
                         <i class="fa fa-clipboard-list" style="font-size: 13px; line-height: 1;"></i>
                       </a>
 
+                      <!-- Tombol delete (MANAGER SAJA) -->
+                      @if (Auth::user()->level === 'manager')
+                      <form action="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.destroy', $item->id) }}"
+                        method="POST"
+                        class="d-inline form-delete">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="button"
+                          class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm btn-delete"
+                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; margin-top: 10px;">
+                          <i class="fas fa-trash" style="font-size: 13px;"></i>
+                        </button>
+                      </form>
+                      @endif
+
                       <!-- Tombol mulai chat -->
                       @if ($item->status === 'paid')
                       <button onclick="window.location.href='{{ route('chat.index',$item->id) }}'"
@@ -371,6 +387,33 @@ Clinik Scopus Riwayat Pemesanan | MIS
     </div>
   </section>
 </div>
+
+<!--================== SWEET ALERT DELETE ==================-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-delete').forEach(button => {
+      button.addEventListener('click', function() {
+        const form = this.closest('.form-delete');
+
+        Swal.fire({
+          title: 'Hapus Data?',
+          text: 'Data dan gambar yang terkait akan dihapus permanen!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Ya, Hapus!',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    });
+  });
+</script>
+<!--================== END SWEET ALERT DELETE ==================-->
 
 <!--================== PROTEKSI AKSES SESI CHAT ==================-->
 @if(session('alert'))

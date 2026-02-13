@@ -438,6 +438,7 @@ Route::prefix('account')
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
             Route::put('/Clinik-Scopus-Riwayat-Pemesanan/update-status/{id}', 'account\ClinikScopusRiwayatPemesananController@updateStatus')->name('account.Clinik-Scopus-Riwayat-Pemesanan.updateStatus');
+            Route::delete('/Clinik-Scopus-Riwayat-Pemesanan/delete/{id}', 'account\ClinikScopusRiwayatPemesananController@destroy')->name('account.Clinik-Scopus-Riwayat-Pemesanan.destroy');
 
             // clinik scopus chat
             Route::get('/clinik-scopus/chat/{pemesanan}', 'account\ClinikScopusChatController@index')->name('chat.index');
