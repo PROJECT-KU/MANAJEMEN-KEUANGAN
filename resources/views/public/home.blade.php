@@ -29,7 +29,7 @@ Beranda | Rumah Scopus
 @section('konten')
 <!-- ======= Hero Section ======= -->
 <section id="hero" class="hero d-flex align-items-center">
-    @include('public.layout.ultah')
+    <!-- @include('public.layout.ultah') -->
     <div class="container">
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
