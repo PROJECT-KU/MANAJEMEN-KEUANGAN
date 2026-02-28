@@ -69,9 +69,12 @@ Scopus Camp | Rumah Scopus
                                 {{ strtoupper($item->nama) }} #{{ strtoupper($item->nama_ke) }}
                             </h4>
 
+                            @if($tipe_diskon == null)
+                            @else
                             <h4 style="color:#ff3131; text-decoration: line-through;">
                                 Rp {{ number_format($item->biaya, 0, ',', '.') }}
                             </h4>
+                            @endif
 
                             <span
                                 style="font-size: clamp(14px, 2.5vw, 22px); font-weight: 700; padding: 6px 10px; border-radius: 6px; color: #fff; background: linear-gradient(to right, #ff3131, #ff914d); display: inline-block; white-space: nowrap;">
