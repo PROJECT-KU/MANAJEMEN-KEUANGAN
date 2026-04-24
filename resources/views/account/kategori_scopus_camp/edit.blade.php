@@ -176,8 +176,8 @@ Update Kategori | MIS
                                     <div class="input-group">
                                         <select class="form-control" style="height: auto;" name="status">
                                             <option value="" disabled selected>-- PILIH STATUS --</option>
-                                            <option value="publish" {{ $categories->status == 'publish' ? 'selected' : '' }}>Publish</option>
-                                            <option value="draft" {{ $categories->status == 'draft' ? 'selected' : '' }}>Draft</option>
+                                            <option value="active" {{ $categories->status == 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="non active" {{ $categories->status == 'non active' ? 'selected' : '' }}>Non Active</option>
                                         </select>
                                     </div>
                                 </div>
@@ -246,7 +246,7 @@ Update Kategori | MIS
                                     <label>Tipe Diskon</label>
                                     <div class="input-group">
                                         <select class="form-control" name="tipe_diskon" id="tipe_diskon" style="height: auto;" onchange="handleDiskonTypeChange()">
-                                            <option value="" disabled selected>-- PILIH TIPE DISKON --</option>
+                                            <option value="" selected>-- PILIH TIPE DISKON --</option>
                                             <option value="persentase" {{ $categories->tipe_diskon == 'persentase' ? 'selected' : '' }}>Persentase</option>
                                             <option value="nominal" {{ $categories->tipe_diskon == 'nominal' ? 'selected' : '' }}>Nominal</option>
                                         </select>
@@ -395,54 +395,69 @@ Update Kategori | MIS
         if (tipe === 'persentase') {
             persenField.disabled = false;
             nominalField.readOnly = true;
-            nominalField.value = ''; // reset manual entry
+            nominalField.value = '';
             updateNominalDiskon();
         } else if (tipe === 'nominal') {
             persenField.disabled = true;
             nominalField.readOnly = false;
-            persenField.value = ''; // reset persentase
+            persenField.value = '';
+            updateNominalDiskon();
         } else {
-            // Belum memilih tipe
+            // JIKA KEMBALI KE "-- PILIH TIPE DISKON --"
             persenField.disabled = true;
             nominalField.readOnly = true;
             persenField.value = '';
             nominalField.value = '';
+            updateNominalDiskon(); // Trigger update untuk reset total
         }
     }
 
     function updateNominalDiskon() {
         const tipe = document.getElementById('tipe_diskon').value;
-        const persen = parseFloat(document.getElementById('diskon_persentase').value) || 0;
         const biayaRaw = document.getElementById('biaya').value.replace(/\D/g, '');
         const biaya = parseFloat(biayaRaw) || 0;
+
         let hasilDiskon = 0;
 
-        if (tipe === 'persentase' && biaya > 0 && persen > 0) {
+        if (tipe === 'persentase') {
+            const persen = parseFloat(document.getElementById('diskon_persentase').value) || 0;
             hasilDiskon = Math.round((persen / 100) * biaya);
             document.getElementById('nominal_diskon').value = formatRupiah(hasilDiskon);
         } else if (tipe === 'nominal') {
             const diskonRaw = document.getElementById('nominal_diskon').value.replace(/\D/g, '');
             hasilDiskon = parseFloat(diskonRaw) || 0;
+        } else {
+            // Jika tipe diskon kosong, maka diskon adalah 0
+            hasilDiskon = 0;
         }
 
+        // Total biaya sekarang otomatis sama dengan biaya jika hasilDiskon adalah 0
         const total = biaya - hasilDiskon;
         document.getElementById('total_biaya').value = formatRupiah(total > 0 ? total : 0);
     }
 
+    // Gunakan fungsi format yang konsisten (menghapus format bawaan Intl)
     function formatRupiah(angka) {
-        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        if (typeof angka === 'undefined' || angka === null) return '';
+        let stringAngka = angka.toString().replace(/\D/g, '');
+        return stringAngka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
+
     window.addEventListener('DOMContentLoaded', function() {
         handleDiskonTypeChange();
 
         document.getElementById('tipe_diskon').addEventListener('change', handleDiskonTypeChange);
         document.getElementById('diskon_persentase').addEventListener('input', updateNominalDiskon);
+
         document.getElementById('nominal_diskon').addEventListener('input', function(e) {
-            const angka = e.target.value.replace(/\D/g, '');
-            e.target.value = formatRupiah(angka);
+            this.value = formatRupiah(this.value);
             updateNominalDiskon();
         });
-        document.getElementById('biaya').addEventListener('input', updateNominalDiskon);
+
+        document.getElementById('biaya').addEventListener('input', function(e) {
+            this.value = formatRupiah(this.value);
+            updateNominalDiskon();
+        });
     });
 </script>
 <!--================== END ==================-->

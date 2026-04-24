@@ -115,7 +115,7 @@ Update Kategori | MIS
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">#</span>
                                         </div>
-                                        <input type="text" name="nama_ke" value="{{ $categories->nama_ke }}" placeholder="Kategori Ke-" class="form-control">
+                                        <input type="number" name="nama_ke" value="{{ $categories->nama_ke }}" placeholder="Kategori Ke-" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -167,8 +167,8 @@ Update Kategori | MIS
                                     <div class="input-group">
                                         <select class="form-control" style="height: auto;" name="status">
                                             <option value="" disabled selected>-- PILIH STATUS --</option>
-                                            <option value="publish" {{ $categories->status == 'publish' ? 'selected' : '' }}>PUBLISH</option>
-                                            <option value="draft" {{ $categories->status == 'draft' ? 'selected' : '' }}>DRAFT</option>
+                                            <option value="active" {{ $categories->status == 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="non active" {{ $categories->status == 'non active' ? 'selected' : '' }}>Non Active</option>
                                         </select>
                                     </div>
                                 </div>
@@ -206,7 +206,9 @@ Update Kategori | MIS
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" id="biaya" name="biaya" value="{{ number_format($categories->biaya, 0, ',', '.') }}" placeholder="Masukkan Total Biaya" class="form-control">
+                                        <input type="text" id="biaya" name="biaya"
+                                            value="{{ number_format((float)($categories->biaya ?? 0), 0, ',', '.') }}"
+                                            placeholder="Masukkan Total Biaya" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -229,7 +231,7 @@ Update Kategori | MIS
                                     <label>Tipe Diskon</label>
                                     <div class="input-group">
                                         <select class="form-control" name="tipe_diskon" id="tipe_diskon" style="height: auto;" onchange="handleDiskonTypeChange()">
-                                            <option value="" disabled selected>-- PILIH TIPE DISKON --</option>
+                                            <option value="" selected>-- PILIH TIPE DISKON --</option>
                                             <option value="persentase" {{ $categories->tipe_diskon == 'persentase' ? 'selected' : '' }}>PERSENTASE</option>
                                             <option value="nominal" {{ $categories->tipe_diskon == 'nominal' ? 'selected' : '' }}>NOMINAL</option>
                                         </select>
@@ -257,7 +259,9 @@ Update Kategori | MIS
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="text" name="nominal_diskon" id="nominal_diskon" value="{{ $categories->nominal_diskon }}" placeholder="Masukkan Total Nominal Diskon" class="form-control">
+                                        <input type="text" name="nominal_diskon" id="nominal_diskon"
+                                            value="{{ number_format((float)($categories->nominal_diskon ?? 0), 0, ',', '.') }}"
+                                            placeholder="Masukkan Total Nominal Diskon" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -279,7 +283,9 @@ Update Kategori | MIS
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="number" name="total_biaya" id="total_biaya" value="{{ $categories->total_biaya }}" placeholder="Masukkan Total Biaya" class="form-control" readonly>
+                                        <input type="text" name="total_biaya" id="total_biaya"
+                                            value="{{ number_format((float)($categories->total_biaya ?? 0), 0, ',', '.') }}"
+                                            placeholder="Masukkan Total Biaya" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -371,54 +377,69 @@ Update Kategori | MIS
         if (tipe === 'persentase') {
             persenField.disabled = false;
             nominalField.readOnly = true;
-            nominalField.value = ''; // reset manual entry
+            nominalField.value = '';
             updateNominalDiskon();
         } else if (tipe === 'nominal') {
             persenField.disabled = true;
             nominalField.readOnly = false;
-            persenField.value = ''; // reset persentase
+            persenField.value = '';
+            updateNominalDiskon();
         } else {
-            // Belum memilih tipe
+            // JIKA TIDAK MEMILIH TIPE DISKON
             persenField.disabled = true;
             nominalField.readOnly = true;
             persenField.value = '';
             nominalField.value = '';
+            updateNominalDiskon(); // Panggil update untuk reset total biaya ke harga awal
         }
     }
 
     function updateNominalDiskon() {
         const tipe = document.getElementById('tipe_diskon').value;
-        const persen = parseFloat(document.getElementById('diskon_persentase').value) || 0;
         const biayaRaw = document.getElementById('biaya').value.replace(/\D/g, '');
         const biaya = parseFloat(biayaRaw) || 0;
+
         let hasilDiskon = 0;
 
-        if (tipe === 'persentase' && biaya > 0 && persen > 0) {
+        if (tipe === 'persentase') {
+            const persen = parseFloat(document.getElementById('diskon_persentase').value) || 0;
             hasilDiskon = Math.round((persen / 100) * biaya);
             document.getElementById('nominal_diskon').value = formatRupiah(hasilDiskon);
         } else if (tipe === 'nominal') {
             const diskonRaw = document.getElementById('nominal_diskon').value.replace(/\D/g, '');
             hasilDiskon = parseFloat(diskonRaw) || 0;
+        } else {
+            // Jika tipe kosong, diskon dianggap 0
+            hasilDiskon = 0;
         }
 
+        // Hitung Total: Biaya dikurangi diskon (0 jika tipe tidak dipilih)
         const total = biaya - hasilDiskon;
         document.getElementById('total_biaya').value = formatRupiah(total > 0 ? total : 0);
     }
 
+    // Fungsi format titik yang konsisten
     function formatRupiah(angka) {
-        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        if (typeof angka === 'undefined' || angka === null) return '';
+        let stringAngka = angka.toString().replace(/\D/g, '');
+        return stringAngka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
+
     window.addEventListener('DOMContentLoaded', function() {
         handleDiskonTypeChange();
 
         document.getElementById('tipe_diskon').addEventListener('change', handleDiskonTypeChange);
         document.getElementById('diskon_persentase').addEventListener('input', updateNominalDiskon);
+
         document.getElementById('nominal_diskon').addEventListener('input', function(e) {
-            const angka = e.target.value.replace(/\D/g, '');
-            e.target.value = formatRupiah(angka);
+            this.value = formatRupiah(this.value);
             updateNominalDiskon();
         });
-        document.getElementById('biaya').addEventListener('input', updateNominalDiskon);
+
+        document.getElementById('biaya').addEventListener('input', function(e) {
+            this.value = formatRupiah(this.value);
+            updateNominalDiskon();
+        });
     });
 </script>
 <!--================== END ==================-->

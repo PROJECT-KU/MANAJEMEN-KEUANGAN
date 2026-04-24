@@ -35,6 +35,18 @@ class CategoriesAnalisisBibliometrikController extends Controller
     {
         $user = Auth::user();
 
+        // --- LOGIKA OTOMATIS NON-ACTIVE ---
+        // Menggunakan Carbon untuk mendapatkan waktu sekarang (Server Time)
+        $now = \Carbon\Carbon::now();
+
+        // Update status ke 'non active' jika waktu sekarang sudah melewati atau sama dengan kolom 'mulai'
+        // (Misal: kolom mulai diset 2026-04-16 00:01:00, maka saat ini juga status akan berubah)
+        DB::table('categories_analisis_bibliometrik')
+            ->where('status', 'active')
+            ->where('mulai', '<=', $now->format('Y-m-d H:i:s'))
+            ->update(['status' => 'non active']);
+        // ----------------------------------
+
         // Ambil nilai filter tanggal dari request
         $startDate = $request->input('tanggal_awal');
         $endDate = $request->input('tanggal_akhir');

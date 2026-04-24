@@ -45,11 +45,6 @@ Artikel | Rumah Scopus
 
     /* END */
 </style>
-<!--================== IKLAN ==================-->
-<!-- google ads -->
-<meta name="google-adsense-account" content="ca-pub-4416930989633394">
-<!-- end -->
-<!--================== END ==================-->
 
 @section('konten')
 @csrf
@@ -106,8 +101,12 @@ Artikel | Rumah Scopus
                                 @endforeach
 
                                 <li class="d-flex align-items-center">
-                                    <i class="bi bi-person"></i>
-                                    <a href="">{{ $user->full_name }}</a>
+                                    @if ($user->gambar == null)
+                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
+                                    @else
+                                    <img src="{{ asset('assets/img/profil/' . $user->gambar) }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
+                                    @endif
+                                    <a href="" style="margin-left: 10px;">{{ $user->full_name }}</a>
                                 </li>
                                 <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href=""><time datetime="2020-01-01"> {{ \Carbon\Carbon::parse($artikel->created_at)->format('l, j F Y') }}</time></a></li>
                                 <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="">{{ $jumlah_komentar }} Comments</a></li>
@@ -144,26 +143,6 @@ Artikel | Rumah Scopus
 
                     </article>
                     <!--================== END ==================-->
-
-                    <div class="blog-author d-flex align-items-center">
-
-                        @if ($user->gambar == null)
-                        <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 100px; height: 100px;" alt="">
-                        @else
-                        <img src="{{ asset('assets/img/profil/' . $user->gambar) }}" class="rounded-circle float-left" style="width: 100px; height: 100px;" alt="">
-                        @endif
-                        <div>
-                            <h4>{{ $user->full_name }}</h4>
-                            <!-- <div class="social-links">
-                                <a href="https://twitters.com/#"><i class="bi bi-twitter"></i></a>
-                                <a href="https://facebook.com/#"><i class="bi bi-facebook"></i></a>
-                                <a href="https://instagram.com/#"><i class="biu bi-instagram"></i></a>
-                            </div> -->
-                            <p>
-                                {!! strip_tags($user->jobdesk) !!}
-                            </p>
-                        </div>
-                    </div>
 
                     <!--================== KOMENTAR ==================-->
                     <div class="blog-comments">
@@ -425,13 +404,10 @@ Artikel | Rumah Scopus
                         @endif
                         @endforeach
 
-
                         @endif
                         @endforeach
                         @endif
                         @endforeach
-
-
 
                         <!--================== FORM KOMENTAR ==================-->
                         <div class="reply-form">
@@ -520,71 +496,87 @@ Artikel | Rumah Scopus
                         <!--================== END ==================-->
 
                         <!--================== MENAMPILKAN KATA KUNCI ==================-->
-                        <h3 class="sidebar-title">Tags</h3>
-                        <div class="sidebar-item tags">
-                            <ul>
-                                @php
-                                $keywords = explode(',', $artikel->kata_kunci); // Memisahkan kata kunci yang dipisahkan oleh koma
-                                @endphp
-                                @foreach ($keywords as $keyword)
-                                <li><a href="#">{{ $keyword }}</a></li>
-                                @endforeach
-                            </ul>
+                        <div class="sidebar-tags-container" style="margin-top: 30px;">
+                            <style>
+                                .sidebar-tags-wrapper {
+                                    background: #ffffff;
+                                }
+
+                                .tags-title {
+                                    font-size: 16px;
+                                    font-weight: 700;
+                                    color: #1e293b;
+                                    margin-bottom: 15px;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                }
+
+                                .tags-list {
+                                    list-style: none;
+                                    padding: 0;
+                                    margin: 0;
+                                    display: flex;
+                                    flex-wrap: wrap;
+                                    gap: 6px;
+                                }
+
+                                .tag-badge {
+                                    display: inline-block;
+                                    padding: 5px 12px;
+                                    background: #f8fafc;
+                                    /* Ultra soft gray */
+                                    color: #94a3b8;
+                                    /* Disabled look */
+                                    border-radius: 6px;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    border: 1px solid #f1f5f9;
+                                    cursor: not-allowed;
+                                    /* Menunjukkan status disabled */
+                                    user-select: none;
+                                    transition: all 0.2s ease;
+                                }
+
+                                .tag-badge i {
+                                    font-size: 10px;
+                                    opacity: 0.6;
+                                }
+                            </style>
+
+                            <div class="sidebar-tags-wrapper">
+                                <h3 class="tags-title">
+                                    <span style="width: 3px; height: 15px; background: var(--primary-gradient, #ff3131); display: inline-block; border-radius: 10px;"></span>
+                                    Tags
+                                </h3>
+
+                                <div class="sidebar-item tags">
+                                    <ul class="tags-list">
+                                        @php
+                                        $keywords = $artikel->kata_kunci ? explode(',', $artikel->kata_kunci) : [];
+                                        @endphp
+
+                                        @forelse ($keywords as $keyword)
+                                        @if(trim($keyword) !== '')
+                                        <li>
+                                            <span class="tag-badge">
+                                                <i class="bi bi-tag-fill me-1"></i>{{ trim($keyword) }}
+                                            </span>
+                                        </li>
+                                        @endif
+                                        @empty
+                                        <li style="color: #cbd5e1; font-size: 12px; font-style: italic;">No tags available</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <!--================== END ==================-->
-
-                        <!--================== IKLAN ==================-->
-                        <!-- google ads -->
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4416930989633394" crossorigin="anonymous"></script>
-                        <!-- end -->
-
-                        <!-- adnow ads -->
-                        <div id="SC_TBlock_883745"></div>
-                        <div id="SC_TBlock_883745" class="SC_TBlock"></div>
-                        <!-- end -->
-
-                        <!-- yllix ads -->
-                        <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=300x250&ga=g"></script>
-                        <noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/300x250.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
-                        <!-- end -->
-                        <!--================== END ==================-->
-
                     </div>
                 </div>
             </div>
         </div>
-
-        <!--================== IKLAN ==================-->
-        <!-- yllix ads -->
-        <p style="text-align: center;">
-            <script type="text/javascript" src="https://udbaa.com/bnr.php?section=General&pub=467718&format=728x90&ga=g"></script>
-            <noscript><a href="https://yllix.com/publishers/467718" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub/728x90.png" style="border:none;margin:0;padding:0;vertical-align:baseline;" alt="ylliX - Online Advertising Network" /></a></noscript>
-        </p>
-        <!-- end -->
-        <!--================== END ==================-->
-    </section>
-
 </main>
-
-<!--================== IKLAN ==================-->
-<!-- adnow ads -->
-<script type="text/javascript">
-    (sc_adv_out = window.sc_adv_out || []).push({
-        id: 883745,
-        domain: "n.ads1-adnow.com",
-    });
-</script>
-<script type="text/javascript" src="//st-n.ads1-adnow.com/js/a.js" async></script>
-<script type="text/javascript">
-    (sc_adv_out = window.sc_adv_out || []).push({
-        id: "883745",
-        domain: "n.nnowa.com",
-        no_div: false
-    });
-</script>
-<script async type="text/javascript" src="//st-n.nnowa.com/js/a.js"></script>
-<!-- end -->
-<!--================== END ==================-->
 
 <script>
     // komentar
@@ -630,7 +622,5 @@ Artikel | Rumah Scopus
     });
     @endif
 </script>
-
-
 
 @stop

@@ -1,390 +1,640 @@
 @extends('layouts.account')
 @extends('layouts.loader')
+@extends('layouts.headerfitur')
 
 @section('title')
 Clinik Scopus Riwayat Pemesanan | MIS
 @stop
 
-<!-- ================== FILTER ================== -->
 <style>
-  /*  Responsive behavior */
-  @media (max-width: 576px) {
-    .card-header {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+
+    .booking-grid {
+      display: grid;
+      /* Membuat 3 kolom sama rata di desktop */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      padding: 20px 0;
+      align-items: stretch;
+      /* Memastikan tinggi card sama dalam satu baris */
+    }
+
+    @media (max-width: 1100px) {
+      .booking-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* Menjadi 2 kolom */
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .booking-grid {
+        grid-template-columns: 1fr;
+        /* Menjadi 1 kolom (full width) */
+        gap: 15px;
+      }
+    }
+
+    .card-booking {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 35px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+      transition: all 0.5s ease;
+      display: flex;
       flex-direction: column;
-      align-items: stretch !important;
+      height: 100%;
+      position: relative;
     }
 
-    /* Search penuh */
-    .search-wrapper {
-      width: 100%;
+    .card-booking:hover {
+      transform: translateY(-10px);
+      border-color: #6366f1;
+      box-shadow: 0 25px 50px rgba(99, 102, 241, 0.15);
     }
 
-    /* Tombol sejajar (50% - 50%) */
-    #toggleFilterBtn {
-      width: 100%;
-      justify-content: center;
-      margin-top: 10px;
+    /* 🔹 Kendala / Issue Box */
+    .issue-container {
+      margin-top: 15px;
+      padding: 12px 18px;
+      background: rgba(239, 68, 68, 0.08);
+      /* Soft Red */
+      border-radius: 20px;
+      border-left: 4px solid #ef4444;
     }
 
-    /* Rapatkan jarak antar tombol */
-    .card-header .d-flex {
-      gap: 0.5rem !important;
+    .issue-label {
+      font-size: 9px;
+      font-weight: 900;
+      color: #ef4444;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 4px;
     }
 
-    /* Hilangkan teks panjang kalau mau lebih ringkas di HP */
-    #toggleFilterText {
+    .issue-text {
       font-size: 12px;
+      color: #7f1d1d;
+      font-weight: 600;
+      line-height: 1.4;
     }
-  }
 
-  /*  Tambahkan jarak input → tombol di laptop/desktop */
-  @media (min-width: 577px) {
-    .search-wrapper {
-      margin-right: 10px !important;
-      /* 💡 jarak nyaman antara input dan tombol */
+    /* 🔹 Sesi Info Styling */
+    .sesi-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
     }
-  }
+
+    .sesi-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 15px;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .bento-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .bento-item {
+      background: white;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid #f1f5f9;
+    }
+
+    .bento-item .val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* 🔹 Base Status Badge */
+    .status-badge {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+    }
+
+    /* Dot Indikator di depan teks */
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* 🔹 Variant: PAID (Sudah Bayar) */
+    .status-paid {
+      background: #dcfce7;
+      /* Soft Green */
+      color: #166534;
+      border: 1px solid rgba(22, 101, 52, 0.1);
+    }
+
+    .status-paid::before {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    /* 🔹 Variant: PENDING (Menunggu) */
+    .status-pending {
+      background: #fef3c7;
+      /* Soft Amber */
+      color: #92400e;
+      border: 1px solid rgba(146, 64, 14, 0.1);
+    }
+
+    .status-pending::before {
+      background: #f59e0b;
+    }
+
+    /* 🔹 Variant: COMPLETED (Selesai) */
+    .status-completed {
+      background: #e0e7ff;
+      /* Soft Indigo */
+      color: #3730a3;
+      border: 1px solid rgba(55, 48, 163, 0.1);
+    }
+
+    .status-completed::before {
+      background: #6366f1;
+    }
+
+    /* 🔹 Variant: CANCELED (Dibatalkan) */
+    .status-canceled {
+      background: #fee2e2;
+      /* Soft Red */
+      color: #991b1b;
+      border: 1px solid rgba(153, 27, 27, 0.1);
+    }
+
+    .status-canceled::before {
+      background: #ef4444;
+    }
+
+    .action-wrap {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .btn-modern {
+      flex: 1;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none !important;
+    }
+
+    .btn-edit {
+      background: #eef2ff;
+      color: #6366f1;
+    }
+
+    .btn-edit:hover {
+      background: #6366f1;
+      color: #fff;
+      transform: translateY(-3px);
+    }
+
+    .btn-delete {
+      background: #fff1f2;
+      color: #f43f5e;
+    }
+
+    .btn-delete:hover {
+      background: #f43f5e;
+      color: #fff;
+      transform: translateY(-3px);
+    }
+
+    .btn-chat {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .btn-chat:hover {
+      background: #10b981;
+      color: #ffffff;
+      transform: translateY(-3px);
+    }
+
+    .btn-locked {
+      background: #fef3c7;
+      color: #78350f;
+      border: 1px solid #fcd34d;
+      cursor: not-allowed;
+    }
+
+    .btn-locked i {
+      color: #92400e;
+    }
+
+    .btn-locked:hover {
+      transform: none;
+      background: #fef3c7;
+      color: #78350f;
+    }
+
+    /* 🔹 Wrapper Utama Tabs */
+    .status-tabs-wrapper {
+      background: #f8fafc;
+      padding: 8px;
+      border-radius: 25px;
+      display: inline-flex;
+      border: 1px solid #e2e8f0;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .nav-pills#statusTabs {
+      border: none;
+      gap: 5px;
+    }
+
+    .nav-pills .nav-item .nav-link {
+      border-radius: 20px;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #64748b;
+      border: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+    }
+
+    /* 🔹 State Aktif yang Berwarna-warni */
+    .nav-pills .nav-link.active[data-status="all"] {
+      background: #1e293b;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.3);
+    }
+
+    .nav-pills .nav-link.active[data-status="pending"] {
+      background: #f59e0b;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-pills .nav-link.active[data-status="paid"] {
+      background: #10b981;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    }
+
+    .nav-pills .nav-link.active[data-status="completed"] {
+      background: #6366f1;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    }
+
+    .nav-pills .nav-link.active[data-status="canceled"] {
+      background: #ef4444;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+      background: #ffffff;
+      color: #334155;
+      transform: translateY(-1px);
+    }
+
+    /* 🔹 Badge Angka yang Cantik */
+    .tab-count {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.05);
+      color: inherit;
+      transition: all 0.3s;
+    }
+
+    .nav-link.active .tab-count {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    /* 🔹 Perbaikan Mobile Responsive untuk Tabs */
+    /* 🔹 TABLET & IPAD MINI (768px ke atas) */
+    /* Kita ubah min-width menjadi 768px agar iPad Mini ikut ke sini */
+    @media (min-width: 768px) {
+      .d-flex.justify-content-center {
+        justify-content: center !important;
+        padding: 0 20px;
+      }
+
+      .status-tabs-wrapper {
+        display: flex;
+        width: auto;
+        min-width: 600px;
+        /* Menjaga agar tidak terlalu ciut di tablet */
+        max-width: 100%;
+        background: #f8fafc;
+        padding: 7px;
+        border-radius: 25px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .nav-pills#statusTabs {
+        display: flex;
+        width: 100%;
+        /* Paksa UL ambil ruang penuh */
+        justify-content: space-between;
+        /* Bagi ruang rata kiri-kanan */
+        flex-wrap: nowrap;
+      }
+
+      .nav-pills .nav-item {
+        flex: 1;
+        /* Membuat setiap tab memiliki lebar yang sama/adil */
+        text-align: center;
+      }
+
+      .nav-pills .nav-item .nav-link {
+        justify-content: center;
+        /* Teks & Ikon di tengah */
+        padding: 12px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .action-bar-glass {
+        gap: 8px;
+      }
+
+      .btn-modern {
+        padding: 10px 12px;
+        font-size: 11px;
+        gap: 5px;
+      }
+
+      .action-wrap {
+        gap: 6px;
+      }
+    }
+
+    /* 🔹 HANDPHONE SAJA (Dibawah 768px) */
+    @media (max-width: 767px) {
+      .d-flex.justify-content-center {
+        justify-content: flex-start !important;
+        padding: 0 15px;
+      }
+
+      .status-tabs-wrapper {
+        display: flex;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-radius: 18px;
+        padding: 5px;
+        background: #f8fafc;
+      }
+
+      .status-tabs-wrapper::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-pills#statusTabs {
+        flex-wrap: nowrap;
+        display: flex;
+      }
+
+      .nav-pills .nav-item .nav-link {
+        padding: 8px 14px;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .tab-count {
+        padding: 1px 5px;
+        font-size: 9px;
+      }
+
+      /* 1. Baris utama dibagi menjadi dua baris vertikal */
+      .action-bar-glass {
+        flex-direction: column;
+        gap: 12px;
+        /* Jarak antar baris tombol */
+        padding-top: 15px !important;
+      }
+
+      /* 2. Setiap grup tombol (Chat & Edit/Delete) mengambil lebar penuh */
+      .action-wrap {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        /* Jarak antar tombol yang bersisian */
+      }
+
+      /* 4. Ukuran tombol disesuaikan untuk layar sentuh */
+      .btn-modern {
+        flex: 1;
+        /* Tombol membagi lebar secara adil (50:50) */
+        padding: 12px 8px;
+        font-size: 11px;
+        border-radius: 12px;
+        height: 45px;
+        /* Tinggi standar jempol agar mudah diklik */
+      }
+
+      .btn-modern i {
+        font-size: 14px;
+      }
+    }
 </style>
-
-<style>
-  /*  Wrapper agar posisi relatif terhadap tombol */
-  .search-wrapper {
-    position: relative;
-    min-width: 200px;
-  }
-
-  /*  Tambahkan ruang di kanan agar teks tidak menabrak ikon */
-  #liveSearch {
-    padding-right: 36px;
-  }
-
-  /*  Tombol clear di dalam input */
-  #clearSearch {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    color: #aaa;
-    cursor: pointer;
-    display: none;
-    /* sembunyikan awal */
-  }
-
-  #clearSearch:hover {
-    color: #dc3545;
-    /* warna merah muda saat hover */
-  }
-</style>
-<!-- ================== END ================== -->
-
-<!-- ================== TAB STATUS CUSTOM ================== -->
-<style>
-  /* Posisi relatif untuk anchor tab */
-  #statusTabs .nav-link {
-    position: relative;
-    color: #555;
-    border-radius: 30px;
-    padding: 8px 18px;
-    transition: all 0.3s ease;
-  }
-
-  /* 🔢 Badge naik ke atas garis tab */
-  #statusTabs .badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    font-size: 11px;
-    padding: 4px 7px;
-    border-radius: 50%;
-    min-width: 22px;
-    text-align: center;
-  }
-
-  /* 🔥 ACTIVE TAB GRADIENT */
-  #statusTabs .nav-link.active {
-    background: linear-gradient(to right, #ff3131, #ff914d) !important;
-    color: #fff !important;
-    box-shadow: 0 4px 10px rgba(255, 49, 49, 0.35);
-  }
-
-  /* Badge tetap kontras saat aktif */
-  #statusTabs .nav-link.active .badge {
-    background: #fff !important;
-    color: #ff3131 !important;
-  }
-
-  /* Icon ikut putih saat aktif */
-  #statusTabs .nav-link.active i {
-    color: #fff !important;
-  }
-
-  /* Hover efek */
-  #statusTabs .nav-link:hover {
-    background: rgba(255, 49, 49, 0.1);
-  }
-</style>
-<!-- ================== END ================== -->
 
 @section('content')
 <div class="main-content">
   <section class="section">
-    <div class="section-header">
-      <h1>DATA RIWAYAT PEMESANAN CLINIK SCOPUS</h1>
+    <div class="section-header-modern">
+      <div>
+        <h1>Riwayat Pemesanan
+        </h1>
+        <p class="text-muted font-weight-bold mb-0">Daftar administrasi sesi bimbingan Scopus dalam tampilan kartu.</p>
+      </div>
+
+      <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" id="liveSearch" class="form-control-modern w-100" placeholder="Cari data..." autocomplete="off">
+        <span id="clearSearch" style="display:none; cursor:pointer;">✕</span>
+      </div>
     </div>
 
-    <div class="section-body">
-
-      <div class="card">
-
-        <!--================== FILTER ==================-->
-        <div class="card-header  d-flex justify-content-between align-items-center">
-          <h4><i class="fas fa-list"></i> DATA RIWAYAT PEMESANAN</h4>
-
-          <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
-
-            <div class="dropdown card-header-action">
-              <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-                <i class="fas fa-download"></i> FILTER
-              </button>
-              <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
-
-                <!-- FILTER TANGGAL -->
-                <form action="{{ route('account.clinikscopus.filter') }}" method="GET">
-                  <div class="form-group">
-                    <label>Tanggal Awal</label>
-                    <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
-                  </div>
-
-                  <div class="form-group">
-                    <label>Tanggal Akhir</label>
-                    <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
-                  </div>
-
-                  @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
-                  <div class="btn-group" style="width: 100%;">
-                    <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                    <a href="{{ route('account.clinikscopus.index') }}" class="btn btn-danger" style="margin-top: 30px;">
-                      <i class="fa fa-trash mt-2"></i> HAPUS
-                    </a>
-                  </div>
-                  @else
-                  <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
-                  @endif
-                </form>
-                <!-- END -->
-
-              </div>
-            </div>
-
-            <!-- SEARCH -->
-            <div style="max-width:250px; width:100%; position:relative;">
-              <input type="text" id="liveSearch" class="form-control pe-4" placeholder="Pencarian..." autocomplete="off">
-
-              <button
-                type="button"
-                id="clearSearch"
-                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:transparent; display:none; cursor:pointer; font-size:14px;">
-                ✕
-              </button>
-            </div>
-            <!-- END -->
-
-          </div>
-        </div>
-        <!--================== END FILTER ==================-->
-
-        {{-- ================== TABS STATUS ================== --}}
-        <ul class="nav nav-pills mb-3 justify-content-center" id="statusTabs">
+    <div class="d-flex justify-content-center">
+      <div class="status-tabs-wrapper">
+        <ul class="nav nav-pills" id="statusTabs">
           <li class="nav-item">
             <a class="nav-link active" href="#" data-status="all">
-              <i class="fas fa-list"></i> Semua
-              <span class="badge badge-light ml-1" data-count="all">0</span>
+              <i class="fas fa-grid-2"></i> Semua <span class="tab-count" data-count="all">0</span>
             </a>
           </li>
-
           <li class="nav-item">
             <a class="nav-link" href="#" data-status="pending">
-              <i class="fas fa-clock text-warning"></i> Pending
-              <span class="badge badge-warning ml-1" data-count="pending">0</span>
+              <i class="fas fa-clock"></i> Pending <span class="tab-count" data-count="pending">0</span>
             </a>
           </li>
-
           <li class="nav-item">
             <a class="nav-link" href="#" data-status="paid">
-              <i class="fas fa-check-circle text-success"></i> Paid
-              <span class="badge badge-success ml-1" data-count="paid">0</span>
+              <i class="fas fa-check-circle"></i> Paid <span class="tab-count" data-count="paid">0</span>
             </a>
           </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="#" data-status="canceled">
-              <i class="fas fa-times-circle text-danger"></i> Canceled
-              <span class="badge badge-danger ml-1" data-count="canceled">0</span>
-            </a>
-          </li>
-
           <li class="nav-item">
             <a class="nav-link" href="#" data-status="completed">
-              <i class="fas fa-check-circle text-primary"></i> Completed
-              <span class="badge badge-primary ml-1" data-count="completed">0</span>
+              <i class="fas fa-flag-checkered"></i> Done <span class="tab-count" data-count="completed">0</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="canceled">
+              <i class="fas fa-times-circle"></i> Cancel <span class="tab-count" data-count="canceled">0</span>
             </a>
           </li>
         </ul>
-        {{-- ================== END TABS ================== --}}
+      </div>
+    </div>
 
-        <!--================== DATA ==================-->
-        <div class="card-body" style="font-size: 11px;">
-          <div class="table-responsive" id="riwayatPemesananTableWrapper">
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th scope="col" style="text-align: center;" rowspan="2">NO.</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Kode Booking</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Sesi</th>
-                  <th scope="col" rowspan="2" style="text-align: center; width:150px">Jam Sesi</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Nama Customer</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Nama Trainer</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Kendala</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Tanggal Booking</th>
-                  <th scope="col" rowspan="2" style="text-align: center;">Status Pembayaran</th>
-                  <th scope="col" rowspan="2" style="width: 10%;text-align: center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="customerTable">
-                @php
-                $no = 1;
-                @endphp
-                @foreach ($datas as $item)
-                <tr data-status="{{ $item->status }}">
-                  <th scope="row" class="row-number" style="text-align: center">{{ $no }}</th>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->kode_booking ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->sesi ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->jam_sesi ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->customer->full_name ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->trainer->full_name ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->kendala ?? '-' }}
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    {{ $item->tanggal_booking ? \Carbon\Carbon::parse($item->tanggal_booking)->translatedFormat('d F Y') : '-' }}
-                  </td>
-                  <td style="text-align:center;">
-                    @if ($item->status === 'pending')
-                    <span class="badge bg-warning" style="padding: 6px 12px; border-radius: 6px;">
-                      Pending
-                    </span>
+    <div id="search-results">
+      @if($datas->count() > 0)
+      <div class="booking-grid" id="customerTable">
+        @foreach ($datas as $item)
+        <div class="card-booking p-4" data-status="{{ $item->status }}">
+          <div class="status-badge status-{{ $item->status }}">
+            {{ $item->status }}
+          </div>
 
-                    @elseif ($item->status === 'paid')
-                    <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px;">
-                      Paid
-                    </span>
+          <div class="card-booking-content">
+            <span class="booking-id-text text-muted small">#{{ $item->kode_booking }}</span>
+            <h2 class="sesi-title">{{ $item->sesi ?? '-' }}</h2>
 
-                    @elseif ($item->status === 'canceled')
-                    <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
-                      Canceled
-                    </span>
+            <div class="bento-info">
+              <div class="bento-item">
+                <span class="label text-muted d-block" style="font-size: 9px;">TANGGAL BOOKING</span>
+                <span class="val">
+                  {{ $item->tanggal_booking ? \Carbon\Carbon::parse($item->tanggal_booking)->translatedFormat('d F Y') : '-' }}
+                </span>
+              </div>
+              <div class="bento-item">
+                <span class="label text-muted d-block" style="font-size: 9px;">JAM SESI</span>
+                <span class="val">{{ $item->jam_sesi ?? '--:--' }}</span>
+              </div>
+            </div>
 
-                    @elseif ($item->status === 'completed')
-                    <span class="badge bg-primary" style="padding: 6px 12px; border-radius: 6px; color: #fff;">
-                      Completed
-                    </span>
+            @if($item->kendala)
+            <div class="issue-container">
+              <div class="issue-label">
+                <i class="fas fa-exclamation-triangle"></i> Kendala Sesi
+              </div>
+              <div class="issue-text italic">
+                "{{ $item->kendala }}"
+              </div>
+            </div>
+            @endif
 
-                    @else
-                    <span class="badge bg-secondary px-3 py-2 rounded">
-                      Unknown
-                    </span>
-                    @endif
-                  </td>
+            <div class="profile-stack mt-4 d-flex align-items-center bg-white p-3 shadow-sm" style="border-radius: 20px;">
+              <div class="avatar-stack shadow-sm" style="width: 45px; height: 45px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #f1f5f9;">
+                @if($item->customer && $item->customer->gambar && file_exists(public_path('assets/img/profil/' . $item->customer->gambar)))
+                <img src="{{ asset('assets/img/profil/' . $item->customer->gambar) }}"
+                  alt="Profile {{ $item->customer->full_name }}"
+                  style="width: 100%; height: 100%; object-fit: cover;">
+                @else
+                <div class="bg-primary text-white d-flex align-items-center justify-content-center"
+                  style="width: 100%; height: 100%; font-weight: 800; font-size: 16px; background: var(--primary-gradient) !important;">
+                  {{ strtoupper(substr($item->customer->full_name ?? 'C', 0, 1)) }}
+                </div>
+                @endif
+              </div>
+              <div class="ml-3">
+                <span class="d-block font-weight-bold" style="font-size: 13px;">{{ $item->customer->full_name ?? '-' }}</span>
+                <span class="text-muted" style="font-size: 11px;">Trainer: <b class="text-primary">{{ $item->trainer->full_name ?? 'Pending' }}</b></span>
+              </div>
+            </div>
 
-                  <td class=" text-center align-middle">
-                    <div class="d-flex justify-content-center align-items-center"
-                      style="gap: 6px; flex-wrap: nowrap; min-height: 32px;">
-
-                      <!-- Tombol detail -->
-                      <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.detail', $item->id) }}"
-                        class="btn btn-warning d-flex align-items-center justify-content-center shadow-sm"
-                        style="width: 28px; height: 28px; padding: 0; border-radius: 6px; display: inline-flex;">
-                        <i class="fa fa-clipboard-list" style="font-size: 13px; line-height: 1;"></i>
-                      </a>
-
-                      <!-- Tombol delete (MANAGER SAJA) -->
-                      @if (Auth::user()->level === 'manager')
-                      <form action="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.destroy', $item->id) }}"
-                        method="POST"
-                        class="d-inline form-delete">
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="button"
-                          class="btn btn-danger d-flex align-items-center justify-content-center shadow-sm btn-delete"
-                          style="width: 28px; height: 28px; padding: 0; border-radius: 6px; margin-top: 10px;">
-                          <i class="fas fa-trash" style="font-size: 13px;"></i>
-                        </button>
-                      </form>
-                      @endif
-
-                      <!-- Tombol mulai chat -->
-                      @if ($item->status === 'paid')
-                      <button onclick="window.location.href='{{ route('chat.index',$item->id) }}'"
-                        class="btn btn-info d-inline-flex align-items-center shadow-sm"
-                        style="padding: 4px 10px; border-radius: 6px;">
-
-                        <i class="fas fa-comment-dots mr-1"></i>
-                        <span>Konsultasi</span>
-                      </button>
-                      @endif
-
-                    </div>
-                  </td>
-
-                </tr>
-                @php
-                $no++;
-                @endphp
-                @endforeach
-
-              </tbody>
-            </table>
-            <div style="text-align: center;">
-              <style>
-                @media (max-width: 767px) {
-                  .pagination {
-                    margin-left: 480px;
-                    /* Adjust the margin value as needed for mobile devices */
-                  }
-                }
-
-                @media (min-width: 768px) and (max-width: 991px) {
-                  .pagination {
-                    margin-left: 300px;
-                    /* Adjust the margin value as needed for iPads */
-                  }
-                }
-              </style>
-
-              <div id="paginationWrapper" style="text-align: center;">
+            <div class="action-bar-glass mt-4 pt-3 d-flex justify-content-between " style="border-top: 1px dashed #ddd;">
+              <div class="action-wrap">
+                @if ($item->status === 'paid')
+                <a href="{{ route('chat.index', $item->id) }}" class="btn-modern btn-chat" style="display: inline-flex;">
+                  <i class="fas fa-comments mr-2"></i>Live Chat
+                </a>
+                @else
+                <span class="btn-modern btn-locked"><i class="fas fa-lock mr-1"></i>Chat Locked</span>
+                @endif
               </div>
 
+              <div class="action-wrap">
+                <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.detail', $item->id) }}" class="btn-modern btn-edit" style="display: inline-flex;">
+                  <i class="fa fa-clipboard-list"></i>Detail
+                </a>
+                @if (Auth::user()->level === 'manager')
+                <button onclick="Delete({{ $item->id }})" type="button" class="btn-modern btn-delete" style="display: inline-flex;">
+                  <i class="fas fa-trash"></i>
+                </button>
+                @endif
+              </div>
             </div>
           </div>
         </div>
-        <!--================== END DATA ==================-->
-
+        @endforeach
       </div>
+      @else
+      <div class="text-center py-5">
+        <div style="background: var(--card-bg); padding: 60px 20px; border-radius: var(--radius-xl); border: 2px dashed #e2e8f0; margin: 20px;">
+          <div class="mb-4">
+            <i class="fas fa-search-minus" style="font-size: 64px; color: #cbd5e1; transform: rotate(-15deg);"></i>
+          </div>
+          <h4 style="font-weight: 800; color: #475569;">Data Tidak Ditemukan</h4>
+          <p style="color: #94a3b8; font-weight: 600;">Maaf, sepertinya tidak ada data riwayat pemesanan yang cocok dengan pencarian Anda.</p>
+          <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="btn btn-primary mt-3" style="border-radius: 50px; padding: 10px 25px; font-weight: 700;">
+            <i class="fas fa-sync-alt mr-2"></i> Segarkan Halaman
+          </a>
+        </div>
+      </div>
+      @endif
     </div>
+
+    <div id="paginationWrapper" class="mt-4 d-flex justify-content-center">
+      @if ($datas instanceof \Illuminate\Pagination\LengthAwarePaginator)
+      {{ $datas->links('pagination::bootstrap-4') }}
+      @endif
+    </div>
+
   </section>
 </div>
 
@@ -430,185 +680,132 @@ Clinik Scopus Riwayat Pemesanan | MIS
 
 <!--================== TABS STATUS DATA ==================-->
 <script>
-  function updateStatusCounts() {
-    const rows = document.querySelectorAll('#customerTable tr');
-    const counts = {
-      all: 0,
-      pending: 0,
-      paid: 0,
-      canceled: 0,
-      completed: 0
-    };
-
-    rows.forEach(row => {
-      const status = row.dataset.status;
-      if (!status) return;
-
-      counts.all++;
-
-      if (counts.hasOwnProperty(status)) {
-        counts[status]++;
-      }
-    });
-
-    // Update badge angka
-    Object.keys(counts).forEach(status => {
-      const badge = document.querySelector(`[data-count="${status}"]`);
-      if (badge) {
-        badge.textContent = counts[status];
-      }
-    });
-  }
-
-  // Hitung saat halaman pertama kali load
-  document.addEventListener('DOMContentLoaded', function() {
-    updateStatusCounts();
-  });
-</script>
-
-<script>
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('#statusTabs .nav-link');
+    const cards = document.querySelectorAll('.card-booking');
 
+    // --- 1. Fungsi Update Counter ---
+    function updateCounts() {
+      const counts = {
+        all: cards.length,
+        pending: 0,
+        paid: 0,
+        completed: 0,
+        canceled: 0
+      };
+
+      cards.forEach(card => {
+        const status = card.dataset.status.toLowerCase();
+        if (counts.hasOwnProperty(status)) counts[status]++;
+      });
+
+      Object.keys(counts).forEach(key => {
+        const el = document.querySelector(`[data-count="${key}"]`);
+        if (el) el.textContent = counts[key];
+      });
+    }
+
+    // --- 2. Fungsi Filter Data ---
     tabs.forEach(tab => {
       tab.addEventListener('click', function(e) {
         e.preventDefault();
 
-        // aktifkan tab
+        // Toggle Class Active
         tabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
 
-        const status = this.dataset.status;
-        const rows = document.querySelectorAll('#customerTable tr');
+        const selectedStatus = this.dataset.status.toLowerCase();
 
-        let nomor = 1;
+        cards.forEach(card => {
+          const cardStatus = card.dataset.status.toLowerCase();
 
-        rows.forEach(row => {
-          if (status === 'all' || row.dataset.status === status) {
-            row.style.display = '';
-
-            // reset nomor
-            const numberCell = row.querySelector('.row-number');
-            if (numberCell) {
-              numberCell.textContent = nomor++;
-            }
+          if (selectedStatus === 'all' || cardStatus === selectedStatus) {
+            card.style.display = 'flex'; // Tampilkan
+            card.style.animation = 'fadeInUp 0.4s ease forwards';
           } else {
-            row.style.display = 'none';
+            card.style.display = 'none'; // Sembunyikan
           }
         });
       });
     });
+
+    // Jalankan counter saat page load
+    updateCounts();
   });
 </script>
-<!--================== END ==================-->
 
-<!--================== SHOW & HIDE FILTER ==================-->
-<script>
-  const toggleText = document.getElementById('toggleFilterText');
-  const filterCard = document.getElementById('filterCard');
+<style>
+  /* Animasi halus saat filter berubah */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
 
-  filterCard.addEventListener('show.bs.collapse', () => {
-    toggleText.textContent = 'Tutup Filter';
-  });
-
-  filterCard.addEventListener('hide.bs.collapse', () => {
-    toggleText.textContent = 'Tampilkan Filter';
-  });
-</script>
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
 <!--================== END ==================-->
 
 <!-- ================== LIVE SEARCH ================== -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  $(document).ready(function() {
     let timer;
-    const liveSearchInput = document.getElementById('liveSearch');
-    const clearSearchBtn = document.getElementById('clearSearch');
-    const customerTable = document.getElementById('customerTable');
-    const paginationWrapper = document.querySelector('#paginationWrapper');
 
-    // 🧩 Cek apakah ada query ?q= di URL, isi input otomatis
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryFromURL = urlParams.get('q');
-    if (queryFromURL) {
-      liveSearchInput.value = queryFromURL;
-      clearSearchBtn.style.display = 'block';
-    } else {
-      clearSearchBtn.style.display = 'none';
-    }
+    $('#liveSearch').on('keyup', function() {
+      let query = $(this).val();
 
-    //  Event keyup untuk Live Search
-    liveSearchInput.addEventListener('keyup', function() {
+      // Kontrol tombol clear (X)
+      if (query.length > 0) {
+        $('#clearSearch').show();
+      } else {
+        $('#clearSearch').hide();
+      }
+
+      // Gunakan debounce agar tidak spam request ke server
       clearTimeout(timer);
-      const query = this.value.trim();
+      timer = setTimeout(function() {
+        $.ajax({
+          url: "{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.search') }}",
+          type: "GET",
+          data: {
+            'q': query
+          },
+          beforeSend: function() {
+            // Beri efek transparan saat loading
+            $('#customerTable').css('opacity', '0.5');
+          },
+          success: function(data) {
+            // Ambil konten dari response AJAX
+            // Kita ambil isi dari #search-results dan #paginationWrapper
+            let htmlContent = $(data).find('#search-results').html();
+            let paginationContent = $(data).find('#paginationWrapper').html();
 
-      timer = setTimeout(() => {
-        if (query === "") {
-          // Jika input kosong → reload semua data
-          fetch(`{{ route('account.clinikscopus.index') }}`)
-            .then(response => response.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(html, 'text/html');
-              const newTableBody = doc.querySelector('#customerTable');
-              if (newTableBody) customerTable.innerHTML = newTableBody.innerHTML;
-              if (paginationWrapper) {
-                const newPagination = doc.querySelector('.pagination');
-                paginationWrapper.innerHTML = newPagination ? newPagination.outerHTML : '';
-              }
-            });
-          return;
-        }
+            // Masukkan ke halaman aktif
+            $('#search-results').html(htmlContent);
+            $('#paginationWrapper').html(paginationContent);
 
-        // Jika ada teks → jalankan pencarian AJAX
-        fetch(`{{ route('account.clinikscopus.search') }}?q=${encodeURIComponent(query)}`)
-          .then(response => response.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newTableBody = doc.querySelector('#customerTable');
-            const newPagination = doc.querySelector('.pagination');
+            // Kembalikan opacity
+            $('#customerTable').css('opacity', '1');
 
-            if (newTableBody && newTableBody.children.length > 0) {
-              customerTable.innerHTML = newTableBody.innerHTML;
-              if (paginationWrapper) {
-                paginationWrapper.innerHTML = newPagination ? newPagination.outerHTML : '';
-              }
-            } else {
-              customerTable.innerHTML = "";
-              if (paginationWrapper) paginationWrapper.innerHTML = "";
-              Swal.fire({
-                icon: 'warning',
-                title: 'Tidak Ditemukan',
-                text: `Tidak ada hasil untuk pencarian: "${query}"`,
-                confirmButtonColor: '#3085d6',
-              });
+            // Jalankan ulang fungsi hitung angka di tab status jika ada
+            if (typeof updateCounts === "function") {
+              updateCounts();
             }
-          })
-          .catch(error => console.error('Error:', error));
-      }, 300); // debounce 300ms
-    });
-
-    //  Tampilkan / sembunyikan tombol clear sesuai input
-    liveSearchInput.addEventListener('input', function() {
-      clearSearchBtn.style.display = this.value.trim() ? 'block' : 'none';
-    });
-
-    //  Klik tombol clear → hapus teks & reload semua data
-    clearSearchBtn.addEventListener('click', function() {
-      liveSearchInput.value = '';
-      this.style.display = 'none';
-      fetch(`{{ route('account.clinikscopus.index') }}`)
-        .then(response => response.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newTableBody = doc.querySelector('#customerTable');
-          const newPagination = doc.querySelector('.pagination');
-          if (newTableBody) customerTable.innerHTML = newTableBody.innerHTML;
-          if (paginationWrapper) {
-            paginationWrapper.innerHTML = newPagination ? newPagination.outerHTML : '';
+          },
+          error: function() {
+            $('#customerTable').css('opacity', '1');
           }
         });
+      }, 500); // Tunggu 0.5 detik setelah berhenti mengetik
+    });
+
+    // Fungsi klik tombol X
+    $('#clearSearch').on('click', function() {
+      $('#liveSearch').val('').trigger('keyup');
     });
   });
 </script>

@@ -1,539 +1,358 @@
 @extends('layouts.account')
 @extends('layouts.loader')
+@extends('layouts.inputfitur')
 
 @section('title')
-Clinik Scopus Create Trainer | MIS
+Tambah Data Trainer | MIS
 @stop
 
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <style>
-    .custom-file-upload {
-        position: relative;
+    /* 🔹 Base Card Modern */
+    .card-modern {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
         overflow: hidden;
-        margin-top: 10px;
     }
 
-    .inputfile {
-        width: 0.1px;
-        height: 0.1px;
-        opacity: 0;
-        overflow: hidden;
-        position: absolute;
-        z-index: -1;
+    .card-modern:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
     }
 
-    .file-upload {
-        cursor: pointer;
-        display: inline-block;
-        padding: 10px 20px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 5px;
+    /* 🔹 Header Custom di dalam Card */
+    .card-header-custom {
+
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-header-custom h6 {
+        font-size: 15px;
+        letter-spacing: -0.5px;
+        color: #1e293b;
+    }
+
+    /* 🔹 Sesi Item Styling */
+    .sesi-item {
+        transition: all 0.2s ease;
+    }
+
+    .sesi-item:focus-within {
+        border-color: #6366f1 !important;
+        /* Warna ungu indigo modern */
+        background: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+    }
+
+    /* 🔹 Tag Spesialis Modern */
+    .badge-spesialis {
+        background: #6366f1;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* 🔹 Button Styling */
+    .btn-primary.shadow-lg {
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    /* Lingkaran Icon Timeline */
+    .date-icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
         font-size: 16px;
-        transition: background-color 0.3s;
     }
 
-    .file-upload:hover {
-        background-color: #0056b3;
-    }
-
-    #file-selected {
+    /* Input Modern yang tidak akan meluber */
+    .form-control-modern-date-fixed {
         display: block;
-        margin-top: 5px;
-        color: #888;
-    }
-
-    .image-preview {
-        margin-top: 10px;
-    }
-
-    .image-preview img {
+        width: 100%;
         max-width: 100%;
-        height: auto;
-        border-radius: 5px;
+        /* Kunci agar tidak keluar card */
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        height: 45px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-modern-date-fixed:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        outline: none;
+    }
+
+    /* Badge Status */
+    .status-badge-modern {
+        display: inline-block;
+        padding: 8px 20px;
+        background: #ffffff;
+        border-radius: 50px;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Penyesuaian Border di Mobile */
+    .timeline-container {
+        position: relative;
+    }
+
+    /* Garis Timeline yang Pintar */
+    .timeline-line {
+        position: absolute;
+        /* 44px didapat dari: Padding container (24px) + setengah lebar icon (20px) */
+        left: 38px;
+        top: 60px;
+        bottom: 60px;
+        border-left: 2px dashed #cbd5e1;
+        z-index: 1;
+    }
+
+    /* Penyesuaian di Mobile (HP) */
+    @media (max-width: 767px) {
+        .timeline-line {
+            /* Di mobile padding p-4 biasanya tetap 24px, 
+           tapi karena icon mengecil jadi 35px, maka setengahnya 17.5px.
+           24px + 17.5px = 41.5px */
+            left: 38px;
+            top: 55px;
+            bottom: 55px;
+        }
+
+        /* Pastikan garis tetap muncul di mobile */
+        .d-md-block {
+            display: block !important;
+        }
     }
 </style>
-<!--================== END ==================-->
 
 @section('content')
 <div class="main-content">
     <section class="section">
-        <div class="section-header">
-            <h1>TAMBAH DATA TRAINER</h1>
+        <div class="section-header-modern mb-4">
+            <div>
+                <h1>Tambah Data Trainer</h1>
+                <p class="text-muted font-weight-bold mb-0">Integrasikan spesialisasi dan jadwal trainer Scopus.</p>
+            </div>
         </div>
 
         <div class="section-body">
-            <div class="card">
-                <div class="card-body">
+            <form id="trainerForm" action="{{ route('account.clinikscopus.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-                    <form id="trainerForm" action="{{ route('account.clinikscopus.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
+                <div class="row">
+                    <div class="col-lg-8">
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Nama Karyawan <span style="color: red;">*</span></label>
-                                    <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
-                                        <option value="">-- PILIH NAMA KARYAWAN --</option>
-                                        @foreach ($datas as $user)
-                                        <option value="{{ $user->id }}">{{ $user->full_name }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    @error('user_id')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
+                        <div class="card-modern mb-4">
+                            <div class="card-header-custom p-4 border-bottom">
+                                <h6 class="m-0 font-weight-bold"><i class="fas fa-user text-primary mr-2"></i> Identitas & Status</h6>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Status <span style="color: red;">*</span></label>
-                                    <select class="form-control" name="status" style="height: auto;" required>
-                                        <option value="" disabled selected>-- PILIH STATUS TRAINER --</option>
-                                        <option value="active">Active</option>
-                                        <option value="non active">Non Active</option>
-                                    </select>
-                                    @error('Status')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
+                            <div class="card-body p-4">
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <div class="form-group mb-0">
+                                            <label>Nama Karyawan <span class="badge-required">*</span></label>
+                                            <select class="form-control select2" name="user_id" id="karyawanSelect" required>
+                                                <option value="">-- PILIH NAMA KARYAWAN --</option>
+                                                @foreach ($datas as $user)
+                                                <option value="{{ $user->id }}">{{ $user->full_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
-                                    @enderror
+
+                                    <div class="col-md-5 mt-4 mt-md-0">
+                                        <div class="form-group mb-0">
+                                            <label>Status <span class="badge-required">*</span></label>
+                                            <select class="form-control-modern" name="status" required>
+                                                <option value="">-- PILIH STATUS --</option>
+                                                <option value="active">Active</option>
+                                                <option value="non active">Non Active</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 1</label>
-                                    <select name="sesi" id="sesi" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
+                        <div class="card-modern mb-4">
+                            <div class="card-header-custom p-4 border-bottom">
+                                <h6 class="m-0 font-weight-bold"><i class="fas fa-calendar-alt text-primary mr-2"></i> Jadwal Sesi Bimbingan</h6>
                             </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 2</label>
-                                    <select name="sesi2" id="sesi2" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi2')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
+                            <div class="card-body p-4">
+                                <div class="row">
+                                    @for ($i = 1; $i <= 9; $i++)
+                                        <div class="col-md-4 mb-3">
+                                        <div class="sesi-item p-3" style="background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0;">
+                                            <label class="small font-weight-bold text-primary mb-1 d-block">Sesi {{ $i }}</label>
+                                            @php $fieldName = ($i == 1) ? 'sesi' : 'sesi'.$i; @endphp
+                                            <select name="{{ $fieldName }}" id="{{ $fieldName }}" class="form-control border-0 bg-transparent p-0" style="height: auto;">
+                                                <option value="">-- Kosong --</option>
+                                                @php $start = \Carbon\Carbon::createFromTime(6, 0); $end = \Carbon\Carbon::createFromTime(23, 0); @endphp
+                                                @while ($start->lt($end))
+                                                @php $finish = $start->copy()->addMinutes(50); @endphp
+                                                <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
+                                                    {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
+                                                </option>
+                                                @php $start->addMinutes(50); @endphp
+                                                @endwhile
+                                            </select>
+                                        </div>
                                 </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 3</label>
-                                    <select name="sesi3" id="sesi3" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi3')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
+                                @endfor
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 4</label>
-                                    <select name="sesi4" id="sesi4" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi4')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
+                    <div class="card-modern mb-4">
+                        <div class="card-header-custom p-4 border-bottom">
+                            <h6 class="m-0 font-weight-bold"><i class="fas fa-brain text-primary mr-2"></i> Keahlian Spesialis</h6>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="form-group mb-0">
+                                <label>Input Spesialis <span class="badge-required">*</span></label>
+                                <div id="tag-container" class="form-control-modern d-flex flex-wrap align-items-center" style="min-height: 50px; gap: 8px; cursor: text;">
+                                    <input type="text" id="spesialisInput" class="border-0 flex-grow-1" style="outline:none; min-width: 200px; background: transparent;" placeholder="Ketik keahlian lalu Enter...">
                                 </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 5</label>
-                                    <select name="sesi5" id="sesi5" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi5')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 6</label>
-                                    <select name="sesi6" id="sesi6" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi6')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
+                                <input type="hidden" name="spesialis" id="spesialis">
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 7</label>
-                                    <select name="sesi7" id="sesi7" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi7')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 8</label>
-                                    <select name="sesi8" id="sesi8" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi8')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Sesi 9</label>
-                                    <select name="sesi9" id="sesi9" class="form-control" style="height: auto;">
-                                        <option value="">-- Pilih Sesi --</option>
-                                        @php
-                                        $start = \Carbon\Carbon::createFromTime(6, 0);
-                                        $end = \Carbon\Carbon::createFromTime(23, 0);
-                                        @endphp
-
-                                        @while ($start->lt($end))
-                                        @php
-                                        $finish = $start->copy()->addMinutes(50);
-                                        @endphp
-
-                                        <option value="{{ $start->format('H.i') }} - {{ $finish->format('H.i') }}">
-                                            {{ $start->format('H.i') }} - {{ $finish->format('H.i') }}
-                                        </option>
-
-                                        @php
-                                        $start->addMinutes(50);
-                                        @endphp
-                                        @endwhile
-                                    </select>
-
-                                    @error('sesi9')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
+                    <div class="card-modern mb-4">
+                        <div class="card-header-custom p-4 border-bottom">
+                            <h6 class="m-0 font-weight-bold"><i class="fas fa-file-invoice-dollar text-primary mr-2"></i> Tarif & Masa Aktif</h6>
                         </div>
+                        <div class="card-body p-4">
+                            <div class="row align-items-stretch">
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Tanggal Online <span style="color: red;">*</span></label>
-                                    <input type="date" id="tanggal_online" name="tanggal_online" placeholder="Masukkan tanggal_online" class="form-control" required>
+                                <div class="col-md-6 border-right">
+                                    <div class="form-group mb-0 h-100 d-flex flex-column">
+                                        <label>Biaya Per Sesi Aktif </label>
 
-                                    @error('tanggal_online')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Tanggal Offline <span style="color: red;">*</span></label>
-                                    <input type="date" id="tanggal_offline" name="tanggal_offline" placeholder="Masukkan tanggal_offline" class="form-control" required>
+                                        <div class="position-relative overflow-hidden p-4 text-center d-flex flex-column justify-content-center flex-grow-1"
+                                            style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 25px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); min-height: 200px;">
 
-                                    @error('tanggal_offline')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Biaya Per Sesi</label>
+                                            <i class="fas fa-wallet position-absolute"
+                                                style="font-size: 80px; right: -15px; bottom: -15px; color: rgba(255,255,255,0.1); transform: rotate(-15deg);"></i>
 
-                                    <input type="text"
-                                        id="biaya_persesi"
-                                        class="form-control"
-                                        value="{{ $biayaPersesiAktif ? 'Rp ' . number_format($biayaPersesiAktif->biaya_persesi, 0, ',', '.') : '-' }}"
-                                        readonly>
-
-                                    <!-- ID disimpan hidden -->
-                                    <input type="hidden"
-                                        name="biaya_persesi_id"
-                                        value="{{ $biayaPersesiAktif->id ?? '' }}">
-
-                                    @error('biaya_persesi_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Spesialis <span style="color:red">*</span></label>
-
-                                    <!-- Container Tag -->
-                                    <div id="tag-container"
-                                        style="display:flex; flex-wrap:wrap; gap:6px; padding:6px; border:1px solid #ced4da; min-height:38px; cursor:text;">
-
-                                        <!-- Input -->
-                                        <input
-                                            type="text"
-                                            id="spesialisInput"
-                                            class="border-0"
-                                            placeholder="Ketik lalu tekan Enter atau ,"
-                                            style="outline:none; flex:1; min-width:150px;">
-                                    </div>
-
-                                    <!-- Hidden input untuk dikirim ke backend -->
-                                    <input type="hidden" name="spesialis" id="spesialis">
-
-                                    @error('spesialis')
-                                    <div class="invalid-feedback d-block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group custom-file-upload" style="margin-top: -3px;">
-                                    <label>Foto Trainer <span style="color:red">*</span></label>
-                                    <div class="input-group">
-                                        <input type="file" name="foto" id="foto" class="inputfile" accept="image/*">
-                                        <label for="foto" class="file-upload">
-                                            <i class="fas fa-cloud-upload-alt"></i> Choose Image
-                                        </label>
+                                            <div class="position-relative" style="z-index: 2;">
+                                                <span class="text-white-50 small d-block font-weight-bold mb-1">Tarif Layanan</span>
+                                                <h3 class="mb-0 text-white font-weight-bold" style="letter-spacing: -1px; font-size: 28px;">
+                                                    {{ $biayaPersesiAktif ? 'Rp ' . number_format($biayaPersesiAktif->biaya_persesi, 0, ',', '.') : '-' }}
+                                                </h3>
+                                                <div class="mt-2">
+                                                    <span class="badge badge-pill d-inline-flex align-items-center"
+                                                        style="background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; padding: 5px 12px; line-height: 1;">
+                                                        <i class="fas fa-check-circle mr-1" style="font-size: 12px;"></i>
+                                                        <span>Terkonfigurasi di Sistem</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="biaya_persesi_id" value="{{ $biayaPersesiAktif->id ?? '' }}">
+                                        </div>
                                     </div>
                                 </div>
-                                @error('foto')
-                                <div class="invalid-feedback" style="display: block">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <div class="image-preview-container">
-                                    <div id="imagePreview" class="image-preview">
-                                        <img src="{{ asset('ClinikScopusTrainer/no-image.jpg') }}" alt="No Image">
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0 h-100 d-flex flex-column">
+                                        <label class="mt-4 mt-md-0">Masa Aktif Online</label>
+
+                                        <div class="p-4 timeline-container flex-grow-1 d-flex flex-column justify-content-center"
+                                            style="background: #f8fafc; border-radius: 25px; border: 1px solid #e2e8f0;">
+
+                                            <div class="timeline-line"></div>
+
+                                            <div class="d-flex align-items-center mb-4" style="position: relative; z-index: 2;">
+                                                <div class="date-icon-circle bg-primary shadow-sm">
+                                                    <i class="fas fa-calendar-check text-white"></i>
+                                                </div>
+                                                <div class="flex-grow-1 ml-3 text-left">
+                                                    <span class="d-block small text-muted font-weight-bold mb-1">Mulai Online <span class="badge-required">*</span></span>
+                                                    <input type="date" name="tanggal_online" class="form-control-modern-date-fixed" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center" style="position: relative; z-index: 2;">
+                                                <div class="date-icon-circle bg-danger shadow-sm">
+                                                    <i class="fas fa-calendar-times text-white"></i>
+                                                </div>
+                                                <div class="flex-grow-1 ml-3 text-left">
+                                                    <span class="d-block small text-muted font-weight-bold mb-1">Selesai Offline <span class="badge-required">*</span></span>
+                                                    <input type="date" name="tanggal_offline" class="form-control-modern-date-fixed" required>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span id="file-selected"></span>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
-
-                                <!-- Tombol Simpan -->
-                                <button type="submit"
-                                    class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-paper-plane"></i> SIMPAN
-                                </button>
-
-                                <!-- Tombol Kembali -->
-                                <a href="{{ route('account.clinikscopus.index') }}"
-                                    class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-undo"></i> KEMBALI
-                                </a>
 
                             </div>
                         </div>
-
-                    </form>
+                    </div>
                 </div>
-            </div>
+
+                <div class="col-lg-4">
+                    <div class="card-modern sticky-top" style="top: 100px; z-index: 10;">
+                        <div class="card-header-custom p-4 border-bottom">
+                            <h6 class="m-0 font-weight-bold"><i class="fas fa-camera text-primary mr-2"></i> Foto Profil</h6>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="image-preview-container d-flex flex-column align-items-center justify-content-center p-3"
+                                style="background: #f1f5f9;">
+
+                                <div id="imagePreview" class="image-preview mb-4 w-100 d-flex justify-content-center">
+                                    <img src="{{ asset('ClinikScopusTrainer/no-image.jpg') }}" alt="Preview"
+                                        style="width: 100%; min-height: 350px; max-height: 600px; object-fit: cover; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                                </div>
+
+                                <input type="file" name="foto" id="foto" class="inputfile" accept="image/*" style="display:none;">
+                                <label for="foto" class="btn btn-dark btn-block btn-lg rounded-pill py-3">
+                                    <i class="fas fa-upload mr-2"></i> Pilih Foto Trainer
+                                </label>
+                                <span id="file-selected" class="small text-primary d-block text-center font-weight-bold"></span>
+                            </div>
+
+                            <div class="mt-4 p-3 rounded-lg bg-light text-center">
+                                <small class="text-muted d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <span>Gunakan foto formal dengan latar belakang polos untuk hasil terbaik di website.</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 order-3 order-lg-2">
+                    <div class="d-flex flex-md-nowrap flex-wrap gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-save flex-grow-1">
+                            <i class="fas fa-save"></i> SIMPAN DATA
+                    </div>
+                </div>
+
+            </form>
         </div>
     </section>
 </div>
@@ -670,14 +489,15 @@ Clinik Scopus Create Trainer | MIS
         const tag = document.createElement('span');
         tag.textContent = label;
         tag.style.cssText = `
-        background:#0d6efd;
-        color:#fff;
-        padding:4px 8px;
-        border-radius:12px;
-        font-size:13px;
-        display:flex;
-        align-items:center;
-        gap:6px;
+         background: #6366f1;
+                color: #fff;
+                padding: 5px 12px;
+                border-radius: 12px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 600;
     `;
 
         const closeBtn = document.createElement('span');

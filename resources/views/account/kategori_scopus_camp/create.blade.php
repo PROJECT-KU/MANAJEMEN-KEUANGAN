@@ -145,8 +145,8 @@ Tambah Kategori | MIS
                                     <div class="input-group">
                                         <select class="form-control" style="height: auto;" name="status" required>
                                             <option value="" disabled selected>-- PILIH STATUS --</option>
-                                            <option value="publish">Publish</option>
-                                            <option value="draft">Draft</option>
+                                            <option value="active">Active</option>
+                                            <option value="non active">Non Active</option>
                                         </select>
                                     </div>
                                 </div>

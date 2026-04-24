@@ -26,10 +26,27 @@ class ClinikScopusBiayaPersesiController extends Controller
     // <!--================== MENAMPILKAN DATA ==================-->
     public function index(Request $request)
     {
-        // Ambil semua data dari tabel clinikscopus_biaya_persesi
-        $biayaPersesi = ClinikscopusBiayaPersesi::all();
+        $biayaPersesi = ClinikscopusBiayaPersesi::orderBy('created_at', 'DESC')->paginate(10);
+        return view('account.clinik_scopus_biaya_persesi.index', compact('biayaPersesi'));
+    }
+    // <!--================== END ==================-->
 
-        // Kirim ke view
+    // <!--================== SEARCH ==================-->
+    public function search(Request $request)
+    {
+        $search = $request->get('q');
+
+        $biayaPersesi = ClinikScopusBiayaPersesi::query()
+            ->where(function ($query) use ($search) {
+                $query->where('biaya_persesi', 'LIKE', '%' . $search . '%')
+                    ->orWhere('ppn', 'LIKE', '%' . $search . '%')
+                    ->orWhere('status', 'LIKE', '%' . $search . '%');
+            })
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+
+        $biayaPersesi->appends(['q' => $search]);
+
         return view('account.clinik_scopus_biaya_persesi.index', compact('biayaPersesi'));
     }
     // <!--================== END ==================-->

@@ -20,7 +20,7 @@ class PublicAnalisisBibliometrikController extends Controller
     {
 
         $categories = DB::table('categories_analisis_bibliometrik')
-            ->where('status', 'publish')
+            ->where('status', 'active')
             ->latest()
             ->paginate(6);
 

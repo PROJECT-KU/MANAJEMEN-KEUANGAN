@@ -70,11 +70,73 @@ $agent = new Agent();
     <style>
         .navbar {
             position: fixed;
+            top: 15px;
+            /* Memberikan jarak dari atas agar terlihat melayang (Floating) */
+            left: 270px;
+            /* Jarak dari sidebar + sedikit gap agar rapi */
+            right: 20px;
+            /* Jarak dari kanan */
             z-index: 1050;
-            /* Agar navbar tetap di atas */
-            background: linear-gradient(to right, #ff3131, #ff914d);
-            width: auto;
-            height: auto;
+            height: 65px;
+
+            /* Glassmorphism Effect */
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+
+            /* Border Tipis seperti Apple UI */
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 18px;
+            /* Sudut membulat modern */
+
+            /* Shadow yang sangat halus (Soft Shadow) */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Efek saat scroll (opsional jika ingin berubah warna) */
+        .navbar-active {
+            background: rgba(255, 255, 255, 0.9) !important;
+            top: 0;
+            left: 250px;
+            right: 0;
+            border-radius: 0;
+        }
+
+        /* Styling Teks & Ikon agar Kontras dengan Background Kaca */
+        .navbar .nav-link,
+        .navbar #greeting,
+        .navbar .nav-link-user {
+            color: #1e293b !important;
+            /* Warna slate gelap yang elegan */
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Styling Avatar di Navbar */
+        .user-img-nav {
+            border-radius: 12px !important;
+            /* Kotak membulat lebih modern daripada lingkaran sempurna */
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Responsif untuk Mobile */
+        @media (max-width: 1024px) {
+            .navbar {
+                top: 0;
+                left: 0;
+                right: 0;
+                margin: 0;
+                border-radius: 0;
+                background: #fff !important;
+                /* Full white di mobile agar clean */
+            }
         }
     </style>
 </head>
@@ -140,17 +202,10 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             <!--================== UNTUK DIVACE SELAIN MOBILE ==================-->
             @else
 
-            <div class="navbar-bg"></div>
+
             <nav class="navbar navbar-expand-lg main-navbar">
-                <form class="form-inline mr-auto d-flex align-items-center">
-                    <ul class="navbar-nav mr-3">
-                        <li>
-                            <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg d-flex align-items-center">
-                                <i class="fas fa-bars"></i>
-                            </a>
-                        </li>
-                    </ul>
-                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-2" style="font-size:13px; width:150px;"></p>
+                <form class="form-inline mr-auto d-flex align-items-center" style="height: 100%;">
+                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-3 d-flex align-items-center mt-3"></p>
                 </form>
 
                 <!-- Dropdown Profil -->
@@ -233,8 +288,24 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         @endif
 
                         <li class="{{ setActive('account/Clinik-Scopus-Riwayat-Pemesanan') . setActive('account/pengguna/search') }}">
-                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}">
-                                <i class="fas fa-users"></i> <span>Riwayat Pemesanan</span>
+                            <a class="nav-link d-flex align-items-center justify-content-between" href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}">
+                                <div>
+                                    <i class="fas fa-users"></i> <span>Riwayat Pemesanan</span>
+                                </div>
+
+                                <div class="d-flex align-items-center" style="gap: 3px;">
+                                    @if(($countScopusPending ?? 0) > 0)
+                                    <span class="badge badge-warning" style="font-size: 10px; padding: 2px 6px; border-radius: 5px;">
+                                        {{ $countScopusPending }}
+                                    </span>
+                                    @endif
+
+                                    @if(($countPaid ?? 0) > 0)
+                                    <span class="badge badge-success" style="font-size: 10px; padding: 2px 6px; border-radius: 5px;">
+                                        {{ $countPaid }}
+                                    </span>
+                                    @endif
+                                </div>
                             </a>
                         </li>
                         <!--================== END ==================-->
