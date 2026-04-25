@@ -21,7 +21,7 @@ class PublicScopusCampController extends Controller
     {
 
         $categories = DB::table('scopus_camp_kategori')
-            ->where('status', 'publish')
+            ->where('status', 'active')
             ->latest()
             ->get();
 

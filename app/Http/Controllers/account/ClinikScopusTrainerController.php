@@ -38,63 +38,29 @@ class ClinikScopusTrainerController extends Controller
             ]);
 
         // 🔽 AMBIL DATA SETELAH UPDATE
-        $data = DB::table('clinikscopus')
+        $query = DB::table('clinikscopus')
             ->select(
                 'clinikscopus.*',
                 'users.full_name'
             )
             ->leftJoin('users', 'clinikscopus.user_id', '=', 'users.id')
-            ->where('users.company', $user->company)
-            ->orderBy('clinikscopus.created_at', 'DESC')
-            ->paginate(20);
+            ->where('users.company', $user->company);
 
-        return view('account.clinik_scopus.index', compact('data'));
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== FILTER ==================-->
-    public function filter(Request $request)
-    {
-        $user = Auth::user();
-
-        $query = DB::table('clinikscopus')
-            ->leftJoin('users', 'clinikscopus.user_id', '=', 'users.id')
-            ->select(
-                'clinikscopus.*',
-                'users.full_name'
-            );
-
-        // 🔐 Filter company
-        if (in_array($user->level, ['manager', 'staff', 'ceo']) && $user->company) {
-            $query->where('users.company', $user->company);
-        }
-
-        // 📅 FILTER TANGGAL (PAKAI KOLOM YANG BENAR)
-        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
-            $query->whereBetween('clinikscopus.tanggal', [
-                $request->tanggal_awal,
-                $request->tanggal_akhir
-            ]);
-        }
-
-        // 🔍 SEARCH
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function ($q) use ($search) {
-                $q->where('users.full_name', 'like', "%{$search}%")
-                    ->orWhere('clinikscopus.spesialis', 'like', "%{$search}%")
-                    ->orWhere('clinikscopus.status', 'like', "%{$search}%");
-            });
-        }
-
+        // 🚀 LOGIKA PENGURUTAN CUSTOM
         $data = $query
-            ->orderBy('clinikscopus.tanggal_online', 'desc')
-            ->paginate(10)
-            ->appends($request->all());
+            ->orderByRaw("CASE 
+            /* 1. Prioritaskan data milik user yang sedang login */
+            WHEN clinikscopus.user_id = ? THEN 1 
+            /* 2. Prioritaskan data yang statusnya Active */
+            WHEN clinikscopus.status = 'active' THEN 2 
+            /* 3. Selain itu (Non Active) taruh di bawah */
+            ELSE 3 
+        END ASC", [$user->id])
+            ->orderBy('clinikscopus.tanggal_online', 'DESC')
+            ->paginate(12);
 
         return view('account.clinik_scopus.index', compact('data'));
     }
-
     // <!--================== END ==================-->
 
     // <!--================== SEARCH ==================-->
@@ -114,26 +80,27 @@ class ClinikScopusTrainerController extends Controller
             $query->where('clinikscopus.user_id', $user->id);
         }
 
-        // 🔍 SEARCH (LOWERCASE SAFE)
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(users.full_name) LIKE ?', ["%{$search}%"])
                     ->orWhereRaw('LOWER(clinikscopus.spesialis) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi2) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi3) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi4) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi5) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi6) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi7) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi8) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.sesi9) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(clinikscopus.status) LIKE ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(clinikscopus.status) LIKE ?', ["%{$search}%"])
+                    // Format Search Tanggal (Contoh: "21 April 2026")
+                    ->orWhereRaw("DATE_FORMAT(clinikscopus.tanggal_online, '%d %M %Y') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("DATE_FORMAT(clinikscopus.tanggal_offline, '%d %M %Y') LIKE ?", ["%{$search}%"])
+                    // Sesi 1 - 9
+                    ->orWhere(function ($sub) use ($search) {
+                        for ($i = 1; $i <= 9; $i++) {
+                            $field = $i == 1 ? 'sesi' : 'sesi' . $i;
+                            $sub->orWhereRaw("LOWER(clinikscopus.$field) LIKE ?", ["%{$search}%"]);
+                        }
+                    });
             });
         }
 
         $data = $query
-            ->orderBy('clinikscopus.tanggal_online', 'DESC') // 🔴 GANTI created_at
+            ->orderByRaw("CASE WHEN clinikscopus.status = 'active' THEN 1 ELSE 2 END ASC")
+            ->orderBy('clinikscopus.tanggal_online', 'DESC')
             ->paginate(10);
 
         return view('account.clinik_scopus.index', compact('data'));

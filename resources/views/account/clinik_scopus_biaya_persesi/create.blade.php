@@ -1,140 +1,66 @@
 @extends('layouts.account')
 @extends('layouts.loader')
+@extends('layouts.inputfitur')
 
 @section('title')
-Clinik Scopus Create Biaya Per Sesi | MIS
+Tambah Biaya Per Sesi | MIS
 @stop
-
-<!--================== UPLOAD IMAGE WITH VIEW ==================-->
-<style>
-    .custom-file-upload {
-        position: relative;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-
-    .inputfile {
-        width: 0.1px;
-        height: 0.1px;
-        opacity: 0;
-        overflow: hidden;
-        position: absolute;
-        z-index: -1;
-    }
-
-    .file-upload {
-        cursor: pointer;
-        display: inline-block;
-        padding: 10px 20px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        transition: background-color 0.3s;
-    }
-
-    .file-upload:hover {
-        background-color: #0056b3;
-    }
-
-    #file-selected {
-        display: block;
-        margin-top: 5px;
-        color: #888;
-    }
-
-    .image-preview {
-        margin-top: 10px;
-    }
-
-    .image-preview img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 5px;
-    }
-</style>
-<!--================== END ==================-->
 
 @section('content')
 <div class="main-content">
     <section class="section">
-        <div class="section-header">
-            <h1>TAMBAH DATA BIAYA PERSESI</h1>
+        <div class="section-header-modern">
+            <div>
+                <h1>Tambah Biaya Per Sesi</h1>
+                <p class="text-muted font-weight-bold mb-0">Konfigurasi tarif dan administrasi layanan secara presisi.</p>
+            </div>
         </div>
 
         <div class="section-body">
-            <div class="card">
-                <div class="card-body">
-
-                    <form id="trainerForm" action="{{ route('account.Clinik-Scopus-Biaya-Persesi.store') }}" method="POST" enctype="multipart/form-data">
+            <div class="card-neo">
+                <div class="card-body p-5">
+                    <form id="trainerForm" action="{{ route('account.Clinik-Scopus-Biaya-Persesi.store') }}" method="POST">
                         @csrf
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Biaya Per Sesi <span style="color: red;">*</span></label>
-                                    <input type="text" id="biaya_persesi" name="biaya_persesi" placeholder="Masukkan biaya" class="form-control" required>
-
-                                    @error('biaya_persesi')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
+                                    <label>Biaya Per Sesi <span class="badge-required">*</span></label>
+                                    <div class="input-group">
+                                        <span class="modern-prefix">Rp</span>
+                                        <input type="text" id="biaya_persesi" name="biaya_persesi" class="form-control-modern" required>
+                                    </div>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>PPN</label>
-                                    <div class="input-group">
-                                        <input type="number" id="ppn" name="ppn" placeholder="Masukkan PPN" class="form-control">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">%</span>
-                                        </div>
+                                    <label>PPN (%)</label>
+                                    <div class="input-group-modern">
+                                        <input type="number" id="ppn" name="ppn" placeholder="0" class="form-control-modern form-control-ppn">
+                                        <span class="input-suffix">%</span>
                                     </div>
-
-                                    @error('ppn')
-                                    <div class="invalid-feedback d-block">{{ $message }}
-                                    </div>
-                                    @enderror
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row mt-3">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Status <span style="color: red;">*</span></label>
-                                    <select class="form-control" name="status" style="height: auto;" required>
+                                    <label>Status Layanan <span class="badge-required">*</span></label>
+                                    <select class="form-control-modern" name="status" required>
                                         <option value="" disabled selected>-- PILIH STATUS --</option>
                                         <option value="active">Active</option>
                                         <option value="non active">Non Active</option>
                                     </select>
-                                    @error('Status')
-                                    <div class="invalid-feedback" style="display: block">
-                                        {{ $message }}
-                                    </div>
-                                    @enderror
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-3">
-                            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
-
-                                <!-- Tombol Simpan -->
-                                <button type="submit"
-                                    class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-paper-plane"></i> SIMPAN
-                                </button>
-
-                                <!-- Tombol Kembali -->
-                                <a href="{{ route('account.clinikscopus.index') }}"
-                                    class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-undo"></i> KEMBALI
-                                </a>
-
-                            </div>
+                        <div class="d-flex flex-md-nowrap flex-wrap gap-3 mt-5">
+                            <button type="submit" class="btn-modern btn-save flex-grow-1">
+                                <i class="fas fa-save"></i> SIMPAN DATA
                         </div>
-
                     </form>
                 </div>
             </div>
@@ -142,22 +68,17 @@ Clinik Scopus Create Biaya Per Sesi | MIS
     </section>
 </div>
 
-<!--================== FORMAT BIAYA SESI ==================-->
 <script>
+    // Format Mata Uang Rupiah Otomatis
     const biayaInput = document.getElementById('biaya_persesi');
-
     biayaInput.addEventListener('input', function(e) {
-        // Hapus semua karakter selain angka
         let value = this.value.replace(/\D/g, '');
-
         if (value) {
-            // Format dengan ribuan
             value = parseInt(value, 10).toLocaleString('id-ID');
-            this.value = 'Rp ' + value;
+            this.value = value;
         } else {
             this.value = '';
         }
     });
 </script>
-<!--================== END ==================-->
 @stop

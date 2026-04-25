@@ -61,9 +61,10 @@ class ClinikScopusRiwayatPemesananController extends Controller
                 });
         }
 
-        $datas = $query->latest()->get();
+        $datas = $query->latest()->paginate(9);
 
-        $datas->each(function ($item) {
+        // Karena $datas sekarang adalah LengthAwarePaginator, gunakan getCollection() untuk looping autoUpdate
+        $datas->getCollection()->each(function ($item) {
             $this->autoUpdateStatus($item);
         });
 
@@ -71,6 +72,55 @@ class ClinikScopusRiwayatPemesananController extends Controller
             'account.clinik_scopus_riwayat_pemesanan.index',
             compact('datas')
         );
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== SEARCH ==================-->
+    public function search(Request $request)
+    {
+        $search = strtolower($request->get('q'));
+        $user = Auth::user();
+
+        $query = ClinikScopusPemesanan::with(['customer', 'trainer']);
+
+        // ==========================================================
+        // 🔐 ROLE FILTER (Disamakan persis dengan function index)
+        // ==========================================================
+        if ($user->level === 'user' && $user->jenis === 'perorangan') {
+            $query->where('customer_id', $user->id);
+        } elseif ($user->level === 'manager') {
+            // tampilkan semua
+        } elseif ($user->level === 'karyawan') {
+            $query->where('trainer_id', $user->id)
+                ->whereHas('trainer', function ($q) use ($user) {
+                    $q->where('company', $user->company);
+                });
+        }
+
+        // ===============================
+        // 🔍 LOGIKA PENCARIAN
+        // ===============================
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_booking', 'LIKE', "%{$search}%")
+                    ->orWhere('status', 'LIKE', "%{$search}%")
+                    ->orWhere('sesi', 'LIKE', "%{$search}%")
+                    ->orWhere('jam_sesi', 'LIKE', "%{$search}%")
+                    ->orWhere('kendala', 'LIKE', "%{$search}%")
+                    ->orWhereHas('customer', function ($sub) use ($search) {
+                        $sub->where('full_name', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('trainer', function ($sub) use ($search) {
+                        $sub->where('full_name', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereRaw("DATE_FORMAT(tanggal_booking, '%d %M %Y') LIKE ?", ["%{$search}%"]);
+            });
+        }
+        $datas = $query->latest()->paginate(10);
+        $datas->each(function ($item) {
+            $this->autoUpdateStatus($item);
+        });
+        return view('account.clinik_scopus_riwayat_pemesanan.index', compact('datas'));
     }
     // <!--================== END ==================-->
 

@@ -6,719 +6,519 @@ Dashboard | MIS
 @stop
 
 <style>
-    .bar-chart-container {
-        width: 100%;
-        max-width: 100%;
-        padding: 20px;
-        box-sizing: border-box;
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
-    .bar-chart {
+    /* Layout Dasar & Spacing */
+    .section-body {
+        padding-bottom: 60px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* Modern Card Styles */
+    .modern-card {
+        background: var(--glass-bg);
+        border-radius: 20px;
+        padding: 25px;
+        border: none;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
         display: flex;
-        align-items: flex-end;
-        height: 200px;
-        border-left: 2px solid #333;
-        border-bottom: 2px solid #333;
-        padding-left: 10px;
-        padding-bottom: 10px;
-        width: 100%;
-        box-sizing: border-box;
+        align-items: center;
+        position: relative;
         overflow: hidden;
     }
 
-    .bar {
-        flex-grow: 1;
-        margin: 0 5px;
-        position: relative;
-        transition: background-color 0.3s;
+    .modern-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+    }
+
+    .card-total-karyawan::before {
+        background: #5F9EA0;
+    }
+
+    .card-aktif::before {
+        background: #28a745;
+    }
+
+    .card-nonaktif::before {
+        background: #dc3545;
+    }
+
+    .card-icon-modern {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center; justify-content: center;
+        font-size: 24px;
+        margin-right: 20px;
+        color: white;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .info-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    /* Presensi Styles */
+    .presensi-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .btn-presensi {
+        border-radius: 12px;
+        padding: 15px;
+        font-weight: 700;
+        border: none;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none !important; /* Menghilangkan underline */
+    }
+
+    .btn-masuk {
+        background: #667eea;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-pulang {
+        background: #ff7f50;
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 127, 80, 0.4);
+    }
+
+    .btn-disabled {
+        background: #e9ecef;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+
+    /* Main Grid: Chart & Info */
+    .dashboard-main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+        align-items: stretch;
+    }
+
+    .salary-analytics-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: var(--card-shadow);
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
+        min-height: 350px;
     }
 
-    .increase {
-        background-color: rgba(76, 175, 80, 0.7);
-    }
-
-    .increase:hover {
-        background-color: rgba(76, 175, 80, 1);
-    }
-
-    .decrease {
-        background-color: rgba(244, 67, 54, 0.7);
-        transform: translateY(100%);
-    }
-
-    .decrease:hover {
-        background-color: rgba(244, 67, 54, 1);
-    }
-
-    .bar-label {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        text-align: center;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-
-    .total-salary {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-top: -5px;
-        font-weight: bold;
-        font-size: 14px;
-        display: none;
-        /* Initially hidden */
-    }
-
-    .month-labels {
+    .bar-chart-wrapper {
         display: flex;
+        align-items: flex-end;
         justify-content: space-between;
-        margin-top: 10px;
-        margin-left: 10px;
+        height: 200px;
+        padding: 20px 10px;
+        background: #f8fafc;
+        border-radius: 15px;
+        margin-top: 20px;
     }
 
-    .month {
+    .bar-pill {
         flex: 1;
-        text-align: center;
-        font-size: 12px;
+        margin: 0 5px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        position: relative;
+        transition: all 0.3s ease;
     }
 
-    /* Media Queries for Responsive Design */
-    @media (max-width: 768px) {
-        .bar-label {
-            display: none;
-            /* Hide total salary above the bar on mobile */
-        }
-
-        .bar:hover .total-salary {
-            display: block;
-            /* Show only when hovered */
-        }
-
-        .bar-chart {
-            height: 140px;
-        }
-
-        .month {
-            font-size: 5px;
-        }
-
-        .bar {
-            margin: 0 2px;
-        }
+    .bar-pill:hover {
+        background: var(--primary-gradient);
+        transform: scaleX(1.1);
     }
 
-    @media (max-width: 480px) {
-        .bar-chart {
-            height: 120px;
+    .bar-tooltip {
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 10px;
+        opacity: 0;
+        transition: 0.3s;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .bar-pill:hover .bar-tooltip {
+        opacity: 1;
+        top: -50px;
+    }
+
+    /* Right Column Grid */
+    .info-right-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .mini-card-modern {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        transition: var(--transition);
+    }
+
+    .mini-card-limit {
+        background: #fff5f5;
+        border: 1px dashed #feb2b2;
+    }
+
+    .icon-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 18px;
+    }
+
+    .info-label-small {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .info-value-small {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-main-grid {
+            grid-template-columns: 1fr;
         }
 
-        .month {
-            font-size: 5px;
-        }
-
-        .bar {
-            margin: 0 1px;
+        .presensi-container {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
-<!-- Swiper CSS -->
-<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 @section('content')
-
 <div class="main-content">
     <section class="section">
         <div class="section-body">
 
-            <!--================== NOTIFIKASI ==================-->
+            @if (Auth::user()->level !== 'user')
             @include('account.dashboard.task-slider-default')
-            <!--================== END ==================-->
+            @endif
 
-            <!--================== TOTAL KARYAWAN ==================-->
+            {{-- 1. Statistik Manager (Hanya untuk Level Manager) --}}
             @if (Auth::user()->level === 'manager')
-            <div class="row"> <!-- Tambahkan row untuk mengatur tata letak grid -->
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                            <i class="fas fa-users" style="margin-top: 13px;"></i>
+            <div class="dashboard-grid">
+                <div class="modern-card card-total-karyawan">
+                    <div class="card-icon-modern" style="background: #5F9EA0;"><i class="fas fa-users"></i></div>
+                    <div>
+                        <p class="info-label">Total Karyawan</p>
+                        <h5 class="info-value">{{ $totalKaryawan }}</h5>
+                    </div>
+                </div>
+                <div class="modern-card card-aktif">
+                    <div class="card-icon-modern" style="background: #28a745;"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <p class="info-label">Karyawan Aktif</p>
+                        <h5 class="info-value">{{ $totalKaryawanAktif }}</h5>
+                    </div>
+                </div>
+                <div class="modern-card card-nonaktif">
+                    <div class="card-icon-modern" style="background: #dc3545;"><i class="fas fa-user-times"></i></div>
+                    <div>
+                        <p class="info-label">Non-Aktif</p>
+                        <h5 class="info-value">{{ $totalKaryawanNonAktif }}</h5>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- 2. Baris Presensi & Artikel --}}
+            @if (Auth::user()->status !== 'nonactive' && !is_null(Auth::user()->email_verified_at))
+            <div class="row">
+                {{-- Bagian Presensi disembunyikan jika level user --}}
+                @if (Auth::user()->level !== 'user')
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="modern-card flex-column align-items-stretch">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="card-icon-modern m-0 me-3" style="background: var(--primary-gradient); width: 45px; height: 45px;">
+                                <i class="fas fa-fingerprint" style="font-size: 18px;"></i>
+                            </div>
+                            <h5 class="m-0 fw-bold ml-2">Presensi Kehadiran</h5>
                         </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan</h4>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawan }} Karyawan</h5> <!-- Menampilkan jumlah total karyawan -->
-                            </div>
+
+                        @php
+                        $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                        ->whereDate('created_at', now()->toDateString())->first();
+                        $currentTime = date('H:i:s');
+                        @endphp
+
+                        <div class="presensi-container">
+                            @if (!$todayPresensi && $currentTime >= '07:00:00' && $currentTime <= '22:00:00' )
+                                <a href="{{ route('account.presensi.create') }}" class="btn-presensi btn-masuk text-center">Masuk</a>
+                                @else
+                                <button class="btn-presensi btn-disabled" disabled>Masuk</button>
+                                @endif
+
+                                @if ($todayPresensi && is_null($todayPresensi->status_pulang) && $currentTime >= '07:00:00' && $currentTime <= '22:00:00' )
+                                    <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn-presensi btn-pulang text-center">Pulang</a>
+                                    @else
+                                    <button class="btn-presensi btn-disabled" disabled>Pulang</button>
+                                    @endif
+                        </div>
+
+                        <div class="mt-4">
+                            @if ($todayPresensi && is_null($todayPresensi->status_pulang))
+                            <div class="alert alert-success border-0"><i class="fas fa-check-circle me-2"></i> Selamat Bekerja!</div>
+                            @elseif (!$todayPresensi)
+                            <div class="alert alert-danger border-0"><i class="fas fa-exclamation-triangle me-2"></i> Belum Presensi Hari Ini</div>
+                            @else
+                            <div class="alert alert-info border-0"><i class="fas fa-info-circle me-2"></i> Tugas Selesai!</div>
+                            @endif
                         </div>
                     </div>
                 </div>
+                @endif
 
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanAktifCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #008000;">
-                            <i class="fas fa-user-check" style="margin-top: 13px;"></i>
-                        </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan Aktif</h4>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawanAktif }} Karyawan Aktif</h5> <!-- Menampilkan jumlah total karyawan aktif -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- Artikel Slider (Selalu Tampil) --}}
+                {{-- Penambahan mt-5 pt-4 khusus level user agar lebih turun --}}
+                <div class="{{ Auth::user()->level === 'user' ? 'col-12 mt-5 pt-4' : 'col-lg-6 col-md-12' }} mb-4">
+                    <div class="modern-card flex-column align-items-stretch" style="background: var(--glass-bg); border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); overflow: hidden;">
+                        <h5 class="fw-bold mb-4"><i class="fas fa-newspaper me-2 text-primary"></i> Artikel Terbaru</h5>
 
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanNonAktifCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #800000;">
-                            <i class="fas fa-user-times" style="margin-top: 13px;"></i>
-                        </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan Non Aktif</h4>
+                        <div class="swiper mySwiper" style="width: 100%; cursor: grab; padding-bottom: 35px;">
+                            <div class="swiper-wrapper" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;">
+                                @foreach($artikel->take(10) as $item)
+                                <div class="swiper-slide ml-2" style="width: 160px; flex-shrink: 0; height: auto;">
+                                    <div class="card border-0 shadow-sm" style="width: 100%; border-radius: 15px; overflow: hidden; background: #fff; border: 1px solid #f1f1f1; margin-bottom: 5px;">
+                                        <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" class="text-decoration-none">
+                                            <div style="width: 100%; height: 85px; overflow: hidden;">
+                                                <img src="{{ asset('images/' . $item->gambar_depan) }}"
+                                                    alt="{{ $item->judul }}"
+                                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                            </div>
+
+                                            <div class="p-2" style="height: 55px; display: flex; align-items: center; justify-content: center; background: #fff;">
+                                                <h6 style="font-size: 10px; font-weight: 600; line-height: 1.3; color: #2d3436; margin: 0; text-align: center;">
+                                                    {{ Str::limit($item->judul, 35) }}
+                                                </h6>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                @endforeach
                             </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawanNonAktif }} Karyawan Non Aktif</h5> <!-- Menampilkan jumlah total karyawan nonaktif -->
-                            </div>
+                            <div class="swiper-pagination" style="bottom: 0 !important;"></div>
                         </div>
                     </div>
                 </div>
             </div>
             @endif
-            <!--================== END ==================-->
 
-            @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
-            @else
-            <!--================== PRESENSI KARYAWAN ==================-->
-
-            <!-- tampilan untuk role user -->
-            @if (Auth::user()->level === 'user')
-            <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
-                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
-                    </div>
-
-                    <div class="card-body">
-                        <!-- Swiper Container -->
-                        <div class="swiper mySwiper">
-                            <div class="swiper-wrapper">
-                                @foreach($artikel->take(6) as $item)
-                                <div class="swiper-slide">
-                                    <div class="card h-100">
-                                        <img src="{{ asset('images/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
-                                        <div class="card-body">
-                                            <h5 class="card-title" style="text-align: center;">
-                                                <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
-                                                    {{ $item->judul }}
-                                                </a>
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
+            {{-- 3. Analitik Gaji & Informasi (Hanya untuk Level Non-User) --}}
+            @if (Auth::user()->level !== 'user')
+            <div class="dashboard-main-grid">
+                <div class="salary-analytics-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Gaji {{ $currentYear }}</h6>
+                            <p class="text-muted small mb-0">Statistik bulanan Anda</p>
+                        </div>
+                        <div class="text-end">
+                            <p class="text-muted small mb-0">Total Pendapatan</p>
+                            <span class="fw-bold text-primary">Rp {{ number_format($totalGaji ?? 0, 0, ',', '.') }}</span>
                         </div>
                     </div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-            <!-- ================== END SLIDER ARTIKEL ================== -->
-            <!-- end tampilan untuk role user -->
 
-            <!-- tampilan untuk role selain user -->
-            @else
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
-                            <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
+                    <div class="bar-chart-wrapper">
+                        @php $maxSalary = !empty($salaryData) && max($salaryData) > 0 ? max($salaryData) : 1; @endphp
+                        @foreach($salaryData as $month => $salary)
+                        <div class="bar-pill" style="height: {{ max(($salary / $maxSalary) * 100, 5) }}%;">
+                            <span class="bar-tooltip">Rp {{ number_format($salary, 0, ',', '.') }}</span>
                         </div>
-
-                        <div class="card-wrap">
-                            <div class="card-header">
-                                <h4>PRESENSI KEHADIRAN</h4>
-                            </div>
-
-                            @php
-                            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                            ->whereDate('created_at', now()->toDateString())
-                            ->first();
-                            @endphp
-
-                            <!-- Jika sudah presensi masuk, belum pulang -->
-                            @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
-                                    MASUK
-                                </button>
-                                <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                                    PULANG
-                                </a>
-                                <!-- end -->
-                        </div>
-
-                        <div class="d-flex align-items-center" style="width: 100%;">
-                            <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                                Selamat Bekerja!
-                            </span>
-                        </div>
-
-                        <!-- Jika belum presensi sama sekali -->
-                        @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                            <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
-                                MASUK
-                            </a>
-                            <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                PULANG
-                            </button>
-                            <!-- end -->
+                        @endforeach
                     </div>
 
-                    <div class="d-flex align-items-center" style="width: 100%;">
-                        <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                            Anda Belum Melakukan Presensi Pada Hari Ini!
+                    <div class="d-flex justify-content-between mt-3 px-1">
+                        @foreach($salaryData as $month => $salary)
+                        <span class="text-muted" style="font-size: 9px; flex: 1; text-align: center; font-weight: 600;">
+                            {{ substr(date('F', mktime(0, 0, 0, $month, 1)), 0, 3) }}
                         </span>
+                        @endforeach
                     </div>
-
-                    @else
-
-                    <!-- Di luar jam kerja atau presensi selesai -->
-                    <div class="d-flex mx-1 mt-2 mb-2">
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                            MASUK
-                        </button>
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                            PULANG
-                        </button>
-                    </div>
-                    <!-- end -->
-
-                    <div class="d-flex align-items-center" style="width: 100%;">
-                        <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Selesai Bekerja!
-                        </span>
-                    </div>
-                    @endif
                 </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
 
-        <!--================== TOTAL GAJI TAHUN INI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                    <i class="fas fa-dollar-sign" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>TOTAL GAJI TAHUN INI</h4>
-                    </div>
+                <div class="info-right-column">
+                    <div class="mini-card-modern {{ ($totalIzin ?? 0) >= 3 ? 'mini-card-limit' : '' }}"
+                        style="background: white; border-radius: 18px; padding: 20px; display: flex; align-items: center; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.02); position: relative; overflow: hidden;">
 
-                    <div class="card-body d-flex align-items-center" id="totalgaji">
-                        <span style="margin-left: -30px; font-size: 1em;">******</span>
-                        <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
-                    </div>
-
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($gaji->isEmpty())
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Belum ada data gaji untuk bulan ini. Mohon bersabar.
-                        </div>
-                        @else
                         @php
-                        $belumTerbayarkan = false;
-                        foreach ($gaji as $item) {
-                        if ($item->status != 'terbayar') {
-                        $belumTerbayarkan = true;
-                        break;
-                        }
-                        }
+                        $currentIzin = $totalIzin ?? 0;
+                        $isLimit = $currentIzin >= 3;
+                        $isWarning = $currentIzin == 2;
                         @endphp
-                        @if ($belumTerbayarkan)
-                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
-                        </div>
-                        @else
-                        <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
-                        </div>
-                        @endif
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
 
-        <!--================== JUMLAH IZIN BULAN INI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="izinBulanIniCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-danger" style="background-color: #DC143C;">
-                    <i class="fas fa-user-clock" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>Izin Bulan Ini</h4>
-                    </div>
-                    <div class="card-body">
-                        <h5>{{ $jumlahIzinBulanIni }} / 3 Izin</h5>
-                    </div>
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($jumlahIzinBulanIni >= 3)
-                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Anda telah mencapai batas maksimal izin bulan ini.
-                        </div>
-                        @else
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Anda masih memiliki {{ 3 - $jumlahIzinBulanIni }} izin bulan ini.
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!--================== HAK CUTI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="cutiCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-primary" style="background-color: #4169E1;">
-                    <i class="fas fa-calendar-check" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>Hak Cuti</h4>
-                    </div>
-                    <div class="card-body">
-                        @if ($bolehCuti)
-                        <h5>Anda memenuhi syarat cuti.</h5>
-                        @else
-                        <h5>Belum memenuhi syarat cuti.</h5>
-                        @endif
-                    </div>
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($bolehCuti)
-                        <button class="alert alert-primary mb-0 d-flex align-items-center justify-content-center" style="flex-grow: 1; height: 48px;">
-                            <a href="" style="text-decoration: none;">
-                                Ajukan Cuti
-                            </a>
-                        </button>
-                        @else
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Minimal 1 tahun bekerja untuk dapat mengajukan cuti.
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
-                    <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
-                </div>
-
-                <div class="card-body">
-                    <!-- Swiper Container -->
-                    <div class="swiper mySwiper">
-                        <div class="swiper-wrapper">
-                            @foreach($artikel->take(6) as $item)
-                            <div class="swiper-slide">
-                                <div class="card h-100">
-                                    <img src="{{ asset('images/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
-                                    <div class="card-body">
-                                        <h5 class="card-title" style="text-align: center;">
-                                            <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
-                                                {{ $item->judul }}
-                                            </a>
-                                        </h5>
-                                    </div>
+                        <div style="display: flex; align-items: center; width: 100%; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <div class="icon-circle" style="
+                width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 18px;
+                background: {{ $isLimit ? '#feb2b2' : ($isWarning ? '#fef3c7' : 'rgba(102, 126, 234, 0.1)') }}; 
+                color: {{ $isLimit ? '#c53030' : ($isWarning ? '#d97706' : '#667eea') }};">
+                                    <i class="fas {{ $isLimit ? 'fa-ban' : 'fa-calendar-minus' }}"></i>
+                                </div>
+                                <div>
+                                    <p style="font-size: 0.75rem; color: #6c757d; font-weight: 600; margin: 0;">Izin Bulan Ini</p>
+                                    <h6 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: {{ $isLimit ? '#c53030' : ($isWarning ? '#d97706' : '#2d3436') }};">
+                                        {{ $currentIzin }} / 3 Kali
+                                    </h6>
                                 </div>
                             </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-        <!-- ================== END SLIDER ARTIKEL ================== -->
 
-        <!--================== CHART GAJI PERBULAN SELAMA SETAHUN ==================-->
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header border-0"
-                    style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
-                    <div class="d-flex justify-content-between">
-                        <h4 class="card-title"><i class="fas fa-dollar-sign"></i> Total Gaji Per Bulan</h4>
-                    </div>
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseCardGaji"
-                        aria-expanded="true" aria-controls="collapseCardGaji">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-
-                <!-- Collapsible Content -->
-                <div id="collapseCardGaji" class="collapse show">
-                    <div class="card-body chartgaji">
-                        <div class="d-flex">
-                            <p class="d-flex flex-column">
-                                <span class="total-salary-above-label">Total Gaji Tahun {{ $currentYear }}</span>
-                                <span class="text-bold text-lg total-salary-above">
-                                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
-                                </span>
-                            </p>
-                            <p class="ml-auto d-flex flex-column text-right">
-                                <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i>
-                                    {{ $totalGaji > 0 ? number_format(($totalGaji / 12), 0, ',', '.') : '0' }}
-                                </span>
-                                <span class="text-muted">Rata-rata per Bulan</span>
-                            </p>
-                        </div>
-
-                        <!-- Bar Chart -->
-                        <div class="bar-chart">
-                            @foreach($salaryData as $month => $salary)
-                            <div class="bar {{ $salary >= 0 ? 'increase' : 'decrease' }}"
-                                style="height: {{ $totalGaji > 0 ? abs(($salary / $totalGaji) * 500) : 0 }}%;">
-                                <span class="bar-label">Rp {{ number_format($salary, 0, ',', '.') }}</span>
-                                <span class="total-salary">Rp {{ number_format($salary, 0, ',', '.') }}</span>
+                            <div style="flex-shrink: 0;">
+                                @if($isLimit)
+                                <div style="background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; padding: 6px 10px; border-radius: 10px; font-size: 10px; line-height: 1.2;">
+                                    <i class="fas fa-exclamation-circle me-1"></i> <strong>Kuota Habis</strong><br>
+                                    Batas maksimal 3x tercapai.
+                                </div>
+                                @elseif($isWarning)
+                                <div style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 6px 10px; border-radius: 10px; font-size: 10px; line-height: 1.2;">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> <strong>Tersisa 1x</strong><br>
+                                    Gunakan dengan bijak.
+                                </div>
+                                @else
+                                <div style="color: #667eea; font-size: 10px; font-style: italic; opacity: 0.7;">
+                                    Kuota aman <i class="fas fa-check-circle"></i>
+                                </div>
+                                @endif
                             </div>
-                            @endforeach
                         </div>
+                    </div>
 
-                        <div class="month-labels">
-                            @foreach($salaryData as $month => $salary)
-                            <span class="month">{{ date('F', mktime(0, 0, 0, $month, 1)) }}</span>
-                            @endforeach
+                    <div class="mini-card-modern">
+    @php
+        // 1. Hitung durasi sejak email diverifikasi
+        $verifiedAt = Auth::user()->email_verified_at;
+        $isOneYear = $verifiedAt ? \Carbon\Carbon::parse($verifiedAt)->diffInYears(now()) >= 1 : false;
+
+        // 2. Logika Sisa Cuti (Hanya muncul jika sudah 1 tahun)
+        $displaySisaCuti = $isOneYear ? ($sisaCuti ?? 0) : 0;
+    @endphp
+
+    <div class="icon-circle" style="background: {{ $isOneYear ? 'rgba(40, 167, 69, 0.1)' : 'rgba(148, 163, 184, 0.1)' }}; 
+                                   color: {{ $isOneYear ? '#28a745' : '#94a3b8' }};">
+        <i class="fas {{ $isOneYear ? 'fa-user-clock' : 'fa-user-lock' }}"></i>
+    </div>
+    
+    <div>
+        <p class="info-label-small">Sisa Hak Cuti</p>
+        <h6 class="info-value-small {{ $isOneYear ? 'text-dark' : 'text-muted' }}">
+            {{ $displaySisaCuti }} Hari
+        </h6>
+        
+        @if(!$isOneYear)
+            <div style="font-size: 9px; color: #ef4444; font-weight: 600; line-height: 1.1; margin-top: 2px;">
+                <i class="fas fa-info-circle"></i> Minimal 1 tahun masa kerja (sejak verifikasi email)
+            </div>
+        @endif
+    </div>
+</div>
+
+                    <div class="mini-card-modern" style="background: var(--primary-gradient); color: white; border: none;">
+                        <div class="icon-circle" style="background: rgba(255,255,255,0.2);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <p class="small mb-0" style="opacity: 0.8;">Rata-rata Gaji</p>
+                            <h6 class="fw-bold mb-0">
+                                Rp {{ number_format(($totalGaji > 0 ? $totalGaji / 12 : 0), 0, ',', '.') }}
+                            </h6>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        @endif
-        @endif
-        <!--================== END ==================-->
+            @endif
 
+        </div>
     </section>
 </div>
 
-<!--================== SLIDER ==================-->
-<!-- Swiper JS -->
-<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    var swiper = new Swiper(".mySwiper", {
-        slidesPerView: 3,
-        spaceBetween: 20,
-        slidesPerGroup: 1,
-        loop: true,
-        autoplay: {
-            delay: 3000, // Geser otomatis setiap 3 detik
-            disableOnInteraction: false, // Tetap autoplay meskipun user swipe manual
-        },
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-        pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-        },
-        breakpoints: {
-            0: {
-                slidesPerView: 1
+    document.addEventListener('DOMContentLoaded', function() {
+        var swiper = new Swiper(".mySwiper", {
+            slidesPerView: "auto",
+            spaceBetween: 20,
+            freeMode: true,
+            loop: true,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
             },
-            576: {
-                slidesPerView: 1
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+                dynamicBullets: true,
             },
-            768: {
-                slidesPerView: 2
-            },
-            992: {
-                slidesPerView: 3
+            breakpoints: {
+                320: { spaceBetween: 15 },
+                768: { spaceBetween: 20 }
             }
-        }
+        });
     });
 </script>
-<!--================== END ==================-->
-
-<!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
-<script>
-    function isMobileDevice() {
-        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-    }
-
-    function toggleElementBasedOnDevice() {
-        var totalGajiCard = document.getElementById('totalGajiCard');
-        var MenuPwaCard = document.getElementById('MenuPwaCard');
-        var SisaSaldoBulanIniCard = document.getElementById('SisaSaldoBulanIniCard');
-        var PemasukanHariIniCard = document.getElementById('PemasukanHariIniCard');
-        var PemasukanBulanIniCard = document.getElementById('PemasukanBulanIniCard');
-        var PemasukanTahunIniCard = document.getElementById('PemasukanTahunIniCard');
-        var PengeluaranHariIniCard = document.getElementById('PengeluaranHariIniCard');
-        var PengeluaranBulanIniCard = document.getElementById('PengeluaranBulanIniCard');
-        var PengeluaranTahunIniCard = document.getElementById('PengeluaranTahunIniCard');
-        var StatistikPemasukan = document.getElementById('StatistikPemasukan');
-        var StatistikPengeluaran = document.getElementById('StatistikPengeluaran');
-        var PenggunaBaru = document.getElementById('PenggunaBaru');
-
-        if (isMobileDevice()) {
-            totalGajiCard.style.display = 'none';
-            MenuPwaCard.style.display = 'block';
-            SisaSaldoBulanIniCard.style.display = 'block';
-            PemasukanHariIniCard.style.display = 'none';
-            PemasukanBulanIniCard.style.display = 'none';
-            PemasukanTahunIniCard.style.display = 'none';
-            PengeluaranHariIniCard.style.display = 'none';
-            PengeluaranBulanIniCard.style.display = 'none';
-            PengeluaranTahunIniCard.style.display = 'none';
-            StatistikPemasukan.style.display = 'none';
-            StatistikPengeluaran.style.display = 'none';
-            PenggunaBaru.style.display = 'none';
-        } else {
-            totalGajiCard.style.display = 'block';
-            MenuPwaCard.style.display = 'none';
-            SisaSaldoBulanIniCard.style.display = 'block';
-            PemasukanHariIniCard.style.display = 'block';
-            PemasukanBulanIniCard.style.display = 'block';
-            PemasukanTahunIniCard.style.display = 'block';
-            PengeluaranHariIniCard.style.display = 'block';
-            PengeluaranBulanIniCard.style.display = 'block';
-            PengeluaranTahunIniCard.style.display = 'block';
-            StatistikPemasukan.style.display = 'block';
-            StatistikPengeluaran.style.display = 'block';
-            PenggunaBaru.style.display = 'block';
-        }
-    }
-
-    window.addEventListener('load', toggleElementBasedOnDevice);
-</script>
-<!--================== END ==================-->
-
-<!--================== SHOW & HIDE TOTAL GAJI ==================-->
-<script>
-    function toggleTotalGaji() {
-        const totalgajiToggle = document.getElementById('totalgaji-toggle');
-
-        if (totalgajiToggle.classList.contains('fa-eye')) {
-            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;">Rp. {{ number_format($totalGaji, 0, ', ', ', ') }}</span> <i class="fas fa-eye-slash totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>';
-        } else {
-            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;"> ****** </span> <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()" style="margin-left: -1em;"></i>';
-        }
-    }
-</script>
-<!--================== END ==================-->
-
-<script>
-    function submitForm() {
-        // Prevent default form submission
-        event.preventDefault();
-
-        // Submit the form using AJAX
-        var form = document.getElementById('pulangForm');
-        var formData = new FormData(form);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action, true);
-        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    // Handle success, if needed
-                    console.log('Form submitted successfully');
-                    window.location.reload(); // Reload the page after successful submission
-                } else {
-                    // Handle error, if needed
-                    console.error('Form submission failed');
-                }
-            }
-        };
-        xhr.send(formData);
-    }
-</script>
-
-<style>
-    /* CSS for the hover effect */
-    .card-hover:hover {
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
-    }
-</style>
-
-<!--================== open and close chart akses cepat ==================-->
-<script>
-    function toggleChartAksescepat() {
-        var chartContainerAksescepat = document.getElementById('chartContainerAksescepat');
-        var financeChartAksescepat = document.getElementById('financeChartAksescepat');
-        var toggleBtnAksescepat = document.getElementById('toggleChartBtnAksescepat');
-
-        if (chartContainerAksescepat.style.display === 'none') {
-            chartContainerAksescepat.style.display = 'block';
-            financeChartAksescepat.style.display = 'none';
-            toggleBtnAksescepat.innerText = 'Tutup Chart';
-        } else {
-            chartContainerAksescepat.style.display = 'none';
-            financeChartAksescepat.style.display = 'block';
-            toggleBtnAksescepat.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
-
-<!--================== open and close chart pemasukan ==================-->
-<script>
-    function toggleChartPemasukan() {
-        var chartContainerPemasukan = document.getElementById('chartContainerPemasukan');
-        var financeChartPemasukan = document.getElementById('financeChartPemasukan');
-        var toggleBtnPemasukan = document.getElementById('toggleChartBtnPemasukan');
-
-        if (chartContainerPemasukan.style.display === 'none') {
-            chartContainerPemasukan.style.display = 'block';
-            financeChartPemasukan.style.display = 'none';
-            toggleBtnPemasukan.innerText = 'Tutup Chart';
-        } else {
-            chartContainerPemasukan.style.display = 'none';
-            financeChartPemasukan.style.display = 'block';
-            toggleBtnPemasukan.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
-
-<!--================== open and close chart pengeluaran ==================-->
-<script>
-    function toggleChart() {
-        var chartContainer = document.getElementById('chartContainer');
-        var financeChart = document.getElementById('financeChart');
-        var toggleBtn = document.getElementById('toggleChartBtn');
-
-        if (chartContainer.style.display === 'none') {
-            chartContainer.style.display = 'block';
-            financeChart.style.display = 'none';
-            toggleBtn.innerText = 'Tutup Chart';
-        } else {
-            chartContainer.style.display = 'none';
-            financeChart.style.display = 'block';
-            toggleBtn.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
 
 <!--================== popup akun berhasil ==================-->
 @if (is_null(auth()->user()->email_verified_at))
@@ -739,45 +539,4 @@ Dashboard | MIS
 </script>
 @endif
 <!--================== end ==================-->
-
-<script type="text/javascript" src="chartjs/Chart.js"></script>
-<script>
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 23, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-</script>
 @stop

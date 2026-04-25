@@ -433,12 +433,14 @@ Route::prefix('account')
             Route::get('/Clinik-Scopus-Biaya-Persesi/data/edit/{id}', 'account\ClinikScopusBiayaPersesiController@edit')->name('account.Clinik-Scopus-Biaya-Persesi.edit');
             Route::post('/Clinik-Scopus-Biaya-Persesi/data/update-data/{id}', 'account\ClinikScopusBiayaPersesiController@update')->name('account.Clinik-Scopus-Biaya-Persesi.update');
             Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{id}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
+            Route::get('/Clinik-Scopus-Biaya-Persesi/search', 'account\ClinikScopusBiayaPersesiController@search')->name('account.Clinik-Scopus-Biaya-Persesi.search');
 
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
             Route::put('/Clinik-Scopus-Riwayat-Pemesanan/update-status/{id}', 'account\ClinikScopusRiwayatPemesananController@updateStatus')->name('account.Clinik-Scopus-Riwayat-Pemesanan.updateStatus');
             Route::delete('/Clinik-Scopus-Riwayat-Pemesanan/delete/{id}', 'account\ClinikScopusRiwayatPemesananController@destroy')->name('account.Clinik-Scopus-Riwayat-Pemesanan.destroy');
+            Route::get('/Clinik-Scopus-Riwayat-Pemesanan/search', 'account\ClinikScopusRiwayatPemesananController@search')->name('account.Clinik-Scopus-Riwayat-Pemesanan.search');
 
             // clinik scopus chat
             Route::get('/clinik-scopus/chat/{pemesanan}', 'account\ClinikScopusChatController@index')->name('chat.index');

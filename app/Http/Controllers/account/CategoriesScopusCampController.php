@@ -36,6 +36,17 @@ class CategoriesScopusCampController extends Controller
     {
         $user = Auth::user();
 
+        // --- LOGIKA OTOMATIS NON-ACTIVE ---
+        // Update status menjadi 'non active' jika tanggal 'mulai' sudah terlewati (>= sekarang pukul 00:01)
+        // Kita gunakan Carbon untuk mendapatkan waktu sekarang
+        $now = \Carbon\Carbon::now();
+
+        DB::table('scopus_camp_kategori')
+            ->where('status', 'active') // Hanya cek yang masih aktif
+            ->where('mulai', '<=', $now->format('Y-m-d H:i:s'))
+            ->update(['status' => 'non active']);
+        // ----------------------------------
+
         // Ambil nilai filter tanggal dari request
         $startDate = $request->input('tanggal_awal');
         $endDate = $request->input('tanggal_akhir');

@@ -138,57 +138,6 @@ class CustomerController extends Controller
     }
     // <!--================== END ==================-->
 
-    // <!--================== FILTER ==================-->
-    public function filter(Request $request)
-    {
-        $status = $request->get('status');
-        $verified = $request->get('verified');
-        $email = $request->get('email');
-        $start = $request->get('datestart'); // dari input id="dateStart"
-        $end = $request->get('dateend');     // dari input id="dateEnd"
-        $perPage = $request->get('per_page', 10);
-
-        $users = DB::table('users')
-            ->select('users.*', DB::raw("COALESCE(users.status, 'non active') AS status"))
-            ->where('level', 'user')
-            ->when($status, function ($query, $status) {
-                if ($status === 'active') {
-                    $query->where('users.status', 'active');
-                } elseif ($status === 'non active') {
-                    $query->where(function ($q) {
-                        $q->whereNull('users.status')
-                            ->orWhere('users.status', 'non active');
-                    });
-                }
-            })
-            ->when($verified, function ($query, $verified) {
-                if ($verified === 'verified') {
-                    $query->whereNotNull('users.email_verified_at');
-                } elseif ($verified === 'unverified') {
-                    $query->whereNull('users.email_verified_at');
-                }
-            })
-            ->when($email, function ($q, $email) {
-                $q->where('email', $email);
-            })
-            ->when($start, function ($q, $start) {
-                $q->whereDate('users.created_at', '>=', $start);
-            })
-            ->when($end, function ($q, $end) {
-                $q->whereDate('users.created_at', '<=', $end);
-            })
-            ->orderBy('users.created_at', 'DESC')
-            ->paginate($perPage)
-            ->appends($request->all());
-
-        if ($request->ajax()) {
-            return view('account.customer.partials.table-body', compact('users'))->render();
-        }
-
-        return view('account.customer.index', compact('users'));
-    }
-    // <!--================== END ==================-->
-
     // <!--================== UPDATE DATA ==================-->
     public function edit($id)
     {

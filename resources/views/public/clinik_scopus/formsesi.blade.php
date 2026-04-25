@@ -450,7 +450,7 @@ Sesi Klinik Scopus | Rumah Scopus
 
                                                 {{-- Jadwal / Status --}}
                                                 <div class="fw-semibold">
-                                                    {{ $isDisabled ? 'TIDAK TERSEDIA' : $value }}
+                                                    {{ $isDisabled ? 'TIDAK TERSEDIA' : $value . ' WIB' }}
                                                 </div>
 
                                                 {{-- Badge Full --}}
@@ -855,48 +855,48 @@ Sesi Klinik Scopus | Rumah Scopus
                             <small class="text-danger error-msg"></small>
                         </div>
 
-                        <!-- NAMA -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Nama Lengkap <span class="text-danger">*</span>
                             </label>
                             <input type="text" name="nama" id="nama"
-                                class="form-control rounded-3"
-                                placeholder="Masukkan nama lengkap">
+                                class="form-control rounded-3 {{ (auth()->check() && auth()->user()->full_name) ? 'bg-light' : '' }}"
+                                value="{{ auth()->check() ? auth()->user()->full_name : '' }}"
+                                {{ (auth()->check() && auth()->user()->full_name) ? 'readonly' : 'required' }}>
                             <small class="text-danger error-msg"></small>
                         </div>
 
-                        <!-- AFILIASI -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Afiliasi <span class="text-danger">*</span>
                             </label>
                             <input type="text" name="afiliasi" id="afiliasi"
                                 class="form-control rounded-3"
-                                placeholder="Universitas / Institusi">
+                                placeholder="Universitas / Institusi"
+                                required>
                             <small class="text-danger error-msg"></small>
                         </div>
 
-                        <!-- EMAIL -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Email <span class="text-danger">*</span>
                             </label>
                             <input type="email" name="email" id="email"
-                                class="form-control rounded-3"
-                                placeholder="nama@email.com">
+                                class="form-control rounded-3 {{ (auth()->check() && auth()->user()->email) ? 'bg-light' : '' }}"
+                                value="{{ auth()->check() ? auth()->user()->email : '' }}"
+                                {{ (auth()->check() && auth()->user()->email) ? 'readonly' : 'required' }}>
                             <small class="text-danger error-msg"></small>
                         </div>
 
-                        <!-- WHATSAPP -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Nomor WhatsApp <span class="text-danger">*</span>
                             </label>
                             <input type="tel" name="whatsapp" id="whatsapp"
-                                class="form-control rounded-3"
+                                class="form-control rounded-3 {{ (auth()->check() && auth()->user()->telp) ? 'bg-light' : '' }}"
+                                value="{{ auth()->check() ? auth()->user()->telp : '' }}"
                                 placeholder="08xxxxxxxxxx"
-                                oninput="formatPhoneNumber(this)">
+                                {{ (auth()->check() && auth()->user()->telp) ? 'readonly' : 'required' }}>
                             <small class="text-danger error-msg"></small>
                         </div>
 
@@ -1257,7 +1257,7 @@ Sesi Klinik Scopus | Rumah Scopus
 
                 // Set modal content
                 document.getElementById('modalSesiName').textContent = sesi.length ? sesi.join(', ') : 'Sesi Tidak Tersedia';
-                document.getElementById('modalSesiTime').textContent = jadwal.length ? jadwal.join(', ') : 'Jadwal Tidak Tersedia';
+                document.getElementById('modalSesiTime').textContent = jadwal.length ? jadwal.join(', ') + ' WIB' : 'Jadwal Tidak Tersedia';
 
                 // Atur data klinik dan sesi key untuk digunakan di form
                 modalElement.dataset.klinikId = item.dataset.klinikId;

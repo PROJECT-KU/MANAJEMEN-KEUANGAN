@@ -1,183 +1,178 @@
 @extends('public.layout.header')
 
-@section('title')
-Scopus Camp | Rumah Scopus
-@stop
+@section('title', 'Scopus Camp | Rumah Scopus')
 
-<!--================== BACKGOUND IMAGE ==================-->
 <style>
     .hero-bg {
         position: relative;
-        background-image: url('/assets/artikel/img/hero-bg.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        padding-top: 120px;
-        padding-bottom: 80px;
+        background: url('/assets/artikel/img/hero-bg.png') no-repeat center center / cover;
+        padding: 120px 0 80px;
     }
 
-    .hero-bg::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-    }
-
-    .hero-bg>.container {
+    .scopus-card {
+        border-radius: 16px;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
         position: relative;
-        z-index: 2;
+        overflow: hidden;
+        border: 1px solid #f1f5f9;
+    }
+
+    .scopus-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-img-wrapper {
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .img-fluid-custom {
+        width: 100%;
+        height: auto;
+        display: block;
+        object-fit: contain;
+    }
+
+    /* --- UPDATE BUTTON STYLE --- */
+    .btn-register {
+        font-size: 16px;
+        width: 100%;
+        border: none;
+        padding: 14px;
+        /* Sedikit lebih tebal */
+        border-radius: 0 0 16px 16px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-active {
+        background: linear-gradient(135deg, #ff3131, #ff914d);
+        /* Warna senada Label Hemat */
+        color: white;
+        /* Efek Timbul & Bayangan */
+        box-shadow: 0 4px 15px rgba(255, 49, 49, 0.4);
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-active:hover {
+        background: linear-gradient(135deg, #ff4141, #ffa15d);
+        box-shadow: 0 6px 20px rgba(255, 49, 49, 0.6);
+        transform: scale(1.02);
+        /* Sedikit membesar saat hover */
+    }
+
+    .btn-active:active {
+        transform: scale(0.98);
+        /* Efek tertekan saat diklik */
+        box-shadow: 0 2px 10px rgba(255, 49, 49, 0.3);
+    }
+
+    .btn-disabled {
+        background-color: #94a3b8;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    /* --------------------------- */
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff3131, #ff914d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 </style>
-<!--================== END ==================-->
 
 @section('konten')
 <section id="hero" class="hero-bg d-flex align-items-center">
     <div class="container mb-5">
-
-        <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center text-center"
-            style="font-family:'Poppins','Inter',sans-serif;">
-
-            <h1 data-aos="fade-down"
-                style="font-size:48px; font-weight:700; line-height:1.3; color:#0f172a; max-width:900px;">
-                Tingkatkan Peluang Tembus
-                <span style="background: linear-gradient(to right, #ff3131, #ff914d); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Scopus</span>
-                Bersama
-                <span style="background: linear-gradient(to right, #ff3131, #ff914d); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Scopus Camp</span>
+        <div class="col-lg-12 text-center mb-5" data-aos="fade-down">
+            <h1 style="font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #0f172a; line-height: 1.2;">
+                Tingkatkan Peluang Tembus <span class="text-gradient">Scopus</span> <br>
+                Bersama <span class="text-gradient">Scopus Camp</span>
             </h1>
         </div>
 
-        <div class="row d-flex justify-content-center flex-wrap">
-
-            <!--================== JIKA CLASS ADA ==================-->
+        <div class="row justify-content-center">
             @forelse($categories as $item)
-            <div class="col-md-3 mb-2 d-flex" data-aos="fade-up" style="margin: 10px; text-align: center; min-height: 100%;">
-                <div class="inner-card d-flex flex-column justify-content-between"
-                    style="border-radius: 10px; padding: 20px; padding-bottom: 60px; background-color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; width: 100%;">
+            @php
+            $kuotaHabis = $item->sisa_kuota === null || $item->sisa_kuota <= 0;
+                $adaDiskon=!empty($item->tipe_diskon) && ($item->biaya > $item->total_biaya);
+                $hematPersen = $item->biaya > 0 ? round((($item->biaya - $item->total_biaya) / $item->biaya) * 100) : 0;
+                @endphp
 
-                    <!-- GAMBAR -->
-                    <div style="border-radius: 5px">
-                        <img id="clickableImage"
-                            src="{{ !empty($item->gambar) ? asset('ScopusCamp/' . basename($item->gambar)) : asset('ScopusCamp/no-image.jpg') }}"
-                            style="max-width:100%; height:auto;"
-                            alt="Current Image">
-                    </div>
+                <div class="col-md-4 col-lg-3 mb-4 d-flex" data-aos="fade-up">
+                    <div class="scopus-card d-flex flex-column w-100">
 
-                    <!-- KONTEN TENGAH -->
-                    <div class="mt-3 flex-grow-1 d-flex flex-column justify-content-between">
-                        <div>
-                            <!-- Judul -->
-                            <h4 style="font-weight: bold;">
-                                {{ strtoupper($item->nama) }} #{{ strtoupper($item->nama_ke) }}
-                            </h4>
-
-                            @if($item->tipe_diskon == null)
-                            @else
-                            <h4 style="color:#ff3131; text-decoration: line-through;">
-                                Rp {{ number_format($item->biaya, 0, ',', '.') }}
-                            </h4>
-                            @endif
-
-                            <span
-                                style="font-size: clamp(14px, 2.5vw, 22px); font-weight: 700; padding: 6px 10px; border-radius: 6px; color: #fff; background: linear-gradient(to right, #ff3131, #ff914d); display: inline-block; white-space: nowrap;">
-                                Rp {{ number_format($item->total_biaya, 0, ',', '.') }}
-                            </span>
-
-                            <!-- Baris Tanggal -->
-                            <div class="d-flex justify-content-between align-items-center mt-2" style="font-size: 12px;">
-                                <span style="display: flex; align-items: center;">
-                                    <i class="fas fa-clock me-1"></i>
-                                    {{ date('d M Y', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TOMBOL HARGA -->
-                    @php
-                    $kuotaHabis = $item->sisa_kuota === null || $item->sisa_kuota <= 0;
-                        @endphp
-
-                        <a href="{{ $kuotaHabis ? '#' : route('public.scopuscamp.Selengkapnya', ['id' => $item->id, 'token' => $item->token]) }}">
-                        <button class="btn {{ $kuotaHabis ? 'btn-danger' : 'btn-info' }}"
-                            style="{{ $kuotaHabis ? '' : 'background-color: #6495ED; color:white;' }} font-size: 16px; width: 100%; position: absolute; bottom: 0; left: 0;"
-                            {{ $kuotaHabis ? 'disabled' : '' }}>
-                            <i class="fa {{ $kuotaHabis ? 'fa-lock' : 'fa-paper-plane' }}"></i>
-                            {{ $kuotaHabis ? ' Pendaftaran Ditutup' : ' Daftar Sekarang' }}
-                        </button>
-                        </a>
-
-
-                        <!-- LABEL DISKON -->
-                        @php
-                        $hematPersen = $item->biaya > 0
-                        ? round((($item->biaya - $item->total_biaya) / $item->biaya) * 100)
-                        : 0;
-                        @endphp
-
-                        <div class="label"
-                            style="position: absolute; top: 0px; right: 0px; background: linear-gradient(135deg, #ff3131, #ff6b6b); color: white; padding: 6px 10px; border-radius: 0 10px 0 10px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        @if($adaDiskon && $hematPersen > 0)
+                        <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #ff3131, #ff6b6b); color: white; padding: 6px 15px; border-radius: 0 16px 0 16px; font-size: 13px; font-weight: 700; z-index: 10;">
                             Hemat {{ $hematPersen }}%
                         </div>
+                        @endif
 
+                        <div class="card-img-wrapper">
+                            <img src="{{ !empty($item->gambar) ? asset('ScopusCamp/' . basename($item->gambar)) : asset('ScopusCamp/no-image.jpg') }}"
+                                class="img-fluid-custom" alt="Scopus Camp">
+                        </div>
+
+                        <div class="flex-grow-1 text-center">
+                            <h5 style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: center;">
+                                {{ strtoupper($item->nama) }} #{{ $item->nama_ke }}
+                            </h5>
+
+                            <div class="mb-3">
+                                @if($adaDiskon)
+                                <small class="text-muted text-decoration-line-through" style="font-size: 15px;">Rp {{ number_format($item->biaya, 0, ',', '.') }}</small>
+                                @endif
+                                <div class="mt-1">
+                                    <span style="font-size: 20px; font-weight: 800; color: #ff3131;">
+                                        Rp {{ number_format($item->total_biaya, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center align-items-center mb-4 text-muted" style="font-size: 13px;">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                {{ date('d M', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}
+                            </div>
+                        </div>
+
+                        <div style="margin: 0 -20px -20px -20px;">
+                            @if($kuotaHabis)
+                            <button class="btn-register btn-disabled" disabled>
+                                <i class="fa fa-lock"></i> Pendaftaran Ditutup
+                            </button>
+                            @else
+                            <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $item->id, 'token' => $item->token]) }}" class="text-decoration-none">
+                                <button class="btn-register btn-active">
+                                    <i class="fa fa-paper-plane"></i> Daftar Sekarang
+                                </button>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!--================== END ==================-->
-
-            <!--================== JIKA CLASS TIDAK ADA ==================-->
-            @empty
-            <div class="col-lg-12 d-flex justify-content-center py-5" data-aos="fade-up">
-                <div
-                    style="background: #ffffff; border-radius: 16px; padding: 40px 32px; max-width: 720px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 20px 40px rgba(0, 0, 0, 0.08);">
-
-                    <!-- TITLE -->
-                    <h4 style="font-weight: 700; color: #0f172a; font-size: clamp(20px, 3vw, 26px); margin-bottom: 14px;">
-                        Kelas Scopus Camp Belum Tersedia
-                    </h4>
-
-                    <!-- DESCRIPTION -->
-                    <p style="color: #64748b; font-size: clamp(14px, 2.5vw, 16px); max-width: 560px; margin: 0 auto 28px; line-height: 1.6;">
-                        Saat ini belum ada kelas Scopus Camp yang dibuka.
-                        Silakan cek kembali dalam waktu dekat atau hubungi kami untuk informasi terbaru.
-                    </p>
-
-                    <!-- CTA BUTTON -->
-                    <a href="{{ route('blog.contact.kontak') }}"
-                        style="display: inline-block; background: linear-gradient(to right, #ff3131, #ff914d); color: #fff; border-radius: 10px; padding: 12px 30px; font-weight: 600; font-size: 15px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        Hubungi Admin
-                    </a>
+                @empty
+                <div class="col-lg-12 d-flex justify-content-center py-5" data-aos="fade-up">
+                    <div
+                        style="background: #ffffff; border-radius: 16px; padding: 40px 32px; max-width: 720px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 20px 40px rgba(0, 0, 0, 0.08);">
+                        <h4 style="font-weight: 700; color: #0f172a; font-size: clamp(20px, 3vw, 26px); margin-bottom: 14px;">Kelas Belum Tersedia</h4>
+                        <p style="color: #64748b; font-size: clamp(14px, 2.5vw, 16px); max-width: 560px; margin: 0 auto 28px; line-height: 1.6;">Saat ini belum ada kelas Scopus Camp yang dibuka. Silakan cek kembali dalam waktu dekat atau hubungi kami untuk informasi terbaru.</p>
+                        <a href="{{ route('blog.contact.kontak') }}"
+                            style="display: inline-block; background: linear-gradient(to right, #ff3131, #ff914d); color: #fff; border-radius: 10px; padding: 12px 30px; font-weight: 600; font-size: 15px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Hubungi Admin</a>
+                    </div>
                 </div>
-            </div>
-            <!--================== END ==================-->
-            @endempty
-
+                @endforelse
         </div>
     </div>
 </section>
-<!--================== RELOAD KETIKA DATA SUKSES ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@if (session()->has('success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            html: 'Data Pendaftaran Scopus Camp Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
-            confirmButtonText: 'OK'
-        });
-    });
-</script>
-@endif
-
-@if (session()->has('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: 'Data Pendaftaran Scopus Camp Gagal Terkirim',
-            confirmButtonText: 'OK'
-        });
-    });
-</script>
-@endif
-<!--================== END ==================-->
 @stop

@@ -62,5 +62,32 @@ class AppServiceProvider extends ServiceProvider
             // Bagikan variabel ke semua view
             $view->with('totalAssignTask', $totalAssignTask);
         });
+
+        View::composer('*', function ($view) {
+            $user = Auth::user();
+            $countScopusPending = 0;
+            $countPaid = 0;
+
+            if ($user) {
+                // Query Dasar
+                $queryScopus = DB::table('clinikscopus_pemesanan');
+
+                // Filter Hak Akses
+                if ($user->level === 'user' && $user->jenis === 'perorangan') {
+                    $queryScopus->where('customer_id', $user->id);
+                } elseif ($user->level === 'karyawan') {
+                    $queryScopus->where('trainer_id', $user->id);
+                }
+                // Manager/CEO melihat semua data
+
+                // Hitung masing-masing status
+                $countScopusPending = (clone $queryScopus)->where('status', 'pending')->count();
+                $countPaid = (clone $queryScopus)->where('status', 'paid')->count();
+            }
+
+            // Bagikan ke View
+            $view->with('countScopusPending', $countScopusPending);
+            $view->with('countPaid', $countPaid);
+        });
     }
 }
