@@ -49,14 +49,12 @@ class CategoriesArtikelController extends Controller
         return view('account.kategori_artikel.index', compact('categories_artikel', 'startDate', 'endDate'));
     }
 
-
-
     public function create()
     {
         $user = Auth::user();
         $currentTime = now()->format('H:i:s');
 
-        return view('account.kategori_artikel.create', compact('users', 'currentTime'));
+        return view('account.kategori_artikel.create', compact('currentTime'));
     }
 
     public function store(Request $request)

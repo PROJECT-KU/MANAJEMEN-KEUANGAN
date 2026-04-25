@@ -431,7 +431,7 @@ class DashboardController extends Controller
             ->leftJoin('users', 'artikel.user_id', '=', 'users.id')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
             ->orderBy('artikel.created_at', 'DESC')
-            ->paginate(6);
+            ->paginate(10);
         // <!--================== END ==================-->
 
         // <!--================== PERJALANAN DINAS ==================-->
@@ -569,13 +569,11 @@ class DashboardController extends Controller
         }
 
         // Ambil jumlah izin bulan ini
-        $jumlahIzinBulanIni = DB::table('presensi')
+        $totalIzin = \DB::table('presensi')
             ->where('user_id', $user->id)
             ->whereMonth('created_at', $now->month)
             ->whereYear('created_at', $now->year)
             ->sum('izin');
-
-        $maksimalIzin = 3;
 
         // Apakah sudah memenuhi syarat cuti? (≥ 1 tahun)
         $bolehCuti = $user->created_at->diffInYears($now) >= 1;
@@ -583,8 +581,7 @@ class DashboardController extends Controller
 
         return view('account.dashboard.index', compact(
             'workDuration',
-            'jumlahIzinBulanIni',
-            'maksimalIzin',
+            'totalIzin',
             'bolehCuti',
             'salaryData',
             'currentYear',

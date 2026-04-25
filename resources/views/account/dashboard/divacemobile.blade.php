@@ -5,1161 +5,417 @@
 Dashboard | MIS
 @stop
 
+{{-- Vendor CSS --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <style>
-    .bar-chart-container {
-        width: 100%;
-        max-width: 100%;
-        padding: 20px;
-        box-sizing: border-box;
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+        --success-gradient: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        --warning-gradient: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
     }
 
-    .bar-chart {
+    /* Core Card Design */
+    .modern-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    /* Stats Icon Styling */
+    .icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Attendance Buttons */
+    .presensi-btn-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .btn-modern {
+        padding: 14px;
+        border-radius: 16px;
+        font-weight: 700;
+        text-align: center;
+        border: none;
+        transition: 0.3s ease;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-in { background: var(--success-gradient); color: white; }
+    .btn-out { background: var(--danger-gradient); color: white; }
+    .btn-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    .btn-modern:not(.btn-disabled):hover { opacity: 0.9; transform: scale(1.02); }
+
+    /* Salary Chart Components */
+    .chart-container {
+        height: 200px;
         display: flex;
         align-items: flex-end;
-        height: 200px;
-        border-left: 2px solid #333;
-        border-bottom: 2px solid #333;
-        padding-left: 10px;
-        padding-bottom: 10px;
+        gap: 8px;
+        padding-top: 20px;
+    }
+
+    .bar-modern {
+        flex: 1;
+        background: var(--primary-gradient);
+        border-radius: 8px 8px 4px 4px;
+        position: relative;
+        min-height: 5px;
+        transition: height 0.6s ease;
+    }
+
+    .bar-modern:hover::after {
+        content: attr(data-value);
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 10;
+    }
+
+    /* Layout Spacing */
+    .section-body { padding-top: 20px; }
+    .mb-24 { margin-bottom: 24px; }
+
+    @media (max-width: 576px) {
+        .modern-card { padding: 20px; }
+    }
+
+    /* Enhanced Article Slider */
+    .article-slide-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        height: 180px;
+        border: none;
+        transition: all 0.4s ease;
+    }
+
+    .article-image-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        box-sizing: border-box;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .article-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px 15px 15px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .article-slide-card:hover {
+        transform: scale(0.98);
+    }
+
+    .article-slide-card:hover .article-overlay {
+        padding-bottom: 25px;
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
+    }
+
+    .article-title {
+        color: white !important;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.4;
+        text-decoration: none !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    .bar {
-        flex-grow: 1;
-        margin: 0 5px;
-        position: relative;
-        transition: background-color 0.3s;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-    }
-
-    .increase {
-        background-color: rgba(76, 175, 80, 0.7);
-    }
-
-    .increase:hover {
-        background-color: rgba(76, 175, 80, 1);
-    }
-
-    .decrease {
-        background-color: rgba(244, 67, 54, 0.7);
-        transform: translateY(100%);
-    }
-
-    .decrease:hover {
-        background-color: rgba(244, 67, 54, 1);
-    }
-
-    .bar-label {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        text-align: center;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-
-    .total-salary {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-top: -5px;
-        font-weight: bold;
-        font-size: 14px;
-        display: none;
-        /* Initially hidden */
-    }
-
-    .month-labels {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 10px;
-        margin-left: 10px;
-    }
-
-    .month {
-        flex: 1;
-        text-align: center;
-        font-size: 12px;
-    }
-
-    /* Media Queries for Responsive Design */
-    @media (max-width: 768px) {
-        .bar-label {
-            display: none;
-            /* Hide total salary above the bar on mobile */
-        }
-
-        .bar:hover .total-salary {
-            display: block;
-            /* Show only when hovered */
-        }
-
-        .bar-chart {
-            height: 140px;
-        }
-
-        .month {
-            font-size: 5px;
-        }
-
-        .bar {
-            margin: 0 2px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .bar-chart {
-            height: 120px;
-        }
-
-        .month {
-            font-size: 5px;
-        }
-
-        .bar {
-            margin: 0 1px;
-        }
+    .swiper-pagination-bullet-active {
+        background: var(--primary-gradient) !important;
+        width: 20px !important;
+        border-radius: 5px !important;
     }
 </style>
 
-<!-- Swiper CSS -->
-<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-
 @section('content')
-
 <div class="main-content">
     <section class="section">
         <div class="section-body">
 
-            <!--================== NOTIFIKASI ==================-->
             @include('account.dashboard.task-slider-mobile')
-            <!--================== END ==================-->
 
-            <!--================== TOTAL KARYAWAN ==================-->
             @if (Auth::user()->level === 'manager')
-            <div class="row"> <!-- Tambahkan row untuk mengatur tata letak grid -->
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                            <i class="fas fa-users" style="margin-top: 13px;"></i>
+            <div class="row mb-24">
+                @php
+                    $stats = [
+                        ['label' => 'Total Karyawan', 'value' => $totalKaryawan, 'icon' => 'fa-users', 'bg' => '#4facfe'],
+                        ['label' => 'Aktif', 'value' => $totalKaryawanAktif, 'icon' => 'fa-user-check', 'bg' => '#43e97b', 'color' => 'text-success'],
+                        ['label' => 'Non-Aktif', 'value' => $totalKaryawanNonAktif, 'icon' => 'fa-user-times', 'bg' => '#f093fb', 'color' => 'text-danger']
+                    ];
+                @endphp
+                @foreach($stats as $stat)
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="modern-card d-flex align-items-center">
+                        <div class="icon-box mr-3" style="background: {{ $stat['bg'] }}">
+                            <i class="fas {{ $stat['icon'] }}"></i>
                         </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan</h4>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawan }} Karyawan</h5> <!-- Menampilkan jumlah total karyawan -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanAktifCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #008000;">
-                            <i class="fas fa-user-check" style="margin-top: 13px;"></i>
-                        </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan Aktif</h4>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawanAktif }} Karyawan Aktif</h5> <!-- Menampilkan jumlah total karyawan aktif -->
-                            </div>
+                        <div>
+                            <p class="text-muted mb-0 small font-weight-bold">{{ $stat['label'] }}</p>
+                            <h3 class="font-weight-bold mb-0 {{ $stat['color'] ?? '' }}">{{ $stat['value'] }}</h3>
                         </div>
                     </div>
                 </div>
+                @endforeach
+            </div>
+            @endif
 
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="totalKaryawanNonAktifCard">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-primary" style="background-color: #800000;">
-                            <i class="fas fa-user-times" style="margin-top: 13px;"></i>
+            <div class="row mb-24">
+                @if (Auth::user()->level !== 'user')
+                <div class="col-lg-6 mb-4">
+                    <div class="modern-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="font-weight-bold mb-0">Sistem Presensi</h5>
+                            <span class="badge badge-light px-3 py-2" style="border-radius: 10px;">{{ date('d M Y') }}</span>
+                            {{-- Penampung Jam Real-time --}}
+                <span id="live-clock" class="font-weight-bold text-primary small" style="letter-spacing: 1px;">00:00:00</span>
                         </div>
-                        <div class="card-wrap flex-column">
-                            <div class="card-header">
-                                <h4>Total Karyawan Non Aktif</h4>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ $totalKaryawanNonAktif }} Karyawan Non Aktif</h5> <!-- Menampilkan jumlah total karyawan nonaktif -->
-                            </div>
+
+                        @php
+                            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
+                                ->whereDate('created_at', now()->toDateString())->first();
+                            $currentTime = date('H:i:s');
+                            $isTimeRange = ($currentTime >= '07:00:00' && $currentTime <= '22:00:00');
+                        @endphp
+
+                        <div class="presensi-btn-container">
+                            @if (!$todayPresensi && $isTimeRange)
+                                <a href="{{ route('account.presensi.create') }}" class="btn-modern btn-in"><i class="fas fa-sign-in-alt"></i> Masuk</a>
+                                <div class="btn-modern btn-disabled"><i class="fas fa-sign-out-alt"></i> Pulang</div>
+                            @elseif ($todayPresensi && is_null($todayPresensi->status_pulang) && $isTimeRange)
+                                <div class="btn-modern btn-disabled"><i class="fas fa-sign-in-alt"></i> Masuk</div>
+                                <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn-modern btn-out"><i class="fas fa-sign-out-alt"></i> Pulang</a>
+                            @else
+                                <div class="btn-modern btn-disabled">Masuk</div>
+                                <div class="btn-modern btn-disabled">Pulang</div>
+                            @endif
+                        </div>
+
+                        @if($todayPresensi)
+                        <div class="mt-4 p-3 border-0 rounded-xl bg-light text-center font-weight-bold {{ is_null($todayPresensi->status_pulang) ? 'text-success' : 'text-primary' }}">
+                            <i class="fas {{ is_null($todayPresensi->status_pulang) ? 'fa-check-circle' : 'fa-briefcase' }} mr-2"></i>
+                            {{ is_null($todayPresensi->status_pulang) ? 'Anda sudah absen masuk' : 'Tugas hari ini selesai' }}
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                <div class="col-lg-6">
+                    <div class="modern-card">
+                        <h5 class="font-weight-bold mb-4">Akses Cepat</h5>
+                        <div id="quick-access-wrapper">
+                            @include('account.dashboard.menu-akses-cepat')
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
-            <!--================== END ==================-->
 
-            @if (Auth::user()->status === 'nonactive' || is_null(Auth::user()->status) || is_null(Auth::user()->email_verified_at))
-            @else
-
-            <!--================== TAMPILAN UNTUK ROLE USER ==================-->
-            @if (Auth::user()->level === 'user')
-            <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
-                        <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
+            {{-- Jarak Seragam Baris Izin & Cuti --}}
+            <div class="row mb-24">
+                <div class="col-md-6 mb-4 mb-md-0"> {{-- Margin bawah hanya di mobile agar tidak menumpuk --}}
+                    <div class="modern-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="font-weight-bold text-muted mb-0">Izin Bulan Ini</h6>
+                            <span class="text-danger font-weight-bold">{{ $totalIzin }} / 3</span>
+                        </div>
+                        <div class="progress mt-3 mb-2" style="height: 10px; border-radius: 10px; background: #f1f5f9;">
+                            <div class="progress-bar" style="width: {{ ($totalIzin / 3) * 100 }}%; background: var(--danger-gradient);"></div>
+                        </div>
+                        <p class="small mb-0 {{ $totalIzin >= 3 ? 'text-danger' : 'text-muted' }}">
+                            {{ $totalIzin >= 3 ? 'Batas maksimal tercapai' : 'Sisa kuota: ' . (3 - $totalIzin) }}
+                        </p>
                     </div>
+                </div>
+            <div class="col-md-6">
+    <div class="modern-card d-flex flex-column justify-content-between">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="font-weight-bold text-muted mb-0">Hak Cuti</h6>
+            @php
+                // Cek apakah sudah 1 tahun sejak email diverifikasi
+                $verifiedAt = Auth::user()->email_verified_at;
+                $isOneYear = $verifiedAt ? \Carbon\Carbon::parse($verifiedAt)->diffInYears(now()) >= 1 : false;
+                
+                // Variabel $bolehCuti digabung dengan syarat 1 tahun
+                $hakCutiFinal = $bolehCuti && $isOneYear;
+            @endphp
+            <i class="fas fa-calendar-check {{ $hakCutiFinal ? 'text-success' : 'text-light' }}"></i>
+        </div>
+        <div class="mt-2">
+            <h5 class="font-weight-bold mb-0">
+                {{ $hakCutiFinal ? 'Siap Diajukan' : 'Belum Memenuhi Syarat' }}
+            </h5>
+            
+            @if($hakCutiFinal)
+                <a href="#" class="btn btn-primary btn-sm rounded-pill mt-2 px-3">Ajukan Sekarang</a>
+            @else
+                <p class="small text-muted mb-0 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    {{ !$isOneYear ? 'Minimal 1 tahun masa kerja (sejak verifikasi email)' : 'Syarat lainnya belum terpenuhi' }}
+                </p>
+            @endif
+        </div>
+    </div>
+</div>
+            </div>
 
-                    <div class="card-body">
-                        <!-- Swiper Container -->
+            <div class="row mb-24">
+                <div class="col-12">
+                    <div class="modern-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="font-weight-bold mb-0"><i class="fas fa-newspaper mr-2 text-primary"></i> Artikel Terupdate</h5>
+                            <a style="text-decoration:none" href="{{ route('account.Artikel.index') }}" class="text-primary small font-weight-bold">Lihat Semua</a>
+                        </div>
+                        
                         <div class="swiper mySwiper">
                             <div class="swiper-wrapper">
                                 @foreach($artikel->take(6) as $item)
                                 <div class="swiper-slide">
-                                    <div class="card h-100">
-                                        <img src="{{ asset('images/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
-                                        <div class="card-body">
-                                            <h5 class="card-title" style="text-align: center;">
-                                                <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
-                                                    {{ $item->judul }}
-                                                </a>
-                                            </h5>
+                                    <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" class="article-slide-card d-block shadow-sm">
+                                        <div class="article-image-wrapper">
+                                            <img src="{{ asset('images/' . $item->gambar_depan) }}" class="w-100 h-100" style="object-fit: cover;">
                                         </div>
-                                    </div>
+                                        <div class="article-overlay">
+                                            <span class="badge badge-primary mb-2" style="font-size: 8px; opacity: 0.9;">Terbaru</span>
+                                            <div class="article-title">
+                                                {{ $item->judul }}
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
                                 @endforeach
                             </div>
+                            <div class="swiper-pagination" style="position: relative; margin-top: 25px;"></div>
                         </div>
                     </div>
-                    <div class="swiper-pagination"></div>
                 </div>
             </div>
-            <!-- ================== END SLIDER ARTIKEL ================== -->
-            <!--================== END ==================-->
 
-            <!--================== TAMPILAN UNTUK ROLE SELAIN USER ==================-->
-            @else
-            <!--================== PRESENSI KARYAWAN ==================-->
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                    <div class="card card-statistic-2">
-                        <div class="card-icon shadow-warning" style="background-color: #FF7F50;">
-                            <img alt="image" src="{{ asset('assets/img/hadir.png') }}" style="width: 40px; margin-top: 6px;">
-                        </div>
-
-                        <div class="card-wrap" style="box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-                            <div class="card-header">
-                                <h4>PRESENSI KEHADIRAN</h4>
+            <div class="row mb-24">
+                <div class="col-12">
+                    <div class="modern-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="font-weight-bold mb-0">Statistik Pendapatan</h5>
+                                <p class="text-muted small">Total: Rp {{ number_format($totalGaji, 0, ',', '.') }}</p>
                             </div>
-
-                            @php
-                            $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
-                            ->whereDate('created_at', now()->toDateString())
-                            ->first();
-                            @endphp
-
-                            <!-- Jika sudah presensi masuk, belum pulang -->
-                            @if ($todayPresensi && is_null($todayPresensi->status_pulang) && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                                <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;" disabled>
-                                    MASUK
-                                </button>
-                                <a href="{{ route('account.presensi.edit', $todayPresensi->id) }}" class="btn btn-sm btn-warning" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
-                                    PULANG
-                                </a>
-                                <!-- end -->
-                        </div>
-
-                        <div class="d-flex align-items-center" style="width: 100%;">
-                            <span class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                                Selamat Bekerja!
-                            </span>
-                        </div>
-
-                        <!-- Jika belum presensi sama sekali -->
-                        @elseif (!$todayPresensi && date('H:i:s') >= '07:00:00' && date('H:i:s') <= '22:00:00' ) <div class="d-flex mx-1 mt-2 mb-2">
-                            <a href="{{ route('account.presensi.create') }}" class="btn btn-primary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%">
-                                MASUK
-                            </a>
-                            <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                                PULANG
-                            </button>
-                            <!-- end -->
-                    </div>
-
-                    <div class="d-flex align-items-center" style="width: 100%;">
-                        <span class="alert alert-danger mb-0" role="alert" style="flex-grow: 1;">
-                            Anda Belum Melakukan Presensi Pada Hari Ini!
-                        </span>
-                    </div>
-
-                    @else
-
-                    <!-- Di luar jam kerja atau presensi selesai -->
-                    <div class="d-flex mx-1 mt-2 mb-2">
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary mr-2" style="flex-grow: 1; margin-left: -5px; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                            MASUK
-                        </button>
-                        <button href="{{ route('account.presensi.create') }}" class="btn btn-secondary" style="flex-grow: 1; padding-top: 10px; padding-bottom:10px; font-size: 15px; font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; width: 100%" disabled>
-                            PULANG
-                        </button>
-                    </div>
-                    <!-- end -->
-
-                    <div class="d-flex align-items-center" style="width: 100%;">
-                        <span class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Selesai Bekerja!
-                        </span>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!--================== TOTAL GAJI TAHUN INI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="totalGajiCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-primary" style="background-color: #5F9EA0;">
-                    <i class="fas fa-dollar-sign" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column" style="box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-                    <div class="card-header">
-                        <h4>TOTAL GAJI TAHUN INI</h4>
-                    </div>
-
-                    <div class="card-body d-flex align-items-center" id="totalgaji">
-                        <span style="margin-left: -30px; font-size: 1em;">******</span>
-                        <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>
-                    </div>
-
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($gaji->isEmpty())
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Belum ada data gaji untuk bulan ini. Mohon bersabar.
-                        </div>
-                        @else
-                        @php
-                        $belumTerbayarkan = false;
-                        foreach ($gaji as $item) {
-                        if ($item->status != 'terbayar') {
-                        $belumTerbayarkan = true;
-                        break;
-                        }
-                        }
-                        @endphp
-                        @if ($belumTerbayarkan)
-                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini belum terbayarkan. Sabar ya, semoga segera cair!
-                        </div>
-                        @else
-                        <div class="alert alert-success mb-0" role="alert" style="flex-grow: 1;">
-                            Gaji pada bulan ini sudah terbayarkan. Terima kasih atas kerja keras Anda!
-                        </div>
-                        @endif
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!--================== MENU ==================-->
-        <div class="card akses-cepat col-lg-6 col-md-6 col-sm-6 col-xs-6">
-            <style>
-                .akses-cepat .menu-grid {
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                }
-
-                .akses-cepat .menu-item {
-                    width: 25%;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: flex-start;
-                    text-align: center;
-                    padding: 10px 0;
-                    margin-top: 10px;
-                }
-
-                .akses-cepat .menu-item a {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: flex-start;
-                    text-decoration: none;
-                    color: inherit;
-                    height: 100%;
-                }
-
-                .akses-cepat .menu-item i {
-                    font-size: 26px;
-                    color: white;
-                    background-image: linear-gradient(to right, #ff3131, #ff914d);
-                    padding: 12px;
-                    border-radius: 50%;
-                    width: 60px;
-                    height: 60px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 10px;
-                    transition: all 0.3s ease;
-                }
-
-                .akses-cepat .menu-item i:hover {
-                    transform: scale(1.1);
-                    filter: brightness(1.2);
-                }
-
-                .akses-cepat .menu-label {
-                    display: block;
-                    font-size: 10px;
-                    text-align: center;
-                    line-height: 1.2;
-                    height: 24px;
-                    /* fix height supaya 1 kata/2 kata tetap rapi */
-                    overflow: hidden;
-                    margin-top: 5px;
-                }
-
-                /* Hide baris ketiga dan seterusnya */
-                .akses-cepat .menu-item.hidden {
-                    display: none;
-                }
-
-                @media (max-width: 768px) {
-                    .akses-cepat .menu-item {
-                        width: 25%;
-                    }
-                }
-
-                /* Icon + Badge */
-                .icon-badge {
-                    font-size: 26px;
-                    color: #6495ED;
-                    position: relative;
-                }
-
-                .badge-custom {
-                    position: absolute;
-                    top: 15px;
-                    right: 25%;
-                    transform: translate(50%, -50%);
-                    font-size: 10px;
-                    padding: 3px 6px;
-                    border-radius: 10px;
-                }
-
-                /* Menata tombol toggle supaya anak panah dan teks berada di tengah */
-                .toggle-button {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin-top: -px;
-                    margin-bottom: 10px;
-                }
-
-                .toggle-button .btn {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 10px 20px;
-                    font-size: 12px;
-                    color: black;
-                    border-radius: 5px;
-                }
-
-                .toggle-button .btn i {
-                    margin-right: 8px;
-                    /* sedikit memberi jarak antara anak panah dan teks */
-                    font-size: 18px;
-                }
-            </style>
-            <div class="menu-grid" id="menuGrid">
-                <!-- Default 8 menu (2 baris) -->
-                @if (Auth::user()->level === 'manager')
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
-                        <i class="fas fa-building"></i>
-                        <span class="menu-label">Company</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level === 'manager')
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.pengguna.index') }}">
-                        <i class="fas fa-users"></i>
-                        <span class="menu-label">Data Karyawan</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level !== 'staff')
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.PerjalananDinas.index') }}">
-                        <i class="fas fa-suitcase-rolling icon-badge"></i>
-                        <span class="menu-label">Perjalanan Dinas</span>
-                    </a>
-                    <span class="badge badge-warning badge-custom">{{ $countAjukan }}</span>
-                </div>
-                @endif
-
-                @if (Auth::user()->level !== 'karyawan')
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('karir.list') }}">
-                        <i class="fas fa-user-tie"></i>
-                        <span class="menu-label">Karir</span>
-                    </a>
-                    @php
-                    $totalStatusNull = App\Karir::whereNull('status')->count();
-                    @endphp
-
-                    @if ($totalStatusNull > 0)
-                    <span class="badge badge-warning badge-custom">{{ $totalStatusNull }}</span>
-                    @endif
-                </div>
-                @endif
-
-                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.pendaftaran-scopus-kafe.index') }}">
-                        <i class="fas fa-users"></i>
-                        <span class="menu-label">Scopus Kafe</span>
-                    </a>
-                    @php
-                    // Menghitung jumlah data dengan status 'menunggu verifikasi'
-                    $totalStatusMenunggu = App\PendaftaranScopusKafe::where('status', 'menunggu verifikasi')->count();
-                    @endphp
-
-                    @if ($totalStatusMenunggu > 0)
-                    <span class="badge badge-warning badge-custom">{{ $totalStatusMenunggu }}</span>
-                    @endif
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.paperisasi.index') }}">
-                        <i class="fas fa-folder-open"></i>
-                        <span class="menu-label">Paperisasi</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
-                        <i class="fas fa-folder"></i>
-                        <span class="menu-label">Refrensi Paper</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'staff' || Auth::user()->id === 83 || Auth::user()->id === 87)
-                <div class="menu-item position-relative">
-                    <a class="nav-link" href="{{ route('account.Artikel.index') }}">
-                        <i class="fas fa-file-signature"></i>
-                        <span class="menu-label">Blog</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level === 'karyawan')
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.categories_debit.index') }}">
-                        <i class="fas fa-dice-d6"></i>
-                        <span class="menu-label">Kategori Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.debit.index') }}">
-                        <i class="fas fa-money-check-alt"></i>
-                        <span class="menu-label">Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.categories_credit.index') }}">
-                        <i class="fas fa-dice-d6"></i>
-                        <span class="menu-label">Kategori Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.credit.index') }}">
-                        <i class="fas fa-money-check-alt"></i>
-                        <span class="menu-label">Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.laporan_debit.index') }}">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="menu-label">Laporan Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.laporan_credit.index') }}">
-                        <i class="fas fa-chart-area"></i>
-                        <span class="menu-label">Laporan Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item position-relative">
-                    <a class=" nav-link" href="{{ route('account.laporan_semua.index') }}">
-                        <i class="fas fa-chart-area"></i>
-                        <span class="menu-label">Laporan Semua</span>
-                    </a>
-                </div>
-                @endif
-
-                <!--====== Menu tambahan (disembunyikan dulu) ======-->
-                <!-- khusus hidden menu untuk selain karyawan -->
-                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.kategori.index') }}">
-                        <i class="fas fa-dice-d6"></i>
-                        <span class="menu-label">Kategori Camp</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.camp.index') }}">
-                        <i class="fas fa-file-signature"></i>
-                        <span class="menu-label">Pendaftaran Camp</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.peserta.list') }}">
-                        <i class="fas fa-user-edit"></i>
-                        <span class="menu-label">Evaluasi Camp</span>
-                    </a>
-                </div>
-                @endif
-
-                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.categories_debit.index') }}">
-                        <i class="fas fa-dice-d6"></i>
-                        <span class="menu-label">Kategori Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.debit.index') }}">
-                        <i class="fas fa-money-check-alt"></i>
-                        <span class="menu-label">Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.categories_credit.index') }}">
-                        <i class="fas fa-dice-d6"></i>
-                        <span class="menu-label">Kategori Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.credit.index') }}">
-                        <i class="fas fa-money-check-alt"></i>
-                        <span class="menu-label">Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.camp.index') }}">
-                        <i class="fas fa-campground"></i>
-                        <span class="menu-label">Laporan Camp</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden laporan-debit">
-                    <a class=" nav-link" href="{{ route('account.laporan_debit.index') }}">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="menu-label">Laporan Uang Masuk</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden laporan-credit">
-                    <a class=" nav-link" href="{{ route('account.laporan_credit.index') }}">
-                        <i class="fas fa-chart-area"></i>
-                        <span class="menu-label">Laporan Uang Keluar</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden laporan-semua">
-                    <a class=" nav-link" href="{{ route('account.laporan_semua.index') }}">
-                        <i class="fas fa-chart-area"></i>
-                        <span class="menu-label">Laporan Semua</span>
-                    </a>
-                </div>
-
-                <div class="menu-item hidden neraca">
-                    <a class=" nav-link" href="{{ route('account.neraca.index') }}">
-                        <i class="fas fa-balance-scale"></i>
-                        <span class="menu-label">Laporan Neraca</span>
-                    </a>
-                </div>
-                @endif
-                <!-- end -->
-
-                <!-- khusus hidden menu untuk karyawan -->
-                @if (Auth::user()->level === 'karyawan')
-                <div class="menu-item hidden">
-                    <a class=" nav-link" href="{{ route('account.neraca.index') }}">
-                        <i class="fas fa-balance-scale"></i>
-                        <span class="menu-label">Laporan Neraca</span>
-                    </a>
-                </div>
-                @endif
-                <!-- end -->
-
-            </div>
-
-            <hr style="width: 80%; margin: 10px auto;">
-
-            <div class="toggle-button" style="margin-top: -px; margin-bottom:10px;">
-                <button id="toggleBtn" class="btn">
-                    <i class="fa fa-chevron-down"></i> <span id="toggleText">Lainnya</span>
-                </button>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!--================== JUMLAH IZIN BULAN INI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="izinBulanIniCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-danger" style="background-color: #DC143C;">
-                    <i class="fas fa-user-clock" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>Izin Bulan Ini</h4>
-                    </div>
-                    <div class="card-body">
-                        <h5>{{ $jumlahIzinBulanIni }} / 3 Izin</h5>
-                    </div>
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($jumlahIzinBulanIni >= 3)
-                        <div class="alert alert-warning mb-0" role="alert" style="flex-grow: 1;">
-                            Anda telah mencapai batas maksimal izin bulan ini.
-                        </div>
-                        @else
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Anda masih memiliki {{ 3 - $jumlahIzinBulanIni }} izin bulan ini.
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!--================== HAK CUTI ==================-->
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="cutiCard">
-            <div class="card card-statistic-2">
-                <div class="card-icon shadow-primary" style="background-color: #4169E1;">
-                    <i class="fas fa-calendar-check" style="margin-top: 13px;"></i>
-                </div>
-                <div class="card-wrap flex-column">
-                    <div class="card-header">
-                        <h4>Hak Cuti</h4>
-                    </div>
-                    <div class="card-body">
-                        @if ($bolehCuti)
-                        <h5>Anda memenuhi syarat cuti.</h5>
-                        @else
-                        <h5>Belum memenuhi syarat cuti.</h5>
-                        @endif
-                    </div>
-                    <div class="d-flex" style="width: 100%;">
-                        @if ($bolehCuti)
-                        <button class="alert alert-primary mb-0 d-flex align-items-center justify-content-center" style="flex-grow: 1; height: 48px;">
-                            <a href="" style="text-decoration: none;">
-                                Ajukan Cuti
-                            </a>
-                        </button>
-                        @else
-                        <div class="alert alert-info mb-0" role="alert" style="flex-grow: 1;">
-                            Minimal 1 tahun bekerja untuk dapat mengajukan cuti.
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================== END ==================-->
-
-        <!-- ================== SLIDER ARTIKEL TERBARU ================== -->
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header" style="background-color: #6495ED; display: flex; justify-content: space-between; align-items: center;">
-                    <h4 style="color: white;"><i class="fas fa-chart-pie"></i> ARTIKEL TERBARU</h4>
-                </div>
-
-                <div class="card-body">
-                    <!-- Swiper Container -->
-                    <div class="swiper mySwiper">
-                        <div class="swiper-wrapper">
-                            @foreach($artikel->take(6) as $item)
-                            <div class="swiper-slide">
-                                <div class="card h-100">
-                                    <img src="{{ asset('images/' . $item->gambar_depan) }}" class="card-img-top" alt="Gambar Artikel" style="height: 180px; object-fit: cover;">
-                                    <div class="card-body">
-                                        <h5 class="card-title" style="text-align: center;">
-                                            <a href="{{ route('blog.topic.blog-single', ['id' => $item->id, 'token' => $item->token]) }}" style="color: inherit; text-decoration: none;">
-                                                {{ $item->judul }}
-                                            </a>
-                                        </h5>
-                                    </div>
-                                </div>
+                            <div class="icon-box" style="background: var(--primary-gradient); width: 44px; height: 44px;">
+                                <i class="fas fa-chart-line" style="font-size: 16px;"></i>
                             </div>
-                            @endforeach
                         </div>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-        <!-- ================== END SLIDER ARTIKEL ================== -->
-
-        <!--================== CHART GAJI PERBULAN SELAMA SETAHUN ==================-->
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header border-0"
-                    style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
-                    <div class="d-flex justify-content-between">
-                        <h4 class="card-title"><i class="fas fa-dollar-sign"></i> Total Gaji Per Bulan</h4>
-                    </div>
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseCardGaji"
-                        aria-expanded="true" aria-controls="collapseCardGaji">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-
-                <!-- Collapsible Content -->
-                <div id="collapseCardGaji" class="collapse show">
-                    <div class="card-body chartgaji">
-                        <div class="d-flex">
-                            <p class="d-flex flex-column">
-                                <span class="total-salary-above-label">Total Gaji Tahun {{ $currentYear }}</span>
-                                <span class="text-bold text-lg total-salary-above">
-                                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
-                                </span>
-                            </p>
-                            <p class="ml-auto d-flex flex-column text-right">
-                                <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i>
-                                    {{ $totalGaji > 0 ? number_format(($totalGaji / 12), 0, ',', '.') : '0' }}
-                                </span>
-                                <span class="text-muted">Rata-rata per Bulan</span>
-                            </p>
-                        </div>
-
-                        <!-- Bar Chart -->
-                        <div class="bar-chart">
+                        <div class="chart-container">
+                            @php $maxS = count($salaryData) > 0 ? max($salaryData) : 1; @endphp
                             @foreach($salaryData as $month => $salary)
-                            <div class="bar {{ $salary >= 0 ? 'increase' : 'decrease' }}"
-                                style="height: {{ $totalGaji > 0 ? abs(($salary / $totalGaji) * 500) : 0 }}%;">
-                                <span class="bar-label">Rp {{ number_format($salary, 0, ',', '.') }}</span>
-                                <span class="total-salary">Rp {{ number_format($salary, 0, ',', '.') }}</span>
-                            </div>
+                                @php $h = ($salary / $maxS) * 100; @endphp
+                                <div class="bar-modern" style="height: {{ max($h, 5) }}%;" data-value="Rp {{ number_format($salary, 0, ',', '.') }}"></div>
                             @endforeach
                         </div>
-
-                        <div class="month-labels">
+                        <div class="d-flex justify-content-between mt-3 px-2">
                             @foreach($salaryData as $month => $salary)
-                            <span class="month">{{ date('F', mktime(0, 0, 0, $month, 1)) }}</span>
+                                <span class="text-muted small font-weight-bold" style="flex: 1; text-align: center;">
+                                    {{ substr(date('F', mktime(0, 0, 0, $month, 1)), 0, 3) }}
+                                </span>
                             @endforeach
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
-        <!--================== END ==================-->
-
-        @endif
-        @endif
-
-        <!--================== PENGGUNA BARU ==================-->
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header border-0"
-                    style="justify-content: space-between; align-items: center; background-color: rgba(169, 169, 169, 0.4);">
-                    <div class="d-flex justify-content-between">
-                        <h4 class="card-title"><i class="fas fa-user"></i> Pengguna Baru</h4>
-                    </div>
-                    <!-- Tombol untuk membuka/menutup card -->
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapsePenggunaBaru"
-                        aria-expanded="true" aria-controls="collapsePenggunaBaru">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-
-                <!-- Card body yang dapat di-collapse -->
-                <div id="collapsePenggunaBaru" class="collapse show">
-                    <div class="card-body">
-                        <div class="row" style="margin: 3px;">
-                            @foreach($users as $user)
-                            @if ($loop->iteration <= 6)
-                                <div class="col-lg-4 col-md-12 mt-4">
-                                <div class="card text-center card-hover" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-                                    @if ($user->gambar == null)
-                                    <a class="mt-3" href="{{ asset('assets/img/profil/no-image.jpg') }}" data-lightbox="{{ $user->id }}">
-                                        @else
-                                        <a class="mt-3" href="{{ asset('assets/img/profil/' . $user->gambar) }}" data-lightbox="{{ $user->id }}">
-                                            @endif
-                                            <div class="thumbnail-circle">
-                                                <img style="width: 100px; height: 100px;" src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/profil/no-image.jpg') }}" alt="Gambar Pengguna" class="card-img-top rounded-circle">
-                                            </div>
-                                        </a>
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $user->full_name }}</h5>
-                                        </div>
-                                        <a href="{{ route('account.pengguna.edit', $user->id) }}" class="btn btn-info">Lihat Detail</a>
-                                </div>
-                        </div>
-                        @endif
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-</div>
-@endif
-<!--================== END ==================-->
-
-</section>
+    </section>
 </div>
 
-<!--================== SLIDER ==================-->
-<!-- Swiper JS -->
-<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    var swiper = new Swiper(".mySwiper", {
-        slidesPerView: 3,
-        spaceBetween: 20,
-        slidesPerGroup: 1,
-        loop: true,
-        autoplay: {
-            delay: 3000, // Geser otomatis setiap 3 detik
-            disableOnInteraction: false, // Tetap autoplay meskipun user swipe manual
-        },
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-        pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-        },
-        breakpoints: {
-            0: {
-                slidesPerView: 1
-            },
-            576: {
-                slidesPerView: 1
-            },
-            768: {
-                slidesPerView: 2
-            },
-            992: {
-                slidesPerView: 3
+    document.addEventListener('DOMContentLoaded', function() {
+        new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
             }
-        }
+        });
     });
 </script>
-<!--================== END ==================-->
-
-<!--================== CEK DIVACE APAKAH PWA ATAU WEBSITE ==================-->
-<script>
-    function isMobileDevice() {
-        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-    }
-
-    function toggleElementBasedOnDevice() {
-        var totalGajiCard = document.getElementById('totalGajiCard');
-        var MenuPwaCard = document.getElementById('MenuPwaCard');
-        var SisaSaldoBulanIniCard = document.getElementById('SisaSaldoBulanIniCard');
-        var PemasukanHariIniCard = document.getElementById('PemasukanHariIniCard');
-        var PemasukanBulanIniCard = document.getElementById('PemasukanBulanIniCard');
-        var PemasukanTahunIniCard = document.getElementById('PemasukanTahunIniCard');
-        var PengeluaranHariIniCard = document.getElementById('PengeluaranHariIniCard');
-        var PengeluaranBulanIniCard = document.getElementById('PengeluaranBulanIniCard');
-        var PengeluaranTahunIniCard = document.getElementById('PengeluaranTahunIniCard');
-        var StatistikPemasukan = document.getElementById('StatistikPemasukan');
-        var StatistikPengeluaran = document.getElementById('StatistikPengeluaran');
-        var PenggunaBaru = document.getElementById('PenggunaBaru');
-
-        if (isMobileDevice()) {
-            totalGajiCard.style.display = 'none';
-            MenuPwaCard.style.display = 'block';
-            SisaSaldoBulanIniCard.style.display = 'block';
-            PemasukanHariIniCard.style.display = 'none';
-            PemasukanBulanIniCard.style.display = 'none';
-            PemasukanTahunIniCard.style.display = 'none';
-            PengeluaranHariIniCard.style.display = 'none';
-            PengeluaranBulanIniCard.style.display = 'none';
-            PengeluaranTahunIniCard.style.display = 'none';
-            StatistikPemasukan.style.display = 'none';
-            StatistikPengeluaran.style.display = 'none';
-            PenggunaBaru.style.display = 'none';
-        } else {
-            totalGajiCard.style.display = 'block';
-            MenuPwaCard.style.display = 'none';
-            SisaSaldoBulanIniCard.style.display = 'block';
-            PemasukanHariIniCard.style.display = 'block';
-            PemasukanBulanIniCard.style.display = 'block';
-            PemasukanTahunIniCard.style.display = 'block';
-            PengeluaranHariIniCard.style.display = 'block';
-            PengeluaranBulanIniCard.style.display = 'block';
-            PengeluaranTahunIniCard.style.display = 'block';
-            StatistikPemasukan.style.display = 'block';
-            StatistikPengeluaran.style.display = 'block';
-            PenggunaBaru.style.display = 'block';
-        }
-    }
-
-    window.addEventListener('load', toggleElementBasedOnDevice);
-</script>
 
 <script>
-    const toggleBtn = document.getElementById('toggleBtn');
-    const hiddenItems = document.querySelectorAll('.menu-item.hidden');
-    const toggleText = document.getElementById('toggleText'); // Ambil elemen teks
-    let expanded = false;
-
-    toggleBtn.addEventListener('click', () => {
-        expanded = !expanded;
-        hiddenItems.forEach(item => item.classList.toggle('hidden', !expanded));
-
-        const icon = toggleBtn.querySelector('i');
-        icon.classList.toggle('fa-chevron-down', !expanded);
-        icon.classList.toggle('fa-chevron-up', expanded);
-
-        // Ganti teks sesuai dengan status
-        if (expanded) {
-            toggleText.textContent = 'Tutup'; // Ganti teks menjadi 'Tutup' saat expand
-        } else {
-            toggleText.textContent = 'Lainnya'; // Ganti teks menjadi 'Buka' saat collapse
+    document.addEventListener('DOMContentLoaded', function() {
+        // Live Clock Function
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            
+            const clockElement = document.getElementById('live-clock');
+            if(clockElement) clockElement.textContent = timeString;
         }
+        setInterval(updateClock, 1000);
+        updateClock(); // Jalankan langsung saat load
+
+        // Swiper Configuration (tetap seperti semula)
+        new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            }
+        });
     });
 </script>
-<!--================== END ==================-->
-
-<!--================== SHOW & HIDE TOTAL GAJI ==================-->
-<script>
-    function toggleTotalGaji() {
-        const totalgajiToggle = document.getElementById('totalgaji-toggle');
-
-        if (totalgajiToggle.classList.contains('fa-eye')) {
-            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;">Rp. {{ number_format($totalGaji, 0, ', ', ', ') }}</span> <i class="fas fa-eye-slash totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()"></i>';
-        } else {
-            document.getElementById('totalgaji').innerHTML = '<span style="margin-left: -30px; font-size: 23px;"> ****** </span> <i class="fas fa-eye totalgaji-toggle ml-2" id="totalgaji-toggle" onclick="toggleTotalGaji()" style="margin-left: -1em;"></i>';
-        }
-    }
-</script>
-<!--================== END ==================-->
-
-<script>
-    function submitForm() {
-        // Prevent default form submission
-        event.preventDefault();
-
-        // Submit the form using AJAX
-        var form = document.getElementById('pulangForm');
-        var formData = new FormData(form);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action, true);
-        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    // Handle success, if needed
-                    console.log('Form submitted successfully');
-                    window.location.reload(); // Reload the page after successful submission
-                } else {
-                    // Handle error, if needed
-                    console.error('Form submission failed');
-                }
-            }
-        };
-        xhr.send(formData);
-    }
-</script>
-
-<style>
-    /* CSS for the hover effect */
-    .card-hover:hover {
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
-    }
-</style>
-
-<!--================== open and close chart akses cepat ==================-->
-<script>
-    function toggleChartAksescepat() {
-        var chartContainerAksescepat = document.getElementById('chartContainerAksescepat');
-        var financeChartAksescepat = document.getElementById('financeChartAksescepat');
-        var toggleBtnAksescepat = document.getElementById('toggleChartBtnAksescepat');
-
-        if (chartContainerAksescepat.style.display === 'none') {
-            chartContainerAksescepat.style.display = 'block';
-            financeChartAksescepat.style.display = 'none';
-            toggleBtnAksescepat.innerText = 'Tutup Chart';
-        } else {
-            chartContainerAksescepat.style.display = 'none';
-            financeChartAksescepat.style.display = 'block';
-            toggleBtnAksescepat.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
-
-<!--================== open and close chart pemasukan ==================-->
-<script>
-    function toggleChartPemasukan() {
-        var chartContainerPemasukan = document.getElementById('chartContainerPemasukan');
-        var financeChartPemasukan = document.getElementById('financeChartPemasukan');
-        var toggleBtnPemasukan = document.getElementById('toggleChartBtnPemasukan');
-
-        if (chartContainerPemasukan.style.display === 'none') {
-            chartContainerPemasukan.style.display = 'block';
-            financeChartPemasukan.style.display = 'none';
-            toggleBtnPemasukan.innerText = 'Tutup Chart';
-        } else {
-            chartContainerPemasukan.style.display = 'none';
-            financeChartPemasukan.style.display = 'block';
-            toggleBtnPemasukan.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
-
-<!--================== open and close chart pengeluaran ==================-->
-<script>
-    function toggleChart() {
-        var chartContainer = document.getElementById('chartContainer');
-        var financeChart = document.getElementById('financeChart');
-        var toggleBtn = document.getElementById('toggleChartBtn');
-
-        if (chartContainer.style.display === 'none') {
-            chartContainer.style.display = 'block';
-            financeChart.style.display = 'none';
-            toggleBtn.innerText = 'Tutup Chart';
-        } else {
-            chartContainer.style.display = 'none';
-            financeChart.style.display = 'block';
-            toggleBtn.innerText = 'Buka Chart';
-        }
-    }
-</script>
-<!--================== end ==================-->
 
 <!--================== popup akun berhasil ==================-->
 @if (is_null(auth()->user()->email_verified_at))
@@ -1180,45 +436,4 @@ Dashboard | MIS
 </script>
 @endif
 <!--================== end ==================-->
-
-<script type="text/javascript" src="chartjs/Chart.js"></script>
-<script>
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 23, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-</script>
 @stop

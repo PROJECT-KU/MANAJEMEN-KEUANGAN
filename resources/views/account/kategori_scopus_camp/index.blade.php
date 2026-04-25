@@ -119,14 +119,10 @@ Kategori Scopus Camp | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->total_kuota }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->sisa_kuota }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if($hasil->status == 'publish')
-                                            <span class="badge bg-success" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>
-                                                Publish
-                                            </span>
+                                            @if($hasil->status == 'active')
+                                            <span class="badge badge-success">Active</span>
                                             @else
-                                            <span class="badge bg-danger" style="padding: 6px 12px; border-radius: 6px; color: white;" disabled>
-                                                Draft
-                                            </span>
+                                            <span class="badge badge-danger">Non Active</span>
                                             @endif
                                         </td>
                                         <td style="text-align: center;">

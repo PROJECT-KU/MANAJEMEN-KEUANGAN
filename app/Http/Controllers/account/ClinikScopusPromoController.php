@@ -167,4 +167,58 @@ class ClinikScopusPromoController extends Controller
 
     // <!--================== END ==================-->
 
+    // <!--================== SEARCH ==================-->
+    public function search(Request $request)
+    {
+        $search = $request->get('q');
+
+        $promos = ClinikScopusPromo::query()
+            ->where(function ($query) use ($search) {
+                $query->where('nama_promo', 'LIKE', '%' . $search . '%')
+                    ->orWhere('status', 'LIKE', '%' . $search . '%')
+                    ->orWhere('kode_diskon', 'LIKE', '%' . $search . '%');
+
+                // Pencarian Tanggal & Waktu
+                $query->orWhereRaw("DATE_FORMAT(tanggal_mulai_promo, '%d %M %Y %H:%i') LIKE ?", ["%$search%"])
+                    ->orWhereRaw("DATE_FORMAT(tanggal_selesai_promo, '%d %M %Y %H:%i') LIKE ?", ["%$search%"]);
+            })
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+
+        $promos->appends(['q' => $search]);
+
+        //  JIKA REQUEST BERASAL DARI AJAX/JS
+        if ($request->ajax()) {
+            return view('account.clinik_scopus_promo.index', compact('promos'))->renderSections()['content'];
+        }
+
+        // Jika pencarian manual lewat URL dan kosong
+        if ($promos->isEmpty() && !$request->ajax()) {
+            return redirect()->route('account.Clinik-Scopus-Promo.index')
+                ->with('error', 'Data Promo tidak ditemukan.');
+        }
+
+        return view('account.clinik_scopus_promo.index', compact('promos'));
+    }
+    // <!--================== END ==================-->
+
+    // <!--================== DELETE DATA ==================-->
+    public function destroy($id)
+    {
+        try {
+            $promo = ClinikScopusPromo::findOrFail($id);
+            $promo->delete();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Data berhasil dihapus!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menghapus data!'
+            ], 500);
+        }
+    }
+    // <!--================== END ==================-->
 }

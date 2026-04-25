@@ -1,44 +1,145 @@
 @extends('layouts.account')
 @extends('layouts.loader')
+@extends('layouts.inputfitur')
 
 @section('title')
 Clinik Scopus Create Promo | MIS
 @stop
 
+<style>
+    .card-neo {
+        background: white;
+        border-radius: var(--radius-xl);
+        border: none;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+
+    .card-header-neo {
+        padding: 20px 25px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #fcfcfd;
+    }
+
+    .card-header-neo i {
+        font-size: 18px;
+        color: var(--accent);
+    }
+
+    .card-header-neo span {
+        font-weight: 800;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-modern[readonly] {
+        background-color: #f1f5f9 !important;
+        color: #0b0b0b !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+    }
+
+    .input-group-modern:has(input[readonly]) {
+        background-color: #f1f5f9 !important;
+        cursor: not-allowed !important;
+        border-color: #e2e8f0 !important;
+    }
+
+    .input-group-modern:has(input[readonly]):focus-within {
+        border-color: #e2e8f0 !important;
+        box-shadow: none !important;
+        background-color: #f1f5f9 !important;
+    }
+
+    /* 🔹 Table Styling */
+    .table-modern thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 15px;
+        border: none;
+    }
+
+    .table-modern tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8fafc;
+        font-size: 13px;
+    }
+
+    /* 🔹 Buttons */
+    .btn-modern {
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+        border: none;
+    }
+
+    .btn-primary-gradient {
+        background: var(--accent-gradient);
+        color: white;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+    }
+
+    .alert-modern {
+        background: linear-gradient(to right, #1e293b 0%, #6366f1 100%);
+        border-left: 4px solid var(--accent);
+        border-radius: 12px;
+        color: #1e40af;
+        font-weight: 600;
+    }
+</style>
+
 @section('content')
 <div class="main-content">
     <section class="section">
-
-        <div class="section-header">
-            <h1>TAMBAH DATA PROMO</h1>
+        <div class="section-header-modern">
+            <div>
+                <h1>Tambah Data Promo</h1>
+                <p class="text-muted font-weight-bold mb-0 small">Buat kampanye diskon baru dan atur jadwal sesi secara otomatis.</p>
+            </div>
         </div>
 
         <div class="section-body">
-
             <form action="{{ route('account.Clinik-Scopus-Promo.store') }}" method="POST">
+                @csrf
 
-                <div class="card">
-                    <div class="card-body">
-                        @csrf
-
+                <div class="card-neo">
+                    <div class="card-header-neo">
+                        <i class="fas fa-edit"></i>
+                        <span>Informasi Utama Promo</span>
+                    </div>
+                    <div class="card-body p-4">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        Nama Promo <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" name="nama_promo"
-                                        class="form-control"
-                                        placeholder="Contoh: Promo Awal Tahun"
-                                        required>
+                                    <label>Nama Promo <span class="badge-required">*</span></label>
+                                    <input type="text" name="nama_promo" class="form-control-modern" placeholder="Contoh: Promo Ramadhan" required>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">Status</label>
-                                    <select name="status" class="form-control" style="height: auto;">
-                                        <option value="" disabled selected>-- PILIH STATUS PROMO --</option>
+                                    <label>Status Promo <span class="badge-required">*</span></label>
+                                    <select name="status" class="form-control-modern" style="height: auto;" required>
+                                        <option value="" disabled selected>-- PILIH STATUS --</option>
                                         <option value="active">Active</option>
                                         <option value="non active">Non Active</option>
                                     </select>
@@ -49,452 +150,319 @@ Clinik Scopus Create Promo | MIS
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        Tanggal Mulai <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="datetime-local"
-                                        name="tanggal_mulai_promo"
-                                        class="form-control"
-                                        required>
+                                    <label>Tanggal Mulai <span class="badge-required">*</span></label>
+                                    <input type="datetime-local" name="tanggal_mulai_promo" class="form-control-modern" required>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        Tanggal Selesai <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="datetime-local"
-                                        name="tanggal_selesai_promo"
-                                        class="form-control"
-                                        required>
+                                    <label>Tanggal Selesai <span class="badge-required">*</span></label>
+                                    <input type="datetime-local" name="tanggal_selesai_promo" class="form-control-modern" required>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-body">
-
-                        <div class="row align-items-center">
+                <div class="card-neo">
+                    <div class="card-header-neo">
+                        <i class="fas fa-calculator"></i>
+                        <span>Konfigurasi Biaya & Diskon</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
                             @php
                             $firstEvent = $events->first();
-                            $hargaNormal = $firstEvent && $firstEvent->biayaPersesi
-                            ? $firstEvent->biayaPersesi->biaya_persesi
-                            : 0;
+                            $hargaNormal = $firstEvent && $firstEvent->biayaPersesi ? $firstEvent->biayaPersesi->biaya_persesi : 0;
                             @endphp
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Harga Normal</label>
+                                    <label>Harga Normal (Akumulasi Sesi)</label>
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
-                                        </div>
-                                        <input type="text" name="harga_normal" id="harga_normal" value="{{ number_format($hargaNormal, 0, ',', '.') }}" placeholder="Masukkan Harga Normal" class="form-control" oninput="updateNominalDiskon()" readonly>
+                                        <span class="modern-prefix">Rp</span>
+                                        <input type="text" name="harga_normal" id="harga_normal" value="{{ number_format($hargaNormal, 0, ',', '.') }}" class="form-control-modern" readonly>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Tipe Diskon</label>
-                                    <div class="input-group">
-                                        <select class="form-control" name="tipe_diskon" id="tipe_diskon" style="height: auto;" onchange="handleDiskonTypeChange()">
-                                            <option value="" disabled selected>-- PILIH TIPE DISKON --</option>
-                                            <option value="persentase">PERSENTASE</option>
-                                            <option value="nominal">NOMINAL</option>
-                                            <option value="bundling">BUNDLING</option>
-                                        </select>
-                                    </div>
+                                    <label>Tipe Diskon <span class="badge-required">*</span></label>
+                                    <select class="form-control-modern" name="tipe_diskon" id="tipe_diskon" style="height: auto;" onchange="handleDiskonTypeChange()">
+                                        <option value="" disabled selected>-- PILIH TIPE DISKON --</option>
+                                        <option value="persentase">PERSENTASE (%)</option>
+                                        <option value="nominal">NOMINAL (Rp)</option>
+                                        <option value="bundling">BUNDLING</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row align-items-center">
+                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Diskon Persentase</label>
-                                    <div class="input-group">
-                                        <input type="number" name="diskon_persentase" id="diskon_persentase" value="{{ old('diskon_persentase') }}" placeholder="Masukkan Total Persentase" class="form-control" disabled oninput="updateNominalDiskon()">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">%</span>
-                                        </div>
+                                    <div class="input-group-modern">
+                                        <input type="number" name="diskon_persentase" id="diskon_persentase" placeholder="0" class="form-control-modern form-control-ppn" disabled oninput="updateNominalDiskon()">
+                                        <span class="input-suffix">%</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Nominal Diskon</label>
+                                    <label>Nominal Potongan</label>
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
-                                        </div>
-                                        <input type="text" name="nominal_diskon" id="nominal_diskon" value="{{ old('nominal_diskon') }}" placeholder="Masukkan Total Nominal Diskon" class="form-control">
+                                        <span class="modern-prefix">Rp</span>
+                                        <input type="text" name="nominal_diskon" id="nominal_diskon" placeholder="0" class="form-control-modern">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Kode Diskon</label>
-                                    <div class="input-group">
-                                        <input type="text" name="kode_diskon" id="kode_diskon" value="{{ old('kode_diskon') }}" placeholder="Masukkan Kode Diskon" class="form-control">
-                                    </div>
+                                    <label>Kode Kupon</label>
+                                    <input type="text" name="kode_diskon" id="kode_diskon" placeholder="CONTOH: HEMAT77" class="form-control-modern">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row align-items-center">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Total Biaya</label>
+                        <div class="p-4" style="background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <span class="d-block font-weight-bold text-dark">TOTAL BIAYA AKHIR</span>
+                                    <small class="text-muted">Estimasi biaya yang dibayarkan peserta.</small>
+                                </div>
+                                <div class="col-md-6 text-right">
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Rp.</span>
-                                        </div>
-                                        <input type="text" name="total_biaya" id="total_biaya" value="{{ old('total_biaya') }}" placeholder="Masukkan Total Biaya" class="form-control" readonly>
+                                        <span class="modern-prefix">Rp</span>
+                                        <input type="text" name="total_biaya" id="total_biaya" class="form-control-modern text-left" readonly
+                                            style="font-size: 20px; font-weight: 800; color: var(--accent); background: white !important; border: 1.5px solid var(--accent);">
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-body">
-
-                        <div class="mt-4" id="card-bundling" style="display:none;">
-                            <div class="alert alert-light">
-                                <small>
-                                    Promo akan mengikuti <b>jadwal sesi & trainer</b> dari event yang dipilih.
-                                </small>
+                <div class="card-neo" id="card-bundling" style="display:none;">
+                    <div class="card-header-neo">
+                        <i class="fas fa-tasks"></i>
+                        <span>Pilih Target Event & Sesi</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="alert alert-modern mb-0">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Centang event dan pilih sesi yang ingin diikutkan dalam promo ini.
                             </div>
+                        </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th width="50">#</th>
-                                            <th>Tanggal Active</th>
-                                            <th>Trainer</th>
-                                            <th>Sesi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($events as $event)
-                                        <tr>
-                                            <td class="text-center">
-                                                <input type="checkbox"
-                                                    class="event-checkbox"
-                                                    data-event="{{ $event->id }}"
-                                                    data-harga="{{ $event->biayaPersesi->biaya_persesi ?? 0 }}"
-                                                    name="clinikscopus_ids[]"
-                                                    value="{{ $event->id }}">
-                                            </td>
-                                            <td>{{ $event->tanggal_online->format('d M Y') }} - {{ $event->tanggal_offline->format('d M Y') }}</td>
-                                            <td>{{ $event->user->full_name }}</td>
-                                            <td>
-                                                @php
-                                                $sesiList = [
-                                                1 => $event->sesi,
-                                                2 => $event->sesi2,
-                                                3 => $event->sesi3,
-                                                4 => $event->sesi4,
-                                                5 => $event->sesi5,
-                                                6 => $event->sesi6,
-                                                7 => $event->sesi7,
-                                                8 => $event->sesi8,
-                                                9 => $event->sesi9,
-                                                ];
-                                                @endphp
-
+                        <div class="table-responsive">
+                            <table class="table table-modern mb-0">
+                                <thead>
+                                    <tr>
+                                        <th width="60" class="text-center">CEK</th>
+                                        <th>DETAIL EVENT</th>
+                                        <th>TRAINER</th>
+                                        <th>SESI TERSEDIA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($events as $event)
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="event-checkbox" data-event="{{ $event->id }}" data-harga="{{ $event->biayaPersesi->biaya_persesi ?? 0 }}" name="clinikscopus_ids[]" value="{{ $event->id }}">
+                                        </td>
+                                        <td>
+                                            <span class="font-weight-bold text-dark">{{ $event->tanggal_online->format('d M Y') }}</span>
+                                            <div class="text-muted x-small">Sampai: {{ $event->tanggal_offline->format('d M Y') }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="font-weight-bold" style="font-size: 13px;">{{ $event->user->full_name }}</div>
+                                        </td>
+                                        <td>
+                                            @php
+                                            $sesiList = [1=>$event->sesi, 2=>$event->sesi2, 3=>$event->sesi3, 4=>$event->sesi4, 5=>$event->sesi5, 6=>$event->sesi6, 7=>$event->sesi7, 8=>$event->sesi8, 9=>$event->sesi9];
+                                            @endphp
+                                            <div class="d-flex flex-wrap gap-2">
                                                 @forelse($sesiList as $nomorSesi => $jam)
                                                 @if(!empty($jam))
-                                                <label class="d-block">
-                                                    <input type="checkbox"
-                                                        class="sesi-checkbox sesi-{{ $event->id }}"
-                                                        data-event="{{ $event->id }}"
-                                                        name="sesi_promo[{{ $event->id }}][]"
-                                                        value="{{ $nomorSesi }}">
-
-                                                    <strong>Sesi {{ $nomorSesi }}</strong> — {{ $jam }}
-                                                </label>
+                                                <div class="mr-3 mb-1">
+                                                    <input type="checkbox" class="sesi-checkbox sesi-{{ $event->id }}" data-event="{{ $event->id }}" name="sesi_promo[{{ $event->id }}][]" value="{{ $nomorSesi }}" id="s-{{ $event->id }}-{{ $nomorSesi }}">
+                                                    <label for="s-{{ $event->id }}-{{ $nomorSesi }}" class="ml-1 font-weight-bold text-muted small" style="cursor: pointer;">S{{ $nomorSesi }}</label>
+                                                </div>
                                                 @endif
                                                 @empty
-                                                <small class="text-muted">Tidak ada sesi</small>
+                                                <span class="text-muted x-small italic">Sesi tidak tersedia</span>
                                                 @endforelse
-                                            </td>
-
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-
-                        <div class="mt-3">
-                            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
-
-                                <!-- Tombol Simpan -->
-                                <button type="submit"
-                                    class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-paper-plane"></i> SIMPAN
-                                </button>
-
-                                <!-- Tombol Kembali -->
-                                <a href="{{ route('account.Clinik-Scopus-Promo.index') }}"
-                                    class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                                    <i class="fa fa-undo"></i> KEMBALI
-                                </a>
-
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
+                <div class="d-flex flex-md-nowrap flex-wrap gap-3 mt-5">
+                    <button type="submit" class="btn-modern btn-save flex-grow-1">
+                        <i class="fas fa-save"></i> SIMPAN DATA
+                </div>
             </form>
         </div>
     </section>
 </div>
 
-<!--================== KONDISI CEKLIS CEKBOX ==================-->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        function hitungHargaNormal() {
-            let total = 0;
-
-            document.querySelectorAll('.sesi-checkbox:checked').forEach(sesi => {
-                const eventId = sesi.dataset.event;
-                const eventCheckbox = document.querySelector(
-                    `.event-checkbox[data-event="${eventId}"]`
-                );
-
-                if (eventCheckbox) {
-                    total += parseInt(eventCheckbox.dataset.harga || 0);
-                }
-            });
-
-            document.getElementById('harga_normal').value =
-                new Intl.NumberFormat('id-ID').format(total);
-
-            updateTotalBiaya();
-        }
-
-        // ✔️ EVENT CHECKBOX → AUTO CEKLIS SESI + HITUNG
-        document.querySelectorAll('.event-checkbox').forEach(eventCheckbox => {
-            eventCheckbox.addEventListener('change', function() {
-                const eventId = this.dataset.event;
-                const sesiCheckboxes = document.querySelectorAll('.sesi-' + eventId);
-
-                sesiCheckboxes.forEach(cb => {
-                    cb.checked = this.checked;
-                });
-
-                // 🔥 INI YANG KURANG
-                hitungHargaNormal();
-            });
-        });
-
-        // ✔️ SESI MANUAL CHECK
-        document.querySelectorAll('.sesi-checkbox').forEach(cb => {
-            cb.addEventListener('change', hitungHargaNormal);
-        });
-
-    });
-</script>
-<!--================== END ==================-->
-
-<!--================== MENGHITUNG DISKON DAN DISABLED DISKON ==================-->
-<script>
-    function handleDiskonTypeChange() {
-        const tipe = document.getElementById('tipe_diskon').value;
-
-        const persenField = document.getElementById('diskon_persentase');
-        const nominalField = document.getElementById('nominal_diskon');
-        const cardBundling = document.getElementById('card-bundling');
-        const kodeDiskonField = document.querySelector('[name="kode_diskon"]');
-
-        // Reset default
-        persenField.disabled = true;
-        nominalField.readOnly = true;
-        kodeDiskonField.readOnly = false;
-
-        persenField.value = '';
-
-        if (cardBundling) {
-            cardBundling.style.display = 'block';
-        }
-
-        if (tipe === 'persentase') {
-            persenField.disabled = false;
-            nominalField.readOnly = true;
-
-        } else if (tipe === 'nominal') {
-            persenField.disabled = true;
-            nominalField.readOnly = false;
-
-        } else if (tipe === 'bundling') {
-            persenField.disabled = true;
-            nominalField.readOnly = false;
-            kodeDiskonField.readOnly = true;
-        }
-
-        updateNominalDiskon();
-    }
-
-    window.addEventListener('DOMContentLoaded', function() {
-        handleDiskonTypeChange();
-
-        document.getElementById('tipe_diskon')
-            .addEventListener('change', handleDiskonTypeChange);
-
-        document.getElementById('diskon_persentase')
-            .addEventListener('input', updateNominalDiskon);
-
-        document.getElementById('nominal_diskon')
-            .addEventListener('input', function(e) {
-                const angka = e.target.value.replace(/\D/g, '');
-                e.target.value = formatRupiah(angka);
-                updateNominalDiskon();
-            });
-
-        document.getElementById('biaya')
-            .addEventListener('input', updateNominalDiskon);
-    });
-</script>
-<!--================== END ==================-->
-
-<!--================== FORMAT RUPIAH ==================-->
-<script>
-    // ===============================
-    // FORMAT RUPIAH
-    // ===============================
+    // 1. Helper Functions
     function formatRupiah(angka) {
-        if (!angka) return '';
+        if (!angka && angka !== 0) return '0';
         return new Intl.NumberFormat('id-ID').format(angka);
     }
 
-    function toNumber(rupiah) {
-        return parseInt((rupiah || '0').replace(/\D/g, '')) || 0;
-    }
-
-    // Konversi string rupiah ke number
     function toNumber(str) {
         if (!str) return 0;
-        // Hapus semua karakter kecuali angka
-        return Number(str.replace(/\D/g, '')) || 0;
+        return Number(str.toString().replace(/\D/g, '')) || 0;
     }
 
-    // Format number ke rupiah
-    function formatRupiah(number) {
-        return new Intl.NumberFormat('id-ID').format(number);
+    // Fungsi Global agar onchange="handleDiskonTypeChange()" di HTML bekerja
+    function handleDiskonTypeChange() {
+        const tipeSelect = document.getElementById('tipe_diskon');
+        const tipe = tipeSelect.value;
+        const persenField = document.getElementById('diskon_persentase');
+        const nominalField = document.getElementById('nominal_diskon');
+        const cardBundling = document.getElementById('card-bundling');
+        const kodeDiskonField = document.getElementById('kode_diskon');
+
+        // Kondisi jika belum memilih tipe
+        if (!tipe) {
+            if (cardBundling) cardBundling.style.display = 'none';
+            persenField.disabled = true;
+            persenField.readOnly = true;
+            nominalField.readOnly = true;
+            if (kodeDiskonField) kodeDiskonField.readOnly = true;
+            return;
+        }
+
+        // Tampilkan card bundling jika ada tipe yang dipilih
+        if (cardBundling) cardBundling.style.display = 'block';
+
+        // Pengaturan Input berdasarkan tipe
+        if (tipe === 'persentase') {
+            // AKTIFKAN Persentase
+            persenField.disabled = false;
+            persenField.readOnly = false; // <-- Ini yang sebelumnya terlewat
+
+            // MATIKAN Nominal
+            nominalField.readOnly = true;
+
+            if (kodeDiskonField) kodeDiskonField.readOnly = false;
+
+        } else if (tipe === 'nominal') {
+            // MATIKAN Persentase
+            persenField.disabled = true;
+            persenField.readOnly = true;
+            persenField.value = '';
+
+            // AKTIFKAN Nominal
+            nominalField.readOnly = false;
+
+            if (kodeDiskonField) kodeDiskonField.readOnly = false;
+
+        } else if (tipe === 'bundling') {
+            // MATIKAN Persentase
+            persenField.disabled = true;
+            persenField.readOnly = true;
+            persenField.value = '';
+
+            // AKTIFKAN Nominal (Karena bundling mengisi nominal secara manual/otomatis)
+            nominalField.readOnly = false;
+
+            if (kodeDiskonField) kodeDiskonField.readOnly = true;
+        }
+
+        // Trigger hitung ulang harga
+        if (window.hitungHargaNormal) window.hitungHargaNormal();
     }
 
-    // ===============================
-    // HITUNG TOTAL BIAYA
-    // ===============================
-    function updateTotalBiaya() {
-        const hargaNormal = toNumber(document.getElementById('harga_normal').value);
-        const nominalDiskon = toNumber(document.getElementById('nominal_diskon').value);
-
-        let total = hargaNormal - nominalDiskon;
-        if (total < 0) total = 0;
-
-        document.getElementById('total_biaya').value = formatRupiah(total);
-    }
-    // ===============================
-    // EVENT LISTENER
-    // ===============================
     document.addEventListener('DOMContentLoaded', function() {
         const hargaNormalInput = document.getElementById('harga_normal');
-        const nominalDiskonInput = document.getElementById('nominal_diskon');
-
-        // Harga Normal
-        hargaNormalInput.addEventListener('input', function(e) {
-            const angka = toNumber(e.target.value);
-            e.target.value = formatRupiah(angka);
-            updateTotalBiaya();
-        });
-
-        // Nominal Diskon
-        nominalDiskonInput.addEventListener('input', function(e) {
-            const angka = toNumber(e.target.value);
-            e.target.value = formatRupiah(angka);
-            updateTotalBiaya();
-        });
-
-        // Hitung pertama kali
-        updateTotalBiaya();
-    });
-</script>
-<!--================== END ==================-->
-
-<!--================== MENGHITUNG HARGA NORMAL ==================-->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        const hargaNormalInput = document.getElementById('harga_normal');
-
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID').format(number);
-        }
-
-        function toNumber(str) {
-            return Number((str || '0').replace(/\D/g, '')) || 0;
-        }
-
-        function hitungHargaNormal() {
-            let total = 0;
-
-            document.querySelectorAll('.sesi-checkbox:checked').forEach(sesi => {
-                const eventId = sesi.dataset.event;
-                const eventCheckbox = document.querySelector(
-                    `.event-checkbox[data-event="${eventId}"]`
-                );
-
-                if (eventCheckbox) {
-                    const hargaSesi = parseInt(eventCheckbox.dataset.harga || 0);
-                    total += hargaSesi;
-                }
-            });
-
-            hargaNormalInput.value = formatRupiah(total);
-
-            // 🔥 otomatis hitung ulang total biaya
-            updateTotalBiaya();
-        }
-
-        // Hitung setiap sesi dicentang / dilepas
-        document.querySelectorAll('.sesi-checkbox').forEach(cb => {
-            cb.addEventListener('change', hitungHargaNormal);
-        });
-
-    });
-</script>
-<!--================== END ==================-->
-
-<!--================== MENGHITUNG DISKON PERSENTASE ==================-->
-<script>
-    function updateNominalDiskon() {
-        const hargaNormal = toNumber(document.getElementById('harga_normal').value);
-        const tipeDiskon = document.getElementById('tipe_diskon').value;
+        const tipeDiskonSelect = document.getElementById('tipe_diskon');
         const persenInput = document.getElementById('diskon_persentase');
         const nominalInput = document.getElementById('nominal_diskon');
+        const totalBiayaInput = document.getElementById('total_biaya');
 
-        // Jika diskon persentase
-        if (tipeDiskon === 'persentase') {
-            const persen = parseFloat(persenInput.value) || 0;
-            const nominalDiskon = Math.floor(hargaNormal * persen / 100);
+        // Simpan harga asli dari database
+        const HARGA_DASAR_DB = toNumber(hargaNormalInput.value);
 
-            nominalInput.value = formatRupiah(nominalDiskon);
+        // Fungsi Hitung Harga Normal (Global agar bisa dipanggil handleDiskonTypeChange)
+        window.hitungHargaNormal = function() {
+            const tipe = tipeDiskonSelect.value;
+            let total = 0;
+
+            if (tipe === 'bundling') {
+                // 🔵 LOGIKA BUNDLING: Akumulasi harga sesi
+                document.querySelectorAll('.sesi-checkbox:checked').forEach(sesi => {
+                    const eventId = sesi.dataset.event;
+                    const eventCheckbox = document.querySelector(`.event-checkbox[data-event="${eventId}"]`);
+                    if (eventCheckbox) {
+                        total += parseInt(eventCheckbox.dataset.harga || 0);
+                    }
+                });
+            } else {
+                // 🔴 LOGIKA PERSENTASE & NOMINAL: Harga Statis
+                total = HARGA_DASAR_DB;
+            }
+
+            hargaNormalInput.value = formatRupiah(total);
+            updateNominalDiskon();
         }
 
-        // Tetap hitung total biaya
-        updateTotalBiaya();
-    }
+        // Fungsi Hitung Diskon
+        window.updateNominalDiskon = function() {
+            const hargaNormal = toNumber(hargaNormalInput.value);
+            const tipe = tipeDiskonSelect.value;
+            let nominalDiskon = 0;
+
+            if (tipe === 'persentase') {
+                const persen = parseFloat(persenInput.value) || 0;
+                nominalDiskon = Math.floor(hargaNormal * persen / 100);
+                nominalInput.value = formatRupiah(nominalDiskon);
+            } else {
+                nominalDiskon = toNumber(nominalInput.value);
+            }
+
+            // Safety: Diskon tak boleh lebih besar dari harga
+            if (nominalDiskon > hargaNormal) {
+                nominalDiskon = hargaNormal;
+                nominalInput.value = formatRupiah(hargaNormal);
+            }
+
+            let akhir = hargaNormal - nominalDiskon;
+            totalBiayaInput.value = formatRupiah(akhir < 0 ? 0 : akhir);
+        }
+
+        // Event Listener untuk input manual nominal
+        nominalInput.addEventListener('input', function() {
+            this.value = formatRupiah(toNumber(this.value));
+            updateNominalDiskon();
+        });
+
+        // Event Listener untuk Ceklis
+        document.querySelectorAll('.event-checkbox, .sesi-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (this.classList.contains('event-checkbox')) {
+                    const eventId = this.dataset.event;
+                    document.querySelectorAll('.sesi-' + eventId).forEach(s => s.checked = this.checked);
+                }
+                window.hitungHargaNormal();
+            });
+        });
+
+        // Inisialisasi awal jika ada pilihan lama (misal saat edit atau reload)
+        if (tipeDiskonSelect.value) {
+            handleDiskonTypeChange();
+        }
+    });
 </script>
-<!--================== END ==================-->
 
 @endsection

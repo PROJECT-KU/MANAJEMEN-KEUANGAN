@@ -119,10 +119,10 @@ Kategori Analisis Bibliometrik | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->total_kuota }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->sisa_kuota }}</td>
                                         <td class="column-width" style="text-align: center;">
-                                            @if($hasil->status == 'publish')
-                                            <span class="badge badge-success">PUBLISH</i></span>
+                                            @if($hasil->status == 'active')
+                                            <span class="badge badge-success">Active</span>
                                             @else
-                                            <span class="badge badge-danger">DRAFT</span>
+                                            <span class="badge badge-danger">Non Active</span>
                                             @endif
                                         </td>
                                         <td style="text-align: center;">

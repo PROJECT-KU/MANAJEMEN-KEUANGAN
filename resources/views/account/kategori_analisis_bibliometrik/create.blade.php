@@ -136,8 +136,8 @@ Tambah Kategori | MIS
                                     <div class="input-group">
                                         <select class="form-control" style="height: auto;" name="status" required>
                                             <option value="" disabled selected>-- PILIH STATUS --</option>
-                                            <option value="publish">PUBLISH</option>
-                                            <option value="draft">DRAFT</option>
+                                            <option value="active">Active</option>
+                                            <option value="non active">Non Active</option>
                                         </select>
                                     </div>
                                 </div>
@@ -248,7 +248,7 @@ Tambah Kategori | MIS
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp.</span>
                                         </div>
-                                        <input type="number" name="total_biaya" id="total_biaya" value="{{ old('total_biaya') }}" placeholder="Masukkan Total Biaya" class="form-control" readonly>
+                                        <input type="text" name="total_biaya" id="total_biaya" placeholder="Masukkan Total Biaya" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
