@@ -266,25 +266,35 @@ Update Data Customer | MIS
                                         </select>
                                     </div>
                                     <div class="col-md-6 form-group">
-                                        <label>Level Akses </label>
-                                        <input class="form-control-modern" type="text" value="{{ ucfirst($user->level) }}" readonly>
+                                        <label>Level Sistem </label>
+                                        <select class="form-control-modern" name="level">
+                                            <option value="">-- Pilih Level --</option>
+                                            <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager Sistem</option>
+                                            <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan Sistem</option>
+                                            <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff Sistem</option>
+                                            <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User Sistem</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label>Jenis Akun </label>
-                                        <input class="form-control-modern" type="text" value="{{ ucfirst($user->jenis) }}" readonly>
+                                        <select class="form-control-modern" name="jenis">
+                                            <option value="">-- Pilih Jenis --</option>
+                                            <option value="bisnis" {{ $user->jenis == 'bisnis' ? 'selected' : '' }}>Bisnis (Entity)</option>
+                                            <option value="perorangan" {{ $user->jenis == 'perorangan' ? 'selected' : '' }}>Perorangan (Personal)</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-6 form-group">
-                                        <label>Nomor Telepon </label>
-                                        <input class="form-control-modern" type="text" value="{{ $user->telp }}" readonly>
+                                        <label>Kode Perusahaan </label>
+                                        <input class="form-control-modern" type="text" value="{{ ucfirst($user->company ?? '-') }}">
                                     </div>
                                 </div>
 
                                 <div class="mt-4">
                                     <button type="submit" class="btn-modern btn-gradient w-100">
-                                        <i class="fas fa-save mr-2"></i> SIMPAN SEMUA PERUBAHAN DATA
+                                        <i class="fas fa-sync-alt"></i> UPDATE DATA
                                     </button>
                                 </div>
                             </form>

@@ -40,6 +40,7 @@ class CreateUsersTable extends Migration
             $table->string('tenggat', 300)->nullable();
             $table->string('title', 300)->nullable();
             $table->string('nik', 100)->nullable();
+            $table->date('tanggal_lahir')->nullable();
             $table->string('norek', 100)->nullable();
             $table->string('bank', 100)->nullable();
             $table->string('gambar', 300)->nullable();

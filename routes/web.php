@@ -108,7 +108,7 @@ Route::prefix('account')
             Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
             Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
             Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
-            Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
+            Route::delete('/pengguna/delete/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
             Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
 
             // routes/web.php
