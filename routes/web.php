@@ -120,7 +120,7 @@ Route::prefix('account')
             //profil
             Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
-            Route::post('/profil/update/foto/{id}', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
+            Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
             Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
             Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');

@@ -272,14 +272,15 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 <i class="fas fa-coins"></i> <span>Biaya Persesi</span>
                             </a>
                         </li>
-                        @endif
 
-                        @if (in_array($level, ['manager', 'karyawan']))
                         <li class="{{ setActive('account/Clinik-Scopus-Promo') }}">
                             <a class="nav-link" href="{{ route('account.Clinik-Scopus-Promo.index') }}">
                                 <i class="fas fa-tags"></i> <span>Promo</span>
                             </a>
                         </li>
+                        @endif
+
+                        @if (in_array($level, ['manager', 'karyawan']))
                         <li class="{{ setActive('account/clinikscopus') }}">
                             <a class="nav-link" href="{{ route('account.clinikscopus.index') }}">
                                 <i class="fas fa-home"></i> <span>Clinik Scopus</span>
