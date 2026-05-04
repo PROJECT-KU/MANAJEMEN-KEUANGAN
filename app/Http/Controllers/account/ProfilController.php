@@ -18,14 +18,6 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfilController extends Controller
 {
-  // ...
-
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
   public function show($id)
   {
     $user = User::find($id);
@@ -72,27 +64,39 @@ class ProfilController extends Controller
   }
 
   // <!--================== UPDATE FOTO PROFIL ==================-->
-  public function updatePhoto(Request $request, $id)
+  public function updatePhoto(Request $request)
   {
-    $user = User::find($id);
+    // 1. Validasi input (Sesuaikan max dengan script JS Anda: 3MB = 3072)
+    $request->validate([
+      'gambar' => 'required|image|mimes:jpeg,png,jpg,gif|max:3072',
+    ]);
 
+    // 2. Langsung ambil User yang sedang login (Hanya diri sendiri)
     $user = Auth::user();
 
-    // Menghapus foto lama jika ada
-    if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
-      unlink(public_path('assets/img/profil/' . $user->gambar));
+    if ($request->hasFile('gambar')) {
+
+      // 3. Hapus foto lama (Proteksi agar tidak menghapus foto default)
+      if ($user->gambar && !in_array($user->gambar, ['default.png', 'no-image.jpg'])) {
+        $oldPath = public_path('assets/img/profil/' . $user->gambar);
+        if (file_exists($oldPath)) {
+          unlink($oldPath);
+        }
+      }
+
+      // 4. Proses Upload
+      $file = $request->file('gambar');
+      $fileName = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+      $file->move(public_path('assets/img/profil'), $fileName);
+
+      // 5. Simpan ke DB
+      $user->gambar = $fileName;
+      $user->save();
+
+      return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
     }
 
-    // Menyimpan foto baru di assets/public/img/profil
-    $fileName = time() . '.' . $request->gambar->extension();
-    $request->gambar->move(public_path('assets/img/profil'), $fileName);
-
-    // Update nama file gambar di database
-    $user->gambar = $fileName;
-    $user->save();
-
-    // Redirect dengan session success
-    return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
+    return redirect()->back()->with('error', 'Gagal memperbarui foto.');
   }
   // <!--================== END ==================-->
 
@@ -212,13 +216,13 @@ class ProfilController extends Controller
 
     // Validate input data
     $request->validate([
-      'nik' => 'nullable|string',
+      'tanggal_lahir' => 'nullable|date',
       'norek' => 'nullable|string',
       'bank' => 'nullable|string',
     ]);
 
-    if ($request->has('nik')) {
-      $user->nik = $request->input('nik');
+    if ($request->has('tanggal_lahir')) {
+      $user->tanggal_lahir = $request->input('tanggal_lahir');
     }
 
     if ($request->has('norek')) {
@@ -227,6 +231,22 @@ class ProfilController extends Controller
 
     if ($request->has('bank')) {
       $user->bank = $request->input('bank');
+    }
+
+    if ($request->has('status')) {
+      $user->status = $request->input('status');
+    }
+
+    if ($request->has('level')) {
+      $user->level = $request->input('level');
+    }
+
+    if ($request->has('company')) {
+      $user->company = $request->input('company');
+    }
+
+    if ($request->has('jenis')) {
+      $user->jenis = $request->input('jenis');
     }
 
     $user->save();

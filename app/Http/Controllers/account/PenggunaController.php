@@ -51,24 +51,28 @@ class PenggunaController extends Controller
 
         $users = DB::table('users')
             ->where('company', $user->company)
-            ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager', 'ceo'])
-            ->orderBy('created_at', 'DESC')
+            ->where('jenis', 'bisnis')
+            ->where('level', '!=', 'user')
             ->where(function ($query) use ($search) {
-                $query->where('users.full_name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.email', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.username', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.email_verified_at', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.jenis', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.level', 'LIKE', '%' . $search . '%')
-                    ->orWhere('users.status', 'LIKE', '%' . $search . '%');
+                $query->where('full_name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('email', 'LIKE', '%' . $search . '%')
+                    ->orWhere('username', 'LIKE', '%' . $search . '%')
+                    ->orWhere('jobdesk', 'LIKE', '%' . $search . '%')
+                    ->orWhere('status', 'LIKE', '%' . $search . '%');
             })
-            ->orderBy('users.created_at', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->paginate(10);
+
         $users->appends(['q' => $search]);
 
+        // JIKA REQUEST DARI AJAX / LIVE SEARCH
+        if ($request->ajax() || $request->hasHeader('X-Requested-With')) {
+            return view('account.pengguna.index', compact('users'));
+        }
 
+        // JIKA AKSES MANUAL VIA URL (Bukan Live Search)
         if ($users->isEmpty()) {
-            return redirect()->route('account.pengguna.index')->with('error', 'Data Pengguna tidak ditemukan.');
+            return redirect()->route('account.pengguna.index')->with('error', 'Data tidak ditemukan.');
         }
 
         return view('account.pengguna.index', compact('users'));
@@ -81,12 +85,6 @@ class PenggunaController extends Controller
         return view('account.pengguna.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -105,7 +103,7 @@ class PenggunaController extends Controller
             'level' => 'required',
             'jenis' => 'required',
             'telp' => 'required',
-            'nik' => 'required',
+            'tanggal_lahir' => 'required',
             'norek' => 'required',
             'bank' => 'required',
         ], [
@@ -113,7 +111,7 @@ class PenggunaController extends Controller
             'company.required'  => 'Masukkan Nama Tempat Anda Bekerja!',
             'username.required'          => 'Masukkan Username Anda!',
             'telp.required'          => 'Masukkan No Telp Anda!',
-            'nik.required'          => 'Masukkan NIK Anda!',
+            'tanggal_lahir.required'          => 'Masukkan Tanggal Lahir Anda!',
             'norek.required'          => 'Masukkan Nomor Rekening Anda!',
             'bank.required'          => 'Masukkan BANK Anda!',
             'gambar.max' => 'Ukuran gambar tidak boleh melebihi 5MB!',
@@ -140,7 +138,7 @@ class PenggunaController extends Controller
         $user->notif = $request->input('notif');
         $user->tenggat = $request->input('tenggat');
         $user->title = $request->input('title');
-        $user->nik = $request->input('nik');
+        $user->tanggal_lahir = $request->input('tanggal_lahir');
         $user->norek = $request->input('norek');
         $user->bank = $request->input('bank');
         $user->jobdesk = $request->input('jobdesk');
@@ -283,7 +281,8 @@ class PenggunaController extends Controller
         $user->company = $request->input('company') ?? $user->company;
         $user->level = $request->input('level') ?? $user->level;
         $user->status = $request->input('status') ?? $user->status;
-        $user->nik = $request->input('nik') ?? $user->nik;
+        $user->jenis = $request->input('jenis') ?? $user->jenis;
+        $user->tanggal_lahir = $request->input('tanggal_lahir') ?? $user->tanggal_lahir;
         $user->norek = $request->input('norek') ?? $user->norek;
         $user->bank = $request->input('bank') ?? $user->bank;
 
@@ -312,47 +311,26 @@ class PenggunaController extends Controller
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
-        // Find the user by ID
         $user = User::find($id);
 
-        // Check if the user exists
         if (!$user) {
-            return redirect()->route('account.pengguna.index')->with('error', 'Pengguna tidak ditemukan');
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak ditemukan!'
+            ]);
         }
 
-        // Delete the user
+        // Hapus foto jika ada (Opsional tapi disarankan)
+        if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
+            unlink(public_path('assets/img/profil/' . $user->gambar));
+        }
+
         $user->delete();
 
-        // Redirect with success message
-        return redirect()->route('account.pengguna.index')->with('success', 'Data pengguna berhasil dihapus!');
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== RESET PASSWORD ==================-->
-    public function resetPassword(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'password' => 'required|min:8|confirmed',
+        return response()->json([
+            'status' => true,
+            'message' => 'Data pengguna berhasil dihapus!'
         ]);
-
-        $user = Auth::user(); // Get the authenticated user
-
-        // Check if the old password matches the user's current password
-        // ... You can add your old password check logic here if needed
-
-        // Update the user's password with the new one
-        $user->password = bcrypt($request->input('password'));
-        $user->save();
-
-        return redirect()->with('success', 'Password berhasil diubah'); // Redirect to the desired route
-    }
-
-    public function password($id)
-    {
-        $user = User::findOrFail($id);
-
-        return view('account.profil.resetpassword', compact('user'));
     }
     // <!--================== END ==================-->
 

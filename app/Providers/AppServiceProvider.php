@@ -72,15 +72,32 @@ class AppServiceProvider extends ServiceProvider
                 // Query Dasar
                 $queryScopus = DB::table('clinikscopus_pemesanan');
 
-                // Filter Hak Akses
+                // ===============================
+                // USER - PERORANGAN
+                // ===============================
                 if ($user->level === 'user' && $user->jenis === 'perorangan') {
                     $queryScopus->where('customer_id', $user->id);
-                } elseif ($user->level === 'karyawan') {
-                    $queryScopus->where('trainer_id', $user->id);
                 }
-                // Manager/CEO melihat semua data
 
-                // Hitung masing-masing status
+                // ===============================
+                // KARYAWAN (Logic disamakan dengan Controller)
+                // ===============================
+                elseif ($user->level === 'karyawan') {
+                    $queryScopus->where('trainer_id', $user->id)
+                        ->whereExists(function ($q) use ($user) {
+                            $q->select(DB::raw(1))
+                                ->from('users') // atau nama tabel trainer Anda
+                                ->whereColumn('users.id', 'clinikscopus_pemesanan.trainer_id')
+                                ->where('users.company', $user->company);
+                        });
+                }
+
+                // ===============================
+                // MANAGER / CEO
+                // ===============================
+                // Sesuai controller: tampilkan semua (tanpa filter tambahan)
+
+                // Hitung masing-masing status dengan cloning agar filter di atas tetap terjaga
                 $countScopusPending = (clone $queryScopus)->where('status', 'pending')->count();
                 $countPaid = (clone $queryScopus)->where('status', 'paid')->count();
             }
