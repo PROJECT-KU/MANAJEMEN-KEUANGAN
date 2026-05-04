@@ -32,6 +32,7 @@ class User extends Authenticatable
         'pj_company',
         'level',
         'nik',
+        'tanggal_lahir',
         'norek',
         'bank',
         'gambar',

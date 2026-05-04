@@ -108,7 +108,7 @@ Route::prefix('account')
             Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
             Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
             Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
-            Route::delete('/pengguna/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
+            Route::delete('/pengguna/delete/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
             Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
 
             // routes/web.php
@@ -120,7 +120,7 @@ Route::prefix('account')
             //profil
             Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
-            Route::post('/profil/update/foto/{id}', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
+            Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
             Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
             Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');

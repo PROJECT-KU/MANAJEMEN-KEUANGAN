@@ -5,119 +5,228 @@ use Carbon\Carbon;
 
 $user = Auth::user();
 $userId = $user->id;
-$slides = [];
 
-// TO DO LIST
 if ($user->level === 'manager') {
 $tasks = DB::table('todolist')->where('status', 'Assign Task')->get();
 } else {
 $tasks = DB::table('todolist')
 ->where('status', 'Assign Task')
 ->where(function ($query) use ($userId) {
-$query->where('user_id', $userId)
-->orWhere('user_id_kedua', $userId);
-})
-->get();
+$query->where('user_id', $userId)->orWhere('user_id_kedua', $userId);
+})->get();
 }
+$taskCount = $tasks->count();
+@endphp
 
-if ($tasks->count() > 0) {
-$slides[] = [
-'type' => 'task',
-'html' => '
-<div class="d-flex align-items-center justify-content-center" style="min-height: 250px;">
-    <div class="alert alert-info mx-auto mb-3" role="alert" style="width: 100%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-        <b style="font-size: 20px;">Notifikasi Tugas</b>
-        <hr>
-        <p style="font-size: 15px;">Anda memiliki tugas yang perlu segera diselesaikan.<br>Silakan lihat detail tugas di menu To Do List.</p>
-    </div>
-</div>'
-];
-}
+<!-- Library Pendukung -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-// NONACTIVE ACCOUNT
-if ($user->status === 'nonactive') {
-$slides[] = [
-'type' => 'nonactive',
-'html' => '
-<div class="d-flex align-items-center justify-content-center" style="min-height: 250px;">
-    <div class="alert alert-danger mx-auto mb-3" role="alert" style="width: 100%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-        <b style="font-size: 20px;">Akun Anda Telah Dinonaktifkan</b>
-        <hr>
-        <p style="font-size: 15px;">Silakan hubungi admin untuk mengaktifkan kembali akun Anda.</p>
-    </div>
-</div>'
-];
-}
+<style>
+    /* Keyframes untuk Animasi Muncul */
+    @keyframes bjFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-// DATA DIRI KOSONG
-if (
-!$user->company || !$user->telp || !$user->nik || !$user->norek ||
-!$user->bank || !$user->gambar || !$user->jobdesk
-) {
-$slides[] = [
-'type' => 'datadiri',
-'html' => '
-<div class="d-flex align-items-center justify-content-center" style="min-height: 250px;">
-    <div class="alert alert-warning mx-auto mb-3" role="alert" style="width: 100%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-        <b style="font-size: 20px;">Data Diri Belum Lengkap</b>
-        <hr>
-        <p style="font-size: 15px;">Beberapa informasi pribadi Anda belum lengkap.<br>Silakan lengkapi data diri Anda terlebih dahulu.</p>
-    </div>
-</div>'
-];
-}
-
-// MAINTENANCE
-if (isset($maintenances) && !$maintenances->isEmpty()) {
-foreach ($maintenances as $maintenance) {
-if ($maintenance->status === 'aktif' && now() <= Carbon::parse($maintenance->end_date)->endOfDay()) {
-    $start = Carbon::parse($maintenance->start_date)->isoFormat('D MMMM YYYY HH:mm');
-    $end = Carbon::parse($maintenance->end_date)->isoFormat('D MMMM YYYY HH:mm');
-    $slides[] = [
-    'type' => 'maintenance',
-    'html' => '
-    <div class="d-flex align-items-center justify-content-center" style="min-height: 250px;">
-        <div class="alert alert-danger mx-auto mb-3" role="alert" style="width: 100%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-            <b style="font-size: 22px; text-transform: uppercase;">' . e($maintenance->title) . '</b>
-            <hr>
-            <p style="font-size: 16px;">' . e($maintenance->note) . '</p>
-            <p style="font-size: 14px;">Dari tanggal ' . $start . ' - ' . $end . '</p>
-        </div>
-    </div>'
-    ];
-    break;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    }
-    }
-    @endphp
 
-    @if(count($slides) > 0)
-    <div id="taskSlider" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            @foreach($slides as $index => $slide)
-            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                {!! $slide['html'] !!}
+    .bj-grid-container {
+        font-family: 'Outfit', sans-serif;
+        padding: 15px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .bj-grid-wrapper {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .bj-grid-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Base Card Style dengan Transisi */
+    .bj-neo-card {
+        position: relative;
+        flex: 0 0 85%;
+        height: 200px;
+        padding: 20px;
+        border-radius: 25px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: #1a1a1a;
+        /* Warna solid agar tidak berkabut */
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        scroll-snap-align: center;
+        overflow: hidden;
+
+        /* Animasi Masuk */
+        animation: bjFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+
+        /* Transisi Hover */
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    /* Staggered Delay untuk tiap card */
+    .bj-neo-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .bj-neo-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    /* Hover effect yang modern */
+    .bj-neo-card:hover {
+        transform: translateY(-8px);
+        background: #222222;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (min-width: 768px) {
+        .bj-grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            overflow-x: visible;
+            gap: 20px;
+        }
+
+        .bj-neo-card {
+            flex: none;
+            height: 240px;
+        }
+    }
+
+    .bj-neo-icon {
+        font-size: 2rem;
+        transition: transform 0.4s ease;
+    }
+
+    /* Animasi ikon saat card di-hover */
+    .bj-neo-card:hover .bj-neo-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .bj-neo-title {
+        font-weight: 800;
+        color: #ffffff;
+        margin-top: 10px;
+        font-size: 1.2rem;
+    }
+
+    .bj-neo-desc {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .bj-neo-btn {
+        background: #ffffff;
+        color: #000 !important;
+        padding: 10px 20px;
+        border-radius: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        width: fit-content;
+        text-decoration: none !important;
+        transition: background 0.3s ease;
+    }
+
+    .bj-neo-btn:hover {
+        background: #e0e0e0;
+    }
+
+    .bj-neo-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 0.6rem;
+        color: #fff;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .bj-neo-task {
+        border-left: 5px solid #00f2fe;
+    }
+
+    .bj-neo-warning {
+        border-left: 5px solid #f59e0b;
+    }
+
+    .bj-neo-danger {
+        border-left: 5px solid #f43f5e;
+    }
+
+    .bj-neo-bg-icon {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 6rem;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+</style>
+
+<div class="bj-grid-container">
+    <div class="bj-grid-wrapper">
+
+        @if ($taskCount > 0)
+        <div class="bj-neo-card bj-neo-task">
+            <i class="fas fa-list-check bj-neo-bg-icon"></i>
+            <div class="bj-neo-badge">{{ $taskCount }} NEW ASSIGNMENTS</div>
+            <i class="fas fa-bolt bj-neo-icon" style="color: #00f2fe;"></i>
+            <div>
+                <h5 class="bj-neo-title">Tugas Menanti</h5>
+                <p class="bj-neo-desc">Selesaikan tanggung jawab Anda hari ini agar produktivitas tetap terjaga.</p>
             </div>
-            @endforeach
-        </div>
-
-        @if(count($slides) > 1)
-        <button class="carousel-control-prev" type="button" data-bs-target="#taskSlider" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Sebelumnya</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#taskSlider" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Berikutnya</span>
-        </button>
-        <div class="carousel-indicators">
-            @foreach($slides as $index => $slide)
-            <button type="button" data-bs-target="#taskSlider" data-bs-slide-to="{{ $index }}"
-                class="{{ $index === 0 ? 'active' : '' }}"
-                aria-current="{{ $index === 0 ? 'true' : 'false' }}"
-                aria-label="Slide {{ $index + 1 }}"></button>
-            @endforeach
+            <a href="{{ route('account.todolist.index') }}" class="bj-neo-btn">Cek To Do List</a>
         </div>
         @endif
+
+        @if (!$user->company || !$user->telp || !$user->nik || !$user->norek || !$user->bank || !$user->gambar || !$user->jobdesk)
+        <div class="bj-neo-card bj-neo-warning">
+            <i class="fas fa-user-gear bj-neo-bg-icon"></i>
+            <div class="bj-neo-badge">UPDATE REQUIRED</div>
+            <i class="fas fa-user-shield bj-neo-icon" style="color: #f59e0b;"></i>
+            <div>
+                <h5 class="bj-neo-title">Lengkapi Profil</h5>
+                <p class="bj-neo-desc">Data diri Anda belum lengkap. Perbarui informasi profil untuk akses penuh sistem.</p>
+            </div>
+            <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="bj-neo-btn">Update Sekarang</a>
+        </div>
+        @endif
+
+        @if ($user->status == "nonactive")
+        <div class="bj-neo-card bj-neo-danger">
+            <i class="fas fa-ban bj-neo-bg-icon"></i>
+            <div class="bj-neo-badge">LOCKED</div>
+            <i class="fas fa-exclamation-triangle bj-neo-icon" style="color: #f43f5e;"></i>
+            <div>
+                <h5 class="bj-neo-title">Akun Nonaktif</h5>
+                <p class="bj-neo-desc">Akses Anda saat ini dibatasi. Silakan hubungi admin untuk aktivasi kembali.</p>
+            </div>
+            <a href="https://wa.me/6288983567819" class="bj-neo-btn">Hubungi Admin</a>
+        </div>
+        @endif
+
     </div>
-    @endif
+</div>
