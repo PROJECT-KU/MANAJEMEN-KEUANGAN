@@ -163,7 +163,7 @@ class ProfilController extends Controller
   }
   // <!--================== END ==================-->
 
-  // <!--================== UPDATE DATA DIRI ==================-->
+  // <!--================== UPDATE DATA DIRI SIDE BAR ==================-->
   public function updatediri(Request $request)
   {
     $user = Auth::user();
@@ -209,17 +209,10 @@ class ProfilController extends Controller
   }
   // <!--================== END ==================-->
 
-  // <!--================== UPDATE BANK ==================-->
+  // <!--================== UPDATE DATA DIRI ==================-->
   public function update(Request $request)
   {
     $user = Auth::user();
-
-    // Validate input data
-    $request->validate([
-      'tanggal_lahir' => 'nullable|date',
-      'norek' => 'nullable|string',
-      'bank' => 'nullable|string',
-    ]);
 
     if ($request->has('tanggal_lahir')) {
       $user->tanggal_lahir = $request->input('tanggal_lahir');
@@ -247,6 +240,14 @@ class ProfilController extends Controller
 
     if ($request->has('jenis')) {
       $user->jenis = $request->input('jenis');
+    }
+
+    if ($request->has('full_name')) {
+      $user->full_name = $request->input('full_name');
+    }
+
+    if ($request->has('username')) {
+      $user->username = $request->input('username');
     }
 
     $user->save();
