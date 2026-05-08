@@ -251,6 +251,7 @@ Profil | MIS
                 <button class="btn btn-sm btn-light text-warning" id="openPopupButtonTelp"><i class="fas fa-pencil-alt"></i></button>
               </div>
             </div>
+            @if (Auth::user()->level !== 'user')
             <hr style="border-top: 1px dashed #e2e8f0;">
             <div class="mb-4">
               <label class="text-muted small font-weight-bold">POSISI / JABATAN</label>
@@ -266,6 +267,7 @@ Profil | MIS
                 <span class="font-weight-bold">{{ $workDuration }}</span>
               </div>
             </div>
+            @endif
           </div>
         </div>
 
@@ -317,7 +319,7 @@ Profil | MIS
               @csrf
               <div class="form-group mb-4">
                 <label>Masukkan Nomor WhatsApp Baru</label>
-                <input type="text" class="form-control-modern" name="telp" value="{{ Auth::user()->telp }}" oninput="formatPhoneNumber(this)" required>
+                <input type="text" class="form-control-modern" name="telp" value="{{ Auth::user()->telp }}" oninput="formatPhoneNumber(this)">
               </div>
               <button type="submit" class="btn-modern btn-gradient w-100">Simpan Nomor</button>
             </form>
@@ -332,7 +334,7 @@ Profil | MIS
             <form id="verification-form" action="{{ route('account.profil.verify.code') }}" method="POST">
               @csrf
               <div class="form-group mb-4">
-                <input type="text" name="verification_code" class="form-control-modern text-center" placeholder="6 Digit Kode" maxlength="6" required>
+                <input type="text" name="verification_code" class="form-control-modern text-center" placeholder="6 Digit Kode" maxlength="6">
               </div>
               <button type="submit" class="btn-modern btn-gradient w-100">Verifikasi Sekarang</button>
             </form>
@@ -378,21 +380,17 @@ Profil | MIS
                   @endif
 
                   <div class="mb-4">
-                    <form id="register-form" action="{{ route('account.profil.update.datadiri') }}" method="POST">
-                      @csrf
-                      <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">Profil Dasar</h6>
-                      <div class="row">
-                        <div class="col-md-6 form-group">
-                          <label class="small font-weight-bold">Nama Lengkap</label>
-                          <input class="form-control-modern" type="text" name="full_name" value="{{ Auth::user()->full_name }}">
-                        </div>
-                        <div class="col-md-6 form-group">
-                          <label class="small font-weight-bold">Username</label>
-                          <input class="form-control-modern" type="text" name="username" value="{{ Auth::user()->username }}">
-                        </div>
+                    <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">Profil Dasar</h6>
+                    <div class="row">
+                      <div class="col-md-6 form-group">
+                        <label class="small font-weight-bold">Nama Lengkap</label>
+                        <input class="form-control-modern" type="text" name="full_name" value="{{ $user->full_name }}" form="form-update-data">
                       </div>
-                    </form>
-
+                      <div class="col-md-6 form-group">
+                        <label class="small font-weight-bold">Username</label>
+                        <input class="form-control-modern" type="text" name="username" value="{{ $user->username }}" form="form-update-data">
+                      </div>
+                    </div>
 
                     <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST">
                       @csrf
@@ -416,7 +414,7 @@ Profil | MIS
 
                   <hr class="my-4" style="border-top: 1px dashed #e2e8f0;">
 
-                  <form id="register-form" action="{{ route('account.profil.update') }}" method="POST">
+                  <form id="form-update-data" action="{{ route('account.profil.update') }}" method="POST">
                     @csrf
                     <div class="mb-4">
                       <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">Akses & Kepegawaian</h6>
@@ -474,7 +472,7 @@ Profil | MIS
 
                     <div class="mb-2">
                       <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">Data Finansial & Pribadi</h6>
-                      <div class="row">
+                      <div class="row w-100 m-0">
                         <div class="col-md-4 form-group">
                           <label class="small font-weight-bold">Tanggal Lahir</label>
                           <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control-modern" value="{{ old('tanggal_lahir', $user->tanggal_lahir) }}">
@@ -783,7 +781,7 @@ Profil | MIS
         if (localStorage.getItem('countdownRemaining') > 0) return;
 
         // Mulai countdown 120 detik
-        startCountdown(120);
+        startCountdown(60);
 
         // Fetch ke server minta email
         fetch("{{ route('account.profil.verify.email') }}", {
