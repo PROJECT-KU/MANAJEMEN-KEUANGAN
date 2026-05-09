@@ -214,8 +214,21 @@ class ProfilController extends Controller
   {
     $user = Auth::user();
 
-    if ($request->has('tanggal_lahir')) {
-      $user->tanggal_lahir = $request->input('tanggal_lahir');
+    if ($request->has('tanggal_lahir') && $request->input('tanggal_lahir') != null) {
+      try {
+        $request->validate([
+          // Memastikan tanggal lahir adalah 17 tahun yang lalu atau lebih lama
+          'tanggal_lahir' => 'date|before:-17 years',
+        ], [
+          'tanggal_lahir.before' => 'Usia Anda harus minimal 17 tahun.'
+        ]);
+
+        $user->tanggal_lahir = $request->input('tanggal_lahir');
+      } catch (\Illuminate\Validation\ValidationException $e) {
+        return redirect()->back()
+          ->with('errortanggallahir', 'Usia Anda harus minimal 17 tahun.')
+          ->withErrors($e->validator);
+      }
     }
 
     if ($request->has('norek')) {

@@ -1,125 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
-    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
-    <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Analisis Bibliometrik</title>
     <style>
-        .container {
-            background-color: #FF8C00;
-            margin: 20px;
-            max-width: 100%;
+        /* CSS ini dikhususkan untuk Media Queries perangkat Mobile */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .card {
-            background-color: #F8F8FF;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 100px;
-            /* Jarak atas */
-            margin-bottom: 100px;
-            /* Jarak bawah */
-        }
-
-        .card_dalam {
-            background-color: #F5F5F5;
-            color: white;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 20px;
-            /* Jarak atas */
-            margin-bottom: 20px;
-            /* Jarak bawah */
-        }
-
-        @media (max-width: 767px) {
-
-            /* Target perangkat dengan lebar maksimum 767px */
-            .container {
-                background-color: transparent;
-                /* Mengubah warna latar belakang menjadi transparan */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
             }
 
-            .mobile {
-                font-size: 18px;
+            .content-wrapper {
+                padding: 20px !important;
             }
-        }
 
-        @media (min-width: 768px) and (max-width: 991px) {
-            .mobile {
-                margin-left: 100px;
+            .data-table td {
+                display: block !important;
+                width: 100% !important;
+                text-align: left !important;
+            }
+
+            .data-table td.value {
+                padding-top: 2px !important;
+                padding-bottom: 15px !important;
+                font-size: 16px !important;
             }
         }
     </style>
 </head>
 
-<body>
-    <div id="app">
-        <section class="section">
-            <div class="container mt-5">
-                <div class="row">
-                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-                        <center>
-                            <div class="card mt-5 mb-5" style="width: 35rem;">
-                                <div style="text-align: center;" class="login-brand">
-                                    <a href="https://rumahscopusfoundation.com/">
-                                        <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250">
-                                    </a>
-                                </div>
-                                <div class="card-body">
-                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $analisisbibliometrik->nama }}</p>
-                                    <p style="font-size: 15px;">Terima kasih sudah melakukan pendaftaran Analisis Bibliometrik! Anda baru saja mendaftar Analisis Bibliometrik, berikut rinciannya:</p>
-                                    <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-                                        <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
-                                            <p>Kode Transaksi </p>
-                                            <p>Tanggal Mulai Pelaksanaan</p>
-                                            <p>Tanggal selesai Pelaksanaan</p>
-                                            <p>Batch </p>
-                                            <p>Total Pembayaran </p>
-                                        </div>
-                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:180px;">
-                                            <div style="text-align: right;">
-                                                <p>{{ strtoupper($analisisbibliometrik->id_transaksi) }}</p>
-                                                <p>{{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->mulai)) }}</p>
-                                                <p>{{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->selesai)) }}</p>
-                                                <p>{{ $categoriesanalisisbibliometrik->nama }} #{{ $categoriesanalisisbibliometrik->nama_ke }} </p>
-                                                <p>Rp. {{ number_format($analisisbibliometrik->total_pembayaran, 0, ',', '.') }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p style="font-size: 15px;">Status pendaftaran Analisis Bibliometrik anda saat ini masih tahap <b>{{ $status }}</b>. Silahkan Tunggu 1x24 jam.</p>
-                                    <p style="font-size:15px">Salam Q1!</p>
+<body style="margin: 0; padding: 0; background-color: #f4f7f6;">
 
-                                    <p>Salam,<br>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #ff914d 0%, #ff3131 100%); padding: 40px 20px;">
+        <tr>
+            <td align="center">
 
-                                        Admin Rumah Scopus Foundation<br>
-                                        Rumah Scopus Foundation (RSC) <br>
-                                        Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi,<br>
-                                        Sleman Regency, Special Region of Yogyakarta 55551 <br>
-                                        Telp: 0812-2688-3280</p>
-                                    <a href="https://www.instagram.com/rumah_scopus/"> <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}" alt="logo" width="40" height="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.youtube.com/@rumahscopus"> <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}" alt="logo" width="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.facebook.com/RumahScopusAkademi"> <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}" alt="logo" width="40" style="margin-top:10px"></a>
-                                </div>
+                <table class="email-container" width="600" border="0" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden;">
+
+                    <tr>
+                        <td align="center" style="padding: 40px 20px 20px 20px;">
+                            <a href="https://rumahscopusfoundation.com/" target="_blank">
+                                <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="Rumah Scopus" width="220" style="display: block; border: 0;">
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="content-wrapper" style="padding: 20px 40px; color: #334155;">
+
+                            <h1 style="margin: 0 0 15px 0; font-size: 26px; color: #1e293b; font-weight: 800; text-align: center;">
+                                Hallo, {{ $analisisbibliometrik->nama }} 👋
+                            </h1>
+
+                            <p style="font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 25px; text-align: center;">
+                                Terima kasih sudah melakukan pendaftaran! Berikut adalah rincian data Analisis Bibliometrik Anda:
+                            </p>
+
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom right, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 25px;">
+
+                                        <table class="data-table" width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 14px;">
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;" width="45%">Kode Transaksi</td>
+                                                <td class="value" style="padding: 8px 0; color: #ff3131; font-weight: 800; text-align: right; border-bottom: 1px dashed #cbd5e1; letter-spacing: 1px;">
+                                                    {{ strtoupper($analisisbibliometrik->id_transaksi) }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Batch</td>
+                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
+                                                    {{ $categoriesanalisisbibliometrik->nama }} #{{ $categoriesanalisisbibliometrik->nama_ke }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Mulai Pelaksanaan</td>
+                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
+                                                    {{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->mulai)) }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Selesai Pelaksanaan</td>
+                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
+                                                    {{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->selesai)) }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0 0 0; color: #64748b; font-weight: 600;">Total Pembayaran</td>
+                                                <td class="value" style="padding: 12px 0 0 0; color: #10b981; font-size: 18px; font-weight: 900; text-align: right;">
+                                                    Rp. {{ number_format($analisisbibliometrik->total_pembayaran, 0, ',', '.') }}
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px;">
+                                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                                    Status pendaftaran Anda saat ini: <strong style="text-transform: uppercase;">{{ $status }}</strong>.<br>
+                                    Silakan tunggu maksimal 1x24 jam untuk proses konfirmasi.
+                                </p>
                             </div>
-                        </center>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+
+                            <p style="font-size: 15px; font-weight: bold; color: #1e293b; margin-bottom: 30px;">Salam Q1!</p>
+
+                            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
+
+                            <p style="font-size: 13px; line-height: 1.6; color: #64748b; margin-bottom: 20px;">
+                                <strong>Admin Rumah Scopus Foundation</strong><br>
+                                Bangunsari, Jl. Bangunsari, Bangun Kerto, Turi,<br>
+                                Sleman Regency, Special Region of Yogyakarta 55551<br>
+                                Telp: 0812-2688-3280
+                            </p>
+
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="padding-right: 15px;">
+                                        <a href="https://www.instagram.com/rumah_scopus/" target="_blank">
+                                            <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}" alt="Instagram" width="35" style="display: block; border: 0;">
+                                        </a>
+                                    </td>
+                                    <td style="padding-right: 15px;">
+                                        <a href="https://www.youtube.com/@rumahscopus" target="_blank">
+                                            <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}" alt="YouTube" width="35" style="display: block; border: 0;">
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="https://www.facebook.com/RumahScopusAkademi" target="_blank">
+                                            <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}" alt="Facebook" width="35" style="display: block; border: 0;">
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td height="20"></td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
 </body>
 
 </html>
