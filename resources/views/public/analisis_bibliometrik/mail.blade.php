@@ -71,10 +71,10 @@
                             </h1>
 
                             <p style="font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 25px; text-align: center;">
-                                Terima kasih sudah melakukan pendaftaran! Berikut adalah rincian data Analisis Bibliometrik Anda:
+                                Terima kasih sudah melakukan pendaftaran! Berikut adalah rincian data <strong>Analisis Bibliometrik</strong> Anda:
                             </p>
 
-                            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom right, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px;">
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom right, #ffffff, #f0fdf4); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px;">
                                 <tr>
                                     <td style="padding: 25px;">
 
@@ -101,6 +101,12 @@
                                                 <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Selesai Pelaksanaan</td>
                                                 <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
                                                     {{ strftime('%d %B %Y', strtotime($categoriesanalisisbibliometrik->selesai)) }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Lokasi</td>
+                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
+                                                    {{ $categoriesanalisisbibliometrik->lokasi ?? 'Online' }}
                                                 </td>
                                             </tr>
                                             <tr>
