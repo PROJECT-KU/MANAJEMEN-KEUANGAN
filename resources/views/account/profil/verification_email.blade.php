@@ -1,105 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
-    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
-    <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Email - RSC</title>
     <style>
-        .container {
-            background-color: #FF8C00;
-            margin: 20px;
-            max-width: 100%;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .card {
-            background-color: #F8F8FF;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 100px;
-            /* Jarak atas */
-            margin-bottom: 100px;
-            /* Jarak bawah */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            overflow: hidden;
         }
 
-        .card_dalam {
-            background-color: #F5F5F5;
-            color: white;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 20px;
-            /* Jarak atas */
-            margin-bottom: 20px;
-            /* Jarak bawah */
-        }
-
-        @media (max-width: 767px) {
-
-            /* Target perangkat dengan lebar maksimum 767px */
-            .container {
-                background-color: transparent;
-                /* Mengubah warna latar belakang menjadi transparan */
+        @media screen and (max-width: 600px) {
+            .glass-card {
+                border-radius: 16px !important;
             }
 
-            .mobile {
-                font-size: 18px;
+            .content-pad {
+                padding: 30px 20px !important;
             }
-        }
 
-        @media (min-width: 768px) and (max-width: 991px) {
-            .mobile {
-                margin-left: 100px;
+            .otp-text {
+                font-size: 32px !important;
+                letter-spacing: 6px !important;
+            }
+
+            .bg-wrapper {
+                padding: 20px 10px !important;
             }
         }
     </style>
 </head>
 
-<body>
-    <div id="app">
-        <section class="section">
-            <div class="container mt-5">
-                <div class="row">
-                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-                        <center>
-                            <div class="card mt-5 mb-5" style="width: 35rem;">
-                                <div style="text-align: center;" class="login-brand">
-                                    <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250"></a>
-                                </div>
-                                <div class="card-body">
-                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $user->full_name }}</p>
-                                    <p style="font-size: 15px;">Kode verifikasi Email kamu <b>{{ $verificationCode }}</b></p>
-                                    <p style="font-size:15px">Silakan gunakan kode ini untuk memverifikasi alamat email Anda. Jika Anda tidak merasa memverifikasi email, silahkan abaikan psesan ini.</p>
-                                    <p style="font-size:15px; font-weight: bold;">Hati-hati penipuan, jangan pernah bagikan kode verifikasi ke siapa pun.</p>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9;">
 
-                                    <p>Salam,<br>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-wrapper" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); padding: 60px 15px;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" class="glass-card" style="background-color: rgba(255, 255, 255, 0.92); border: 1px solid #ffffff; border-radius: 24px; max-width: 600px; width: 100%;">
 
-                                        Admin Rumah Scopus Foundation<br>
-                                        Rumah Scopus Foundation (RSC) <br>
-                                        Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi,<br>
-                                        Sleman Regency, Special Region of Yogyakarta 55551 <br>
-                                        Telp: 0812-2688-3280</p>
-                                    <a href="https://www.instagram.com/rumah_scopus/"> <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}" alt="logo" width="40" height="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.youtube.com/@rumahscopus"> <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}" alt="logo" width="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.facebook.com/RumahScopusAkademi"> <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}" alt="logo" width="40" style="margin-top:10px"></a>
-                                </div>
+                    <tr>
+                        <td align="center" style="padding: 40px 20px 20px 20px;">
+                            <a href="https://rumahscopusfoundation.com/" target="_blank">
+                                <img src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus Foundation" style="max-width: 200px; height: auto; border: 0; outline: none;">
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center">
+                            <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3), transparent); width: 80%;"></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="content-pad" style="padding: 40px; color: #1e293b;">
+                            <h2 style="margin: 0 0 10px 0; font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #1e293b;">
+                                Halo, {{ $user->full_name }}
+                            </h2>
+                            <p style="margin: 0 0 30px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                                Seseorang mencoba mengakses atau mengubah pengaturan akun Anda. Gunakan kode verifikasi (OTP) di bawah ini untuk melanjutkan.
+                            </p>
+
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <div style="background: rgba(241, 245, 249, 0.7); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px 40px; display: inline-block; margin-bottom: 30px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                            <span class="otp-text" style="font-family: 'Courier New', Courier, monospace; font-size: 42px; font-weight: 900; letter-spacing: 12px; color: #6366f1; text-shadow: 2px 2px 4px rgba(99, 102, 241, 0.2);">
+                                                {{ $verificationCode }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div style="background-color: rgba(254, 243, 199, 0.6); border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 8px; margin-bottom: 10px;">
+                                <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #92400e;">
+                                    <strong>Peringatan:</strong> Rahasiakan kode ini. Tim RSC tidak akan pernah meminta kode verifikasi Anda dengan alasan apa pun.
+                                </p>
                             </div>
-                        </center>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background-color: rgba(248, 250, 252, 0.6); padding: 30px 40px; text-align: center; border-top: 1px solid rgba(226, 232, 240, 0.6); border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
+                            <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #1e293b;">Rumah Scopus Foundation (RSC)</h4>
+                            <p style="margin: 0 0 20px 0; font-size: 12px; line-height: 1.6; color: #64748b;">
+                                Jl. Bangunsari, Bangun Kerto, Turi,<br>
+                                Sleman, DI Yogyakarta 55551<br>
+                                0812-2688-3280
+                            </p>
+
+                            <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                <tr>
+                                    <td style="padding: 0 8px;">
+                                        <a href="https://www.instagram.com/rumah_scopus/" target="_blank">
+                                            <img src="{{ asset('assets/img/instagram.png') }}" alt="IG" width="30" height="30" style="display: block; opacity: 0.8;">
+                                        </a>
+                                    </td>
+                                    <td style="padding: 0 8px;">
+                                        <a href="https://www.youtube.com/@rumahscopus" target="_blank">
+                                            <img src="{{ asset('assets/img/youtube.png') }}" alt="YT" width="30" height="30" style="display: block; opacity: 0.8;">
+                                        </a>
+                                    </td>
+                                    <td style="padding: 0 8px;">
+                                        <a href="https://www.facebook.com/RumahScopusAkademi" target="_blank">
+                                            <img src="{{ asset('assets/img/facebook.png') }}" alt="FB" width="30" height="30" style="display: block; opacity: 0.8;">
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                    <tr>
+                        <td align="center" style="padding: 20px 0; color: rgba(255,255,255,0.8); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+                            &copy; {{ date('Y') }} Rumah Scopus Foundation
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
 </body>
 
 </html>

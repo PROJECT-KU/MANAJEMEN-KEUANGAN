@@ -201,6 +201,26 @@ Profil | MIS
       font-size: 13px;
     }
   }
+
+  input[type="date"].form-control-modern {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100% !important;
+    min-height: calc(1.5em + 1.2rem + 2px);
+  }
+
+  @media (max-width: 576px) {
+    .row {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    .form-group {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  }
 </style>
 
 @section('content')
@@ -472,7 +492,7 @@ Profil | MIS
 
                     <div class="mb-2">
                       <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">Data Finansial & Pribadi</h6>
-                      <div class="row w-100 m-0">
+                      <div class="row">
                         <div class="col-md-4 form-group">
                           <label class="small font-weight-bold">Tanggal Lahir</label>
                           <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control-modern" value="{{ old('tanggal_lahir', $user->tanggal_lahir) }}">
