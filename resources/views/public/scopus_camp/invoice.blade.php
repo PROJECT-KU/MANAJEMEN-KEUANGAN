@@ -18,7 +18,7 @@
                             <img src="{{ public_path('assets/img/LogoRSC.png') }}" alt="logo" width="250">
                         </center>
                         <h2 class="page-header" style="text-align: center;">
-                            INVOICE PEMBAYARAN SCOPUS CAMP
+                            INVOICE SCOPUS CAMP
                             <p style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Pelaksanaan</strong>
                                 {{ date('j F Y', strtotime($categoriesScopusCamp->mulai)) }}
                                 s/d
