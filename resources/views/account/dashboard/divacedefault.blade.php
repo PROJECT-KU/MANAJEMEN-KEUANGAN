@@ -65,7 +65,8 @@ Dashboard | MIS
         height: 60px;
         border-radius: 15px;
         display: flex;
-        align-items: center; justify-content: center;
+        align-items: center;
+        justify-content: center;
         font-size: 24px;
         margin-right: 20px;
         color: white;
@@ -101,7 +102,8 @@ Dashboard | MIS
         transition: var(--transition);
         text-transform: uppercase;
         letter-spacing: 1px;
-        text-decoration: none !important; /* Menghilangkan underline */
+        text-decoration: none !important;
+        /* Menghilangkan underline */
     }
 
     .btn-masuk {
@@ -255,9 +257,7 @@ Dashboard | MIS
     <section class="section">
         <div class="section-body">
 
-            @if (Auth::user()->level !== 'user')
             @include('account.dashboard.task-slider-default')
-            @endif
 
             {{-- 1. Statistik Manager (Hanya untuk Level Manager) --}}
             @if (Auth::user()->level === 'manager')
@@ -448,33 +448,33 @@ Dashboard | MIS
                     </div>
 
                     <div class="mini-card-modern">
-    @php
-        // 1. Hitung durasi sejak email diverifikasi
-        $verifiedAt = Auth::user()->email_verified_at;
-        $isOneYear = $verifiedAt ? \Carbon\Carbon::parse($verifiedAt)->diffInYears(now()) >= 1 : false;
+                        @php
+                        // 1. Hitung durasi sejak email diverifikasi
+                        $verifiedAt = Auth::user()->email_verified_at;
+                        $isOneYear = $verifiedAt ? \Carbon\Carbon::parse($verifiedAt)->diffInYears(now()) >= 1 : false;
 
-        // 2. Logika Sisa Cuti (Hanya muncul jika sudah 1 tahun)
-        $displaySisaCuti = $isOneYear ? ($sisaCuti ?? 0) : 0;
-    @endphp
+                        // 2. Logika Sisa Cuti (Hanya muncul jika sudah 1 tahun)
+                        $displaySisaCuti = $isOneYear ? ($sisaCuti ?? 0) : 0;
+                        @endphp
 
-    <div class="icon-circle" style="background: {{ $isOneYear ? 'rgba(40, 167, 69, 0.1)' : 'rgba(148, 163, 184, 0.1)' }}; 
+                        <div class="icon-circle" style="background: {{ $isOneYear ? 'rgba(40, 167, 69, 0.1)' : 'rgba(148, 163, 184, 0.1)' }}; 
                                    color: {{ $isOneYear ? '#28a745' : '#94a3b8' }};">
-        <i class="fas {{ $isOneYear ? 'fa-user-clock' : 'fa-user-lock' }}"></i>
-    </div>
-    
-    <div>
-        <p class="info-label-small">Sisa Hak Cuti</p>
-        <h6 class="info-value-small {{ $isOneYear ? 'text-dark' : 'text-muted' }}">
-            {{ $displaySisaCuti }} Hari
-        </h6>
-        
-        @if(!$isOneYear)
-            <div style="font-size: 9px; color: #ef4444; font-weight: 600; line-height: 1.1; margin-top: 2px;">
-                <i class="fas fa-info-circle"></i> Minimal 1 tahun masa kerja (sejak verifikasi email)
-            </div>
-        @endif
-    </div>
-</div>
+                            <i class="fas {{ $isOneYear ? 'fa-user-clock' : 'fa-user-lock' }}"></i>
+                        </div>
+
+                        <div>
+                            <p class="info-label-small">Sisa Hak Cuti</p>
+                            <h6 class="info-value-small {{ $isOneYear ? 'text-dark' : 'text-muted' }}">
+                                {{ $displaySisaCuti }} Hari
+                            </h6>
+
+                            @if(!$isOneYear)
+                            <div style="font-size: 9px; color: #ef4444; font-weight: 600; line-height: 1.1; margin-top: 2px;">
+                                <i class="fas fa-info-circle"></i> Minimal 1 tahun masa kerja (sejak verifikasi email)
+                            </div>
+                            @endif
+                        </div>
+                    </div>
 
                     <div class="mini-card-modern" style="background: var(--primary-gradient); color: white; border: none;">
                         <div class="icon-circle" style="background: rgba(255,255,255,0.2);">
@@ -513,8 +513,12 @@ Dashboard | MIS
                 dynamicBullets: true,
             },
             breakpoints: {
-                320: { spaceBetween: 15 },
-                768: { spaceBetween: 20 }
+                320: {
+                    spaceBetween: 15
+                },
+                768: {
+                    spaceBetween: 20
+                }
             }
         });
     });
