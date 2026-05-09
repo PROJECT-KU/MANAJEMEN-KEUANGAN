@@ -25,7 +25,7 @@ $taskCount = $tasks->count();
 <style>
     .bj-neo-wrapper {
         font-family: 'Outfit', sans-serif;
-        padding: 40px 20px;
+        padding: 25px 0px;
         /* Jarak atas-bawah pembungkus diperlebar */
         display: flex;
         flex-wrap: wrap;
@@ -161,7 +161,7 @@ $taskCount = $tasks->count();
     }
 </style>
 
-<div class="bj-neo-wrapper mt-4">
+<div class="bj-neo-wrapper">
 
     {{-- NOTIFIKASI TUGAS --}}
     @if ($taskCount > 0)
