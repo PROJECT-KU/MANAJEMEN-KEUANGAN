@@ -178,8 +178,11 @@ $taskCount = $tasks->count();
     @endif
 
     {{-- DATA DIRI KOSONG --}}
-    @if (!$user->company || !$user->telp || !$user->nik || !$user->norek || !$user->bank || !$user->gambar || !$user->jobdesk)
-    <div class="bj-neo-card bj-neo-warning">
+    @if (
+    (Auth::user()->level !== 'user' && (!$user->gambar || !$user->telp || !$user->jobdesk || !$user->tanggal_lahir || !$user->norek || !$user->bank))
+    ||
+    (Auth::user()->level === 'user' && (!$user->gambar || !$user->telp || !$user->tanggal_lahir))
+    ) <div class="bj-neo-card bj-neo-warning">
         <i class="fas fa-user-gear bj-neo-bg-icon"></i>
         <div class="bj-neo-badge">UPDATE REQUIRED</div>
         <i class="fas fa-user-shield bj-neo-icon"></i>
