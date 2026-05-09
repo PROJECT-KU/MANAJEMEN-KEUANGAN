@@ -58,6 +58,12 @@
                     </tr>
 
                     <tr>
+                        <td align="center">
+                            <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent); width: 80%;"></div>
+                        </td>
+                    </tr>
+
+                    <tr>
                         <td class="content-wrapper" style="padding: 20px 40px; color: #334155;">
 
                             <h1 style="margin: 0 0 15px 0; font-size: 26px; color: #1e293b; font-weight: 800; text-align: center;">
@@ -75,7 +81,7 @@
                                         <table class="data-table" width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 14px;">
                                             <tr>
                                                 <td style="padding: 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;" width="45%">Kode Transaksi</td>
-                                                <td class="value" style="padding: 8px 0; color: #ff3131; font-weight: 800; text-align: right; border-bottom: 1px dashed #cbd5e1; letter-spacing: 1px;">
+                                                <td class="value" style="padding: 8px 0; color: #3b82f6; font-weight: 800; text-align: right; border-bottom: 1px dashed #cbd5e1; letter-spacing: 1px;">
                                                     {{ strtoupper($analisisbibliometrik->id_transaksi) }}
                                                 </td>
                                             </tr>
