@@ -178,10 +178,18 @@ $taskCount = $tasks->count();
     @endif
 
     {{-- DATA DIRI KOSONG --}}
+    @php
+    // Gunakan 1 sumber data yang pasti akurat
+    $cekUser = Auth::user();
+
+    // Validasi super ketat untuk tanggal lahir (cek spasi, null, dan format 0000)
+    $tglLahirKosong = empty(trim($cekUser->tanggal_lahir)) || $cekUser->tanggal_lahir === '0000-00-00';
+    @endphp
+
     @if (
-    (Auth::user()->level !== 'user' && (empty($user->gambar) || empty($user->telp) || empty($user->jobdesk) || empty($user->tanggal_lahir) || empty($user->norek) || empty($user->bank)))
+    ($cekUser->level !== 'user' && (empty($cekUser->gambar) || empty($cekUser->telp) || empty($cekUser->jobdesk) || $tglLahirKosong || empty($cekUser->norek) || empty($cekUser->bank)))
     ||
-    (Auth::user()->level === 'user' && (empty($user->gambar) || empty($user->telp) || empty($user->tanggal_lahir)))
+    ($cekUser->level === 'user' && (empty($cekUser->gambar) || empty($cekUser->telp) || $tglLahirKosong))
     )
     <div class="bj-neo-card bj-neo-warning">
         <i class="fas fa-user-gear bj-neo-bg-icon"></i>
