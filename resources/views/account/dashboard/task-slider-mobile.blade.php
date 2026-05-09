@@ -203,10 +203,11 @@ $taskCount = $tasks->count();
         @endif
 
         @if (
-        (Auth::user()->level !== 'user' && (!$user->gambar || !$user->telp || !$user->jobdesk || !$user->tanggal_lahir || !$user->norek || !$user->bank))
+        (Auth::user()->level !== 'user' && (empty($user->gambar) || empty($user->telp) || empty($user->jobdesk) || empty($user->tanggal_lahir) || empty($user->norek) || empty($user->bank)))
         ||
-        (Auth::user()->level === 'user' && (!$user->gambar || !$user->telp || !$user->tanggal_lahir))
-        ) <div class="bj-neo-card bj-neo-warning">
+        (Auth::user()->level === 'user' && (empty($user->gambar) || empty($user->telp) || empty($user->tanggal_lahir)))
+        )
+        <div class="bj-neo-card bj-neo-warning">
             <i class="fas fa-user-gear bj-neo-bg-icon"></i>
             <div class="bj-neo-badge">UPDATE REQUIRED</div>
             <i class="fas fa-user-shield bj-neo-icon" style="color: #f59e0b;"></i>
