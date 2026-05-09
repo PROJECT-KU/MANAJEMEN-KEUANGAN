@@ -335,7 +335,7 @@ Dashboard | MIS
 
                 {{-- Artikel Slider (Selalu Tampil) --}}
                 {{-- Penambahan mt-5 pt-4 khusus level user agar lebih turun --}}
-                <div class="{{ Auth::user()->level === 'user' ? 'col-12 mt-5 pt-4' : 'col-lg-6 col-md-12' }} mb-4">
+                <div class="{{ Auth::user()->level === 'user' ? 'col-12 pt-4' : 'col-lg-6 col-md-12' }} mb-4">
                     <div class="modern-card flex-column align-items-stretch" style="background: var(--glass-bg); border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); overflow: hidden;">
                         <h5 class="fw-bold mb-4"><i class="fas fa-newspaper me-2 text-primary"></i> Artikel Terbaru</h5>
 

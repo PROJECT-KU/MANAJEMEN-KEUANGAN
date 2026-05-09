@@ -495,7 +495,7 @@ Profil | MIS
                       <div class="row">
                         <div class="col-md-4 form-group">
                           <label class="small font-weight-bold">Tanggal Lahir</label>
-                          <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control-modern" value="{{ old('tanggal_lahir', $user->tanggal_lahir) }}">
+                          <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control-modern" value="{{ old('tanggal_lahir', $user->tanggal_lahir) }}" max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}" required>
                         </div>
                         <div class="col-md-4 form-group">
                           <label class="small font-weight-bold">No Rekening</label>
@@ -1128,6 +1128,20 @@ Profil | MIS
     });
     @endif
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    @if(session('errortanggallahir'))
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: '{{ session("errortanggallahir") }}',
+      showConfirmButton: true,
+      confirmButtonColor: '#6366f1'
+    });
+    @endif
+  });
 </script>
+
+
 <!--================== END ==================-->
 @stop
