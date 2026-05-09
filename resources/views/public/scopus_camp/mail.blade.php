@@ -58,6 +58,12 @@
                     </tr>
 
                     <tr>
+                        <td align="center">
+                            <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent); width: 80%;"></div>
+                        </td>
+                    </tr>
+
+                    <tr>
                         <td class="content-wrapper" style="padding: 20px 40px; color: #334155;">
 
                             <h1 style="margin: 0 0 15px 0; font-size: 26px; color: #1e293b; font-weight: 800; text-align: center;">
@@ -79,6 +85,13 @@
                                                     {{ strtoupper($pendaftaran->id_transaksi) }}
                                                 </td>
                                             </tr>
+
+                                            <tr>
+                                                <td align="center">
+                                                    <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent); width: 80%;"></div>
+                                                </td>
+                                            </tr>
+
                                             <tr>
                                                 <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Batch</td>
                                                 <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
