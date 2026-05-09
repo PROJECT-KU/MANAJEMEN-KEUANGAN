@@ -398,7 +398,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
                             <div class="form-group">
                                 <label>Diskon (Jika Ada)</label>
                                 <div class="input-group-glass" style="background: #fff; padding: 5px;">
-                                    <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control-glass" placeholder="KODE DISKON..." style="border: none; background: transparent; box-shadow: none; padding-left: 15px; text-transform: uppercase;">
+                                    <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control-glass" placeholder="KODE DISKON..." style="border: none; background: transparent; box-shadow: none; padding-left: 15px;">
                                     <button type="button" class="btn-check-discount" id="btnCekDiskon" data-id="{{ $item->id }}">
                                         <i class="fas fa-tags"></i> CEK
                                     </button>

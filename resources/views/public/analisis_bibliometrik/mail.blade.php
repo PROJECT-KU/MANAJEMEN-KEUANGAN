@@ -43,7 +43,7 @@
 
 <body style="margin: 0; padding: 0; background-color: #f4f7f6;">
 
-    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #ff914d 0%, #ff3131 100%); padding: 40px 20px;">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); padding: 40px 20px;">
         <tr>
             <td align="center">
 
