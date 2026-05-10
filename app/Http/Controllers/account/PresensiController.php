@@ -61,26 +61,26 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else {
       $presensi = Presensi::select('presensi.*', 'users.name as full_name')
         ->join('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
@@ -156,7 +156,7 @@ class PresensiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -164,7 +164,7 @@ class PresensiController extends Controller
         ->paginate(10);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
@@ -238,9 +238,12 @@ class PresensiController extends Controller
     $startDate = $request->get('start_date') ?? date('Y-m-01');
     $endDate = $request->get('end_date') ?? date('Y-m-t');
 
+    // 👇 TAMBAHKAN INI: Set bahasa MySQL ke Indonesia untuk format hari dan bulan
+    DB::statement("SET lc_time_names = 'id_ID'");
+
     if (Auth::user()->level == 'manager') {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$startDate, $endDate])
@@ -249,15 +252,16 @@ class PresensiController extends Controller
             ->orWhere('presensi.status', 'LIKE', '%' . $search . '%')
             ->orWhere('presensi.status_pulang', 'LIKE', '%' . $search . '%')
             ->orWhere(function ($subquery) use ($search) {
-              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
-              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.time_pulang, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
+              // 👇 UBAH DI SINI: Gunakan orWhereRaw untuk time_pulang
+              $subquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%'])
+                ->orWhereRaw('LOWER(DATE_FORMAT(presensi.time_pulang, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         })
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else {
       $presensi = DB::table('presensi')
-        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+        ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
         ->where('presensi.user_id', $user->id)
         ->whereBetween('presensi.created_at', [$startDate, $endDate])
@@ -270,7 +274,7 @@ class PresensiController extends Controller
             });
         })
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
@@ -296,7 +300,7 @@ class PresensiController extends Controller
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else {
       $presensihariini = DB::table('presensi')
         ->select(
@@ -317,10 +321,10 @@ class PresensiController extends Controller
           'users.telp as telp'
         )
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
-        ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
+        ->where('presensi.user_id', $user->id)
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     $presensi->appends(['q' => $search, 'start_date' => $startDate, 'end_date' => $endDate]);
@@ -328,6 +332,7 @@ class PresensiController extends Controller
     if ($presensi->isEmpty()) {
       return redirect()->route('account.presensi.index')->with('error', 'Data Presensi tidak ditemukan.');
     }
+
     return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
 
@@ -565,7 +570,7 @@ class PresensiController extends Controller
     }
 
     $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
+      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
