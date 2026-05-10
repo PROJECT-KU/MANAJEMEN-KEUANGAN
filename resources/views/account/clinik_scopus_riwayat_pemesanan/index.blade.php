@@ -603,7 +603,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
                   <i class="fa fa-clipboard-list"></i>Detail
                 </a>
                 @if (Auth::user()->level === 'manager')
-                <button onclick="Delete({{ $item->id }})" type="button" class="btn-modern btn-delete" style="display: inline-flex;">
+                <button onclick="Delete('{{ $item->id  }}')" type="button" class="btn-modern btn-delete" style="display: inline-flex;">
                   <i class="fas fa-trash"></i>
                 </button>
                 @endif
@@ -637,33 +637,6 @@ Clinik Scopus Riwayat Pemesanan | MIS
 
   </section>
 </div>
-
-<!--================== SWEET ALERT DELETE ==================-->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-delete').forEach(button => {
-      button.addEventListener('click', function() {
-        const form = this.closest('.form-delete');
-
-        Swal.fire({
-          title: 'Hapus Data?',
-          text: 'Data dan gambar yang terkait akan dihapus permanen!',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Ya, Hapus!',
-          cancelButtonText: 'Batal'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            form.submit();
-          }
-        });
-      });
-    });
-  });
-</script>
-<!--================== END SWEET ALERT DELETE ==================-->
 
 <!--================== PROTEKSI AKSES SESI CHAT ==================-->
 @if(session('alert'))
@@ -812,60 +785,51 @@ Clinik Scopus Riwayat Pemesanan | MIS
 
 <!-- ================== END ================== -->
 
-<!--================== RELOAD DATA KETIKA SUKSES ==================-->
-<script>
-  @if(Session::has('success'))
-  // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
-  setTimeout(function() {
-    window.location.reload();
-  }, 1000); // Refresh halaman setelah 2 detik
-  @endif
-</script>
-<!--================== END ==================-->
-
-<!--==================  SWEET ALERT DELETET  ==================-->
+<!--================== DELETE DATA  ==================-->
 <script>
   function Delete(id) {
-    const token = document.querySelector("meta[name='csrf-token']").getAttribute("content");
-
     Swal.fire({
-      title: "APAKAH KAMU YAKIN?",
-      text: "INGIN MENGHAPUS DATA INI!",
-      icon: "warning",
+      title: 'Apakah Anda yakin?',
+      text: "Data yang dihapus tidak dapat dikembalikan!",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'YA',
-      cancelButtonText: 'TIDAK',
-      reverseButtons: true
+      confirmButtonColor: '#6366f1',
+      cancelButtonColor: '#f43f5e',
+      confirmButtonText: 'YA, HAPUS!',
+      cancelButtonText: 'BATAL',
+      borderRadius: '15px'
     }).then((result) => {
       if (result.isConfirmed) {
+        let token = $("meta[name='csrf-token']").attr("content");
+
         $.ajax({
-          url: "{{ route('account.Clinik-Scopus-Biaya-Persesi.destroy', ':id') }}".replace(':id', id),
-          type: 'POST',
+          url: "/account/Clinik-Scopus-Riwayat-Pemesanan/delete/" + id,
+          type: "DELETE",
           data: {
-            _token: token,
-            _method: 'DELETE'
+            "_token": token
           },
           success: function(response) {
-            Swal.fire({
-              icon: 'success',
-              title: 'BERHASIL!',
-              text: response.message,
-              timer: 1200,
-              showConfirmButton: false
-            });
-
-            setTimeout(() => location.reload(), 1200);
-          },
-          error: function(xhr) {
-            Swal.fire(
-              'Gagal!',
-              xhr.responseJSON?.message || 'Terjadi kesalahan.',
-              'error'
-            );
+            if (response.status) {
+              Swal.fire({
+                icon: 'success',
+                title: 'BERHASIL!',
+                text: response.message,
+                showConfirmButton: false,
+                timer: 2000
+              }).then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'GAGAL!',
+                text: response.message,
+              });
+            }
           }
         });
       }
-    });
+    })
   }
 </script>
 <!--================== END ==================-->

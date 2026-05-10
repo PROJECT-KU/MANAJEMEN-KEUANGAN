@@ -234,54 +234,90 @@ class ClinikScopusRiwayatPemesananController extends Controller
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
-        //  Proteksi role manager
+        /**
+         * ========================================================
+         * 🛡️ GATEKEEPER: CEK OTORISASI
+         * ========================================================
+         * Hanya user dengan level 'manager' yang memiliki "kunci".
+         * Jika bukan manager, hentikan proses dan kirim error 403.
+         */
         if (Auth::user()->level !== 'manager') {
-            abort(403, 'Unauthorized');
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized. Anda tidak memiliki akses.'
+            ], 403);
         }
 
+        /**
+         * ========================================================
+         * 📦 MULAI TRANSAKSI DATABASE (SAFETY FIRST)
+         * ========================================================
+         * Kita bungkus dalam try-catch. Jika di tengah jalan ada 
+         * proses yang gagal, semua akan dibatalkan (rollback) 
+         * agar database tetap bersih dan tidak ada data yang cacat.
+         */
         DB::beginTransaction();
         try {
+            // Cari data yang mau dieksekusi, jika tidak ada langsung lempar error (findOrFail)
             $pemesanan = ClinikScopusPemesanan::findOrFail($id);
 
             /**
-             * ===============================
-             * HAPUS FILE GAMBAR (PUBLIC)
-             * ===============================
-             * contoh isi kolom:
-             * bukti_pembayaran = bukti123.jpg
+             * ========================================================
+             * 🖼️ EKSEKUSI 1: HAPUS BUKTI PEMBAYARAN (FILE FISIK)
+             * ========================================================
+             * Jangan sampai penyimpanan server penuh dengan file usang.
+             * Kita pastikan file benar-benar ada di folder, lalu hapus! 🔥
              */
             if ($pemesanan->gambar) {
-                $filePath = public_path(
-                    'ClinikScopusPemesanan/' . $pemesanan->gambar
-                );
-
+                $filePath = public_path('ClinikScopusPemesanan/' . $pemesanan->gambar);
                 if (File::exists($filePath)) {
                     File::delete($filePath);
                 }
             }
 
             /**
-             * ===============================
-             * HAPUS TESTIMONI JIKA ADA
-             * ===============================
+             * ========================================================
+             * 💬 EKSEKUSI 2: BERSIHKAN DATA RELASI (TESTIMONI)
+             * ========================================================
+             * Mencegah "Orphan Data" (data yatim piatu).
+             * Hapus semua testimoni yang menempel pada ID pesanan ini.
              */
-            ClinikScopusTestimoni::where(
-                'clinikscopus_pemesanan_id',
-                $pemesanan->id
-            )->delete();
+            ClinikScopusTestimoni::where('clinikscopus_pemesanan_id', $pemesanan->id)->delete();
 
             /**
-             * ===============================
-             * HAPUS DATA PEMESANAN
-             * ===============================
+             * ========================================================
+             * 🗑️ EKSEKUSI 3: HAPUS DATA INDUK (PEMESANAN)
+             * ========================================================
+             * Setelah semua "buntut" dan "sampah" dibersihkan, 
+             * saatnya menghapus data utamanya. Sayonara! 👋
              */
             $pemesanan->delete();
 
+            /**
+             * ========================================================
+             * 🚀 MISI SUKSES: SIMPAN PERMANEN & BERI KABAR BAIK
+             * ========================================================
+             * Semua proses berjalan mulus. Lakukan Commit ke DB,
+             * lalu kirim JSON berisi pesan sukses ke SweetAlert (AJAX).
+             */
             DB::commit();
-            return back()->with('success', 'Data dan gambar berhasil dihapus');
+            return response()->json([
+                'status' => true,
+                'message' => 'Data dan gambar berhasil dihapus secara permanen!'
+            ]);
         } catch (\Throwable $e) {
+            /**
+             * ========================================================
+             * 🚨 SYSTEM FAILURE: BATALKAN SEMUA & TANGKAP ERROR
+             * ========================================================
+             * Terjadi kebocoran/error! Tarik mundur semua proses DB (Rollback).
+             * Kirim kode 500 dan pesan error agar mudah di-debug.
+             */
             DB::rollBack();
-            return back()->with('error', 'Gagal menghapus data');
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghapus data: ' . $e->getMessage()
+            ], 500);
         }
     }
     // <!--================== END ==================-->
