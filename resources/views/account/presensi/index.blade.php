@@ -482,6 +482,7 @@ Data Presensi Karyawan | MIS
 $isManagerJS = (Auth::user()->level == 'manager') ? 1 : 0;
 @endphp
 
+<!--================== POPUP FILTER ==================-->
 <script>
   document.getElementById('btnFilterPopup').addEventListener('click', function() {
     const tglAwal = "{{ request('tanggal_awal') }}";
@@ -650,7 +651,9 @@ $isManagerJS = (Auth::user()->level == 'manager') ? 1 : 0;
     });
   });
 </script>
+<!--================== END ==================-->
 
+<!--================== LIVE SEARCH ==================-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     let timer;
@@ -807,4 +810,45 @@ $isManagerJS = (Auth::user()->level == 'manager') ? 1 : 0;
     })
   }
 </script>
+<!--================== END ==================-->
+
+<!--================== EXPORT DATA EXCEL SEARCH ==================-->
+<script>
+  window.addEventListener('load', function() {
+    // 1. Mempertahankan nilai pencarian di kolom input jika halaman direfresh/berpindah pagination
+    const urlParams = new URLSearchParams(window.location.search);
+    const qParam = urlParams.get('q');
+    const searchInput = document.getElementById('liveSearch');
+
+    if (qParam && searchInput) {
+      searchInput.value = qParam;
+      const clearBtn = document.getElementById('clearSearch');
+      if (clearBtn) clearBtn.style.display = 'block';
+    }
+
+    // 2. Menjamin Tombol Export selalu membawa kata kunci pencarian yang sedang diketik
+    const btnExportDirect = document.getElementById('btnExportDirect');
+    if (btnExportDirect && searchInput) {
+      // Triks: Menghapus listener lama tanpa menghapus kodenya (Cloning elemen)
+      const newBtnExport = btnExportDirect.cloneNode(true);
+      btnExportDirect.parentNode.replaceChild(newBtnExport, btnExportDirect);
+
+      newBtnExport.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Ambil filter tanggal yang sedang aktif
+        const tglAwal = "{{ request('tanggal_awal') }}";
+        const tglAkhir = "{{ request('tanggal_akhir') }}";
+
+        // Ambil kata kunci yang tampil/diketik di layar saat ini
+        const q = searchInput.value;
+
+        // Gabungkan dan jalankan aksi download
+        const url = `{{ route('account.laporan_presensi.download-excel') }}?tanggal_awal=${tglAwal}&tanggal_akhir=${tglAkhir}&q=${encodeURIComponent(q)}`;
+        window.location.href = url;
+      });
+    }
+  });
+</script>
+<!--================== END ==================-->
 @stop

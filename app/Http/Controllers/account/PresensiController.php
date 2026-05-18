@@ -40,6 +40,7 @@ class PresensiController extends Controller
     return $id;
   }
 
+  // <!--================== MENAMPILKAN DATA ==================-->
   public function index(Request $request)
   {
     $user = Auth::user();
@@ -106,7 +107,7 @@ class PresensiController extends Controller
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else {
       $presensihariini = DB::table('presensi')
         ->select(
@@ -130,12 +131,14 @@ class PresensiController extends Controller
         ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
+  // <!--================== END ==================-->
 
+  // <!--================== FILTER DATA ==================-->
   public function filter(Request $request)
   {
     $user = Auth::user();
@@ -161,7 +164,7 @@ class PresensiController extends Controller
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
@@ -169,7 +172,7 @@ class PresensiController extends Controller
         ->where('presensi.user_id', $user->id)  // Display only the salary data for the logged-in user
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
@@ -195,7 +198,7 @@ class PresensiController extends Controller
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     } else {
       $presensihariini = DB::table('presensi')
         ->select(
@@ -219,12 +222,14 @@ class PresensiController extends Controller
         ->where('presensi.user_id', $user->id)  // Display only the presensi data for the logged-in user
         ->whereBetween('presensi.created_at', [$startOfDay, $endOfDay])
         ->orderBy('presensi.created_at', 'DESC')
-        ->paginate(10);
+        ->paginate(12);
     }
 
     return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
+  // <!--================== END ==================-->
 
+  // <!--================== SEARCH DATA ==================-->
   public function search(Request $request)
   {
     $search = $request->get('q');
@@ -335,7 +340,9 @@ class PresensiController extends Controller
 
     return view('account.presensi.index', compact('presensi', 'startDate', 'endDate', 'presensihariini'));
   }
+  // <!--================== END ==================-->
 
+  // <!--================== CREATE DATA ==================-->
   public function create()
   {
     $user = Auth::user();
@@ -438,22 +445,9 @@ class PresensiController extends Controller
       return redirect()->route('account.dashboard.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
     }
   }
+  // <!--================== END ==================-->
 
-  public function detail($id)
-  {
-    $user = Auth::user();
-    $presensi = Presensi::findOrFail($id);
-
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
-      $users = User::join('presensi', 'users.id', '=', 'presensi.user_id')
-        ->where('users.company', $user->company)
-        ->get(['users.*']);
-    } else {
-      $users = User::where('id', $presensi->user_id)->get();
-    }
-    return view('account.presensi.detail', compact('presensi', 'users')); // Sesuaikan path template dengan benar
-  }
-
+  // <!--================== UPDATE DATA ==================-->
   public function edit($id)
   {
     $user = Auth::user();
@@ -527,8 +521,9 @@ class PresensiController extends Controller
       return redirect()->route('account.dashboard.index')->with('error', 'Data Presensi Karyawan Gagal Disimpan!');
     }
   }
+  // <!--================== END ==================-->
 
-
+  // <!--================== DELETE DATA ==================-->
   public function destroy($id)
   {
     try {
@@ -551,71 +546,9 @@ class PresensiController extends Controller
 
     return response()->json(['phone_number' => $user->telp]);
   }
+  // <!--================== END ==================-->
 
-  public function downloadPdf(Request $request)
-  {
-    $user = Auth::user();
-    $startDate = $request->input('tanggal_awal');
-    $endDate = $request->input('tanggal_akhir');
-    $searchQuery = $request->input('q');
-
-    if (!$startDate || !$endDate) {
-      // Jika tanggal_awal atau tanggal_akhir tidak ada dalam request, gunakan rentang bulan ini
-      $currentMonth = date('Y-m-01 00:00:00');
-      $nextMonth = date('Y-m-01 00:00:00', strtotime('+1 month'));
-    } else {
-      // Jika tanggal_awal dan tanggal_akhir ada dalam request, gunakan rentang tersebut
-      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
-      $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
-    }
-
-    $presensi = DB::table('presensi')
-      ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
-      ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
-      ->where('users.company', $user->company)
-      ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
-      ->when($searchQuery, function ($query) use ($searchQuery) {
-        $query->where(function ($subquery) use ($searchQuery) {
-          // Adjust this part based on your search requirements
-          $subquery->where('users.full_name', 'LIKE', '%' . $searchQuery . '%')
-            ->orWhere('presensi.status', 'LIKE', '%' . $searchQuery . '%')
-            ->orWhere('presensi.status_pulang', 'LIKE', '%' . $searchQuery . '%')
-            ->orWhere(function ($dateSubquery) use ($searchQuery) {
-              $dateSubquery->whereRaw('LOWER(DATE_FORMAT(presensi.created_at, "%W %d %M %Y %H:%i")) LIKE ?', ['%' . strtolower($searchQuery) . '%']);
-            });
-        });
-      })
-      ->orderBy('presensi.created_at', 'DESC')
-      ->get();
-
-    // Additional data retrieval for 'maintenance
-
-    $html = view('account.presensi.pdf', compact('presensi', 'user', 'startDate', 'endDate'))->render();
-
-    // Instantiate Dompdf with the default configuration
-    $dompdf = new Dompdf();
-
-    // Load the HTML content into Dompdf
-    $dompdf->loadHtml($html);
-
-    // (Optional) Set paper size and orientation
-    $dompdf->setPaper('A4', 'landscape');
-
-    // Render the PDF
-    $dompdf->render();
-
-    // Get the output as a string
-    $output = $dompdf->output();
-
-    // Set the response headers
-    $headers = [
-      'Content-Type' => 'application/pdf',
-      'Content-Disposition' => 'inline; filename="Laporan-Presensi_' . date('d-m-Y') . '.pdf"',
-    ];
-    return Response::make($dompdf->output(), 200, $headers);
-  }
-
-  // <!--================== DOWNLOAD ==================-->
+  // <!--================== DOWNLOAD EXCEL ==================-->
   public function downloadExcel(Request $request)
   {
     $user = Auth::user();
@@ -627,21 +560,15 @@ class PresensiController extends Controller
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
-    // Default tanggal bulan ini jika tidak ada filter
-    // Default tanggal
-    if (!$startDate && !$endDate && empty($search)) {
-      // Kalau tidak ada filter tanggal & tidak ada search → bulan ini saja
-      $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
-      $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
-    } else {
-      // Kalau ada search atau ada filter tanggal → ambil sesuai tanggal
-      $currentMonth = $startDate
-        ? date('Y-m-d 00:00:00', strtotime($startDate))
-        : '2000-01-01 00:00:00';
+    // 1. SETTING DEFAULT: SELALU BULAN INI
+    $currentMonth = now()->startOfMonth()->format('Y-m-d 00:00:00');
+    $nextMonth = now()->endOfMonth()->format('Y-m-d 23:59:59');
 
-      $nextMonth = $endDate
-        ? date('Y-m-d 23:59:59', strtotime($endDate))
-        : now()->format('Y-m-d 23:59:59');
+    // 2. JIKA USER MELAKUKAN FILTER TANGGAL (Kolom tidak kosong)
+    // Maka timpa default bulan ini dengan tanggal dari input filter
+    if (!empty($startDate) && !empty($endDate)) {
+      $currentMonth = date('Y-m-d 00:00:00', strtotime($startDate));
+      $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate));
     }
 
     $presensiQuery = DB::table('presensi')
@@ -687,7 +614,7 @@ class PresensiController extends Controller
       });
     }
 
-    // Filter tanggal
+    // Filter tanggal akan dieksekusi (Bulan ini ATAU sesuai filter)
     $presensi = $presensiQuery
       ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
       ->orderBy('presensi.created_at', 'DESC')
