@@ -190,7 +190,7 @@ Route::prefix('account')
             Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
             Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
             Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
-            Route::delete('/gaji/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
+            Route::delete('/gaji/delete/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
             Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
             Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
             Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
