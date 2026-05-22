@@ -211,7 +211,30 @@ class GajiController extends Controller
     $endDate    = $request->input('tanggal_akhir');
     $search     = $request->input('q');
 
-    // 1) Bentuk base query (tanpa paginate)
+    // 1) Hitung total untuk Kartu Statistik (Bulan Ini, Bulan Lalu, 2 Bulan Lalu)
+    $queryStats = DB::table('gaji')
+      ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
+
+    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+      $queryStats->where('users.company', $user->company);
+    } else {
+      $queryStats->where('gaji.user_id', $user->id);
+    }
+
+    $totalBulanIni = (clone $queryStats)
+      ->whereBetween('gaji.tanggal', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+      ->sum('gaji.total');
+
+    $totalBulanLalu = (clone $queryStats)
+      ->whereBetween('gaji.tanggal', [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])
+      ->sum('gaji.total');
+
+    $totalDuaBulanLalu = (clone $queryStats)
+      ->whereBetween('gaji.tanggal', [Carbon::now()->subMonths(2)->startOfMonth(), Carbon::now()->subMonths(2)->endOfMonth()])
+      ->sum('gaji.total');
+
+
+    // 2) Bentuk base query (tanpa paginate) untuk data tabel
     $baseQuery = DB::table('gaji')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
       ->select([
@@ -235,7 +258,7 @@ class GajiController extends Controller
         'users.bank',
       ]);
 
-    // 2) Terapkan filter tanggal (default bulan ini)
+    // 3) Terapkan filter tanggal tabel (default bulan ini)
     $from = $startDate
       ? Carbon::parse($startDate)->startOfDay()
       : Carbon::now()->startOfMonth();
@@ -245,14 +268,14 @@ class GajiController extends Controller
 
     $baseQuery->whereBetween('gaji.tanggal', [$from, $to]);
 
-    // 3) Filter berdasarkan level user
+    // 4) Filter berdasarkan level user
     if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
       $baseQuery->where('users.company', $user->company);
     } else {
       $baseQuery->where('gaji.user_id', $user->id);
     }
 
-    // 4) Filter pencarian (jika ada)
+    // 5) Filter pencarian (jika ada)
     if ($search) {
       $baseQuery->where(function ($q) use ($search) {
         $q->where('gaji.id_transaksi', 'like', "%{$search}%")
@@ -261,10 +284,10 @@ class GajiController extends Controller
       });
     }
 
-    // 5) Hitung total Gaji tanpa paginate
+    // 6) Hitung total Gaji filter tanpa paginate
     $totalGaji = (clone $baseQuery)->sum('gaji.total');
 
-    // 6) Ambil data ter‑paginate (halaman)
+    // 7) Ambil data ter‑paginate (halaman)
     $gaji = (clone $baseQuery)
       ->orderBy('gaji.created_at', 'desc')
       ->paginate(10)
@@ -274,7 +297,7 @@ class GajiController extends Controller
         'q'             => $search,
       ]);
 
-    // 7) Data pendukung lain
+    // 8) Data pendukung lain
     $presensiExist = false;
     if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
       $presensiExist = Presensi::whereNotNull('status')
@@ -282,12 +305,16 @@ class GajiController extends Controller
         ->exists();
     }
 
+    // 9) Kirim semua variabel ke view, termasuk variabel total bulan ini/lalu
     return view('account.gaji.index', compact(
       'gaji',
       'startDate',
       'endDate',
       'totalGaji',
-      'presensiExist'
+      'presensiExist',
+      'totalBulanIni',
+      'totalBulanLalu',
+      'totalDuaBulanLalu'
     ));
   }
   // <!--================== END ==================-->
@@ -298,15 +325,28 @@ class GajiController extends Controller
     $user = Auth::user();
     $search = $request->get('q');
 
-    // Ambil input tanggal dari request
     $startDate = $request->input('tanggal_awal');
     $endDate = $request->input('tanggal_akhir');
 
-    // Jika tanggal tidak diisi, pakai default dari masa lalu hingga sekarang
-    $currentMonth = $startDate ? date('Y-m-d 00:00:00', strtotime($startDate)) : '2000-01-01 00:00:00';
-    $nextMonth = $endDate ? date('Y-m-d 23:59:59', strtotime($endDate)) : now()->format('Y-m-d 23:59:59');
+    // =========================================================================
+    // 1) HITUNG TOTAL STATISTIK KARTU
+    // =========================================================================
+    $queryStats = DB::table('gaji')->leftJoin('users', 'gaji.user_id', '=', 'users.id');
 
-    // Query awal
+    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+      $queryStats->where('users.company', $user->company);
+    } else {
+      $queryStats->where('gaji.user_id', $user->id);
+    }
+
+    $totalBulanIni = (clone $queryStats)->whereBetween('gaji.tanggal', [\Carbon\Carbon::now()->startOfMonth(), \Carbon\Carbon::now()->endOfMonth()])->sum('gaji.total');
+    $totalBulanLalu = (clone $queryStats)->whereBetween('gaji.tanggal', [\Carbon\Carbon::now()->subMonth()->startOfMonth(), \Carbon\Carbon::now()->subMonth()->endOfMonth()])->sum('gaji.total');
+    $totalDuaBulanLalu = (clone $queryStats)->whereBetween('gaji.tanggal', [\Carbon\Carbon::now()->subMonths(2)->startOfMonth(), \Carbon\Carbon::now()->subMonths(2)->endOfMonth()])->sum('gaji.total');
+
+
+    // =========================================================================
+    // 2) QUERY UTAMA TABEL
+    // =========================================================================
     $gajiQuery = DB::table('gaji')
       ->select(
         'gaji.id',
@@ -330,15 +370,22 @@ class GajiController extends Controller
       )
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
 
-    // Filter sesuai role user
-    if ($user->level === 'manager') {
+    // Filter Tanggal HANYA Bekerja Jika Form Filter Diisi (Tidak ada batasan default)
+    if (!empty($startDate) && !empty($endDate)) {
+      $from = date('Y-m-d 00:00:00', strtotime($startDate));
+      $to = date('Y-m-d 23:59:59', strtotime($endDate));
+      $gajiQuery->whereBetween('gaji.tanggal', [$from, $to]);
+    }
+
+    // Filter Role User
+    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
       $gajiQuery->where('users.company', $user->company);
     } else {
       $gajiQuery->where('gaji.user_id', $user->id);
     }
 
-    // Pencarian berdasarkan kata kunci
-    if ($search) {
+    // Logika Live Search
+    if (!empty($search)) {
       $gajiQuery->where(function ($query) use ($search) {
         $query->where('gaji.id_transaksi', 'LIKE', '%' . $search . '%')
           ->orWhere('users.full_name', 'LIKE', '%' . $search . '%')
@@ -348,37 +395,32 @@ class GajiController extends Controller
       });
     }
 
-    // Duplikasi query untuk menghitung total (tanpa pagination)
-    $totalGajiQuery = clone $gajiQuery;
+    $totalGaji = (clone $gajiQuery)->sum('gaji.total');
 
-    // Hitung total gaji dari semua hasil (bukan hanya paginasi)
-    $totalGaji = $totalGajiQuery
-      ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
-      ->sum('total');
-
-    // Ambil data gaji dengan pagination
+    // =========================================================================
+    // KEMBALIKAN MENGGUNAKAN PAGINATE (BUKAN GET)
+    // =========================================================================
     $gaji = $gajiQuery
-      ->whereBetween('gaji.created_at', [$currentMonth, $nextMonth])
       ->orderBy('gaji.created_at', 'DESC')
-      ->paginate(10);
+      ->paginate(10)
+      ->appends([
+        'q' => $search,
+        'tanggal_awal' => $startDate,
+        'tanggal_akhir' => $endDate
+      ]);
 
-    // Simpan filter ke pagination
-    $gaji->appends([
-      'q' => $search,
-      'tanggal_awal' => $startDate,
-      'tanggal_akhir' => $endDate
-    ]);
-
+    // Cek Presensi
     $presensiExist = false;
-    if ($user->level === 'manager') {
-      $presensiExist = Presensi::where('status', '<>', null)
-        ->whereBetween('created_at', [$currentMonth, $nextMonth])
-        ->exists();
-    }
-
-    // Jika kosong, redirect dengan error
-    if ($gaji->isEmpty()) {
-      return redirect()->route('account.gaji.index')->with('error', 'Data Gaji tidak ditemukan.');
+    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+      if (!empty($startDate) && !empty($endDate)) {
+        $presensiExist = Presensi::whereNotNull('status')
+          ->whereBetween('created_at', [$from, $to])
+          ->exists();
+      } else {
+        $presensiExist = Presensi::whereNotNull('status')
+          ->whereBetween('created_at', [\Carbon\Carbon::now()->startOfMonth(), \Carbon\Carbon::now()->endOfMonth()])
+          ->exists();
+      }
     }
 
     return view('account.gaji.index', compact(
@@ -386,7 +428,10 @@ class GajiController extends Controller
       'startDate',
       'endDate',
       'totalGaji',
-      'presensiExist'
+      'presensiExist',
+      'totalBulanIni',
+      'totalBulanLalu',
+      'totalDuaBulanLalu'
     ));
   }
   // <!--================== END ==================-->
@@ -464,221 +509,136 @@ class GajiController extends Controller
       ]
     );
 
-    $gaji_pokok = $request->input('gaji_pokok');
-    $gaji_pokok_ethes_digital = $request->input('gaji_pokok_ethes_digital');
-    $gaji_pokok = empty($gaji_pokok) ? 0 : str_replace(",", "", $gaji_pokok); // Convert to numeric value or set to 0 if empty
-    $gaji_pokok_ethes_digital = empty($gaji_pokok_ethes_digital) ? 0 : str_replace(",", "", $gaji_pokok_ethes_digital);
+    // =================================================================
+    // HELPER FUNCTION: Memastikan semua data uang/jumlah menjadi angka
+    // Jika kosong (""), otomatis akan menjadi 0.
+    // =================================================================
+    $cleanNum = function ($value) {
+      return (float) str_replace(",", "", $value);
+    };
+
+    // GAJI POKOK
+    $gaji_pokok = $cleanNum($request->input('gaji_pokok'));
+    $gaji_pokok_ethes_digital = $cleanNum($request->input('gaji_pokok_ethes_digital'));
     $total_gaji_pokok = $gaji_pokok +  $gaji_pokok_ethes_digital;
 
-    //lembur
-    $lembur = $request->input('lembur');
-    $lembur = empty($lembur) ? 0 : str_replace(",", "", $lembur);
+    // LEMBUR
+    $lembur = $cleanNum($request->input('lembur'));
+    $lembur1 = $cleanNum($request->input('lembur1'));
+    $lembur2 = $cleanNum($request->input('lembur2'));
+    $lembur3 = $cleanNum($request->input('lembur3'));
+    $lembur4 = $cleanNum($request->input('lembur4'));
+    $lembur5 = $cleanNum($request->input('lembur5'));
+    $lembur6 = $cleanNum($request->input('lembur6'));
+    $lembur7 = $cleanNum($request->input('lembur7'));
+    $lembur8 = $cleanNum($request->input('lembur8'));
+    $lembur9 = $cleanNum($request->input('lembur9'));
+    $lembur10 = $cleanNum($request->input('lembur10'));
 
-    $lembur1 = $request->input('lembur1');
-    $lembur1 = empty($lembur1) ? 0 : str_replace(",", "", $lembur1);
+    // JUMLAH LEMBUR
+    $jumlah_lembur = (float) $request->input('jumlah_lembur');
+    $jumlah_lembur1 = (float) $request->input('jumlah_lembur1');
+    $jumlah_lembur2 = (float) $request->input('jumlah_lembur2');
+    $jumlah_lembur3 = (float) $request->input('jumlah_lembur3');
+    $jumlah_lembur4 = (float) $request->input('jumlah_lembur4');
+    $jumlah_lembur5 = (float) $request->input('jumlah_lembur5');
+    $jumlah_lembur6 = (float) $request->input('jumlah_lembur6');
+    $jumlah_lembur7 = (float) $request->input('jumlah_lembur7');
+    $jumlah_lembur8 = (float) $request->input('jumlah_lembur8');
+    $jumlah_lembur9 = (float) $request->input('jumlah_lembur9');
+    $jumlah_lembur10 = (float) $request->input('jumlah_lembur10');
 
-    $lembur2 = $request->input('lembur2');
-    $lembur2 = empty($lembur2) ? 0 : str_replace(",", "", $lembur2);
+    // BONUS DALAM KOTA
+    $bonus = $cleanNum($request->input('bonus'));
+    $bonus1 = $cleanNum($request->input('bonus1'));
+    $bonus2 = $cleanNum($request->input('bonus2'));
+    $bonus3 = $cleanNum($request->input('bonus3'));
+    $bonus4 = $cleanNum($request->input('bonus4'));
+    $bonus5 = $cleanNum($request->input('bonus5'));
+    $bonus6 = $cleanNum($request->input('bonus6'));
+    $bonus7 = $cleanNum($request->input('bonus7'));
+    $bonus8 = $cleanNum($request->input('bonus8'));
+    $bonus9 = $cleanNum($request->input('bonus9'));
+    $bonus10 = $cleanNum($request->input('bonus10'));
 
-    $lembur3 = $request->input('lembur3');
-    $lembur3 = empty($lembur3) ? 0 : str_replace(",", "", $lembur3);
+    // JUMLAH BONUS DALAM KOTA
+    $jumlah_bonus = (float) $request->input('jumlah_bonus');
+    $jumlah_bonus1 = (float) $request->input('jumlah_bonus1');
+    $jumlah_bonus2 = (float) $request->input('jumlah_bonus2');
+    $jumlah_bonus3 = (float) $request->input('jumlah_bonus3');
+    $jumlah_bonus4 = (float) $request->input('jumlah_bonus4');
+    $jumlah_bonus5 = (float) $request->input('jumlah_bonus5');
+    $jumlah_bonus6 = (float) $request->input('jumlah_bonus6');
+    $jumlah_bonus7 = (float) $request->input('jumlah_bonus7');
+    $jumlah_bonus8 = (float) $request->input('jumlah_bonus8');
+    $jumlah_bonus9 = (float) $request->input('jumlah_bonus9');
+    $jumlah_bonus10 = (float) $request->input('jumlah_bonus10');
 
-    $lembur4 = $request->input('lembur4');
-    $lembur4 = empty($lembur4) ? 0 : str_replace(",", "", $lembur4);
+    // BONUS LUAR KOTA
+    $bonus_luar = $cleanNum($request->input('bonus_luar'));
+    $bonus_luar1 = $cleanNum($request->input('bonus_luar1'));
+    $bonus_luar2 = $cleanNum($request->input('bonus_luar2'));
+    $bonus_luar3 = $cleanNum($request->input('bonus_luar3'));
+    $bonus_luar4 = $cleanNum($request->input('bonus_luar4'));
+    $bonus_luar5 = $cleanNum($request->input('bonus_luar5'));
+    $bonus_luar6 = $cleanNum($request->input('bonus_luar6'));
+    $bonus_luar7 = $cleanNum($request->input('bonus_luar7'));
+    $bonus_luar8 = $cleanNum($request->input('bonus_luar8'));
+    $bonus_luar9 = $cleanNum($request->input('bonus_luar9'));
+    $bonus_luar10 = $cleanNum($request->input('bonus_luar10'));
 
-    $lembur5 = $request->input('lembur5');
-    $lembur5 = empty($lembur5) ? 0 : str_replace(",", "", $lembur5);
+    // JUMLAH BONUS LUAR KOTA
+    $jumlah_bonus_luar = (float) $request->input('jumlah_bonus_luar');
+    $jumlah_bonus_luar1 = (float) $request->input('jumlah_bonus_luar1');
+    $jumlah_bonus_luar2 = (float) $request->input('jumlah_bonus_luar2');
+    $jumlah_bonus_luar3 = (float) $request->input('jumlah_bonus_luar3');
+    $jumlah_bonus_luar4 = (float) $request->input('jumlah_bonus_luar4');
+    $jumlah_bonus_luar5 = (float) $request->input('jumlah_bonus_luar5');
+    $jumlah_bonus_luar6 = (float) $request->input('jumlah_bonus_luar6');
+    $jumlah_bonus_luar7 = (float) $request->input('jumlah_bonus_luar7');
+    $jumlah_bonus_luar8 = (float) $request->input('jumlah_bonus_luar8');
+    $jumlah_bonus_luar9 = (float) $request->input('jumlah_bonus_luar9');
+    $jumlah_bonus_luar10 = (float) $request->input('jumlah_bonus_luar10');
 
-    $lembur6 = $request->input('lembur6');
-    $lembur6 = empty($lembur6) ? 0 : str_replace(",", "", $lembur6);
+    // LAINNYA
+    $operasional = $cleanNum($request->input('operasional'));
+    $webinar = $cleanNum($request->input('webinar'));
+    $kinerja = $cleanNum($request->input('kinerja'));
+    $tunjangan = $cleanNum($request->input('tunjangan'));
+    $tunjangan_bpjs = $cleanNum($request->input('tunjangan_bpjs'));
+    $tunjangan_thr = $cleanNum($request->input('tunjangan_thr'));
+    $tunjangan_pulsa = $cleanNum($request->input('tunjangan_pulsa'));
+    $potongan = $cleanNum($request->input('potongan'));
+    $pph = $cleanNum($request->input('pph'));
 
-    $lembur7 = $request->input('lembur7');
-    $lembur7 = empty($lembur7) ? 0 : str_replace(",", "", $lembur7);
+    // PENGHITUNGAN MATEMATIKA
+    $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) +
+      ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) +
+      ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) +
+      ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
 
-    $lembur8 = $request->input('lembur8');
-    $lembur8 = empty($lembur8) ? 0 : str_replace(",", "", $lembur8);
+    $total_bonus = ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) +
+      ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) +
+      ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) + $webinar + $kinerja;
 
-    $lembur9 = $request->input('lembur9');
-    $lembur9 = empty($lembur9) ? 0 : str_replace(",", "", $lembur9);
-
-    $lembur10 = $request->input('lembur10');
-    $lembur10 = empty($lembur10) ? 0 : str_replace(",", "", $lembur10);
-    //end
-
-    //fee bonus dalam kota
-    $bonus = $request->input('bonus');
-    $bonus = empty($bonus) ? null : str_replace(",", "", $bonus);
-
-    $bonus1 = $request->input('bonus1');
-    $bonus1 = empty($bonus1) ? null : str_replace(",", "", $bonus1);
-
-    $bonus2 = $request->input('bonus2');
-    $bonus2 = empty($bonus2) ? null : str_replace(",", "", $bonus2);
-
-    $bonus3 = $request->input('bonus3');
-    $bonus3 = empty($bonus3) ? null : str_replace(",", "", $bonus3);
-
-    $bonus4 = $request->input('bonus4');
-    $bonus4 = empty($bonus4) ? null : str_replace(",", "", $bonus4);
-
-    $bonus5 = $request->input('bonus5');
-    $bonus5 = empty($bonus5) ? null : str_replace(",", "", $bonus5);
-
-    $bonus6 = $request->input('bonus6');
-    $bonus6 = empty($bonus6) ? null : str_replace(",", "", $bonus6);
-
-    $bonus7 = $request->input('bonus7');
-    $bonus7 = empty($bonus7) ? null : str_replace(",", "", $bonus7);
-
-    $bonus8 = $request->input('bonus8');
-    $bonus8 = empty($bonus8) ? null : str_replace(",", "", $bonus8);
-
-    $bonus9 = $request->input('bonus9');
-    $bonus9 = empty($bonus9) ? null : str_replace(",", "", $bonus9);
-
-    $bonus10 = $request->input('bonus10');
-    $bonus10 = empty($bonus10) ? null : str_replace(",", "", $bonus10);
-    //end fee bonus dalam kota
-
-    //fee bonus luar kota
-    $bonus_luar = $request->input('bonus_luar');
-    $bonus_luar = empty($bonus_luar) ? null : str_replace(",", "", $bonus_luar);
-
-    $bonus_luar1 = $request->input('bonus_luar1');
-    $bonus_luar1 = empty($bonus_luar1) ? null : str_replace(",", "", $bonus_luar1);
-
-    $bonus_luar2 = $request->input('bonus_luar2');
-    $bonus_luar2 = empty($bonus_luar2) ? null : str_replace(",", "", $bonus_luar2);
-
-    $bonus_luar3 = $request->input('bonus_luar3');
-    $bonus_luar3 = empty($bonus_luar3) ? null : str_replace(",", "", $bonus_luar3);
-
-    $bonus_luar4 = $request->input('bonus_luar4');
-    $bonus_luar4 = empty($bonus_luar4) ? null : str_replace(",", "", $bonus_luar4);
-
-    $bonus_luar5 = $request->input('bonus_luar5');
-    $bonus_luar5 = empty($bonus_luar5) ? null : str_replace(",", "", $bonus_luar5);
-
-    $bonus_luar6 = $request->input('bonus_luar6');
-    $bonus_luar6 = empty($bonus_luar6) ? null : str_replace(",", "", $bonus_luar6);
-
-    $bonus_luar7 = $request->input('bonus_luar7');
-    $bonus_luar7 = empty($bonus_luar7) ? null : str_replace(",", "", $bonus_luar7);
-
-    $bonus_luar8 = $request->input('bonus_luar8');
-    $bonus_luar8 = empty($bonus_luar8) ? null : str_replace(",", "", $bonus_luar8);
-
-    $bonus_luar9 = $request->input('bonus_luar9');
-    $bonus_luar9 = empty($bonus_luar9) ? null : str_replace(",", "", $bonus_luar9);
-
-    $bonus_luar10 = $request->input('bonus_luar10');
-    $bonus_luar10 = empty($bonus_luar10) ? null : str_replace(",", "", $bonus_luar10);
-    //end fee bonus luar kota
-
-    $operasional = $request->input('operasional');
-    $operasional = empty($operasional) ? 0 : str_replace(",", "", $operasional);
-
-    $webinar = $request->input('webinar');
-    $webinar = empty($webinar) ? 0 : str_replace(",", "", $webinar);
-    $kinerja = $request->input('kinerja');
-    $kinerja = empty($kinerja) ? 0 : str_replace(",", "", $kinerja);
-    $tunjangan = $request->input('tunjangan');
-    $tunjangan = empty($tunjangan) ? 0 : str_replace(",", "", $tunjangan);
-    $tunjangan_bpjs = $request->input('tunjangan_bpjs');
-    $tunjangan_bpjs = empty($tunjangan_bpjs) ? 0 : str_replace(",", "", $tunjangan_bpjs);
-    $tunjangan_thr = $request->input('tunjangan_thr');
-    $tunjangan_thr = empty($tunjangan_thr) ? 0 : str_replace(",", "", $tunjangan_thr);
-    $tunjangan_pulsa = $request->input('tunjangan_pulsa');
-    $tunjangan_pulsa = empty($tunjangan_pulsa) ? 0 : str_replace(",", "", $tunjangan_pulsa);
-
-    //jumlah lembur
-    $jumlah_lembur = $request->input('jumlah_lembur') ?? 0;
-    $jumlah_lembur1 = $request->input('jumlah_lembur1') ?? 0;
-    $jumlah_lembur2 = $request->input('jumlah_lembur2') ?? 0;
-    $jumlah_lembur3 = $request->input('jumlah_lembur3') ?? 0;
-    $jumlah_lembur4 = $request->input('jumlah_lembur4') ?? 0;
-    $jumlah_lembur5 = $request->input('jumlah_lembur5') ?? 0;
-    $jumlah_lembur6 = $request->input('jumlah_lembur6') ?? 0;
-    $jumlah_lembur7 = $request->input('jumlah_lembur7') ?? 0;
-    $jumlah_lembur8 = $request->input('jumlah_lembur8') ?? 0;
-    $jumlah_lembur9 = $request->input('jumlah_lembur9') ?? 0;
-    $jumlah_lembur10 = $request->input('jumlah_lembur10') ?? 0;
-    //end jumlah lembur
-
-    //jumlah bonus dalam kota
-    $jumlah_bonus = $request->input('jumlah_bonus') ?? null;
-    $jumlah_bonus1 = $request->input('jumlah_bonus1') ?? null;
-    $jumlah_bonus2 = $request->input('jumlah_bonus2') ?? null;
-    $jumlah_bonus3 = $request->input('jumlah_bonus3') ?? null;
-    $jumlah_bonus4 = $request->input('jumlah_bonus4') ?? null;
-    $jumlah_bonus5 = $request->input('jumlah_bonus5') ?? null;
-    $jumlah_bonus6 = $request->input('jumlah_bonus6') ?? null;
-    $jumlah_bonus7 = $request->input('jumlah_bonus7') ?? null;
-    $jumlah_bonus8 = $request->input('jumlah_bonus8') ?? null;
-    $jumlah_bonus9 = $request->input('jumlah_bonus9') ?? null;
-    $jumlah_bonus10 = $request->input('jumlah_bonus10') ?? null;
-    $alpha = $request->input('alpha') ?? null;
-    //end jumlah bonus dalam kota
-
-    //jumlah bonus luar kota
-    $jumlah_bonus_luar = $request->input('jumlah_bonus_luar') ?? null;
-    $jumlah_bonus_luar1 = $request->input('jumlah_bonus_luar1') ?? null;
-    $jumlah_bonus_luar2 = $request->input('jumlah_bonus_luar2') ?? null;
-    $jumlah_bonus_luar3 = $request->input('jumlah_bonus_luar3') ?? null;
-    $jumlah_bonus_luar4 = $request->input('jumlah_bonus_luar4') ?? null;
-    $jumlah_bonus_luar5 = $request->input('jumlah_bonus_luar5') ?? null;
-    $jumlah_bonus_luar6 = $request->input('jumlah_bonus_luar6') ?? null;
-    $jumlah_bonus_luar7 = $request->input('jumlah_bonus_luar7') ?? null;
-    $jumlah_bonus_luar8 = $request->input('jumlah_bonus_luar8') ?? null;
-    $jumlah_bonus_luar9 = $request->input('jumlah_bonus_luar9') ?? null;
-    $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? null;
-    //end jumlah bonus luar kota
-
-    $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) +
-      ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
-    $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
-
-    // $total_bonus =
-    //   ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) +
-    //   ($bonus8 * $jumlah_bonus8) + ($bonus9 * $jumlah_bonus9) + ($bonus10 * $jumlah_bonus10) +
-    //   ($bonus_luar * $jumlah_bonus_luar) + ($bonus_luar1 * $jumlah_bonus_luar1) + ($bonus_luar2 * $jumlah_bonus_luar2) + ($bonus_luar3 * $jumlah_bonus_luar3) + ($bonus_luar4 * $jumlah_bonus_luar4) + ($bonus_luar5 * $jumlah_bonus_luar5) +
-    //   ($bonus_luar6 * $jumlah_bonus_luar6) + ($bonus_luar7 * $jumlah_bonus_luar7) + ($bonus_luar8 * $jumlah_bonus_luar8) + ($bonus_luar9 * $jumlah_bonus_luar9) + ($bonus_luar10 * $jumlah_bonus_luar10);
-    // $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
-
-    $total_bonus =
-      ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) + ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) + ($bonus6 * $jumlah_bonus6) + ($bonus7 * $jumlah_bonus7) + $webinar + $kinerja;
-    $total_bonus = empty($total_bonus) ? 0 : str_replace(",", "", $total_bonus);
-
-    $potongan = $request->input('potongan');
-    $potongan = empty($potongan) ? 0 : str_replace(",", "", $potongan);
-
-    $pph = $request->input('pph');
-    $pph = empty($pph) ? 0 : str_replace(",", "", $pph);
-
-    // <!-- POTONGAN JIKA ALPHA -->
+    // POTONGAN JIKA ALPHA
     $subalpha = $jumlah_bonus5 * 0.005;
     $subhasil = $total_gaji_pokok * $subalpha;
     $totalalpha = $total_gaji_pokok - $subhasil;
-    // <!-- END -->
 
-    // <!-- TOTAL -->
-    $subtotal = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
-    $total = $subtotal;
-    $total = empty($total) ? 0 : str_replace(",", "", $total);
-    // <!-- END -->
+    // TOTAL KESELURUHAN
+    $total = $totalalpha + $total_lembur + $total_bonus + $tunjangan + $tunjangan_bpjs + $tunjangan_thr + $tunjangan_pulsa - $potongan - $pph;
 
-    //menyinpan image di path
+    // MENYIMPAN GAMBAR
     $imagePath = null;
-
     if ($request->hasFile('gambar')) {
       $image = $request->file('gambar');
       $imageName = time() . '.' . $image->getClientOriginalExtension();
-      $imagePath = $imageName; // Sesuaikan dengan path yang telah didefinisikan di konfigurasi
-      $image->move(public_path('images'), $imageName); // Pindahkan gambar ke direktori public/images
+      $imagePath = $imageName;
+      $image->move(public_path('images'), $imageName);
     }
-    //end
 
-
+    // PROSES SIMPAN KE DATABASE
     $save = Gaji::create([
       'id_transaksi' => $id_transaksi,
       'token'             => $token,
@@ -686,6 +646,7 @@ class GajiController extends Controller
       'gaji_pokok' => $gaji_pokok,
       'gaji_pokok_ethes_digital' => $gaji_pokok_ethes_digital,
       'total_gaji_pokok' => $total_gaji_pokok,
+
       'lembur' => $lembur,
       'lembur1' => $lembur1,
       'lembur2' => $lembur2,
@@ -697,6 +658,7 @@ class GajiController extends Controller
       'lembur8' => $lembur8,
       'lembur9' => $lembur9,
       'lembur10' => $lembur10,
+
       'jumlah_lembur' => $jumlah_lembur,
       'jumlah_lembur1' => $jumlah_lembur1,
       'jumlah_lembur2' => $jumlah_lembur2,
@@ -708,6 +670,7 @@ class GajiController extends Controller
       'jumlah_lembur8' => $jumlah_lembur8,
       'jumlah_lembur9' => $jumlah_lembur9,
       'jumlah_lembur10' => $jumlah_lembur10,
+
       'bonus' => $bonus,
       'bonus1' => $bonus1,
       'bonus2' => $bonus2,
@@ -719,6 +682,7 @@ class GajiController extends Controller
       'bonus8' => $bonus8,
       'bonus9' => $bonus9,
       'bonus10' => $bonus10,
+
       'bonus_luar' => $bonus_luar,
       'bonus_luar1' => $bonus_luar1,
       'bonus_luar2' => $bonus_luar2,
@@ -730,6 +694,7 @@ class GajiController extends Controller
       'bonus_luar8' => $bonus_luar8,
       'bonus_luar9' => $bonus_luar9,
       'bonus_luar10' => $bonus_luar10,
+
       'operasional' => $operasional,
       'webinar' => $webinar,
       'kinerja' => $kinerja,
@@ -737,6 +702,7 @@ class GajiController extends Controller
       'tunjangan_bpjs' => $tunjangan_bpjs,
       'tunjangan_thr' => $tunjangan_thr,
       'tunjangan_pulsa' => $tunjangan_pulsa,
+
       'jumlah_bonus' => $jumlah_bonus,
       'jumlah_bonus1' => $jumlah_bonus1,
       'jumlah_bonus2' => $jumlah_bonus2,
@@ -748,6 +714,7 @@ class GajiController extends Controller
       'jumlah_bonus8' => $jumlah_bonus8,
       'jumlah_bonus9' => $jumlah_bonus9,
       'jumlah_bonus10' => $jumlah_bonus10,
+
       'jumlah_bonus_luar' => $jumlah_bonus_luar,
       'jumlah_bonus_luar1' => $jumlah_bonus_luar1,
       'jumlah_bonus_luar2' => $jumlah_bonus_luar2,
@@ -759,7 +726,7 @@ class GajiController extends Controller
       'jumlah_bonus_luar8' => $jumlah_bonus_luar8,
       'jumlah_bonus_luar9' => $jumlah_bonus_luar9,
       'jumlah_bonus_luar10' => $jumlah_bonus_luar10,
-      'alpha' => $alpha,
+
       'tanggal' => $request->input('tanggal'),
       'potongan' => $potongan,
       'pph' => $pph,
@@ -773,23 +740,18 @@ class GajiController extends Controller
       'email' => $request->input('email'),
     ]);
 
-    // Redirect with success or error message
+    // EKSEKUSI REDIRECT / KIRIM EMAIL
     if ($save) {
       $user = User::findOrFail($request->input('user_id'));
       $appName = 'Rumah Scopus Foundation';
       $isTerbayar = $request->input('status') == 'terbayar';
+
       if ($isTerbayar) {
         Mail::to($request->email)->send(new GajiSuccessMail($user, $save, $appName, $isTerbayar));
       }
 
       return redirect()->route('account.gaji.index')->with('success', 'Data Gaji Karyawan Berhasil Disimpan!');
-      // $gajiId = $save->id;
-      // return Redirect::route(
-      //   'account.gaji.detail',
-      //   ['id' => $gajiId]
-      // )->with('success', 'Data Gaji Karyawan Berhasil Disimpan!');
     } else {
-      // Redirect with an error message if data creation fails
       return redirect()->route('account.gaji.index')->with('error', 'Data Gaji Karyawan Gagal Disimpan!');
     }
   }

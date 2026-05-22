@@ -14,6 +14,8 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Riskihajar\Terbilang\Facades\Terbilang;
 
 class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents, WithCustomStartCell
@@ -37,7 +39,7 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     public function headings(): array
     {
         return [
-            ['NO', 'ID TRANSAKSI', 'NAMA KARYAWAN', 'NO REKENING', 'BANK', 'TOTAL GAJI', 'TANGGAL PEMBAYARAN']
+            ['NO', 'ID TRANSAKSI', 'NAMA KARYAWAN', 'NO REKENING', 'BANK', 'TOTAL GAJI', 'TANGGAL DIBAYARKAN']
         ];
     }
 
@@ -106,16 +108,17 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             '135' => 'BPD SULAWESI TENGGARA',
             '137' => 'BPD BANTEN'
         ];
+
         $nama_bank = $bankNames[$gaji->bank] ?? 'Bank Name Not Found';
-        $formatted_date = date('d F Y H:i', strtotime($gaji->tanggal));
+        $formatted_date = date('d M Y, H:i', strtotime($gaji->tanggal));
 
         return [
             $row,
             $gaji->id_transaksi,
             $gaji->full_name,
-            "'" . $gaji->norek,
+            $gaji->norek . " ", // Spasi agar tidak jadi format scientific di excel
             $nama_bank,
-            'Rp. ' . number_format($gaji->total ?? 0, 0, ',', '.'),
+            'Rp ' . number_format($gaji->total ?? 0, 0, ',', '.'),
             $formatted_date
         ];
     }
@@ -127,7 +130,7 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function startCell(): string
     {
-        return 'A8'; // Heading kolom mulai dari A8, data mulai dari A9
+        return 'A8';
     }
 
     public function registerEvents(): array
@@ -136,82 +139,131 @@ class GajiExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // Periode dari filter (jika ada), jika tidak ambil bulan ini
+                // 1. LOGIKA PERIODE
                 $tanggal_awal = request('tanggal_awal');
                 $tanggal_akhir = request('tanggal_akhir');
 
                 if ($tanggal_awal && $tanggal_akhir) {
-                    $periode = 'Periode: ' . date('d-m-Y', strtotime($tanggal_awal)) . ' s.d. ' . date('d-m-Y', strtotime($tanggal_akhir));
+                    $periode = 'Periode: ' . date('d M Y', strtotime($tanggal_awal)) . ' - ' . date('d M Y', strtotime($tanggal_akhir));
                 } else {
-                    $firstDay = date('01-m-Y');
-                    $lastDay = date('t-m-Y');
-                    $periode = 'Periode: ' . $firstDay . ' s.d. ' . $lastDay;
+                    $periode = 'Periode: ' . date('01 M Y') . ' - ' . date('t M Y');
                 }
 
-                // Judul
+                // 2. STYLING KOP LAPORAN (MINIMALIST)
+                $sheet->setShowGridlines(false);
+
                 $sheet->mergeCells('A1:G1');
                 $sheet->setCellValue('A1', 'LAPORAN GAJI KARYAWAN');
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-                $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('A1')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 18, 'color' => ['argb' => 'FF0F172A']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
 
-                // Periode
                 $sheet->mergeCells('A2:G2');
                 $sheet->setCellValue('A2', $periode);
-                $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('A2')->applyFromArray([
+                    'font' => ['size' => 11, 'color' => ['argb' => 'FF64748B']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
 
-                // Garis separator
-                $sheet->getStyle('A3:G3')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
-
-                // Alamat
                 $sheet->mergeCells('A4:G4');
-                $sheet->setCellValue('A4', 'Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman, Yogyakarta 55551');
-                $sheet->getStyle('A4')->getAlignment()->setHorizontal('center');
+                $sheet->setCellValue('A4', 'Rumah Scopus Foundation');
+                $sheet->getStyle('A4')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FF334155']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
 
-                // Kontak
                 $sheet->mergeCells('A5:G5');
-                $sheet->setCellValue('A5', 'Email : info@rumahscopusfoundation.com Telp : 0812-2688-3280');
-                $sheet->getStyle('A5')->getAlignment()->setHorizontal('center');
+                $sheet->setCellValue('A5', 'Bangunsari, Jl. Bangunsari, Bangun Kerto, Turi, Sleman, Yogyakarta 55551 | info@rumahscopusfoundation.com');
+                $sheet->getStyle('A5')->applyFromArray([
+                    'font' => ['size' => 9, 'color' => ['argb' => 'FF94A3B8']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
 
-                // Garis separator kedua
-                $sheet->getStyle('A6:G6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+                // 3. STYLING HEADER TABEL (CLEAN & SUBTLE BACKGROUND)
+                $sheet->getStyle('A8:G8')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FF475569']],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFF8FAFC']
+                    ],
+                    'borders' => [
+                        'top' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['argb' => 'FFCBD5E1']],
+                        'bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['argb' => 'FFCBD5E1']],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ]
+                ]);
+                $sheet->getRowDimension(8)->setRowHeight(30);
 
-                // Heading kolom
-                $sheet->getStyle('A8:G8')->getFont()->setBold(true);
-                $sheet->getStyle('A8:G8')->getAlignment()->setHorizontal('center');
-
-                // Hitung jumlah data yang ditampilkan
+                // 4. STYLING BODY TABEL
                 $dataCount = $this->collection()->count();
                 $lastDataRow = 8 + $dataCount;
-                $totalRow = $lastDataRow + 2; // beri 1 baris kosong sebelum total
+
+                if ($dataCount > 0) {
+                    for ($r = 9; $r <= $lastDataRow; $r++) {
+                        $sheet->getRowDimension($r)->setRowHeight(24);
+                        $sheet->getStyle("A{$r}:G{$r}")->applyFromArray([
+                            'borders' => [
+                                'bottom' => [
+                                    'borderStyle' => Border::BORDER_HAIR,
+                                    'color' => ['argb' => 'FFE2E8F0']
+                                ]
+                            ],
+                            'alignment' => [
+                                'vertical' => Alignment::VERTICAL_CENTER
+                            ]
+                        ]);
+                    }
+
+                    $sheet->getStyle('A9:B' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('C9:C' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('D9:D' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('E9:E' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('F9:F' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                    $sheet->getStyle('G9:G' . $lastDataRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+
+                // 5. STYLING TOTAL (DIUBAH MENJADI CENTER)
+                $totalRow = $lastDataRow + 1;
                 $terbilangRow = $totalRow + 1;
 
-                // Format total angka
                 $formattedTotal = 'Rp ' . number_format($this->totalGaji, 0, ',', '.');
 
-                // Garis pemisah di atas total
-                $sheet->getStyle('A' . ($totalRow - 1) . ':G' . ($totalRow - 1))->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
-
-                // TOTAL - merge kolom A sampai E
                 $sheet->mergeCells("A{$totalRow}:E{$totalRow}");
-                $sheet->setCellValue("A{$totalRow}", 'TOTAL');
-                $sheet->getStyle("A{$totalRow}")->getFont()->setBold(true);
-                $sheet->getStyle("A{$totalRow}")->getAlignment()->setHorizontal('center');
-
-                // NILAI TOTAL - merge kolom F sampai G
+                $sheet->setCellValue("A{$totalRow}", 'TOTAL GAJI DIBAYARKAN');
                 $sheet->mergeCells("F{$totalRow}:G{$totalRow}");
                 $sheet->setCellValue("F{$totalRow}", $formattedTotal);
-                $sheet->getStyle("F{$totalRow}:G{$totalRow}")->getFont()->setBold(true);
-                $sheet->getStyle("F{$totalRow}:G{$totalRow}")->getAlignment()->setHorizontal('center');
 
-                // Garis pemisah di bawah total
-                $sheet->getStyle('A' . ($totalRow + 1) . ':G' . ($totalRow + 1))->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("A{$totalRow}:G{$totalRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11, 'color' => ['argb' => 'FF0F172A']],
+                    'borders' => [
+                        'top' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF94A3B8']],
+                        'bottom' => ['borderStyle' => Border::BORDER_DOUBLE, 'color' => ['argb' => 'FF94A3B8']],
+                    ],
+                    'alignment' => ['vertical' => Alignment::VERTICAL_CENTER]
+                ]);
 
-                // TERBILANG - merge kolom A sampai G
+                // Ubah teks total dan angkanya menjadi Center
+                $sheet->getStyle("A{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("F{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getRowDimension($totalRow)->setRowHeight(30);
+
+                // 6. STYLING TERBILANG (DIUBAH MENJADI CENTER)
                 $terbilang = \Riskihajar\Terbilang\Facades\Terbilang::make($this->totalGaji);
                 $sheet->mergeCells("A{$terbilangRow}:G{$terbilangRow}");
-                $sheet->setCellValue("A{$terbilangRow}", ucwords($terbilang) . ' Rupiah');
-                $sheet->getStyle("A{$terbilangRow}")->getAlignment()->setHorizontal('center');
-                $sheet->getStyle("A{$terbilangRow}")->getFont()->setItalic(true);
+                $sheet->setCellValue("A{$terbilangRow}", 'Terbilang: ' . ucwords($terbilang) . ' Rupiah');
+
+                $sheet->getStyle("A{$terbilangRow}:G{$terbilangRow}")->applyFromArray([
+                    'font' => ['italic' => true, 'size' => 10, 'color' => ['argb' => 'FF64748B']],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER, // Ubah ke Center
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ]
+                ]);
+                $sheet->getRowDimension($terbilangRow)->setRowHeight(25);
             },
         ];
     }

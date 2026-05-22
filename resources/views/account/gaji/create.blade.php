@@ -1,165 +1,87 @@
 @extends('layouts.account')
+@extends('layouts.inputfitur')
 
 @section('title')
 Tambah Gaji Karyawan | MIS
 @stop
 
-<!--================== button lembur responsive ==================-->
+<!--================== lembur responsive ==================-->
 <style>
-  /* Default styling for the button */
-  #addLembur,
-  #removeAddedLembur0,
-  #removeAddedLembur2,
-  #removeAddedLembur3,
-  #removeAddedLembur4,
-  #removeAddedLembur5,
-  #removeAddedLembur6,
-  #removeAddedLembur7,
-  #removeAddedLembur8,
-  #removeAddedLembur9,
-  #removeAddedLembur10 {
-    height: 40px;
-    white-space: nowrap;
+  /* 🔹 Input Group Glossy (Untuk prefix Rp) */
+  .input-group-glossy {
+    display: flex;
+    align-items: stretch;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
+    transition: all 0.3s ease;
   }
 
-  /* Media query for handphones (width 767px or less) */
-  @media (max-width: 767px) {
-
-    #addLembur,
-    #removeAddedLembur0,
-    #removeAddedLembur2,
-    #removeAddedLembur3,
-    #removeAddedLembur4,
-    #removeAddedLembur5,
-    #removeAddedLembur6,
-    #removeAddedLembur7,
-    #removeAddedLembur8,
-    #removeAddedLembur9,
-    #removeAddedLembur10 {
-      width: 100%;
-    }
+  .input-group-glossy:focus-within {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
-  /* Media query for tablets (width between 768px and 991px) */
-  @media (min-width: 768px) and (max-width: 991px) {
-
-    #addLembur,
-    #removeAddedLembur0,
-    #removeAddedLembur2,
-    #removeAddedLembur3,
-    #removeAddedLembur4,
-    #removeAddedLembur5,
-    #removeAddedLembur6,
-    #removeAddedLembur7,
-    #removeAddedLembur8,
-    #removeAddedLembur9,
-    #removeAddedLembur10 {
-      width: auto;
-      /* atau atur sesuai kebutuhan pada tablet */
-    }
+  .prefix-glossy {
+    padding: 12px 15px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #64748b;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Styling for larger screens (laptops, monitors) */
-  @media (min-width: 992px) {
-
-    #addLembur,
-    #removeAddedLembur0,
-    #removeAddedLembur2,
-    #removeAddedLembur3,
-    #removeAddedLembur4,
-    #removeAddedLembur5,
-    #removeAddedLembur6,
-    #removeAddedLembur7,
-    #removeAddedLembur8,
-    #removeAddedLembur9,
-    #removeAddedLembur10 {
-      width: auto;
-      /* Atur sesuai kebutuhan pada laptop atau monitor */
-    }
-  }
-</style>
-<!--================== end ==================-->
-
-<!--================== button bonus responsive ==================-->
-<style>
-  /* Default styling for the button */
-  #addBonus,
-  #removeAddedBonus1,
-  #removeAddedBonus2,
-  #removeAddedBonus3,
-  #removeAddedBonus4,
-  #removeAddedBonus5,
-  #removeAddedBonus6,
-  #removeAddedBonus7,
-  #removeAddedBonus8,
-  #removeAddedBonus9,
-  #removeAddedBonus10 {
-    height: 40px;
-    white-space: nowrap;
+  .input-group-glossy input {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
   }
 
-  #label {
-    margin-bottom: 20px;
+  /* 🔹 Tombol Clean & Glossy */
+  .btn-action-glossy {
+    height: 46px;
+    /* Sejajar dengan tinggi input */
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    /* Otomatis full width di HP, mengikuti kolom di Laptop */
   }
 
-  /* Media query for handphones (width 767px or less) */
-  @media (max-width: 767px) {
-
-    #addBonus,
-    #removeAddedBonus1,
-    #removeAddedBonus2,
-    #removeAddedBonus3,
-    #removeAddedBonus4,
-    #removeAddedBonus5,
-    #removeAddedBonus6,
-    #removeAddedBonus7,
-    #removeAddedBonus8,
-    #removeAddedBonus9,
-    #removeAddedBonus10 {
-      width: 100%;
-    }
+  .btn-action-glossy:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
   }
 
-  /* Media query for tablets (width between 768px and 991px) */
-  @media (min-width: 768px) and (max-width: 991px) {
-
-    #addBonus,
-    #removeAddedBonus1,
-    #removeAddedBonus2,
-    #removeAddedBonus3,
-    #removeAddedBonus4,
-    #removeAddedBonus5,
-    #removeAddedBonus6,
-    #removeAddedBonus7,
-    #removeAddedBonus8,
-    #removeAddedBonus9,
-    #removeAddedBonus10 {
-      width: auto;
-      /* atau atur sesuai kebutuhan pada tablet */
-    }
-
-    #label {
-      margin-bottom: 35px;
-    }
+  .btn-add-glossy {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
   }
 
-  /* Styling for larger screens (laptops, monitors) */
-  @media (min-width: 992px) {
-
-    #addBonus,
-    #removeAddedBonus1,
-    #removeAddedBonus2,
-    #removeAddedBonus3,
-    #removeAddedBonus4,
-    #removeAddedBonus5,
-    #removeAddedBonus6,
-    #removeAddedBonus7,
-    #removeAddedBonus8,
-    #removeAddedBonus9,
-    #removeAddedBonus10 {
-      width: auto;
-      /* Atur sesuai kebutuhan pada laptop atau monitor */
-    }
+  .btn-remove-glossy {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
   }
 </style>
 <!--================== end ==================-->
@@ -216,74 +138,156 @@ Tambah Gaji Karyawan | MIS
 </style>
 <!--================== END ==================-->
 
+<style>
+  .card-neo {
+    background: white;
+    border-radius: var(--radius-xl);
+    border: none;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
+
+  .card-header-neo {
+    padding: 20px 25px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fcfcfd;
+  }
+
+  .card-header-neo i {
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .card-header-neo span {
+    font-weight: 800;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .form-control-modern[readonly] {
+    background-color: #f1f5f9 !important;
+    color: #0b0b0b !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+  }
+
+  .input-group-modern:has(input[readonly]) {
+    background-color: #f1f5f9 !important;
+    cursor: not-allowed !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  .input-group-modern:has(input[readonly]):focus-within {
+    border-color: #e2e8f0 !important;
+    box-shadow: none !important;
+    background-color: #f1f5f9 !important;
+  }
+
+  /* 🔹 Table Styling */
+  .table-modern thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 15px;
+    border: none;
+  }
+
+  .table-modern tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 13px;
+  }
+
+  /* 🔹 Buttons */
+  .btn-modern {
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    border: none;
+  }
+
+  .btn-primary-gradient {
+    background: var(--accent-gradient);
+    color: white;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+  }
+
+  .btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(99, 102, 241, 0.3);
+    color: white;
+  }
+
+  .alert-modern {
+    background: linear-gradient(to right, #1e293b 0%, #6366f1 100%);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    color: #1e40af;
+    font-weight: 600;
+  }
+</style>
+
 @section('content')
 <div class="main-content">
   <section class="section">
-    <div class="section-header">
-      <h1>TAMBAH GAJI KARYAWAN</h1>
+    <div class="section-header-modern">
+      <div>
+        <h1>Tambah Gaji Karyawan</h1>
+        <p class="text-muted font-weight-bold mb-0">Manajemen rekapitulasi pembayaran gaji bulanan tim.</p>
+      </div>
     </div>
 
     <div class="section-body">
+      <form action="{{ route('account.gaji.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
 
-      <div class="card">
-        <div class="card-header">
-          <h4>DETAIL KARYAWAN</h4>
-        </div>
-
-        @if(session('status') === 'error')
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <b>{{ session('message') }}</b>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        @endif
-
-        <div class="card-body">
-
-          <form action="{{ route('account.gaji.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-
-            <!--================== DETAIL KARYAWAN ==================-->
+        <!--================== DETAIL KARYAWAN ==================-->
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-user-tie"></i>
+            <span>Detail Karyawan</span>
+          </div>
+          <div class="card-body p-4">
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-12 mb-3">
                 <div class="form-group">
-                  <label>Nama Karyawan</label>
-                  <select class="form-control select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
+                  <label><i class="far fa-user text-primary mr-1"></i> Nama Karyawan <span class="badge-required">*</span></label>
+                  <select class="form-control-modern select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" data-nik="{{ $user->nik }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
                     @endforeach
                   </select>
-
-                  @error('user_id')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>NIK</label>
-                  <input type="text" class="form-control" id="nik" disabled>
                 </div>
               </div>
             </div>
 
             <div class="row">
-              <div class="col-md-4">
+              <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label>Nomor Rekening</label>
-                  <input type="text" class="form-control" id="norek" disabled>
+                  <label><i class="fas fa-money-check text-primary mr-1"></i> Nomor Rekening</label>
+                  <input type="text" class="form-control-modern" id="norek" readonly placeholder="0000-0000-0000">
                 </div>
               </div>
-              <div class="col-md-4">
+
+              <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label>Bank</label>
-                  <select class="form-control bank" name="bank" id="bank" disabled="true" style="height: auto;">
-                    <option value="" disabled selected></option>
+                  <label><i class="fas fa-university text-primary mr-1"></i> Bank</label>
+                  <select class="form-control-modern bank" name="bank" id="bank" disabled="true" style="height: auto;">
+                    <option value="" disabled selected>Pilih Bank</option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
                     <option value="009" {{ $user->bank == '009' ? 'selected' : '' }}>BNI</option>
@@ -345,853 +349,682 @@ Tambah Gaji Karyawan | MIS
                   </select>
                 </div>
               </div>
-              <div class="col-md-4">
+
+              <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label>Email</label>
-                  <input type="text" name="email" class="form-control" id="email" readonly>
+                  <label><i class="far fa-envelope text-primary mr-1"></i> Email</label>
+                  <input type="text" name="email" class="form-control-modern" id="email" readonly placeholder="email@contoh.com">
                 </div>
               </div>
 
             </div>
-        </div>
-      </div>
-      <!--================== END ==================-->
-
-      <!--================== GAJI POKOK ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>GAJI POKOK</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
           </div>
+        </div>
+        <!--================== END DETAIL KARYAWAN ==================-->
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Gaji Pokok <span style="color: red;">*</span></label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+        <!--================== GAJI POKOK ==================-->
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-calculator"></i>
+            <span>Gaji Pokok</span>
+          </div>
+          <div class="card-body p-4">
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Gaji Pokok <span class="badge-required">*</span></label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control-modern currency" required>
                   </div>
-                  <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok Karyawan" class="form-control currency" required>
                 </div>
-                @error('gaji_pokok')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
-            </div>
 
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Bonus Ethes Digital</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Bonus Ethes Digital</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="gaji_pokok_ethes_digital" value="{{ old('gaji_pokok_ethes_digital') }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control-modern currency_ethes">
                   </div>
-                  <input type="text" name="gaji_pokok_ethes_digital" value="{{ old('gaji_pokok_ethes_digital') }}" placeholder="Masukkan Gaji Pokok Karyawan Ethes Digital" class="form-control currency_ethes">
                 </div>
-                @error('gaji_pokok_ethes_digital')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <!--================== END ==================-->
+        <!--================== END GAJI POKOK ==================-->
 
-      <!--================== BONUS LEMBUR ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>BONUS LEMBUR</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
+        <!--================== BONUS LEMBUR ==================-->
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-calculator"></i>
+            <span>Bonus Lembur</span>
           </div>
+          <div class="card-body p-4">
 
-          <!-- lembur default -->
-          <div class="row">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- DEFAULTS -->
+            <div class="row align-items-end mb-4">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group-glossy">
+                    <span class="prefix-glossy">Rp</span>
+                    <input type="text" name="lembur" value="{{ old('lembur') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_default">
                   </div>
-                  <input type="text" name="lembur" value="{{ old('lembur') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_default">
                 </div>
-                @error('lembur')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
-            </div>
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur" value="{{ old('jumlah_lembur') }}" placeholder="Masukkan Total Jam" class="form-control">
-                @error('jumlah_lembur')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur" value="{{ old('jumlah_lembur') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
               </div>
-            </div>
 
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-info mt-2" id="addLembur" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-plus"></i> INPUT
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-add-glossy" id="addLembur">
+                  <i class="fas fa-plus-circle"></i> INPUT
                 </button>
               </div>
             </div>
+            <!-- END DEFAULTS -->
 
-          </div>
-          <!-- end lembur default -->
-
-          <!-- lembur field 1 -->
-          <div class="row lembur-field0" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 1 -->
+            <div class="row align-items-end mb-4 lembur-field0" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur1" value="{{ old('lembur1') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_1">
                   </div>
-                  <input type="text" name="lembur1" value="{{ old('lembur1') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_1">
                 </div>
-                @error('lembur1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur1" value="{{ old('jumlah_lembur1') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur0">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 1 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur1" value="{{ old('jumlah_lembur1') }}" placeholder="Masukkan Total Jam" class="form-control">
-                @error('jumlah_lembur1')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1 col-12">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur0" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 1 -->
-
-          <!-- lembur field 2 -->
-          <div class="row lembur-field2" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 2 -->
+            <div class="row align-items-end mb-4 lembur-field2" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur2" value="{{ old('lembur2') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_2">
                   </div>
-                  <input type="text" name="lembur2" value="{{ old('lembur2') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_2" autofocus>
                 </div>
-                @error('lembur2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur2" value="{{ old('jumlah_lembur2') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur2">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 2 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur2" value="{{ old('jumlah_lembur2') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur2')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur2" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 2 -->
-
-          <!-- lembur field 3 -->
-          <div class="row lembur-field3" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 3 -->
+            <div class="row align-items-end mb-4 lembur-field3" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur3" value="{{ old('lembur3') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_3">
                   </div>
-                  <input type="text" name="lembur3" value="{{ old('lembur3') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_3" autofocus>
                 </div>
-                @error('lembur3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur3" value="{{ old('jumlah_lembur3') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur3">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 3 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur
-
-                </label>
-                <input type="text" name="jumlah_lembur3" value="{{ old('jumlah_lembur3') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur3')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur3" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 3 -->
-
-          <!-- lembur field 4 -->
-          <div class="row lembur-field4" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 4 -->
+            <div class="row align-items-end mb-4 lembur-field4" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur4" value="{{ old('lembur4') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_4">
                   </div>
-                  <input type="text" name="lembur4" value="{{ old('lembur4') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_4" autofocus>
                 </div>
-                @error('lembur4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur4" value="{{ old('jumlah_lembur4') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur4">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 4 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur4" value="{{ old('jumlah_lembur4') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur4')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur4" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 4 -->
-
-          <!-- lembur field 5 -->
-          <div class="row lembur-field5" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 5 -->
+            <div class="row align-items-end mb-4 lembur-field5" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur5" value="{{ old('lembur5') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_5">
                   </div>
-                  <input type="text" name="lembur5" value="{{ old('lembur5') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_5" autofocus>
                 </div>
-                @error('lembur5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur5" value="{{ old('jumlah_lembur5') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur5">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 5 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur5" value="{{ old('jumlah_lembur5') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur5')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur5" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 5 -->
-
-          <!-- lembur field 6 -->
-          <div class="row lembur-field6" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 6 -->
+            <div class="row align-items-end mb-4 lembur-field6" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur6" value="{{ old('lembur6') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_6">
                   </div>
-                  <input type="text" name="lembur6" value="{{ old('lembur6') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_6" autofocus>
                 </div>
-                @error('lembur6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur6" value="{{ old('jumlah_lembur6') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur6">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 6 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur6" value="{{ old('jumlah_lembur6') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur6')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur6" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 6 -->
-
-          <!-- lembur field 7 -->
-          <div class="row lembur-field7" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 7 -->
+            <div class="row align-items-end mb-4 lembur-field7" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur7" value="{{ old('lembur7') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_7">
                   </div>
-                  <input type="text" name="lembur7" value="{{ old('lembur7') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_7" autofocus>
                 </div>
-                @error('lembur7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur7" value="{{ old('jumlah_lembur7') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur7">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 7 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur7" value="{{ old('jumlah_lembur7') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur7')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur7" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 7 -->
-
-          <!-- lembur field 8 -->
-          <div class="row lembur-field8" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 8 -->
+            <div class="row align-items-end mb-4 lembur-field8" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur8" value="{{ old('lembur8') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_8">
                   </div>
-                  <input type="text" name="lembur8" value="{{ old('lembur8') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_8" autofocus>
                 </div>
-                @error('lembur8')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur8" value="{{ old('jumlah_lembur8') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur8">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 8 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur8" value="{{ old('jumlah_lembur8') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur8')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur8" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 8 -->
-
-          <!-- lembur field 9 -->
-          <div class="row lembur-field9" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 9 -->
+            <div class="row align-items-end mb-4 lembur-field9" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur9" value="{{ old('lembur9') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_9">
                   </div>
-                  <input type="text" name="lembur9" value="{{ old('lembur9') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_9" autofocus>
                 </div>
-                @error('lembur9')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur9" value="{{ old('jumlah_lembur9') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
-                @enderror
+              </div>
+
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur9">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
+            <!-- END LEMBUR FIELDS 9 -->
 
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur9" value="{{ old('jumlah_lembur9') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur9')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur9" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 9 -->
-
-          <!-- lembur field 10 -->
-          <div class="row lembur-field10" style="display: none;">
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Bonus Lembur (Per Jam)</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <!-- LEMBUR FIELDS 10 -->
+            <div class="row align-items-end mb-0 lembur-field10" style="display: none;">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Bonus Lembur (Per Jam)</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="lembur10" value="{{ old('lembur10') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_10">
                   </div>
-                  <input type="text" name="lembur10" value="{{ old('lembur10') }}" placeholder="Masukkan Bonus Lembur Per Jam" class="form-control currency_lembur_10" autofocus>
-                </div>
-                @error('lembur10')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="form-group">
-                <label>Total Jam Lembur</label>
-                <input type="text" name="jumlah_lembur10" value="{{ old('jumlah_lembur10') }}" placeholder="Masukkan Total Jam" class="form-control" autofocus>
-                @error('jumlah_lembur10')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-1">
-              <div class="form-group">
-                <label class="mb-3"></label>
-                <button type="button" class="btn btn-danger mt-2" id="removeAddedLembur10" style="height: 40px; white-space: nowrap;">
-                  <i class="fas fa-times"></i> HAPUS</button>
-              </div>
-            </div>
-          </div>
-          <!-- end lembur field 10 -->
-        </div>
-      </div>
-      <!--================== END ==================-->
-
-
-      <!--================== BONUS DARI PRESENSI ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>BONUS PRESENSI</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Total Alpha</label>
-                <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-
-            <!-- BONUS KEHADIRAN -->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Kehadiran</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus" value="{{ old('bonus') }}" placeholder="Bonus Kehadiran" class="form-control currency_kehadiran">
                 </div>
               </div>
-            </div>
 
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Kehadiran</label>
-                <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-          </div>
-
-          <div class="row">
-            <!-- BONUS CAMP JOGJA -->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Camp Jogja</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus1" value="{{ old('bonus1') }}" placeholder="Bonus Camp Jogja" class="form-control currency_camp_jogja ">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div class="form-group mb-0">
+                  <label>Total Jam Lembur</label>
+                  <input type="text" name="jumlah_lembur10" value="{{ old('jumlah_lembur10') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
                 </div>
               </div>
-            </div>
 
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Camp Jogja</label>
-                <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control" readonly>
+              <div class="col-md-2">
+                <button type="button" class="btn-action-glossy btn-remove-glossy" id="removeAddedLembur10">
+                  <i class="fas fa-trash-alt"></i> HAPUS
+                </button>
               </div>
             </div>
-            <!-- END -->
+            <!-- END LEMBUR FIELDS 10 -->
 
-            <!-- BONUS CAMP LUAR KOTA-->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Camp Luar Kota</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus4" value="{{ old('bonus4') }}" placeholder="Bonus Camp Luar Kota" class="form-control currency_camp_luar_kota">
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Camp Luar Kota</label>
-                <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-          </div>
-
-          <div class="row">
-            <!-- PERJALANAN JAWA -->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Perjalanan Dalam Jawa</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus2" value="{{ old('bonus2') }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control currency_perjalanan_jawa">
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Perjalanan Dalam Jawa</label>
-                <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-
-            <!-- PERJALANAN LUAR JAWA -->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Perjalanan Luar Jawa</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus3" value="{{ old('bonus3') }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control currency_perjalanan_luar_jawa">
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Perjalanan Luar Jawa</label>
-                <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-          </div>
-
-          <div class="row">
-            <!-- REMOTE -->
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Bonus Remote</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="bonus6" value="{{ old('bonus6') }}" placeholder="Bonus Remote" class="form-control currency_remote">
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Total Remote</label>
-                <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
-
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Total Izin</label>
-                <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control" readonly>
-              </div>
-            </div>
-            <!-- END -->
           </div>
         </div>
-      </div>
-      <!--================== end ==================-->
+        <!--================== END BONUS LEMBUR ==================-->
 
-      <!--================== BONUS LAINNYA ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>BONUS LAINNYA</h4>
+        <!--================== BONUS DARI PRESENSI ==================-->
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-calculator"></i>
+            <span>Bonus Presensi</span>
+          </div>
+          <div class="card-body p-4">
+
+            <div class="row">
+              <!-- TOTAL ALPHA -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Total Alpha</label>
+                  <input type="text" id="alpha" name="jumlah_bonus5" placeholder="Total Tanpa Kehadiran" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END TOTAL ALPHA -->
+
+              <!-- KEHADIRAN -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Kehadiran</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus" value="{{ old('bonus') }}" placeholder="Bonus Kehadiran" class="form-control-modern currency_kehadiran">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Kehadiran</label>
+                  <input type="text" id="hadir" name="jumlah_bonus" placeholder="Total Kehadiran" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END KEHADIRAN -->
+            </div>
+
+            <div class="row">
+              <!-- CAMP JOGJA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Camp Jogja</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus1" value="{{ old('bonus1') }}" placeholder="Bonus Camp Jogja" class="form-control-modern currency_camp_jogja ">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Camp Jogja</label>
+                  <input type="text" id="camp_jogja" name="jumlah_bonus1" placeholder="Total Camp Jogja" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END CAMP JOGJA -->
+
+              <!-- CAMP LUAR KOTA-->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Camp Luar Kota</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus4" value="{{ old('bonus4') }}" placeholder="Bonus Camp Luar Kota" class="form-control-modern currency_camp_luar_kota">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Camp Luar Kota</label>
+                  <input type="text" id="camp_luar_kota" name="jumlah_bonus4" placeholder="Total Camp Luar Kota" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END CAMP LUAR KOTA -->
+            </div>
+
+            <div class="row">
+              <!-- PERJALANAN JAWA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Perjalanan Dalam Jawa</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus2" value="{{ old('bonus2') }}" placeholder="Bonus Perjalanan Dalam Jawa" class="form-control-modern currency_perjalanan_jawa">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Perjalanan Dalam Jawa</label>
+                  <input type="text" id="perjalanan_jawa" name="jumlah_bonus2" placeholder="Total Perjalanan Dalam Jawa" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END PERJALANAN JAWA -->
+
+              <!-- PERJALANAN LUAR JAWA -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Perjalanan Luar Jawa</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus3" value="{{ old('bonus3') }}" placeholder="Bonus Perjalanan Luar Jawa" class="form-control-modern currency_perjalanan_luar_jawa">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Perjalanan Luar Jawa</label>
+                  <input type="text" id="perjalanan_luar_jawa" name="jumlah_bonus3" placeholder="Total Perjalanan Luar Jawa" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END PERJALANAN LUAR JAWA -->
+            </div>
+
+            <div class="row">
+              <!-- REMOTE -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Bonus Remote</label>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="bonus6" value="{{ old('bonus6') }}" placeholder="Bonus Remote" class="form-control-modern currency_remote">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Total Remote</label>
+                  <input type="text" id="remote" name="jumlah_bonus6" placeholder="Total Remote" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END REMOTE -->
+
+              <!-- TOTAL IZIN -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Total Izin</label>
+                  <input type="text" id="izin" name="jumlah_bonus7" placeholder="Total Izin" class="form-control-modern" readonly>
+                </div>
+              </div>
+              <!-- END TOTAL IZIN -->
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="row">
+        <!--================== end ==================-->
+
+        <!--================== BONUS LAINNYA ==================-->
+        <div class="card">
+          <div class="card-header">
+            <h4>BONUS LAINNYA</h4>
           </div>
+          <div class="card-body">
+            <div class="row">
+            </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Bonus Webinar</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Bonus Webinar</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
                   </div>
-                  <input type="text" name="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
+                  @error('webinar')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @error('webinar')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Bonus Kinerja</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="kinerja" id="kinerja" value="{{ old('kinerja') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja">
+                  </div>
+                  @error('kinerja')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @enderror
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Bonus Kinerja</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan Kesehatan</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS">
                   </div>
-                  <input type="text" name="kinerja" id="kinerja" value="{{ old('kinerja') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja">
+                  @error('tunjangan_bpjs')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @error('kinerja')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan THR</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ old('tunjangan_thr') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
+                  </div>
+                  @error('tunjangan_thr')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
                 </div>
-                @enderror
               </div>
             </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan Pulsa</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ old('tunjangan_pulsa') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
+                  </div>
+                  @error('tunjangan_pulsa')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tunjangan Lainnya</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="tunjangan" id="tunjangan" value="{{ old('tunjangan') }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya">
+                  </div>
+                  @error('tunjangan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tunjangan Kesehatan</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS">
-                </div>
-                @error('tunjangan_bpjs')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tunjangan THR</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ old('tunjangan_thr') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
-                </div>
-                @error('tunjangan_thr')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tunjangan Pulsa</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ old('tunjangan_pulsa') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
-                </div>
-                @error('tunjangan_pulsa')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tunjangan Lainnya</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
-                  </div>
-                  <input type="text" name="tunjangan" id="tunjangan" value="{{ old('tunjangan') }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya">
-                </div>
-                @error('tunjangan')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-          </div>
-
         </div>
-      </div>
-      <!--================== END ==================-->
+        <!--================== END ==================-->
 
-      <!--================== POTONGAN ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>POTONGAN</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
+        <!--================== POTONGAN ==================-->
+        <div class="card">
+          <div class="card-header">
+            <h4>POTONGAN</h4>
           </div>
+          <div class="card-body">
+            <div class="row">
+            </div>
 
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Potongan</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Potongan</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="potongan" id="potongan" value="{{ old('potongan') }}" placeholder="Masukkan Total Potongan" class="form-control currency_potongan">
                   </div>
-                  <input type="text" name="potongan" id="potongan" value="{{ old('potongan') }}" placeholder="Masukkan Total Potongan" class="form-control currency_potongan">
-                </div>
-                @error('potongan')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>PPH 21</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+                  @error('potongan')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
                   </div>
-                  <input type="text" name="pph" id="pph" value="{{ old('pph') }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph">
+                  @enderror
                 </div>
-                @error('pph')
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>PPH 21</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Rp.</span>
+                    </div>
+                    <input type="text" name="pph" id="pph" value="{{ old('pph') }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph">
+                  </div>
+                  @error('pph')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
+                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
+                </div>
+                @error('tanggal')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
@@ -1199,109 +1032,96 @@ Tambah Gaji Karyawan | MIS
               </div>
             </div>
 
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
-                <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
-              </div>
-              @error('tanggal')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
-              </div>
-              @enderror
+          </div>
+        </div>
+        <!--================== END ==================-->
+
+        <!--================== LAINNYA ==================-->
+        <div class="card">
+          <div class="card-header">
+            <h4>LAINNYA</h4>
+          </div>
+          <div class="card-body">
+            <div class="row">
             </div>
-          </div>
 
-        </div>
-      </div>
-      <!--================== END ==================-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Status Pembayaran <span style="color: red;">*</span></label>
+                  <select class="form-control" name="status" style="height: auto;" required>
+                    <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
+                    <option value="pending">PENDING</option>
+                    <option value="terbayar">TERBAYAR</option>
+                  </select>
+                  @error('status')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
 
-      <!--================== LAINNYA ==================-->
-      <div class="card">
-        <div class="card-header">
-          <h4>LAINNYA</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
-          </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Catatan</label>
+                  <div class="input-group">
+                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
+                  </div>
+                  @error('note')
+                  <div class="invalid-feedback" style="display: block">
+                    {{ $message }}
+                  </div>
+                  @enderror
+                </div>
+              </div>
+            </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Status Pembayaran <span style="color: red;">*</span></label>
-                <select class="form-control" name="status" style="height: auto;" required>
-                  <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
-                  <option value="pending">PENDING</option>
-                  <option value="terbayar">TERBAYAR</option>
-                </select>
-                @error('status')
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group custom-file-upload" style="margin-top: -3px;">
+                  <label>Bukti Pembayaran</label>
+                  <div class="input-group">
+                    <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*">
+                    <label for="gambar" class="file-upload">
+                      <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                    </label>
+                  </div>
+                </div>
+                @error('gambar')
                 <div class="invalid-feedback" style="display: block">
                   {{ $message }}
                 </div>
                 @enderror
               </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Catatan</label>
-                <div class="input-group">
-                  <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
-                </div>
-                @error('note')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group custom-file-upload" style="margin-top: -3px;">
-                <label>Bukti Pembayaran</label>
-                <div class="input-group">
-                  <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*">
-                  <label for="gambar" class="file-upload">
-                    <i class="fas fa-cloud-upload-alt"></i> Choose Image
-                  </label>
+              <div class="col-md-6">
+                <div class="image-preview-container">
+                  <div id="imagePreview" class="image-preview"></div>
+                  <span id="file-selected"></span>
                 </div>
               </div>
-              @error('gambar')
-              <div class="invalid-feedback" style="display: block">
-                {{ $message }}
+            </div>
+
+            <div class="mt-3">
+              <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
+
+                <!-- Tombol Simpan -->
+                <button type="submit"
+                  class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                  <i class="fa fa-paper-plane"></i> SIMPAN
+                </button>
+
+                <!-- Tombol Kembali -->
+                <a href="{{ route('account.gaji.index') }}"
+                  class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
+                  <i class="fa fa-undo"></i> KEMBALI
+                </a>
+
               </div>
-              @enderror
             </div>
-            <div class="col-md-6">
-              <div class="image-preview-container">
-                <div id="imagePreview" class="image-preview"></div>
-                <span id="file-selected"></span>
-              </div>
-            </div>
+
           </div>
-
-          <div class="mt-3">
-            <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
-
-              <!-- Tombol Simpan -->
-              <button type="submit"
-                class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                <i class="fa fa-paper-plane"></i> SIMPAN
-              </button>
-
-              <!-- Tombol Kembali -->
-              <a href="{{ route('account.gaji.index') }}"
-                class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                <i class="fa fa-undo"></i> KEMBALI
-              </a>
-
-            </div>
-          </div>
-
         </div>
-      </div>
 
 
       </form>
@@ -1522,7 +1342,6 @@ Tambah Gaji Karyawan | MIS
       var selectedKaryawanOption = $('#karyawanSelect option:selected');
 
       if (selectedKaryawanOption.length) {
-        var nik = selectedKaryawanOption.data('nik');
         var norek = selectedKaryawanOption.data('norek');
         var bank = selectedKaryawanOption.data('bank');
         var email = selectedKaryawanOption.data('email');
@@ -1535,7 +1354,6 @@ Tambah Gaji Karyawan | MIS
         var remote = selectedKaryawanOption.data('remote');
         var izin = selectedKaryawanOption.data('izin');
 
-        $('#nik').val(nik);
         $('#norek').val(norek);
         $('#bank').val(bank);
         $('#email').val(email);
@@ -1548,7 +1366,6 @@ Tambah Gaji Karyawan | MIS
         $('#remote').val(remote);
         $('#izin').val(izin);
       } else {
-        $('#nik').val('');
         $('#norek').val('');
         $('#bank').val('');
         $('#email').val('');
