@@ -22,7 +22,7 @@ class PublicScopusCampController extends Controller
 
         $categories = DB::table('scopus_camp_kategori')
             ->where('status', 'active')
-            ->latest()
+            ->oldest() // Mengurutkan dari created_at terlama ke terbaru
             ->get();
 
         return view('public.scopus_camp.index', compact('categories'));

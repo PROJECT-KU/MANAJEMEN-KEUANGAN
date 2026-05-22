@@ -225,7 +225,7 @@ $agent = new Agent();
   }
 </style>
 
-<?php $version = "10.5.26"; ?>
+<?php $version = "22.5.26"; ?>
 <footer class="main-footer" id="PwaFooter">
   <div class="footer-left">
     © <strong>Rumah Scopus Foundation</strong> {{ date("Y") }}
