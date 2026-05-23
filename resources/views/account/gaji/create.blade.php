@@ -5,7 +5,7 @@
 Tambah Gaji Karyawan | MIS
 @stop
 
-<!--================== lembur responsive ==================-->
+<!--================== LEMBUR RESPONSIVE ==================-->
 <style>
   /* 🔹 Input Group Glossy (Untuk prefix Rp) */
   .input-group-glossy {
@@ -84,14 +84,31 @@ Tambah Gaji Karyawan | MIS
     box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
   }
 </style>
-<!--================== end ==================-->
+<!--================== END ==================-->
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
 <style>
-  .custom-file-upload {
-    position: relative;
-    overflow: hidden;
-    margin-top: 10px;
+  /* 🔹 Modern File Upload */
+  .upload-btn-glossy {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+  }
+
+  .upload-btn-glossy:hover {
+    transform: translateY(-2px);
+    color: white;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   }
 
   .inputfile {
@@ -103,41 +120,77 @@ Tambah Gaji Karyawan | MIS
     z-index: -1;
   }
 
-  .file-upload {
-    cursor: pointer;
-    display: inline-block;
-    padding: 10px 20px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: background-color 0.3s;
+  /* 🔹 Image Preview Container */
+  .preview-container-glossy {
+    border: 2px dashed #cbd5e1;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s ease;
   }
 
-  .file-upload:hover {
-    background-color: #0056b3;
-  }
-
-  #file-selected {
-    display: block;
-    margin-top: 5px;
-    color: #888;
-  }
-
-  .image-preview {
-    margin-top: 10px;
-    display: none;
+  .preview-container-glossy:hover {
+    border-color: #94a3b8;
   }
 
   .image-preview img {
     max-width: 100%;
-    height: auto;
-    border-radius: 5px;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+  }
+
+  #file-selected {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* 🔹 Main Action Buttons (Simpan & Kembali) */
+  .btn-main-action {
+    padding: 12px 30px;
+    border-radius: 50px;
+    /* pill shape */
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-main-action:hover {
+    transform: translateY(-3px);
+  }
+
+  .btn-save-glossy {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-back-glossy {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
   }
 </style>
 <!--================== END ==================-->
 
+<!--================== GLOBAL STYLE ==================-->
 <style>
   .card-neo {
     background: white;
@@ -239,6 +292,7 @@ Tambah Gaji Karyawan | MIS
     font-weight: 600;
   }
 </style>
+<!--================== END ==================-->
 
 @section('content')
 <div class="main-content">
@@ -264,7 +318,7 @@ Tambah Gaji Karyawan | MIS
             <div class="row">
               <div class="col-md-12 mb-3">
                 <div class="form-group">
-                  <label><i class="far fa-user text-primary mr-1"></i> Nama Karyawan <span class="badge-required">*</span></label>
+                  <label>Nama Karyawan <span class="badge-required">*</span></label>
                   <select class="form-control-modern select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)
@@ -278,14 +332,14 @@ Tambah Gaji Karyawan | MIS
             <div class="row">
               <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label><i class="fas fa-money-check text-primary mr-1"></i> Nomor Rekening</label>
+                  <label>Nomor Rekening</label>
                   <input type="text" class="form-control-modern" id="norek" readonly placeholder="0000-0000-0000">
                 </div>
               </div>
 
               <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label><i class="fas fa-university text-primary mr-1"></i> Bank</label>
+                  <label>Bank</label>
                   <select class="form-control-modern bank" name="bank" id="bank" disabled="true" style="height: auto;">
                     <option value="" disabled selected>Pilih Bank</option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
@@ -352,7 +406,7 @@ Tambah Gaji Karyawan | MIS
 
               <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label><i class="far fa-envelope text-primary mr-1"></i> Email</label>
+                  <label>Email</label>
                   <input type="text" name="email" class="form-control-modern" id="email" readonly placeholder="email@contoh.com">
                 </div>
               </div>
@@ -853,48 +907,34 @@ Tambah Gaji Karyawan | MIS
             </div>
           </div>
         </div>
-        <!--================== end ==================-->
+        <!--================== END BONUS DARI PRESENSI ==================-->
 
         <!--================== BONUS LAINNYA ==================-->
-        <div class="card">
-          <div class="card-header">
-            <h4>BONUS LAINNYA</h4>
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-calculator"></i>
+            <span>Bonus Lainnya</span>
           </div>
-          <div class="card-body">
-            <div class="row">
-            </div>
+          <div class="card-body p-4">
 
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Bonus Webinar</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control currency_webinar">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="webinar" value="{{ old('webinar') }}" placeholder="Masukkan Total Bonus Webinar" class="form-control-modern currency_webinar">
                   </div>
-                  @error('webinar')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
+
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Bonus Kinerja</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
-                    </div>
-                    <input type="text" name="kinerja" id="kinerja" value="{{ old('kinerja') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control currency_kinerja">
+                    <span class="modern-prefix">Rp</span>
+                    <input type="text" name="kinerja" id="kinerja" value="{{ old('kinerja') }}" placeholder="Masukkan Total Bonus Kinerja" class="form-control-modern currency_kinerja">
                   </div>
-                  @error('kinerja')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
             </div>
@@ -904,16 +944,11 @@ Tambah Gaji Karyawan | MIS
                 <div class="form-group">
                   <label>Tunjangan Kesehatan</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control-modern currency_tunjanganBPJS">
                     </div>
-                    <input type="text" name="tunjangan_bpjs" id="tunjangan_bpjs" value="{{ old('tunjangan_bpjs') }}" placeholder="Masukkan Total Tunjangan Kesehatan" class="form-control currency_tunjanganBPJS">
                   </div>
-                  @error('tunjangan_bpjs')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
 
@@ -921,16 +956,11 @@ Tambah Gaji Karyawan | MIS
                 <div class="form-group">
                   <label>Tunjangan THR</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ old('tunjangan_thr') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control-modern currency_tunjanganTHR">
                     </div>
-                    <input type="text" name="tunjangan_thr" id="tunjangan_thr" value="{{ old('tunjangan_thr') }}" placeholder="Masukkan Total Tunjangan THR" class="form-control currency_tunjanganTHR">
                   </div>
-                  @error('tunjangan_thr')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
             </div>
@@ -940,16 +970,11 @@ Tambah Gaji Karyawan | MIS
                 <div class="form-group">
                   <label>Tunjangan Pulsa</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ old('tunjangan_pulsa') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control-modern currency_tunjanganPulsa">
                     </div>
-                    <input type="text" name="tunjangan_pulsa" id="tunjangan_pulsa" value="{{ old('tunjangan_pulsa') }}" placeholder="Masukkan Total Tunjangan Pulsa" class="form-control currency_tunjanganPulsa">
                   </div>
-                  @error('tunjangan_pulsa')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
 
@@ -957,48 +982,37 @@ Tambah Gaji Karyawan | MIS
                 <div class="form-group">
                   <label>Tunjangan Lainnya</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="tunjangan" id="tunjangan" value="{{ old('tunjangan') }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control-modern currency_tunjangan_lainnya">
                     </div>
-                    <input type="text" name="tunjangan" id="tunjangan" value="{{ old('tunjangan') }}" placeholder="Masukkan Total Tunjangan Lainnya" class="form-control currency_tunjangan_lainnya">
                   </div>
-                  @error('tunjangan')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
             </div>
 
           </div>
         </div>
-        <!--================== END ==================-->
+        <!--================== END BONUS LAINNYA ==================-->
 
         <!--================== POTONGAN ==================-->
-        <div class="card">
-          <div class="card-header">
-            <h4>POTONGAN</h4>
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-calculator"></i>
+            <span>Potongan</span>
           </div>
-          <div class="card-body">
-            <div class="row">
-            </div>
+          <div class="card-body p-4">
 
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Potongan</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="potongan" id="potongan" value="{{ old('potongan') }}" placeholder="Masukkan Total Potongan" class="form-control-modern currency_potongan">
                     </div>
-                    <input type="text" name="potongan" id="potongan" value="{{ old('potongan') }}" placeholder="Masukkan Total Potongan" class="form-control currency_potongan">
                   </div>
-                  @error('potongan')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
 
@@ -1006,126 +1020,89 @@ Tambah Gaji Karyawan | MIS
                 <div class="form-group">
                   <label>PPH 21</label>
                   <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp.</span>
+                    <div class="input-group">
+                      <span class="modern-prefix">Rp</span>
+                      <input type="text" name="pph" id="pph" value="{{ old('pph') }}" placeholder="Masukkan Total PPH 21" class="form-control-modern currency_pph">
                     </div>
-                    <input type="text" name="pph" id="pph" value="{{ old('pph') }}" placeholder="Masukkan Total PPH 21" class="form-control currency_pph">
                   </div>
-                  @error('pph')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
 
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
-                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control" required>
+                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control-modern" required>
                 </div>
-                @error('tanggal')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
             </div>
 
           </div>
         </div>
-        <!--================== END ==================-->
+        <!--================== END POTONGAN ==================-->
 
         <!--================== LAINNYA ==================-->
-        <div class="card">
-          <div class="card-header">
-            <h4>LAINNYA</h4>
+        <div class="card-neo">
+          <div class="card-header-neo">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Lainnya & Konfirmasi</span>
           </div>
-          <div class="card-body">
-            <div class="row">
-            </div>
+
+          <div class="card-body p-4 p-md-5">
 
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Status Pembayaran <span style="color: red;">*</span></label>
-                  <select class="form-control" name="status" style="height: auto;" required>
+              <div class="col-md-6 mb-3">
+                <div class="form-group mb-0">
+                  <label>Status Pembayaran <span class="badge-required">*</span></label>
+                  <select class="form-control-modern" name="status" required>
                     <option value="" disabled selected>-- PILIH STATUS PEMBAYARAN --</option>
                     <option value="pending">PENDING</option>
                     <option value="terbayar">TERBAYAR</option>
                   </select>
-                  @error('status')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
                 </div>
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Catatan</label>
-                  <div class="input-group">
-                    <textarea name="note" id="note" placeholder="Masukkan catatan" class="form-control" style="width: 100%;"></textarea>
-                  </div>
-                  @error('note')
-                  <div class="invalid-feedback" style="display: block">
-                    {{ $message }}
-                  </div>
-                  @enderror
+              <div class="col-md-6 mb-3">
+                <div class="form-group mb-0">
+                  <label> Catatan</label>
+                  <textarea name="note" id="note" placeholder="Tuliskan catatan tambahan (opsional)..." class="form-control-modern" rows="2" style="min-height: 48px;"></textarea>
                 </div>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group custom-file-upload" style="margin-top: -3px;">
+            <div class="row mt-3">
+              <div class="col-md-6 mb-3">
+                <div class="form-group mb-0">
                   <label>Bukti Pembayaran</label>
-                  <div class="input-group">
+                  <div class="mt-2">
                     <input type="file" name="gambar" id="gambar" class="inputfile" accept="image/*">
-                    <label for="gambar" class="file-upload">
-                      <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                    <label for="gambar" class="upload-btn-glossy">
+                      <i class="fas fa-cloud-upload-alt"></i> Pilih Gambar Bukti
                     </label>
                   </div>
+                  <small class="text-muted font-weight-bold mt-2 d-block">Format: JPG, JPEG, PNG (Maks 3MB)</small>
                 </div>
-                @error('gambar')
-                <div class="invalid-feedback" style="display: block">
-                  {{ $message }}
-                </div>
-                @enderror
               </div>
-              <div class="col-md-6">
-                <div class="image-preview-container">
-                  <div id="imagePreview" class="image-preview"></div>
+
+              <div class="col-md-6 mb-3">
+                <div class="preview-container-glossy">
+                  <i class="far fa-image text-muted" style="font-size: 24px; margin-bottom: 5px;"></i>
+                  <span class="text-muted" style="font-size: 12px; font-weight: 600;">Preview Gambar Akan Tampil Disini</span>
+                  <div id="imagePreview" class="image-preview w-100" style="display: none;"></div>
                   <span id="file-selected"></span>
                 </div>
               </div>
             </div>
 
-            <div class="mt-3">
-              <div class="d-flex flex-md-nowrap flex-wrap gap-2 mt-4">
-
-                <!-- Tombol Simpan -->
-                <button type="submit"
-                  class="btn btn-primary btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                  <i class="fa fa-paper-plane"></i> SIMPAN
-                </button>
-
-                <!-- Tombol Kembali -->
-                <a href="{{ route('account.gaji.index') }}"
-                  class="btn btn-warning btn-submit rounded-pill w-100 w-md-auto mb-2 mb-md-0">
-                  <i class="fa fa-undo"></i> KEMBALI
-                </a>
-
-              </div>
+            <div class="d-flex flex-md-nowrap flex-wrap gap-3 mt-5">
+              <button type="submit" class="btn-modern btn-save flex-grow-1">
+                <i class="fas fa-save"></i> SIMPAN DATA
             </div>
 
           </div>
         </div>
-
+        <!--================== END LAINNYA ==================-->
 
       </form>
-
     </div>
   </section>
 </div>
