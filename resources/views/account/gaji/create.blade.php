@@ -316,7 +316,7 @@ Tambah Gaji Karyawan | MIS
           </div>
           <div class="card-body p-4">
             <div class="row">
-              <div class="col-md-12 mb-3">
+              <div class="col-md-12">
                 <div class="form-group">
                   <label>Nama Karyawan <span class="badge-required">*</span></label>
                   <select class="form-control-modern select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
@@ -330,18 +330,18 @@ Tambah Gaji Karyawan | MIS
             </div>
 
             <div class="row">
-              <div class="col-md-4 mb-3">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Nomor Rekening</label>
                   <input type="text" class="form-control-modern" id="norek" readonly placeholder="0000-0000-0000">
                 </div>
               </div>
 
-              <div class="col-md-4 mb-3">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Bank</label>
-                  <select class="form-control-modern bank" name="bank" id="bank" disabled="true" style="height: auto;">
-                    <option value="" disabled selected>Pilih Bank</option>
+                  <select class="form-control-modern bank select2" name="bank" id="bank" disabled style="height: auto;">
+                    <option value="">Pilih Bank</option>
                     <option value="002" {{ $user->bank == '002' ? 'selected' : '' }}>BRI</option>
                     <option value="008" {{ $user->bank == '008' ? 'selected' : '' }}>BANK MANDIRI</option>
                     <option value="009" {{ $user->bank == '009' ? 'selected' : '' }}>BNI</option>
@@ -404,7 +404,7 @@ Tambah Gaji Karyawan | MIS
                 </div>
               </div>
 
-              <div class="col-md-4 mb-3">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label>Email</label>
                   <input type="text" name="email" class="form-control-modern" id="email" readonly placeholder="email@contoh.com">
@@ -462,8 +462,8 @@ Tambah Gaji Karyawan | MIS
               <div class="col-md-5 mb-3 mb-md-0">
                 <div class="form-group mb-0">
                   <label>Bonus Lembur (Per Jam)</label>
-                  <div class="input-group-glossy">
-                    <span class="prefix-glossy">Rp</span>
+                  <div class="input-group">
+                    <span class="modern-prefix">Rp</span>
                     <input type="text" name="lembur" value="{{ old('lembur') }}" placeholder="Masukkan Nominal" class="form-control-modern currency_lembur_default">
                   </div>
                 </div>
@@ -1004,7 +1004,7 @@ Tambah Gaji Karyawan | MIS
           <div class="card-body p-4">
 
             <div class="row">
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>Potongan</label>
                   <div class="input-group">
@@ -1016,7 +1016,7 @@ Tambah Gaji Karyawan | MIS
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group">
                   <label>PPH 21</label>
                   <div class="input-group">
@@ -1025,13 +1025,6 @@ Tambah Gaji Karyawan | MIS
                       <input type="text" name="pph" id="pph" value="{{ old('pph') }}" placeholder="Masukkan Total PPH 21" class="form-control-modern currency_pph">
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
-                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control-modern" required>
                 </div>
               </div>
             </div>
@@ -1062,8 +1055,17 @@ Tambah Gaji Karyawan | MIS
               </div>
 
               <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  <label>Tanggal Dibayarkan <span style="color: red;">*</span></label>
+                  <input type="datetime-local" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" placeholder="Masukkan Total Tunjangan" class="form-control-modern" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
                 <div class="form-group mb-0">
-                  <label> Catatan</label>
+                  <label>Catatan</label>
                   <textarea name="note" id="note" placeholder="Tuliskan catatan tambahan (opsional)..." class="form-control-modern" rows="2" style="min-height: 48px;"></textarea>
                 </div>
               </div>
@@ -1084,11 +1086,17 @@ Tambah Gaji Karyawan | MIS
               </div>
 
               <div class="col-md-6 mb-3">
-                <div class="preview-container-glossy">
-                  <i class="far fa-image text-muted" style="font-size: 24px; margin-bottom: 5px;"></i>
-                  <span class="text-muted" style="font-size: 12px; font-weight: 600;">Preview Gambar Akan Tampil Disini</span>
-                  <div id="imagePreview" class="image-preview w-100" style="display: none;"></div>
-                  <span id="file-selected"></span>
+                <div class="preview-container-glossy" style="position: relative; height: 300px; border: 2px dashed #e2e8f0; border-radius: 12px; overflow: hidden; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <div id="placeholder-elements" style="text-align: center;">
+                    <i class="far fa-image text-muted" style="font-size: 40px; margin-bottom: 10px;"></i>
+                    <span class="text-muted" style="font-size: 14px; font-weight: 600; display: block;">Preview Gambar Akan Tampil Disini</span>
+                  </div>
+                  <img id="imagePreview" src="" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; display: none;">
+                </div>
+                <div class="mt-2 text-center">
+                  <span id="file-selected" style="font-size: 12px; font-weight: 700; color: #6366f1; background: #eef2ff; padding: 4px 12px; border-radius: 6px;">
+                    Belum ada file dipilih
+                  </span>
                 </div>
               </div>
             </div>
@@ -1108,276 +1116,167 @@ Tambah Gaji Karyawan | MIS
 </div>
 
 <!--================== UPLOAD IMAGE WITH VIEW ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.getElementById('gambar').addEventListener('change', function(event) {
-    var fileInput = event.target;
-    var file = fileInput.files[0];
-    var fileName = file.name;
-    var fileSize = (file.size / 1024).toFixed(2); // in KB
-    var allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!isValidFile(file)) return;
+
+    updateUI(file);
+  });
+
+  // 1. Fungsi Validasi (Pemisahan logika)
+  function isValidFile(file) {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxSize = 3000; // KB
+    const fileSize = (file.size / 1024).toFixed(2);
 
     if (!allowedTypes.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Only PNG, JPEG, and JPG files are allowed. Please choose a valid file type.'
-      });
-      return;
+      showError('Format tidak didukung! Gunakan JPG atau PNG.');
+      return false;
     }
 
-    if (fileSize > 3000) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'File size exceeds the maximum limit of 3MB. Please choose a smaller file.'
-      });
-      return;
+    if (fileSize > maxSize) {
+      showError('Maksimal ukuran file adalah 3MB!');
+      return false;
     }
 
-    document.getElementById('file-selected').innerHTML = fileName + ' (' + fileSize + ' KB)';
-
-    var reader = new FileReader();
-    reader.onload = function() {
-      var output = document.getElementById('imagePreview');
-      output.innerHTML = `<img src="${reader.result}">`;
-      output.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
-</script>
-<!--================== END ==================-->
-
-<!-- add dan remove field lembur -->
-<script>
-  $(document).ready(function() {
-
-    var lemburCounter = 0;
-
-    $('#addLembur').on('click', function() {
-      if (lemburCounter === 0) {
-        $('.lembur-field0').show();
-        $('#removeAddedLembur0').show();
-        $('#removeAddedLembur1').show();
-        $('#removeAddedLembur2').show();
-        $('#removeAddedLembur3').show();
-        $('#removeAddedLembur4').show();
-        $('#removeAddedLembur5').show();
-        $('#removeAddedLembur6').show();
-        $('#removeAddedLembur7').show();
-        $('#removeAddedLembur8').show();
-        $('#removeAddedLembur9').show();
-        $('#removeAddedLembur10').show();
-      } else if (lemburCounter === 1) {
-        $('.lembur-field2').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur2').show();
-      } else if (lemburCounter === 2) {
-        $('.lembur-field3').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur3').show();
-      } else if (lemburCounter === 3) {
-        $('.lembur-field4').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur4').show();
-      } else if (lemburCounter === 4) {
-        $('.lembur-field5').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur5').show();
-      } else if (lemburCounter === 5) {
-        $('.lembur-field6').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur6').show();
-      } else if (lemburCounter === 6) {
-        $('.lembur-field7').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur7').show();
-      } else if (lemburCounter === 7) {
-        $('.lembur-field8').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur8').show();
-      } else if (lemburCounter === 8) {
-        $('.lembur-field9').show();
-        $('#addLembur').show();
-        $('#removeAddedLembur9').show();
-      } else if (lemburCounter === 9) {
-        $('.lembur-field10').show();
-        $('#addLembur').hide();
-        $('#removeAddedLembur10').show();
-      }
-      lemburCounter++;
-    });
-
-    // Remove additional lembur2 fields
-    $('#removeAddedLembur0').on('click', function() {
-      $('.lembur-field0').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur1').val('');
-      $('[name="jumlah_lembur1"]').val('');
-    });
-    $('#removeAddedLembur2').on('click', function() {
-      $('.lembur-field2').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur2').val('');
-      $('[name="jumlah_lembur2"]').val('');
-    });
-    $('#removeAddedLembur3').on('click', function() {
-      $('.lembur-field3').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur3').val('');
-      $('[name="jumlah_lembur3"]').val('');
-    });
-    $('#removeAddedLembur4').on('click', function() {
-      $('.lembur-field4').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur4').val('');
-      $('[name="jumlah_lembur4"]').val('');
-    });
-    $('#removeAddedLembur5').on('click', function() {
-      $('.lembur-field5').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur5').val('');
-      $('[name="jumlah_lembur5"]').val('');
-    });
-    $('#removeAddedLembur6').on('click', function() {
-      $('.lembur-field6').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur6').val('');
-      $('[name="jumlah_lembur6"]').val('');
-    });
-    $('#removeAddedLembur7').on('click', function() {
-      $('.lembur-field7').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur7').val('');
-      $('[name="jumlah_lembur7"]').val('');
-    });
-    $('#removeAddedLembur8').on('click', function() {
-      $('.lembur-field8').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur8').val('');
-      $('[name="jumlah_lembur8"]').val('');
-    });
-    $('#removeAddedLembur9').on('click', function() {
-      $('.lembur-field9').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur9').val('');
-      $('[name="jumlah_lembur9"]').val('');
-    });
-    $('#removeAddedLembur10').on('click', function() {
-      $('.lembur-field10').hide();
-      $('#addLembur').show();
-      lemburCounter--;
-      $('.currency_lembur10').val('');
-      $('[name="jumlah_lembur10"]').val('');
-    });
-  });
-</script>
-<!-- end add dan remove field lembur -->
-
-
-<script>
-  if ($(".datetimepicker").length) {
-    $('.datetimepicker').daterangepicker({
-      locale: {
-        format: 'YYYY-MM-DD hh:mm'
-      },
-      singleDatePicker: true,
-      timePicker: true,
-      timePicker24Hour: true,
-    });
+    return true;
   }
 
-  var cleaveC = new Cleave('.currency', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
+  // 2. Fungsi Update UI (Pemisahan logika tampilan)
+  function updateUI(file) {
+    const reader = new FileReader();
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('placeholder-elements');
+    const fileLabel = document.getElementById('file-selected');
 
-  var cleaveC = new Cleave('.currency_ethes', {
-    numeral: true,
-    numeralThousandsGroupStyle: 'thousand'
-  });
+    reader.onload = (e) => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      fileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+    };
 
-  var timeoutHandler = null;
-  // end
+    reader.readAsDataURL(file);
+  }
 
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: message
+    });
+  }
+</script>
+<!--================== END UPLOAD IMAGE WITH VIEW ==================-->
 
-
+<!--================== ADD & REMOVE LEMBUR ==================-->
+<script>
   $(document).ready(function() {
-    // ... (kode lainnya)
 
-    // Function to update the input fields based on selected karyawan
+    // 1. Tombol Tambah Lembur
+    $('#addLembur').on('click', function() {
+      // Cari elemen field pertama yang sedang tersembunyi
+      var $hiddenField = $('[class*="lembur-field"]:hidden').first();
+
+      if ($hiddenField.length) {
+        $hiddenField.show();
+
+        // Jika tidak ada lagi field yang tersembunyi, sembunyikan tombol tambah
+        if ($('[class*="lembur-field"]:hidden').length === 0) {
+          $(this).hide();
+        }
+      }
+    });
+
+    // 2. Tombol Hapus Lembur (Gunakan event delegation)
+    $(document).on('click', '[id^="removeAddedLembur"]', function() {
+      // Cari parent baris yang tombol hapusnya diklik
+      var $parentRow = $(this).closest('[class*="lembur-field"]');
+
+      // Sembunyikan baris
+      $parentRow.hide();
+
+      // Kosongkan semua input di dalam baris tersebut agar tidak tersimpan ke DB
+      $parentRow.find('input').val('');
+
+      // Tampilkan kembali tombol tambah
+      $('#addLembur').show();
+    });
+
+  });
+</script>
+<!--================== END ADD & REMOVE LEMBUR ==================-->
+
+<!--================== MENAMPILKAN DATA KARYAWAN ==================-->
+<script>
+  $(document).ready(function() {
+    // 1. Inisialisasi Select2 untuk semua dropdown
+    $('.select2').select2({
+      width: '100%'
+    });
+
+    // 2. Fungsi utama untuk mengupdate field saat karyawan dipilih
     function updateFields() {
       var selectedKaryawanOption = $('#karyawanSelect option:selected');
 
-      if (selectedKaryawanOption.length) {
-        var norek = selectedKaryawanOption.data('norek');
-        var bank = selectedKaryawanOption.data('bank');
-        var email = selectedKaryawanOption.data('email');
-        var alpha = selectedKaryawanOption.data('alpha');
-        var hadir = selectedKaryawanOption.data('hadir');
-        var camp_jogja = selectedKaryawanOption.data('camp_jogja');
-        var camp_luar_kota = selectedKaryawanOption.data('camp_luar_kota');
-        var perjalanan_jawa = selectedKaryawanOption.data('perjalanan_jawa');
-        var perjalanan_luar_jawa = selectedKaryawanOption.data('perjalanan_luar_jawa');
-        var remote = selectedKaryawanOption.data('remote');
-        var izin = selectedKaryawanOption.data('izin');
+      if (selectedKaryawanOption.length && selectedKaryawanOption.val() !== "") {
+        // Ambil semua data dari atribut 'data-*'
+        var data = {
+          norek: selectedKaryawanOption.data('norek'),
+          bank: selectedKaryawanOption.data('bank'),
+          email: selectedKaryawanOption.data('email'),
+          alpha: selectedKaryawanOption.data('alpha'),
+          hadir: selectedKaryawanOption.data('hadir'),
+          camp_jogja: selectedKaryawanOption.data('camp_jogja'),
+          camp_luar_kota: selectedKaryawanOption.data('camp_luar_kota'),
+          perjalanan_jawa: selectedKaryawanOption.data('perjalanan_jawa'),
+          perjalanan_luar_jawa: selectedKaryawanOption.data('perjalanan_luar_jawa'),
+          remote: selectedKaryawanOption.data('remote'),
+          izin: selectedKaryawanOption.data('izin')
+        };
 
-        $('#norek').val(norek);
-        $('#bank').val(bank);
-        $('#email').val(email);
-        $('#alpha').val(alpha);
-        $('#hadir').val(hadir);
-        $('#camp_jogja').val(camp_jogja);
-        $('#camp_luar_kota').val(camp_luar_kota);
-        $('#perjalanan_jawa').val(perjalanan_jawa);
-        $('#perjalanan_luar_jawa').val(perjalanan_luar_jawa);
-        $('#remote').val(remote);
-        $('#izin').val(izin);
+        // Update Field Input Biasa
+        $('#norek').val(data.norek);
+        $('#email').val(data.email);
+        $('#alpha').val(data.alpha);
+        $('#hadir').val(data.hadir);
+        $('#camp_jogja').val(data.camp_jogja);
+        $('#camp_luar_kota').val(data.camp_luar_kota);
+        $('#perjalanan_dalam_jawa').val(data.perjalanan_jawa);
+        $('#perjalanan_luar_jawa').val(data.perjalanan_luar_jawa);
+        $('#remote').val(data.remote);
+        $('#izin').val(data.izin);
+
+        // Update khusus Select2 (BANK)
+        $('#bank').val(data.bank).trigger('change.select2');
+
       } else {
-        $('#norek').val('');
-        $('#bank').val('');
-        $('#email').val('');
-        $('#alpha').val('');
-        $('#hadir').val('');
-        $('#camp_jogja').val('');
-        $('#camp_luar_kota').val('');
-        $('#perjalanan_jawa').val('');
-        $('#perjalanan_luar_jawa').val('');
-        $('#remote').val('');
-        $('#izin').val('');
+        // Kosongkan semua field jika tidak ada yang dipilih
+        $('#norek, #email, #alpha, #hadir, #camp_jogja, #camp_luar_kota, #perjalanan_dalam_jawa, #perjalanan_luar_jawa, #remote, #izin').val('');
+        $('#bank').val('').trigger('change.select2');
+      }
+
+      // Panggil fungsi hitung otomatis (jika ada)
+      if (typeof calculateGrandTotalPresensi === 'function') {
+        calculateGrandTotalPresensi();
       }
     }
 
-    // Call the function when the page loads to initialize the values
-    updateFields();
-
-    // Call the function whenever the user selects a karyawan
+    // 3. Jalankan fungsi saat ganti pilihan
     $('#karyawanSelect').on('change', function() {
       updateFields();
     });
-  });
-</script>
-<script>
-  $(document).ready(function() {
-    // Menangani perubahan pada elemen select
-    $('#userSelect').change(function() {
-      // Mengambil data total_hadir dari atribut data-total-hadir pada option yang dipilih
-      var hadir = $(this).find(':selected').data('hadir');
 
-      // Menampilkan nilai total_hadir
-      $('#hadir span').text(hadir);
-    });
+    // 4. Jalankan saat pertama kali halaman dimuat (dengan sedikit delay agar Select2 siap)
+    setTimeout(function() {
+      updateFields();
+    }, 200);
   });
 </script>
+<!--================== END MENAMPILKAN DATA KARYAWAN ==================-->
 
 <!--================== FORMAT RUPIAH ==================-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
@@ -1430,7 +1329,6 @@ Tambah Gaji Karyawan | MIS
 
   });
 </script>
-<!--================== END ==================-->
-
+<!--================== END FORMAT RUPIAH ==================-->
 
 @stop
