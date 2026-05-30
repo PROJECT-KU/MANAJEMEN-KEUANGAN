@@ -245,4 +245,38 @@
         box-shadow: none !important;
         background-color: #f1f5f9 !important;
     }
+
+    /* Input biasa yang disabled */
+    .form-control-modern:disabled,
+    .form-control-modern[disabled] {
+        background-color: #f1f5f9 !important;
+        color: #64748b !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Khusus untuk Select2 yang disabled */
+    .select2-container--disabled .select2-selection--single {
+        background-color: #f1f5f9 !important;
+        border: 1px solid #e2e8f0 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Jika ada input group pembungkus */
+    .input-group-modern:has(input[disabled]),
+    .input-group-modern:has(select[disabled]) {
+        background-color: #f1f5f9 !important;
+    }
+
+    /* Gaya untuk Select2 yang disabled */
+    .select2-container--disabled .select2-selection--single {
+        background-color: #f1f5f9 !important;
+        /* Warna abu-abu yang sama */
+        border: 1px solid #e2e8f0 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Mengubah warna teks di dalam Select2 yang disabled agar terlihat "mati" */
+    .select2-container--disabled .select2-selection__rendered {
+        color: #64748b !important;
+    }
 </style>

@@ -19,10 +19,9 @@ class PublicScopusCampController extends Controller
     // <!--================== NAMPILIN KATEGORI ==================-->
     public function public(Request $request)
     {
-
         $categories = DB::table('scopus_camp_kategori')
             ->where('status', 'active')
-            ->oldest() // Mengurutkan dari created_at terlama ke terbaru
+            ->orderBy('mulai', 'asc') // Mengurutkan berdasarkan kolom 'mulai' dari tanggal terawal ke akhir
             ->get();
 
         return view('public.scopus_camp.index', compact('categories'));

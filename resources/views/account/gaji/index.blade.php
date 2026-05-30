@@ -588,22 +588,22 @@ Data Gaji Karyawan | MIS
 
                   @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
 
-                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1;" title="Detail">
+                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoaration: none;" title="Detail">
                     <i class="fa fa-eye"></i>
                   </a>
-                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7;">
+                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoaration: none;">
                     <i class="fa fa-file-invoice mr-1"></i> Slip
                   </a>
 
                   @else
 
                   @if($hasil->status == 'pending' && now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                  <a href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #fffbeb; color: #d97706;" title="Edit">
+                  <a href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #fffbeb; color: #d97706; text-decoration: none;" title="Edit">
                     <i class="fa fa-pencil-alt"></i>
                   </a>
                   @endif
 
-                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1;" title="Detail">
+                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoration: none;" title="Detail">
                     <i class="fa fa-eye"></i>
                   </a>
 
@@ -611,7 +611,7 @@ Data Gaji Karyawan | MIS
                     <i class="fa fa-trash"></i>
                   </button>
 
-                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7;">
+                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoration: none;">
                     <i class="fa fa-file-invoice mr-1"></i> Slip
                   </a>
 
@@ -635,7 +635,7 @@ Data Gaji Karyawan | MIS
   </section>
 </div>
 
-// <!--================== POP UP FILTER DATA ==================-->
+<!--================== POP UP FILTER DATA ==================-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const btnFilterPopup = document.getElementById('btnFilterPopup');
@@ -793,9 +793,9 @@ Data Gaji Karyawan | MIS
     }
   });
 </script>
-// <!--================== END POP UP FILTER DATA ==================-->
+<!--================== END POP UP FILTER DATA ==================-->
 
-// <!--================== EXPORT EXCEL DATA GAJI ==================-->
+<!--================== EXPORT EXCEL DATA GAJI ==================-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const downloadBtn = document.getElementById('downloadExcelBtn');
@@ -814,9 +814,9 @@ Data Gaji Karyawan | MIS
     }
   });
 </script>
-// <!--================== END EXPORT EXCEL DATA GAJI ==================-->
+<!--================== END EXPORT EXCEL DATA GAJI ==================-->
 
-// <!--================== LIVE SEARCH GAJI ==================-->
+<!--================== LIVE SEARCH GAJI ==================-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     let timer;
@@ -889,9 +889,9 @@ Data Gaji Karyawan | MIS
     }
   });
 </script>
-// <!--================== END LIVE SEARCH GAJI ==================-->
+<!--================== END LIVE SEARCH GAJI ==================-->
 
-// <!--================== TAMBAH GAJI ==================-->
+<!--================== TAMBAH GAJI ==================-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('tambahGajiBtn');
@@ -912,9 +912,9 @@ Data Gaji Karyawan | MIS
     }
   });
 </script>
-// <!--================== END TAMBAH GAJI ==================-->
+<!--================== END TAMBAH GAJI ==================-->
 
-// <!--================== NOTIFIKASI ==================-->
+<!--================== NOTIFIKASI ==================-->
 <script>
   @if(Session::has('success'))
   setTimeout(function() {
@@ -922,9 +922,9 @@ Data Gaji Karyawan | MIS
   }, 1000);
   @endif
 </script>
-// <!--================== END NOTIFIKASI ==================-->
+<!--================== END NOTIFIKASI ==================-->
 
-// <!--================== DELETE GAJI ==================-->
+<!--================== DELETE GAJI ==================-->
 <script>
   function Delete(id) {
     Swal.fire({
@@ -979,5 +979,5 @@ Data Gaji Karyawan | MIS
     })
   }
 </script>
-// <!--================== END DELETE GAJI ==================-->
+<!--================== END DELETE GAJI ==================-->
 @stop
