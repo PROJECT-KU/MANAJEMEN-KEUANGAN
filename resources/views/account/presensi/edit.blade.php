@@ -245,7 +245,7 @@ Update Presensi Karyawan | MIS
   <section class="section">
     <div class="section-header-modern">
       <div>
-        <h1>Upadate Presensi</h1>
+        <h1>Update Presensi</h1>
         <p class="text-muted font-weight-bold">Pantau kehadiran, waktu kerja, dan lokasi tim operasional Anda.</p>
       </div>
     </div>
