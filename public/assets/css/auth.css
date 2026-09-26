@@ -118,6 +118,31 @@ img {
         linear-gradient(155deg, var(--aksen-1) 0%, var(--aksen-2) 45%, var(--aksen-3) 100%);
 }
 
+.panel-merek::after {
+    /* pola titik halus: memberi tekstur tanpa meramaikan bidang */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, .32) 1.1px, transparent 1.1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(130% 100% at 15% 0%, #000 15%, transparent 70%);
+    -webkit-mask-image: radial-gradient(130% 100% at 15% 0%, #000 15%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Logo utuh sebagai latar. Ukuran & posisinya dijaga supaya seluruh logo
+   tetap terlihat -- tidak boleh terpotong tepi panel. */
+.merek-latar {
+    position: absolute;
+    right: 6%;
+    bottom: 13%;
+    width: min(62%, 420px);
+    opacity: .09;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+    z-index: 0;
+}
+
 .cahaya {
     position: absolute;
     border-radius: 50%;
@@ -678,6 +703,12 @@ img {
         height: 54px;
     }
 
+    .merek-latar {
+        width: min(46%, 300px);
+        right: 5%;
+        bottom: 18%;
+    }
+
     .panel-merek {
         /* hero ikut tumbuh di layar tinggi supaya sisi form tidak menyisakan
            bidang kosong yang lebar */
@@ -730,6 +761,11 @@ img {
 
     .merek-logo {
         height: 40px;
+    }
+
+    /* hero ponsel terlalu ringkas untuk latar logo */
+    .merek-latar {
+        display: none;
     }
 
     .merek-judul {

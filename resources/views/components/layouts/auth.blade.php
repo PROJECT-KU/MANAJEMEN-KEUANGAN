@@ -8,11 +8,13 @@
     <meta name="theme-color" content="#0891b2">
     <title>{{ $judulHalaman ?? 'Masuk' }} | MIS Rumah Scopus</title>
 
-    <link rel="icon" href="{{ asset('assets/img/newlogogeneration.png') }}">
+    {{-- hanya favicon yang memakai potongan logo, sebab tab peramban butuh
+         gambar persegi; di tempat lain logo selalu tampil utuh --}}
+    <link rel="icon" href="{{ asset('assets/img/mis-favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=9">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=10">
     @livewireStyles
 </head>
 
@@ -23,6 +25,9 @@
         <aside class="panel-merek">
             <span class="cahaya cahaya-1"></span>
             <span class="cahaya cahaya-2"></span>
+            {{-- logo utuh sebagai latar; ditempatkan penuh di dalam bidang,
+                 tidak terpotong tepi panel --}}
+            <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="" class="merek-latar">
 
             <div class="merek-atas">
                 <img src="{{ asset('assets/img/newlogogeneration.png') }}"
