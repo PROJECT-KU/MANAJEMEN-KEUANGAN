@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=10">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=11">
     @livewireStyles
 </head>
 
@@ -25,9 +25,8 @@
         <aside class="panel-merek">
             <span class="cahaya cahaya-1"></span>
             <span class="cahaya cahaya-2"></span>
-            {{-- logo utuh sebagai latar; ditempatkan penuh di dalam bidang,
-                 tidak terpotong tepi panel --}}
-            <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="" class="merek-latar">
+            {{-- potongan ikon sebagai latar, menyembul di pojok kanan bawah --}}
+            <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="" class="merek-latar">
 
             <div class="merek-atas">
                 <img src="{{ asset('assets/img/newlogogeneration.png') }}"

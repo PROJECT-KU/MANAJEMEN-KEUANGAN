@@ -130,15 +130,15 @@ img {
     pointer-events: none;
 }
 
-/* Logo utuh sebagai latar. Ukuran & posisinya dijaga supaya seluruh logo
-   tetap terlihat -- tidak boleh terpotong tepi panel. */
+/* Potongan ikon sebagai latar panel, menyembul di pojok kanan bawah. */
 .merek-latar {
     position: absolute;
-    right: 6%;
-    bottom: 13%;
-    width: min(62%, 420px);
-    opacity: .09;
-    filter: brightness(0) invert(1);
+    right: -52px;
+    bottom: -46px;
+    width: 340px;
+    opacity: .13;
+    transform: rotate(-8deg);
+    filter: saturate(1.2);
     pointer-events: none;
     z-index: 0;
 }
@@ -704,9 +704,9 @@ img {
     }
 
     .merek-latar {
-        width: min(46%, 300px);
-        right: 5%;
-        bottom: 18%;
+        width: 230px;
+        right: -40px;
+        bottom: -56px;
     }
 
     .panel-merek {
@@ -763,9 +763,11 @@ img {
         height: 40px;
     }
 
-    /* hero ponsel terlalu ringkas untuk latar logo */
     .merek-latar {
-        display: none;
+        width: 150px;
+        right: -26px;
+        bottom: -34px;
+        opacity: .1;
     }
 
     .merek-judul {
