@@ -8,11 +8,11 @@
     <meta name="theme-color" content="#0891b2">
     <title>{{ $judulHalaman ?? 'Masuk' }} | MIS Rumah Scopus</title>
 
-    <link rel="icon" href="{{ asset('assets/img/logoterbaru1.png') }}">
+    <link rel="icon" href="{{ asset('assets/img/mis-ikon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=5">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=6">
     @livewireStyles
 </head>
 
@@ -21,17 +21,14 @@
 
         {{-- ============ panel identitas (kiri di desktop, hero di atas pada layar kecil) --}}
         <aside class="panel-merek">
-            <span class="gelembung gelembung-1"></span>
-            <span class="gelembung gelembung-2"></span>
-            <span class="gelembung gelembung-3"></span>
+            <span class="cahaya cahaya-1"></span>
+            <span class="cahaya cahaya-2"></span>
+            <span class="cahaya cahaya-3"></span>
+            <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="" class="merek-cap">
 
             <div class="merek-atas">
-                {{-- logo berwarna diletakkan di atas bidang putih supaya tetap
-                     terbaca di panel bergradien --}}
-                <span class="merek-logo-wadah">
-                    <img src="{{ asset('assets/img/newlogogeneration.png') }}"
-                        alt="MIS — Management Integration System by Rumah Scopus" class="merek-logo">
-                </span>
+                <img src="{{ asset('assets/img/newlogogeneration.png') }}"
+                    alt="MIS — Management Integration System by Rumah Scopus" class="merek-logo">
             </div>
 
             <div class="merek-isi">
@@ -48,11 +45,8 @@
         <main class="panel-form">
             <div class="kepala-panel">
                 <span class="tanda-merek">
-                    {{-- di ukuran sekecil ini hanya ikon grafiknya yang terbaca,
-                         jadi logo dipotong dan namanya ditulis di sebelahnya --}}
-                    <span class="tanda-ikon">
-                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS">
-                    </span>
+                    {{-- ikon persegi tersendiri, dipotong dari logo utama --}}
+                    <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="" class="tanda-ikon">
                     MIS Rumah Scopus
                 </span>
                 <span class="tanda-status"><i></i> Sistem berjalan normal</span>

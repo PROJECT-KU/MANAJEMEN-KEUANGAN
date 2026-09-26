@@ -162,18 +162,8 @@ $agent = new Agent();
             display: block;
             width: 42px;
             height: 42px;
-            overflow: hidden;
             margin: 0 auto;
-        }
-
-        .merek-ikon-kecil img {
-            /* dirender lebih besar lalu dipotong dari kiri-atas supaya hanya
-               ikon grafiknya yang tampak */
-            height: 64px;
-            width: auto;
-            max-width: none;
-            object-fit: cover;
-            object-position: left top;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -284,11 +274,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS — Management Integration System" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        {{-- sidebar menyempit: logo dipotong menyisakan ikon grafiknya
-                             saja, sebab logo penuh terlalu lebar untuk ruang ini --}}
-                        <span class="merek-ikon-kecil">
-                            <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS">
-                        </span>
+                        {{-- sidebar menyempit memakai ikon persegi tersendiri --}}
+                        <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="MIS" class="merek-ikon-kecil">
                     </div>
                     <ul class="sidebar-menu">
 
