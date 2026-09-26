@@ -41,7 +41,7 @@ class CreatePublicPendaftaranScopusKafeMail extends Mailable
 
         return $this->view('public.scopus_kafe.send_email_sukses')
             ->subject('Pendaftaran Scopus Kafe Berhasil Terkirim')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

@@ -39,7 +39,7 @@ class PasswordResetSuccessMail extends Mailable
 
         return $this->view('auth.email_lupa_password')
             ->subject('Reset Password Berhasil')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

@@ -46,7 +46,7 @@ class GajiSuccessMail extends Mailable
 
         $mail = $this->view('account.gaji.send_email_sukses')
             ->subject('Pembayaran Gaji Berhasil')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

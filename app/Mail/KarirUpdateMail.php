@@ -42,7 +42,7 @@ class KarirUpdateMail extends Mailable
 
         $mail = $this->view('karir.update_email_sukses')
             ->subject('Panggilan Interview')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

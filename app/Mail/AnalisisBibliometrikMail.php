@@ -52,7 +52,7 @@ class AnalisisBibliometrikMail extends Mailable
 
         return $this->view('public.analisis_bibliometrik.mail')
             ->subject('Pendaftaran Analisis Bibliometrik Berhasil Terkirim')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attachData($pdf->output(), 'invoice_' . strtoupper($this->analisisbibliometrik->id_transaksi) . '.pdf', [
                 'mime' => 'application/pdf',
             ]);
