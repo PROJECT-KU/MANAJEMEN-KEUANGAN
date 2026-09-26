@@ -311,6 +311,14 @@ class ProfilController extends Controller
     $user->password = Hash::make($request->input('password'));
     $user->save();
 
+    // Token API ikut dicabut: kata sandi berganti berarti akses lama harus
+    // berhenti, bukan hanya sesi peramban.
+    try {
+      $user->tokens()->update(['revoked' => true]);
+    } catch (\Throwable $e) {
+      report($e);
+    }
+
     return response()->json([
       'statussuksesreset' => 'success',
       'message' => 'Password anda berhasil diubah!'

@@ -9,8 +9,17 @@
             <span>
                 Ada {{ $errors->count() }} isian yang perlu diperbaiki:
                 <ul>
-                    @foreach ($errors->all() as $pesan)
-                        <li>{{ $pesan }}</li>
+                    @foreach ($errors->getMessages() as $medan => $pesanMedan)
+                        @foreach ($pesanMedan as $pesan)
+                            <li>
+                                @if ($medan === 'kodePos2')
+                                    {{ $pesan }}
+                                @else
+                                    <a href="#{{ $medan }}" class="tautan-galat"
+                                        @click.prevent="document.getElementById(@js($medan))?.focus()">{{ $pesan }}</a>
+                                @endif
+                            </li>
+                        @endforeach
                     @endforeach
                 </ul>
             </span>
@@ -149,6 +158,12 @@
                     </button>
                 </div>
 
+                <ul class="syarat-sandi" aria-hidden="true">
+                    <li>Minimal 8 karakter</li>
+                    <li>Memuat huruf dan angka</li>
+                    <li>Bukan kata sandi yang pernah bocor</li>
+                </ul>
+
                 <div class="bar-kekuatan" x-show="sandi.length > 0" x-cloak>
                     <template x-for="n in 4" :key="n">
                         <i :style="n <= skor ? 'background:' + warna : ''"></i>
@@ -199,7 +214,7 @@
 
         <div class="medan">
             <label class="centang">
-                <input type="checkbox" wire:model="setuju">
+                <input type="checkbox" id="setuju" wire:model="setuju">
                 <span>Saya menyetujui
                     <a href="{{ route('ketentuan') }}" target="_blank" rel="noopener" class="tautan">kebijakan privasi dan ketentuan layanan</a>
                     Rumah Scopus Foundation.</span>

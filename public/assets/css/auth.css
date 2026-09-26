@@ -855,6 +855,111 @@ img {
     }
 }
 
+/* ------------------------------------------------- halaman naskah panjang */
+
+.naskah h3 {
+    margin: 22px 0 8px;
+    font-size: .98rem;
+    font-weight: 700;
+    color: var(--dasar-900);
+}
+
+.naskah p,
+.naskah li {
+    margin: 0 0 10px;
+    font-size: .92rem;
+    line-height: 1.75;
+    color: var(--dasar-500);
+}
+
+.naskah ul {
+    margin: 0 0 10px;
+    padding-left: 20px;
+}
+
+.pemisah-naskah {
+    margin: 30px 0 26px;
+    border: 0;
+    border-top: 1px solid #eef1f6;
+}
+
+/* ---------------------------------------------------- fokus papan ketik */
+
+/* Sebelumnya hanya isian yang punya penanda fokus, sehingga pengguna papan
+   ketik tidak tahu posisinya saat menekan Tab. */
+.tombol-utama:focus-visible,
+.tombol-kedua:focus-visible,
+.tombol-mata:focus-visible,
+.tombol-teks:focus-visible,
+.tautan:focus-visible,
+.kaki-halaman a:focus-visible,
+.centang input:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--aksen-1) 55%, transparent);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.panel-merek a:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, .8);
+    outline-offset: 2px;
+}
+
+/* -------------------------------------------------- peringatan Caps Lock */
+
+.peringatan-caps {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 7px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--kuning);
+}
+
+.peringatan-caps svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --------------------------------------------- ringkasan galat formulir */
+
+.ringkasan-galat ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+}
+
+.ringkasan-galat li {
+    margin-bottom: 3px;
+}
+
+/* ------------------------------------------------ ikon keadaan pada kartu */
+
+.ikon-keadaan {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 20px;
+    background: var(--aksen-lembut);
+    border: 1px solid color-mix(in srgb, var(--aksen-1) 22%, transparent);
+}
+
+.ikon-keadaan svg {
+    width: 30px;
+    height: 30px;
+    stroke: var(--aksen-1);
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 /* ------------------------------------------------- halaman naskah panjang */
 
@@ -962,89 +1067,41 @@ img {
     stroke-linejoin: round;
 }
 
-/* ============================== MODE GELAP ============================== */
+/* ------------------------------------------------ syarat kata sandi */
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --dasar-900: #f1f5f9;
-        --dasar-700: #e2e8f0;
-        --dasar-500: #9aa8bd;
-        --dasar-300: #3c4a60;
-        --dasar-100: #1e293b;
-        --dasar-50: #0f172a;
-        --putih: #161f31;
-    }
+.syarat-sandi {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 8px 0 0;
+    padding: 0;
+    font-size: .78rem;
+    color: var(--dasar-500);
+}
 
-    /* gradien lembut memakai warna terang; di mode gelap dimatikan supaya
-       tidak muncul gumpalan putih di pojok */
-    .panel-form {
-        background: var(--dasar-50);
-    }
+.syarat-sandi li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
 
-    .kartu {
-        border-color: #26324a;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 18px 40px -30px rgba(0, 0, 0, .8);
-    }
+.syarat-sandi li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--dasar-300);
+}
 
-    .ikon-keadaan {
-        background: #16233a;
-        border-color: #2c3d5c;
-    }
+/* butir ringkasan galat bisa diklik menuju medannya */
+.tautan-galat {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
 
-    .kotak-isian input {
-        background: #101a2b;
-        border-color: #30405c;
-        color: #f1f5f9;
-    }
-
-    .kotak-isian input::placeholder {
-        color: #8b9ab3;
-    }
-
-    .kotak-isian input.salah {
-        background: #2a1420;
-    }
-
-    .kaki-kartu,
-    .pemisah-naskah {
-        border-top-color: #26324a;
-    }
-
-    .kaki-halaman {
-        border-top-color: #26324a;
-    }
-
-    .tombol-kedua {
-        background: #101a2b;
-        border-color: #30405c;
-    }
-
-    .kabar-sukses {
-        color: #6ee7b7;
-        background: #0c2c22;
-        border-color: #14503c;
-    }
-
-    .kabar-galat {
-        color: #fda4af;
-        background: #2d1220;
-        border-color: #5c1d32;
-    }
-
-    .kabar-info {
-        color: #e2e8f0;
-        background: #16233a;
-        border-color: #2c3d5c;
-    }
-
-    .tanda-status {
-        color: #6ee7b7;
-        background: #0c2c22;
-        border-color: #14503c;
-    }
-
-    .jaminan li {
-        background: rgba(22, 31, 49, .8);
-        border-color: #26324a;
-    }
+.tautan-galat:hover {
+    text-decoration-thickness: 2px;
 }

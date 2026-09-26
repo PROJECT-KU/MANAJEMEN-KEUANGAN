@@ -44,8 +44,17 @@
                 <span>
                     Ada {{ $errors->count() }} hal yang perlu diperbaiki:
                     <ul>
-                        @foreach ($errors->all() as $pesan)
-                            <li>{{ $pesan }}</li>
+                        @foreach ($errors->getMessages() as $medan => $pesanMedan)
+                            @foreach ($pesanMedan as $pesan)
+                                <li>
+                                    @if ($medan === 'kodePos2')
+                                        {{ $pesan }}
+                                    @else
+                                        <a href="#{{ $medan }}" class="tautan-galat"
+                                            @click.prevent="document.getElementById(@js($medan))?.focus()">{{ $pesan }}</a>
+                                    @endif
+                                </li>
+                            @endforeach
                         @endforeach
                     </ul>
                 </span>
@@ -116,6 +125,12 @@
                         </button>
                     </div>
 
+                    <ul class="syarat-sandi" aria-hidden="true">
+                        <li>Minimal 8 karakter</li>
+                        <li>Memuat huruf dan angka</li>
+                        <li>Bukan kata sandi yang pernah bocor</li>
+                    </ul>
+
                     <div class="bar-kekuatan" x-show="sandi.length > 0" x-cloak>
                         <template x-for="n in 4" :key="n">
                             <i :style="n <= skor ? 'background:' + warna : ''"></i>
@@ -134,8 +149,8 @@
 
                 <div class="medan">
                     <label for="kataSandiKonfirmasi">Ulangi Kata Sandi <span class="wajib">*</span></label>
-                    <div class="kotak-isian">
-                        <input type="password" id="kataSandiKonfirmasi" wire:model="kataSandiKonfirmasi"
+                    <div class="kotak-isian" x-data="{ tampil2: false }">
+                        <input :type="tampil2 ? 'text' : 'password'" type="password" id="kataSandiKonfirmasi" wire:model="kataSandiKonfirmasi"
                             autocomplete="new-password" placeholder="Ketik ulang kata sandi"
                             class="@error('kataSandiKonfirmasi') salah @enderror"
                     @error('kataSandiKonfirmasi') aria-invalid="true" aria-describedby="galat-kataSandiKonfirmasi" @enderror>
@@ -144,6 +159,17 @@
                             <rect x="3" y="11" width="18" height="10" rx="2" />
                             <path d="M7 11V8a5 5 0 0110 0v3" />
                         </svg>
+                        <button type="button" class="tombol-mata" @click="tampil2 = !tampil2"
+                            :aria-label="tampil2 ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
+                            <svg x-show="!tampil2" viewBox="0 0 24 24">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <svg x-show="tampil2" x-cloak viewBox="0 0 24 24">
+                                <path d="M17.9 17.9A10.3 10.3 0 0112 19C5.6 19 2 12 2 12a18.5 18.5 0 015.1-5.9M9.9 4.2A9.6 9.6 0 0112 4c6.4 0 10 7 10 7a18.6 18.6 0 01-2.2 3.2" />
+                                <path d="M9.9 9.9a3 3 0 104.2 4.2M2 2l20 20" />
+                            </svg>
+                        </button>
                     </div>
                     @error('kataSandiKonfirmasi')
                         <p class="pesan-salah" id="galat-kataSandiKonfirmasi" role="alert">

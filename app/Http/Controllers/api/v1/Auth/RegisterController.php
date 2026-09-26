@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password as AturanKataSandi;
 use App\Mail\VerifikasiEmailMail;
+use App\Rules\BukanEmailSekaliPakai;
 
 class RegisterController extends Controller
 {
@@ -22,7 +23,7 @@ class RegisterController extends Controller
 
                 'full_name'     => 'required',
                 'username'      => ['required', 'unique:users'],
-                'email'         => ['required', 'email', 'unique:users'],
+                'email'         => ['required', 'email', new BukanEmailSekaliPakai, 'unique:users'],
                 'password'      => ['required', 'string', AturanKataSandi::defaults()],
                 'telp'          => ['nullable', 'string', 'max:20'],
                 'jenis'         => ['required', 'in:perorangan,bisnis'],

@@ -289,4 +289,37 @@ class ResetKataSandiTest extends TestCase
         $pengguna->refresh();
         $this->assertTrue(Hash::check('SandiUji2026', $pengguna->password));
     }
+
+    public function test_token_api_dicabut_saat_kata_sandi_diatur_ulang(): void
+    {
+        Mail::fake();
+        $pengguna = $this->buatPengguna();
+        $token = $this->mintaTautan($pengguna);
+
+        // Token API yang masih hidup sebelum kata sandi diganti.
+        DB::table('oauth_access_tokens')->insert([
+            'id' => 'uji-' . uniqid(),
+            'user_id' => $pengguna->getKey(),
+            'client_id' => 1,
+            'name' => 'uji',
+            'scopes' => '[]',
+            'revoked' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => now()->addYear(),
+        ]);
+
+        Livewire::test(AturUlangPassword::class, ['token' => $token])
+            ->set('email', $pengguna->email)
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
+            ->call('simpan');
+
+        $masihHidup = DB::table('oauth_access_tokens')
+            ->where('user_id', $pengguna->getKey())
+            ->where('revoked', false)
+            ->count();
+
+        $this->assertSame(0, $masihHidup, 'Token API harus ikut dicabut saat kata sandi diganti.');
+    }
 }

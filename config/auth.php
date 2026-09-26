@@ -122,6 +122,14 @@ return [
 
     'verifikasi_wajib_sejak' => env('VERIFIKASI_WAJIB_SEJAK', '2026-09-26'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Masa simpan jejak aktivitas masuk (hari)
+    |--------------------------------------------------------------------------
+    */
+
+    'simpan_aktivitas_masuk_hari' => env('SIMPAN_AKTIVITAS_MASUK_HARI', 90),
+
     'password_timeout' => 10800,
 
 ];

@@ -7,6 +7,7 @@ use App\Livewire\Auth\Masuk;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -163,5 +164,33 @@ class MasukTest extends TestCase
         // jadi sesi lama harus ikut berakhir.
         $this->get('/account/dashboard')->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_akun_terkunci_walau_penyerang_berganti_ip(): void
+    {
+        $pengguna = $this->buatPengguna();
+        RateLimiter::clear('masuk-akun|' . strtolower($pengguna->username));
+
+        // Tiap percobaan datang dari IP berbeda, sehingga pembatas per
+        // identitas+IP tidak pernah tercapai. Pembatas per akun yang menahan.
+        for ($i = 0; $i < 20; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.' . ($i + 1)]);
+
+            Livewire::test(Masuk::class)
+                ->set('identitas', $pengguna->username)
+                ->set('kataSandi', 'salah-' . $i)
+                ->call('masuk');
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.9']);
+
+        Livewire::test(Masuk::class)
+            ->set('identitas', $pengguna->username)
+            ->set('kataSandi', 'RahasiaUji2026')
+            ->call('masuk')
+            ->assertHasErrors('identitas');
+
+        $this->assertGuest();
+        RateLimiter::clear('masuk-akun|' . strtolower($pengguna->username));
     }
 }

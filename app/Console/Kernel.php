@@ -16,6 +16,9 @@ class Kernel extends ConsoleKernel
         // Run the 'send:email' command daily at 9:46 AM
         $schedule->command('send:email')->everyMinute();
         $schedule->command('promo:expire')->everyMinute();
+
+        // Pangkas jejak masuk supaya tabelnya tidak tumbuh tanpa batas.
+        $schedule->command('aktivitas:pangkas')->dailyAt('02:30');
     }
 
     protected function commands()

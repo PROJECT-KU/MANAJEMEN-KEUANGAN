@@ -21,11 +21,6 @@ class ResetPasswordController extends Controller
 {
     use SendsPasswordResetEmails;
 
-    public function showResetForm()
-    {
-        return view('auth.lupapassword');
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Alur atur ulang kata sandi pindah ke Livewire

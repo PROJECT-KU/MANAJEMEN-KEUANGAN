@@ -193,4 +193,16 @@ class DaftarTest extends TestCase
 
         RateLimiter::clear('daftar|127.0.0.1');
     }
+
+    public function test_email_sekali_pakai_ditolak(): void
+    {
+        Mail::fake();
+
+        Livewire::test(Daftar::class)
+            ->set($this->isianSah(['email' => 'tico@mailinator.com']))
+            ->call('daftar')
+            ->assertHasErrors('email');
+
+        Mail::assertNothingSent();
+    }
 }

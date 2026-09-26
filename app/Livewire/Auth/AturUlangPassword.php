@@ -83,6 +83,11 @@ class AturUlangPassword extends Component
                     'reset_token' => null,
                 ])->save();
 
+                // Sesi peramban sudah berakhir sendiri lewat AuthenticateSession,
+                // tetapi token API tidak. Tanpa ini, token yang sudah bocor tetap
+                // bisa dipakai walau kata sandinya sudah diganti.
+                $this->cabutTokenApi($pengguna);
+
                 event(new PasswordReset($pengguna));
 
                 try {
@@ -120,5 +125,15 @@ class AturUlangPassword extends Component
     public function render()
     {
         return view('livewire.auth.atur-ulang-password');
+    }
+
+    /** Cabut seluruh token API milik pengguna (Passport). */
+    private function cabutTokenApi($pengguna): void
+    {
+        try {
+            $pengguna->tokens()->update(['revoked' => true]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

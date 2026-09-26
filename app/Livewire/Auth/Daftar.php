@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use App\Mail\VerifikasiEmailMail;
+use App\Rules\BukanEmailSekaliPakai;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -55,7 +56,7 @@ class Daftar extends Component
         return [
             'namaLengkap' => ['required', 'string', 'min:3', 'max:100'],
             'username' => ['required', 'string', 'alpha_dash', 'min:4', 'max:30', Rule::unique('users', 'username')],
-            'email' => ['required', 'string', 'email:rfc', 'max:150', Rule::unique('users', 'email')],
+            'email' => ['required', 'string', 'email:rfc', 'max:150', new BukanEmailSekaliPakai, Rule::unique('users', 'email')],
             'telp' => ['nullable', 'string', 'regex:/^[0-9+\-\s()]{8,20}$/'],
             'kataSandi' => ['required', 'string', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
             'kataSandiKonfirmasi' => ['required', 'string'],

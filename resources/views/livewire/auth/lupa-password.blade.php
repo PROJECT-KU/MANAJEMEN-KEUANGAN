@@ -38,7 +38,12 @@
         @enderror
 
         <p class="kaki-kartu">
-            <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+            Salah ketik alamatnya?
+            <button type="button" class="tombol-teks" wire:click="$set('terkirim', false)">Ubah email</button>
+            <br>
+            <span style="display:inline-block;margin-top:8px">
+                <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+            </span>
         </p>
     @else
         <h2 class="judul-form">Lupa kata sandi?</h2>

@@ -40,6 +40,16 @@ class Masuk extends Component
     /** Lama kunci setelah batas percobaan tercapai (detik). */
     private const LAMA_KUNCI = 60;
 
+    /**
+     * Pembatas kedua, dihitung per akun tanpa memandang IP. Tanpa ini,
+     * penyerang yang berganti-ganti IP bisa terus menebak satu akun karena
+     * pembatas pertama hanya berlaku per kombinasi identitas+IP.
+     */
+    private const BATAS_PER_AKUN = 20;
+
+    /** Lama kunci pembatas per akun (detik). */
+    private const LAMA_KUNCI_AKUN = 900;
+
     protected function rules(): array
     {
         return [
@@ -61,6 +71,17 @@ class Masuk extends Component
         $this->validate();
 
         $kunci = $this->kunciPembatas();
+        $kunciAkun = $this->kunciPembatasAkun();
+
+        if (RateLimiter::tooManyAttempts($kunciAkun, self::BATAS_PER_AKUN)) {
+            AktivitasMasuk::catat(null, $this->identitas, false, 'akun dikunci sementara');
+            $this->beriTahuPemilikAkun();
+
+            throw ValidationException::withMessages([
+                'identitas' => 'Akun ini dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam '
+                    . ceil(RateLimiter::availableIn($kunciAkun) / 60) . ' menit.',
+            ]);
+        }
 
         if (RateLimiter::tooManyAttempts($kunci, self::BATAS_PERCOBAAN)) {
             AktivitasMasuk::catat(null, $this->identitas, false, 'dikunci sementara');
@@ -88,6 +109,7 @@ class Masuk extends Component
 
         if (! Auth::attempt([$kolom => $this->identitas, 'password' => $this->kataSandi], $this->ingatSaya)) {
             RateLimiter::hit($kunci, self::LAMA_KUNCI);
+            RateLimiter::hit($kunciAkun, self::LAMA_KUNCI_AKUN);
 
             AktivitasMasuk::catat($pengguna, $this->identitas, false, $pengguna ? 'kata sandi salah' : 'akun tidak ditemukan');
 
@@ -99,6 +121,7 @@ class Masuk extends Component
         }
 
         RateLimiter::clear($kunci);
+        RateLimiter::clear($kunciAkun);
 
         AktivitasMasuk::catat(Auth::user(), $this->identitas, true);
 
@@ -111,6 +134,11 @@ class Masuk extends Component
     private function kunciPembatas(): string
     {
         return 'masuk|' . Str::lower($this->identitas) . '|' . request()->ip();
+    }
+
+    private function kunciPembatasAkun(): string
+    {
+        return 'masuk-akun|' . Str::lower($this->identitas);
     }
 
     public function render()
