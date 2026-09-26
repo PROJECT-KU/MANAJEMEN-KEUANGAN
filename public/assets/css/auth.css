@@ -181,10 +181,19 @@ img {
     color: rgba(255, 255, 255, .72);
 }
 
+/* Logo MIS berwarna (grafik oranye + teks navy), jadi tidak diputihkan
+   seperti logo lama; dialasi bidang putih agar kontras di atas gradien. */
+.merek-logo-wadah {
+    display: inline-flex;
+    padding: 14px 22px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 12px 26px -16px rgba(15, 23, 42, .5);
+}
+
 .merek-logo {
-    height: 34px;
+    height: 78px;
     width: auto;
-    filter: brightness(0) invert(1);
 }
 
 .merek-judul {
@@ -698,6 +707,10 @@ img {
         grid-template-rows: auto 1fr;
     }
 
+    .merek-logo {
+        height: 58px;
+    }
+
     .panel-merek {
         /* hero ikut tumbuh di layar tinggi supaya sisi form tidak menyisakan
            bidang kosong yang lebar */
@@ -749,7 +762,22 @@ img {
     }
 
     .merek-logo {
-        height: 27px;
+        height: 42px;
+    }
+
+    .merek-logo-wadah {
+        padding: 8px 12px;
+        border-radius: 12px;
+    }
+
+    .tanda-ikon,
+    .tanda-ikon img {
+        width: 26px;
+        height: 26px;
+    }
+
+    .tanda-ikon img {
+        width: auto;
     }
 
     .merek-judul {
@@ -857,10 +885,23 @@ img {
     color: var(--dasar-700);
 }
 
-.tanda-merek img {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
+/* potongan ikon dari logo penuh, dipakai di ukuran kecil */
+.tanda-ikon {
+    display: block;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+.tanda-ikon img {
+    /* gambar dirender lebih besar lalu dipotong dari kiri-atas, supaya yang
+       tersisa hanya ikon grafiknya tanpa potongan teks */
+    height: 46px;
+    width: auto;
+    max-width: none;
+    object-fit: cover;
+    object-position: left top;
 }
 
 .tanda-status {

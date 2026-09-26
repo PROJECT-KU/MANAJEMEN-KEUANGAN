@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=5">
     @livewireStyles
 </head>
 
@@ -26,7 +26,12 @@
             <span class="gelembung gelembung-3"></span>
 
             <div class="merek-atas">
-                <img src="{{ asset('assets/img/newlogo.png') }}" alt="ManagePro" class="merek-logo">
+                {{-- logo berwarna diletakkan di atas bidang putih supaya tetap
+                     terbaca di panel bergradien --}}
+                <span class="merek-logo-wadah">
+                    <img src="{{ asset('assets/img/newlogogeneration.png') }}"
+                        alt="MIS — Management Integration System by Rumah Scopus" class="merek-logo">
+                </span>
             </div>
 
             <div class="merek-isi">
@@ -43,7 +48,11 @@
         <main class="panel-form">
             <div class="kepala-panel">
                 <span class="tanda-merek">
-                    <img src="{{ asset('assets/img/logoterbaru1.png') }}" alt="">
+                    {{-- di ukuran sekecil ini hanya ikon grafiknya yang terbaca,
+                         jadi logo dipotong dan namanya ditulis di sebelahnya --}}
+                    <span class="tanda-ikon">
+                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS">
+                    </span>
                     MIS Rumah Scopus
                 </span>
                 <span class="tanda-status"><i></i> Sistem berjalan normal</span>

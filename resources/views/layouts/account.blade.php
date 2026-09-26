@@ -139,6 +139,43 @@ $agent = new Agent();
             }
         }
     </style>
+    <style>
+        /* Logo MIS berbentuk lebar; di sidebar yang menyempit hanya bagian
+           ikon grafiknya yang ditampilkan supaya tetap terbaca. */
+        /* Logo MIS lebih tinggi daripada logo lama, jadi bidang merek sidebar
+           diberi ruang agar tidak terpotong. */
+        .sidebar-brand:not(.sidebar-brand-sm) {
+            height: auto;
+            min-height: 76px;
+            padding: 12px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-brand:not(.sidebar-brand-sm) img {
+            max-height: 58px;
+            width: auto;
+        }
+
+        .merek-ikon-kecil {
+            display: block;
+            width: 42px;
+            height: 42px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .merek-ikon-kecil img {
+            /* dirender lebih besar lalu dipotong dari kiri-atas supaya hanya
+               ikon grafiknya yang tampak */
+            height: 64px;
+            width: auto;
+            max-width: none;
+            object-fit: cover;
+            object-position: left top;
+        }
+    </style>
 </head>
 @php
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
@@ -244,10 +281,14 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             <div class="main-sidebar sidebar-style-2" id="SidebarPwa" style="position: fixed;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/logo-header.png') }}" alt="logo" width="150">
+                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS — Management Integration System" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <img src="{{ asset('assets/img/logo-pwa.png') }}" alt="logo" width="50px">
+                        {{-- sidebar menyempit: logo dipotong menyisakan ikon grafiknya
+                             saja, sebab logo penuh terlalu lebar untuk ruang ini --}}
+                        <span class="merek-ikon-kecil">
+                            <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS">
+                        </span>
                     </div>
                     <ul class="sidebar-menu">
 
