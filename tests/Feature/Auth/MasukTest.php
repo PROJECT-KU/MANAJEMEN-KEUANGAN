@@ -28,8 +28,9 @@ class MasukTest extends TestCase
         ], $ubah));
 
         // Kolom status tidak ada di $fillable model User, jadi harus diisi
-        // terpisah (bukan lewat mass assignment).
-        $pengguna->forceFill(['status' => $status])->save();
+        // terpisah (bukan lewat mass assignment). Emailnya ditandai
+        // terverifikasi supaya middleware verifikasi tidak ikut diuji di sini.
+        $pengguna->forceFill(['status' => $status, 'email_verified_at' => now()])->save();
 
         return $pengguna->refresh();
     }

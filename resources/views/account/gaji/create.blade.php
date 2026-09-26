@@ -322,7 +322,7 @@ Tambah Gaji Karyawan | MIS
                   <select class="form-control-modern select2" name="user_id" id="karyawanSelect" style="width: 100%" required>
                     <option value="">-- PILIH NAMA KARYAWAN --</option>
                     @foreach ($datas as $user)
-                    <option value="{{ $user->id }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}">{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}" data-norek="{{ $user->norek }}" data-bank="{{ $user->bank }}" data-email="{{ $user->email }}" data-alpha="{{ $user->alpha }}" data-hadir="{{ $user->hadir }}" data-camp_jogja="{{ $user->camp_jogja }}" data-camp_luar_kota="{{ $user->camp_luar_kota }}" data-perjalanan_jawa="{{ $user->perjalanan_jawa }}" data-perjalanan_luar_jawa="{{ $user->perjalanan_luar_jawa }}" data-remote="{{ $user->remote }}" data-izin="{{ $user->izin }}" data-jam_lembur="{{ $user->jam_lembur }}">{{ $user->full_name }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -472,7 +472,8 @@ Tambah Gaji Karyawan | MIS
               <div class="col-md-5 mb-3 mb-md-0">
                 <div class="form-group mb-0">
                   <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur" value="{{ old('jumlah_lembur') }}" placeholder="Masukkan Total Jam" class="form-control-modern input-glossy">
+                  <input type="text" id="jumlah_lembur" name="jumlah_lembur" value="{{ old('jumlah_lembur') }}" placeholder="Otomatis Dari Presensi" class="form-control-modern input-glossy" readonly>
+                  <small class="text-muted"><i class="fas fa-info-circle" style="font-size: 12px;"></i> Otomatis dari presensi berstatus <b>LEMBUR</b> bulan ini (jam pulang &minus; jam masuk).</small>
                 </div>
               </div>
 
@@ -753,6 +754,17 @@ Tambah Gaji Karyawan | MIS
               </div>
             </div>
             <!-- END LEMBUR FIELDS 10 -->
+
+            <!-- TOTAL LEMBUR -->
+            <div class="row mt-4 pt-4 border-top">
+              <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center p-3" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 12px; border: 1px solid #a5b4fc; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);">
+                  <h5 class="mb-0" style="color: #3730a3; font-weight: 800;"><i class="fas fa-money-bill-wave mr-2"></i> Total Bonus Lembur</h5>
+                  <h4 class="mb-0" style="color: #312e81; font-weight: 900;" id="grandTotalLembur">Rp 0</h4>
+                </div>
+              </div>
+            </div>
+            <!-- END TOTAL LEMBUR -->
 
           </div>
         </div>
@@ -1210,6 +1222,75 @@ Tambah Gaji Karyawan | MIS
 </script>
 <!--================== END ADD & REMOVE LEMBUR ==================-->
 
+<!--================== CALCULATE GRAND TOTAL LEMBUR ==================-->
+<script>
+  // Fungsi untuk memformat angka menjadi format Rupiah (contoh: 1000000 -> 1.000.000)
+  function formatRupiahHitungLembur(angka) {
+    // Bulatkan dulu. Jam lembur bisa desimal (mis. 1,1 jam) sehingga hasil kali
+    // menghasilkan pecahan floating point (25000 * 1.1 = 27500.000000000004).
+    // Tanpa pembulatan, titik desimal ikut terhapus regex di bawah dan angkanya meledak.
+    angka = Math.round(angka || 0);
+
+    var number_string = angka.toString().replace(/[^,\d]/g, ''),
+      split = number_string.split(','),
+      sisa = split[0].length % 3,
+      rupiah = split[0].substr(0, sisa),
+      ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+      let separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+    return rupiah;
+  }
+
+  // Fungsi utama kalkulasi (global, dipanggil juga saat karyawan dipilih)
+  function calculateGrandTotalLembur() {
+    let totalLembur = 0;
+
+    // Array daftar field lembur (kosong untuk default, lalu 1 sampai 10)
+    let fieldSuffixes = ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+
+    fieldSuffixes.forEach(function(suffix) {
+      // Ambil elemen input
+      let lemburInput = $('input[name="lembur' + suffix + '"]');
+      let jamInput = $('input[name="jumlah_lembur' + suffix + '"]');
+
+      // Bersihkan format currency (hilangkan titik dan huruf) agar bisa dihitung secara matematis
+      let lemburValStr = lemburInput.val() ? lemburInput.val().replace(/[^0-9]/g, '') : '0';
+      let lemburRate = parseInt(lemburValStr) || 0;
+
+      // Ambil nilai jam (ubah koma jadi titik agar terbaca sebagai desimal)
+      let jamValStr = jamInput.val() ? jamInput.val().replace(',', '.') : '0';
+      let jamHours = parseFloat(jamValStr) || 0;
+
+      // Kalikan (Tarif per Jam * Jam) dan tambahkan ke total
+      totalLembur += (lemburRate * jamHours);
+    });
+
+    // Tampilkan hasil di kotak total
+    $('#grandTotalLembur').text('Rp ' + formatRupiahHitungLembur(totalLembur));
+  }
+
+  $(document).ready(function() {
+
+    // Panggil fungsi saat user mengetik sesuatu (keyup) atau nilai input berubah (change)
+    $(document).on('input change keyup', 'input[name^="lembur"], input[name^="jumlah_lembur"]', function() {
+      calculateGrandTotalLembur();
+    });
+
+    // Panggil fungsi saat tombol hapus diklik (delay 100ms agar input sempat di-clear oleh fungsi sebelumnya)
+    $(document).on('click', '[id^="removeAddedLembur"]', function() {
+      setTimeout(calculateGrandTotalLembur, 100);
+    });
+
+    // Panggil fungsi sekali saat halaman pertama kali dimuat
+    calculateGrandTotalLembur();
+
+  });
+</script>
+<!--================== END CALCULATE GRAND TOTAL LEMBUR ==================-->
+
 <!--================== MENAMPILKAN DATA KARYAWAN ==================-->
 <script>
   $(document).ready(function() {
@@ -1235,7 +1316,8 @@ Tambah Gaji Karyawan | MIS
           perjalanan_jawa: selectedKaryawanOption.data('perjalanan_jawa'),
           perjalanan_luar_jawa: selectedKaryawanOption.data('perjalanan_luar_jawa'),
           remote: selectedKaryawanOption.data('remote'),
-          izin: selectedKaryawanOption.data('izin')
+          izin: selectedKaryawanOption.data('izin'),
+          jam_lembur: selectedKaryawanOption.data('jam_lembur')
         };
 
         // Update Field Input Biasa
@@ -1250,18 +1332,25 @@ Tambah Gaji Karyawan | MIS
         $('#remote').val(data.remote);
         $('#izin').val(data.izin);
 
+        // TOTAL JAM LEMBUR OTOMATIS DARI PRESENSI
+        var jamLembur = parseFloat(data.jam_lembur) || 0;
+        $('#jumlah_lembur').val(jamLembur > 0 ? jamLembur : '');
+
         // Update khusus Select2 (BANK)
         $('#bank').val(data.bank).trigger('change.select2');
 
       } else {
         // Kosongkan semua field jika tidak ada yang dipilih
-        $('#norek, #email, #alpha, #hadir, #camp_jogja, #camp_luar_kota, #perjalanan_dalam_jawa, #perjalanan_luar_jawa, #remote, #izin').val('');
+        $('#norek, #email, #alpha, #hadir, #camp_jogja, #camp_luar_kota, #perjalanan_dalam_jawa, #perjalanan_luar_jawa, #remote, #izin, #jumlah_lembur').val('');
         $('#bank').val('').trigger('change.select2');
       }
 
       // Panggil fungsi hitung otomatis (jika ada)
       if (typeof calculateGrandTotalPresensi === 'function') {
         calculateGrandTotalPresensi();
+      }
+      if (typeof calculateGrandTotalLembur === 'function') {
+        calculateGrandTotalLembur();
       }
     }
 

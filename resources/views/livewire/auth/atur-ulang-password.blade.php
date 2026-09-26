@@ -37,6 +37,21 @@
             </div>
         @enderror
 
+        @if ($errors->any())
+            <div class="kabar kabar-galat ringkasan-galat" role="alert" aria-live="assertive" tabindex="-1"
+                x-data x-init="$nextTick(() => $el.focus())">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+                <span>
+                    Ada {{ $errors->count() }} hal yang perlu diperbaiki:
+                    <ul>
+                        @foreach ($errors->all() as $pesan)
+                            <li>{{ $pesan }}</li>
+                        @endforeach
+                    </ul>
+                </span>
+            </div>
+        @endif
+
         <form wire:submit="simpan" novalidate>
             <div class="medan">
                 <label for="email">Alamat Email</label>
@@ -55,7 +70,10 @@
                         {{ $message }}
                     </p>
                 @else
-                    <p class="petunjuk">Diambil dari tautan yang Anda klik.</p>
+                    <p class="petunjuk">
+                        Diambil dari tautan yang Anda klik. Tautan ini berlaku
+                        {{ config('auth.passwords.users.expire', 60) }} menit sejak diminta dan hanya sekali pakai.
+                    </p>
                 @enderror
             </div>
 

@@ -74,6 +74,18 @@
             @enderror
         </div>
 
+        @if ($detikTunggu > 0)
+            <div class="kabar kabar-galat" role="alert"
+                x-data="{ sisa: @js($detikTunggu) }"
+                x-init="const t = setInterval(() => { if (--sisa <= 0) clearInterval(t) }, 1000)">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                <span x-show="sisa > 0">
+                    Akun dikunci sementara. Coba lagi dalam <span class="hitung-mundur" x-text="sisa"></span> detik.
+                </span>
+                <span x-show="sisa <= 0" x-cloak>Silakan coba masuk kembali.</span>
+            </div>
+        @endif
+
         <div class="baris-sela">
             <label class="centang">
                 <input type="checkbox" wire:model="ingatSaya">
@@ -98,5 +110,10 @@
 
     <p class="kaki-kartu">
         Belum punya akun? <a href="{{ route('register') }}" class="tautan">Buat akun baru</a>
+        <br>
+        <span style="display:inline-block;margin-top:8px">
+            Belum menerima email verifikasi?
+            <a href="{{ route('verification.resend') }}" class="tautan">Kirim ulang</a>
+        </span>
     </p>
 </div>

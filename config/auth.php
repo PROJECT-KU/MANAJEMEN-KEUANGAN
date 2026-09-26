@@ -112,6 +112,16 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sejak kapan verifikasi email diwajibkan
+    |--------------------------------------------------------------------------
+    | Akun yang dibuat sebelum tanggal ini tetap bisa masuk walau emailnya
+    | belum terverifikasi, supaya pengguna lama tidak terkunci serentak.
+    */
+
+    'verifikasi_wajib_sejak' => env('VERIFIKASI_WAJIB_SEJAK', '2026-09-26'),
+
     'password_timeout' => 10800,
 
 ];

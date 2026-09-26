@@ -592,6 +592,16 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 </li> -->
                                 @endif
 
+                                <!--================== KEAMANAN ==================-->
+                                @if (in_array(Auth::user()->level, ['manager', 'ceo', 'admin']))
+                                <li class="{{ setActive('account/aktivitas-masuk') }}">
+                                    <a class="nav-link" href="{{ route('account.aktivitas-masuk.index') }}">
+                                        <i class="fas fa-user-shield"></i> <span>Aktivitas Masuk</span>
+                                    </a>
+                                </li>
+                                @endif
+                                <!--================== END ==================-->
+
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->
                                 @if (Auth::user()->level === 'admin')
                                 <li class="{{ setActive('account/maintenance') . setActive('account/pengguna/search') }}">

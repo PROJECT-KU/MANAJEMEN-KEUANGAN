@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\VerifikasiEmailController;
 use App\Livewire\Auth\AturUlangPassword;
 use App\Livewire\Auth\Daftar;
+use App\Livewire\Auth\KirimUlangVerifikasi;
 use App\Livewire\Auth\LupaPassword;
 use App\Livewire\Auth\Masuk;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,10 @@ Route::redirect('/K4rY4w4N', '/login')->name('login.karyawan');
 Route::get('/verifikasi-email/{id}/{hash}', VerifikasiEmailController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+// Kirim ulang tautan verifikasi. Sengaja di luar grup 'guest' supaya pengguna
+// yang sudah masuk tapi belum terverifikasi juga bisa memakainya.
+Route::get('/kirim-ulang-verifikasi', KirimUlangVerifikasi::class)->name('verification.resend');
 
 // Halaman yang ditunjuk kotak centang pada formulir pendaftaran.
 Route::view('/ketentuan-layanan', 'halaman.ketentuan')->name('ketentuan');

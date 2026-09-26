@@ -73,7 +73,7 @@ Route::post('/Clinik-Scopus/Pemesanan/upload-bukti', 'Publict\PublicClinikScopus
  * account
  */
 Route::prefix('account')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'terverifikasi'])
     ->group(
         function () {
 
@@ -92,6 +92,9 @@ Route::prefix('account')
 
             //dashboard account
             Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
+
+            // Jejak percobaan masuk (manager, ceo, admin)
+            Route::get('/aktivitas-masuk', 'account\AktivitasMasukController@index')->name('account.aktivitas-masuk.index');
 
             // pengguna
             Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');
@@ -116,8 +119,6 @@ Route::prefix('account')
             Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
             Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
-            Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
-            Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
             Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
             Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');

@@ -3,7 +3,8 @@
     <p class="teks-bantu">Isi data di bawah ini. Tanda <span class="wajib">*</span> berarti wajib diisi.</p>
 
     @if ($errors->any())
-        <div class="kabar kabar-galat ringkasan-galat" role="alert" aria-live="assertive">
+        <div class="kabar kabar-galat ringkasan-galat" role="alert" aria-live="assertive" tabindex="-1"
+            x-data x-init="$nextTick(() => $el.focus())">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
             <span>
                 Ada {{ $errors->count() }} isian yang perlu diperbaiki:

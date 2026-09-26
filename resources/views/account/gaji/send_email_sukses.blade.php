@@ -82,11 +82,15 @@
                                     <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
                                         <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
                                             <p>Kode Transaksi </p>
+                                            <p>Total Jam Lembur </p>
+                                            <p>Bonus Lembur </p>
                                             <p>Total </p>
                                         </div>
                                         <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:180px;">
                                             <div style="text-align: right;">
                                                 <p>{{ strtoupper($gaji->id_transaksi) }}</p>
+                                                <p>{{ rtrim(rtrim(number_format($jamLembur, 2, ',', '.'), '0'), ',') }} Jam</p>
+                                                <p>Rp. {{ number_format($gaji->total_lembur, 0, ',', ',') }}</p>
                                                 <p>Rp. {{ number_format($gaji->total, 0, ',', ',') }}</p>
                                             </div>
                                         </div>

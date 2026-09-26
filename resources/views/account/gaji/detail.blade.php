@@ -461,7 +461,8 @@ Detail Gaji Karyawan | MIS
               <div class="col-md-6 mb-3 mb-md-0">
                 <div class="form-group mb-0">
                   <label>Total Jam Lembur</label>
-                  <input type="text" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Masukkan Total Jam" class="form-control-modern" readonly>
+                  <input type="text" id="jumlah_lembur" name="jumlah_lembur" value="{{ $gaji->jumlah_lembur }}" placeholder="Otomatis Dari Presensi" class="form-control-modern" readonly>
+                  <small class="text-muted"><i class="fas fa-info-circle" style="font-size: 12px;"></i> Otomatis dari presensi berstatus <b>LEMBUR</b> periode {{ $periodeLembur }} (jam pulang &minus; jam masuk): <b>{{ $jamLemburPresensi }} Jam</b>.</small>
                 </div>
               </div>
             </div>
@@ -1375,6 +1376,11 @@ Detail Gaji Karyawan | MIS
 
     // Fungsi untuk memformat angka menjadi format Rupiah (contoh: 1000000 -> 1.000.000)
     function formatRupiahHitung(angka) {
+      // Bulatkan dulu. Jam lembur bisa desimal (mis. 1,1 jam) sehingga hasil kali
+      // menghasilkan pecahan floating point (25000 * 1.1 = 27500.000000000004).
+      // Tanpa pembulatan, titik desimal ikut terhapus regex di bawah dan angkanya meledak.
+      angka = Math.round(angka || 0);
+
       var number_string = angka.toString().replace(/[^,\d]/g, ''),
         split = number_string.split(','),
         sisa = split[0].length % 3,

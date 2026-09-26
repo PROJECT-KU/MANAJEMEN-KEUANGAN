@@ -3,8 +3,12 @@
 namespace App\Livewire\Auth;
 
 use App\AktivitasMasuk;
+use App\Mail\PeringatanKeamananMail;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -26,6 +30,9 @@ class Masuk extends Component
     public string $kataSandi = '';
 
     public bool $ingatSaya = false;
+
+    /** Sisa detik penguncian, dipakai untuk hitung mundur di layar. */
+    public int $detikTunggu = 0;
 
     /** Berapa kali percobaan gagal sebelum dikunci sementara. */
     private const BATAS_PERCOBAAN = 5;
@@ -57,10 +64,12 @@ class Masuk extends Component
 
         if (RateLimiter::tooManyAttempts($kunci, self::BATAS_PERCOBAAN)) {
             AktivitasMasuk::catat(null, $this->identitas, false, 'dikunci sementara');
+            $this->beriTahuPemilikAkun();
+
+            $this->detikTunggu = RateLimiter::availableIn($kunci);
 
             throw ValidationException::withMessages([
-                'identitas' => 'Terlalu banyak percobaan. Coba lagi dalam '
-                    . RateLimiter::availableIn($kunci) . ' detik.',
+                'identitas' => 'Terlalu banyak percobaan. Coba lagi dalam ' . $this->detikTunggu . ' detik.',
             ]);
         }
 
@@ -107,5 +116,35 @@ class Masuk extends Component
     public function render()
     {
         return view('livewire.auth.masuk');
+    }
+
+    /**
+     * Beri tahu pemilik akun saat akunnya dikunci karena percobaan beruntun.
+     * Dikirim sekali per periode kunci supaya tidak jadi banjir surat.
+     */
+    private function beriTahuPemilikAkun(): void
+    {
+        $kolom = filter_var($this->identitas, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $pengguna = User::where($kolom, $this->identitas)->first();
+
+        if (! $pengguna) {
+            return;
+        }
+
+        $penanda = 'peringatan-masuk|' . $pengguna->getKey() . '|' . request()->ip();
+
+        if (Cache::get($penanda)) {
+            return;
+        }
+
+        Cache::put($penanda, true, now()->addMinutes(30));
+
+        try {
+            Mail::to($pengguna->email)->send(
+                new PeringatanKeamananMail($pengguna, (string) request()->ip(), self::BATAS_PERCOBAAN)
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim peringatan keamanan: ' . $e->getMessage());
+        }
     }
 }

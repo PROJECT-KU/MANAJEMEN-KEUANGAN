@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Log;
+use App\Mail\VerifikasiEmailMail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rules\Password as AturanKataSandi;
 
 class ProfilController extends Controller
 {
@@ -187,9 +190,12 @@ class ProfilController extends Controller
     }
 
     // Update email only if provided and different from the current email
+    $emailBerubah = false;
+
     if ($request->has('email') && $request->input('email') !== $user->email) {
       $user->email = $request->input('email');
       $user->email_verified_at = null; // Reset email verification if email changes
+      $emailBerubah = true;
     }
 
     // Update jobdesk and telp if present
@@ -203,6 +209,16 @@ class ProfilController extends Controller
 
     // Save user data
     $user->save();
+
+    if ($emailBerubah) {
+      // Status verifikasi sudah direset di atas; kirimkan tautan baru supaya
+      // pengguna tidak tertinggal tanpa cara memverifikasi alamat barunya.
+      $terkirim = $this->kirimTautanVerifikasi($user);
+
+      return redirect()->back()->with('statusdataprofil', $terkirim
+        ? 'Data profil berhasil diperbarui. Tautan verifikasi sudah dikirim ke alamat email baru Anda.'
+        : 'Data profil berhasil diperbarui, tetapi tautan verifikasi gagal dikirim. Silakan kirim ulang dari halaman verifikasi.');
+    }
 
     // Return success message
     return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
@@ -278,7 +294,9 @@ class ProfilController extends Controller
     // Validate input
     $request->validate([
       'old_password' => 'required',
-      'password' => 'required|string|min:8|confirmed',
+      // Aturan yang sama dengan pendaftaran & atur ulang: minimal 8, ada huruf
+      // dan angka, serta bukan kata sandi yang pernah bocor.
+      'password' => ['required', 'string', 'confirmed', AturanKataSandi::defaults()],
     ]);
 
     // Check if old password matches
@@ -300,4 +318,23 @@ class ProfilController extends Controller
   }
   // <!--================== END ==================-->
 
+
+  /** Kirim tautan verifikasi ke alamat email pengguna saat ini. */
+  private function kirimTautanVerifikasi($user): bool
+  {
+    $tautan = URL::temporarySignedRoute('verification.verify', now()->addHours(48), [
+      'id' => $user->getKey(),
+      'hash' => sha1($user->getEmailForVerification()),
+    ]);
+
+    try {
+      Mail::to($user->email)->send(new VerifikasiEmailMail($user, $tautan, 48));
+
+      return true;
+    } catch (\Throwable $e) {
+      Log::error('Gagal mengirim tautan verifikasi setelah ganti email: ' . $e->getMessage());
+
+      return false;
+    }
+  }
 }
