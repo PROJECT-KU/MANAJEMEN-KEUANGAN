@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use DB;
-use App\Models\Todolist;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Laravel 8+ memakai Tailwind untuk pagination bawaan; aplikasi ini memakai Bootstrap 4.
+        Paginator::useBootstrapFour();
+
         View::composer('*', function ($view) {
             $user = Auth::user();
             $countAjukan = 0; // Default to 0

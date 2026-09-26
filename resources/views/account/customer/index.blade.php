@@ -456,7 +456,7 @@ Data Customer | MIS
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: "{{ route('account.customer.destroy', '') }}/" + id,
+          url: "{{ url('account/customer/data') }}/" + id,
           type: 'POST',
           data: {
             _token: token,

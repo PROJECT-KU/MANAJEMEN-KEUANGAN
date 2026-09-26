@@ -106,7 +106,7 @@ class ProfilController extends Controller
     $user = Auth::user();
 
     // Check if a code was already sent within the last 2 minutes
-    if ($user->code_verified_mail_sent_at && now()->diffInMinutes($user->code_verified_mail_sent_at) <= 1) {
+    if ($user->code_verified_mail_sent_at && (int) now()->diffInMinutes($user->code_verified_mail_sent_at, true) <= 1) {
       return response()->json(['statuswaitingsend' => 'error', 'message' => 'Kode verifikasi sudah dikirim. Harap tunggu 60 detik sebelum mencoba lagi.'], 200);
     }
 
@@ -136,7 +136,7 @@ class ProfilController extends Controller
 
     // Check if the code is correct and was sent within the last 2 minutes
     if ($user->code_verified_mail == $verificationCode) {
-      if (now()->diffInMinutes($user->code_verified_mail_sent_at) <= 2) {
+      if ((int) now()->diffInMinutes($user->code_verified_mail_sent_at, true) <= 2) {
         // Mark email as verified
         $user->email_verified_at = now();
         $user->status = 'active';

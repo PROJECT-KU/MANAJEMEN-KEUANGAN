@@ -149,12 +149,10 @@ Route::prefix('account')
             //tambah barang
             Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
             Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
-            Route::delete('account/tambah_barang/{id}', 'TambahBarangController@destroy')->name('account.tambah_barang.destroy');
 
             //categories debit
             Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
             Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account']);
-            Route::delete('account/categories_debit/{id}', 'CategoriesDebitController@destroy')->name('account.categories_debit.destroy');
 
             //debit
             Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
@@ -163,7 +161,6 @@ Route::prefix('account')
             //categories credit
             Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
             Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
-            Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
 
             //credit
             Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
