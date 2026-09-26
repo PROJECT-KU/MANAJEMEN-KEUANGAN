@@ -2514,7 +2514,7 @@ Update Perjalanan Dinas Ajukan | MIS
           </div>
           <!--================== END CARD ==================-->
 
-          @if($DatasAjukan->tanggal36 == null)
+          @if($DatasDitolak->tanggal36 == null)
           <div class="button-container">
             <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
               <i class="fa fa-undo mr-1"></i> KEMBALI
@@ -2858,7 +2858,7 @@ Update Perjalanan Dinas Ajukan | MIS
           </div>
           <!--================== END CARD ==================-->
 
-          @if($DatasAjukan->tanggal36 !== null)
+          @if($DatasDitolak->tanggal36 !== null)
           <div class="button-container">
             <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
               <i class="fa fa-undo mr-1"></i> KEMBALI

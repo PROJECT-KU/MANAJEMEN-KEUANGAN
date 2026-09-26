@@ -37,41 +37,15 @@ class DebitController extends Controller
         return $id;
     }
 
-    public function index()
+    /**
+     * Ringkasan gaji untuk panel di halaman ini.
+     * Dipakai index() dan search() supaya search tidak lagi kehilangan $gaji
+     * (dulu view-nya galat "Undefined variable $gaji").
+     *
+     * @return array{gaji: mixed, totalGaji: mixed}
+     */
+    private function ringkasanGaji($user)
     {
-        $user = Auth::user();
-
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
-            $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
-                ->leftJoin('users', 'debit.user_id', '=', 'users.id')
-                ->where(function ($query) use ($user) {
-                    $query->where('users.company', $user->company)
-                        ->orWhere('debit.user_id', $user->id);
-                })
-                ->where(function ($query) {
-                    $query->where('users.level', 'manager')
-                        ->orWhere('users.level', 'staff');
-                })
-                ->orderBy('debit.created_at', 'DESC')
-                ->paginate(10);
-        } else {
-            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
-            $debit = DB::table('debit')
-                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
-                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
-                ->where('debit.user_id', $user->id)
-                ->orderBy('debit.created_at', 'DESC')
-                ->paginate(10);
-        }
-
-        // Mengubah format tanggal menjadi "dd-mm-yyyy h:i"
-        foreach ($debit as $item) {
-            $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
-        }
-
         $totalGaji = 0;
         if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
 
@@ -114,6 +88,46 @@ class DebitController extends Controller
                 ->orderBy('gaji.created_at', 'DESC')
                 ->paginate(10);
         }
+
+        return ['gaji' => $gaji, 'totalGaji' => $totalGaji];
+    }
+
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+            $debit = DB::table('debit')
+                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+                ->leftJoin('users', 'debit.user_id', '=', 'users.id')
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('debit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
+            $debit = DB::table('debit')
+                ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.gambar', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
+                ->leftJoin('categories_debit', 'debit.category_id', '=', 'categories_debit.id')
+                ->where('debit.user_id', $user->id)
+                ->orderBy('debit.created_at', 'DESC')
+                ->paginate(10);
+        }
+
+        // Mengubah format tanggal menjadi "dd-mm-yyyy h:i"
+        foreach ($debit as $item) {
+            $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
+        }
+
+        ['gaji' => $gaji, 'totalGaji' => $totalGaji] = $this->ringkasanGaji($user);
 
         return view('account.debit.index', compact('debit', 'totalGaji', 'gaji'));
     }
@@ -176,7 +190,9 @@ class DebitController extends Controller
             $item->debit_date = date('d-m-Y H:i', strtotime($item->debit_date));
         }
 
-        return view('account.debit.index', compact('debit'));
+        ['gaji' => $gaji, 'totalGaji' => $totalGaji] = $this->ringkasanGaji($user);
+
+        return view('account.debit.index', compact('debit', 'totalGaji', 'gaji'));
     }
 
     public function create()

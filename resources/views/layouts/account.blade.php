@@ -518,7 +518,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif
                                 <!--================== END ==================-->
 
-                                <!-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
+                                {{-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
                                     <ul class="dropdown-menu">
@@ -527,7 +527,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-list"></i>PENYEWAAN</a></li>
                                     </ul>
                                 </li>
-                                @endif -->
+                                @endif --}}
 
                                 <!--================== LAPORAN ==================-->
                                 @if (Auth::user()->level !== 'user' && Auth::user()->level !== 'karyawan')
@@ -570,11 +570,6 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 <li class="{{ setActive('account/maintenance') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
                                         <i class="fas fa-users-cog"></i> <span>MAINTENANCE</span>
-                                    </a>
-                                </li>
-                                <li class="{{ setActive('account/sewa') . setActive('account/pengguna/search') }}">
-                                    <a class="nav-link" href="{{ route('account.sewa.index') }}">
-                                        <i class="fas fa-bell"></i> <span>NOTIF SEWA</span>
                                     </a>
                                 </li>
                                 @endif

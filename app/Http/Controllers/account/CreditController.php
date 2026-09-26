@@ -36,43 +36,15 @@ class CreditController extends Controller
         return $id;
     }
 
-    public function index()
+    /**
+     * Ringkasan gaji untuk panel di halaman ini.
+     * Dipakai index() dan search() supaya search tidak lagi kehilangan $gaji
+     * (dulu view-nya galat "Undefined variable $gaji").
+     *
+     * @return array{gaji: mixed, totalGaji: mixed}
+     */
+    private function ringkasanGaji($user)
     {
-
-        $user = Auth::user();
-
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
-            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
-            $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description',  'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
-                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where(function ($query) use ($user) {
-                    $query->where('users.company', $user->company)
-                        ->orWhere('credit.user_id', $user->id);
-                })
-                ->where(function ($query) {
-                    $query->where('users.level', 'manager')
-                        ->orWhere('users.level', 'staff');
-                })
-                ->orderBy('credit.created_at', 'DESC')
-                ->paginate(10);
-        } else {
-            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
-            $credit = DB::table('credit')
-                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
-                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
-                ->where('credit.user_id', $user->id)
-                ->orderBy('credit.created_at', 'DESC')
-                ->paginate(10);
-        }
-
-        // Mengubah format tanggal menjadi "dd-mm-yyyy h:i"
-        foreach ($credit as $item) {
-            $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
-        }
-
         $totalGaji = 0;
         if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
 
@@ -115,6 +87,48 @@ class CreditController extends Controller
                 ->orderBy('gaji.created_at', 'DESC')
                 ->paginate(10);
         }
+
+        return ['gaji' => $gaji, 'totalGaji' => $totalGaji];
+    }
+
+    public function index()
+    {
+
+        $user = Auth::user();
+
+        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+            // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description',  'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->where(function ($query) use ($user) {
+                    $query->where('users.company', $user->company)
+                        ->orWhere('credit.user_id', $user->id);
+                })
+                ->where(function ($query) {
+                    $query->where('users.level', 'manager')
+                        ->orWhere('users.level', 'staff');
+                })
+                ->orderBy('credit.created_at', 'DESC')
+                ->paginate(10);
+        } else {
+            // Jika user bukan 'manager' atau 'staff', ambil hanya data transaksi miliknya sendiri
+            $credit = DB::table('credit')
+                ->select('credit.id', 'credit.category_id', 'credit.user_id', 'credit.nominal', 'credit.credit_date', 'credit.description', 'credit.gambar', 'categories_credit.id as id_category', 'categories_credit.name')
+                ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
+                ->leftJoin('users', 'credit.user_id', '=', 'users.id')
+                ->where('credit.user_id', $user->id)
+                ->orderBy('credit.created_at', 'DESC')
+                ->paginate(10);
+        }
+
+        // Mengubah format tanggal menjadi "dd-mm-yyyy h:i"
+        foreach ($credit as $item) {
+            $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
+        }
+
+        ['gaji' => $gaji, 'totalGaji' => $totalGaji] = $this->ringkasanGaji($user);
 
         return view('account.credit.index', compact('credit', 'totalGaji', 'gaji'));
     }
@@ -176,7 +190,9 @@ class CreditController extends Controller
             $item->credit_date = date('d-m-Y H:i', strtotime($item->credit_date));
         }
 
-        return view('account.credit.index', compact('credit'));
+        ['gaji' => $gaji, 'totalGaji' => $totalGaji] = $this->ringkasanGaji($user);
+
+        return view('account.credit.index', compact('credit', 'totalGaji', 'gaji'));
     }
 
     public function create()

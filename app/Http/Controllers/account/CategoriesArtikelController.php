@@ -131,12 +131,16 @@ class CategoriesArtikelController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
+        // Hitungan artikel per kategori harus ikut diambil seperti di index(),
+        // karena view menampilkan kolom jumlah_artikel.
         $categories_artikel = DB::table('categories_artikel')
-            ->select('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
+            ->leftJoin('artikel', 'categories_artikel.id', '=', 'artikel.categories_artikel_id')
+            ->select('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori', DB::raw('COUNT(artikel.id) as jumlah_artikel'))
             ->where(function ($query) use ($search) {
                 $query->where('categories_artikel.kategori', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('categories_artikel.created_at', 'DESC')
+            ->groupBy('categories_artikel.id', 'categories_artikel.user_id', 'categories_artikel.token', 'categories_artikel.kategori')
             ->paginate(10);
         $categories_artikel->appends(['q' => $search]);
 
