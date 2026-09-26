@@ -120,7 +120,25 @@
                 tampil: false,
                 tampil2: false,
                 sandi: @entangle('kataSandi'),
+                bocor: null,
+                pewaktu: null,
+                get panjangOk() { return this.sandi.length >= 8 },
+                get hurufAngkaOk() { return /[A-Za-z]/.test(this.sandi) && /[0-9]/.test(this.sandi) },
+                periksaBocor() {
+                    clearTimeout(this.pewaktu);
+                    this.bocor = null;
+                    if (!this.panjangOk || !this.hurufAngkaOk) return;
+                    this.bocor = 'periksa';
+                    const nilai = this.sandi;
+                    this.pewaktu = setTimeout(async () => {
+                        const hasil = await window.periksaSandiBocor(nilai);
+                        if (this.sandi === nilai) this.bocor = hasil;
+                    }, 600);
+                },
                 get skor() {
+                    // Kata sandi yang pernah bocor selalu dihitung lemah, sekuat
+                    // apa pun bentuknya -- supaya tidak memberi sinyal bertentangan.
+                    if (this.bocor === 'bocor') return 1;
                     let s = 0;
                     if (this.sandi.length >= 8) s++;
                     if (this.sandi.length >= 12) s++;
@@ -158,10 +176,14 @@
                     </button>
                 </div>
 
-                <ul class="syarat-sandi" aria-hidden="true">
-                    <li>Minimal 8 karakter</li>
-                    <li>Memuat huruf dan angka</li>
-                    <li>Bukan kata sandi yang pernah bocor</li>
+                <ul class="syarat-sandi" x-effect="periksaBocor()">
+                    <li :class="sandi.length ? (panjangOk ? 'oke' : 'belum') : ''">Minimal 8 karakter</li>
+                    <li :class="sandi.length ? (hurufAngkaOk ? 'oke' : 'belum') : ''">Memuat huruf dan angka</li>
+                    <li :class="bocor === 'aman' ? 'oke' : (bocor === 'bocor' ? 'gagal' : (bocor === 'periksa' ? 'periksa' : ''))">
+                        <span x-text="bocor === 'periksa' ? 'Memeriksa riwayat kebocoran…'
+                            : (bocor === 'bocor' ? 'Kata sandi ini pernah bocor'
+                            : (bocor === 'gagal' ? 'Riwayat kebocoran belum bisa diperiksa' : 'Bukan kata sandi yang pernah bocor'))"></span>
+                    </li>
                 </ul>
 
                 <div class="bar-kekuatan" x-show="sandi.length > 0" x-cloak>
