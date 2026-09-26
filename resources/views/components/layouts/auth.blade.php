@@ -5,16 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#0891b2">
+    <meta name="theme-color" content="{{ $warnaTema ?? '#0891b2' }}">
     <title>{{ $judulHalaman ?? 'Masuk' }} | MIS Rumah Scopus</title>
 
     {{-- hanya favicon yang memakai potongan logo, sebab tab peramban butuh
          gambar persegi; di tempat lain logo selalu tampil utuh --}}
     <link rel="icon" href="{{ asset('assets/img/mis-favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/mis-favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=11">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=13">
     @livewireStyles
 </head>
 

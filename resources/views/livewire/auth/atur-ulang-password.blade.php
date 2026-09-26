@@ -8,7 +8,7 @@
             silakan minta yang baru.
         </p>
 
-        <div class="kabar kabar-galat">
+        <div class="kabar kabar-galat" role="alert">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
             <span>Token atur ulang tidak ditemukan pada alamat halaman ini.</span>
         </div>
@@ -28,7 +28,7 @@
         </p>
 
         @error('token')
-            <div class="kabar kabar-galat">
+            <div class="kabar kabar-galat" role="alert">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
                 <span>
                     {{ $message }}
@@ -42,14 +42,15 @@
                 <label for="email">Alamat Email</label>
                 <div class="kotak-isian">
                     <input type="email" id="email" wire:model="email" autocomplete="email" readonly
-                        class="@error('email') salah @enderror">
+                        class="@error('email') salah @enderror"
+                    @error('email') aria-invalid="true" aria-describedby="galat-email" @enderror>
                     <svg class="ikon-medan" viewBox="0 0 24 24">
                         <rect x="3" y="5" width="18" height="14" rx="2" />
                         <path d="M3 7l9 6 9-6" />
                     </svg>
                 </div>
                 @error('email')
-                    <p class="pesan-salah">
+                    <p class="pesan-salah" id="galat-email" role="alert">
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
                         {{ $message }}
                     </p>
@@ -79,7 +80,8 @@
                     <div class="kotak-isian">
                         <input :type="tampil ? 'text' : 'password'" type="password" id="kataSandi"
                             wire:model="kataSandi" x-model="sandi" autocomplete="new-password"
-                            placeholder="Minimal 8 karakter" class="@error('kataSandi') salah @enderror" autofocus>
+                            placeholder="Minimal 8 karakter" class="@error('kataSandi') salah @enderror"
+                    @error('kataSandi') aria-invalid="true" aria-describedby="galat-kataSandi" @enderror autofocus>
                         <svg class="ikon-medan" viewBox="0 0 24 24">
                             <rect x="3" y="11" width="18" height="10" rx="2" />
                             <path d="M7 11V8a5 5 0 0110 0v3" />
@@ -105,7 +107,7 @@
                         x-text="'Kekuatan: ' + label"></p>
 
                     @error('kataSandi')
-                        <p class="pesan-salah">
+                        <p class="pesan-salah" id="galat-kataSandi" role="alert">
                             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
                             {{ $message }}
                         </p>
@@ -117,7 +119,8 @@
                     <div class="kotak-isian">
                         <input type="password" id="kataSandiKonfirmasi" wire:model="kataSandiKonfirmasi"
                             autocomplete="new-password" placeholder="Ketik ulang kata sandi"
-                            class="@error('kataSandiKonfirmasi') salah @enderror">
+                            class="@error('kataSandiKonfirmasi') salah @enderror"
+                    @error('kataSandiKonfirmasi') aria-invalid="true" aria-describedby="galat-kataSandiKonfirmasi" @enderror>
                         <svg class="ikon-medan" viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4" />
                             <rect x="3" y="11" width="18" height="10" rx="2" />
@@ -125,7 +128,7 @@
                         </svg>
                     </div>
                     @error('kataSandiKonfirmasi')
-                        <p class="pesan-salah">
+                        <p class="pesan-salah" id="galat-kataSandiKonfirmasi" role="alert">
                             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
                             {{ $message }}
                         </p>
