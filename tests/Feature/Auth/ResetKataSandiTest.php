@@ -127,14 +127,14 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiBaru123')
-            ->set('kataSandiKonfirmasi', 'SandiBaru123')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
             ->call('simpan')
             ->assertRedirect(route('login'));
 
         $pengguna->refresh();
 
-        $this->assertTrue(Hash::check('SandiBaru123', $pengguna->password));
+        $this->assertTrue(Hash::check('SandiUji2026', $pengguna->password));
         // Token sekali pakai: barisnya harus hilang setelah dipakai.
         $this->assertNull(DB::table('password_resets')->where('email', $pengguna->email)->first());
         Mail::assertSent(PasswordResetSuccessMail::class);
@@ -148,19 +148,19 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiBaru123')
-            ->set('kataSandiKonfirmasi', 'SandiBaru123')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
             ->call('simpan');
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiKetiga123')
-            ->set('kataSandiKonfirmasi', 'SandiKetiga123')
+            ->set('kataSandi', 'SandiKetiga2026')
+            ->set('kataSandiKonfirmasi', 'SandiKetiga2026')
             ->call('simpan')
             ->assertHasErrors('token');
 
         $pengguna->refresh();
-        $this->assertTrue(Hash::check('SandiBaru123', $pengguna->password));
+        $this->assertTrue(Hash::check('SandiUji2026', $pengguna->password));
     }
 
     public function test_token_palsu_ditolak(): void
@@ -171,8 +171,8 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => 'token-karangan-sendiri'])
             ->set('email', $korban->email)
-            ->set('kataSandi', 'DibajakOrang1')
-            ->set('kataSandiKonfirmasi', 'DibajakOrang1')
+            ->set('kataSandi', 'DibajakOrang2026')
+            ->set('kataSandiKonfirmasi', 'DibajakOrang2026')
             ->call('simpan')
             ->assertHasErrors('token');
 
@@ -192,8 +192,8 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiBaru123')
-            ->set('kataSandiKonfirmasi', 'SandiBaru123')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
             ->call('simpan')
             ->assertHasErrors('token');
 
@@ -211,8 +211,8 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiBaru123')
-            ->set('kataSandiKonfirmasi', 'BedaSekali123')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'BedaSekali2026')
             ->call('simpan')
             ->assertHasErrors(['kataSandi' => 'same']);
     }
@@ -280,13 +280,13 @@ class ResetKataSandiTest extends TestCase
 
         Livewire::test(AturUlangPassword::class, ['token' => $token])
             ->set('email', $pengguna->email)
-            ->set('kataSandi', 'SandiBaru123')
-            ->set('kataSandiKonfirmasi', 'SandiBaru123')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
             ->call('simpan')
             ->assertHasNoErrors()
             ->assertRedirect(route('login'));
 
         $pengguna->refresh();
-        $this->assertTrue(Hash::check('SandiBaru123', $pengguna->password));
+        $this->assertTrue(Hash::check('SandiUji2026', $pengguna->password));
     }
 }

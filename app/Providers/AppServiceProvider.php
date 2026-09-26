@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Validation\Rules\Password as AturanKataSandi;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
     {
         // Laravel 8+ memakai Tailwind untuk pagination bawaan; aplikasi ini memakai Bootstrap 4.
         Paginator::useBootstrapFour();
+
+        // Aturan kata sandi tunggal untuk pendaftaran & atur ulang: minimal 8
+        // karakter, mengandung huruf dan angka, serta tidak pernah muncul pada
+        // kebocoran data publik. Pemeriksaan kebocoran gagal-aman: kalau layanan
+        // pemeriksanya tidak terjangkau, kata sandi tetap diterima.
+        AturanKataSandi::defaults(fn () => AturanKataSandi::min(8)->letters()->numbers()->uncompromised());
 
         View::composer('*', function ($view) {
             $user = Auth::user();

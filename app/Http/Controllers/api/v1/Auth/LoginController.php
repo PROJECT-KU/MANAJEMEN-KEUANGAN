@@ -36,10 +36,41 @@ class LoginController extends Controller
             ], 401);
         } else {
             if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+                /** @var \App\User $user */
                 $user = Auth::user();
+
+                if ($user->status === 'nonactive') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Akun ini dinonaktifkan.',
+                    ], 403);
+                }
+
+                try {
+                    // Sebelumnya endpoint ini hanya mengembalikan objek user dan
+                    // tidak pernah menerbitkan token, sehingga seluruh endpoint
+                    // auth:api di bawahnya mustahil dipakai.
+                    $token = $user->createToken('api')->accessToken;
+                } catch (\Throwable $e) {
+                    report($e);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Token tidak bisa diterbitkan. Passport belum disiapkan di server (jalankan passport:install).',
+                    ], 500);
+                }
+
                 return response()->json([
                     'success' => true,
-                    'apiToken' => $user
+                    'token_type' => 'Bearer',
+                    'access_token' => $token,
+                    'user' => [
+                        'id' => $user->id,
+                        'full_name' => $user->full_name,
+                        'username' => $user->username,
+                        'email' => $user->email,
+                        'level' => $user->level,
+                    ],
                 ], 200);
             } else {
                 return response()->json([

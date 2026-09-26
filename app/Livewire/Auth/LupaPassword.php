@@ -13,6 +13,7 @@ use Livewire\Component;
 #[Layout('components.layouts.auth', [
     'judulHalaman' => 'Lupa Kata Sandi',
     'kelasHalaman' => 'halaman-lupa',
+    'warnaTema' => '#ea580c',
     'merekJudul' => 'Tidak bisa masuk? Tenang.',
     'merekTeks' => 'Kami kirimkan tautan aman ke email Anda untuk membuat kata sandi baru.',
 ])]

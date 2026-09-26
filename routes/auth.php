@@ -13,6 +13,7 @@
 */
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\VerifikasiEmailController;
 use App\Livewire\Auth\AturUlangPassword;
 use App\Livewire\Auth\Daftar;
 use App\Livewire\Auth\LupaPassword;
@@ -21,7 +22,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', Masuk::class)->name('login');
-    Route::get('/K4rY4w4N', Masuk::class)->name('login.karyawan');
     Route::get('/register', Daftar::class)->name('register');
 
     // Alur atur ulang kata sandi wajib bisa diakses tamu. Sebelumnya rutenya
@@ -30,5 +30,17 @@ Route::middleware('guest')->group(function () {
     Route::get('/lupa-password', LupaPassword::class)->name('formemail.reset');
     Route::get('/atur-ulang-password/{token?}', AturUlangPassword::class)->name('password.atur-ulang');
 });
+
+// Alamat lama pintu masuk karyawan: dialihkan supaya tautan & pintasan lama
+// tetap bekerja, tanpa memelihara dua halaman yang sama.
+Route::redirect('/K4rY4w4N', '/login')->name('login.karyawan');
+
+// Tautan verifikasi dari email pendaftaran (URL bertanda tangan + dibatasi).
+Route::get('/verifikasi-email/{id}/{hash}', VerifikasiEmailController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+// Halaman yang ditunjuk kotak centang pada formulir pendaftaran.
+Route::view('/ketentuan-layanan', 'halaman.ketentuan')->name('ketentuan');
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

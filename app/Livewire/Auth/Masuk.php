@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\AktivitasMasuk;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -13,6 +14,7 @@ use Livewire\Component;
 #[Layout('components.layouts.auth', [
     'judulHalaman' => 'Masuk Akun',
     'kelasHalaman' => 'halaman-masuk',
+    'warnaTema' => '#0891b2',
     'merekJudul' => 'Selamat datang kembali.',
     'merekTeks' => 'Masuk untuk melanjutkan ke layanan Rumah Scopus Foundation.',
 ])]
@@ -54,6 +56,8 @@ class Masuk extends Component
         $kunci = $this->kunciPembatas();
 
         if (RateLimiter::tooManyAttempts($kunci, self::BATAS_PERCOBAAN)) {
+            AktivitasMasuk::catat(null, $this->identitas, false, 'dikunci sementara');
+
             throw ValidationException::withMessages([
                 'identitas' => 'Terlalu banyak percobaan. Coba lagi dalam '
                     . RateLimiter::availableIn($kunci) . ' detik.',
@@ -66,6 +70,8 @@ class Masuk extends Component
         $pengguna = User::where($kolom, $this->identitas)->first();
 
         if ($pengguna && $pengguna->status === 'nonactive') {
+            AktivitasMasuk::catat($pengguna, $this->identitas, false, 'akun nonaktif');
+
             throw ValidationException::withMessages([
                 'identitas' => 'Akun ini dinonaktifkan. Hubungi admin untuk mengaktifkannya kembali.',
             ]);
@@ -73,6 +79,8 @@ class Masuk extends Component
 
         if (! Auth::attempt([$kolom => $this->identitas, 'password' => $this->kataSandi], $this->ingatSaya)) {
             RateLimiter::hit($kunci, self::LAMA_KUNCI);
+
+            AktivitasMasuk::catat($pengguna, $this->identitas, false, $pengguna ? 'kata sandi salah' : 'akun tidak ditemukan');
 
             $this->reset('kataSandi');
 
@@ -82,6 +90,8 @@ class Masuk extends Component
         }
 
         RateLimiter::clear($kunci);
+
+        AktivitasMasuk::catat(Auth::user(), $this->identitas, true);
 
         // Cegah session fixation setelah pergantian identitas.
         session()->regenerate();

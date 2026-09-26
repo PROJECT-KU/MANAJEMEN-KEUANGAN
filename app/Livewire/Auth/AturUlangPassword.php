@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as AturanKataSandi;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -15,6 +16,7 @@ use Livewire\Component;
 #[Layout('components.layouts.auth', [
     'judulHalaman' => 'Atur Ulang Kata Sandi',
     'kelasHalaman' => 'halaman-atur-ulang',
+    'warnaTema' => '#7c3aed',
     'merekJudul' => 'Buat kata sandi baru.',
     'merekTeks' => 'Tentukan kata sandi baru untuk akun Anda, lalu masuk seperti biasa.',
 ])]
@@ -40,7 +42,7 @@ class AturUlangPassword extends Component
         return [
             'email' => ['required', 'string', 'email:rfc', 'max:150'],
             'token' => ['required', 'string'],
-            'kataSandi' => ['required', 'string', 'min:8', 'same:kataSandiKonfirmasi'],
+            'kataSandi' => ['required', 'string', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
             'kataSandiKonfirmasi' => ['required', 'string'],
         ];
     }
@@ -53,6 +55,9 @@ class AturUlangPassword extends Component
             'token.required' => 'Tautan tidak lengkap. Silakan minta tautan baru.',
             'kataSandi.required' => 'Masukkan kata sandi baru.',
             'kataSandi.min' => 'Kata sandi minimal 8 karakter.',
+            'kataSandi.letters' => 'Kata sandi harus memuat huruf.',
+            'kataSandi.numbers' => 'Kata sandi harus memuat angka.',
+            'kataSandi.uncompromised' => 'Kata sandi ini pernah bocor di internet. Pilih yang lain.',
             'kataSandi.same' => 'Konfirmasi kata sandi tidak cocok.',
             'kataSandiKonfirmasi.required' => 'Ulangi kata sandi baru Anda.',
         ];
