@@ -1,10 +1,4 @@
 <div class="kartu">
-    <span class="lencana">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 2l-2 2m-7.6 7.6a5 5 0 11-7.1 7.1 5 5 0 017.1-7.1zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3" />
-        </svg>
-        Pemulihan Akun
-    </span>
 
     @if ($terkirim)
         <h2 class="judul-form">Cek email Anda</h2>
@@ -36,19 +30,12 @@
             </p>
         @enderror
 
-        <div class="pemisah">SUDAH SELESAI?</div>
-
         <p class="kaki-kartu">
             <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
         </p>
     @else
         <h2 class="judul-form">Lupa kata sandi?</h2>
         <p class="teks-bantu">Masukkan email akun Anda. Kami kirimkan tautan aman untuk membuat kata sandi baru.</p>
-
-        <div class="kabar kabar-info">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
-            <span>Tautan berlaku {{ $menitBerlaku }} menit dan hanya bisa dipakai satu kali.</span>
-        </div>
 
         <form wire:submit="kirimTautan" novalidate>
             <div class="medan">
@@ -66,6 +53,8 @@
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
                         {{ $message }}
                     </p>
+                @else
+                    <p class="petunjuk">Tautan berlaku {{ $menitBerlaku }} menit dan hanya bisa dipakai satu kali.</p>
                 @enderror
             </div>
 
@@ -83,10 +72,8 @@
             </button>
         </form>
 
-        <div class="pemisah">INGAT KATA SANDI ANDA?</div>
-
         <p class="kaki-kartu">
-            <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+            Ingat kata sandi Anda? <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
         </p>
     @endif
 </div>

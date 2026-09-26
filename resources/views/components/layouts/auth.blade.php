@@ -8,11 +8,11 @@
     <meta name="theme-color" content="#0891b2">
     <title>{{ $judulHalaman ?? 'Masuk' }} | MIS Rumah Scopus</title>
 
-    <link rel="icon" href="{{ asset('assets/img/mis-ikon.png') }}">
+    <link rel="icon" href="{{ asset('assets/img/newlogogeneration.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=9">
     @livewireStyles
 </head>
 
@@ -23,8 +23,6 @@
         <aside class="panel-merek">
             <span class="cahaya cahaya-1"></span>
             <span class="cahaya cahaya-2"></span>
-            <span class="cahaya cahaya-3"></span>
-            <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="" class="merek-cap">
 
             <div class="merek-atas">
                 <img src="{{ asset('assets/img/newlogogeneration.png') }}"
@@ -43,32 +41,9 @@
 
         {{-- ================================================== sisi formulir --}}
         <main class="panel-form">
-            <div class="kepala-panel">
-                <span class="tanda-merek">
-                    {{-- ikon persegi tersendiri, dipotong dari logo utama --}}
-                    <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="" class="tanda-ikon">
-                    MIS Rumah Scopus
-                </span>
-                <span class="tanda-status"><i></i> Sistem berjalan normal</span>
-            </div>
-
             <div class="isi-form">
                 {{ $slot }}
 
-                <ul class="jaminan">
-                    <li>
-                        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V8a5 5 0 0110 0v3" /></svg>
-                        Sambungan terenkripsi
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 4.4-3.4 8.3-8 9-4.6-.7-8-4.6-8-9V7l8-4z" /></svg>
-                        Data Anda terlindungi
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                        Bantuan hari kerja
-                    </li>
-                </ul>
             </div>
 
             <footer class="kaki-halaman">

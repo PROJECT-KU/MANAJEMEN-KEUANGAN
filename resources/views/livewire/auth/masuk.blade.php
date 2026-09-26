@@ -1,12 +1,4 @@
 <div class="kartu">
-    <span class="lencana">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="10" rx="2" />
-            <path d="M8 11V7a4 4 0 118 0v4" />
-        </svg>
-        Area Pengguna
-    </span>
-
     <h2 class="judul-form">Masuk ke akun Anda</h2>
     <p class="teks-bantu">Gunakan username atau alamat email yang terdaftar.</p>
 
@@ -95,10 +87,7 @@
         </button>
     </form>
 
-    <div class="pemisah">BELUM PUNYA AKUN?</div>
-
     <p class="kaki-kartu">
-        Daftar dulu untuk memakai layanan Rumah Scopus.
-        <a href="{{ route('register') }}" class="tautan">Buat akun baru</a>
+        Belum punya akun? <a href="{{ route('register') }}" class="tautan">Buat akun baru</a>
     </p>
 </div>

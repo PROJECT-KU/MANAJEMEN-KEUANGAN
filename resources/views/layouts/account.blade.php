@@ -160,10 +160,9 @@ $agent = new Agent();
 
         .merek-ikon-kecil {
             display: block;
-            width: 42px;
-            height: 42px;
+            width: 52px;
+            height: auto;
             margin: 0 auto;
-            object-fit: contain;
         }
     </style>
 </head>
@@ -274,8 +273,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS — Management Integration System" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        {{-- sidebar menyempit memakai ikon persegi tersendiri --}}
-                        <img src="{{ asset('assets/img/mis-ikon.png') }}" alt="MIS" class="merek-ikon-kecil">
+                        {{-- logo tampil utuh, hanya diperkecil --}}
+                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS" class="merek-ikon-kecil">
                     </div>
                     <ul class="sidebar-menu">
 

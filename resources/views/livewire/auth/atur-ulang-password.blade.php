@@ -1,11 +1,4 @@
 <div class="kartu">
-    <span class="lencana">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="10" rx="2" />
-            <path d="M7 11V8a5 5 0 019.9-1" />
-        </svg>
-        Kata Sandi Baru
-    </span>
 
     @if (empty($token))
         {{-- Halaman ini semestinya dibuka lewat tautan dari email. --}}
@@ -24,8 +17,6 @@
             <svg viewBox="0 0 24 24"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>
             Minta Tautan Baru
         </a>
-
-        <div class="pemisah">ATAU</div>
 
         <p class="kaki-kartu">
             <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
@@ -153,10 +144,8 @@
             </button>
         </form>
 
-        <div class="pemisah">BUKAN ANDA?</div>
-
         <p class="kaki-kartu">
-            Abaikan saja tautannya, atau <a href="{{ route('login') }}" class="tautan">kembali ke halaman masuk</a>.
+            Bukan Anda? <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
         </p>
     @endif
 </div>
