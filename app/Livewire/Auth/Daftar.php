@@ -38,8 +38,11 @@ class Daftar extends Component
 
     public bool $setuju = false;
 
-    /** Jebakan bot: manusia tidak akan mengisinya karena tersembunyi. */
-    public string $situs = '';
+    /**
+     * Jebakan bot: tersembunyi dari manusia. Namanya sengaja tidak bermakna
+     * ('situs'/'website' justru diincar pengisi otomatis peramban).
+     */
+    public string $kodePos2 = '';
 
     /** Maksimal pendaftaran per IP dalam satu jam. */
     private const BATAS_DAFTAR = 5;
@@ -57,7 +60,7 @@ class Daftar extends Component
             'kataSandi' => ['required', 'string', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
             'kataSandiKonfirmasi' => ['required', 'string'],
             'setuju' => ['accepted'],
-            'situs' => ['prohibited'],
+            'kodePos2' => ['prohibited'],
         ];
     }
 
@@ -82,6 +85,7 @@ class Daftar extends Component
             'kataSandi.same' => 'Konfirmasi kata sandi tidak cocok.',
             'kataSandiKonfirmasi.required' => 'Ulangi kata sandi Anda.',
             'setuju.accepted' => 'Centang dulu kebijakan dan ketentuan.',
+            'kodePos2.prohibited' => 'Pendaftaran tidak dapat diproses. Muat ulang halaman, lalu isi formulir tanpa bantuan pengisi otomatis.',
         ];
     }
 

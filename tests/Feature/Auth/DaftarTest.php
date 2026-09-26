@@ -172,9 +172,9 @@ class DaftarTest extends TestCase
     public function test_jebakan_bot_menolak_pendaftaran(): void
     {
         Mail::fake();
-        $isian = $this->isianSah(['situs' => 'https://spam.example']);
+        $isian = $this->isianSah(['kodePos2' => 'https://spam.example']);
 
-        Livewire::test(Daftar::class)->set($isian)->call('daftar')->assertHasErrors('situs');
+        Livewire::test(Daftar::class)->set($isian)->call('daftar')->assertHasErrors('kodePos2');
 
         $this->assertNull(User::where('username', $isian['username'])->first());
         Mail::assertNothingSent();

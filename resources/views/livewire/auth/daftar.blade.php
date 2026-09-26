@@ -20,8 +20,9 @@
     <form wire:submit="daftar" novalidate>
         {{-- jebakan bot: disembunyikan dari manusia, diabaikan pembaca layar --}}
         <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
-            <label for="situs">Situs web</label>
-            <input type="text" id="situs" wire:model="situs" tabindex="-1" autocomplete="off">
+            <label for="kodePos2">Abaikan isian ini</label>
+            <input type="text" id="kodePos2" wire:model="kodePos2" tabindex="-1" autocomplete="off"
+                data-lpignore="true" data-1p-ignore data-form-type="other">
         </div>
 
         <div class="baris-medan">
