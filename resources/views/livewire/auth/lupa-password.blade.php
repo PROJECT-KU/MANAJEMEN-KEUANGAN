@@ -49,7 +49,7 @@
         <h2 class="judul-form">Lupa kata sandi?</h2>
         <p class="teks-bantu">Masukkan email akun Anda. Kami kirimkan tautan aman untuk membuat kata sandi baru.</p>
 
-        <form wire:submit="kirimTautan" novalidate>
+        <form wire:submit="kirimTautan" novalidate x-data x-sinkron-livewire>
             <div class="medan">
                 <label for="email">Alamat Email <span class="wajib">*</span></label>
                 <div class="kotak-isian">

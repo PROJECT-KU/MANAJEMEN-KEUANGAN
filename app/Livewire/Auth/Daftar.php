@@ -94,6 +94,13 @@ class Daftar extends Component
     public function updated(string $medan): void
     {
         $this->validateOnly($medan);
+
+        // Aturan 'same' menempel pada kataSandi. Tanpa pemeriksaan ulang ini,
+        // galat "konfirmasi tidak cocok" tetap tampil walau konfirmasinya
+        // sudah dibetulkan.
+        if ($medan === 'kataSandiKonfirmasi' && $this->kataSandi !== '') {
+            $this->validateOnly('kataSandi');
+        }
     }
 
     public function daftar()

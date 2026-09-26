@@ -26,7 +26,7 @@
         </div>
     @endif
 
-    <form wire:submit="daftar" novalidate>
+    <form wire:submit="daftar" novalidate x-data x-sinkron-livewire>
         {{-- jebakan bot: disembunyikan dari manusia, diabaikan pembaca layar --}}
         <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
             <label for="kodePos2">Abaikan isian ini</label>

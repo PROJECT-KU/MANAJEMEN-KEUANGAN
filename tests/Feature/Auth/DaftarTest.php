@@ -205,4 +205,17 @@ class DaftarTest extends TestCase
 
         Mail::assertNothingSent();
     }
+
+    public function test_galat_konfirmasi_hilang_setelah_dibetulkan(): void
+    {
+        // Aturan 'same' menempel pada kataSandi, sehingga galatnya dulu
+        // bertahan di layar meski konfirmasinya sudah diperbaiki.
+        $uji = Livewire::test(Daftar::class)
+            ->set('kataSandi', 'kataSandiKuat2026')
+            ->set('kataSandiKonfirmasi', 'BedaSekali2026')
+            ->assertHasErrors('kataSandi');
+
+        $uji->set('kataSandiKonfirmasi', 'kataSandiKuat2026')
+            ->assertHasNoErrors('kataSandi');
+    }
 }

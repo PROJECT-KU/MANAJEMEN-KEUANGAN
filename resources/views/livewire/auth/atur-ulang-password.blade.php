@@ -61,7 +61,7 @@
             </div>
         @endif
 
-        <form wire:submit="simpan" novalidate>
+        <form wire:submit="simpan" novalidate x-data x-sinkron-livewire>
             <div class="medan">
                 <label for="email">Alamat Email</label>
                 <div class="kotak-isian">

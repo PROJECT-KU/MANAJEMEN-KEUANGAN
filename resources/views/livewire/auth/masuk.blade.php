@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form wire:submit="masuk" novalidate>
+    <form wire:submit="masuk" novalidate x-data x-sinkron-livewire>
         <div class="medan">
             <label for="identitas">Username atau Email <span class="wajib">*</span></label>
             <div class="kotak-isian">

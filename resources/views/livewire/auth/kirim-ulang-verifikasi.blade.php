@@ -32,7 +32,7 @@
             Masukkan email akun Anda. Kami kirimkan tautan verifikasi yang baru.
         </p>
 
-        <form wire:submit="kirimUlang" novalidate>
+        <form wire:submit="kirimUlang" novalidate x-data x-sinkron-livewire>
             <div class="medan">
                 <label for="email">Alamat Email <span class="wajib">*</span></label>
                 <div class="kotak-isian">
