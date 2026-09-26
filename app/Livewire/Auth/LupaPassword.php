@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -57,10 +58,20 @@ class LupaPassword extends Component
 
         RateLimiter::hit($kunci, self::JENDELA_KIRIM);
 
-        // Password broker bawaan Laravel: token disimpan dalam bentuk hash di
-        // tabel password_resets, kedaluwarsa mengikuti config auth.passwords,
-        // dan hanya berlaku sekali pakai.
-        Password::sendResetLink(['email' => $this->email]);
+        try {
+            // Password broker bawaan Laravel: token disimpan dalam bentuk hash di
+            // tabel password_resets, kedaluwarsa mengikuti config auth.passwords,
+            // dan hanya berlaku sekali pakai.
+            Password::sendResetLink(['email' => $this->email]);
+        } catch (\Throwable $e) {
+            // Server surat bisa saja tidak terjangkau (DNS, kredensial, kuota).
+            // Jangan sampai halamannya galat 500; cukup beri tahu pengguna.
+            Log::error('Gagal mengirim tautan atur ulang kata sandi: ' . $e->getMessage());
+
+            throw ValidationException::withMessages([
+                'email' => 'Tautan gagal dikirim karena layanan email sedang bermasalah. Silakan coba beberapa saat lagi atau hubungi admin.',
+            ]);
+        }
 
         // Hasilnya sengaja tidak dibedakan antara email terdaftar dan tidak,
         // supaya halaman ini tidak bisa dipakai menebak alamat email mana yang

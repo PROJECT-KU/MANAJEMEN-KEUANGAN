@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Mail\PasswordResetSuccessMail;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -79,9 +80,15 @@ class AturUlangPassword extends Component
 
                 event(new PasswordReset($pengguna));
 
-                Mail::to($pengguna->email)->send(
-                    new PasswordResetSuccessMail($pengguna, 'Rumah Scopus Foundation')
-                );
+                try {
+                    Mail::to($pengguna->email)->send(
+                        new PasswordResetSuccessMail($pengguna, 'Rumah Scopus Foundation')
+                    );
+                } catch (\Throwable $e) {
+                    // Kata sandi sudah terganti; surat pemberitahuan hanya
+                    // pelengkap, jadi kegagalannya cukup dicatat.
+                    Log::error('Gagal mengirim pemberitahuan kata sandi berhasil diubah: ' . $e->getMessage());
+                }
             }
         );
 

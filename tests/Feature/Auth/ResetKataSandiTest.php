@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
 
 class ResetKataSandiTest extends TestCase
@@ -251,5 +252,41 @@ class ResetKataSandiTest extends TestCase
             Password::RESET_THROTTLED,
             Password::sendResetLink(['email' => $pengguna->email])
         );
+    }
+
+    public function test_kegagalan_kirim_email_tidak_membuat_halaman_galat(): void
+    {
+        // Di jaringan yang DNS-nya memblokir host SMTP, pengiriman gagal.
+        // Halaman harus memberi pesan, bukan menampilkan galat 500.
+        $pengguna = $this->buatPengguna();
+
+        Mail::shouldReceive('to')->andThrow(new TransportException('DNS tidak terjangkau'));
+
+        Livewire::test(LupaPassword::class)
+            ->set('email', $pengguna->email)
+            ->call('kirimTautan')
+            ->assertHasErrors('email')
+            ->assertSet('terkirim', false);
+    }
+
+    public function test_kata_sandi_tetap_tersimpan_walau_surat_pemberitahuan_gagal(): void
+    {
+        Mail::fake();
+        $pengguna = $this->buatPengguna();
+        $token = $this->mintaTautan($pengguna);
+
+        // Setelah token didapat, pengiriman surat dibuat gagal.
+        Mail::shouldReceive('to')->andThrow(new TransportException('DNS tidak terjangkau'));
+
+        Livewire::test(AturUlangPassword::class, ['token' => $token])
+            ->set('email', $pengguna->email)
+            ->set('kataSandi', 'SandiBaru123')
+            ->set('kataSandiKonfirmasi', 'SandiBaru123')
+            ->call('simpan')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('login'));
+
+        $pengguna->refresh();
+        $this->assertTrue(Hash::check('SandiBaru123', $pengguna->password));
     }
 }
