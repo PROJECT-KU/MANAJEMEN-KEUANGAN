@@ -384,6 +384,13 @@ Profil | MIS
                     <i class="fas fa-shield-alt mr-2"></i> Ubah Password
                   </a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link font-weight-bold d-flex align-items-center justify-content-center"
+                    id="pills-pin-tab" data-toggle="pill" href="#pin" role="tab"
+                    style="border-radius: 14px; padding: 12px; transition: 0.3s;">
+                    <i class="fas fa-mobile-alt mr-2"></i> PIN Masuk
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -618,6 +625,12 @@ Profil | MIS
                   </form>
                 </div>
                 <!--================== END TAB RESET PASSWORD ==================-->
+
+                <!--================== TAB 3: PIN MASUK ==================-->
+                <div class="tab-pane fade" id="pin" role="tabpanel">
+                  <livewire:akun.pengaturan-pin />
+                </div>
+                <!--================== END TAB PIN MASUK ==================-->
 
               </div>
             </div>

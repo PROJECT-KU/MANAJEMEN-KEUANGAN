@@ -139,6 +139,32 @@ return [
 
     'ingat_saya_menit' => env('INGAT_SAYA_MENIT', 43200),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Masa simpan identitas pada peramban (menit)
+    |--------------------------------------------------------------------------
+    | Saat "Ingat saya" dicentang, username/email terakhir disimpan di kue
+    | (cookie) terenkripsi supaya tidak perlu diketik ulang. Kata sandi dan
+    | PIN TIDAK pernah ikut disimpan.
+    */
+
+    'ingat_identitas_menit' => env('INGAT_IDENTITAS_MENIT', 43200),
+
+    /*
+    |--------------------------------------------------------------------------
+    | PIN masuk
+    |--------------------------------------------------------------------------
+    | Jalan pintas enam angka yang harus diaktifkan sendiri dari profil.
+    | Karena ruang tebakannya kecil, PIN dimatikan otomatis setelah beberapa
+    | kali salah dan pemiliknya diberi tahu lewat email.
+    */
+
+    'pin' => [
+        'panjang' => (int) env('PIN_PANJANG', 6),
+        'batas_gagal' => (int) env('PIN_BATAS_GAGAL', 5),
+        'kunci_detik' => (int) env('PIN_KUNCI_DETIK', 900),
+    ],
+
     'password_timeout' => 10800,
 
 ];
