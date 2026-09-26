@@ -6,6 +6,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Mail\TautanResetPasswordMail;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
@@ -61,4 +63,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Kirim tautan atur ulang kata sandi memakai surat milik aplikasi ini,
+     * bukan notifikasi bawaan Laravel, supaya tampilannya seragam.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $tautan = route('password.atur-ulang', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ]);
+
+        Mail::to($this->getEmailForPasswordReset())->send(
+            new TautanResetPasswordMail($this, $tautan, (int) config('auth.passwords.users.expire', 60))
+        );
+    }
 }

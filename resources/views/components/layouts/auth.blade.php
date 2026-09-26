@@ -30,48 +30,12 @@
             </div>
 
             <div class="merek-isi">
-                <div>
-                    <h1 class="merek-judul">{{ $merekJudul ?? 'Satu pintu untuk seluruh operasional.' }}</h1>
-                    <p class="merek-teks">{{ $merekTeks ?? 'Kelola keuangan, presensi, gaji, dan layanan Rumah Scopus Foundation dari satu sistem yang rapi dan terukur.' }}</p>
-                </div>
-
-                <ul class="daftar-nilai">
-                    <li>
-                        <span class="ikon-bulat">
-                            <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7" /><path d="M14 8h6v6" /></svg>
-                        </span>
-                        <span>Arus kas, debit, dan kredit terpantau harian</span>
-                    </li>
-                    <li>
-                        <span class="ikon-bulat">
-                            <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8" /><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h9" /></svg>
-                        </span>
-                        <span>Presensi, cuti, dan slip gaji dalam satu alur</span>
-                    </li>
-                    <li>
-                        <span class="ikon-bulat">
-                            <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 4.4-3.4 8.3-8 9-4.6-.7-8-4.6-8-9V7l8-4z" /><path d="M9.5 12.5l1.8 1.8 3.4-3.6" /></svg>
-                        </span>
-                        <span>Akses dibatasi sesuai peran tiap pengguna</span>
-                    </li>
-                </ul>
+                <h1 class="merek-judul">{{ $merekJudul ?? 'Satu akun untuk semua layanan.' }}</h1>
+                <p class="merek-teks">{{ $merekTeks ?? 'Masuk atau daftar untuk mengakses layanan Rumah Scopus Foundation.' }}</p>
             </div>
 
             <div class="merek-bawah">
-                <div class="papan-angka">
-                    <div>
-                        <b>12+</b>
-                        <span>Modul</span>
-                    </div>
-                    <div>
-                        <b>7</b>
-                        <span>Peran</span>
-                    </div>
-                    <div>
-                        <b>24/7</b>
-                        <span>Akses</span>
-                    </div>
-                </div>
+                <p class="merek-kaki">Rumah Scopus Foundation</p>
             </div>
         </aside>
 
@@ -95,7 +59,7 @@
                     </li>
                     <li>
                         <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 4.4-3.4 8.3-8 9-4.6-.7-8-4.6-8-9V7l8-4z" /></svg>
-                        Data sesuai peran
+                        Data Anda terlindungi
                     </li>
                     <li>
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>

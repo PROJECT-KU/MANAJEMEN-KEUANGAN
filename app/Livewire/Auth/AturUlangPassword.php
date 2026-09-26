@@ -2,14 +2,10 @@
 
 namespace App\Livewire\Auth;
 
-use App\Mail\KodeResetPasswordMail;
 use App\Mail\PasswordResetSuccessMail;
-use App\User;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -19,34 +15,30 @@ use Livewire\Component;
     'judulHalaman' => 'Atur Ulang Kata Sandi',
     'kelasHalaman' => 'halaman-atur-ulang',
     'merekJudul' => 'Buat kata sandi baru.',
-    'merekTeks' => 'Masukkan kode 6 digit yang kami kirim ke email Anda, lalu tentukan kata sandi baru yang kuat.',
+    'merekTeks' => 'Tentukan kata sandi baru untuk akun Anda, lalu masuk seperti biasa.',
 ])]
 class AturUlangPassword extends Component
 {
     public string $email = '';
 
-    public string $kode = '';
+    public string $token = '';
 
     public string $kataSandi = '';
 
     public string $kataSandiKonfirmasi = '';
 
-    /** Maksimal percobaan kode yang salah per email+IP. */
-    private const BATAS_COBA = 5;
-
-    /** Jendela pembatasan percobaan kode (detik). */
-    private const JENDELA_COBA = 600;
-
-    public function mount(?string $email = null): void
+    public function mount(?string $token = null): void
     {
-        $this->email = $email ?? '';
+        // Token datang dari parameter rute, email dari query string tautan.
+        $this->token = $token ?? '';
+        $this->email = (string) request()->query('email', '');
     }
 
     protected function rules(): array
     {
         return [
             'email' => ['required', 'string', 'email:rfc', 'max:150'],
-            'kode' => ['required', 'digits:6'],
+            'token' => ['required', 'string'],
             'kataSandi' => ['required', 'string', 'min:8', 'same:kataSandiKonfirmasi'],
             'kataSandiKonfirmasi' => ['required', 'string'],
         ];
@@ -55,10 +47,9 @@ class AturUlangPassword extends Component
     protected function messages(): array
     {
         return [
-            'email.required' => 'Masukkan alamat email Anda.',
+            'email.required' => 'Alamat email tidak terbaca dari tautan.',
             'email.email' => 'Format alamat email tidak valid.',
-            'kode.required' => 'Masukkan kode verifikasi dari email.',
-            'kode.digits' => 'Kode verifikasi terdiri dari 6 angka.',
+            'token.required' => 'Tautan tidak lengkap. Silakan minta tautan baru.',
             'kataSandi.required' => 'Masukkan kata sandi baru.',
             'kataSandi.min' => 'Kata sandi minimal 8 karakter.',
             'kataSandi.same' => 'Konfirmasi kata sandi tidak cocok.',
@@ -70,100 +61,48 @@ class AturUlangPassword extends Component
     {
         $this->validate();
 
-        $kunci = 'reset-coba|' . Str::lower($this->email) . '|' . request()->ip();
+        // Password broker memeriksa token (tersimpan sebagai hash), masa
+        // berlakunya, lalu menghapusnya setelah dipakai.
+        $hasil = Password::reset(
+            [
+                'email' => $this->email,
+                'password' => $this->kataSandi,
+                'password_confirmation' => $this->kataSandiKonfirmasi,
+                'token' => $this->token,
+            ],
+            function ($pengguna, $kataSandiBaru) {
+                $pengguna->forceFill([
+                    'password' => bcrypt($kataSandiBaru),
+                    'remember_token' => Str::random(60),
+                    'reset_token' => null,
+                ])->save();
 
-        if (RateLimiter::tooManyAttempts($kunci, self::BATAS_COBA)) {
-            throw ValidationException::withMessages([
-                'kode' => 'Terlalu banyak percobaan. Coba lagi dalam '
-                    . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.',
-            ]);
-        }
+                event(new PasswordReset($pengguna));
 
-        $baris = DB::table('password_resets')->where('email', $this->email)->first();
-
-        if (! $baris) {
-            throw ValidationException::withMessages([
-                'kode' => 'Kode tidak ditemukan. Silakan minta kode baru.',
-            ]);
-        }
-
-        $kedaluwarsa = Carbon::parse($baris->created_at)
-            ->addMinutes((int) config('auth.passwords.users.expire', 60));
-
-        if ($kedaluwarsa->isPast()) {
-            DB::table('password_resets')->where('email', $this->email)->delete();
-
-            throw ValidationException::withMessages([
-                'kode' => 'Kode sudah kedaluwarsa. Silakan minta kode baru.',
-            ]);
-        }
-
-        if (! Hash::check($this->kode, $baris->token)) {
-            RateLimiter::hit($kunci, self::JENDELA_COBA);
-
-            throw ValidationException::withMessages([
-                'kode' => 'Kode verifikasi salah.',
-            ]);
-        }
-
-        $pengguna = User::where('email', $this->email)->first();
-
-        if (! $pengguna) {
-            throw ValidationException::withMessages([
-                'email' => 'Akun dengan email tersebut tidak ditemukan.',
-            ]);
-        }
-
-        $pengguna->password = Hash::make($this->kataSandi);
-        $pengguna->reset_token = null;
-        $pengguna->save();
-
-        // Kode sekali pakai: baris dihapus supaya tidak bisa dipakai ulang.
-        DB::table('password_resets')->where('email', $this->email)->delete();
-        RateLimiter::clear($kunci);
-
-        Mail::to($pengguna->email)->send(
-            new PasswordResetSuccessMail($pengguna, 'Rumah Scopus Foundation')
+                Mail::to($pengguna->email)->send(
+                    new PasswordResetSuccessMail($pengguna, 'Rumah Scopus Foundation')
+                );
+            }
         );
+
+        if ($hasil !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'token' => $this->pesanGagal($hasil),
+            ]);
+        }
 
         session()->flash('success', 'Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru Anda.');
 
         return redirect()->route('login');
     }
 
-    public function kirimUlang(): void
+    private function pesanGagal(string $hasil): string
     {
-        $this->validateOnly('email');
-
-        $kunci = 'kode-reset|' . Str::lower($this->email) . '|' . request()->ip();
-
-        if (RateLimiter::tooManyAttempts($kunci, 3)) {
-            throw ValidationException::withMessages([
-                'kode' => 'Terlalu banyak permintaan kode. Coba lagi dalam '
-                    . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.',
-            ]);
-        }
-
-        RateLimiter::hit($kunci, 600);
-
-        $pengguna = User::where('email', $this->email)->first();
-
-        if ($pengguna) {
-            $kode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-            DB::table('password_resets')->where('email', $pengguna->email)->delete();
-            DB::table('password_resets')->insert([
-                'email' => $pengguna->email,
-                'token' => Hash::make($kode),
-                'created_at' => Carbon::now(),
-            ]);
-
-            Mail::to($pengguna->email)->send(
-                new KodeResetPasswordMail($pengguna, $kode, (int) config('auth.passwords.users.expire', 60))
-            );
-        }
-
-        session()->flash('info', 'Kode baru sudah dikirim jika email tersebut terdaftar.');
+        return match ($hasil) {
+            Password::INVALID_TOKEN => 'Tautan sudah kedaluwarsa atau pernah dipakai. Silakan minta tautan baru.',
+            Password::INVALID_USER => 'Akun dengan alamat email tersebut tidak ditemukan.',
+            default => 'Kata sandi gagal diperbarui. Silakan minta tautan baru.',
+        };
     }
 
     public function render()

@@ -14,7 +14,7 @@ use Livewire\Component;
     'judulHalaman' => 'Masuk Akun',
     'kelasHalaman' => 'halaman-masuk',
     'merekJudul' => 'Selamat datang kembali.',
-    'merekTeks' => 'Masuk untuk melanjutkan pengelolaan keuangan, presensi, dan layanan Rumah Scopus Foundation.',
+    'merekTeks' => 'Masuk untuk melanjutkan ke layanan Rumah Scopus Foundation.',
 ])]
 class Masuk extends Component
 {

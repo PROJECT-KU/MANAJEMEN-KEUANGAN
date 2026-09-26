@@ -6,54 +6,87 @@
         Pemulihan Akun
     </span>
 
-    <h2 class="judul-form">Lupa kata sandi?</h2>
-    <p class="teks-bantu">Masukkan email akun Anda. Kami kirim kode verifikasi 6 digit untuk membuat kata sandi baru.</p>
+    @if ($terkirim)
+        <h2 class="judul-form">Cek email Anda</h2>
+        <p class="teks-bantu">
+            Jika <strong>{{ $email }}</strong> terdaftar, tautan untuk membuat kata sandi baru sudah kami kirim ke
+            sana. Periksa juga folder spam atau promosi.
+        </p>
 
-    <div class="kabar kabar-info">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
-        <span>Kode berlaku {{ config('auth.passwords.users.expire', 60) }} menit dan hanya bisa dipakai satu kali.</span>
-    </div>
-
-    <form wire:submit="kirimKode" novalidate>
-        <div class="medan">
-            <label for="email">Alamat Email <span class="wajib">*</span></label>
-            <div class="kotak-isian">
-                <input type="email" id="email" wire:model="email" autocomplete="email"
-                    placeholder="email terdaftar Anda" class="@error('email') salah @enderror" autofocus>
-                <svg class="ikon-medan" viewBox="0 0 24 24">
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                    <path d="M3 7l9 6 9-6" />
-                </svg>
-            </div>
-            @error('email')
-                <p class="pesan-salah">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
-                    {{ $message }}
-                </p>
-            @enderror
+        <div class="kabar kabar-sukses">
+            <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
+            <span>Tautan berlaku {{ $menitBerlaku }} menit dan hanya bisa dipakai satu kali.</span>
         </div>
 
-        <button type="submit" class="tombol-utama" wire:loading.attr="disabled" wire:target="kirimKode">
-            <span wire:loading.remove wire:target="kirimKode" style="display:inline-flex;align-items:center;gap:10px">
-                <svg viewBox="0 0 24 24">
-                    <path d="M22 2L11 13" />
-                    <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
-                Kirim Kode Verifikasi
+        <button type="button" class="tombol-utama tombol-kedua" wire:click="kirimTautan"
+            wire:loading.attr="disabled" wire:target="kirimTautan">
+            <span wire:loading.remove wire:target="kirimTautan" style="display:inline-flex;align-items:center;gap:10px">
+                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 019-9 9 9 0 018 5" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 01-9 9 9 9 0 01-8-5" /><path d="M3 21v-5h5" /></svg>
+                Kirim ulang tautan
             </span>
-            <span wire:loading.flex wire:target="kirimKode" style="display:none;align-items:center;gap:10px">
-                <span class="pemutar"></span> Mengirim…
+            <span wire:loading.flex wire:target="kirimTautan" style="display:none;align-items:center;gap:10px">
+                <span class="pemutar" style="border-color:rgba(100,116,139,.35);border-top-color:currentColor"></span> Mengirim…
             </span>
         </button>
-    </form>
 
-    <div class="pemisah">SUDAH PUNYA KODE?</div>
+        @error('email')
+            <p class="pesan-salah" style="justify-content:center;margin-top:12px">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+                {{ $message }}
+            </p>
+        @enderror
 
-    <p class="kaki-kartu" style="margin-bottom:14px">
-        <a href="{{ route('password.atur-ulang') }}" class="tautan">Langsung masukkan kode</a>
-    </p>
+        <div class="pemisah">SUDAH SELESAI?</div>
 
-    <p class="kaki-kartu">
-        Ingat kata sandi Anda? <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
-    </p>
+        <p class="kaki-kartu">
+            <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+        </p>
+    @else
+        <h2 class="judul-form">Lupa kata sandi?</h2>
+        <p class="teks-bantu">Masukkan email akun Anda. Kami kirimkan tautan aman untuk membuat kata sandi baru.</p>
+
+        <div class="kabar kabar-info">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+            <span>Tautan berlaku {{ $menitBerlaku }} menit dan hanya bisa dipakai satu kali.</span>
+        </div>
+
+        <form wire:submit="kirimTautan" novalidate>
+            <div class="medan">
+                <label for="email">Alamat Email <span class="wajib">*</span></label>
+                <div class="kotak-isian">
+                    <input type="email" id="email" wire:model="email" autocomplete="email"
+                        placeholder="email terdaftar Anda" class="@error('email') salah @enderror" autofocus>
+                    <svg class="ikon-medan" viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="M3 7l9 6 9-6" />
+                    </svg>
+                </div>
+                @error('email')
+                    <p class="pesan-salah">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+            <button type="submit" class="tombol-utama" wire:loading.attr="disabled" wire:target="kirimTautan">
+                <span wire:loading.remove wire:target="kirimTautan" style="display:inline-flex;align-items:center;gap:10px">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22 2L11 13" />
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                    </svg>
+                    Kirim Tautan Atur Ulang
+                </span>
+                <span wire:loading.flex wire:target="kirimTautan" style="display:none;align-items:center;gap:10px">
+                    <span class="pemutar"></span> Mengirim…
+                </span>
+            </button>
+        </form>
+
+        <div class="pemisah">INGAT KATA SANDI ANDA?</div>
+
+        <p class="kaki-kartu">
+            <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+        </p>
+    @endif
 </div>

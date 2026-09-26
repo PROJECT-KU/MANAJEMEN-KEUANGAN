@@ -28,7 +28,7 @@ Route::middleware('guest')->group(function () {
     // berada di grup middleware 'auth', sehingga orang yang lupa kata sandi
     // justru dilempar balik ke halaman masuk.
     Route::get('/lupa-password', LupaPassword::class)->name('formemail.reset');
-    Route::get('/atur-ulang-password', AturUlangPassword::class)->name('password.atur-ulang');
+    Route::get('/atur-ulang-password/{token?}', AturUlangPassword::class)->name('password.atur-ulang');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
