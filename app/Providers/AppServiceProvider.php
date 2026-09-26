@@ -37,6 +37,23 @@ class AppServiceProvider extends ServiceProvider
         // pemeriksanya tidak terjangkau, kata sandi tetap diterima.
         AturanKataSandi::defaults(fn () => AturanKataSandi::min(8)->letters()->numbers()->uncompromised());
 
+        // "Ingat saya" bawaan Laravel berlaku lima tahun; untuk sistem yang
+        // memegang data keuangan itu terlalu lama, apalagi bila dipakai di
+        // komputer bersama.
+        // Tautan verifikasi & atur ulang dibuat dari APP_URL. Bila salah, semua
+        // tautan di email mengarah ke tempat yang keliru -- dan tanda tangannya
+        // ikut tidak cocok. Cukup sering terlewat saat deploy.
+        if ($this->app->environment('production')
+            && preg_match('/localhost|127\.0\.0\.1|^$/', (string) config('app.url'))) {
+            \Illuminate\Support\Facades\Log::warning(
+                'APP_URL masih ' . config('app.url') . ' di lingkungan produksi; tautan pada email akan salah.'
+            );
+        }
+
+        Auth::guard('web')->setRememberDuration(
+            (int) config('auth.ingat_saya_menit', 60 * 24 * 30)
+        );
+
         View::composer('*', function ($view) {
             $user = Auth::user();
             $countAjukan = 0; // Default to 0

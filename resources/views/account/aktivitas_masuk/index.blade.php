@@ -47,8 +47,16 @@ Jejak Aktivitas Masuk | MIS
                             <option value="berhasil" {{ $status === 'berhasil' ? 'selected' : '' }}>Berhasil</option>
                             <option value="gagal" {{ $status === 'gagal' ? 'selected' : '' }}>Gagal</option>
                         </select>
+                        <label class="mr-2 mb-2">Dari</label>
+                        <input type="date" name="dari" value="{{ $dari }}" class="form-control mr-2 mb-2">
+                        <label class="mr-2 mb-2">Sampai</label>
+                        <input type="date" name="sampai" value="{{ $sampai }}" class="form-control mr-2 mb-2">
                         <button type="submit" class="btn btn-primary mb-2 mr-2">Tampilkan</button>
-                        <a href="{{ route('account.aktivitas-masuk.index') }}" class="btn btn-secondary mb-2">Reset</a>
+                        <a href="{{ route('account.aktivitas-masuk.index') }}" class="btn btn-secondary mb-2 mr-2">Reset</a>
+                        <a href="{{ route('account.aktivitas-masuk.ekspor', request()->only('q', 'status', 'dari', 'sampai')) }}"
+                            class="btn btn-success mb-2">
+                            <i class="fas fa-file-csv"></i> Unduh CSV
+                        </a>
                     </form>
                 </div>
             </div>

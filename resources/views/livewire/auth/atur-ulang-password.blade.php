@@ -124,7 +124,7 @@
                         <input :type="tampil ? 'text' : 'password'" type="password" id="kataSandi"
                             wire:model="kataSandi" x-model="sandi" autocomplete="new-password"
                             placeholder="Minimal 8 karakter" class="@error('kataSandi') salah @enderror"
-                    @error('kataSandi') aria-invalid="true" aria-describedby="galat-kataSandi" @enderror autofocus>
+                    @error('kataSandi') aria-invalid="true" aria-describedby="galat-kataSandi" @enderror x-init="if (window.innerWidth >= 640) $el.focus()">
                         <svg class="ikon-medan" viewBox="0 0 24 24">
                             <rect x="3" y="11" width="18" height="10" rx="2" />
                             <path d="M7 11V8a5 5 0 0110 0v3" />

@@ -55,7 +55,7 @@
                 <div class="kotak-isian">
                     <input type="email" id="email" wire:model="email" autocomplete="email"
                         placeholder="email terdaftar Anda" class="@error('email') salah @enderror"
-                    @error('email') aria-invalid="true" aria-describedby="galat-email" @enderror autofocus>
+                    @error('email') aria-invalid="true" aria-describedby="galat-email" @enderror x-init="if (window.innerWidth >= 640) $el.focus()">
                     <svg class="ikon-medan" viewBox="0 0 24 24">
                         <rect x="3" y="5" width="18" height="14" rx="2" />
                         <path d="M3 7l9 6 9-6" />

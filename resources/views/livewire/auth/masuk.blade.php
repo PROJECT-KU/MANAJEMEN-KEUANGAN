@@ -22,7 +22,7 @@
             <div class="kotak-isian">
                 <input type="text" id="identitas" wire:model="identitas" autocomplete="username"
                     placeholder="mis. budisantoso" class="@error('identitas') salah @enderror"
-                    @error('identitas') aria-invalid="true" aria-describedby="galat-identitas" @enderror autofocus>
+                    @error('identitas') aria-invalid="true" aria-describedby="galat-identitas" @enderror x-init="if (window.innerWidth >= 640) $el.focus()">
                 <svg class="ikon-medan" viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                     <circle cx="12" cy="7" r="4" />

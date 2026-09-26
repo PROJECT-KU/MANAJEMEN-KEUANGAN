@@ -95,6 +95,7 @@ Route::prefix('account')
 
             // Jejak percobaan masuk (manager, ceo, admin)
             Route::get('/aktivitas-masuk', 'account\AktivitasMasukController@index')->name('account.aktivitas-masuk.index');
+            Route::get('/aktivitas-masuk/ekspor', 'account\AktivitasMasukController@ekspor')->name('account.aktivitas-masuk.ekspor');
 
             // pengguna
             Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');

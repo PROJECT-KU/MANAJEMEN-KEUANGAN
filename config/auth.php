@@ -130,6 +130,15 @@ return [
 
     'simpan_aktivitas_masuk_hari' => env('SIMPAN_AKTIVITAS_MASUK_HARI', 90),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Masa berlaku "ingat saya" (menit)
+    |--------------------------------------------------------------------------
+    | Bawaan Laravel lima tahun; di sini dipersingkat menjadi 30 hari.
+    */
+
+    'ingat_saya_menit' => env('INGAT_SAYA_MENIT', 43200),
+
     'password_timeout' => 10800,
 
 ];
