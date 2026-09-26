@@ -17,6 +17,7 @@
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.10",
         "laravel/ui": "^4.6",
+        "livewire/livewire": "^3.6",
         "maatwebsite/excel": "^3.1",
         "riskihajar/terbilang": "^2.0"
     },

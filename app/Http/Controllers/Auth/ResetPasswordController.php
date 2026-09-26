@@ -26,51 +26,17 @@ class ResetPasswordController extends Controller
         return view('auth.lupapassword');
     }
 
-    public function formpassword()
-    {
-        return view('auth.newpassword');
-    }
-    public function resetPassword(Request $request)
-    {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'email' => ['required', 'email'],
-                'password' => ['required', 'min:8', 'confirmed'],
-            ],
-            [
-                'email.required' => 'Masukkan Alamat Email Anda!',
-                'password.required' => 'Masukkan Password Baru Anda!',
-                'password.confirmed' => 'Konfirmasi Password Salah!',
-            ]
-        );
-
-        if ($validator->fails()) {
-            return redirect()->route('formemail.reset')->withErrors($validator)->withInput();
-        }
-
-        // Check if the email exists in the users table
-        $user = User::where('email', $request->email)->first();
-
-        if ($user) {
-            // Generate a random reset token
-            $resetToken = Str::random(32);
-
-            // Update the user's password and save the reset token to the database
-            $user->password = Hash::make($request->input('password'));
-            $user->reset_token = $resetToken;
-            $user->save();  // Save the updated user model
-
-            $appName = 'Rumah Scopus Foundation';
-
-            // Include the reset token in the email
-            Mail::to($request->email)->send(new PasswordResetSuccessMail($user, $appName, $resetToken));
-
-            // Redirect to the login page
-            return redirect()->route('login')->with('reset', 'Password Anda Berhasil Diperbarui!');
-        } else {
-            // Email doesn't exist, display error message and redirect back
-            return redirect()->back()->withInput()->with('error', 'Alamat Email Tidak Terdaftar!');
-        }
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Alur atur ulang kata sandi pindah ke Livewire
+    |--------------------------------------------------------------------------
+    | Method formpassword() dan resetPassword() dihapus. resetPassword() dulu
+    | mengganti kata sandi akun mana pun hanya berbekal alamat email, tanpa
+    | token maupun kode verifikasi, sehingga siapa pun yang sudah masuk bisa
+    | mengambil alih akun lain.
+    |
+    | Penggantinya: App\Livewire\Auth\LupaPassword (kirim kode 6 digit ke
+    | email) dan App\Livewire\Auth\AturUlangPassword (verifikasi kode lalu
+    | simpan kata sandi baru).
+    */
 }

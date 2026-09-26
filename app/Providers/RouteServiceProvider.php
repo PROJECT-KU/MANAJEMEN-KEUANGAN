@@ -30,6 +30,10 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         $this->routes(function () {
+            // Tanpa namespace: isinya komponen Livewire & controller ber-FQCN.
+            Route::middleware('web')
+                ->group(base_path('routes/auth.php'));
+
             Route::prefix('api')
                 ->middleware('api')
                 ->namespace($this->namespace)

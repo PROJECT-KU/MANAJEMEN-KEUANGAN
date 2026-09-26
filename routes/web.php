@@ -15,7 +15,6 @@ use App\Http\Middleware\CheckTestimoniToken;
 use Illuminate\Support\Facades\Broadcast;
 
 
-Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
 
 Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
@@ -70,7 +69,6 @@ Route::get('/cek-ppn-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@
 Route::post('/Clinik-Scopus/Pemesanan', 'Publict\PublicClinikScopusController@store')->name('public.ClinikScopusPemesanan.store');
 Route::post('/Clinik-Scopus/Pemesanan/upload-bukti', 'Publict\PublicClinikScopusController@uploadBukti')->name('public.ClinikScopusPemesanan.uploadBukti');
 
-Auth::routes();
 /**
  * account
  */
@@ -91,8 +89,6 @@ Route::prefix('account')
             Route::delete('/karir/{id}', 'account\KarirController@destroy')->name('account.karir.destroy');
 
             //reset password
-            Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
-            Route::post('cekemail/reset', 'Auth\ResetPasswordController@resetPassword')->name('cekemail.reset');
 
             //dashboard account
             Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
