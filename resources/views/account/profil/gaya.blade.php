@@ -52,6 +52,74 @@
         display: block;
     }
 
+    /* ---------------------------------------------------- lencana status */
+
+    .prof-lencana-deret {
+        gap: 8px;
+    }
+
+    /*
+     * Lencana, bukan sekadar pil datar: latar bergradien tipis, tepi setipis
+     * rambut dengan warna yang sama, dan bayangan pendek supaya ia terasa
+     * timbul sedikit dari kartunya.
+     */
+    .prof-lencana {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 13px 5px 10px;
+        border-radius: 999px;
+        font-size: .7rem;
+        font-weight: 800;
+        letter-spacing: .01em;
+        white-space: nowrap;
+        color: var(--tinta-lencana);
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--warna-lencana) 16%, #fff),
+            color-mix(in srgb, var(--warna-lencana) 7%, #fff));
+        border: 1px solid color-mix(in srgb, var(--warna-lencana) 28%, #fff);
+        box-shadow: 0 2px 6px -3px color-mix(in srgb, var(--warna-lencana) 55%, transparent);
+    }
+
+    .prof-lencana-hijau { --warna-lencana: #10b981; --tinta-lencana: #047857; }
+    .prof-lencana-biru { --warna-lencana: #0ea5e9; --tinta-lencana: #0369a1; }
+    .prof-lencana-kuning { --warna-lencana: #f59e0b; --tinta-lencana: #92400e; }
+    .prof-lencana-merah { --warna-lencana: #f43f5e; --tinta-lencana: #be123c; }
+
+    .prof-lencana-titik {
+        position: relative;
+        flex: 0 0 8px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--warna-lencana);
+    }
+
+    /* Denyutnya sebuah cincin yang melebar lalu memudar — titik intinya
+       tetap utuh, jadi lencananya tidak ikut berkedip. */
+    .prof-lencana-titik.berdenyut::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--warna-lencana);
+        animation: prof-denyut 2s cubic-bezier(.22, .61, .36, 1) infinite;
+    }
+
+    @keyframes prof-denyut {
+        0% { transform: scale(1); opacity: .6; }
+        70% { transform: scale(2.6); opacity: 0; }
+        100% { transform: scale(2.6); opacity: 0; }
+    }
+
+    /* Denyut dimatikan untuk yang memilih gerak minimal; lencananya tetap
+       terbaca karena warnanya yang membedakan, bukan geraknya. */
+    @media (prefers-reduced-motion: reduce) {
+        .prof-lencana-titik.berdenyut::after {
+            animation: none;
+        }
+    }
+
     /* -------------------------------------------------------- tata letak */
 
     /*
