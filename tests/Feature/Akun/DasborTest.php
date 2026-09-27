@@ -148,4 +148,80 @@ class DasborTest extends TestCase
 
         $this->assertNotContains('Orang Perusahaan Lain', $nama->all());
     }
+
+    public function test_pengawas_melihat_kartu_keamanan_akun(): void
+    {
+        $this->actingAs($this->buatPengguna('admin'));
+
+        Livewire::test(Dasbor::class)
+            ->assertSee('Keamanan akun')
+            ->assertSee('Gagal 24 jam');
+    }
+
+    public function test_karyawan_biasa_tidak_melihat_kartu_keamanan(): void
+    {
+        $this->actingAs($this->buatPengguna('karyawan'));
+
+        Livewire::test(Dasbor::class)->assertDontSee('Keamanan akun');
+    }
+
+    public function test_pengelola_melihat_antrean_cuti_perusahaannya(): void
+    {
+        $manajer = $this->buatPengguna('manager');
+
+        $anggota = $this->buatPengguna('karyawan');
+        $anggota->forceFill(['full_name' => 'Anggota Perusahaan Ini'])->save();
+
+        $luar = $this->buatPengguna('karyawan');
+        $luar->forceFill(['company' => 'Perusahaan Lain', 'full_name' => 'Orang Perusahaan Lain'])->save();
+
+        foreach ([[$anggota, 'Cuti Anggota Sendiri'], [$luar, 'Cuti Perusahaan Lain']] as [$orang, $tanda]) {
+            DB::table('cuti')->insert([
+                // Tabel cuti di basis data ini belum memakai auto_increment,
+                // jadi id-nya diisi sendiri supaya tesnya tidak bergantung
+                // pada hal yang memang sedang bermasalah.
+                'id' => (int) DB::table('cuti')->max('id') + 1,
+                'user_id' => $orang->getKey(),
+                'id_pengajuan' => \Illuminate\Support\Str::random(10),
+                'jabatan' => $tanda,
+                'jenis_cuti' => 'tahunan',
+                'tanggal_mulai_cuti' => now()->addDays(3)->toDateString(),
+                'tanggal_selesai_cuti' => now()->addDays(4)->toDateString(),
+                'total_hari_cuti' => 2,
+                'keterangan' => 'uji',
+                'status' => 'ajukan',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($manajer);
+
+        $nama = Livewire::test(Dasbor::class)->instance()->antreanCuti()->pluck('full_name');
+
+        $this->assertContains('Anggota Perusahaan Ini', $nama->all());
+        $this->assertNotContains('Orang Perusahaan Lain', $nama->all());
+    }
+
+    public function test_daftar_perlu_tindakan_menyebut_presensi_yang_belum(): void
+    {
+        $this->travelTo(now()->setTime(9, 0));
+
+        $this->actingAs($this->buatPengguna('karyawan'));
+
+        $judul = collect(Livewire::test(Dasbor::class)->instance()->perluTindakan())->pluck('judul');
+
+        $this->assertContains('Belum presensi hari ini', $judul->all());
+
+        $this->travelBack();
+    }
+
+    public function test_pelanggan_mendapat_pintasan_miliknya_sendiri(): void
+    {
+        $this->actingAs($this->buatPengguna('user'));
+
+        Livewire::test(Dasbor::class)
+            ->assertSee('Riwayat pemesanan')
+            ->assertDontSee('Gaji 2026');
+    }
 }

@@ -273,10 +273,24 @@
 
     .dsb-kpi-kartu {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 16px;
         position: relative;
         overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .dsb-kpi-kartu:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 44px rgba(15, 23, 42, .1);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .dsb-kpi-kartu .dsb-panah {
+        margin-left: auto;
     }
 
     .dsb-kpi-kartu::after {
@@ -364,20 +378,103 @@
         background: #ffe4e6;
     }
 
-    /* ------------------------------------------------------------- lajur */
+    /* -------------------------------------------------------------- kisi */
 
-    .dsb-lajur {
+    /* Dulu isi dasbor dibagi "lajur utama" dan "lajur samping" dengan lebar
+       tetap. Begitu kartu kas dihapus, lajur utama tinggal satu kartu pendek
+       sementara lajur samping berisi empat kartu -- menyisakan lubang kosong
+       setinggi 772px di layar 1440. Kini semuanya satu kisi: kartu mengisi
+       kolom yang tersedia, dan kartu yang memang butuh lebar (grafik gaji,
+       karyawan, artikel, akses cepat) merentang penuh. */
+    .dsb-kisi {
         display: grid;
-        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
         gap: 22px;
-        align-items: start;
+        align-items: stretch;
     }
 
-    .dsb-lajur-utama,
-    .dsb-lajur-samping {
+    .dsb-kisi > section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* kartu yang merentang penuh */
+    .dsb-lebar {
+        grid-column: 1 / -1;
+    }
+
+    /* isi kosong ikut memenuhi kartu yang teregang, supaya tidak ada
+       ruang menganggur di bawahnya */
+    .dsb-kisi > section > .dsb-kosong {
+        flex: 1;
+        align-content: center;
+    }
+
+    .dsb-kepala-kanan {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    /* ------------------------------------------------------ perlu tindakan */
+
+    .dsb-tindakan-kisi {
         display: grid;
-        gap: 22px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+    }
+
+    .dsb-tindakan-item {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 13px 15px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid var(--dsb-garis);
+        text-decoration: none;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .dsb-tindakan-item:hover {
+        transform: translateY(-2px);
+        border-color: #c7d2fe;
+        box-shadow: 0 12px 24px -18px rgba(15, 23, 42, .8);
+        text-decoration: none;
+    }
+
+    .dsb-tindakan-teks {
+        display: flex;
+        flex-direction: column;
         min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .dsb-tindakan-teks strong {
+        font-size: .87rem;
+        font-weight: 700;
+        color: var(--dsb-tinta);
+    }
+
+    .dsb-tindakan-teks small {
+        font-size: .74rem;
+        color: var(--dsb-tinta-3);
+    }
+
+    .dsb-medali.kecil {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        border-radius: 14px;
+        font-size: .95rem;
+    }
+
+    .dsb-panah {
+        color: #cbd5e1;
+        font-size: .8rem;
+        flex: 0 0 auto;
     }
 
     /* ------------------------------------------------------ grafik batang */
@@ -626,6 +723,7 @@
     .dsb-pil-abu { color: #64748b; background: #f1f5f9; }
     .dsb-pil-biru { color: #0369a1; background: #e0f2fe; }
     .dsb-pil-kuning { color: #92400e; background: #fef3c7; }
+    .dsb-pil-merah { color: #be123c; background: #ffe4e6; }
 
     .dsb-titik {
         width: 10px;
@@ -637,6 +735,7 @@
     .dsb-titik.biru { background: #0ea5e9; }
     .dsb-titik.merah { background: #f43f5e; }
     .dsb-titik.kuning { background: #f59e0b; }
+    .dsb-titik.hijau { background: #10b981; }
 
     .dsb-lewat {
         color: #be123c;
@@ -730,6 +829,14 @@
         padding-top: 15px;
         border-top: 1px dashed var(--dsb-garis);
         text-align: center;
+    }
+
+    /* varian di bagian atas kartu: garisnya di bawah, bukan di atas */
+    .dsb-statistik-kecil.atas {
+        margin: 0 0 16px;
+        padding: 0 0 15px;
+        border-top: 0;
+        border-bottom: 1px dashed var(--dsb-garis);
     }
 
     .dsb-statistik-kecil span {
@@ -905,9 +1012,6 @@
     /* ============================== TABLET ============================== */
 
     @media (max-width: 1199.98px) {
-        .dsb-lajur {
-            grid-template-columns: 1fr;
-        }
 
         /* Empat kartu tidak boleh jadi tiga tambah satu: sisa barisnya
            menganggur. Di bawah 1200px dijadikan dua lajur rapi. */
@@ -915,10 +1019,6 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        /* di tablet lajur samping dijejer supaya tidak ada ruang menganggur */
-        .dsb-lajur-samping {
-            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-        }
     }
 
     /* ============================== PONSEL ============================== */
@@ -957,10 +1057,12 @@
             gap: 14px;
         }
 
-        .dsb-lajur,
-        .dsb-lajur-samping,
-        .dsb-lajur-utama {
+        .dsb-kisi {
             gap: 16px;
+            grid-template-columns: 1fr;
+        }
+
+        .dsb-tindakan-kisi {
             grid-template-columns: 1fr;
         }
 

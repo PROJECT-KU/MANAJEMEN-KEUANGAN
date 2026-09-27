@@ -34,7 +34,8 @@ class Dasbor extends Component
         // simpanannya; permintaan ini akan menghitung ulang semuanya.
         unset($this->gaji, $this->tim, $this->tugas, $this->pengajuan,
             $this->artikel, $this->kehadiran, $this->cuti, $this->presensiHariIni,
-            $this->ringkasan);
+            $this->ringkasan, $this->perluTindakan, $this->antreanCuti,
+            $this->ringkasSistem, $this->presensiTim);
 
         $this->dimuatPada = now()->format('H:i');
     }
@@ -66,6 +67,19 @@ class Dasbor extends Component
     public function pengelolaTim(): bool
     {
         return in_array($this->pengguna()->level, ['manager', 'ceo'], true);
+    }
+
+    /** Pelanggan biasa: tidak punya presensi, gaji, maupun cuti. */
+    #[Computed]
+    public function pelanggan(): bool
+    {
+        return $this->pengguna()->level === 'user';
+    }
+
+    #[Computed]
+    public function pengawas(): bool
+    {
+        return in_array($this->pengguna()->level, ['admin', 'manager', 'ceo'], true);
     }
 
     #[Computed]
@@ -114,8 +128,24 @@ class Dasbor extends Component
 
         $bulanTerisi = count(array_filter($perBulan, fn ($n) => $n > 0));
 
+        // Pembanding tahun lalu, supaya angkanya punya konteks.
+        $lalu = DB::table('gaji')
+            ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
+            ->where('gaji.status', 'terbayar')
+            ->whereYear('gaji.tanggal', $tahun - 1);
+
+        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
+            $lalu->where('users.company', $this->perusahaan());
+        } else {
+            $lalu->where('gaji.user_id', $pengguna->getKey());
+        }
+
+        $totalLalu = (float) ($lalu->sum('gaji.total') ?? 0);
+
         return [
             'tahun' => $tahun,
+            'total_lalu' => $totalLalu,
+            'selisih_tahun' => $totalLalu > 0 ? round((($total - $totalLalu) / $totalLalu) * 100, 1) : null,
             'per_bulan' => $perBulan,
             'total' => $total,
             'tertinggi' => max($perBulan) ?: 0.0,
@@ -146,9 +176,14 @@ class Dasbor extends Component
 
         $penuh = 'Rp ' . number_format($gaji['total'], 0, ',', '.');
 
+        if ($this->pelanggan()) {
+            return $this->ringkasanPelanggan();
+        }
+
         $kartu[] = [
             'warna' => 'biru',
             'ikon' => 'fa-money-check-alt',
+            'tautan' => route('account.gaji.index'),
             'label' => ($this->pengelolaTim() ? 'Gaji terbayar' : 'Gaji diterima') . ' · ' . $gaji['tahun'],
             // Angka rupiah besar tidak muat di kartu selebar seperempat layar;
             // yang tampil bentuk ringkasnya, nilai penuhnya ada di tooltip dan
@@ -166,6 +201,7 @@ class Dasbor extends Component
             $kartu[] = [
                 'warna' => 'ungu',
                 'ikon' => 'fa-users',
+                'tautan' => route('account.pengguna.index'),
                 'label' => 'Karyawan aktif',
                 'nilai' => (string) $tim['aktif'],
                 'catatan' => $tim['total'] . ' akun terdaftar · ' . $tim['nonaktif'] . ' nonaktif',
@@ -174,6 +210,7 @@ class Dasbor extends Component
             $kartu[] = [
                 'warna' => 'ungu',
                 'ikon' => 'fa-briefcase',
+                'tautan' => route('account.profil.show', $this->pengguna()->getKey()),
                 'label' => 'Masa kerja',
                 'nilai' => $hadir['masa_kerja'],
                 'catatan' => 'Sejak ' . ($this->pengguna()->created_at
@@ -185,6 +222,7 @@ class Dasbor extends Component
         $kartu[] = [
             'warna' => 'hijau',
             'ikon' => 'fa-fingerprint',
+            'tautan' => route('account.presensi.index'),
             'label' => 'Hadir bulan ini',
             'nilai' => $hadir['hadir_bulan_ini'] . ' hari',
             'catatan' => $hadir['izin_bulan_ini'] . ' izin · ' . $hadir['lembur_bulan_ini'] . ' lembur',
@@ -193,6 +231,7 @@ class Dasbor extends Component
         $kartu[] = [
             'warna' => 'kuning',
             'ikon' => 'fa-umbrella-beach',
+            'tautan' => route('account.cuti.index'),
             'label' => 'Sisa cuti',
             'nilai' => $cuti['boleh'] ? $cuti['sisa'] . ' hari' : 'Belum berhak',
             'catatan' => $cuti['boleh']
@@ -201,6 +240,63 @@ class Dasbor extends Component
         ];
 
         return $kartu;
+    }
+
+    /**
+     * Kartu untuk pelanggan biasa. Gaji, presensi, dan cuti tidak pernah
+     * terisi bagi mereka, jadi kartunya bicara soal akun dan layanan.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    private function ringkasanPelanggan(): array
+    {
+        $pengguna = $this->pengguna();
+
+        // Halaman riwayat memakai customer_id; ikuti aturan yang sama.
+        $pesanan = DB::table('clinikscopus_pemesanan')
+            ->where('customer_id', $pengguna->getKey())
+            ->count();
+
+        return [
+            [
+                'warna' => 'ungu',
+                'ikon' => 'fa-user-check',
+                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'label' => 'Status akun',
+                'nilai' => $pengguna->email_verified_at ? 'Terverifikasi' : 'Belum verifikasi',
+                'catatan' => $pengguna->email_verified_at
+                    ? 'Semua layanan terbuka untuk Anda.'
+                    : 'Verifikasi email untuk membuka semua layanan.',
+            ],
+            [
+                'warna' => 'biru',
+                'ikon' => 'fa-clipboard-list',
+                'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index'),
+                'label' => 'Pemesanan saya',
+                'nilai' => $pesanan . ' pesanan',
+                'catatan' => $pesanan > 0 ? 'Lihat riwayat dan statusnya.' : 'Belum ada pemesanan tercatat.',
+            ],
+            [
+                'warna' => 'hijau',
+                'ikon' => 'fa-shield-alt',
+                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'label' => 'Keamanan',
+                'nilai' => $pengguna->pinAktif() ? 'PIN aktif' : 'Kata sandi',
+                'catatan' => $pengguna->pinAktif()
+                    ? 'Masuk cukup dengan 6 angka di perangkat ini.'
+                    : 'Aktifkan PIN agar masuk lebih cepat.',
+            ],
+            [
+                'warna' => 'kuning',
+                'ikon' => 'fa-calendar-alt',
+                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'label' => 'Bergabung sejak',
+                'nilai' => $pengguna->created_at
+                    ? $pengguna->created_at->locale('id')->translatedFormat('M Y')
+                    : '-',
+                'catatan' => 'Terima kasih sudah bersama kami.',
+            ],
+        ];
     }
 
     /** Rupiah ringkas untuk label grafik: 1.250.000 -> 1,3 jt. */
@@ -245,8 +341,13 @@ class Dasbor extends Component
             'izin_bulan_ini' => (int) ($baris->izin ?? 0),
             'lembur_bulan_ini' => (int) ($baris->lembur ?? 0),
             'hari_kerja_lewat' => now()->day,
+            // Ringkas: dua satuan terbesar saja, supaya muat di kartu sempit.
             'masa_kerja' => $masaKerja
-                ? trim(($masaKerja->y ? $masaKerja->y . ' tahun ' : '') . ($masaKerja->m ? $masaKerja->m . ' bulan ' : '') . $masaKerja->d . ' hari')
+                ? ($masaKerja->y > 0
+                    ? $masaKerja->y . ' thn' . ($masaKerja->m > 0 ? ' ' . $masaKerja->m . ' bln' : '')
+                    : ($masaKerja->m > 0
+                        ? $masaKerja->m . ' bln' . ($masaKerja->d > 0 ? ' ' . $masaKerja->d . ' hr' : '')
+                        : $masaKerja->d . ' hari'))
                 : '-',
         ];
     }
@@ -311,6 +412,244 @@ class Dasbor extends Component
                 ->get(['id', 'full_name', 'level', 'gambar', 'created_at', 'status']),
             'tanpa_perusahaan' => false,
         ];
+    }
+
+    /**
+     * Daftar "perlu tindakan": hal-hal yang menunggu diputuskan atau
+     * diselesaikan, dikumpulkan dari beberapa sumber menjadi satu tempat.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    #[Computed]
+    public function perluTindakan(): array
+    {
+        $pengguna = $this->pengguna();
+        $daftar = [];
+
+        if (! $pengguna->email_verified_at) {
+            $daftar[] = [
+                'warna' => 'kuning',
+                'ikon' => 'fa-envelope-open-text',
+                'judul' => 'Email belum diverifikasi',
+                'teks' => 'Sebagian fitur terkunci sampai verifikasi selesai.',
+                'tautan' => route('account.profil.show', $pengguna->getKey()),
+            ];
+        }
+
+        if (! $this->pelanggan() && ! $this->presensiHariIni() && now()->format('H:i:s') >= '07:00:00' && now()->format('H:i:s') <= '22:00:00') {
+            $daftar[] = [
+                'warna' => 'merah',
+                'ikon' => 'fa-fingerprint',
+                'judul' => 'Belum presensi hari ini',
+                'teks' => 'Jam presensi 07.00 – 22.00 WIB.',
+                'tautan' => route('account.presensi.create'),
+            ];
+        }
+
+        $tugasLewat = $this->tugas()->filter(
+            fn ($t) => $t->tanggal_deadline && \Illuminate\Support\Carbon::parse($t->tanggal_deadline)->isPast()
+        )->count();
+
+        if ($tugasLewat > 0) {
+            $daftar[] = [
+                'warna' => 'merah',
+                'ikon' => 'fa-tasks',
+                'judul' => $tugasLewat . ' tugas lewat tenggat',
+                'teks' => 'Perbarui statusnya atau minta perpanjangan.',
+                'tautan' => route('account.todolist.index'),
+            ];
+        }
+
+        if ($this->pengelolaTim()) {
+            $dinas = $this->pengajuan()->count();
+
+            if ($dinas > 0) {
+                $daftar[] = [
+                    'warna' => 'biru',
+                    'ikon' => 'fa-plane-departure',
+                    'judul' => $dinas . ' perjalanan dinas menunggu',
+                    'teks' => 'Menunggu persetujuan Anda.',
+                    'tautan' => route('account.PerjalananDinas.index'),
+                ];
+            }
+
+            $cuti = $this->antreanCuti()->count();
+
+            if ($cuti > 0) {
+                $daftar[] = [
+                    'warna' => 'hijau',
+                    'ikon' => 'fa-umbrella-beach',
+                    'judul' => $cuti . ' pengajuan cuti menunggu',
+                    'teks' => 'Setujui atau tolak dari halaman Cuti.',
+                    'tautan' => route('account.cuti.index'),
+                ];
+            }
+
+            $belum = $this->tim()['belum_verifikasi'];
+
+            if ($belum > 0) {
+                $daftar[] = [
+                    'warna' => 'kuning',
+                    'ikon' => 'fa-user-clock',
+                    'judul' => $belum . ' karyawan belum verifikasi email',
+                    'teks' => 'Ingatkan mereka agar aksesnya tidak tertahan.',
+                    'tautan' => route('account.pengguna.index'),
+                ];
+            }
+        }
+
+        if ($this->pengawas()) {
+            $gagal = $this->ringkasSistem()['gagal_24_jam'];
+
+            if ($gagal >= 10) {
+                $daftar[] = [
+                    'warna' => 'merah',
+                    'ikon' => 'fa-user-lock',
+                    'judul' => $gagal . ' percobaan masuk gagal (24 jam)',
+                    'teks' => 'Periksa jejak aktivitas masuk.',
+                    'tautan' => route('account.aktivitas-masuk.index'),
+                ];
+            }
+        }
+
+        return $daftar;
+    }
+
+    /** Pengajuan cuti yang menunggu keputusan pengelola. */
+    #[Computed]
+    public function antreanCuti()
+    {
+        if (! $this->pengelolaTim() || $this->perusahaan() === null) {
+            return collect();
+        }
+
+        return DB::table('cuti')
+            ->select('cuti.id', 'cuti.id_pengajuan', 'cuti.jenis_cuti', 'cuti.tanggal_mulai_cuti',
+                'cuti.total_hari_cuti', 'users.full_name')
+            ->leftJoin('users', 'cuti.user_id', '=', 'users.id')
+            ->where('users.company', $this->perusahaan())
+            ->whereIn('cuti.status', ['ajukan', 'pending', 'menunggu'])
+            ->orderByDesc('cuti.created_at')
+            ->limit(5)
+            ->get();
+    }
+
+    /**
+     * Angka pengawasan untuk admin, manajer, dan CEO.
+     *
+     * @return array<string,mixed>
+     */
+    #[Computed]
+    public function ringkasSistem(): array
+    {
+        $perusahaan = $this->perusahaan();
+
+        $akun = DB::table('users');
+
+        // Admin mengawasi seluruh sistem; manajer/CEO hanya perusahaannya.
+        if ($this->pengguna()->level !== 'admin' && $perusahaan !== null) {
+            $akun->where('company', $perusahaan);
+        }
+
+        return [
+            'total_akun' => (clone $akun)->count(),
+            'belum_verifikasi' => (clone $akun)->whereNull('email_verified_at')->count(),
+            'nonaktif' => (clone $akun)->where('status', 'nonactive')->count(),
+            'gagal_24_jam' => DB::table('aktivitas_masuk')
+                ->where('berhasil', false)
+                ->where('created_at', '>=', now()->subDay())
+                ->count(),
+            'berhasil_24_jam' => DB::table('aktivitas_masuk')
+                ->where('berhasil', true)
+                ->where('created_at', '>=', now()->subDay())
+                ->count(),
+            'pin_aktif' => (clone $akun)->where('pin_aktif', true)->count(),
+        ];
+    }
+
+    /**
+     * Presensi tim hari ini: sudah, belum, dan siapa saja yang sudah masuk.
+     *
+     * @return array<string,mixed>
+     */
+    #[Computed]
+    public function presensiTim(): array
+    {
+        if (! $this->pengelolaTim() || $this->perusahaan() === null) {
+            return ['total' => 0, 'sudah' => 0, 'belum' => 0, 'daftar' => collect()];
+        }
+
+        $anggota = DB::table('users')
+            ->where('company', $this->perusahaan())
+            ->where('status', 'active')
+            ->whereIn('level', ['staff', 'karyawan', 'trainer', 'manager'])
+            ->pluck('id');
+
+        $sudah = DB::table('presensi')
+            ->select('presensi.user_id', 'presensi.created_at', 'presensi.status_pulang', 'users.full_name')
+            ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
+            ->whereIn('presensi.user_id', $anggota)
+            ->whereDate('presensi.created_at', now()->toDateString())
+            ->orderBy('presensi.created_at')
+            ->get();
+
+        return [
+            'total' => $anggota->count(),
+            'sudah' => $sudah->count(),
+            'belum' => max(0, $anggota->count() - $sudah->count()),
+            'daftar' => $sudah->take(5),
+        ];
+    }
+
+    /**
+     * Menu akses cepat bawaan hanya berisi pintasan untuk manajer dan
+     * karyawan; peran lain melihat kartu yang nyaris kosong. Untuk mereka
+     * dibuatkan pintasan sendiri.
+     */
+    #[Computed]
+    public function menuPenuh(): bool
+    {
+        return in_array($this->pengguna()->level, ['manager', 'karyawan'], true);
+    }
+
+    /** @return array<int,array<string,string>> */
+    #[Computed]
+    public function pintasan(): array
+    {
+        $pengguna = $this->pengguna();
+        $profil = route('account.profil.show', $pengguna->getKey());
+
+        if ($this->pelanggan()) {
+            return [
+                ['warna' => 'biru', 'ikon' => 'fa-clipboard-list', 'judul' => 'Riwayat pemesanan',
+                    'teks' => 'Status dan bukti pembayaran Anda.', 'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index')],
+                ['warna' => 'ungu', 'ikon' => 'fa-comments', 'judul' => 'Konsultasi Clinik Scopus',
+                    'teks' => 'Pesan sesi dengan pendamping.', 'tautan' => route('account.clinikscopus.index')],
+                ['warna' => 'hijau', 'ikon' => 'fa-user-cog', 'judul' => 'Profil & keamanan',
+                    'teks' => 'Ubah data, kata sandi, dan PIN.', 'tautan' => $profil],
+            ];
+        }
+
+        $daftar = [
+            ['warna' => 'hijau', 'ikon' => 'fa-fingerprint', 'judul' => 'Presensi',
+                'teks' => 'Riwayat kehadiran Anda.', 'tautan' => route('account.presensi.index')],
+            ['warna' => 'kuning', 'ikon' => 'fa-umbrella-beach', 'judul' => 'Cuti',
+                'teks' => 'Ajukan dan pantau pengajuan.', 'tautan' => route('account.cuti.index')],
+            ['warna' => 'biru', 'ikon' => 'fa-money-check-alt', 'judul' => 'Gaji',
+                'teks' => 'Slip dan riwayat pembayaran.', 'tautan' => route('account.gaji.index')],
+        ];
+
+        if ($this->pengawas()) {
+            $daftar[] = ['warna' => 'merah', 'ikon' => 'fa-user-shield', 'judul' => 'Jejak aktivitas masuk',
+                'teks' => 'Pantau percobaan masuk ke sistem.', 'tautan' => route('account.aktivitas-masuk.index')];
+            $daftar[] = ['warna' => 'ungu', 'ikon' => 'fa-users', 'judul' => 'Data pengguna',
+                'teks' => 'Kelola akun dan perannya.', 'tautan' => route('account.pengguna.index')];
+        }
+
+        $daftar[] = ['warna' => 'ungu', 'ikon' => 'fa-user-cog', 'judul' => 'Profil & keamanan',
+            'teks' => 'Ubah data, kata sandi, dan PIN.', 'tautan' => $profil];
+
+        return $daftar;
     }
 
     // ------------------------------------------------------- tugas & kabar
