@@ -30,6 +30,10 @@ $agent = new Agent();
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    {{-- Huruf yang sama dengan dasbor & halaman auth --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
@@ -40,6 +44,10 @@ $agent = new Agent();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
     <!-- end -->
+
+    {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=5">
+
     <style>
         .fas,
         .far,
@@ -186,7 +194,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             @if ($agent->isMobile())
             <nav class="navbar navbar-expand-lg main-navbar shadow-sm">
                 <form class="form-inline mr-auto d-flex align-items-center">
-                    <p id="greeting" class="text-dark font-weight-bold mb-0 ml-4 mt-3" style="font-size:13px;"></p>
+                    {{-- Tombol menu: tanpa ini sidebar di ponsel tidak bisa dibuka
+                         sama sekali, sehingga halaman lain tak terjangkau. --}}
+                    <a href="#" data-toggle="sidebar" class="mis-burger" aria-label="Buka menu">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                    <p id="greeting" class="text-dark font-weight-bold mb-0 ml-2 mt-3" style="font-size:13px;"></p>
                 </form>
 
                 <!-- Dropdown Profil -->
@@ -231,7 +244,11 @@ $isTenggatExpired = $tenggatDate < $currentDate;
 
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto d-flex align-items-center" style="height: 100%;">
-                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-3 d-flex align-items-center mt-3"></p>
+                    {{-- Di tablet sidebar juga tersembunyi; tombol ini yang membukanya. --}}
+                    <a href="#" data-toggle="sidebar" class="mis-burger" aria-label="Buka menu">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-2 d-flex align-items-center mt-3"></p>
                 </form>
 
                 <!-- Dropdown Profil -->

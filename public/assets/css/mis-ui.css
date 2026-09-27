@@ -1,0 +1,811 @@
+/* =========================================================================
+   MIS UI — lapis penyeragam tampilan back office
+   =========================================================================
+
+   Berkas ini dimuat PALING AKHIR di layouts/account.blade.php sehingga
+   menimpa gaya bawaan Stisla/Bootstrap tanpa harus menyentuh puluhan berkas
+   tampilan satu per satu.
+
+   Acuannya bahasa rupa dasbor & halaman auth: huruf Inter, kartu bersudut
+   besar dengan bayangan lembut, aksen indigo–ungu, ikon berwarna, dan label
+   huruf kapital kecil.
+
+   Aturan main saat menambah gaya di sini:
+   - Hindari !important kecuali memang melawan gaya sebaris (inline) atau
+     aturan Stisla yang sama kuatnya.
+   - Jangan mengubah tata letak dasar Stisla (posisi sidebar, grid Bootstrap);
+     yang dipoles hanya rupa: warna, sudut, jarak, bayangan, dan huruf.
+   ========================================================================= */
+
+:root {
+    --ui-tinta: #0f172a;
+    --ui-tinta-2: #334155;
+    --ui-tinta-3: #64748b;
+    --ui-tinta-4: #94a3b8;
+    --ui-garis: #e2e8f0;
+    --ui-garis-lembut: #eef2f7;
+    --ui-latar: #f4f7ff;
+    --ui-kartu: #ffffff;
+
+    --ui-aksen: #6366f1;
+    --ui-aksen-tua: #4f46e5;
+    --ui-aksen-muda: #eef2ff;
+    --ui-gradien: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+
+    --ui-hijau: #10b981;
+    --ui-merah: #f43f5e;
+    --ui-kuning: #f59e0b;
+    --ui-biru: #0ea5e9;
+
+    --ui-radius: 20px;
+    --ui-radius-md: 14px;
+    --ui-radius-sm: 11px;
+    --ui-bayang: 0 18px 38px rgba(15, 23, 42, .06);
+    --ui-bayang-kecil: 0 8px 18px -12px rgba(15, 23, 42, .4);
+    --ui-transisi: .25s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ------------------------------------------------------------- dasar --- */
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--ui-latar);
+    color: var(--ui-tinta-2);
+    -webkit-font-smoothing: antialiased;
+}
+
+.main-content {
+    background-color: var(--ui-latar);
+}
+
+/* Ikon bawaan layout dipaksa 20px; di dalam tombol & tabel itu kebesaran. */
+.btn .fas,
+.btn .far,
+.btn .fab,
+.dropdown-item .fas,
+.dropdown-item .far,
+table .fas,
+table .far,
+.badge .fas,
+.nav-link .fas.fa-chevron-down {
+    font-size: 14px;
+}
+
+/* --------------------------------------------------------- sidebar --- */
+
+.main-sidebar {
+    background: var(--ui-kartu);
+    border-right: 1px solid var(--ui-garis-lembut);
+    box-shadow: 0 0 40px rgba(15, 23, 42, .04);
+}
+
+.main-sidebar .sidebar-brand {
+    height: auto;
+    padding: 22px 18px 14px;
+}
+
+.sidebar-menu {
+    padding: 0 12px 40px;
+}
+
+/* judul kelompok menu */
+.sidebar-menu li.menu-header {
+    margin: 22px 0 8px;
+    padding: 0 10px;
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-4);
+}
+
+/* Stisla memaksa tinggi 50px dan padding 0 20px lewat aturan yang lebih
+   spesifik; keduanya ditimpa di sini supaya menunya lebih padat. */
+.main-sidebar .sidebar-menu li a,
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    height: auto;
+    min-height: 0;
+    padding: 9px 11px;
+    margin-bottom: 2px;
+    border-radius: var(--ui-radius-sm);
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--ui-tinta-2);
+    transition: background var(--ui-transisi), color var(--ui-transisi);
+}
+
+.main-sidebar .sidebar-menu li a .fas,
+.main-sidebar .sidebar-menu li a .far,
+.main-sidebar .sidebar-menu li a .fab {
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    margin-right: 0;
+    margin-top: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    font-size: 15px;
+    border-radius: 10px;
+    background: var(--ui-garis-lembut);
+    color: var(--ui-tinta-3);
+    transition: background var(--ui-transisi), color var(--ui-transisi);
+}
+
+.sidebar-menu li a span {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.main-sidebar .sidebar-menu li a:hover {
+    background: var(--ui-aksen-muda);
+    color: var(--ui-aksen-tua);
+}
+
+.sidebar-menu li a:hover .fas,
+.sidebar-menu li a:hover .far {
+    background: #fff;
+    color: var(--ui-aksen);
+}
+
+/* menu aktif */
+.main-sidebar .sidebar-menu li.active > a,
+.main-sidebar .sidebar-menu li.active > a:hover,
+body:not(.sidebar-mini) .sidebar-style-2 .sidebar-menu > li.active > a {
+    padding-left: 11px;
+    background: var(--ui-gradien);
+    background-color: transparent;
+    color: #fff;
+    box-shadow: 0 12px 22px -14px var(--ui-aksen);
+}
+
+.main-sidebar .sidebar-menu li.active > a span,
+.main-sidebar .sidebar-menu li.active a {
+    color: #fff;
+}
+
+/* garis penanda bawaan Stisla tidak diperlukan lagi */
+body:not(.sidebar-mini) .sidebar-style-2 .sidebar-menu > li.active > a:before {
+    display: none;
+}
+
+.main-sidebar .sidebar-menu li a span {
+    margin-top: 0;
+}
+
+.sidebar-menu li.active > a .fas,
+.sidebar-menu li.active > a .far,
+.sidebar-menu li.active > a:hover .fas {
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
+}
+
+/* ikon berwarna per kelompok */
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-home,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-tachometer-alt { color: var(--ui-aksen); background: var(--ui-aksen-muda); }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-users,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-user,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-user-shield,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-user-clock { color: #7c3aed; background: #f5f3ff; }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-dollar-sign,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-coins,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-money-check-alt,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-wallet { color: var(--ui-hijau); background: #ecfdf5; }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-calendar,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-calendar-alt,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-calendar-check,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-clock { color: var(--ui-kuning); background: #fffbeb; }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-chart-line,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-chart-area,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-chart-pie,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-chart-bar,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-balance-scale { color: var(--ui-biru); background: #e0f2fe; }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-file-alt,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-newspaper,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-book,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-file-pdf { color: #ea580c; background: #fff7ed; }
+
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-trash,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-exclamation-triangle,
+.main-sidebar .sidebar-menu li:not(.active) > a .fa-user-lock { color: var(--ui-merah); background: #fff1f2; }
+
+/* Sebagian butir menu membungkus ikon+teksnya di dalam <div> (mis. Riwayat
+   Pemesanan yang punya lencana jumlah). Tanpa aturan ini pembungkusnya
+   menjadi blok, sehingga ikon dan teks tersusun ke bawah. */
+.main-sidebar .sidebar-menu li a > div {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.main-sidebar .sidebar-menu li a > div span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* submenu */
+.sidebar-menu .dropdown-menu {
+    padding: 4px 0 4px 34px;
+    margin: 0 0 4px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.sidebar-menu .dropdown-menu li a {
+    padding: 8px 12px;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.sidebar-menu .dropdown-menu li a .fas,
+.sidebar-menu .dropdown-menu li a .far {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.sidebar-menu li a .fa-chevron-down {
+    width: auto;
+    height: auto;
+    background: none;
+    font-size: 10px;
+    color: var(--ui-tinta-4);
+}
+
+/* lencana angka di menu */
+.sidebar-menu li a .badge {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: .68rem;
+    font-weight: 800;
+}
+
+/* ------------------------------------------------------------ navbar --- */
+
+.main-navbar .nav-link {
+    border-radius: var(--ui-radius-sm);
+}
+
+.navbar .dropdown-menu {
+    border: 1px solid var(--ui-garis);
+    border-radius: var(--ui-radius-md);
+    box-shadow: var(--ui-bayang);
+    padding: 8px;
+}
+
+.navbar .dropdown-menu .dropdown-item {
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--ui-tinta-2);
+}
+
+.navbar .dropdown-menu .dropdown-item:hover {
+    background: var(--ui-aksen-muda);
+    color: var(--ui-aksen-tua);
+}
+
+.navbar .dropdown-title {
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-4);
+    padding: 8px 12px 4px;
+}
+
+/* tombol menu (hamburger) */
+.mis-burger {
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 12px;
+    background: var(--ui-aksen-muda);
+    color: var(--ui-aksen) !important;
+    transition: background var(--ui-transisi), transform var(--ui-transisi);
+}
+
+.mis-burger:hover {
+    background: #e0e7ff;
+    transform: translateY(-1px);
+}
+
+.mis-burger .fas {
+    font-size: 16px;
+}
+
+/* Hanya tampil ketika sidebar memang tersembunyi (di bawah 1024px, mengikuti
+   ambang Stisla). Di layar lebar sidebar selalu terlihat. */
+@media (max-width: 1024px) {
+    .mis-burger {
+        display: grid;
+    }
+}
+
+/* lapisan gelap saat sidebar terbuka di layar kecil */
+body.sidebar-show::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .45);
+    backdrop-filter: blur(2px);
+    z-index: 880;
+}
+
+body.sidebar-show .main-sidebar {
+    z-index: 890;
+}
+
+/* ------------------------------------------------- kepala tiap halaman --- */
+
+.section-header {
+    align-items: center;
+    margin-bottom: 22px;
+    padding: 20px 24px;
+    background: var(--ui-kartu);
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-bayang);
+}
+
+.section-header h1 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    background: linear-gradient(to right, #1e293b 0%, var(--ui-aksen) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-header .section-header-back a {
+    border-radius: var(--ui-radius-sm);
+}
+
+.section-header .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: .8rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ui-tinta);
+}
+
+/* -------------------------------------------------------------- kartu --- */
+
+.card {
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-bayang);
+    margin-bottom: 22px;
+}
+
+.card .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--ui-garis-lembut);
+    padding: 18px 22px;
+    min-height: 0;
+}
+
+.card .card-header h4 {
+    font-size: .98rem;
+    font-weight: 800;
+    color: var(--ui-tinta);
+    letter-spacing: -.01em;
+}
+
+.card .card-body {
+    padding: 22px;
+}
+
+.card .card-footer {
+    background: transparent;
+    border-top: 1px solid var(--ui-garis-lembut);
+    padding: 16px 22px;
+}
+
+/* kartu statistik bawaan Stisla */
+.card-statistic-1,
+.card-statistic-2 {
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-bayang);
+    overflow: hidden;
+}
+
+/* Stisla memberi 80px dengan aturan .card.card-statistic-1; ditimpa di sini. */
+.card.card-statistic-1 .card-icon,
+.card.card-statistic-2 .card-icon {
+    width: 54px;
+    height: 54px;
+    line-height: 54px;
+    margin: 16px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--ui-bayang-kecil);
+}
+
+.card.card-statistic-1 .card-icon .fas,
+.card.card-statistic-1 .card-icon .far,
+.card.card-statistic-2 .card-icon .fas {
+    font-size: 19px;
+    line-height: 1;
+}
+
+/* warna latar ikon dibuat lembut, bukan blok penuh */
+.card.card-statistic-1 .card-icon.bg-danger { background: var(--ui-merah) !important; }
+.card.card-statistic-1 .card-icon.bg-success { background: var(--ui-hijau) !important; }
+.card.card-statistic-1 .card-icon.bg-primary { background: var(--ui-aksen) !important; }
+.card.card-statistic-1 .card-icon.bg-warning { background: var(--ui-kuning) !important; }
+.card.card-statistic-1 .card-icon.bg-info { background: var(--ui-biru) !important; }
+
+.card.card-statistic-1 .card-wrap .card-header h4 {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-4);
+}
+
+.card.card-statistic-1 .card-wrap .card-body {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ui-tinta);
+    padding: 0 14px 14px;
+}
+
+/* --------------------------------------------------------------- tabel --- */
+
+.table {
+    color: var(--ui-tinta-2);
+    margin-bottom: 0;
+}
+
+.table thead th {
+    padding: 12px 14px;
+    border-top: 0;
+    border-bottom: 1px solid var(--ui-garis);
+    background: #f8fafc;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-3);
+    white-space: nowrap;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: var(--ui-radius-sm);
+    border-bottom-left-radius: var(--ui-radius-sm);
+}
+
+.table thead th:last-child {
+    border-top-right-radius: var(--ui-radius-sm);
+    border-bottom-right-radius: var(--ui-radius-sm);
+}
+
+.table tbody td {
+    padding: 13px 14px;
+    border-top: 1px solid var(--ui-garis-lembut);
+    font-size: .85rem;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background var(--ui-transisi);
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.table-bordered,
+.table-bordered td,
+.table-bordered th {
+    border-color: var(--ui-garis-lembut);
+}
+
+/* tabel panjang: digeser mendatar, bukan memaksa halaman melebar */
+.table-responsive {
+    border-radius: var(--ui-radius-md);
+}
+
+/* ------------------------------------------------------------- tombol --- */
+
+.btn {
+    border-radius: var(--ui-radius-sm);
+    font-weight: 700;
+    font-size: .85rem;
+    padding: 9px 16px;
+    letter-spacing: 0;
+    transition: transform var(--ui-transisi), box-shadow var(--ui-transisi), filter var(--ui-transisi);
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--ui-gradien);
+    border: 0;
+    box-shadow: 0 10px 20px -14px var(--ui-aksen);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background: var(--ui-gradien);
+    filter: brightness(1.05);
+    box-shadow: 0 14px 26px -14px var(--ui-aksen);
+}
+
+.btn-success { background: var(--ui-hijau); border-color: var(--ui-hijau); }
+.btn-danger { background: var(--ui-merah); border-color: var(--ui-merah); }
+.btn-warning { background: var(--ui-kuning); border-color: var(--ui-kuning); color: #fff; }
+.btn-info { background: var(--ui-biru); border-color: var(--ui-biru); }
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: .78rem;
+    border-radius: 9px;
+}
+
+.btn-lg {
+    padding: 13px 24px;
+    font-size: .95rem;
+    border-radius: var(--ui-radius-md);
+}
+
+.btn-outline-primary {
+    color: var(--ui-aksen);
+    border-color: #c7d2fe;
+}
+
+.btn-outline-primary:hover {
+    background: var(--ui-aksen);
+    border-color: var(--ui-aksen);
+}
+
+/* ------------------------------------------------------------- isian --- */
+
+.form-control,
+.custom-select,
+.select2-container--default .select2-selection--single {
+    height: auto;
+    min-height: 44px;
+    padding: 11px 14px;
+    border: 1.5px solid var(--ui-garis);
+    border-radius: var(--ui-radius-md);
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--ui-tinta);
+    background-color: #fbfcfe;
+    transition: border-color var(--ui-transisi), box-shadow var(--ui-transisi), background var(--ui-transisi);
+}
+
+.form-control:focus,
+.custom-select:focus {
+    background-color: #fff;
+    border-color: var(--ui-aksen);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+}
+
+.form-group label {
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-3);
+    margin-bottom: 7px;
+}
+
+.input-group-text {
+    border: 1.5px solid var(--ui-garis);
+    border-radius: var(--ui-radius-md);
+    background: #f1f5f9;
+    color: var(--ui-tinta-3);
+}
+
+/* ------------------------------------------------------------ lencana --- */
+
+.badge {
+    padding: 5px 11px;
+    border-radius: 9px;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.badge-success { background: #d1fae5; color: #047857; }
+.badge-danger { background: #ffe4e6; color: #be123c; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-primary { background: var(--ui-aksen-muda); color: var(--ui-aksen-tua); }
+.badge-secondary { background: #f1f5f9; color: var(--ui-tinta-3); }
+
+/* ------------------------------------------------------------- kabar --- */
+
+.alert {
+    border: 0;
+    border-radius: var(--ui-radius-md);
+    padding: 14px 18px;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.alert-success { background: #ecfdf5; color: #065f46; }
+.alert-danger { background: #fff1f2; color: #9f1239; }
+.alert-warning { background: #fffbeb; color: #92400e; }
+.alert-info { background: var(--ui-aksen-muda); color: var(--ui-aksen-tua); }
+
+/* -------------------------------------------------------- halaman & modal --- */
+
+.pagination {
+    gap: 5px;
+}
+
+.page-item .page-link {
+    border: 1px solid var(--ui-garis);
+    border-radius: 10px;
+    color: var(--ui-tinta-2);
+    font-size: .82rem;
+    font-weight: 700;
+    padding: 8px 13px;
+}
+
+.page-item.active .page-link {
+    background: var(--ui-gradien);
+    border-color: transparent;
+    box-shadow: 0 10px 18px -14px var(--ui-aksen);
+}
+
+.page-item.disabled .page-link {
+    color: var(--ui-tinta-4);
+    background: #f8fafc;
+}
+
+.modal-content {
+    border: 0;
+    border-radius: var(--ui-radius);
+    box-shadow: 0 30px 60px -20px rgba(15, 23, 42, .35);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--ui-garis-lembut);
+    padding: 18px 22px;
+}
+
+.modal-title {
+    font-weight: 800;
+    color: var(--ui-tinta);
+}
+
+.modal-body {
+    padding: 22px;
+}
+
+/* --------------------------------------------------------------- tab --- */
+
+.nav-pills .nav-link {
+    border-radius: var(--ui-radius-sm);
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--ui-tinta-3);
+}
+
+.nav-pills .nav-link.active {
+    background: var(--ui-gradien);
+    box-shadow: 0 12px 22px -16px var(--ui-aksen);
+}
+
+.nav-tabs {
+    border-bottom: 1px solid var(--ui-garis);
+}
+
+.nav-tabs .nav-link {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--ui-tinta-3);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--ui-aksen);
+    border-bottom-color: var(--ui-aksen);
+    background: transparent;
+}
+
+/* ====================================================== TABLET & PONSEL === */
+
+@media (max-width: 1024px) {
+    .section-header {
+        padding: 16px 18px;
+        border-radius: var(--ui-radius-md);
+    }
+
+    .section-header h1 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .main-content {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .card {
+        border-radius: var(--ui-radius-md);
+        margin-bottom: 16px;
+    }
+
+    .card .card-header,
+    .card .card-body {
+        padding: 16px;
+    }
+
+    .section-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .section-header h1 {
+        font-size: 1.1rem;
+    }
+
+    /* Tabel dibiarkan bisa digeser mendatar di dalam wadahnya sendiri,
+       supaya halamannya tidak ikut melebar. */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 10px 12px;
+        font-size: .8rem;
+    }
+
+    .btn {
+        padding: 9px 14px;
+    }
+
+    /* tombol aksi beruntun di tabel jangan saling menempel */
+    td .btn + .btn,
+    td form + form {
+        margin-top: 4px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .sidebar-menu li a,
+    .table tbody tr {
+        transition: none !important;
+    }
+}
