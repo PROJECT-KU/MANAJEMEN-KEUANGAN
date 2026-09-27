@@ -341,19 +341,25 @@
     .dsb-medali {
         display: grid;
         place-items: center;
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
-        border-radius: 12px;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        border-radius: 10px;
         background: var(--warna, var(--dsb-ungu));
         color: #fff;
-        font-size: 1.12rem;
+        font-size: .95rem;
         box-shadow: 0 8px 16px -10px rgba(15, 23, 42, .45);
     }
 
+    /* Sama seperti .mis-medali: layout admin memaksa .fas jadi 20px untuk
+       seluruh halaman, dan aturan itu menang atas pewarisan. Tanpa
+       font-size: inherit, mengecilkan ubin tidak pernah mengecilkan ikonnya. */
     .dsb-medali i {
         display: block;
+        width: 100%;
+        font-size: inherit;
         line-height: 1;
+        text-align: center;
     }
 
     .dsb-kpi-isi {
@@ -510,11 +516,11 @@
     }
 
     .dsb-medali.kecil {
-        width: 33px;
-        height: 33px;
-        flex: 0 0 33px;
-        border-radius: 10px;
-        font-size: .92rem;
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+        border-radius: 9px;
+        font-size: .8rem;
     }
 
     .dsb-panah {
