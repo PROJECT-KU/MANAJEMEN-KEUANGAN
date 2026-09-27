@@ -230,6 +230,118 @@
         white-space: nowrap;
     }
 
+    /* ------------------------------------------------ kelengkapan profil */
+
+    .prof-lengkap-atas {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .prof-lengkap-teks {
+        min-width: 0;
+    }
+
+    /*
+     * Cincin kemajuan dari conic-gradient: satu elemen, tanpa SVG dan tanpa
+     * skrip. --nilai diisi dari PHP sebagai angka 0-100.
+     */
+    .prof-cincin {
+        display: grid;
+        place-items: center;
+        width: 66px;
+        height: 66px;
+        flex: 0 0 66px;
+        border-radius: 50%;
+        background: conic-gradient(#6366f1 calc(var(--nilai, 0) * 1%), #e2e8f0 0);
+    }
+
+    .prof-cincin-isi {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #fff;
+    }
+
+    .prof-cincin-isi strong {
+        font-size: .92rem;
+        font-weight: 800;
+        color: var(--mis-tinta);
+        line-height: 1;
+    }
+
+    .prof-cincin-isi small {
+        font-size: .6rem;
+        font-weight: 700;
+        color: var(--mis-tinta-4);
+    }
+
+    .prof-lengkap-daftar {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+    }
+
+    /* Tiap butir sebuah tombol: menekannya membuka tab yang tepat dan
+       menaruh kursor di kotaknya. */
+    .prof-lengkap-butir {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 15px;
+        background: #f8fafc;
+        text-align: left;
+        cursor: pointer;
+        transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .prof-lengkap-butir:hover {
+        border-color: #c7d2fe;
+        background: #fff;
+        transform: translateX(2px);
+    }
+
+    .prof-lengkap-butir-teks {
+        min-width: 0;
+        flex: 1 1 auto;
+        display: grid;
+    }
+
+    .prof-lengkap-butir-judul {
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--mis-tinta);
+        line-height: 1.3;
+    }
+
+    .prof-lengkap-panah {
+        font-size: 11px;
+        color: #cbd5e1;
+        flex: 0 0 auto;
+    }
+
+    .prof-lengkap-tuntas {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 12px 14px;
+        border-radius: 15px;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #047857;
+    }
+
     /* ------------------------------------------------------ baris email */
 
     .prof-baris {
