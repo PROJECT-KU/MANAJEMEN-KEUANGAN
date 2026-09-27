@@ -1151,6 +1151,22 @@ textarea:focus-visible,
     color: var(--mis-tinta-3);
 }
 
+/*
+ * Jarak tidak boleh dihitung dua kali.
+ *
+ * .mis-kartu membawa margin-bottom sendiri supaya layar lama yang menumpuk
+ * kartu tanpa pembungkus tetap punya jarak. Tetapi begitu kartunya duduk di
+ * dalam kisi atau kolom yang SUDAH punya gap, keduanya bertumpuk: gap 16px
+ * + margin 16px = 32px, dan seluruh halaman terasa renggang.
+ */
+.mis-kisi > .mis-kartu,
+.mis-kisi > .mis-tabel-bungkus,
+.mis-kisi > .mis-kepala,
+[style*="display: grid"] > .mis-kartu,
+.mis-kolom > .mis-kartu {
+    margin-bottom: 0;
+}
+
 /* --------------------------------------------------- lencana ikon warna */
 
 /*
