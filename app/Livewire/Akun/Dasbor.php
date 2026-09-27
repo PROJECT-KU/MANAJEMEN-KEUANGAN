@@ -3,10 +3,8 @@
 namespace App\Livewire\Akun;
 
 use App\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -21,13 +19,39 @@ use Livewire\Component;
  */
 class Dasbor extends Component
 {
-    /** 'bulan' | 'tahun' | 'semua' — rentang untuk kartu uang. */
-    #[Url(as: 'rentang', keep: false)]
-    public string $rentang = 'bulan';
+    /** Kapan angka di layar ini terakhir diambil. */
+    public string $dimuatPada = '';
 
-    public function gantiRentang(string $rentang): void
+    public function mount(): void
     {
-        $this->rentang = in_array($rentang, ['bulan', 'tahun', 'semua'], true) ? $rentang : 'bulan';
+        $this->dimuatPada = now()->format('H:i');
+    }
+
+    /** Ambil ulang seluruh angka tanpa memuat ulang halaman. */
+    public function segarkan(): void
+    {
+        // Properti terhitung disimpan per permintaan, jadi cukup membuang
+        // simpanannya; permintaan ini akan menghitung ulang semuanya.
+        unset($this->gaji, $this->tim, $this->tugas, $this->pengajuan,
+            $this->artikel, $this->kehadiran, $this->cuti, $this->presensiHariIni,
+            $this->ringkasan);
+
+        $this->dimuatPada = now()->format('H:i');
+    }
+
+    /**
+     * Perusahaan pengguna, atau null bila belum diisi.
+     *
+     * Penting: where('company', null) diterjemahkan Laravel menjadi
+     * "company IS NULL", sehingga manajer yang perusahaannya belum diisi akan
+     * melihat SELURUH akun yang juga kosong perusahaannya. Semua pemakaian
+     * perusahaan harus lewat sini.
+     */
+    private function perusahaan(): ?string
+    {
+        $nama = trim((string) $this->pengguna()->company);
+
+        return $nama === '' ? null : $nama;
     }
 
     // ------------------------------------------------------------- pengguna
@@ -36,12 +60,6 @@ class Dasbor extends Component
     public function pengguna(): User
     {
         return auth()->user();
-    }
-
-    #[Computed]
-    public function pengelolaKeuangan(): bool
-    {
-        return in_array($this->pengguna()->level, ['manager', 'staff', 'ceo'], true);
     }
 
     #[Computed]
@@ -63,147 +81,6 @@ class Dasbor extends Component
         };
     }
 
-    // ------------------------------------------------------------- keuangan
-
-    /**
-     * Batas rentang yang sedang dipilih beserta rentang pembandingnya.
-     *
-     * @return array{mulai:?Carbon,selesai:?Carbon,banding_mulai:?Carbon,banding_selesai:?Carbon,label:string,label_banding:string}
-     */
-    private function batasRentang(): array
-    {
-        $kini = now();
-
-        return match ($this->rentang) {
-            'tahun' => [
-                'mulai' => $kini->copy()->startOfYear(),
-                'selesai' => $kini->copy()->endOfYear(),
-                'banding_mulai' => $kini->copy()->subYearNoOverflow()->startOfYear(),
-                'banding_selesai' => $kini->copy()->subYearNoOverflow()->endOfYear(),
-                'label' => 'Tahun ' . $kini->year,
-                'label_banding' => 'tahun lalu',
-            ],
-            'semua' => [
-                'mulai' => null,
-                'selesai' => null,
-                'banding_mulai' => null,
-                'banding_selesai' => null,
-                'label' => 'Sejak awal',
-                'label_banding' => '',
-            ],
-            default => [
-                'mulai' => $kini->copy()->startOfMonth(),
-                'selesai' => $kini->copy()->endOfMonth(),
-                // subMonthNoOverflow mencegah 31 Maret melompat ke 3 Maret,
-                // dan memakai rentang tanggal membuat Januari tetap
-                // dibandingkan dengan Desember tahun sebelumnya. Kode lama
-                // memakai whereYear tahun ini + whereMonth bulan lalu,
-                // sehingga tiap Januari pembandingnya selalu kosong.
-                'banding_mulai' => $kini->copy()->subMonthNoOverflow()->startOfMonth(),
-                'banding_selesai' => $kini->copy()->subMonthNoOverflow()->endOfMonth(),
-                'label' => $kini->locale('id')->translatedFormat('F Y'),
-                'label_banding' => 'bulan lalu',
-            ],
-        };
-    }
-
-    /** Jumlah nominal pada tabel debit/credit sesuai hak lihat pengguna. */
-    private function jumlahKas(string $tabel, ?Carbon $mulai, ?Carbon $selesai): float
-    {
-        $kolomTanggal = $tabel === 'debit' ? 'debit_date' : 'credit_date';
-        $pengguna = $this->pengguna();
-
-        $kueri = DB::table($tabel)
-            ->leftJoin('users', $tabel . '.user_id', '=', 'users.id');
-
-        if ($this->pengelolaKeuangan()) {
-            // Kas perusahaan: milik manager & staf pada perusahaan yang sama.
-            $kueri->where(function ($q) use ($pengguna, $tabel) {
-                $q->where('users.company', $pengguna->company)
-                    ->orWhere($tabel . '.user_id', $pengguna->getKey());
-            })->whereIn('users.level', ['manager', 'staff']);
-        } else {
-            $kueri->where($tabel . '.user_id', $pengguna->getKey());
-        }
-
-        if ($mulai && $selesai) {
-            $kueri->whereBetween($tabel . '.' . $kolomTanggal, [$mulai->toDateString(), $selesai->toDateString()]);
-        }
-
-        return (float) ($kueri->sum($tabel . '.nominal') ?? 0);
-    }
-
-    /** @return array<string,mixed> */
-    #[Computed]
-    public function kas(): array
-    {
-        $batas = $this->batasRentang();
-
-        $masuk = $this->jumlahKas('debit', $batas['mulai'], $batas['selesai']);
-        $keluar = $this->jumlahKas('credit', $batas['mulai'], $batas['selesai']);
-
-        $masukBanding = $batas['banding_mulai']
-            ? $this->jumlahKas('debit', $batas['banding_mulai'], $batas['banding_selesai'])
-            : null;
-        $keluarBanding = $batas['banding_mulai']
-            ? $this->jumlahKas('credit', $batas['banding_mulai'], $batas['banding_selesai'])
-            : null;
-
-        return [
-            'label' => $batas['label'],
-            'label_banding' => $batas['label_banding'],
-            'masuk' => $masuk,
-            'keluar' => $keluar,
-            'saldo' => $masuk - $keluar,
-            'masuk_selisih' => $this->selisih($masuk, $masukBanding),
-            'keluar_selisih' => $this->selisih($keluar, $keluarBanding),
-            'saldo_selama_ini' => $this->jumlahKas('debit', null, null) - $this->jumlahKas('credit', null, null),
-            'masuk_hari_ini' => $this->jumlahKas('debit', now()->startOfDay(), now()->endOfDay()),
-            'keluar_hari_ini' => $this->jumlahKas('credit', now()->startOfDay(), now()->endOfDay()),
-        ];
-    }
-
-    /** Persentase perubahan terhadap periode pembanding; null bila tak bisa dihitung. */
-    private function selisih(float $kini, ?float $lalu): ?float
-    {
-        if ($lalu === null || $lalu <= 0.0) {
-            return null;
-        }
-
-        return round((($kini - $lalu) / $lalu) * 100, 1);
-    }
-
-    /** Lima kategori pengeluaran terbesar pada rentang terpilih. */
-    #[Computed]
-    public function kategoriPengeluaran()
-    {
-        $batas = $this->batasRentang();
-        $pengguna = $this->pengguna();
-
-        $kueri = DB::table('credit')
-            ->select('categories_credit.name', DB::raw('SUM(credit.nominal) as total'))
-            ->leftJoin('categories_credit', 'credit.category_id', '=', 'categories_credit.id')
-            ->leftJoin('users', 'credit.user_id', '=', 'users.id');
-
-        if ($this->pengelolaKeuangan()) {
-            $kueri->where(function ($q) use ($pengguna) {
-                $q->where('users.company', $pengguna->company)
-                    ->orWhere('credit.user_id', $pengguna->getKey());
-            })->whereIn('users.level', ['manager', 'staff']);
-        } else {
-            $kueri->where('credit.user_id', $pengguna->getKey());
-        }
-
-        if ($batas['mulai']) {
-            $kueri->whereBetween('credit.credit_date', [$batas['mulai']->toDateString(), $batas['selesai']->toDateString()]);
-        }
-
-        return $kueri->groupBy('categories_credit.name')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get();
-    }
-
     // ---------------------------------------------------------------- gaji
 
     /** @return array<string,mixed> */
@@ -219,8 +96,8 @@ class Dasbor extends Component
             ->where('gaji.status', 'terbayar')
             ->whereYear('gaji.tanggal', $tahun);
 
-        if ($this->pengelolaTim()) {
-            $kueri->where('users.company', $pengguna->company);
+        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
+            $kueri->where('users.company', $this->perusahaan());
         } else {
             $kueri->where('gaji.user_id', $pengguna->getKey());
         }
@@ -247,6 +124,94 @@ class Dasbor extends Component
             'rata' => $bulanTerisi > 0 ? $total / $bulanTerisi : 0.0,
             'bulan_terisi' => $bulanTerisi,
         ];
+    }
+
+    /**
+     * Empat angka pembuka.
+     *
+     * Kartu uang masuk/keluar dihapus bersama fiturnya (27 September 2026),
+     * jadi pembukanya kini bicara soal pekerjaan: gaji, kehadiran, cuti, dan
+     * tugas — atau jumlah karyawan bagi manajer.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    #[Computed]
+    public function ringkasan(): array
+    {
+        $gaji = $this->gaji();
+        $hadir = $this->kehadiran();
+        $cuti = $this->cuti();
+
+        $kartu = [];
+
+        $penuh = 'Rp ' . number_format($gaji['total'], 0, ',', '.');
+
+        $kartu[] = [
+            'warna' => 'biru',
+            'ikon' => 'fa-money-check-alt',
+            'label' => ($this->pengelolaTim() ? 'Gaji terbayar' : 'Gaji diterima') . ' · ' . $gaji['tahun'],
+            // Angka rupiah besar tidak muat di kartu selebar seperempat layar;
+            // yang tampil bentuk ringkasnya, nilai penuhnya ada di tooltip dan
+            // di halaman Gaji.
+            'nilai' => $gaji['total'] >= 10_000_000 ? 'Rp ' . $this->singkat($gaji['total']) : $penuh,
+            'nilai_penuh' => $penuh,
+            'catatan' => $gaji['bulan_terisi'] > 0
+                ? 'Rata-rata Rp ' . number_format($gaji['rata'], 0, ',', '.') . ' / bulan'
+                : 'Belum ada gaji terbayar tahun ini.',
+        ];
+
+        if ($this->pengelolaTim()) {
+            $tim = $this->tim();
+
+            $kartu[] = [
+                'warna' => 'ungu',
+                'ikon' => 'fa-users',
+                'label' => 'Karyawan aktif',
+                'nilai' => (string) $tim['aktif'],
+                'catatan' => $tim['total'] . ' akun terdaftar · ' . $tim['nonaktif'] . ' nonaktif',
+            ];
+        } else {
+            $kartu[] = [
+                'warna' => 'ungu',
+                'ikon' => 'fa-briefcase',
+                'label' => 'Masa kerja',
+                'nilai' => $hadir['masa_kerja'],
+                'catatan' => 'Sejak ' . ($this->pengguna()->created_at
+                    ? $this->pengguna()->created_at->locale('id')->translatedFormat('d F Y')
+                    : '-'),
+            ];
+        }
+
+        $kartu[] = [
+            'warna' => 'hijau',
+            'ikon' => 'fa-fingerprint',
+            'label' => 'Hadir bulan ini',
+            'nilai' => $hadir['hadir_bulan_ini'] . ' hari',
+            'catatan' => $hadir['izin_bulan_ini'] . ' izin · ' . $hadir['lembur_bulan_ini'] . ' lembur',
+        ];
+
+        $kartu[] = [
+            'warna' => 'kuning',
+            'ikon' => 'fa-umbrella-beach',
+            'label' => 'Sisa cuti',
+            'nilai' => $cuti['boleh'] ? $cuti['sisa'] . ' hari' : 'Belum berhak',
+            'catatan' => $cuti['boleh']
+                ? $cuti['terpakai'] . ' dari ' . $cuti['jatah'] . ' hari terpakai'
+                : 'Terbuka setelah 1 tahun masa kerja.',
+        ];
+
+        return $kartu;
+    }
+
+    /** Rupiah ringkas untuk label grafik: 1.250.000 -> 1,3 jt. */
+    public function singkat(float $nilai): string
+    {
+        return match (true) {
+            $nilai >= 1_000_000_000 => rtrim(rtrim(number_format($nilai / 1_000_000_000, 1, ',', '.'), '0'), ',') . ' M',
+            $nilai >= 1_000_000 => rtrim(rtrim(number_format($nilai / 1_000_000, 1, ',', '.'), '0'), ',') . ' jt',
+            $nilai >= 1_000 => rtrim(rtrim(number_format($nilai / 1_000, 0, ',', '.'), '0'), ',') . ' rb',
+            default => number_format($nilai, 0, ',', '.'),
+        };
     }
 
     // ------------------------------------------------------------ kehadiran
@@ -319,7 +284,16 @@ class Dasbor extends Component
     #[Computed]
     public function tim(): array
     {
-        $perusahaan = $this->pengguna()->company;
+        $perusahaan = $this->perusahaan();
+
+        if ($perusahaan === null) {
+            // Tanpa penjaga ini, manajer yang perusahaannya belum diisi akan
+            // melihat semua akun yang perusahaannya juga kosong.
+            return [
+                'total' => 0, 'aktif' => 0, 'nonaktif' => 0, 'belum_verifikasi' => 0,
+                'terbaru' => collect(), 'tanpa_perusahaan' => true,
+            ];
+        }
 
         $dasar = DB::table('users')->where('company', $perusahaan);
 
@@ -335,6 +309,7 @@ class Dasbor extends Component
                 ->orderByDesc('created_at')
                 ->limit(5)
                 ->get(['id', 'full_name', 'level', 'gambar', 'created_at', 'status']),
+            'tanpa_perusahaan' => false,
         ];
     }
 
@@ -375,9 +350,9 @@ class Dasbor extends Component
             ->orderByDesc('perjalanan_dinas.created_at')
             ->limit(5);
 
-        if ($this->pengelolaTim()) {
+        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
             $kueri->where('perjalanan_dinas.status', 'ajukan')
-                ->where('users.company', $pengguna->company);
+                ->where('users.company', $this->perusahaan());
         } else {
             $kueri->where('perjalanan_dinas.user_id', $pengguna->getKey())
                 ->whereIn('perjalanan_dinas.status', ['draft', 'ajukan']);
@@ -392,6 +367,8 @@ class Dasbor extends Component
         return DB::table('artikel')
             ->select('artikel.id', 'artikel.token', 'artikel.judul', 'artikel.gambar_depan', 'artikel.created_at', 'categories_artikel.kategori')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            // Draf tidak boleh ikut tampil di dasbor semua orang.
+            ->whereIn('artikel.status', ['publish', 'published', 'terbit'])
             ->orderByDesc('artikel.created_at')
             ->limit(4)
             ->get();

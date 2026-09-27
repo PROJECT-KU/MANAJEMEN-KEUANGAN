@@ -31,36 +31,6 @@ class DasborTest extends TestCase
         return $pengguna->refresh();
     }
 
-    /** Kategori pemasukan seadanya; tabel debit menuntut kunci asing yang sah. */
-    private function kategoriDebit(): int
-    {
-        $ada = DB::table('categories_debit')->value('id');
-
-        if ($ada) {
-            return (int) $ada;
-        }
-
-        return (int) DB::table('categories_debit')->insertGetId([
-            'name' => 'Uji Dasbor',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
-
-    /** Satu baris pemasukan; kolom wajib diisi seadanya. */
-    private function catatDebit(User $pengguna, int $nominal, $tanggal): void
-    {
-        DB::table('debit')->insert([
-            'user_id' => $pengguna->getKey(),
-            'category_id' => $this->kategoriDebit(),
-            'description' => 'uji dasbor',
-            'nominal' => $nominal,
-            'debit_date' => $tanggal->toDateString(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
-
     public static function peran(): array
     {
         return [
@@ -85,56 +55,84 @@ class DasborTest extends TestCase
             ->assertSeeLivewire(Dasbor::class);
     }
 
-    public function test_rentang_bisa_diganti(): void
+    public function test_dasbor_tidak_lagi_menampilkan_kas(): void
     {
+        // Fitur Uang Masuk & Uang Keluar dihapus 27 September 2026.
         $this->actingAs($this->buatPengguna('manager'));
 
         Livewire::test(Dasbor::class)
-            ->assertSet('rentang', 'bulan')
-            ->call('gantiRentang', 'tahun')
-            ->assertSet('rentang', 'tahun')
-            ->call('gantiRentang', 'semua')
-            ->assertSet('rentang', 'semua')
-            // nilai asing tidak diterima
-            ->call('gantiRentang', 'sembarang')
-            ->assertSet('rentang', 'bulan');
+            ->assertDontSee('Uang masuk')
+            ->assertDontSee('Uang keluar')
+            ->assertDontSee('Pengeluaran terbesar');
     }
 
-    public function test_kas_bulan_lalu_dihitung_lintas_tahun(): void
+    public function test_halaman_uang_masuk_dan_keluar_sudah_tiada(): void
     {
-        // Kode lama memakai whereYear(tahun ini) + whereMonth(bulan lalu),
-        // sehingga pembanding pada bulan Januari selalu kosong.
-        $this->travelTo(now()->setDate(now()->year, 1, 15));
+        $this->actingAs($this->buatPengguna('manager'))
+            ->get('/account/debit')
+            ->assertNotFound();
 
-        $pengguna = $this->buatPengguna('manager');
-        $this->actingAs($pengguna);
+        $this->actingAs($this->buatPengguna('manager'))
+            ->get('/account/credit')
+            ->assertNotFound();
+    }
 
-        $this->catatDebit($pengguna, 500000, now()->subMonthNoOverflow()->startOfMonth()->addDays(3));
-        $this->catatDebit($pengguna, 750000, now());
+    public function test_segarkan_memperbarui_penanda_waktu(): void
+    {
+        $this->actingAs($this->buatPengguna('karyawan'));
 
-        $kas = Livewire::test(Dasbor::class)->instance()->kas();
+        $uji = Livewire::test(Dasbor::class);
+        $semula = $uji->get('dimuatPada');
 
-        $this->assertSame(750000.0, $kas['masuk']);
-        // 750rb dibanding 500rb bulan lalu = +50%
-        $this->assertSame(50.0, $kas['masuk_selisih']);
+        $this->travel(2)->hours();
+
+        $uji->call('segarkan');
+
+        $this->assertNotSame($semula, $uji->get('dimuatPada'));
 
         $this->travelBack();
     }
 
-    public function test_pemasukan_tahun_ini_tidak_terbatas_bulan_mei(): void
+    public function test_artikel_draf_tidak_ikut_tampil(): void
     {
-        // Cabang non-pengelola pada kode lama menimpa pemasukan tahun ini
-        // dengan kueri yang dipatok bulan Mei.
-        $pengguna = $this->buatPengguna('karyawan');
-        $this->actingAs($pengguna);
+        $this->actingAs($this->buatPengguna('karyawan'));
 
-        foreach ([1, 5, 9] as $bulan) {
-            $this->catatDebit($pengguna, 100000, now()->setDate(now()->year, $bulan, 10));
-        }
+        $judul = 'Draf Rahasia ' . uniqid();
 
-        $uji = Livewire::test(Dasbor::class)->call('gantiRentang', 'tahun');
+        DB::table('artikel')->insert([
+            'user_id' => auth()->id(),
+            'categories_artikel_id' => DB::table('categories_artikel')->value('id'),
+            'token' => \Illuminate\Support\Str::random(20),
+            'judul' => $judul,
+            'kata_kunci' => 'uji',
+            'isi' => 'uji',
+            'dilihat' => 0,
+            'status' => 'draft',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        $this->assertSame(300000.0, $uji->instance()->kas()['masuk']);
+        Livewire::test(Dasbor::class)->assertDontSee($judul);
+    }
+
+    public function test_manajer_tanpa_perusahaan_tidak_melihat_akun_orang_lain(): void
+    {
+        // where('company', null) diterjemahkan Laravel jadi "IS NULL", jadi
+        // tanpa penjaga, manajer berperusahaan kosong melihat semua akun yang
+        // perusahaannya juga kosong.
+        $manajer = $this->buatPengguna('manager');
+        $manajer->forceFill(['company' => null])->save();
+
+        $lain = $this->buatPengguna('karyawan');
+        $lain->forceFill(['company' => null, 'full_name' => 'Akun Tanpa Perusahaan'])->save();
+
+        $this->actingAs($manajer->refresh());
+
+        $tim = Livewire::test(Dasbor::class)->instance()->tim();
+
+        $this->assertSame(0, $tim['total']);
+        $this->assertTrue($tim['tanpa_perusahaan']);
+        $this->assertNotContains('Akun Tanpa Perusahaan', $tim['terbaru']->pluck('full_name')->all());
     }
 
     public function test_karyawan_terbaru_hanya_dari_perusahaan_sendiri(): void

@@ -153,17 +153,15 @@ Route::prefix('account')
             Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
             Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account', 'except' => ['show']]);
 
-            //debit
-            Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
-            Route::Resource('/debit', 'account\DebitController', ['as' => 'account', 'except' => ['show']]);
+            // Fitur Uang Masuk (debit) dan Uang Keluar (credit) dihapus
+            // 27 September 2026 atas permintaan pemilik. Tabelnya sengaja
+            // TIDAK ikut dihapus karena Neraca, Laporan Semua, dan Pesanan
+            // masih membaca data yang sudah terlanjur tercatat di sana.
 
             //categories credit
             Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
             Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account', 'except' => ['show']]);
 
-            //credit
-            Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
-            Route::Resource('/credit', 'account\CreditController', ['as' => 'account', 'except' => ['show']]);
 
             //laporan debit
             Route::get('/laporan_debit', 'account\LaporanDebitController@index')->name('account.laporan_debit.index');

@@ -109,10 +109,62 @@
         box-shadow: 0 6px 14px -8px rgba(15, 23, 42, .5);
     }
 
-    .dsb-memuat {
-        font-size: .78rem;
+    .dsb-segar {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .76rem;
+        font-weight: 600;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    .dsb-tombol-segar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 15px;
+        border: 1px solid var(--dsb-garis);
+        border-radius: 13px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .8rem;
         font-weight: 700;
         color: #6366f1;
+        cursor: pointer;
+        transition: all .25s ease;
+        white-space: nowrap;
+    }
+
+    .dsb-tombol-segar:hover:not(:disabled) {
+        border-color: #a5b4fc;
+        box-shadow: 0 8px 18px -12px #6366f1;
+    }
+
+    .dsb-tombol-segar:disabled {
+        opacity: .7;
+        cursor: progress;
+    }
+
+    .dsb-berputar {
+        animation: dsb-putar .8s linear infinite;
+    }
+
+    @keyframes dsb-putar {
+        to { transform: rotate(360deg); }
+    }
+
+    /* tabel alternatif untuk pembaca layar */
+    .dsb-khusus-pembaca {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 
     /* -------------------------------------------------------------- kabar */
@@ -382,6 +434,17 @@
 
     .dsb-batang-kolom:hover .dsb-batang-tip {
         opacity: 1;
+    }
+
+    /* nilai di atas batang: selalu terlihat, termasuk di layar sentuh */
+    .dsb-batang-nilai {
+        display: block;
+        text-align: center;
+        font-size: .58rem;
+        font-weight: 800;
+        color: #64748b;
+        margin-bottom: 4px;
+        white-space: nowrap;
     }
 
     .dsb-batang-label {
@@ -795,6 +858,25 @@
         word-break: break-word;
     }
 
+    /* ------------------------------------------------- menu akses cepat */
+
+    .dsb-pintasan .menu-item,
+    .dsb-pintasan #carousel,
+    .dsb-pintasan .card-icon {
+        font-family: inherit;
+    }
+
+    /* kartu pembungkus sudah punya bayangan sendiri; buang bayangan ganda
+       dan jarak berlebih dari markah menu lama */
+    .dsb-pintasan .quick-menu-container,
+    .dsb-pintasan .menu-grid {
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+    }
+
     /* ------------------------------------------------------------ kosong */
 
     .dsb-kosong {
@@ -887,7 +969,18 @@
             gap: 5px;
         }
 
-        .dsb-batang-label {
+        /* nilai di atas batang: selalu terlihat, termasuk di layar sentuh */
+    .dsb-batang-nilai {
+        display: block;
+        text-align: center;
+        font-size: .58rem;
+        font-weight: 800;
+        color: #64748b;
+        margin-bottom: 4px;
+        white-space: nowrap;
+    }
+
+    .dsb-batang-label {
             font-size: .56rem;
         }
 

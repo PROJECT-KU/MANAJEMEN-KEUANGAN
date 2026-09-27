@@ -525,25 +525,10 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif
                                 <!--================== END ==================-->
 
-                                <!--================== KEUANGAN ==================-->
-                                @if (Auth::user()->level !== 'user')
-                                <li class="menu-header">KEUANGAN</li>
-                                <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
-                                        <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Masuk</a></li>
-                                    </ul>
-                                </li>
-                                <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Keluar</span></a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
-                                        <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Keluar</a></li>
-                                    </ul>
-                                </li>
-                                @endif
-                                <!--================== END ==================-->
+                                {{-- Menu KEUANGAN (Uang Masuk & Uang Keluar beserta kategorinya)
+                                     dihapus 27 September 2026 atas permintaan pemilik.
+                                     Laporan Uang Masuk/Keluar di bagian LAPORAN sengaja
+                                     dibiarkan karena membaca data lama yang masih tersimpan. --}}
 
                                 {{-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">

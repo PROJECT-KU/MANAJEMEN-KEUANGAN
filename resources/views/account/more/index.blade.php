@@ -149,11 +149,6 @@ Dashboard | MIS
                             <a href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left:-1px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-bottom: -30px; margin-left:-5px;">Kategori</span>
                         </div>
-                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #8A2BE2, #800080, #4B0082, #483D8B); text-align: center;">
-                            <a href="{{ route('account.debit.index') }}"><i class="fas fa-wallet" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i></a>
-                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                            <span style="font-size: 16px;">Masuk</span>
-                        </div>
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #7FFF00, #32CD32, #008000, #006400); text-align: center;">
                             <a href="{{ route('account.laporan_debit.index') }}"><i class="fas fa-chart-line" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-bottom: -30px; margin-left:-5px;">Laporan</span>
@@ -166,11 +161,6 @@ Dashboard | MIS
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #800000, #800000, #660000, #B22222); text-align: center;">
                             <a href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left:-1px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-bottom: -30px; margin-left:-5px;">Kategori</span>
-                        </div>
-                        <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #A52A2A, #8B0000, #800000, #C71585); text-align: center;">
-                            <a href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left:-5px;"></i></a>
-                            <span style="font-size: 16px; display: inline-block; margin-bottom: -30px;">Uang</span>
-                            <span style="font-size: 16px;">Keluar</span>
                         </div>
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #FFC0CB, #FFB6C1, #FF69B4, #FA8072); text-align: center;">
                             <a href="{{ route('account.laporan_credit.index') }}"><i class="fas fa-chart-area" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i></a>

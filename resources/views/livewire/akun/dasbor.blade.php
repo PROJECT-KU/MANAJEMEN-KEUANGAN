@@ -7,8 +7,8 @@
             <p class="dsb-sub">
                 @if ($this->pengelolaTim)
                     Ringkasan perusahaan {{ $this->pengguna->company ?: 'Anda' }} hari ini.
-                @elseif ($this->pengelolaKeuangan)
-                    Ringkasan kas dan pekerjaan Anda hari ini.
+                @elseif ($this->pengguna->level !== 'user')
+                    Ringkasan pekerjaan Anda hari ini.
                 @else
                     Ringkasan akun dan kabar terbaru untuk Anda.
                 @endif
@@ -16,15 +16,15 @@
         </div>
 
         <div class="dsb-kepala-aksi">
-            <div class="dsb-pemilih" role="group" aria-label="Pilih rentang waktu">
-                @foreach (['bulan' => 'Bulan ini', 'tahun' => 'Tahun ini', 'semua' => 'Semua'] as $nilai => $label)
-                    <button type="button" class="{{ $rentang === $nilai ? 'aktif' : '' }}"
-                        wire:click="gantiRentang('{{ $nilai }}')" wire:loading.attr="disabled">
-                        {{ $label }}
-                    </button>
-                @endforeach
-            </div>
-            <span class="dsb-memuat" wire:loading wire:target="gantiRentang">Memuat…</span>
+            <span class="dsb-segar">
+                <i class="fas fa-clock"></i> Angka per {{ $dimuatPada }} WIB
+            </span>
+            <button type="button" class="dsb-tombol-segar" wire:click="segarkan" wire:loading.attr="disabled"
+                wire:target="segarkan" title="Ambil ulang angka">
+                <i class="fas fa-rotate" wire:loading.class="dsb-berputar" wire:target="segarkan"></i>
+                <span wire:loading.remove wire:target="segarkan">Segarkan</span>
+                <span wire:loading wire:target="segarkan">Memuat…</span>
+            </button>
         </div>
     </header>
 
@@ -42,69 +42,16 @@
 
     {{-- ======================================================== kartu utama --}}
     <section class="dsb-kpi">
-        <article class="dsb-kartu dsb-kpi-kartu dsb-ungu">
-            <span class="dsb-medali"><i class="fas fa-wallet"></i></span>
-            <div class="dsb-kpi-isi">
-                <p class="dsb-label">Saldo &middot; {{ $this->kas['label'] }}</p>
-                <h2 class="dsb-angka">Rp {{ number_format($this->kas['saldo'], 0, ',', '.') }}</h2>
-                <p class="dsb-catatan">
-                    Sejak awal: Rp {{ number_format($this->kas['saldo_selama_ini'], 0, ',', '.') }}
-                </p>
-            </div>
-        </article>
-
-        <article class="dsb-kartu dsb-kpi-kartu dsb-hijau">
-            <span class="dsb-medali"><i class="fas fa-arrow-down"></i></span>
-            <div class="dsb-kpi-isi">
-                <p class="dsb-label">Uang masuk</p>
-                <h2 class="dsb-angka">Rp {{ number_format($this->kas['masuk'], 0, ',', '.') }}</h2>
-                <p class="dsb-catatan">
-                    @if (! is_null($this->kas['masuk_selisih']))
-                        <span class="dsb-delta {{ $this->kas['masuk_selisih'] >= 0 ? 'naik' : 'turun' }}">
-                            <i class="fas fa-caret-{{ $this->kas['masuk_selisih'] >= 0 ? 'up' : 'down' }}"></i>
-                            {{ abs($this->kas['masuk_selisih']) }}%
-                        </span>
-                        dibanding {{ $this->kas['label_banding'] }}
-                    @else
-                        Hari ini: Rp {{ number_format($this->kas['masuk_hari_ini'], 0, ',', '.') }}
-                    @endif
-                </p>
-            </div>
-        </article>
-
-        <article class="dsb-kartu dsb-kpi-kartu dsb-merah">
-            <span class="dsb-medali"><i class="fas fa-arrow-up"></i></span>
-            <div class="dsb-kpi-isi">
-                <p class="dsb-label">Uang keluar</p>
-                <h2 class="dsb-angka">Rp {{ number_format($this->kas['keluar'], 0, ',', '.') }}</h2>
-                <p class="dsb-catatan">
-                    @if (! is_null($this->kas['keluar_selisih']))
-                        <span class="dsb-delta {{ $this->kas['keluar_selisih'] <= 0 ? 'naik' : 'turun' }}">
-                            <i class="fas fa-caret-{{ $this->kas['keluar_selisih'] >= 0 ? 'up' : 'down' }}"></i>
-                            {{ abs($this->kas['keluar_selisih']) }}%
-                        </span>
-                        dibanding {{ $this->kas['label_banding'] }}
-                    @else
-                        Hari ini: Rp {{ number_format($this->kas['keluar_hari_ini'], 0, ',', '.') }}
-                    @endif
-                </p>
-            </div>
-        </article>
-
-        <article class="dsb-kartu dsb-kpi-kartu dsb-biru">
-            <span class="dsb-medali"><i class="fas fa-money-check-alt"></i></span>
-            <div class="dsb-kpi-isi">
-                <p class="dsb-label">{{ $this->pengelolaTim ? 'Gaji terbayar' : 'Gaji diterima' }} &middot; {{ $this->gaji['tahun'] }}</p>
-                <h2 class="dsb-angka">Rp {{ number_format($this->gaji['total'], 0, ',', '.') }}</h2>
-                <p class="dsb-catatan">
-                    @if ($this->gaji['bulan_terisi'] > 0)
-                        Rata-rata Rp {{ number_format($this->gaji['rata'], 0, ',', '.') }} / bulan
-                    @else
-                        Belum ada gaji terbayar tahun ini.
-                    @endif
-                </p>
-            </div>
-        </article>
+        @foreach ($this->ringkasan as $kartu)
+            <article class="dsb-kartu dsb-kpi-kartu dsb-{{ $kartu['warna'] }}">
+                <span class="dsb-medali"><i class="fas {{ $kartu['ikon'] }}"></i></span>
+                <div class="dsb-kpi-isi">
+                    <p class="dsb-label">{{ $kartu['label'] }}</p>
+                    <h2 class="dsb-angka" title="{{ $kartu['nilai_penuh'] ?? $kartu['nilai'] }}">{{ $kartu['nilai'] }}</h2>
+                    <p class="dsb-catatan">{{ $kartu['catatan'] }}</p>
+                </div>
+            </article>
+        @endforeach
     </section>
 
     {{-- ===================================================== dua lajur isi --}}
@@ -124,12 +71,31 @@
                 </div>
 
                 @if ($this->gaji['total'] > 0)
-                    <div class="dsb-batang">
+                    {{-- Tabel ringkas untuk pembaca layar; grafiknya sendiri
+                         disembunyikan dari pembaca layar karena hanya bentuk. --}}
+                    <table class="dsb-khusus-pembaca">
+                        <caption>Gaji per bulan tahun {{ $this->gaji['tahun'] }}</caption>
+                        <tbody>
+                            @foreach ($this->gaji['per_bulan'] as $bulan => $nilai)
+                                <tr>
+                                    <th scope="row">{{ \Illuminate\Support\Carbon::create(null, $bulan)->locale('id')->translatedFormat('F') }}</th>
+                                    <td>Rp {{ number_format($nilai, 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <div class="dsb-batang" aria-hidden="true">
                         @foreach ($this->gaji['per_bulan'] as $bulan => $nilai)
                             @php
                                 $tinggi = $this->gaji['tertinggi'] > 0 ? max(($nilai / $this->gaji['tertinggi']) * 100, 4) : 4;
                             @endphp
                             <div class="dsb-batang-kolom">
+                                {{-- Nilai ditaruh di atas batang, bukan hanya saat
+                                     kursor lewat: di layar sentuh hover tidak ada. --}}
+                                @if ($nilai > 0)
+                                    <span class="dsb-batang-nilai">{{ $this->singkat($nilai) }}</span>
+                                @endif
                                 <div class="dsb-batang-isi {{ $nilai > 0 ? 'ada' : '' }}" style="height: {{ $tinggi }}%">
                                     <span class="dsb-batang-tip">Rp {{ number_format($nilai, 0, ',', '.') }}</span>
                                 </div>
@@ -141,40 +107,6 @@
                     <div class="dsb-kosong">
                         <i class="fas fa-chart-column"></i>
                         <p>Belum ada gaji berstatus terbayar pada {{ $this->gaji['tahun'] }}.</p>
-                    </div>
-                @endif
-            </section>
-
-            {{-- kategori pengeluaran --}}
-            <section class="dsb-kartu">
-                <div class="dsb-kartu-kepala">
-                    <div>
-                        <h3 class="dsb-kartu-judul"><i class="fas fa-tags dsb-ikon-merah"></i> Pengeluaran terbesar</h3>
-                        <p class="dsb-kartu-sub">{{ $this->kas['label'] }}</p>
-                    </div>
-                    <a href="{{ route('account.credit.index') }}" class="dsb-tautan">Lihat semua</a>
-                </div>
-
-                @if ($this->kategoriPengeluaran->isNotEmpty())
-                    @php $terbesar = (float) $this->kategoriPengeluaran->max('total'); @endphp
-                    <ul class="dsb-daftar-kategori">
-                        @foreach ($this->kategoriPengeluaran as $i => $baris)
-                            <li>
-                                <div class="dsb-kategori-atas">
-                                    <span class="dsb-kategori-nama">{{ $baris->name ?: 'Tanpa kategori' }}</span>
-                                    <span class="dsb-kategori-nilai">Rp {{ number_format($baris->total, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="dsb-bar">
-                                    <span class="dsb-bar-isi warna-{{ $i % 5 }}"
-                                        style="width: {{ $terbesar > 0 ? max(($baris->total / $terbesar) * 100, 3) : 3 }}%"></span>
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
-                @else
-                    <div class="dsb-kosong">
-                        <i class="fas fa-receipt"></i>
-                        <p>Belum ada pengeluaran tercatat pada rentang ini.</p>
                     </div>
                 @endif
             </section>
@@ -462,7 +394,16 @@
     </section>
 
     {{-- =================================================== menu akses cepat --}}
-    @include('account.dashboard.menu-akses-cepat')
+    <section class="dsb-kartu dsb-pintasan">
+        <div class="dsb-kartu-kepala">
+            <div>
+                <h3 class="dsb-kartu-judul"><i class="fas fa-bolt dsb-ikon-ungu"></i> Akses cepat</h3>
+                <p class="dsb-kartu-sub">Pintasan ke halaman yang sering dibuka</p>
+            </div>
+        </div>
+
+        @include('account.dashboard.menu-akses-cepat')
+    </section>
 
     @include('livewire.akun.dasbor-gaya')
 </div>
