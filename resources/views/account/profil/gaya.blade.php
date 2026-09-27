@@ -128,33 +128,54 @@
     }
 
     /*
-     * Lencana terverifikasi mengikuti centang WhatsApp: lingkaran penuh
-     * berwarna hijau khas WhatsApp dengan centang putih di tengah, bukan
-     * kotak membulat bergradien.
+     * Lencana terverifikasi: tepi bergerigi seperti tanda terverifikasi di
+     * Instagram, digambar sebagai path SVG 12 tonjolan. Lingkaran CSS tidak
+     * bisa bergelombang seperti ini.
+     *
+     * Warnanya tetap hijau, bukan biru seperti Instagram, supaya sewarna
+     * dengan centang "Sudah diverifikasi" tepat di bawahnya.
      */
     .prof-foto-lencana {
         position: absolute;
-        right: -2px;
-        bottom: -2px;
-        display: grid;
-        place-items: center;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 2.5px solid #fff;
-        color: #fff;
-        font-size: .62rem;
-        background: #25d366;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
+        right: -5px;
+        bottom: -5px;
+        display: block;
+        width: 30px;
+        height: 30px;
+        line-height: 0;
+        filter: drop-shadow(0 2px 4px rgba(15, 23, 42, .22));
     }
 
-    /* Belum terverifikasi tetap kuning supaya bedanya langsung terlihat. */
-    .prof-foto-lencana.belum {
-        background: #f59e0b;
+    .prof-foto-lencana svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
     }
 
-    .prof-foto-lencana i {
-        line-height: 1;
+    /* Tepi putih dibuat dari garis tebal pada bentuk yang sama, jadi ia
+       mengikuti gerigi persis tanpa perlu path kedua. */
+    .prof-lencana-tepi {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 11;
+        stroke-linejoin: round;
+    }
+
+    .prof-lencana-isi {
+        fill: #16a34a;
+    }
+
+    .prof-foto-lencana.belum .prof-lencana-isi {
+        fill: #f59e0b;
+    }
+
+    .prof-lencana-centang {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 11;
+        stroke-linecap: round;
+        stroke-linejoin: round;
     }
 
     .prof-nama {
@@ -706,10 +727,20 @@
     }
 
     .prof-aksi-catatan {
+        display: flex;
+        align-items: center;
+        gap: 6px;
         margin: 0;
         font-size: .74rem;
         color: var(--mis-tinta-4);
         flex: 1 1 180px;
+    }
+
+    .prof-aksi-catatan i,
+    .prof-salah i {
+        font-size: inherit;
+        line-height: 1;
+        flex: 0 0 auto;
     }
 
     /*
@@ -758,9 +789,8 @@
         color: #e11d48;
     }
 
-    .prof-salah i {
-        margin-top: 2px;
-        font-size: 10px;
+    .prof-salah {
+        align-items: center;
     }
 
     .prof-kabar {

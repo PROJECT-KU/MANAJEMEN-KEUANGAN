@@ -89,12 +89,24 @@ Profil | MIS
               <img id="prf-pratinjau" class="prof-foto" src="{{ $fotoProfil }}"
                 alt="Foto profil {{ $user->full_name }}">
               @if ($user->email_verified_at)
+                {{-- Lencana bergerigi seperti tanda terverifikasi di Instagram.
+                     Bentuknya digambar sebagai satu path SVG (12 tonjolan), bukan
+                     lingkaran CSS, karena tepi bergelombangnya tidak bisa dibuat
+                     dengan border-radius. --}}
                 <span class="prof-foto-lencana" title="Email sudah terverifikasi">
-                  <i class="fas fa-check"></i>
+                  <svg viewBox="-7 -7 114 114" aria-hidden="true">
+                    <path class="prof-lencana-tepi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                    <path class="prof-lencana-isi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                    <path class="prof-lencana-centang" d="M33 51 L45 63 L68 38" />
+                  </svg>
                 </span>
               @else
                 <span class="prof-foto-lencana belum" title="Email belum terverifikasi">
-                  <i class="fas fa-exclamation"></i>
+                  <svg viewBox="-7 -7 114 114" aria-hidden="true">
+                    <path class="prof-lencana-tepi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                    <path class="prof-lencana-isi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                    <path class="prof-lencana-centang" d="M50 30 L50 56 M50 68 L50 70" />
+                  </svg>
                 </span>
               @endif
             </div>

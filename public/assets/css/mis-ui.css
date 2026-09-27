@@ -1108,6 +1108,30 @@ textarea:focus-visible,
     margin-left: auto;
 }
 
+/*
+ * Ikon SEBARIS di dalam teks ikut ukuran teksnya.
+ *
+ * Sama seperti ubin ikon: layout admin memaksa `.fas { font-size: 20px }`
+ * untuk seluruh halaman, jadi centang kecil di samping "Sudah diverifikasi"
+ * tergambar 20px padahal teksnya 11,5px — ikonnya membesar sendiri dan
+ * tidak sejajar dengan tulisannya. Barisnya dibuat flex supaya pusat ikon
+ * dan pusat teks benar-benar setinggi, bukan sekadar mendekati.
+ */
+.mis-bantuan:has(> i),
+.mis-baris-ikon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mis-bantuan i,
+.mis-label i,
+.mis-baris-ikon i {
+    font-size: inherit;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
 /* --------------------------------------------------------------- kartu */
 
 .mis-kartu,
