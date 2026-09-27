@@ -89,11 +89,11 @@ Profil | MIS
               <img id="prf-pratinjau" class="prof-foto" src="{{ $fotoProfil }}"
                 alt="Foto profil {{ $user->full_name }}">
               @if ($user->email_verified_at)
-                <span class="prof-foto-lencana mis-hijau" title="Email sudah terverifikasi">
+                <span class="prof-foto-lencana" title="Email sudah terverifikasi">
                   <i class="fas fa-check"></i>
                 </span>
               @else
-                <span class="prof-foto-lencana mis-kuning" title="Email belum terverifikasi">
+                <span class="prof-foto-lencana belum" title="Email belum terverifikasi">
                   <i class="fas fa-exclamation"></i>
                 </span>
               @endif
@@ -156,18 +156,23 @@ Profil | MIS
               <p class="mis-label prof-email-label">Alamat email</p>
 
               <div class="prof-baris">
-                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                <div class="prof-baris-teks">
+                {{-- Ikon, alamat, dan tombol ubah dalam satu baris sendiri supaya
+                     ketiganya benar-benar sejajar; keterangan terverifikasi turun ke
+                     baris bawahnya. Sebelumnya ikon dirata-tengahkan terhadap DUA
+                     baris teks, jadi alamatnya duduk lebih tinggi daripada ikonnya. --}}
+                <div class="prof-baris-atas">
+                  <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
                   <p class="prof-nilai">{{ $user->email }}</p>
-                  @if ($user->email_verified_at)
-                    <p class="mis-bantuan"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
-                  @else
-                    <p class="mis-bantuan"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
-                  @endif
+                  <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
+                    <i class="fas fa-pen"></i>
+                  </button>
                 </div>
-                <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
-                  <i class="fas fa-pen"></i>
-                </button>
+
+                @if ($user->email_verified_at)
+                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
+                @else
+                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
+                @endif
               </div>
 
               @if (! $user->email_verified_at)
