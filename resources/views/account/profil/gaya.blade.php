@@ -238,9 +238,10 @@
     }
 
     .prof-unggah {
-        display: flex;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 14px;
         align-items: center;
-        gap: 14px;
         padding: 10px 12px;
         border-radius: 13px;
         border: 1.5px dashed #c7d2fe;
@@ -257,9 +258,19 @@
         background: #eef2ff;
     }
 
-    .prof-unggah-teks {
-        min-width: 0;
-        flex: 1 1 auto;
+    .prof-unggah > .mis-medali {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .prof-unggah-nama {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .prof-unggah > .mis-bantuan {
+        grid-column: 2;
+        grid-row: 2;
     }
 
     .prof-unggah-nama {
@@ -331,10 +342,13 @@
 
     /* Tiap butir sebuah tombol: menekannya membuka tab yang tepat dan
        menaruh kursor di kotaknya. */
+    /* Ubin sejajar dengan judul butirnya, bukan dirata-tengahkan terhadap
+       judul + keterangan — sama seperti kepala bagian dan baris email. */
     .prof-lengkap-butir {
-        display: flex;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: 14px;
         align-items: center;
-        gap: 14px;
         width: 100%;
         padding: 8px 10px;
         border: 1px solid var(--mis-garis);
@@ -345,16 +359,34 @@
         transition: transform .2s ease, border-color .2s ease, background .2s ease;
     }
 
+    /* Ubin ikut baris judul saja; panahnya boleh rata tengah terhadap
+       seluruh tombol karena ia penanda arah, bukan pasangan sebuah teks. */
+    .prof-lengkap-butir > .mis-medali {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .prof-lengkap-panah {
+        grid-column: 3;
+        grid-row: 1 / 3;
+    }
+
     .prof-lengkap-butir:hover {
         border-color: #c7d2fe;
         background: #fff;
         transform: translateX(2px);
     }
 
-    .prof-lengkap-butir-teks {
-        min-width: 0;
-        flex: 1 1 auto;
-        display: grid;
+    /* Judul di baris 1, keterangan di baris 2 — keduanya anak langsung kisi
+       supaya ubin bisa disejajarkan dengan baris pertamanya. */
+    .prof-lengkap-butir-judul {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .prof-lengkap-butir > .mis-bantuan {
+        grid-column: 2;
+        grid-row: 2;
     }
 
     .prof-lengkap-butir-judul {
@@ -548,15 +580,42 @@
         border-top: 1px dashed var(--mis-garis);
     }
 
+    /*
+     * Ubin ikon sejajar dengan JUDULNYA, bukan dirata-tengahkan terhadap
+     * judul + keterangan. Dengan flex + align-items: center, ubin 30px yang
+     * diadu dengan blok dua baris membuat judulnya duduk 15px di atas pusat
+     * ikon — persis cacat yang sudah diperbaiki di baris email.
+     *
+     * Kisi dua kolom: ubin menempati baris judul saja, keterangan turun ke
+     * baris kedua kolom kanan sehingga otomatis menjorok sejajar judul.
+     */
     .prof-bagian-kepala {
-        display: flex;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 14px;
+        row-gap: 2px;
         align-items: center;
-        gap: 14px;
         margin-bottom: 14px;
+    }
+
+    .prof-bagian-kepala > .mis-medali {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .prof-bagian-judul {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .prof-bagian-sub {
+        grid-column: 2;
+        grid-row: 2;
     }
 
     .prof-bagian-judul {
         margin: 0;
+        line-height: 1.25;
         font-size: .92rem;
         font-weight: 800;
         color: var(--mis-tinta);
@@ -564,7 +623,8 @@
     }
 
     .prof-bagian-sub {
-        margin: 2px 0 0;
+        margin: 0;
+        line-height: 1.4;
         font-size: .76rem;
         color: var(--mis-tinta-3);
     }
