@@ -1003,7 +1003,10 @@ Detail Karyawan | MIS
                 timerProgressBar: true,
                 showConfirmButton: false,
                 willClose: () => {
-                  window.location.href = "{{ route('account.profil.show', ['uuid' => $user->uuid]) }}";
+                  // Tetap di halaman ini: profil hanya menampilkan akun
+                  // sendiri, jadi mengarahkan admin ke profil orang lain
+                  // hanya akan memantulkannya kembali.
+                  window.location.reload();
                 }
               });
             }

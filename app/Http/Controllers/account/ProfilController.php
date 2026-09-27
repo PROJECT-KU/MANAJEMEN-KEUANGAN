@@ -59,15 +59,125 @@ class ProfilController extends Controller
       $workDuration = 'Email belum diverifikasi atau status tidak aktif';
     }
 
-    // Check if user is allowed to view the profile
-    if (
-      Auth::check() && Auth::user()->level == 'manager' && Auth::user()->company == $user->company ||
-      Auth::check() && Auth::user()->id == $user->id
-    ) {
-      return view('account.profil.index', compact('user', 'workDuration'));
-    } else {
-      return redirect()->route('account.profil.index')->with('error', 'Access denied.');
+    /*
+     * Halaman ini HANYA profil sendiri.
+     *
+     * Dulu manager boleh membuka profil rekan sekantor, dan hasilnya
+     * halaman yang menampilkan dua orang sekaligus: kotak nama dan username
+     * terisi data rekan, kartu kontak di sebelahnya menampilkan email milik
+     * yang membuka, sedangkan tombol Simpan menulis ke akun yang membuka.
+     * Tidak ada urutan klik yang membuat itu masuk akal.
+     *
+     * Untuk melihat data orang lain sudah ada halaman pengelolaan pengguna,
+     * yang memang dibuat untuk itu dan punya pemeriksaan wewenangnya
+     * sendiri. Di sini, alamat milik orang lain dikembalikan ke profil
+     * sendiri — bukan pesan "akses ditolak", karena yang membuka biasanya
+     * hanya salah tautan, bukan sedang mencoba menerobos.
+     *
+     * Cabang lama juga menunjuk route('account.profil.index') yang tidak
+     * pernah ada, jadi penolakannya berakhir sebagai galat 500.
+     */
+    if ($user->getKey() !== Auth::id()) {
+      return redirect()
+        ->route('account.profil.show', Auth::user()->uuid)
+        ->with('info', 'Halaman profil hanya menampilkan akun Anda sendiri.');
     }
+
+    return view('account.profil.index', [
+      'user' => $user,
+      'workDuration' => $workDuration,
+      'kelengkapan' => $this->kelengkapanProfil($user),
+    ]);
+  }
+
+  /**
+   * Daftar hal yang masih kurang dari sebuah profil.
+   *
+   * Sebelumnya tidak ada penanda apa pun: profil yang separuh terisi
+   * tampak sama saja dengan yang lengkap, jadi orang baru tahu ada yang
+   * kurang ketika sistem lain menolaknya — misalnya penggajian yang
+   * butuh nomor rekening.
+   *
+   * Yang didaftar hanya yang BISA diperbaiki sendiri oleh pemiliknya.
+   * Status akun dan perannya ditetapkan admin, jadi memasukkannya ke sini
+   * hanya akan jadi daftar tugas yang mustahil diselesaikan.
+   */
+  private function kelengkapanProfil(User $user): array
+  {
+    $butir = [
+      [
+        'kunci' => 'foto',
+        'judul' => 'Foto profil',
+        'catatan' => 'Supaya rekan mengenali Anda.',
+        'ikon' => 'fa-camera',
+        'warna' => 'biru',
+        'selesai' => filled($user->gambar) && $user->gambar !== 'no-image.jpg',
+        'tab' => null,
+      ],
+      [
+        'kunci' => 'email',
+        'judul' => 'Verifikasi email',
+        'catatan' => 'Dipakai kalau kata sandi terlupa.',
+        'ikon' => 'fa-envelope',
+        'warna' => 'kuning',
+        'selesai' => (bool) $user->email_verified_at,
+        'tab' => null,
+      ],
+      [
+        'kunci' => 'telp',
+        'judul' => 'Nomor WhatsApp',
+        'catatan' => 'Untuk kabar yang mendesak.',
+        'ikon' => 'fa-mobile-alt',
+        'warna' => 'hijau',
+        'selesai' => filled($user->telp),
+        'tab' => 'activity',
+        'medan' => 'prof-telp',
+      ],
+      [
+        'kunci' => 'lahir',
+        'judul' => 'Tanggal lahir',
+        'catatan' => 'Dipakai untuk data kepegawaian.',
+        'ikon' => 'fa-birthday-cake',
+        'warna' => 'ungu',
+        'selesai' => filled($user->tanggal_lahir),
+        'tab' => 'activity',
+        'medan' => 'tanggal_lahir',
+      ],
+    ];
+
+    // Rekening hanya relevan untuk yang memang digaji lewat sistem ini.
+    if ($user->level !== 'user') {
+      $butir[] = [
+        'kunci' => 'rekening',
+        'judul' => 'Rekening penggajian',
+        'catatan' => 'Tanpa ini gaji tidak bisa dikirim.',
+        'ikon' => 'fa-wallet',
+        'warna' => 'jingga',
+        'selesai' => filled($user->norek) && filled($user->bank),
+        'tab' => 'activity',
+        'medan' => 'prof-bank-nama',
+      ];
+    }
+
+    $butir[] = [
+      'kunci' => 'pin',
+      'judul' => 'PIN masuk',
+      'catatan' => 'Masuk cukup dengan 6 angka.',
+      'ikon' => 'fa-key',
+      'warna' => 'merah',
+      'selesai' => $user->pinAktif(),
+      'tab' => 'pin',
+    ];
+
+    $selesai = count(array_filter($butir, fn ($b) => $b['selesai']));
+
+    return [
+      'butir' => $butir,
+      'selesai' => $selesai,
+      'total' => count($butir),
+      'persen' => (int) round($selesai / max(count($butir), 1) * 100),
+      'kurang' => array_values(array_filter($butir, fn ($b) => ! $b['selesai'])),
+    ];
   }
 
   // <!--================== UPDATE FOTO PROFIL ==================-->

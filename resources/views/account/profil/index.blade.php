@@ -9,7 +9,10 @@ Profil | MIS
 
 @section('content')
 @php
-    $saya = Auth::user();
+    /* $user selalu akun yang sedang masuk: ProfilController@show memantulkan
+       alamat milik orang lain kembali ke profil sendiri. Dulu di sini ada dua
+       variabel dan sebagian kotak isian terisi data orang lain sementara
+       tombol Simpan menulis ke akun sendiri. */
 
     // Masa kerja hanya bermakna kalau email terverifikasi dan akun aktif.
     $masaKerja = ($user->email_verified_at && $user->status === 'active') ? $workDuration : null;
@@ -33,8 +36,8 @@ Profil | MIS
     $daftarBank = config('bank');
     $namaBank = $daftarBank[$user->bank] ?? '';
 
-    $fotoProfil = $saya->gambar
-        ? asset('assets/img/profil/' . $saya->gambar)
+    $fotoProfil = $user->gambar
+        ? asset('assets/img/profil/' . $user->gambar)
         : asset('assets/img/profil/no-image.jpg');
 @endphp
 
@@ -62,7 +65,7 @@ Profil | MIS
         </div>
 
         <div class="mis-kepala-aksi">
-          @if ($saya->email_verified_at)
+          @if ($user->email_verified_at)
             <span class="mis-pil mis-pil-hijau"><i class="fas fa-check-circle"></i> Email terverifikasi</span>
           @else
             <span class="mis-pil mis-pil-kuning"><i class="fas fa-exclamation-circle"></i> Email belum terverifikasi</span>
@@ -85,7 +88,7 @@ Profil | MIS
             <div class="prof-foto-bingkai">
               <img id="prf-pratinjau" class="prof-foto" src="{{ $fotoProfil }}"
                 alt="Foto profil {{ $user->full_name }}">
-              @if ($saya->email_verified_at)
+              @if ($user->email_verified_at)
                 <span class="prof-foto-lencana mis-hijau" title="Email sudah terverifikasi">
                   <i class="fas fa-check"></i>
                 </span>
@@ -142,6 +145,60 @@ Profil | MIS
             </form>
           </section>
 
+          {{-- Kelengkapan profil. Bukan hiasan: tanpa ini profil yang separuh
+               terisi tampak sama saja dengan yang lengkap, dan orang baru
+               tahu ada yang kurang saat sistem lain menolaknya. --}}
+          <section class="mis-kartu prof-lengkap">
+            <div class="prof-lengkap-atas">
+              <span class="prof-cincin" role="img"
+                aria-label="Profil {{ $kelengkapan['persen'] }} persen lengkap"
+                style="--nilai: {{ $kelengkapan['persen'] }}">
+                <span class="prof-cincin-isi">
+                  <strong>{{ $kelengkapan['persen'] }}<small>%</small></strong>
+                </span>
+              </span>
+
+              <div class="prof-lengkap-teks">
+                <h3 class="mis-kartu-judul">
+                  @if ($kelengkapan['persen'] === 100)
+                    Profil Anda lengkap
+                  @else
+                    Lengkapi profil Anda
+                  @endif
+                </h3>
+                <p class="mis-kartu-sub">
+                  {{ $kelengkapan['selesai'] }} dari {{ $kelengkapan['total'] }} hal sudah terisi.
+                </p>
+              </div>
+            </div>
+
+            @if ($kelengkapan['kurang'])
+              <ul class="prof-lengkap-daftar">
+                @foreach ($kelengkapan['kurang'] as $butir)
+                  <li>
+                    <button type="button" class="prof-lengkap-butir"
+                      data-tab="{{ $butir['tab'] ?? '' }}" data-medan="{{ $butir['medan'] ?? '' }}"
+                      data-kunci="{{ $butir['kunci'] }}">
+                      <span class="mis-medali kecil mis-{{ $butir['warna'] }}" aria-hidden="true">
+                        <i class="fas {{ $butir['ikon'] }}"></i>
+                      </span>
+                      <span class="prof-lengkap-butir-teks">
+                        <span class="prof-lengkap-butir-judul">{{ $butir['judul'] }}</span>
+                        <span class="mis-bantuan">{{ $butir['catatan'] }}</span>
+                      </span>
+                      <i class="fas fa-chevron-right prof-lengkap-panah" aria-hidden="true"></i>
+                    </button>
+                  </li>
+                @endforeach
+              </ul>
+            @else
+              <p class="prof-lengkap-tuntas">
+                <i class="fas fa-check-circle mis-ikon-hijau"></i>
+                Tidak ada yang perlu diisi lagi.
+              </p>
+            @endif
+          </section>
+
           {{-- Email berdiri sendiri: menggantinya wajib disertai kata sandi,
                jadi ia tidak ikut tombol "Simpan perubahan" di sebelah. --}}
           <section class="mis-kartu">
@@ -155,8 +212,8 @@ Profil | MIS
             <div class="prof-baris">
               <span class="mis-medali mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
               <div class="prof-baris-teks">
-                <p class="prof-nilai">{{ $saya->email }}</p>
-                @if ($saya->email_verified_at)
+                <p class="prof-nilai">{{ $user->email }}</p>
+                @if ($user->email_verified_at)
                   <p class="mis-bantuan"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
                 @else
                   <p class="mis-bantuan"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
@@ -167,11 +224,11 @@ Profil | MIS
               </button>
             </div>
 
-            @if (! $saya->email_verified_at)
+            @if (! $user->email_verified_at)
               <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
                 class="prof-verif">
                 @csrf
-                <input type="hidden" name="code_verified_mail" value="{{ $saya->code_verified_mail }}">
+                <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
                 <div id="container-verify-btn">
                   <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
                     <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
@@ -223,7 +280,7 @@ Profil | MIS
 
                 {{-- ---------------------------------------- tab 1: data diri --}}
                 <div class="tab-pane fade show active" id="activity" role="tabpanel">
-                  @if (! $saya->email_verified_at)
+                  @if (! $user->email_verified_at)
                     <div class="prof-kabar">
                       <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
                       <p class="prof-kabar-teks">
@@ -269,21 +326,21 @@ Profil | MIS
                         <div class="mis-isian">
                           <label class="mis-label" for="prof-telp">Nomor WhatsApp</label>
                           <input class="form-control-modern @error('telp') is-invalid @enderror"
-                            id="prof-telp" type="text" name="telp" value="{{ old('telp', $saya->telp) }}"
+                            id="prof-telp" type="text" name="telp" value="{{ old('telp', $user->telp) }}"
                             inputmode="numeric" placeholder="08xxxxxxxxxx" oninput="formatPhoneNumber(this)">
                           @error('telp')
                             <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                           @enderror
                         </div>
 
-                        @if ($saya->level !== 'user')
+                        @if ($user->level !== 'user')
                           <div class="mis-isian">
                             <label class="mis-label" for="prof-jobdesk">Posisi / jabatan</label>
                             <select class="form-control-modern @error('jobdesk') is-invalid @enderror"
                               id="prof-jobdesk" name="jobdesk">
                               <option value="">Belum ditentukan</option>
                               @foreach (['MANAGER', 'STAFF', 'ASISTEN TRAINER', 'KARYAWAN'] as $posisi)
-                                <option value="{{ $posisi }}" @selected(old('jobdesk', $saya->jobdesk) === $posisi)>{{ $posisi }}</option>
+                                <option value="{{ $posisi }}" @selected(old('jobdesk', $user->jobdesk) === $posisi)>{{ $posisi }}</option>
                               @endforeach
                             </select>
                             @error('jobdesk')
@@ -307,7 +364,7 @@ Profil | MIS
                       </div>
                     </div>
 
-                    @if ($saya->level !== 'user')
+                    @if ($user->level !== 'user')
                       <div class="prof-bagian">
                         <div class="prof-bagian-kepala">
                           <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-wallet"></i></span>
@@ -500,14 +557,14 @@ Profil | MIS
               <p class="prof-modal-sub">Alamat baru wajib diverifikasi ulang.</p>
             </div>
           </div>
-          <form action="{{ route('account.pengguna.update.datadiri', $saya->id) }}" method="POST">
+          <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
             @csrf
             <div class="mis-isian prof-rapat">
               <label class="mis-label" for="prof-email-baru">
                 Alamat email baru <span class="prof-wajib" aria-hidden="true">*</span>
               </label>
               <input type="email" class="form-control-modern" id="prof-email-baru" name="email"
-                value="{{ $saya->email }}" required>
+                value="{{ $user->email }}" required>
             </div>
             <div class="mis-isian prof-rapat">
               <label class="mis-label" for="prof-sandi-email">
@@ -966,6 +1023,58 @@ Profil | MIS
 
     samakan();
   })();
+</script>
+
+<!--================== LOMPAT DARI DAFTAR KELENGKAPAN ==================-->
+<script>
+  /*
+   * Menekan butir yang masih kurang langsung membuka tabnya dan menaruh
+   * kursor di kotaknya. Tanpa ini orang harus menebak sendiri isian mana
+   * yang dimaksud di antara delapan kotak yang ada.
+   */
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.prof-lengkap-butir').forEach(function (tombol) {
+      tombol.addEventListener('click', function () {
+        const kunci = tombol.dataset.kunci;
+        const tab = tombol.dataset.tab;
+        const medan = tombol.dataset.medan;
+
+        // Dua butir tidak menunjuk isian: foto dan verifikasi email punya
+        // tempatnya sendiri di kolom kiri.
+        if (kunci === 'foto') {
+          document.getElementById('foto').click();
+          return;
+        }
+
+        if (kunci === 'email') {
+          const tombolVerif = document.getElementById('btn-verify-email');
+          if (tombolVerif) {
+            tombolVerif.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            tombolVerif.focus();
+          }
+          return;
+        }
+
+        if (tab) {
+          const pil = document.querySelector('#pills-tab a[href="#' + tab + '"]');
+          if (pil) {
+            pil.click();
+          }
+        }
+
+        if (medan) {
+          // Ditunda sebentar supaya tabnya sempat terbuka lebih dulu.
+          setTimeout(function () {
+            const isian = document.getElementById(medan);
+            if (isian) {
+              isian.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              isian.focus();
+            }
+          }, 220);
+        }
+      });
+    });
+  });
 </script>
 
 <!--================== JENDELA GANTI EMAIL ==================-->
