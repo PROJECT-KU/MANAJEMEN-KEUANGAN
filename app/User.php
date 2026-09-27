@@ -73,6 +73,28 @@ class User extends Authenticatable
      * lewat aturPin() supaya selalu teracak dan tidak pernah bisa ikut
      * terisi dari data permintaan.
      */
+    /**
+     * Akun baru selalu dapat UUID.
+     *
+     * Alamat halaman profil memakai UUID, bukan id berurutan, supaya
+     * pengguna yang sudah masuk tidak bisa menelusuri akun orang lain
+     * sekadar dengan menaikkan angka di alamatnya.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $akun) {
+            if (blank($akun->uuid)) {
+                $akun->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
+    /** Cari akun dari UUID-nya; null kalau tidak ada atau UUID-nya kosong. */
+    public static function cariUuid(?string $uuid): ?self
+    {
+        return blank($uuid) ? null : static::where('uuid', $uuid)->first();
+    }
+
     public function pinAktif(): bool
     {
         return (bool) $this->pin_aktif && ! empty($this->pin);

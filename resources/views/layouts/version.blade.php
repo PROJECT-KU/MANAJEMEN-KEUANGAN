@@ -165,7 +165,7 @@ $agent = new Agent();
     <i class="fa-solid fa-list-check"></i><span>To Do</span>
   </a>
 
-  <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
+  <a href="{{ route('account.profil.show', ['uuid' => Auth::user()->uuid]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
     <i class="fa-solid fa-user-gear"></i><span>Profil</span>
   </a>
 </div>
@@ -190,7 +190,7 @@ $agent = new Agent();
     <i class="fa-solid fa-rectangle-list"></i><span>To Do</span>
   </a>
 
-  <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
+  <a href="{{ route('account.profil.show', ['uuid' => Auth::user()->uuid]) }}" class="{{ Request::routeIs('account.profil.show') ? 'active' : '' }}">
     <i class="fa-solid fa-circle-user"></i><span>Profil</span>
   </a>
 </div>

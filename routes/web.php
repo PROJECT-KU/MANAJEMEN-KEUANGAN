@@ -119,7 +119,7 @@ Route::prefix('account')
             //Route::get('/account/laporan-semua/export-users-to-excel', 'account\LaporanSemuaController@exportUsersToExcel')->name('account.laporan-semua.export-users-to-excel');
 
             //profil
-            Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
+            Route::get('/profil/{uuid}/show', 'account\ProfilController@show')->name('account.profil.show');
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
             Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');

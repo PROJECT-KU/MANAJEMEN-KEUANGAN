@@ -68,7 +68,10 @@ class KeamananAkunTest extends TestCase
         Livewire::test(KeamananAkun::class)
             ->set('kataSandi', self::SANDI)
             ->call('keluarkanPerangkatLain')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            // Pemberitahuannya lewat toast bersama, bukan kotak .alert yang
+            // ikut tergambar ulang setiap komponen menyegarkan dirinya.
+            ->assertDispatched('toast', jenis: 'berhasil');
 
         $this->assertDatabaseHas('aktivitas_masuk', [
             'user_id' => $pengguna->getKey(),
@@ -102,7 +105,7 @@ class KeamananAkunTest extends TestCase
         $pengguna = $this->buatPengguna();
 
         $this->actingAs($pengguna)
-            ->get(route('account.profil.show', $pengguna->getKey()))
+            ->get(route('account.profil.show', $pengguna->uuid))
             ->assertOk()
             ->assertSee('Keamanan')
             ->assertSeeLivewire(KeamananAkun::class);

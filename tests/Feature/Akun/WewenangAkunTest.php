@@ -216,4 +216,37 @@ class WewenangAkunTest extends TestCase
         $this->postJson('/api/v1/register', [])->assertNotFound();
         $this->get('/oauth/authorize')->assertNotFound();
     }
+
+    public function test_profil_hanya_bisa_dibuka_lewat_uuid(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        // UUID-nya sendiri: terbuka.
+        $this->actingAs($pengguna)
+            ->get(route('account.profil.show', $pengguna->uuid))
+            ->assertOk();
+
+        // Id berurutan tidak lagi jadi alamat. Dengan id, siapa pun yang
+        // sudah masuk bisa menaikkan angkanya satu per satu dan memetakan
+        // seluruh akun beserta waktu pembuatannya.
+        $this->actingAs($pengguna)
+            ->get('/account/profil/' . $pengguna->getKey() . '/show')
+            ->assertNotFound();
+
+        // UUID karangan juga tidak membocorkan apa pun.
+        $this->actingAs($pengguna)
+            ->get('/account/profil/00000000-0000-0000-0000-000000000000/show')
+            ->assertNotFound();
+    }
+
+    public function test_setiap_akun_baru_dapat_uuid(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        $this->assertNotEmpty($pengguna->uuid);
+        $this->assertMatchesRegularExpression(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+            $pengguna->uuid
+        );
+    }
 }

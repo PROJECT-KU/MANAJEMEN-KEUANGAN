@@ -1679,3 +1679,53 @@ select.form-control-modern {
     background: #e2e8f0;
     color: var(--mis-tinta);
 }
+
+/* ======================================================= TOAST ======= */
+
+/*
+ * Rupa toast SweetAlert2 disamakan dengan kartu sistem ini: sudut membulat,
+ * bayangan lembut, dan satu pita warna di tepi kiri sebagai penanda jenis.
+ */
+.swal2-container .mis-toast {
+    padding: 14px 16px;
+    border: 1px solid var(--mis-garis);
+    border-left: 4px solid var(--mis-toast-warna, #6366f1);
+    border-radius: 16px;
+    box-shadow: 0 18px 38px rgba(15, 23, 42, .12);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.swal2-container .mis-toast .swal2-title {
+    margin: 0;
+    padding: 0;
+    font-size: .86rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--mis-tinta);
+    text-align: left;
+}
+
+.swal2-container .mis-toast .swal2-icon {
+    width: 1.7em;
+    height: 1.7em;
+    margin: 0 12px 0 0;
+}
+
+.swal2-container .mis-toast .swal2-timer-progress-bar {
+    background: var(--mis-toast-warna, #6366f1);
+}
+
+@media (max-width: 575.98px) {
+    /* Di ponsel toast melebar penuh dan turun ke bawah, supaya tidak
+       menutupi tombol atau judul yang sedang dibaca. */
+    .swal2-container.swal2-top-end {
+        align-items: flex-end !important;
+        justify-content: stretch !important;
+        padding: 0 12px 14px;
+    }
+
+    .swal2-container .mis-toast {
+        width: 100%;
+        margin: 0;
+    }
+}

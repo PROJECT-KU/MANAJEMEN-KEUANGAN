@@ -98,3 +98,75 @@
         window.addEventListener('pagehide', simpan);
     });
 })();
+
+/**
+ * Toast bersama (SweetAlert2).
+ *
+ * Satu pintu untuk semua pemberitahuan singkat di back office, supaya
+ * rupanya seragam dan tidak ada lagi campuran alert Bootstrap, modal Swal
+ * yang menutupi layar, dan kotak hijau buatan sendiri di tiap fitur.
+ *
+ *   misToast('berhasil', 'Data tersimpan.')
+ *   misToast('gagal', 'Kata sandi lama tidak cocok.')
+ *   misToast('info', 'Kode dikirim ke email Anda.')
+ *
+ * Komponen Livewire memanggilnya lewat:
+ *   $this->dispatch('toast', jenis: 'berhasil', pesan: '...')
+ */
+(function () {
+    'use strict';
+
+    var JENIS = {
+        berhasil: { icon: 'success', warna: '#10b981' },
+        gagal: { icon: 'error', warna: '#f43f5e' },
+        peringatan: { icon: 'warning', warna: '#f59e0b' },
+        info: { icon: 'info', warna: '#0ea5e9' }
+    };
+
+    function tampilkan(jenis, pesan, lama) {
+        var pilih = JENIS[jenis] || JENIS.info;
+
+        // Halaman yang belum memuat SweetAlert2 tidak boleh ikut rusak;
+        // pemberitahuan lebih baik hilang daripada menghentikan skrip lain.
+        if (typeof window.Swal === 'undefined') {
+            return;
+        }
+
+        window.Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: pilih.icon,
+            title: pesan,
+            showConfirmButton: false,
+            timer: lama || (jenis === 'gagal' ? 5000 : 3000),
+            timerProgressBar: true,
+            customClass: { popup: 'mis-toast' },
+            didOpen: function (el) {
+                el.style.setProperty('--mis-toast-warna', pilih.warna);
+                el.addEventListener('mouseenter', window.Swal.stopTimer);
+                el.addEventListener('mouseleave', window.Swal.resumeTimer);
+            }
+        });
+    }
+
+    window.misToast = tampilkan;
+
+    function dariMuatan(m) {
+        // Livewire 3 membungkus muatannya di dalam larik; versi lama
+        // mengirimnya lewat event.detail. Keduanya diterima di sini.
+        var d = Array.isArray(m) ? (m[0] || {}) : (m || {});
+        tampilkan(d.jenis || 'info', d.pesan || '', d.lama);
+    }
+
+    // Jembatan untuk komponen Livewire 3.
+    document.addEventListener('livewire:init', function () {
+        if (window.Livewire && typeof window.Livewire.on === 'function') {
+            window.Livewire.on('toast', dariMuatan);
+        }
+    });
+
+    // Jalur cadangan: event peramban biasa, dipakai halaman non-Livewire.
+    window.addEventListener('toast', function (e) {
+        dariMuatan(e && e.detail);
+    });
+})();

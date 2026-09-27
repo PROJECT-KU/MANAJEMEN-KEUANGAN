@@ -30,11 +30,7 @@ class PengaturanPin extends Component
     /** Dipakai saat mendaftarkan perangkat baru memakai PIN yang sudah ada. */
     public string $pinPerangkat = '';
 
-    /** Pesan hasil aksi terakhir, ditampilkan di dalam tab. */
-    public string $pesan = '';
 
-    /** 'sukses' atau 'galat'. */
-    public string $jenisPesan = 'sukses';
 
     /** Berapa kali PIN boleh salah saat mendaftarkan perangkat. */
     private const BATAS_PIN_SALAH = 5;
@@ -85,13 +81,11 @@ class PengaturanPin extends Component
      */
     public function aktifkanDiPerangkat(): void
     {
-        $this->pesan = '';
 
         $pengguna = $this->pengguna();
 
         if (! $pengguna->pinAktif()) {
-            $this->jenisPesan = 'galat';
-            $this->pesan = 'PIN belum aktif pada akun ini. Buat PIN dulu di bawah.';
+        $this->toast('gagal', 'PIN belum aktif pada akun ini. Buat PIN dulu di bawah.');
 
             return;
         }
@@ -135,14 +129,12 @@ class PengaturanPin extends Component
 
         $this->reset('pinPerangkat');
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = 'Perangkat ini sekarang bisa dipakai masuk dengan PIN.';
+        $this->toast('berhasil', 'Perangkat ini sekarang bisa dipakai masuk dengan PIN.');
     }
 
     /** Perangkat ini tidak lagi boleh memakai PIN (akun tetap berPIN). */
     public function lupakanPerangkat(): void
     {
-        $this->pesan = '';
 
         $ingatan = IngatanMasuk::baca();
 
@@ -150,14 +142,12 @@ class PengaturanPin extends Component
             IngatanMasuk::lupakan();
         }
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.';
+        $this->toast('berhasil', 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.');
     }
 
     /** Aktifkan PIN, atau ganti PIN yang sudah ada. */
     public function simpan(): void
     {
-        $this->pesan = '';
 
         // Kata sandi dan PIN ikut terkirim balik ke peramban lewat
         // wire:snapshot; pada tiap kegagalan keduanya dibuang.
@@ -193,24 +183,21 @@ class PengaturanPin extends Component
 
         $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = $sudahAda
+        $this->toast('berhasil', $sudahAda
             ? 'PIN berhasil diubah. PIN lama sudah tidak berlaku.'
-            : 'PIN berhasil diaktifkan. Di halaman masuk, pilih tab PIN lalu masukkan ' . $this->panjangPin() . ' angka PIN Anda.';
+            : 'PIN berhasil diaktifkan. Di halaman masuk, pilih tab PIN lalu masukkan ' . $this->panjangPin() . ' angka PIN Anda.');
     }
 
     /** Matikan PIN; masuk kembali hanya dengan kata sandi. */
     public function nonaktifkan(): void
     {
-        $this->pesan = '';
 
         $this->validateOnly('kataSandi', ['kataSandi' => ['required', 'string']]);
 
         $pengguna = $this->pengguna();
 
         if (! $pengguna->pinAktif()) {
-            $this->jenisPesan = 'galat';
-            $this->pesan = 'PIN memang belum aktif pada akun ini.';
+        $this->toast('gagal', 'PIN memang belum aktif pada akun ini.');
 
             return;
         }
@@ -236,8 +223,7 @@ class PengaturanPin extends Component
 
         $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = 'PIN dinonaktifkan. Masuk kini hanya bisa memakai kata sandi.';
+        $this->toast('berhasil', 'PIN dinonaktifkan. Masuk kini hanya bisa memakai kata sandi.');
     }
 
     private function pastikanKataSandiBenar(User $pengguna): void
@@ -305,5 +291,18 @@ class PengaturanPin extends Component
             'pengguna' => $this->pengguna(),
             'panjangPin' => $this->panjangPin(),
         ]);
+    }
+
+    /**
+     * Pemberitahuan singkat lewat toast bersama.
+     *
+     * Dulu komponen ini menyimpan $pesan di dalam keadaannya sendiri lalu
+     * menggambar kotak .alert Bootstrap. Toast tidak menggeser tata letak,
+     * tidak ikut terbawa saat komponen digambar ulang, dan rupanya sama di
+     * seluruh sistem — lihat misToast() di mis-ui.js.
+     */
+    private function toast(string $jenis, string $pesan): void
+    {
+        $this->dispatch('toast', jenis: $jenis, pesan: $pesan);
     }
 }
