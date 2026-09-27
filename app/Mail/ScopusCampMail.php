@@ -52,7 +52,7 @@ class ScopusCampMail extends Mailable
 
         return $this->view('public.scopus_camp.mail')
             ->subject('Pendaftaran Scopus Camp Berhasil Terkirim')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attachData($pdf->output(), 'invoice_' . strtoupper($this->pendaftaran->id_transaksi) . '.pdf', [
                 'mime' => 'application/pdf',
             ]);

@@ -187,7 +187,7 @@
                   <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-                  <td style="text-align: left; width:145px">Lemburan</td>
+                  <td style="text-align: left; width:145px">Lemburan ({{ rtrim(rtrim(number_format($jamLembur, 2, ',', '.'), '0'), ',') }} Jam)</td>
                   <td style="text-align: left; width:145px">Rp. {{ number_format($gaji->total_lembur, 0, ',', '.') }}</td>
 
                   <td style="text-align: left; width:145px">PPH 21</td>

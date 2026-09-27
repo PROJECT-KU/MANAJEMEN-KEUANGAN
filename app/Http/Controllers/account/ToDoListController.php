@@ -112,10 +112,12 @@ class ToDoListController extends Controller
 
             return view('account.todolist.create', compact('datas'));
         } else {
-            $users = User::where('id', $user->id)
+            // View memakai $datas, jadi daftarnya dikirim dengan nama yang sama
+            // (dulu dikirim sebagai $users sehingga halaman galat).
+            $datas = User::where('id', $user->id)
                 ->select('id', 'full_name')
                 ->get();
-            return view('account.todolist.create', compact('users'));
+            return view('account.todolist.create', compact('datas'));
         }
     }
 

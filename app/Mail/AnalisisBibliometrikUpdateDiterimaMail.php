@@ -44,6 +44,6 @@ class AnalisisBibliometrikUpdateDiterimaMail extends Mailable
 
         return $this->view('account.analisis_bibliometrik.mail_diterima')
             ->subject('Pendaftaran Analisis Bibliometrik Berhasil Diterima')
-            ->from('info@rumahscopusfoundation.com', $this->appName);
+            ->from(config('mail.from.address'), $this->appName);
     }
 }

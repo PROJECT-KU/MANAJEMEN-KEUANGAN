@@ -44,6 +44,6 @@ class AnalisisBibliometrikUpdateResheduleMail extends Mailable
 
         return $this->view('account.analisis_bibliometrik.mail_reschedule')
             ->subject('Pendaftaran Analisis Bibliometrik Di Reschedule')
-            ->from('info@rumahscopusfoundation.com', $this->appName);
+            ->from(config('mail.from.address'), $this->appName);
     }
 }

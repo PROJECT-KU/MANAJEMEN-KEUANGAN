@@ -43,7 +43,7 @@ class UpdatePublicPendaftaranScopusKafeMail extends Mailable
 
         return $this->view('account.pendaftaran_scopus_kafe.send_email_sukses')
             ->subject('Pembayaran Scopus Kafe Diterima')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

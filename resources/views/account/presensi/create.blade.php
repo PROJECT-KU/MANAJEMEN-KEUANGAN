@@ -276,6 +276,7 @@ Tambah Presensi Karyawan | MIS
                       <option value="perjalanan luar kota luar jawa">PERJALANAN LUAR KOTA LUAR JAWA</option>
                       <option value="camp luar kota">CAMP LUAR KOTA</option>
                       <option value="remote">REMOTE</option>
+                      <option value="lembur">LEMBUR</option>
                       <option value="izin">IZIN</option>
                       @elseif (date('H:i:s') >= '23:00:00' && date('H:i:s') <= '23:59:59' ) || (date('H:i:s')>= '00:00:00' && date('H:i:s') <= '08:00:00' )
                           <option value="tidak bisa presensi" disabled selected>Belum dapat presensi. Harap pilih status setelah jam 08:00.</option>

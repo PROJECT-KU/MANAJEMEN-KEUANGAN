@@ -1,2 +1,5 @@
 # MANAJEMEN-KEUANGAN
-project pribadi tentangan manajemen keuangan dengan laravel dan php 7.2
+Project pribadi tentang manajemen keuangan (MIS Rumah Scopus Foundation).
+
+- Laravel 12
+- PHP 8.2 atau lebih baru

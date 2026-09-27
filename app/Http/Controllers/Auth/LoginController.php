@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\AktivitasMasuk;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -26,14 +27,22 @@ class LoginController extends Controller
     // Override the logout method to show a logout message
     public function logout(Request $request)
     {
+        // Dicatat sebelum sesi dibersihkan, selagi identitas penggunanya
+        // masih diketahui.
+        $pengguna = $this->guard()->user();
+
+        if ($pengguna) {
+            AktivitasMasuk::catat($pengguna, $pengguna->username ?? $pengguna->email, true, 'keluar');
+        }
+
         $this->guard()->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        Session::flash('success', 'You have been logged out successfully.');
+        Session::flash('success', 'Anda berhasil keluar.');
 
-        return $this->loggedOut($request) ?: redirect('/K4rY4w4N');
+        return $this->loggedOut($request) ?: redirect()->route('login');
     }
 }

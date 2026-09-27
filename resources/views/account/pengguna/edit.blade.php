@@ -297,6 +297,39 @@ Update Data Karyawan | MIS
                         </div>
 
                         <div class="card-body p-4 pt-0">
+                            @if (session('statuspin'))
+                                <div class="alert alert-info border-0 shadow-sm" style="border-radius: 14px;">
+                                    {{ session('statuspin') }}
+                                </div>
+                            @endif
+
+                            {{-- PIN masuk milik karyawan: bisa dimatikan pengelola saat
+                                 karyawan keluar atau perangkatnya hilang. --}}
+                            @if ($user->pinAktif())
+                                <div class="d-flex align-items-center mb-4 p-3"
+                                    style="border-radius: 16px; background: #ecfeff; border: 1px solid #a5f3fc;">
+                                    <i class="fas fa-mobile-alt text-info fa-lg mr-3"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="font-weight-800 text-dark">PIN masuk aktif</div>
+                                        <div class="small text-muted">
+                                            Akun ini bisa masuk dengan 6 angka di perangkat yang sudah didaftarkan.
+                                            @if ($user->pin_diubah_pada)
+                                                Terakhir diubah
+                                                {{ $user->pin_diubah_pada->locale('id')->translatedFormat('d F Y H:i') }} WIB.
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <form action="{{ route('account.pengguna.matikan-pin', $user->id) }}" method="POST"
+                                        onsubmit="return confirm('Matikan PIN masuk milik akun ini? Pemiliknya akan diberi tahu lewat email.')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold"
+                                            style="border-radius: 12px;">
+                                            Matikan PIN
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+
                             @if ($user->email_verified_at == null)
                             <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4" style="border-radius: 16px; background: #fffbeb; border: 1px solid #fde68a !important;">
                                 <i class="fas fa-shield-alt text-warning mr-3 fa-lg"></i>

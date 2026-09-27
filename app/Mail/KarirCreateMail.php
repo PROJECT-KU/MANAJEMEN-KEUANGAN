@@ -39,7 +39,7 @@ class KarirCreateMail extends Mailable
 
         $mail = $this->view('karir.send_email_sukses')
             ->subject('Lamaran Berhasil Terkirim')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

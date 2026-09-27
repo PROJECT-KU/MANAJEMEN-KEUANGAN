@@ -43,6 +43,6 @@ class ScopusCampUpdateResheduleMail extends Mailable
     {
         return $this->view('account.pendaftaran_scopus_camp.mail_reschedule')
             ->subject('Pendaftaran Scopus Camp Di Reschedule')
-            ->from('info@rumahscopusfoundation.com', $this->appName);
+            ->from(config('mail.from.address'), $this->appName);
     }
 }

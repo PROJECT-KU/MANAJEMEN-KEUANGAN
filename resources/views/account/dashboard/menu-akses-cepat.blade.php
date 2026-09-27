@@ -213,17 +213,9 @@
                 <div class="icon-circle bg-finance"><i class="fas fa-tags"></i></div>
                 <span class="menu-label">Kat. Uang Masuk</span>
             </a>
-            <a href="{{ route('account.debit.index') }}" class="menu-item hidden">
-                <div class="icon-circle bg-finance"><i class="fas fa-wallet"></i></div>
-                <span class="menu-label">Uang Masuk</span>
-            </a>
             <a href="{{ route('account.categories_credit.index') }}" class="menu-item hidden">
                 <div class="icon-circle bg-finance" style="opacity: 0.8;"><i class="fas fa-tag"></i></div>
                 <span class="menu-label">Kat. Uang Keluar</span>
-            </a>
-            <a href="{{ route('account.credit.index') }}" class="menu-item hidden">
-                <div class="icon-circle bg-finance"><i class="fas fa-money-bill-wave"></i></div>
-                <span class="menu-label">Uang Keluar</span>
             </a>
         @endif
 

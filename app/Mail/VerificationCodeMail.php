@@ -27,7 +27,7 @@ class VerificationCodeMail extends Mailable
         // Hapus variabel $logoPath dan fungsi ->attach()
         return $this->view('account.profil.verification_email')
             ->subject('Kode Verifikasi Email')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->with(['verificationCode' => $this->verificationCode]);
     }
 }
