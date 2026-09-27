@@ -281,7 +281,8 @@
 
     .prof-unggah > .mis-medali {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
     .prof-unggah-nama {
@@ -380,11 +381,12 @@
         transition: transform .2s ease, border-color .2s ease, background .2s ease;
     }
 
-    /* Ubin ikut baris judul saja; panahnya boleh rata tengah terhadap
-       seluruh tombol karena ia penanda arah, bukan pasangan sebuah teks. */
+    /* Aturan yang sama dengan kepala bagian: ubin merentang dua baris lalu
+       dirata-tengahkan, jadi ia sejajar dengan blok teksnya. */
     .prof-lengkap-butir > .mis-medali {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
     .prof-lengkap-panah {
@@ -622,14 +624,24 @@
          * row-gap di atas itu membuat keterangan terdorong 8px — terasa
          * renggang padahal angkanya kecil.
          */
-        row-gap: 0;
+        row-gap: 2px;
         align-items: center;
         margin-bottom: 10px;
     }
 
+    /*
+     * Ubin merentang dua baris lalu dirata-tengahkan, jadi ia sejajar dengan
+     * BLOK teksnya (judul + keterangan), bukan dengan judulnya saja.
+     *
+     * Sempat dicoba sebaliknya — ubin hanya di baris judul — supaya judulnya
+     * setinggi ikon. Hasilnya ikon terlihat menggantung di bagian atas
+     * teksnya, karena keterangan di bawah membuat bloknya lebih tinggi
+     * daripada ubin.
+     */
     .prof-bagian-kepala > .mis-medali {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
     .prof-bagian-judul {
@@ -652,9 +664,7 @@
     }
 
     .prof-bagian-sub {
-        /* -2px menutup sisa ruang bawaan baris judul yang tingginya
-           mengikuti ubin, bukan mengikuti hurufnya. */
-        margin: -2px 0 0;
+        margin: 0;
         line-height: 1.35;
         font-size: .75rem;
         color: var(--mis-tinta-3);
