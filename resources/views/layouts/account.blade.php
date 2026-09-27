@@ -173,6 +173,11 @@ $agent = new Agent();
             margin: 0 auto;
         }
     </style>
+
+    {{-- Gaya khusus halaman. Harus di sini, bukan di badan berkas: tanpa ini
+         lembar gaya halaman terbit SEBELUM CSS Bootstrap, sehingga aturan
+         dengan bobot sama (misal .prf-tab lawan .nav) selalu kalah. --}}
+    @stack('gaya')
 </head>
 @php
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';

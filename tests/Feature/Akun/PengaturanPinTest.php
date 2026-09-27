@@ -44,7 +44,7 @@ class PengaturanPinTest extends TestCase
         $this->actingAs($pengguna)
             ->get(route('account.profil.show', $pengguna->getKey()))
             ->assertOk()
-            ->assertSee('PIN Masuk')
+            ->assertSee('PIN masuk')
             ->assertSeeLivewire(PengaturanPin::class)
             // Livewire harus ikut memuat asetnya di layout admin, kalau tidak
             // tombol di dalam tab tidak akan berfungsi.
