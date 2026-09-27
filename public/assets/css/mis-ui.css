@@ -946,6 +946,68 @@ body.sidebar-show .main-footer {
     }
 }
 
+/* ============================================================ CETAK === */
+
+@media print {
+    .main-sidebar,
+    .main-navbar,
+    .main-footer,
+    .mobile-bottom-nav,
+    .mis-burger {
+        display: none !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+    }
+
+    body {
+        background: #fff !important;
+    }
+
+    .card,
+    .section-header {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+        break-inside: avoid;
+    }
+}
+
+/* ==================================================== FOKUS PAPAN KETIK === */
+
+/*
+ * Stisla mematikan outline bawaan peramban, sehingga pengguna yang
+ * menavigasi dengan Tab tidak tahu sedang berada di mana. :focus-visible
+ * hanya muncul untuk papan ketik, jadi klik tetikus tetap bersih.
+ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.page-link:focus-visible,
+.dropdown-item:focus-visible,
+.mis-burger:focus-visible,
+.mis-notif-tombol:focus-visible,
+.sidebar-menu li a:focus-visible,
+.table-responsive:focus-visible {
+    outline: 3px solid rgba(99, 102, 241, .5);
+    outline-offset: 2px;
+    border-radius: 10px;
+}
+
+/* isian sudah punya cincin sendiri saat difokus; jangan bertumpuk */
+.form-control:focus-visible,
+.custom-select:focus-visible {
+    outline: 2px solid rgba(99, 102, 241, .45);
+    outline-offset: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .btn,
     .sidebar-menu li a,

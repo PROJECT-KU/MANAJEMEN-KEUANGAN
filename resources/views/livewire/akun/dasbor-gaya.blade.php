@@ -950,6 +950,66 @@
         color: var(--dsb-tinta-3);
     }
 
+    .dsb-lipat {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border: 1px solid var(--dsb-garis);
+        border-radius: 10px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .74rem;
+        font-weight: 700;
+        color: #6366f1;
+        cursor: pointer;
+    }
+
+    .dsb-lipat i {
+        font-size: .6rem;
+        transition: transform .25s ease;
+    }
+
+    @media (max-width: 767.98px) {
+        .dsb-lipat {
+            display: inline-flex;
+        }
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /* ------------------------------------------------- pita kehadiran */
+
+    .dsb-pita {
+        display: flex;
+        gap: 4px;
+        margin-top: 14px;
+    }
+
+    .dsb-pita-hari {
+        flex: 1 1 auto;
+        height: 22px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        border: 1px solid transparent;
+    }
+
+    .dsb-pita-hari.hadir { background: var(--dsb-hijau); }
+    .dsb-pita-hari.izin { background: var(--dsb-kuning); }
+    .dsb-pita-hari.libur { background: #eef2f7; }
+    .dsb-pita-hari.kosong { background: #fee2e2; }
+    .dsb-pita-hari.hari-ini { background: #fff; border-color: #a5b4fc; border-style: dashed; }
+
+    .dsb-pita-teks {
+        margin: 7px 0 0;
+        font-size: .68rem;
+        font-weight: 600;
+        color: var(--dsb-tinta-3);
+        text-align: center;
+    }
+
     /* -------------------------------------------------------------- cuti */
 
     .dsb-cincin {
@@ -1000,6 +1060,22 @@
         gap: 16px;
     }
 
+    .dsb-artikel-kartu {
+        display: block;
+        text-decoration: none;
+        border-radius: 18px;
+        transition: transform .25s ease;
+    }
+
+    .dsb-artikel-kartu:hover {
+        text-decoration: none;
+        transform: translateY(-3px);
+    }
+
+    .dsb-artikel-kartu:hover h4 {
+        color: #4f46e5;
+    }
+
     .dsb-artikel-kartu h4 {
         margin: 11px 0 5px;
         font-size: .86rem;
@@ -1018,7 +1094,16 @@
         aspect-ratio: 16 / 10;
         border-radius: 16px;
         overflow: hidden;
+        /* kerangka berkilau selama gambar belum termuat, supaya kotak abu-abu
+           tidak terlihat seperti gambar rusak */
+        background: linear-gradient(100deg, #f1f5f9 20%, #e9eef5 50%, #f1f5f9 80%);
+        background-size: 220% 100%;
+        animation: dsb-kilau 1.4s linear infinite;
+    }
+
+    .dsb-artikel-gambar.termuat {
         background: #f1f5f9;
+        animation: none;
     }
 
     .dsb-artikel-gambar img {
@@ -1283,6 +1368,15 @@
         .dsb-artikel {
             grid-template-columns: 1fr;
         }
+    }
+
+    /* ------------------------------------------------ fokus papan ketik */
+
+    .dsb a:focus-visible,
+    .dsb button:focus-visible {
+        outline: 3px solid rgba(99, 102, 241, .5);
+        outline-offset: 3px;
+        border-radius: 14px;
     }
 
     @media (prefers-reduced-motion: reduce) {

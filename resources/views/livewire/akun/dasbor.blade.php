@@ -89,6 +89,46 @@
         </section>
     @endif
 
+    {{-- Akun yang belum punya jejak apa pun: diarahkan, bukan disuguhi
+         kartu kosong semua. --}}
+    @if ($this->baruMulai)
+        <section class="dsb-kartu dsb-mulai">
+            <div class="dsb-kartu-kepala">
+                <div>
+                    <h3 class="dsb-kartu-judul"><i class="fas fa-flag-checkered dsb-ikon-hijau"></i> Langkah pertama Anda</h3>
+                    <p class="dsb-kartu-sub">Tiga hal ini membuat dasbor mulai terisi</p>
+                </div>
+            </div>
+
+            <div class="dsb-tindakan-kisi">
+                <a href="{{ route('account.profil.show', $this->pengguna->getKey()) }}" class="dsb-tindakan-item dsb-ungu">
+                    <span class="dsb-medali kecil"><i class="fas fa-user-cog"></i></span>
+                    <span class="dsb-tindakan-teks">
+                        <strong>1. Lengkapi profil</strong>
+                        <small>Nomor telepon, rekening, dan foto.</small>
+                    </span>
+                    <i class="fas fa-chevron-right dsb-panah"></i>
+                </a>
+                <a href="{{ route('account.presensi.create') }}" class="dsb-tindakan-item dsb-hijau">
+                    <span class="dsb-medali kecil"><i class="fas fa-fingerprint"></i></span>
+                    <span class="dsb-tindakan-teks">
+                        <strong>2. Presensi pertama</strong>
+                        <small>Jam presensi 07.00 – 22.00 WIB.</small>
+                    </span>
+                    <i class="fas fa-chevron-right dsb-panah"></i>
+                </a>
+                <a href="{{ route('account.todolist.index') }}" class="dsb-tindakan-item dsb-biru">
+                    <span class="dsb-medali kecil"><i class="fas fa-tasks"></i></span>
+                    <span class="dsb-tindakan-teks">
+                        <strong>3. Lihat tugas Anda</strong>
+                        <small>Tugas yang ditugaskan akan muncul di sini.</small>
+                    </span>
+                    <i class="fas fa-chevron-right dsb-panah"></i>
+                </a>
+            </div>
+        </section>
+    @endif
+
     {{-- ================================================== kisi kartu utama --}}
     <div class="dsb-kisi">
 
@@ -256,6 +296,17 @@
                             <small>Durasi</small>
                         </div>
                     </div>
+
+                    {{-- Pola 14 hari terakhir: angka bulanan saja tidak
+                         memperlihatkan kebiasaannya. --}}
+                    <div class="dsb-pita" role="img"
+                        aria-label="Kehadiran 14 hari terakhir: {{ collect($this->jejakKehadiran)->where('keadaan', 'hadir')->count() }} hari hadir">
+                        @foreach ($this->jejakKehadiran as $hari)
+                            <span class="dsb-pita-hari {{ $hari['keadaan'] }}"
+                                title="{{ $hari['nama_hari'] }}, {{ $hari['tanggal'] }} — {{ $hari['keadaan'] === 'hari-ini' ? 'hari ini' : $hari['keadaan'] }}"></span>
+                        @endforeach
+                    </div>
+                    <p class="dsb-pita-teks">14 hari terakhir</p>
                 </section>
         @endunless
 
@@ -368,16 +419,23 @@
 
         {{-- presensi tim: pengelola melihat siapa yang sudah masuk hari ini --}}
         @if ($this->pengelolaTim)
-            <section class="dsb-kartu">
+            <section class="dsb-kartu" x-data="lipatDiPonsel()">
                 <div class="dsb-kartu-kepala">
                     <div>
                         <h3 class="dsb-kartu-judul"><i class="fas fa-user-check dsb-ikon-hijau"></i> Presensi tim</h3>
                         <p class="dsb-kartu-sub">Hari ini, {{ now()->locale('id')->translatedFormat('d F') }}</p>
                     </div>
-                    <a href="{{ route('account.presensi.index') }}" class="dsb-tautan">Semua</a>
+                    <div class="dsb-kepala-kanan">
+                        <a href="{{ route('account.presensi.index') }}" class="dsb-tautan">Semua</a>
+                        <button type="button" class="dsb-lipat" x-show="kecil" x-cloak @click="buka = ! buka"
+                            :aria-expanded="buka ? 'true' : 'false'">
+                            <span x-text="buka ? 'Tutup' : 'Lihat'"></span>
+                            <i class="fas fa-chevron-down" :style="buka ? 'transform: rotate(180deg)' : ''"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="dsb-statistik-kecil atas">
+                <div x-show="! kecil || buka" x-cloak class="dsb-statistik-kecil atas">
                     <div>
                         <span>{{ $this->presensiTim['sudah'] }}</span>
                         <small>Sudah presensi</small>
@@ -574,7 +632,7 @@
 
         {{-- pengawasan akun: admin, manajer, CEO --}}
         @if ($this->pengawas)
-            <section class="dsb-kartu">
+            <section class="dsb-kartu" x-data="lipatDiPonsel()">
                 <div class="dsb-kartu-kepala">
                     <div>
                         <h3 class="dsb-kartu-judul"><i class="fas fa-shield-alt dsb-ikon-ungu"></i> Keamanan akun</h3>
@@ -582,10 +640,17 @@
                             {{ $this->pengguna->level === 'admin' ? 'Seluruh sistem' : ($this->pengguna->company ?: 'Perusahaan Anda') }}
                         </p>
                     </div>
-                    <a href="{{ route('account.aktivitas-masuk.index') }}" class="dsb-tautan">Jejak masuk</a>
+                    <div class="dsb-kepala-kanan">
+                        <a href="{{ route('account.aktivitas-masuk.index') }}" class="dsb-tautan">Jejak masuk</a>
+                        <button type="button" class="dsb-lipat" x-show="kecil" x-cloak @click="buka = ! buka"
+                            :aria-expanded="buka ? 'true' : 'false'">
+                            <span x-text="buka ? 'Tutup' : 'Lihat'"></span>
+                            <i class="fas fa-chevron-down" :style="buka ? 'transform: rotate(180deg)' : ''"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="dsb-mini">
+                <div x-show="! kecil || buka" x-cloak class="dsb-mini">
                     <div class="dsb-mini-kartu dsb-hijau">
                         <span class="dsb-mini-angka">{{ $this->ringkasSistem['berhasil_24_jam'] }}</span>
                         <span class="dsb-mini-label">Masuk berhasil 24 jam</span>
@@ -633,15 +698,21 @@
                 <h3 class="dsb-kartu-judul"><i class="fas fa-newspaper dsb-ikon-jingga"></i> Artikel terbaru</h3>
                 <p class="dsb-kartu-sub">Kabar dan tulisan dari Rumah Scopus</p>
             </div>
+            <a href="{{ route('account.Artikel.index') }}" class="dsb-tautan">Lihat semua</a>
         </div>
 
         @if ($this->artikel->isNotEmpty())
             <div class="dsb-artikel">
                 @foreach ($this->artikel as $a)
-                    <article class="dsb-artikel-kartu">
+                    {{-- Kartunya dibuat bertaut: sebelumnya hanya pajangan yang
+                         tidak bisa diklik. --}}
+                    <a href="{{ route('blog.topic.blog-single', ['id' => $a->id, 'token' => $a->token]) }}"
+                        class="dsb-artikel-kartu" title="{{ $a->judul }}">
                         <div class="dsb-artikel-gambar">
                             @if ($a->gambar_depan)
-                                <img src="{{ asset('images/' . $a->gambar_depan) }}" alt="" loading="lazy">
+                                <img src="{{ asset('images/' . $a->gambar_depan) }}" alt=""
+                                    loading="{{ $loop->index < 2 ? 'eager' : 'lazy' }}"
+                                    onload="this.closest('.dsb-artikel-gambar').classList.add('termuat')">
                             @else
                                 <span class="dsb-artikel-kosong"><i class="fas fa-image"></i></span>
                             @endif
@@ -650,8 +721,13 @@
                             @endif
                         </div>
                         <h4>{{ \Illuminate\Support\Str::limit($a->judul, 60) }}</h4>
-                        <small>{{ \Illuminate\Support\Carbon::parse($a->created_at)->locale('id')->translatedFormat('d F Y') }}</small>
-                    </article>
+                        <small>
+                            {{ \Illuminate\Support\Carbon::parse($a->created_at)->locale('id')->translatedFormat('d F Y') }}
+                            @if (($a->dilihat ?? 0) > 0)
+                                &middot; {{ $a->dilihat }}x dibaca
+                            @endif
+                        </small>
+                    </a>
                 @endforeach
             </div>
         @else
@@ -699,6 +775,21 @@
             </div>
         </section>
     @endif
+
+    <script>
+        /* Kartu yang jarang dilihat dilipat di ponsel supaya halaman tidak
+           sepanjang tujuh layar; di layar lebar selalu terbuka. */
+        window.lipatDiPonsel = function () {
+            return {
+                kecil: window.matchMedia('(max-width: 767px)').matches,
+                buka: false,
+                init() {
+                    window.matchMedia('(max-width: 767px)')
+                        .addEventListener('change', (e) => { this.kecil = e.matches; });
+                },
+            };
+        };
+    </script>
 
     @include('livewire.akun.dasbor-gaya')
 </div>

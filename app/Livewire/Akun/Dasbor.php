@@ -51,7 +51,8 @@ class Dasbor extends Component
         unset($this->gaji, $this->tim, $this->tugas, $this->pengajuan,
             $this->artikel, $this->kehadiran, $this->cuti, $this->presensiHariIni,
             $this->ringkasan, $this->perluTindakan, $this->antreanCuti,
-            $this->ringkasSistem, $this->presensiTim, $this->clinikScopus);
+            $this->ringkasSistem, $this->presensiTim, $this->clinikScopus,
+            $this->jejakKehadiran, $this->baruMulai);
 
         $this->dimuatPada = now()->format('H:i');
     }
@@ -368,6 +369,67 @@ class Dasbor extends Component
                         : $masaKerja->d . ' hari'))
                 : '-',
         ];
+    }
+
+    /**
+     * Jejak kehadiran 14 hari terakhir untuk pita kecil di kartu presensi.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    #[Computed]
+    public function jejakKehadiran(): array
+    {
+        $mulai = now()->copy()->subDays(13)->startOfDay();
+
+        $baris = DB::table('presensi')
+            ->selectRaw('DATE(created_at) as tanggal, MAX(izin) as izin, MAX(lembur) as lembur')
+            ->where('user_id', $this->pengguna->getKey())
+            ->where('created_at', '>=', $mulai)
+            ->groupBy('tanggal')
+            ->get()
+            ->keyBy('tanggal');
+
+        $hari = [];
+
+        for ($i = 13; $i >= 0; $i--) {
+            $titik = now()->copy()->subDays($i);
+            $kunci = $titik->toDateString();
+            $catatan = $baris[$kunci] ?? null;
+
+            $keadaan = match (true) {
+                $catatan && $catatan->izin > 0 => 'izin',
+                (bool) $catatan => 'hadir',
+                $titik->isWeekend() => 'libur',
+                $titik->isToday() => 'hari-ini',
+                default => 'kosong',
+            };
+
+            $hari[] = [
+                'tanggal' => $titik->locale('id')->translatedFormat('d M'),
+                'nama_hari' => $titik->locale('id')->translatedFormat('D'),
+                'keadaan' => $keadaan,
+            ];
+        }
+
+        return $hari;
+    }
+
+    /**
+     * Akun yang belum punya jejak apa pun: perlu diarahkan, bukan disuguhi
+     * delapan kartu kosong.
+     */
+    #[Computed]
+    public function baruMulai(): bool
+    {
+        if ($this->pelanggan) {
+            return false;
+        }
+
+        $id = $this->pengguna->getKey();
+
+        return ! DB::table('presensi')->where('user_id', $id)->exists()
+            && ! DB::table('gaji')->where('user_id', $id)->exists()
+            && $this->tugas->isEmpty();
     }
 
     /** @return array<string,mixed> */
@@ -801,7 +863,7 @@ class Dasbor extends Component
     public function artikel()
     {
         return DB::table('artikel')
-            ->select('artikel.id', 'artikel.token', 'artikel.judul', 'artikel.gambar_depan', 'artikel.created_at', 'categories_artikel.kategori')
+            ->select('artikel.id', 'artikel.token', 'artikel.judul', 'artikel.gambar_depan', 'artikel.created_at', 'artikel.dilihat', 'categories_artikel.kategori')
             ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
             // Draf tidak boleh ikut tampil di dasbor semua orang.
             ->whereIn('artikel.status', ['publish', 'published', 'terbit'])
