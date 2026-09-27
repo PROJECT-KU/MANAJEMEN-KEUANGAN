@@ -482,6 +482,12 @@
         padding: 0 18px 18px;
     }
 
+    /* Kisi kedua "Nama & kontak" hanya berisi dua isian; auto-fit meniadakan
+       jalur yang tidak terpakai sehingga keduanya mengisi penuh barisnya. */
+    .prof-kisi-dua {
+        margin-top: 14px;
+    }
+
     /* --------------------------------------------------- bagian isian */
 
     .prof-bagian + .prof-bagian {
@@ -513,19 +519,44 @@
 
     /* Nilai yang ditetapkan admin: kartu kecil, bukan <select disabled>
        yang menyamar jadi isian padahal tidak pernah ikut tersimpan. */
+    /*
+     * Kartu "Ditetapkan oleh admin": empat kartu di kisi tiga kolom
+     * menyisakan dua sel kosong. Dengan lebar minimum 300px ia jatuh ke dua
+     * kolom, jadi empat kartu mengisi 2x2 penuh.
+     */
+    .prof-kisi-admin {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    /* Kalau jumlahnya ganjil (akun 'user' tidak punya kartu Perusahaan),
+       kartu terakhir melebar mengisi sisa barisnya. */
+    .prof-kisi-admin > :last-child:nth-child(2n + 1) {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 767.98px) {
+        .prof-kisi-admin > :last-child:nth-child(2n + 1) {
+            grid-column: auto;
+        }
+    }
+
+    /* Kartu ini hanya menampilkan label + satu nilai, jadi tingginya cukup
+       mengikuti isinya; padding 10/12 dengan ubin 38px membuatnya 80px,
+       setinggi kotak isian yang bisa disunting di atasnya. */
     .prof-statis {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        border-radius: 13px;
+        gap: 9px;
+        padding: 8px 10px;
+        border-radius: 11px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
 
     .prof-statis-label {
-        margin: 0 0 2px;
-        font-size: .64rem;
+        margin: 0 0 1px;
+        line-height: 1.2;
+        font-size: .62rem;
         font-weight: 700;
         letter-spacing: .05em;
         text-transform: uppercase;
@@ -534,7 +565,8 @@
 
     .prof-statis-nilai {
         margin: 0;
-        font-size: .85rem;
+        line-height: 1.3;
+        font-size: .82rem;
         font-weight: 700;
         color: var(--mis-tinta);
         overflow-wrap: anywhere;

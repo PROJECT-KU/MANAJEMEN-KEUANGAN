@@ -1204,6 +1204,17 @@ textarea:focus-visible,
     font-size: .98rem;
 }
 
+/* Untuk kartu yang isinya cuma label + satu nilai; ubin 38px di situ
+   lebih tinggi daripada teksnya sendiri dan membuat kartunya menggemuk. */
+.mis-medali.mini {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 9px;
+    font-size: .8rem;
+    box-shadow: 0 6px 12px -8px rgba(15, 23, 42, .45);
+}
+
 .mis-medali i {
     line-height: 1;
 }
@@ -1271,14 +1282,19 @@ textarea:focus-visible,
     display: grid;
     gap: 7px;
     min-width: 0;
-    /* tanpa ini, isian tanpa teks bantuan ikut meregang setinggi tetangganya */
+    /* tanpa keduanya, isian tanpa teks bantuan ikut meregang setinggi sel
+       tertinggi di barisnya, dan di bawah kotaknya tersisa ruang kosong */
     align-content: start;
+    align-self: start;
 }
 
+/* line-height 1,2 — bukan 1,5 bawaan badan halaman. Label 0,7rem yang
+   memakai 1,5 setinggi 28px, dan tiap baris isian ikut menggemuk. */
 .mis-label {
     margin: 0;
     font-size: .7rem;
     font-weight: 800;
+    line-height: 1.2;
     letter-spacing: .04em;
     text-transform: uppercase;
     color: var(--mis-tinta-3);
@@ -1290,6 +1306,7 @@ textarea:focus-visible,
 .mis-bantuan {
     margin: 0;
     font-size: .72rem;
+    line-height: 1.35;
     color: var(--mis-tinta-4);
 }
 
@@ -1307,6 +1324,7 @@ textarea:focus-visible,
     background: #fff;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     font-size: .86rem;
+    line-height: 1.3;
     font-weight: 600;
     color: var(--mis-tinta);
     transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
