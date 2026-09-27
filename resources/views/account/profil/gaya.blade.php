@@ -498,7 +498,16 @@
         height: 28px;
         flex: 0 0 28px;
         border-radius: 9px;
-        font-size: .68rem;
+        /* 0,72rem ~ 11,5px pada tombol 28px: pensilnya jelas terbaca tetapi
+           masih menyisakan ruang di sekelilingnya. */
+        font-size: .72rem;
+        color: #6366f1;
+    }
+
+    .prof-baris .mis-tombol-garis:hover {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: #fff;
     }
 
     .prof-baris-teks {
