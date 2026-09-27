@@ -386,9 +386,18 @@
        setinggi 772px di layar 1440. Kini semuanya satu kisi: kartu mengisi
        kolom yang tersedia, dan kartu yang memang butuh lebar (grafik gaji,
        karyawan, artikel, akses cepat) merentang penuh. */
+    /*
+     * Memakai flex-wrap, bukan grid.
+     *
+     * Dengan grid, kartu terakhir pada sebuah baris tetap selebar satu kolom
+     * sehingga sisa barisnya menganggur -- itulah lubang kosong di sebelah
+     * kartu Clinik Scopus dan Keamanan Akun. Pada flex-wrap setiap kartu
+     * boleh melar (flex-grow), jadi baris apa pun selalu terisi penuh berapa
+     * pun jumlah kartunya.
+     */
     .dsb-kisi {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 22px;
         align-items: stretch;
     }
@@ -396,11 +405,16 @@
     .dsb-kisi > section {
         display: flex;
         flex-direction: column;
+        flex: 1 1 330px;
+        min-width: 0;
+        max-width: 100%;
     }
 
-    /* kartu yang merentang penuh */
-    .dsb-lebar {
-        grid-column: 1 / -1;
+    /* Kartu yang selalu merentang penuh. Pemilihnya harus sama kuatnya
+       dengan `.dsb-kisi > section` di atas, kalau tidak flex-basis 330px
+       yang menang dan grafik gaji ikut menyempit. */
+    .dsb-kisi > section.dsb-lebar {
+        flex: 1 1 100%;
     }
 
     /* isi kosong ikut memenuhi kartu yang teregang, supaya tidak ada
