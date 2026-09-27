@@ -256,11 +256,15 @@ Profil | MIS
         <div class="prof-utama">
           <div class="mis-kartu prof-tab-kartu">
             <div class="prof-tab-kepala">
-              <div class="mis-kartu-kepala">
-                <div>
-                  <h3 class="mis-kartu-judul"><i class="fas fa-id-card mis-ikon-ungu"></i> Pengaturan akun</h3>
-                  <p class="mis-kartu-sub">Data diri, kata sandi, PIN masuk, dan riwayat keamanan.</p>
-                </div>
+              {{-- Memakai pola kepala bagian yang sudah baku di halaman ini:
+                   ubin ikon merentang dua baris lalu dirata-tengahkan, jadi ia
+                   sejajar dengan blok judul + keterangan. Sebelumnya ikonnya
+                   menempel di dalam <h3> sehingga hanya setinggi judulnya, dan
+                   ukurannya ikut terkunci 20px oleh aturan global layout. --}}
+              <div class="prof-bagian-kepala prof-kepala-kartu">
+                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-id-card"></i></span>
+                <h3 class="prof-bagian-judul">Pengaturan akun</h3>
+                <p class="prof-bagian-sub">Data diri, kata sandi, PIN masuk, dan riwayat keamanan.</p>
               </div>
 
               <ul class="prof-tab nav nav-pills" id="pills-tab" role="tablist">

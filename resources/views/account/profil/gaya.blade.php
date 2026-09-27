@@ -602,6 +602,12 @@
         margin-top: 14px;
     }
 
+    /* Kepala kartu: sama seperti kepala bagian, hanya judulnya sedikit
+       lebih besar karena ia menaungi seluruh kartu, bukan satu bagian. */
+    .prof-kepala-kartu > .prof-bagian-judul {
+        font-size: 1rem;
+    }
+
     /* --------------------------------------------------- bagian isian */
 
     .prof-bagian + .prof-bagian {
