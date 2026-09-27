@@ -389,7 +389,7 @@ Profil | MIS
                                  mencari namanya, kode banknya disimpan di input tersembunyi. --}}
                             <input class="form-control-modern @error('bank') is-invalid @enderror"
                               id="prof-bank-nama" type="text" list="daftar-bank" autocomplete="off"
-                              placeholder="Ketik nama bank, misal BCA" value="{{ $namaBank }}">
+                              placeholder="Ketik nama bank, misal mandiri" value="{{ $namaBank }}">
                             <datalist id="daftar-bank">
                               @foreach ($daftarBank as $kode => $nama)
                                 <option value="{{ $nama }}"></option>
@@ -399,7 +399,7 @@ Profil | MIS
                             @error('bank')
                               <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                             @else
-                              <p class="mis-bantuan" id="prof-bank-kabar">Ketik lalu pilih dari daftar yang muncul.</p>
+                              <p class="mis-bantuan" id="prof-bank-kabar">Ketik sebagian namanya saja, misal "mandiri".</p>
                             @enderror
                           </div>
 
@@ -978,9 +978,17 @@ Profil | MIS
 <!--================== PILIH BANK DENGAN MENGETIK ==================-->
 <script>
   /*
-   * Daftarnya 58 bank. Sebagai dropdown, orang harus menggulir dan menebak
-   * urutannya; di sini cukup mengetik "bca". Yang dikirim ke peladen tetap
-   * kode banknya, lewat input tersembunyi.
+   * Memilih bank dengan mengetik.
+   *
+   * Versi sebelumnya hanya menerima nama yang SAMA PERSIS. Akibatnya cuma
+   * bank yang namanya pendek yang bisa dipilih — mengetik "bri" berhasil
+   * karena nama banknya memang "BRI", sedangkan "mandiri" atau "Bank BCA"
+   * dianggap tidak ada lalu kode banknya DIHAPUS diam-diam, dan pilihan
+   * yang sudah tersimpan ikut hilang begitu formulirnya disimpan.
+   *
+   * Sekarang pencocokannya memaafkan: sama persis, atau nama bank memuat
+   * yang diketik, atau sebaliknya. Kalau tetap tidak jelas, nilai lama
+   * dikembalikan — tidak pernah dibiarkan kosong tanpa disengaja.
    */
   (function () {
     const kotak = document.getElementById('prof-bank-nama');
@@ -991,100 +999,115 @@ Profil | MIS
       return;
     }
 
-    const peta = @json(array_flip(config('bank')));
+    const peta = @json(config('bank'));              // kode -> nama
+    const daftar = Object.keys(peta).map(function (kode) {
+      return { kode: String(kode), nama: peta[kode] };
+    });
 
-    function samakan() {
-      const nama = kotak.value.trim().toUpperCase();
-      const cocok = Object.keys(peta).find(function (n) { return n.toUpperCase() === nama; });
+    function rapikan(teks) {
+      return String(teks || '').trim().toUpperCase().replace(/\s+/g, ' ');
+    }
 
-      if (cocok) {
-        tersembunyi.value = peta[cocok];
-        kotak.classList.remove('is-invalid');
-        if (kabar) {
-          kabar.textContent = 'Bank dipilih: ' + cocok + '.';
-        }
-      } else if (kotak.value.trim() === '') {
-        tersembunyi.value = '';
-        kotak.classList.remove('is-invalid');
-        if (kabar) {
-          kabar.textContent = 'Ketik lalu pilih dari daftar yang muncul.';
-        }
-      } else {
-        // Nama yang belum cocok tidak langsung dianggap salah selagi diketik;
-        // penandanya baru muncul saat kotaknya ditinggalkan.
-        if (kabar) {
-          kabar.textContent = 'Ketik lalu pilih dari daftar yang muncul.';
-        }
+    // Nama terakhir yang benar-benar cocok, dipakai untuk memulihkan
+    // ketikan yang tidak jelas.
+    let terakhirSah = daftar.find(function (b) { return b.kode === tersembunyi.value; }) || null;
+
+    function cari(teks) {
+      const cari = rapikan(teks);
+
+      if (cari === '') {
+        return null;
+      }
+
+      const persis = daftar.filter(function (b) { return rapikan(b.nama) === cari; });
+      if (persis.length === 1) {
+        return persis[0];
+      }
+
+      // "mandiri" -> "BANK MANDIRI"
+      const memuat = daftar.filter(function (b) { return rapikan(b.nama).includes(cari); });
+      if (memuat.length === 1) {
+        return memuat[0];
+      }
+
+      // "Bank BCA" -> "BCA"
+      const dimuat = daftar.filter(function (b) { return cari.includes(rapikan(b.nama)); });
+      if (dimuat.length === 1) {
+        return dimuat[0];
+      }
+
+      return null;
+    }
+
+    function beriKabar(teks) {
+      if (kabar) {
+        kabar.textContent = teks;
       }
     }
 
-    kotak.addEventListener('input', samakan);
+    kotak.addEventListener('input', function () {
+      const cocok = cari(kotak.value);
+
+      if (cocok) {
+        tersembunyi.value = cocok.kode;
+        terakhirSah = cocok;
+        kotak.classList.remove('is-invalid');
+        beriKabar('Bank dipilih: ' + cocok.nama + '.');
+        return;
+      }
+
+      if (kotak.value.trim() === '') {
+        kotak.classList.remove('is-invalid');
+        beriKabar('Ketik nama banknya, misal "mandiri" atau "BCA".');
+        return;
+      }
+
+      beriKabar('Terus ketik, lalu pilih dari daftar yang muncul.');
+    });
 
     kotak.addEventListener('blur', function () {
-      samakan();
+      const cocok = cari(kotak.value);
 
-      if (kotak.value.trim() !== '' && tersembunyi.value === '') {
+      if (cocok) {
+        // Ketikan dirapikan jadi nama resminya supaya tidak ada dua ejaan
+        // untuk bank yang sama.
+        kotak.value = cocok.nama;
+        tersembunyi.value = cocok.kode;
+        terakhirSah = cocok;
+        kotak.classList.remove('is-invalid');
+        beriKabar('Bank dipilih: ' + cocok.nama + '.');
+        return;
+      }
+
+      if (kotak.value.trim() === '') {
+        // Dikosongkan dengan sengaja: itu memang boleh.
+        tersembunyi.value = '';
+        terakhirSah = null;
+        kotak.classList.remove('is-invalid');
+        beriKabar('Belum ada bank yang dipilih.');
+        return;
+      }
+
+      // Ketikan tidak jelas — kembalikan yang lama, jangan sampai hilang.
+      if (terakhirSah) {
+        kotak.value = terakhirSah.nama;
+        tersembunyi.value = terakhirSah.kode;
+        kotak.classList.remove('is-invalid');
+        beriKabar('Bank dipilih: ' + terakhirSah.nama + '.');
+        misToast('peringatan', 'Nama bank itu belum jelas, jadi pilihan sebelumnya dipakai lagi.');
+      } else {
+        tersembunyi.value = '';
         kotak.classList.add('is-invalid');
-        if (kabar) {
-          kabar.textContent = 'Nama bank itu tidak ada di daftar.';
-        }
+        beriKabar('Bank itu tidak ada di daftar. Coba ketik sebagian namanya.');
       }
     });
 
-    samakan();
+    // Samakan tampilan dengan kode yang tersimpan saat halaman dibuka.
+    if (terakhirSah) {
+      kotak.value = terakhirSah.nama;
+      beriKabar('Bank dipilih: ' + terakhirSah.nama + '.');
+    }
   })();
-</script>
-
-<!--================== LOMPAT DARI DAFTAR KELENGKAPAN ==================-->
-<script>
-  /*
-   * Menekan butir yang masih kurang langsung membuka tabnya dan menaruh
-   * kursor di kotaknya. Tanpa ini orang harus menebak sendiri isian mana
-   * yang dimaksud di antara delapan kotak yang ada.
-   */
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.prof-lengkap-butir').forEach(function (tombol) {
-      tombol.addEventListener('click', function () {
-        const kunci = tombol.dataset.kunci;
-        const tab = tombol.dataset.tab;
-        const medan = tombol.dataset.medan;
-
-        // Dua butir tidak menunjuk isian: foto dan verifikasi email punya
-        // tempatnya sendiri di kolom kiri.
-        if (kunci === 'foto') {
-          document.getElementById('foto').click();
-          return;
-        }
-
-        if (kunci === 'email') {
-          const tombolVerif = document.getElementById('btn-verify-email');
-          if (tombolVerif) {
-            tombolVerif.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            tombolVerif.focus();
-          }
-          return;
-        }
-
-        if (tab) {
-          const pil = document.querySelector('#pills-tab a[href="#' + tab + '"]');
-          if (pil) {
-            pil.click();
-          }
-        }
-
-        if (medan) {
-          // Ditunda sebentar supaya tabnya sempat terbuka lebih dulu.
-          setTimeout(function () {
-            const isian = document.getElementById(medan);
-            if (isian) {
-              isian.scrollIntoView({ block: 'center', behavior: 'smooth' });
-              isian.focus();
-            }
-          }, 220);
-        }
-      });
-    });
-  });
 </script>
 
 <!--================== JENDELA GANTI EMAIL ==================-->
