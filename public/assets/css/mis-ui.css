@@ -1142,7 +1142,7 @@ textarea:focus-visible,
     color: var(--mis-tinta);
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
 }
 
 .mis-kartu-sub {
@@ -1180,13 +1180,13 @@ textarea:focus-visible,
        di layar MIS yang isiannya lebih rapat ubin sebesar itu masih terasa
        mendominasi. Perbandingan glif terhadap ubin tetap seperti lemon
        (sekitar 0,28x), jadi ikonnya tidak ikut tenggelam. */
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 11px;
     background: var(--warna, var(--mis-ungu));
     color: #fff;
-    font-size: .95rem;
+    font-size: 1.05rem;
     box-shadow: 0 6px 12px -8px rgba(15, 23, 42, .4);
 }
 
@@ -1213,21 +1213,21 @@ textarea:focus-visible,
 }
 
 .mis-medali.kecil {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
     border-radius: 9px;
-    font-size: .8rem;
+    font-size: .88rem;
 }
 
 /* Untuk kartu yang isinya cuma label + satu nilai; ubin 38px di situ
    lebih tinggi daripada teksnya sendiri dan membuat kartunya menggemuk. */
 .mis-medali.mini {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-    border-radius: 7px;
-    font-size: .64rem;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    border-radius: 8px;
+    font-size: .75rem;
     box-shadow: 0 4px 9px -6px rgba(15, 23, 42, .4);
 }
 
@@ -1561,7 +1561,7 @@ select.form-control-modern {
 .mis-sel-utama {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     min-width: 0;
 }
 

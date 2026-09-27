@@ -341,13 +341,13 @@
     .dsb-medali {
         display: grid;
         place-items: center;
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        border-radius: 11px;
         background: var(--warna, var(--dsb-ungu));
         color: #fff;
-        font-size: .95rem;
+        font-size: 1.05rem;
         box-shadow: 0 8px 16px -10px rgba(15, 23, 42, .45);
     }
 
@@ -516,11 +516,11 @@
     }
 
     .dsb-medali.kecil {
-        width: 28px;
-        height: 28px;
-        flex: 0 0 28px;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
         border-radius: 9px;
-        font-size: .8rem;
+        font-size: .88rem;
     }
 
     .dsb-panah {

@@ -240,7 +240,7 @@
     .prof-unggah {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 14px;
         padding: 10px 12px;
         border-radius: 13px;
         border: 1.5px dashed #c7d2fe;
@@ -277,7 +277,7 @@
     .prof-lengkap-atas {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 16px;
         margin-bottom: 12px;
     }
 
@@ -334,7 +334,7 @@
     .prof-lengkap-butir {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 14px;
         width: 100%;
         padding: 8px 10px;
         border: 1px solid var(--mis-garis);
@@ -420,7 +420,7 @@
     .prof-baris-atas {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 13px;
         min-width: 0;
     }
 
@@ -432,8 +432,8 @@
     /* Keterangan menjorok selebar ubin + jaraknya, jadi ia segaris dengan
        alamat email di atasnya, bukan dengan ikonnya. */
     .prof-baris-ket {
-        /* selebar ubin (22px) + jarak (10px) */
-        padding-left: 32px;
+        /* selebar ubin (25px) + jarak (13px) */
+        padding-left: 38px;
     }
 
     /* Tombol ubah di baris ini lebih kecil daripada tombol ikon di tabel,
@@ -551,7 +551,7 @@
     .prof-bagian-kepala {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 14px;
         margin-bottom: 14px;
     }
 
@@ -598,7 +598,7 @@
     .prof-statis {
         display: flex;
         align-items: center;
-        gap: 9px;
+        gap: 12px;
         padding: 8px 10px;
         border-radius: 11px;
         background: #f8fafc;
@@ -696,7 +696,7 @@
     .prof-kabar {
         display: flex;
         align-items: center;
-        gap: 13px;
+        gap: 14px;
         padding: 12px 14px;
         border-radius: 13px;
         margin-bottom: 16px;
@@ -761,7 +761,7 @@
     .prof-modal-kepala {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         margin-bottom: 20px;
         padding-right: 34px;
     }
