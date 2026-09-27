@@ -46,7 +46,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=8">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=10">
 
     <style>
         .fas,
@@ -250,6 +250,38 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                     </a>
                     <p id="greeting" class="text-white font-weight-bold mb-0 ml-2 d-flex align-items-center mt-3"></p>
                 </form>
+
+                {{-- Pintasan pemberitahuan. Angkanya dihitung sekali per
+                     permintaan oleh AppServiceProvider, jadi bagian ini tidak
+                     menambah satu pun kueri. --}}
+                <ul class="navbar-nav mis-notif">
+                    @if (Auth::user()->level !== 'user')
+                        <li>
+                            <a href="{{ route('account.todolist.index') }}" class="mis-notif-tombol" title="Tugas ditugaskan">
+                                <i class="fas fa-tasks"></i>
+                                @if (($totalAssignTask ?? 0) > 0)
+                                    <span class="mis-notif-angka">{{ $totalAssignTask > 99 ? '99+' : $totalAssignTask }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('account.PerjalananDinas.index') }}" class="mis-notif-tombol" title="Perjalanan dinas">
+                                <i class="fas fa-plane-departure"></i>
+                                @if (($countAjukan ?? 0) > 0)
+                                    <span class="mis-notif-angka">{{ $countAjukan > 99 ? '99+' : $countAjukan }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
+                    <li>
+                        <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="mis-notif-tombol" title="Pemesanan Clinik Scopus">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            @if (($countScopusPending ?? 0) > 0)
+                                <span class="mis-notif-angka">{{ $countScopusPending > 99 ? '99+' : $countScopusPending }}</span>
+                            @endif
+                        </a>
+                    </li>
+                </ul>
 
                 <!-- Dropdown Profil -->
                 @if (Auth::check())

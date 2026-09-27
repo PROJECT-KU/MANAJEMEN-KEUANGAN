@@ -428,6 +428,74 @@ body.sidebar-show .main-footer {
     padding-bottom: 72px;
 }
 
+/* ------------------------------------------- pintasan pemberitahuan --- */
+
+.mis-notif {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    margin-right: 6px;
+    padding-right: 12px;
+    border-right: 1px solid var(--ui-garis);
+}
+
+.mis-notif-tombol {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    color: var(--ui-tinta-3);
+    background: #f8fafc;
+    transition: background var(--ui-transisi), color var(--ui-transisi), transform var(--ui-transisi);
+}
+
+.mis-notif-tombol:hover {
+    transform: translateY(-1px);
+    filter: brightness(.97);
+}
+
+/* tiap pintasan punya warnanya sendiri, senada dengan ikon di sidebar */
+.mis-notif li:nth-child(1) .mis-notif-tombol { color: var(--ui-aksen); background: var(--ui-aksen-muda); }
+.mis-notif li:nth-child(2) .mis-notif-tombol { color: var(--ui-biru); background: #e0f2fe; }
+.mis-notif li:nth-child(3) .mis-notif-tombol { color: var(--ui-kuning); background: #fffbeb; }
+
+.mis-notif-tombol .fas {
+    font-size: 16px;
+}
+
+.mis-notif-angka {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    display: grid;
+    place-items: center;
+    border-radius: 99px;
+    background: var(--ui-merah);
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+/* di layar sempit cukup dua pintasan supaya bilahnya tidak sesak */
+@media (max-width: 575.98px) {
+    .mis-notif {
+        padding-right: 6px;
+        margin-right: 2px;
+    }
+
+    .mis-notif li:first-child {
+        display: none;
+    }
+}
+
 /* ------------------------------------------------- kepala tiap halaman --- */
 
 .section-header {
