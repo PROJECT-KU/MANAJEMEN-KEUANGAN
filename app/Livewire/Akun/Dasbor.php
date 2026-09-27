@@ -22,9 +22,25 @@ class Dasbor extends Component
     /** Kapan angka di layar ini terakhir diambil. */
     public string $dimuatPada = '';
 
+    /** Tahun yang sedang ditampilkan pada grafik gaji. */
+    public int $tahunGaji = 0;
+
     public function mount(): void
     {
         $this->dimuatPada = now()->format('H:i');
+        $this->tahunGaji = now()->year;
+    }
+
+    /** Geser grafik gaji ke tahun sebelum/sesudahnya. */
+    public function geserTahun(int $arah): void
+    {
+        $tahun = $this->tahunGaji + ($arah >= 0 ? 1 : -1);
+
+        // Tidak ada gunanya melihat tahun yang belum tiba, dan lima tahun ke
+        // belakang sudah lebih dari cukup untuk data gaji.
+        $this->tahunGaji = max(now()->year - 5, min(now()->year, $tahun));
+
+        unset($this->gaji);
     }
 
     /** Ambil ulang seluruh angka tanpa memuat ulang halaman. */
@@ -35,7 +51,7 @@ class Dasbor extends Component
         unset($this->gaji, $this->tim, $this->tugas, $this->pengajuan,
             $this->artikel, $this->kehadiran, $this->cuti, $this->presensiHariIni,
             $this->ringkasan, $this->perluTindakan, $this->antreanCuti,
-            $this->ringkasSistem, $this->presensiTim);
+            $this->ringkasSistem, $this->presensiTim, $this->clinikScopus);
 
         $this->dimuatPada = now()->format('H:i');
     }
@@ -50,7 +66,7 @@ class Dasbor extends Component
      */
     private function perusahaan(): ?string
     {
-        $nama = trim((string) $this->pengguna()->company);
+        $nama = trim((string) $this->pengguna->company);
 
         return $nama === '' ? null : $nama;
     }
@@ -66,20 +82,20 @@ class Dasbor extends Component
     #[Computed]
     public function pengelolaTim(): bool
     {
-        return in_array($this->pengguna()->level, ['manager', 'ceo'], true);
+        return in_array($this->pengguna->level, ['manager', 'ceo'], true);
     }
 
     /** Pelanggan biasa: tidak punya presensi, gaji, maupun cuti. */
     #[Computed]
     public function pelanggan(): bool
     {
-        return $this->pengguna()->level === 'user';
+        return $this->pengguna->level === 'user';
     }
 
     #[Computed]
     public function pengawas(): bool
     {
-        return in_array($this->pengguna()->level, ['admin', 'manager', 'ceo'], true);
+        return in_array($this->pengguna->level, ['admin', 'manager', 'ceo'], true);
     }
 
     #[Computed]
@@ -101,8 +117,8 @@ class Dasbor extends Component
     #[Computed]
     public function gaji(): array
     {
-        $pengguna = $this->pengguna();
-        $tahun = now()->year;
+        $pengguna = $this->pengguna;
+        $tahun = $this->tahunGaji > 0 ? $this->tahunGaji : now()->year;
 
         $kueri = DB::table('gaji')
             ->selectRaw('MONTH(gaji.tanggal) as bulan, SUM(gaji.total) as total')
@@ -110,7 +126,7 @@ class Dasbor extends Component
             ->where('gaji.status', 'terbayar')
             ->whereYear('gaji.tanggal', $tahun);
 
-        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
+        if ($this->pengelolaTim && $this->perusahaan() !== null) {
             $kueri->where('users.company', $this->perusahaan());
         } else {
             $kueri->where('gaji.user_id', $pengguna->getKey());
@@ -134,7 +150,7 @@ class Dasbor extends Component
             ->where('gaji.status', 'terbayar')
             ->whereYear('gaji.tanggal', $tahun - 1);
 
-        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
+        if ($this->pengelolaTim && $this->perusahaan() !== null) {
             $lalu->where('users.company', $this->perusahaan());
         } else {
             $lalu->where('gaji.user_id', $pengguna->getKey());
@@ -144,6 +160,8 @@ class Dasbor extends Component
 
         return [
             'tahun' => $tahun,
+            'tahun_pertama' => now()->year - 5,
+            'tahun_terakhir' => now()->year,
             'total_lalu' => $totalLalu,
             'selisih_tahun' => $totalLalu > 0 ? round((($total - $totalLalu) / $totalLalu) * 100, 1) : null,
             'per_bulan' => $perBulan,
@@ -168,15 +186,15 @@ class Dasbor extends Component
     #[Computed]
     public function ringkasan(): array
     {
-        $gaji = $this->gaji();
-        $hadir = $this->kehadiran();
-        $cuti = $this->cuti();
+        $gaji = $this->gaji;
+        $hadir = $this->kehadiran;
+        $cuti = $this->cuti;
 
         $kartu = [];
 
         $penuh = 'Rp ' . number_format($gaji['total'], 0, ',', '.');
 
-        if ($this->pelanggan()) {
+        if ($this->pelanggan) {
             return $this->ringkasanPelanggan();
         }
 
@@ -184,7 +202,7 @@ class Dasbor extends Component
             'warna' => 'biru',
             'ikon' => 'fa-money-check-alt',
             'tautan' => route('account.gaji.index'),
-            'label' => ($this->pengelolaTim() ? 'Gaji terbayar' : 'Gaji diterima') . ' · ' . $gaji['tahun'],
+            'label' => ($this->pengelolaTim ? 'Gaji terbayar' : 'Gaji diterima') . ' · ' . $gaji['tahun'],
             // Angka rupiah besar tidak muat di kartu selebar seperempat layar;
             // yang tampil bentuk ringkasnya, nilai penuhnya ada di tooltip dan
             // di halaman Gaji.
@@ -195,8 +213,8 @@ class Dasbor extends Component
                 : 'Belum ada gaji terbayar tahun ini.',
         ];
 
-        if ($this->pengelolaTim()) {
-            $tim = $this->tim();
+        if ($this->pengelolaTim) {
+            $tim = $this->tim;
 
             $kartu[] = [
                 'warna' => 'ungu',
@@ -210,11 +228,11 @@ class Dasbor extends Component
             $kartu[] = [
                 'warna' => 'ungu',
                 'ikon' => 'fa-briefcase',
-                'tautan' => route('account.profil.show', $this->pengguna()->getKey()),
+                'tautan' => route('account.profil.show', $this->pengguna->getKey()),
                 'label' => 'Masa kerja',
                 'nilai' => $hadir['masa_kerja'],
-                'catatan' => 'Sejak ' . ($this->pengguna()->created_at
-                    ? $this->pengguna()->created_at->locale('id')->translatedFormat('d F Y')
+                'catatan' => 'Sejak ' . ($this->pengguna->created_at
+                    ? $this->pengguna->created_at->locale('id')->translatedFormat('d F Y')
                     : '-'),
             ];
         }
@@ -250,7 +268,7 @@ class Dasbor extends Component
      */
     private function ringkasanPelanggan(): array
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
 
         // Halaman riwayat memakai customer_id; ikuti aturan yang sama.
         $pesanan = DB::table('clinikscopus_pemesanan')
@@ -316,7 +334,7 @@ class Dasbor extends Component
     public function presensiHariIni()
     {
         return DB::table('presensi')
-            ->where('user_id', $this->pengguna()->getKey())
+            ->where('user_id', $this->pengguna->getKey())
             ->whereDate('created_at', now()->toDateString())
             ->first();
     }
@@ -325,7 +343,7 @@ class Dasbor extends Component
     #[Computed]
     public function kehadiran(): array
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
         $awalBulan = now()->startOfMonth();
 
         $baris = DB::table('presensi')
@@ -356,7 +374,7 @@ class Dasbor extends Component
     #[Computed]
     public function cuti(): array
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
         $setahun = $pengguna->created_at && $pengguna->created_at->diffInYears(now()) >= 1;
 
         $terpakai = (int) DB::table('cuti')
@@ -396,16 +414,24 @@ class Dasbor extends Component
             ];
         }
 
-        $dasar = DB::table('users')->where('company', $perusahaan);
+        // Empat angka sekaligus dalam satu kueri, bukan empat count() terpisah.
+        $hitung = DB::table('users')
+            ->where('company', $perusahaan)
+            ->selectRaw("COUNT(*) as total,
+                SUM(status = 'active') as aktif,
+                SUM(status = 'nonactive') as nonaktif,
+                SUM(email_verified_at IS NULL) as belum_verifikasi")
+            ->first();
 
         return [
-            'total' => (clone $dasar)->count(),
-            'aktif' => (clone $dasar)->where('status', 'active')->count(),
-            'nonaktif' => (clone $dasar)->where('status', 'nonactive')->count(),
-            'belum_verifikasi' => (clone $dasar)->whereNull('email_verified_at')->count(),
+            'total' => (int) ($hitung->total ?? 0),
+            'aktif' => (int) ($hitung->aktif ?? 0),
+            'nonaktif' => (int) ($hitung->nonaktif ?? 0),
+            'belum_verifikasi' => (int) ($hitung->belum_verifikasi ?? 0),
             // Dulu daftar ini mengambil seluruh pengguna tanpa memandang
             // perusahaan, sehingga manajer melihat akun perusahaan lain.
-            'terbaru' => (clone $dasar)
+            'terbaru' => DB::table('users')
+                ->where('company', $perusahaan)
                 ->whereIn('level', ['staff', 'karyawan', 'trainer'])
                 ->orderByDesc('created_at')
                 ->limit(5)
@@ -423,7 +449,7 @@ class Dasbor extends Component
     #[Computed]
     public function perluTindakan(): array
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
         $daftar = [];
 
         if (! $pengguna->email_verified_at) {
@@ -436,7 +462,7 @@ class Dasbor extends Component
             ];
         }
 
-        if (! $this->pelanggan() && ! $this->presensiHariIni() && now()->format('H:i:s') >= '07:00:00' && now()->format('H:i:s') <= '22:00:00') {
+        if (! $this->pelanggan && ! $this->presensiHariIni && now()->format('H:i:s') >= '07:00:00' && now()->format('H:i:s') <= '22:00:00') {
             $daftar[] = [
                 'warna' => 'merah',
                 'ikon' => 'fa-fingerprint',
@@ -446,7 +472,7 @@ class Dasbor extends Component
             ];
         }
 
-        $tugasLewat = $this->tugas()->filter(
+        $tugasLewat = $this->tugas->filter(
             fn ($t) => $t->tanggal_deadline && \Illuminate\Support\Carbon::parse($t->tanggal_deadline)->isPast()
         )->count();
 
@@ -460,8 +486,8 @@ class Dasbor extends Component
             ];
         }
 
-        if ($this->pengelolaTim()) {
-            $dinas = $this->pengajuan()->count();
+        if ($this->pengelolaTim) {
+            $dinas = $this->pengajuan->count();
 
             if ($dinas > 0) {
                 $daftar[] = [
@@ -473,7 +499,7 @@ class Dasbor extends Component
                 ];
             }
 
-            $cuti = $this->antreanCuti()->count();
+            $cuti = $this->antreanCuti->count();
 
             if ($cuti > 0) {
                 $daftar[] = [
@@ -485,7 +511,7 @@ class Dasbor extends Component
                 ];
             }
 
-            $belum = $this->tim()['belum_verifikasi'];
+            $belum = $this->tim['belum_verifikasi'];
 
             if ($belum > 0) {
                 $daftar[] = [
@@ -498,8 +524,22 @@ class Dasbor extends Component
             }
         }
 
-        if ($this->pengawas()) {
-            $gagal = $this->ringkasSistem()['gagal_24_jam'];
+        if ($this->pengelolaTim || in_array($pengguna->level, ['admin', 'staff'], true)) {
+            $menunggu = $this->clinikScopus['menunggu'];
+
+            if ($menunggu > 0) {
+                $daftar[] = [
+                    'warna' => 'kuning',
+                    'ikon' => 'fa-file-invoice-dollar',
+                    'judul' => $menunggu . ' pemesanan menunggu pembayaran',
+                    'teks' => 'Periksa bukti transfer yang masuk.',
+                    'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index'),
+                ];
+            }
+        }
+
+        if ($this->pengawas) {
+            $gagal = $this->ringkasSistem['gagal_24_jam'];
 
             if ($gagal >= 10) {
                 $daftar[] = [
@@ -519,7 +559,7 @@ class Dasbor extends Component
     #[Computed]
     public function antreanCuti()
     {
-        if (! $this->pengelolaTim() || $this->perusahaan() === null) {
+        if (! $this->pengelolaTim || $this->perusahaan() === null) {
             return collect();
         }
 
@@ -544,26 +584,32 @@ class Dasbor extends Component
     {
         $perusahaan = $this->perusahaan();
 
-        $akun = DB::table('users');
+        $akun = DB::table('users')
+            ->selectRaw("COUNT(*) as total_akun,
+                SUM(email_verified_at IS NULL) as belum_verifikasi,
+                SUM(status = 'nonactive') as nonaktif,
+                SUM(pin_aktif = 1) as pin_aktif");
 
         // Admin mengawasi seluruh sistem; manajer/CEO hanya perusahaannya.
-        if ($this->pengguna()->level !== 'admin' && $perusahaan !== null) {
+        if ($this->pengguna->level !== 'admin' && $perusahaan !== null) {
             $akun->where('company', $perusahaan);
         }
 
+        $hitung = $akun->first();
+
+        // Dua angka jejak masuk juga digabung dalam satu kueri.
+        $jejak = DB::table('aktivitas_masuk')
+            ->where('created_at', '>=', now()->subDay())
+            ->selectRaw('SUM(berhasil = 1) as berhasil, SUM(berhasil = 0) as gagal')
+            ->first();
+
         return [
-            'total_akun' => (clone $akun)->count(),
-            'belum_verifikasi' => (clone $akun)->whereNull('email_verified_at')->count(),
-            'nonaktif' => (clone $akun)->where('status', 'nonactive')->count(),
-            'gagal_24_jam' => DB::table('aktivitas_masuk')
-                ->where('berhasil', false)
-                ->where('created_at', '>=', now()->subDay())
-                ->count(),
-            'berhasil_24_jam' => DB::table('aktivitas_masuk')
-                ->where('berhasil', true)
-                ->where('created_at', '>=', now()->subDay())
-                ->count(),
-            'pin_aktif' => (clone $akun)->where('pin_aktif', true)->count(),
+            'total_akun' => (int) ($hitung->total_akun ?? 0),
+            'belum_verifikasi' => (int) ($hitung->belum_verifikasi ?? 0),
+            'nonaktif' => (int) ($hitung->nonaktif ?? 0),
+            'gagal_24_jam' => (int) ($jejak->gagal ?? 0),
+            'berhasil_24_jam' => (int) ($jejak->berhasil ?? 0),
+            'pin_aktif' => (int) ($hitung->pin_aktif ?? 0),
         ];
     }
 
@@ -575,7 +621,7 @@ class Dasbor extends Component
     #[Computed]
     public function presensiTim(): array
     {
-        if (! $this->pengelolaTim() || $this->perusahaan() === null) {
+        if (! $this->pengelolaTim || $this->perusahaan() === null) {
             return ['total' => 0, 'sudah' => 0, 'belum' => 0, 'daftar' => collect()];
         }
 
@@ -609,17 +655,17 @@ class Dasbor extends Component
     #[Computed]
     public function menuPenuh(): bool
     {
-        return in_array($this->pengguna()->level, ['manager', 'karyawan'], true);
+        return in_array($this->pengguna->level, ['manager', 'karyawan'], true);
     }
 
     /** @return array<int,array<string,string>> */
     #[Computed]
     public function pintasan(): array
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
         $profil = route('account.profil.show', $pengguna->getKey());
 
-        if ($this->pelanggan()) {
+        if ($this->pelanggan) {
             return [
                 ['warna' => 'biru', 'ikon' => 'fa-clipboard-list', 'judul' => 'Riwayat pemesanan',
                     'teks' => 'Status dan bukti pembayaran Anda.', 'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index')],
@@ -639,7 +685,7 @@ class Dasbor extends Component
                 'teks' => 'Slip dan riwayat pembayaran.', 'tautan' => route('account.gaji.index')],
         ];
 
-        if ($this->pengawas()) {
+        if ($this->pengawas) {
             $daftar[] = ['warna' => 'merah', 'ikon' => 'fa-user-shield', 'judul' => 'Jejak aktivitas masuk',
                 'teks' => 'Pantau percobaan masuk ke sistem.', 'tautan' => route('account.aktivitas-masuk.index')];
             $daftar[] = ['warna' => 'ungu', 'ikon' => 'fa-users', 'judul' => 'Data pengguna',
@@ -652,12 +698,63 @@ class Dasbor extends Component
         return $daftar;
     }
 
+    /**
+     * Ringkasan Clinik Scopus — layanan utama, tetapi selama ini sama sekali
+     * tidak tampil di dasbor padahal angkanya sudah dihitung untuk lencana
+     * di bilah samping.
+     *
+     * @return array<string,mixed>
+     */
+    #[Computed]
+    public function clinikScopus(): array
+    {
+        $pengguna = $this->pengguna;
+
+        $dasar = function () use ($pengguna) {
+            $kueri = DB::table('clinikscopus_pemesanan');
+
+            // Trainer hanya melihat sesi yang dipegangnya sendiri.
+            if (! $this->pengelolaTim && ! in_array($pengguna->level, ['admin', 'staff'], true)) {
+                $kueri->where('trainer_id', $pengguna->getKey());
+            }
+
+            return $kueri;
+        };
+
+        $hitung = $dasar()
+            ->selectRaw("COUNT(*) as total,
+                SUM(status = 'pending') as menunggu,
+                SUM(status = 'paid') as terbayar,
+                SUM(DATE(tanggal_booking) = ?) as hari_ini,
+                SUM(status = 'paid' OR status = 'completed') as selesai", [now()->toDateString()])
+            ->first();
+
+        $pendapatanBulanIni = (float) $dasar()
+            ->whereIn('status', ['paid', 'completed'])
+            ->whereBetween('tanggal', [now()->startOfMonth(), now()->endOfMonth()])
+            ->sum('total_pembayaran');
+
+        return [
+            'total' => (int) ($hitung->total ?? 0),
+            'menunggu' => (int) ($hitung->menunggu ?? 0),
+            'terbayar' => (int) ($hitung->terbayar ?? 0),
+            'hari_ini' => (int) ($hitung->hari_ini ?? 0),
+            'pendapatan_bulan_ini' => $pendapatanBulanIni,
+            'mendatang' => $dasar()
+                ->select('id', 'kode_booking', 'nama_pemesan', 'sesi', 'jam_sesi', 'tanggal_booking', 'status')
+                ->whereDate('tanggal_booking', '>=', now()->toDateString())
+                ->orderBy('tanggal_booking')
+                ->limit(4)
+                ->get(),
+        ];
+    }
+
     // ------------------------------------------------------- tugas & kabar
 
     #[Computed]
     public function tugas()
     {
-        $id = $this->pengguna()->getKey();
+        $id = $this->pengguna->getKey();
 
         return DB::table('todolist')
             ->where(function ($q) use ($id) {
@@ -673,7 +770,7 @@ class Dasbor extends Component
     #[Computed]
     public function pengajuan()
     {
-        $pengguna = $this->pengguna();
+        $pengguna = $this->pengguna;
 
         $kueri = DB::table('perjalanan_dinas')
             ->select(
@@ -689,7 +786,7 @@ class Dasbor extends Component
             ->orderByDesc('perjalanan_dinas.created_at')
             ->limit(5);
 
-        if ($this->pengelolaTim() && $this->perusahaan() !== null) {
+        if ($this->pengelolaTim && $this->perusahaan() !== null) {
             $kueri->where('perjalanan_dinas.status', 'ajukan')
                 ->where('users.company', $this->perusahaan());
         } else {

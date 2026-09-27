@@ -479,6 +479,70 @@
 
     /* ------------------------------------------------------ grafik batang */
 
+    /* grafik = garis bantu di belakang + batang di depan */
+    .dsb-grafik {
+        position: relative;
+        margin-top: auto;
+    }
+
+    .dsb-garis-bantu {
+        position: absolute;
+        inset: 22px 0 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        pointer-events: none;
+    }
+
+    .dsb-garis-bantu span {
+        position: relative;
+        display: block;
+        border-top: 1px dashed var(--dsb-garis);
+    }
+
+    .dsb-garis-bantu span i {
+        position: absolute;
+        right: 0;
+        top: -8px;
+        padding-left: 6px;
+        background: var(--dsb-kartu);
+        font-style: normal;
+        font-size: .58rem;
+        font-weight: 700;
+        color: #b8c2cf;
+    }
+
+    /* tombol geser tahun pada kepala kartu */
+    .dsb-geser {
+        display: inline-flex;
+        gap: 4px;
+        margin-left: 4px;
+    }
+
+    .dsb-geser button {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--dsb-garis);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--dsb-tinta-3);
+        font-size: .62rem;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .dsb-geser button:hover:not(:disabled) {
+        border-color: #c7d2fe;
+        color: #6366f1;
+    }
+
+    .dsb-geser button:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
     .dsb-batang {
         display: grid;
         grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -973,6 +1037,30 @@
         font-family: inherit;
     }
 
+    /* markah menu lama memakai jarak & bayangannya sendiri; diselaraskan
+       dengan kartu pembungkusnya */
+    .dsb-pintasan .menu-item {
+        border-radius: 16px;
+        padding: 14px 8px;
+        transition: background .25s ease, transform .25s ease;
+    }
+
+    .dsb-pintasan .menu-item:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
+
+    .dsb-pintasan .menu-label {
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--dsb-tinta-2);
+    }
+
+    .dsb-pintasan .icon-circle {
+        border-radius: 15px;
+        box-shadow: 0 10px 18px -14px rgba(15, 23, 42, .9);
+    }
+
     /* kartu pembungkus sudah punya bayangan sendiri; buang bayangan ganda
        dan jarak berlebih dari markah menu lama */
     .dsb-pintasan .quick-menu-container,
@@ -982,6 +1070,28 @@
         padding: 0 !important;
         margin: 0 !important;
         border: 0 !important;
+    }
+
+    /* ------------------------------------------ keadaan sedang menyegarkan */
+
+    .dsb-menyegarkan .dsb-kartu {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dsb-menyegarkan .dsb-kartu::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(100deg, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, .75) 50%, rgba(255, 255, 255, 0) 80%);
+        background-size: 220% 100%;
+        animation: dsb-kilau 1.1s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes dsb-kilau {
+        from { background-position: 180% 0; }
+        to { background-position: -80% 0; }
     }
 
     /* ------------------------------------------------------------ kosong */
@@ -1052,9 +1162,37 @@
             padding: 18px 16px;
         }
 
+        /* Dua lajur, bukan satu: empat kartu bertumpuk menghabiskan satu
+           layar penuh sebelum isi dasbor terlihat. */
         .dsb-kpi {
-            grid-template-columns: 1fr;
-            gap: 14px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .dsb-kpi-kartu {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .dsb-kpi-kartu .dsb-medali {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            border-radius: 14px;
+            font-size: .95rem;
+        }
+
+        .dsb-kpi-kartu .dsb-panah {
+            display: none;
+        }
+
+        .dsb-angka {
+            font-size: 1.02rem;
+        }
+
+        .dsb-catatan {
+            font-size: .7rem;
         }
 
         .dsb-kisi {

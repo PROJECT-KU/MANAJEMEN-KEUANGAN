@@ -1,4 +1,4 @@
-<div class="dsb">
+<div class="dsb" wire:loading.class="dsb-menyegarkan" wire:target="segarkan,geserTahun">
     {{-- ============================================================ kepala --}}
     <header class="dsb-kepala">
         <div class="dsb-kepala-teks">
@@ -89,7 +89,19 @@
             <section class="dsb-kartu dsb-lebar">
                 <div class="dsb-kartu-kepala">
                     <div>
-                        <h3 class="dsb-kartu-judul"><i class="fas fa-chart-bar dsb-ikon-biru"></i> Gaji {{ $this->gaji['tahun'] }}</h3>
+                        <h3 class="dsb-kartu-judul">
+                            <i class="fas fa-chart-bar dsb-ikon-biru"></i> Gaji {{ $this->gaji['tahun'] }}
+                            <span class="dsb-geser">
+                                <button type="button" wire:click="geserTahun(-1)" aria-label="Tahun sebelumnya"
+                                    @disabled($this->gaji['tahun'] <= $this->gaji['tahun_pertama'])>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button type="button" wire:click="geserTahun(1)" aria-label="Tahun berikutnya"
+                                    @disabled($this->gaji['tahun'] >= $this->gaji['tahun_terakhir'])>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </span>
+                        </h3>
                         <p class="dsb-kartu-sub">{{ $this->pengelolaTim ? 'Seluruh karyawan perusahaan' : 'Gaji yang Anda terima' }}</p>
                     </div>
                     <div class="dsb-kepala-kanan">
@@ -119,7 +131,15 @@
                         </tbody>
                     </table>
 
-                    <div class="dsb-batang" aria-hidden="true">
+                    <div class="dsb-grafik" aria-hidden="true">
+                        {{-- garis bantu supaya dua batang yang mirip tetap bisa dibandingkan --}}
+                        <div class="dsb-garis-bantu">
+                            @foreach ([1, 0.75, 0.5, 0.25, 0] as $bagian)
+                                <span><i>{{ $bagian > 0 ? $this->singkat($this->gaji['tertinggi'] * $bagian) : '0' }}</i></span>
+                            @endforeach
+                        </div>
+
+                        <div class="dsb-batang">
                         @foreach ($this->gaji['per_bulan'] as $bulan => $nilai)
                             @php
                                 $tinggi = $this->gaji['tertinggi'] > 0 ? max(($nilai / $this->gaji['tertinggi']) * 100, 4) : 4;
@@ -136,6 +156,7 @@
                                 <span class="dsb-batang-label">{{ \Illuminate\Support\Str::substr(\Illuminate\Support\Carbon::create(null, $bulan)->locale('id')->translatedFormat('F'), 0, 3) }}</span>
                             </div>
                         @endforeach
+                        </div>
                     </div>
                 @else
                     <div class="dsb-kosong">
@@ -425,7 +446,71 @@
             </section>
         @endif
 
-{{-- tim: hanya untuk pengelola --}}
+{{-- Clinik Scopus: layanan utama, dulu sama sekali tidak ada di dasbor --}}
+        @if ($this->pengelolaTim || in_array($this->pengguna->level, ['admin', 'staff', 'karyawan', 'trainer'], true))
+            <section class="dsb-kartu">
+                <div class="dsb-kartu-kepala">
+                    <div>
+                        <h3 class="dsb-kartu-judul"><i class="fas fa-stethoscope dsb-ikon-ungu"></i> Clinik Scopus</h3>
+                        <p class="dsb-kartu-sub">
+                            {{ $this->pengelolaTim ? 'Seluruh pemesanan' : 'Sesi yang Anda dampingi' }}
+                        </p>
+                    </div>
+                    <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="dsb-tautan">Buka</a>
+                </div>
+
+                <div class="dsb-mini">
+                    <div class="dsb-mini-kartu dsb-ungu">
+                        <span class="dsb-mini-angka">{{ $this->clinikScopus['hari_ini'] }}</span>
+                        <span class="dsb-mini-label">Sesi hari ini</span>
+                    </div>
+                    <div class="dsb-mini-kartu dsb-kuning">
+                        <span class="dsb-mini-angka">{{ $this->clinikScopus['menunggu'] }}</span>
+                        <span class="dsb-mini-label">Menunggu bayar</span>
+                    </div>
+                    <div class="dsb-mini-kartu dsb-hijau">
+                        <span class="dsb-mini-angka">{{ $this->clinikScopus['terbayar'] }}</span>
+                        <span class="dsb-mini-label">Terbayar</span>
+                    </div>
+                    <div class="dsb-mini-kartu dsb-biru">
+                        <span class="dsb-mini-angka">{{ $this->clinikScopus['total'] }}</span>
+                        <span class="dsb-mini-label">Total pemesanan</span>
+                    </div>
+                </div>
+
+                @if ($this->clinikScopus['mendatang']->isNotEmpty())
+                    <ul class="dsb-daftar-tugas">
+                        @foreach ($this->clinikScopus['mendatang'] as $sesi)
+                            <li>
+                                <span class="dsb-titik {{ $sesi->status === 'pending' ? 'kuning' : 'hijau' }}"></span>
+                                <span class="dsb-tugas-teks">
+                                    <strong>{{ \Illuminate\Support\Str::limit($sesi->nama_pemesan ?: $sesi->kode_booking, 34) }}</strong>
+                                    <small>
+                                        {{ $sesi->sesi }} &middot; {{ $sesi->jam_sesi }}
+                                        @if ($sesi->tanggal_booking)
+                                            &middot; {{ \Illuminate\Support\Carbon::parse($sesi->tanggal_booking)->locale('id')->translatedFormat('d M') }}
+                                        @endif
+                                    </small>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <div class="dsb-kosong">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>Tidak ada sesi terjadwal ke depan.</p>
+                    </div>
+                @endif
+
+                @if ($this->pengelolaTim)
+                    <p class="dsb-catatan">
+                        Pendapatan bulan ini: <strong>Rp {{ number_format($this->clinikScopus['pendapatan_bulan_ini'], 0, ',', '.') }}</strong>
+                    </p>
+                @endif
+            </section>
+        @endif
+
+        {{-- tim: hanya untuk pengelola --}}
         @if ($this->pengelolaTim)
             <section class="dsb-kartu dsb-lebar">
                 <div class="dsb-kartu-kepala">
