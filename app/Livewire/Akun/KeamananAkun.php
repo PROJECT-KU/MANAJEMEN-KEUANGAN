@@ -24,9 +24,7 @@ class KeamananAkun extends Component
 {
     public string $kataSandi = '';
 
-    public string $pesan = '';
 
-    public string $jenisPesan = 'sukses';
 
     /** Berapa banyak baris riwayat yang ditampilkan. */
     private const JUMLAH_RIWAYAT = 15;
@@ -38,7 +36,6 @@ class KeamananAkun extends Component
     /** Akhiri sesi di semua perangkat lain, sesi ini tetap hidup. */
     public function keluarkanPerangkatLain(): void
     {
-        $this->pesan = '';
 
         $this->validate(
             ['kataSandi' => ['required', 'string']],
@@ -75,18 +72,15 @@ class KeamananAkun extends Component
 
         $this->reset('kataSandi');
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = 'Sesi di perangkat lain sudah diakhiri. Perangkat ini tetap masuk.';
+        $this->toast('berhasil', 'Sesi di perangkat lain sudah diakhiri. Perangkat ini tetap masuk.');
     }
 
     /** Akhiri satu sesi tertentu (perangkat lain) tanpa menyentuh sesi ini. */
     public function akhiriSesi(string $id): void
     {
-        $this->pesan = '';
 
         if ($id === session()->getId()) {
-            $this->jenisPesan = 'galat';
-            $this->pesan = 'Itu perangkat yang sedang Anda pakai. Pakai tombol Keluar di pojok kanan atas.';
+        $this->toast('gagal', 'Itu perangkat yang sedang Anda pakai. Pakai tombol Keluar di pojok kanan atas.');
 
             return;
         }
@@ -99,8 +93,7 @@ class KeamananAkun extends Component
             ->delete();
 
         if (! $terhapus) {
-            $this->jenisPesan = 'galat';
-            $this->pesan = 'Sesi itu sudah tidak ada.';
+        $this->toast('gagal', 'Sesi itu sudah tidak ada.');
 
             return;
         }
@@ -110,8 +103,7 @@ class KeamananAkun extends Component
         // halaman dibuka. Penanda ingat-saya karena itu ikut diputar.
         $pengguna->forceFill(['remember_token' => Str::random(60)])->save();
 
-        $this->jenisPesan = 'sukses';
-        $this->pesan = 'Sesi di perangkat itu sudah diakhiri. Perangkat yang memakai "Ingat saya" juga harus masuk ulang.';
+        $this->toast('berhasil', 'Sesi di perangkat itu sudah diakhiri. Perangkat yang memakai "Ingat saya" juga harus masuk ulang.');
     }
 
     /**
@@ -164,5 +156,18 @@ class KeamananAkun extends Component
                 ->where('created_at', '>=', now()->subDays(30))
                 ->count(),
         ]);
+    }
+
+    /**
+     * Pemberitahuan singkat lewat toast bersama.
+     *
+     * Dulu komponen ini menyimpan $pesan di dalam keadaannya sendiri lalu
+     * menggambar kotak .alert Bootstrap. Toast tidak menggeser tata letak,
+     * tidak ikut terbawa saat komponen digambar ulang, dan rupanya sama di
+     * seluruh sistem — lihat misToast() di mis-ui.js.
+     */
+    private function toast(string $jenis, string $pesan): void
+    {
+        $this->dispatch('toast', jenis: $jenis, pesan: $pesan);
     }
 }

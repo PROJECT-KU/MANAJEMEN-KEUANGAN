@@ -1,263 +1,96 @@
-{{-- Gaya halaman profil.
+{{-- Gaya khusus halaman profil.
 
-     Kelasnya berawalan .prf- supaya tidak bertabrakan dengan CSS Bootstrap
-     milik layout admin, persis seperti .dsb- di dasbor. Peubah warna, radius,
-     dan bayangannya sengaja disalin dari dasbor supaya dua halaman ini terasa
-     satu keluarga.
+     Yang umum — kartu, lencana ikon, pil, kisi isian, tombol, isian, toast —
+     datang dari .mis-* di public/assets/css/mis-ui.css, sama seperti layar
+     lain. Di sini hanya yang memang milik halaman ini: kartu identitas,
+     pemilih foto, strip tab, dan jendela kecilnya.
 
-     Tiga kelas lama — .form-control-modern, .btn-modern, dan .btn-gradient —
-     tetap dipertahankan (dengan rupa baru) karena dipakai juga oleh komponen
-     Livewire di tab PIN dan Keamanan. --}}
+     @push('gaya') wajib: <style> di badan berkas terbit SEBELUM CSS
+     Bootstrap, sehingga aturan berbobot sama selalu kalah. --}}
 @push('gaya')
 <style>
-    .prf {
-        --prf-tinta: #0f172a;
-        --prf-tinta-2: #475569;
-        --prf-tinta-3: #64748b;
-        --prf-tinta-4: #94a3b8;
-        --prf-garis: #e2e8f0;
-        --prf-kartu: rgba(255, 255, 255, .92);
-        --prf-radius: 22px;
-        --prf-bayang: 0 18px 38px rgba(15, 23, 42, .06);
-        --prf-ungu: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        --prf-hijau: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        --prf-merah: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
-        --prf-biru: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
-        --prf-kuning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-        --prf-jingga: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
-
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        color: var(--prf-tinta-2);
+    .prof {
         display: grid;
         gap: 22px;
     }
 
-    .prf *,
-    .prf *::before,
-    .prf *::after {
+    .prof *,
+    .prof *::before,
+    .prof *::after {
         box-sizing: border-box;
     }
 
-    /* ------------------------------------------------------------- kepala */
-
-    .prf-kepala {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        flex-wrap: wrap;
-        background:
-            radial-gradient(520px 200px at 0% 0%, rgba(99, 102, 241, .07), transparent 70%),
-            var(--prf-kartu);
-        border: 1px solid rgba(255, 255, 255, .8);
-        border-radius: var(--prf-radius);
-        box-shadow: var(--prf-bayang);
-        padding: 18px 22px;
+    .prof-titik {
+        color: #cbd5e1;
     }
 
-    .prf-kepala-avatar {
+    .prof-kepala-foto {
         width: 50px;
         height: 50px;
         flex: 0 0 50px;
         border-radius: 17px;
         overflow: hidden;
-        background: var(--prf-ungu);
+        background: var(--mis-ungu);
         box-shadow: 0 12px 22px -14px #6366f1;
     }
 
-    .prf-kepala-avatar img {
+    .prof-kepala-foto img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
 
-    .prf-kepala-teks {
-        flex: 1 1 260px;
-        min-width: 0;
-    }
-
-    .prf-judul {
-        margin: 0;
-        font-size: clamp(1.15rem, 1.9vw, 1.5rem);
-        font-weight: 800;
-        letter-spacing: -.03em;
-        line-height: 1.25;
-        background: linear-gradient(to right, #1e293b 0%, #6366f1 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .prf-sub {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin: 4px 0 0;
-        font-size: .82rem;
-        color: var(--prf-tinta-3);
-    }
-
-    .prf-sub i {
-        font-size: 12px;
-        color: #a5b4fc;
-        margin-right: 5px;
-    }
-
-    .prf-pemisah {
-        color: #cbd5e1;
-    }
-
-    .prf-kepala-aksi {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        flex-wrap: wrap;
-        margin-left: auto;
-    }
-
     /* -------------------------------------------------------- tata letak */
 
     /*
-     * Kolom kiri diberi lebar tetap supaya kartu identitas tidak melar di
-     * layar lebar, sedangkan kolom kanan memakai minmax(0, 1fr) agar isinya
-     * yang panjang (tabel riwayat masuk) tidak mendorong kisi melebar.
+     * Kolom kiri lebarnya tetap supaya kartu identitas tidak melar di layar
+     * lebar; kolom kanan minmax(0, 1fr) supaya tabel riwayat masuk yang
+     * panjang tidak mendorong kisinya melebar.
      */
-    .prf-tata {
+    .prof-tata {
         display: grid;
         grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
         gap: 22px;
         align-items: start;
     }
 
-    .prf-sisi {
+    .prof-sisi {
         display: grid;
         gap: 22px;
         position: sticky;
         top: 92px;
     }
 
-    .prf-utama {
+    .prof-utama {
         min-width: 0;
     }
 
-    /* --------------------------------------------------------- kartu umum */
-
-    .prf-kartu {
-        background: var(--prf-kartu);
-        border: 1px solid rgba(255, 255, 255, .8);
-        border-radius: var(--prf-radius);
-        box-shadow: var(--prf-bayang);
-        padding: 22px 24px;
+    .prof-penuh {
+        width: 100%;
     }
 
-    .prf-kartu-kepala {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 18px;
-    }
+    /* ---------------------------------------------------- kartu identitas */
 
-    .prf-kartu-judul {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 800;
-        color: var(--prf-tinta);
-        display: flex;
-        align-items: center;
-        gap: 9px;
-    }
-
-    .prf-kartu-sub {
-        margin: 4px 0 0;
-        font-size: .8rem;
-        color: var(--prf-tinta-3);
-    }
-
-    /* ----------------------------------------------------- medali & warna */
-
-    /* Lencana ikon: ikonnya betul-betul di tengah lewat grid + place-items,
-       bukan padding kira-kira, jadi tidak pernah miring di ukuran mana pun. */
-    .prf-medali {
-        display: grid;
-        place-items: center;
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
-        border-radius: 15px;
-        background: var(--warna, var(--prf-ungu));
-        color: #fff;
-        font-size: 1.02rem;
-        box-shadow: 0 12px 22px -12px rgba(15, 23, 42, .6);
-    }
-
-    .prf-medali.kecil {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
-        border-radius: 13px;
-        font-size: .88rem;
-    }
-
-    .prf-ungu { --warna: var(--prf-ungu); }
-    .prf-hijau { --warna: var(--prf-hijau); }
-    .prf-merah { --warna: var(--prf-merah); }
-    .prf-biru { --warna: var(--prf-biru); }
-    .prf-kuning { --warna: var(--prf-kuning); }
-    .prf-jingga { --warna: var(--prf-jingga); }
-
-    .prf-ikon-ungu { color: #6366f1; }
-    .prf-ikon-hijau { color: #10b981; }
-    .prf-ikon-merah { color: #f43f5e; }
-    .prf-ikon-biru { color: #0ea5e9; }
-    .prf-ikon-kuning { color: #f59e0b; }
-    .prf-ikon-jingga { color: #f97316; }
-
-    .prf-pil {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 11px;
-        border-radius: 10px;
-        font-size: .7rem;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .prf-pil i {
-        font-size: 10px;
-    }
-
-    .prf-pil-hijau { color: #047857; background: #d1fae5; }
-    .prf-pil-abu { color: #64748b; background: #f1f5f9; }
-    .prf-pil-biru { color: #0369a1; background: #e0f2fe; }
-    .prf-pil-kuning { color: #92400e; background: #fef3c7; }
-    .prf-pil-merah { color: #be123c; background: #ffe4e6; }
-    .prf-pil-ungu { color: #4338ca; background: #e0e7ff; }
-
-    /* ------------------------------------------------------ kartu identitas */
-
-    .prf-identitas {
+    .prof-identitas {
         text-align: center;
         display: grid;
         justify-items: center;
-        gap: 0;
     }
 
-    .prf-foto-bingkai {
+    .prof-foto-bingkai {
         position: relative;
         width: 124px;
         height: 124px;
         display: grid;
         place-items: center;
         border-radius: 38px;
-        background: var(--prf-ungu);
+        background: var(--mis-ungu);
         padding: 4px;
         box-shadow: 0 18px 32px -18px #6366f1;
     }
 
-    .prf-foto {
+    .prof-foto {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -267,8 +100,7 @@
         display: block;
     }
 
-    /* Lencana terverifikasi menempel di sudut foto. */
-    .prf-foto-lencana {
+    .prof-foto-lencana {
         position: absolute;
         right: -4px;
         bottom: -4px;
@@ -280,26 +112,26 @@
         border: 3px solid #fff;
         color: #fff;
         font-size: .72rem;
-        background: var(--warna, var(--prf-hijau));
+        background: var(--warna, var(--mis-hijau));
     }
 
-    .prf-nama {
+    .prof-nama {
         margin: 16px 0 0;
         font-size: 1.08rem;
         font-weight: 800;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         letter-spacing: -.02em;
         line-height: 1.3;
     }
 
-    .prf-nama-pengguna {
+    .prof-username {
         margin: 3px 0 12px;
         font-size: .8rem;
-        color: var(--prf-tinta-4);
+        color: var(--mis-tinta-4);
         font-weight: 600;
     }
 
-    .prf-pil-baris {
+    .prof-pil-baris {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -307,59 +139,55 @@
         margin-bottom: 18px;
     }
 
-    /* Tiga angka ringkas di bawah nama. Kisi 3 kolom tetap supaya lebarnya
-       sama rata dan tidak ada sisa ruang di kanan. */
-    .prf-mini-kisi {
+    /* Tiga angka ringkas; kolomnya tetap supaya lebarnya rata. */
+    .prof-mini-kisi {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 9px;
         width: 100%;
-        margin-bottom: 18px;
     }
 
-    .prf-mini {
-        padding: 11px 6px;
+    .prof-mini {
+        display: grid;
+        justify-items: center;
+        gap: 5px;
+        padding: 12px 6px;
         border-radius: 15px;
         background: #f8fafc;
-        border: 1px solid var(--prf-garis);
+        border: 1px solid var(--mis-garis);
     }
 
-    .prf-mini-ikon {
-        font-size: .82rem;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    .prf-mini-angka {
+    .prof-mini-angka {
         margin: 0;
-        font-size: .82rem;
+        font-size: .8rem;
         font-weight: 800;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         line-height: 1.25;
     }
 
-    .prf-mini-label {
-        margin: 2px 0 0;
+    .prof-mini-label {
+        margin: 0;
         font-size: .62rem;
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
-        color: var(--prf-tinta-4);
+        color: var(--mis-tinta-4);
     }
 
-    /* ------------------------------------------------------- unggah foto */
+    /* ----------------------------------------------------- pemilih foto */
 
-    .prf-unggah-bungkus {
+    .prof-unggah-bungkus {
         width: 100%;
         display: grid;
         gap: 10px;
+        margin-top: 18px;
         padding-top: 18px;
-        border-top: 1px dashed var(--prf-garis);
+        border-top: 1px dashed var(--mis-garis);
     }
 
-    /* Input berkas bawaan disembunyikan tapi tetap ada di urutan Tab:
-       labelnya yang terlihat, dan ia tetap mengaktifkan input lewat for=. */
-    .prf-berkas {
+    /* Input berkas bawaan disembunyikan, tetapi tetap bisa dicapai Tab:
+       labelnya yang terlihat dan ia mengaktifkan input lewat for=. */
+    .prof-berkas {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -367,7 +195,7 @@
         pointer-events: none;
     }
 
-    .prf-unggah {
+    .prof-unggah {
         display: flex;
         align-items: center;
         gap: 11px;
@@ -381,142 +209,89 @@
         transition: border-color .25s ease, background .25s ease;
     }
 
-    .prf-unggah:hover,
-    .prf-berkas:focus-visible + .prf-unggah {
+    .prof-unggah:hover,
+    .prof-berkas:focus-visible + .prof-unggah {
         border-color: #6366f1;
         background: #eef2ff;
     }
 
-    .prf-unggah-teks {
+    .prof-unggah-teks {
         min-width: 0;
         flex: 1 1 auto;
     }
 
-    .prf-unggah-nama {
-        margin: 0;
+    .prof-unggah-nama {
+        display: block;
         font-size: .78rem;
         font-weight: 700;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .prf-bantuan {
-        margin: 0;
-        font-size: .7rem;
-        color: var(--prf-tinta-4);
-        font-weight: 600;
-    }
+    /* ------------------------------------------------------ baris email */
 
-    /* ---------------------------------------------------- daftar kontak */
-
-    .prf-daftar {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 10px;
-    }
-
-    .prf-baris {
+    .prof-baris {
         display: flex;
         align-items: center;
         gap: 13px;
         padding: 12px 14px;
         border-radius: 16px;
         background: #f8fafc;
-        border: 1px solid var(--prf-garis);
-        transition: border-color .25s ease, background .25s ease;
+        border: 1px solid var(--mis-garis);
     }
 
-    .prf-baris:hover {
-        border-color: #c7d2fe;
-        background: #fff;
-    }
-
-    .prf-baris-teks {
+    .prof-baris-teks {
         min-width: 0;
         flex: 1 1 auto;
     }
 
-    .prf-label {
-        margin: 0 0 3px;
-        font-size: .66rem;
-        font-weight: 700;
-        letter-spacing: .05em;
-        text-transform: uppercase;
-        color: var(--prf-tinta-4);
-    }
-
-    .prf-nilai {
+    .prof-nilai {
         margin: 0;
         font-size: .85rem;
         font-weight: 700;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         overflow-wrap: anywhere;
         line-height: 1.35;
     }
 
-    /* Tombol pensil di ujung baris. */
-    .prf-ubah {
+    .prof-verif {
+        margin-top: 12px;
         display: grid;
-        place-items: center;
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
-        border: 1px solid var(--prf-garis);
-        border-radius: 12px;
-        background: #fff;
-        color: #6366f1;
-        font-size: .72rem;
-        cursor: pointer;
-        transition: all .25s ease;
+        gap: 6px;
     }
 
-    .prf-ubah:hover {
-        background: #6366f1;
-        border-color: #6366f1;
-        color: #fff;
-        transform: translateY(-2px);
-    }
+    /* -------------------------------------------------------------- tab */
 
-    /* ------------------------------------------------------------- tab */
-
-    .prf-tab-kartu {
-        background: var(--prf-kartu);
-        border: 1px solid rgba(255, 255, 255, .8);
-        border-radius: var(--prf-radius);
-        box-shadow: var(--prf-bayang);
+    .prof-tab-kartu {
+        padding: 0;
         overflow: hidden;
     }
 
-    .prf-tab-kepala {
+    .prof-tab-kepala {
         padding: 20px 22px 0;
     }
 
-    .prf-tab {
+    .prof-tab {
         display: flex;
         gap: 6px;
         list-style: none;
         margin: 0 0 20px;
         padding: 6px;
         background: #f1f5f9;
-        border: 1px solid var(--prf-garis);
+        border: 1px solid var(--mis-garis);
         border-radius: 18px;
     }
 
-    .prf-tab > li {
+    .prof-tab > li {
         flex: 1 1 0;
         min-width: 0;
     }
 
-    /*
-     * Bootstrap memberi .nav-link warna & padding sendiri, dan .nav-pills
-     * .active memakai warna primer bawaan tema. Keduanya ditimpa di sini
-     * supaya pil aktifnya memakai gradien yang sama dengan tombol dasbor.
-     */
-    .prf-tab .nav-link {
+    /* Bootstrap memberi .nav-link warna & padding sendiri; ditimpa di sini
+       supaya pil aktifnya memakai gradien yang sama dengan tombol dasbor. */
+    .prof-tab .nav-link {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -526,261 +301,94 @@
         border-radius: 14px;
         font-size: .82rem;
         font-weight: 700;
-        color: var(--prf-tinta-3);
+        color: var(--mis-tinta-3);
         background: transparent;
         white-space: nowrap;
         transition: all .25s ease;
     }
 
-    .prf-tab .nav-link i {
+    .prof-tab .nav-link i {
         font-size: 13px;
     }
 
-    .prf-tab .nav-link:hover {
+    .prof-tab .nav-link:hover {
         color: #4f46e5;
         background: #fff;
     }
 
-    .prf-tab .nav-link.active {
-        background: var(--prf-ungu);
+    .prof-tab .nav-link.active {
+        background: var(--mis-ungu);
         color: #fff;
         box-shadow: 0 10px 20px -12px #6366f1;
     }
 
-    /* Ikon berwarna ikut jadi putih saat pilnya aktif. */
-    .prf-tab .nav-link.active i {
+    .prof-tab .nav-link.active i {
         color: #fff !important;
     }
 
-    .prf-tab-isi {
+    .prof-tab-isi {
         padding: 0 22px 22px;
     }
 
-    /* --------------------------------------------------------- bagian isian */
+    /* --------------------------------------------------- bagian isian */
 
-    .prf-bagian + .prf-bagian,
-    .prf-bagian-lanjut {
+    .prof-bagian + .prof-bagian {
         margin-top: 24px;
         padding-top: 24px;
-        border-top: 1px dashed var(--prf-garis);
+        border-top: 1px dashed var(--mis-garis);
     }
 
-    .prf-bagian-kepala {
+    .prof-bagian-kepala {
         display: flex;
         align-items: center;
         gap: 12px;
         margin-bottom: 16px;
     }
 
-    .prf-bagian-judul {
+    .prof-bagian-judul {
         margin: 0;
         font-size: .92rem;
         font-weight: 800;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         letter-spacing: -.01em;
     }
 
-    .prf-bagian-sub {
+    .prof-bagian-sub {
         margin: 2px 0 0;
         font-size: .76rem;
-        color: var(--prf-tinta-3);
+        color: var(--mis-tinta-3);
     }
 
-    /*
-     * auto-fit + minmax membuat isian menata dirinya sendiri: tiga kolom di
-     * layar lebar, dua di tablet, satu di ponsel — tanpa kelas col-md-* dan
-     * tanpa titik putus yang harus dijaga satu per satu.
-     */
-    .prf-kisi-isian {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 16px;
+    /* Nilai yang ditetapkan admin: kartu kecil, bukan <select disabled>
+       yang menyamar jadi isian padahal tidak pernah ikut tersimpan. */
+    .prof-statis {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid var(--mis-garis);
     }
 
-    .prf-kisi-isian.dua {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-
-    .prf-isian-penuh {
-        grid-column: 1 / -1;
-    }
-
-    .prf-isian {
-        display: grid;
-        gap: 7px;
-        min-width: 0;
-        /* Tanpa ini, isian di kolom tanpa teks bantuan ikut meregang setinggi
-           kolom sebelahnya yang punya teks bantuan. */
-        align-content: start;
-    }
-
-    .prf-label-isian {
-        margin: 0;
-        font-size: .7rem;
-        font-weight: 800;
-        letter-spacing: .04em;
+    .prof-statis-label {
+        margin: 0 0 2px;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .05em;
         text-transform: uppercase;
-        color: var(--prf-tinta-3);
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        color: var(--mis-tinta-4);
     }
 
-    .prf-label-isian i {
-        font-size: 10px;
-    }
-
-    .prf-isian-bantuan {
-        margin: 0;
-        font-size: .72rem;
-        color: var(--prf-tinta-4);
-    }
-
-    /* Rupa dasar semua isian — juga dipakai komponen Livewire PIN & Keamanan. */
-    .form-control-modern {
-        width: 100%;
-        height: auto;
-        padding: 12px 16px;
-        border: 1.5px solid var(--prf-garis);
-        border-radius: 14px;
-        background: #f8fafc;
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        font-size: .88rem;
-        font-weight: 600;
-        color: #0f172a;
-        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
-    }
-
-    .form-control-modern::placeholder {
-        color: #cbd5e1;
-        font-weight: 600;
-    }
-
-    .form-control-modern:focus {
-        border-color: #6366f1;
-        background: #fff;
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
-    }
-
-    .form-control-modern.is-invalid {
-        border-color: #f43f5e;
-        background: #fff1f2;
-    }
-
-    select.form-control-modern {
-        appearance: none;
-        -webkit-appearance: none;
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2394a3b8'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        background-size: 16px;
-        padding-right: 38px;
-    }
-
-    input[type="date"].form-control-modern {
-        appearance: none;
-        -webkit-appearance: none;
-        display: block;
-        width: 100%;
-        min-height: 46px;
-    }
-
-    /* Isian terkunci: rupanya sengaja dibedakan supaya pengguna tahu itu
-       bukan kolom yang sedang gagal, melainkan memang tidak bisa diubah. */
-    .prf-terkunci {
-        position: relative;
-    }
-
-    .prf-terkunci .form-control-modern {
-        background: #f1f5f9;
-        border-color: #e2e8f0;
-        border-style: dashed;
-        color: #64748b;
-        cursor: not-allowed;
-    }
-
-    /* Nilai yang hanya dibaca (status, level, jenis akun) ditampilkan sebagai
-       kartu kecil, bukan <select disabled>: isinya tetap terbaca jelas dan
-       tidak menyamar jadi isian yang bisa disunting. */
-    .prf-statis {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 11px 14px;
-        border-radius: 14px;
-        background: #f8fafc;
-        border: 1px solid var(--prf-garis);
-        min-height: 46px;
-    }
-
-    .prf-statis-teks {
+    .prof-statis-nilai {
         margin: 0;
         font-size: .85rem;
         font-weight: 700;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
         overflow-wrap: anywhere;
     }
 
-    /* ---------------------------------------------------------- tombol */
-
-    .prf-tombol,
-    .btn-modern {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 18px;
-        border: 0;
-        border-radius: 14px;
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        font-size: .85rem;
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-    }
-
-    .prf-tombol-ungu,
-    .btn-gradient {
-        background: var(--prf-ungu, linear-gradient(135deg, #6366f1 0%, #a855f7 100%));
-        color: #fff !important;
-        box-shadow: 0 10px 20px -12px #6366f1;
-    }
-
-    .prf-tombol-ungu:hover:not(:disabled),
-    .btn-gradient:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 26px -14px #6366f1;
-        color: #fff !important;
-    }
-
-    .prf-tombol-biru {
-        background: var(--prf-biru);
-        color: #fff !important;
-        box-shadow: 0 10px 20px -12px #0ea5e9;
-    }
-
-    .prf-tombol-biru:hover {
-        transform: translateY(-2px);
-        color: #fff !important;
-    }
-
-    .prf-tombol:disabled,
-    .btn-modern:disabled {
-        background: #f1f5f9 !important;
-        color: #94a3b8 !important;
-        box-shadow: none;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .prf-penuh {
-        width: 100%;
-    }
-
-    /* Baris tombol simpan menempel di dasar kartu saat isian digulir. */
-    .prf-aksi {
+    .prof-aksi {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -788,19 +396,40 @@
         gap: 12px;
         margin-top: 22px;
         padding-top: 18px;
-        border-top: 1px dashed var(--prf-garis);
+        border-top: 1px dashed var(--mis-garis);
     }
 
-    .prf-aksi-catatan {
+    .prof-aksi-catatan {
         margin: 0;
         font-size: .74rem;
-        color: var(--prf-tinta-4);
+        color: var(--mis-tinta-4);
         flex: 1 1 180px;
     }
 
-    /* ---------------------------------------------------------- kabar */
+    /* Bintang merah hanya untuk isian yang validatornya memang wajib. */
+    .prof-wajib {
+        color: #e11d48;
+        font-weight: 800;
+    }
 
-    .prf-kabar {
+    /* Pesan galat per isian. Sebelumnya halaman ini tidak punya satu pun,
+       sehingga validasi yang menolak terasa seperti tombol yang rusak. */
+    .prof-salah {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 0;
+        font-size: .74rem;
+        font-weight: 600;
+        color: #e11d48;
+    }
+
+    .prof-salah i {
+        margin-top: 2px;
+        font-size: 10px;
+    }
+
+    .prof-kabar {
         display: flex;
         align-items: center;
         gap: 13px;
@@ -811,7 +440,7 @@
         background: #fffbeb;
     }
 
-    .prf-kabar-teks {
+    .prof-kabar-teks {
         margin: 0;
         font-size: .82rem;
         font-weight: 600;
@@ -819,7 +448,7 @@
         flex: 1 1 auto;
     }
 
-    /* ----------------------------------------------------------- modal */
+    /* ------------------------------------------------------------ modal */
 
     .custom-popup {
         display: none;
@@ -855,17 +484,17 @@
         border-radius: 11px;
         font-size: 20px;
         line-height: 1;
-        color: #94a3b8;
+        color: var(--mis-tinta-4);
         cursor: pointer;
         transition: all .2s ease;
     }
 
     .custom-popup-close:hover {
         background: #f1f5f9;
-        color: #0f172a;
+        color: var(--mis-tinta);
     }
 
-    .prf-modal-kepala {
+    .prof-modal-kepala {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -873,21 +502,25 @@
         padding-right: 34px;
     }
 
-    .prf-modal-judul {
+    .prof-modal-judul {
         margin: 0;
         font-size: 1rem;
         font-weight: 800;
-        color: var(--prf-tinta);
+        color: var(--mis-tinta);
     }
 
-    .prf-modal-sub {
+    .prof-modal-sub {
         margin: 2px 0 0;
         font-size: .76rem;
-        color: var(--prf-tinta-3);
+        color: var(--mis-tinta-3);
     }
 
-    /* Isian kode verifikasi: satu baris enam angka berjarak lebar. */
-    .prf-kode {
+    .prof-rapat {
+        margin-bottom: 16px;
+    }
+
+    /* Enam angka berjarak lebar supaya mudah dicocokkan dengan email. */
+    .prof-kode {
         text-align: center;
         font-size: 1.4rem !important;
         font-weight: 800 !important;
@@ -896,13 +529,13 @@
         padding: 14px !important;
     }
 
-    /* ------------------------------------------------------ kata sandi */
+    /* -------------------------------------------------------- kata sandi */
 
-    .prf-sandi {
+    .prof-sandi {
         position: relative;
     }
 
-    .prf-sandi .form-control-modern {
+    .prof-sandi .form-control-modern {
         padding-right: 44px;
     }
 
@@ -912,7 +545,7 @@
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
-        color: #94a3b8;
+        color: var(--mis-tinta-4);
         transition: color .2s ease;
         z-index: 3;
         font-size: 13px;
@@ -923,74 +556,44 @@
         color: #6366f1;
     }
 
-    /* Tab PIN & Keamanan memakai kelas Bootstrap dari komponen Livewire;
-       ini merapikan jaraknya supaya sejajar dengan tab lain. */
-    .prf-tab-isi .tab-pane > div:first-child {
-        margin-top: 0;
-    }
-
-    .prf-tab-isi .alert {
-        border-radius: 16px;
-        border: 1px solid var(--prf-garis);
-    }
-
-    .prf-tab-isi .table {
+    /* Tab PIN & Keamanan memakai kelas Bootstrap dari komponen Livewire. */
+    .prof-tab-isi .table {
         font-size: .82rem;
-    }
-
-    /* ------------------------------------------------ fokus papan ketik */
-
-    .prf a:focus-visible,
-    .prf button:focus-visible,
-    .prf [tabindex]:focus-visible,
-    .prf input:focus-visible,
-    .prf select:focus-visible {
-        outline: 3px solid rgba(99, 102, 241, .5);
-        outline-offset: 3px;
-        border-radius: 14px;
     }
 
     /* --------------------------------------------------------- responsif */
 
     /* Tablet: kartu identitas berhenti menempel supaya tidak memakan tinggi
-       layar, dan dua kolom berubah jadi satu. */
+       layar, dan dua kolom jadi satu. */
     @media (max-width: 1100px) {
-        .prf-tata {
+        .prof-tata {
             grid-template-columns: minmax(0, 1fr);
         }
 
-        .prf-sisi {
+        .prof-sisi {
             position: static;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
     }
 
     @media (max-width: 767.98px) {
-        .prf {
+        .prof,
+        .prof-tata,
+        .prof-sisi {
             gap: 16px;
         }
 
-        .prf-tata,
-        .prf-sisi {
-            gap: 16px;
-        }
-
-        .prf-kartu {
-            padding: 18px;
-            border-radius: 18px;
-        }
-
-        .prf-tab-kepala {
+        .prof-tab-kepala {
             padding: 16px 16px 0;
         }
 
-        .prf-tab-isi {
+        .prof-tab-isi {
             padding: 0 16px 18px;
         }
 
-        /* Empat tab tidak muat berjajar di ponsel; jadikan satu baris yang
-           bisa digeser, bukan empat baris bertumpuk setinggi 226px. */
-        .prf-tab {
+        /* Empat tab tidak muat berjajar; jadikan satu baris yang bisa
+           digeser, bukan empat baris bertumpuk. */
+        .prof-tab {
             flex-wrap: nowrap;
             overflow-x: auto;
             scrollbar-width: none;
@@ -999,53 +602,38 @@
             border-radius: 16px;
         }
 
-        .prf-tab::-webkit-scrollbar {
+        .prof-tab::-webkit-scrollbar {
             display: none;
         }
 
-        .prf-tab > li {
+        .prof-tab > li {
             flex: 0 0 auto;
             scroll-snap-align: start;
         }
 
-        .prf-tab .nav-link {
+        .prof-tab .nav-link {
             padding: 10px 14px;
             font-size: .78rem;
         }
 
-        .prf-kepala {
-            padding: 16px;
-            border-radius: 18px;
-        }
-
-        .prf-kepala-aksi {
-            margin-left: 0;
-            width: 100%;
-        }
-
-        .prf-kisi-isian,
-        .prf-kisi-isian.dua {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .prf-aksi .prf-tombol {
+        .prof-aksi .mis-tombol {
             width: 100%;
         }
     }
 
     @media (max-width: 400px) {
-        .prf-mini-kisi {
+        .prof-mini-kisi {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         /* Kotak ketiga mengisi sisa baris supaya tidak ada ruang menganga. */
-        .prf-mini-kisi > .prf-mini:last-child {
+        .prof-mini-kisi > .prof-mini:last-child {
             grid-column: 1 / -1;
         }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .prf * {
+        .prof * {
             transition: none !important;
         }
     }

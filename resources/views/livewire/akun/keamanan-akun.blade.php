@@ -1,12 +1,4 @@
 <div>
-    @if ($pesan !== '')
-        <div class="alert border-0 shadow-sm d-flex align-items-start mb-4"
-            style="border-radius: 16px; background: {{ $jenisPesan === 'sukses' ? '#ecfdf5' : '#fff1f2' }};">
-            <i class="fas {{ $jenisPesan === 'sukses' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} mr-3 fa-lg mt-1"></i>
-            <div class="font-weight-bold text-dark small">{{ $pesan }}</div>
-        </div>
-    @endif
-
     {{-- Akhiri sesi di perangkat lain --}}
     <div class="p-3 mb-4" style="border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
         <div class="d-flex align-items-start mb-3">

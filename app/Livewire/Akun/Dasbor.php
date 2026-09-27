@@ -229,7 +229,7 @@ class Dasbor extends Component
             $kartu[] = [
                 'warna' => 'ungu',
                 'ikon' => 'fa-briefcase',
-                'tautan' => route('account.profil.show', $this->pengguna->getKey()),
+                'tautan' => route('account.profil.show', $this->pengguna->uuid),
                 'label' => 'Masa kerja',
                 'nilai' => $hadir['masa_kerja'],
                 'catatan' => 'Sejak ' . ($this->pengguna->created_at
@@ -280,7 +280,7 @@ class Dasbor extends Component
             [
                 'warna' => 'ungu',
                 'ikon' => 'fa-user-check',
-                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'tautan' => route('account.profil.show', $pengguna->uuid),
                 'label' => 'Status akun',
                 'nilai' => $pengguna->email_verified_at ? 'Terverifikasi' : 'Belum verifikasi',
                 'catatan' => $pengguna->email_verified_at
@@ -298,7 +298,7 @@ class Dasbor extends Component
             [
                 'warna' => 'hijau',
                 'ikon' => 'fa-shield-alt',
-                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'tautan' => route('account.profil.show', $pengguna->uuid),
                 'label' => 'Keamanan',
                 'nilai' => $pengguna->pinAktif() ? 'PIN aktif' : 'Kata sandi',
                 'catatan' => $pengguna->pinAktif()
@@ -308,7 +308,7 @@ class Dasbor extends Component
             [
                 'warna' => 'kuning',
                 'ikon' => 'fa-calendar-alt',
-                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'tautan' => route('account.profil.show', $pengguna->uuid),
                 'label' => 'Bergabung sejak',
                 'nilai' => $pengguna->created_at
                     ? $pengguna->created_at->locale('id')->translatedFormat('M Y')
@@ -520,7 +520,7 @@ class Dasbor extends Component
                 'ikon' => 'fa-envelope-open-text',
                 'judul' => 'Email belum diverifikasi',
                 'teks' => 'Sebagian fitur terkunci sampai verifikasi selesai.',
-                'tautan' => route('account.profil.show', $pengguna->getKey()),
+                'tautan' => route('account.profil.show', $pengguna->uuid),
             ];
         }
 
@@ -725,7 +725,7 @@ class Dasbor extends Component
     public function pintasan(): array
     {
         $pengguna = $this->pengguna;
-        $profil = route('account.profil.show', $pengguna->getKey());
+        $profil = route('account.profil.show', $pengguna->uuid);
 
         if ($this->pelanggan) {
             return [

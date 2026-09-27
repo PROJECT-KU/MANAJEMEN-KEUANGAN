@@ -46,7 +46,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=18">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=19">
 
     <style>
         .fas,
@@ -222,7 +222,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong>
                                 <hr>
                             </div>
-                            <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                            <a href="{{ route('account.profil.show', ['uuid' => Auth::user()->uuid]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
@@ -304,7 +304,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             <div class="dropdown-title">Logged in as <strong>{{ Auth::user()->username }}</strong>
                                 <hr>
                             </div>
-                            <a href="{{ route('account.profil.show', ['id' => Auth::user()->id]) }}" class="dropdown-item has-icon">
+                            <a href="{{ route('account.profil.show', ['uuid' => Auth::user()->uuid]) }}" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> PROFIL SAYA
                             </a>
                             <div class="dropdown-divider"></div>
@@ -712,7 +712,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     {{-- Mengingat posisi gulir sidebar antar halaman. --}}
-    <script src="{{ asset('assets/js/mis-ui.js') }}?v=3"></script>
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=5"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')

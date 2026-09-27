@@ -24,13 +24,14 @@ use Illuminate\Validation\Rules\Password as AturanKataSandi;
 
 class ProfilController extends Controller
 {
-  public function show($id)
+  public function show($uuid)
   {
-    $user = User::find($id);
+    // Dicari lewat UUID, bukan id berurutan: dengan id, siapa pun yang sudah
+    // masuk bisa menaikkan angka di alamatnya dan memetakan seluruh akun.
+    $user = User::cariUuid($uuid);
 
-    // If user data not found, redirect or show an error message
-    if (!$user) {
-      return redirect()->route('account.profil.index')->with('error', 'User not found.');
+    if (! $user) {
+      abort(404);
     }
 
     // Calculate work duration if email is verified and status is active
@@ -281,12 +282,46 @@ class ProfilController extends Controller
       }
     }
 
+    // Nomor rekening dipakai saat penggajian, jadi isinya diperiksa: hanya
+    // angka dan pemisah, panjang wajar. Sebelumnya apa pun diterima.
     if ($request->has('norek')) {
+      $request->validate([
+        'norek' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 .\-]*$/'],
+      ], [
+        'norek.regex' => 'Nomor rekening hanya boleh berisi angka.',
+      ]);
+
       $user->norek = $request->input('norek');
     }
 
     if ($request->has('bank')) {
+      $request->validate([
+        'bank' => ['nullable', 'string', 'max:5'],
+      ]);
+
       $user->bank = $request->input('bank');
+    }
+
+    // Nomor telepon dan jabatan ikut formulir ini, bukan jendela terpisah:
+    // keduanya isian biasa yang tidak butuh kata sandi, dan dua jalan untuk
+    // satu hal hanya membingungkan. Ganti email tetap terpisah karena harus
+    // disertai kata sandi.
+    if ($request->has('telp')) {
+      $request->validate([
+        'telp' => ['nullable', 'string', 'max:25', 'regex:/^[0-9 +.\-]*$/'],
+      ], [
+        'telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+      ]);
+
+      $user->telp = $request->input('telp');
+    }
+
+    if ($request->has('jobdesk')) {
+      $request->validate([
+        'jobdesk' => ['nullable', 'string', 'max:50'],
+      ]);
+
+      $user->jobdesk = $request->input('jobdesk');
     }
 
     // status, level, company, dan jenis SENGAJA tidak diambil dari permintaan.
