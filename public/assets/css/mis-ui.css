@@ -1179,19 +1179,29 @@ textarea:focus-visible,
     width: 46px;
     height: 46px;
     flex: 0 0 46px;
-    border-radius: 15px;
+    border-radius: 14px;
     background: var(--warna, var(--mis-ungu));
     color: #fff;
-    font-size: 1.02rem;
-    box-shadow: 0 12px 22px -12px rgba(15, 23, 42, .6);
+    /* Glifnya disamakan dengan ubin ikon lemon: 1,3rem pada ubin 46px.
+       Sebelumnya 1,02rem, sehingga ikonnya tampak kecil dan tenggelam di
+       tengah ubin yang justru terasa kebesaran. */
+    font-size: 1.3rem;
+    box-shadow: 0 8px 16px -10px rgba(15, 23, 42, .45);
+}
+
+/* Bootstrap/FontAwesome menyisakan ruang bawah pada pseudo-element-nya;
+   line-height 1 membuat glifnya benar-benar di tengah ubin. */
+.mis-medali i {
+    display: block;
+    line-height: 1;
 }
 
 .mis-medali.kecil {
     width: 38px;
     height: 38px;
     flex: 0 0 38px;
-    border-radius: 13px;
-    font-size: .88rem;
+    border-radius: 11px;
+    font-size: .98rem;
 }
 
 .mis-medali i {

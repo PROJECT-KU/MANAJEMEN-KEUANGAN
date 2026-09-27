@@ -335,17 +335,25 @@
     .dsb-biru { --warna: var(--dsb-biru); }
     .dsb-kuning { --warna: var(--dsb-kuning); }
 
+    /* Ukurannya mengikuti ubin ikon lemon: 46px, radius 14px, glif 1,3rem.
+       Yang lama 52px dengan glif 1,15rem — ubinnya lebih besar tetapi
+       ikonnya justru lebih kecil, jadi terlihat kosong di tengah. */
     .dsb-medali {
         display: grid;
         place-items: center;
-        width: 52px;
-        height: 52px;
-        flex: 0 0 52px;
-        border-radius: 17px;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: 14px;
         background: var(--warna, var(--dsb-ungu));
         color: #fff;
-        font-size: 1.15rem;
-        box-shadow: 0 12px 22px -12px rgba(15, 23, 42, .6);
+        font-size: 1.3rem;
+        box-shadow: 0 8px 16px -10px rgba(15, 23, 42, .45);
+    }
+
+    .dsb-medali i {
+        display: block;
+        line-height: 1;
     }
 
     .dsb-kpi-isi {
@@ -505,8 +513,8 @@
         width: 40px;
         height: 40px;
         flex: 0 0 40px;
-        border-radius: 14px;
-        font-size: .95rem;
+        border-radius: 11px;
+        font-size: .98rem;
     }
 
     .dsb-panah {
