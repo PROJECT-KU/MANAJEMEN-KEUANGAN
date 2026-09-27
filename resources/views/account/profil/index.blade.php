@@ -166,23 +166,20 @@ Profil | MIS
               <p class="mis-label prof-email-label">Alamat email</p>
 
               <div class="prof-baris">
-                {{-- Ikon, alamat, dan tombol ubah dalam satu baris sendiri supaya
-                     ketiganya benar-benar sejajar; keterangan terverifikasi turun ke
-                     baris bawahnya. Sebelumnya ikon dirata-tengahkan terhadap DUA
-                     baris teks, jadi alamatnya duduk lebih tinggi daripada ikonnya. --}}
-                <div class="prof-baris-atas">
-                  <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                  <p class="prof-nilai">{{ $user->email }}</p>
-                  <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
-                    <i class="fas fa-pen"></i>
-                  </button>
-                </div>
-
+                {{-- Ubin, alamat, keterangan, dan tombol ubah dalam satu kisi: ubin dan
+                     tombol merentang dua baris lalu dirata-tengahkan, jadi keduanya
+                     sejajar dengan BLOK teksnya — aturan yang sama dengan kepala
+                     bagian. Keterangan otomatis menjorok karena ia di kolom kedua. --}}
+                <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                <p class="prof-nilai">{{ $user->email }}</p>
                 @if ($user->email_verified_at)
                   <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
                 @else
                   <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
                 @endif
+                <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
+                  <i class="fas fa-pen"></i>
+                </button>
               </div>
 
               @if (! $user->email_verified_at)
