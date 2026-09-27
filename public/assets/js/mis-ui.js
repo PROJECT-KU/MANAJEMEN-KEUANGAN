@@ -23,6 +23,12 @@
     }
 
     siap(function () {
+        // Dasbor punya sapaannya sendiri di kepala halaman; tandai supaya
+        // sapaan di bilah atas bisa disembunyikan lewat CSS.
+        if (document.querySelector('.dsb')) {
+            document.body.classList.add('dasbor-terbuka');
+        }
+
         var wadah = document.getElementById('sidebar-wrapper');
 
         if (!wadah) {

@@ -1,23 +1,31 @@
 <div class="dsb" wire:loading.class="dsb-menyegarkan" wire:target="segarkan,geserTahun">
     {{-- ============================================================ kepala --}}
     <header class="dsb-kepala">
+        <span class="dsb-kepala-avatar" aria-hidden="true">
+            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($this->pengguna->full_name ?: $this->pengguna->username, 0, 1)) }}
+        </span>
+
         <div class="dsb-kepala-teks">
-            <p class="dsb-tanggal">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</p>
-            <h1 class="dsb-judul">{{ $this->sapaan }}, {{ \Illuminate\Support\Str::of($this->pengguna->full_name)->explode(' ')->first() }}.</h1>
+            <h1 class="dsb-judul">{{ $this->sapaan }}, {{ \Illuminate\Support\Str::of((string) $this->pengguna->full_name)->explode(' ')->first() }}.</h1>
             <p class="dsb-sub">
+                <span class="dsb-tanggal">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ now()->locale('id')->translatedFormat('l, d F Y') }}
+                </span>
+                <span class="dsb-pemisah" aria-hidden="true">&middot;</span>
                 @if ($this->pengelolaTim)
-                    Ringkasan perusahaan {{ $this->pengguna->company ?: 'Anda' }} hari ini.
+                    Ringkasan perusahaan {{ $this->pengguna->company ?: 'Anda' }}
                 @elseif ($this->pengguna->level !== 'user')
-                    Ringkasan pekerjaan Anda hari ini.
+                    Ringkasan pekerjaan Anda hari ini
                 @else
-                    Ringkasan akun dan kabar terbaru untuk Anda.
+                    Ringkasan akun dan kabar terbaru untuk Anda
                 @endif
             </p>
         </div>
 
         <div class="dsb-kepala-aksi">
             <span class="dsb-segar">
-                <i class="fas fa-clock"></i> Angka per {{ $dimuatPada }} WIB
+                <i class="fas fa-clock"></i> {{ $dimuatPada }} WIB
             </span>
             <button type="button" class="dsb-tombol-segar" wire:click="segarkan" wire:loading.attr="disabled"
                 wire:target="segarkan" title="Ambil ulang angka">

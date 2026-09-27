@@ -30,34 +30,63 @@
 
     /* ------------------------------------------------------------- kepala */
 
+    /* Ucapan di bilah atas disembunyikan khusus di dasbor: kepala kartu ini
+       sudah menyapa, jadi keduanya bersamaan terasa mengulang. */
+    body.dasbor-terbuka .main-navbar #greeting {
+        /* !important memang perlu: elemennya memakai utilitas .d-flex milik
+           Bootstrap yang sudah ber-!important. */
+        display: none !important;
+    }
+
+    /* Sisi kiri bilah atas diisi nama halaman supaya tidak menganggur. */
+    body.dasbor-terbuka .main-navbar .form-inline::before {
+        content: "Dashboard";
+        margin-left: 4px;
+        font-size: .85rem;
+        font-weight: 700;
+        letter-spacing: -.01em;
+        color: #64748b;
+    }
+
     .dsb-kepala {
         display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 18px;
+        align-items: center;
+        gap: 16px;
         flex-wrap: wrap;
-        background: var(--dsb-kartu);
+        background:
+            radial-gradient(520px 200px at 0% 0%, rgba(99, 102, 241, .07), transparent 70%),
+            var(--dsb-kartu);
         border: 1px solid rgba(255, 255, 255, .8);
         border-radius: var(--dsb-radius);
         box-shadow: var(--dsb-bayang);
-        padding: 24px 26px;
+        padding: 18px 22px;
     }
 
-    .dsb-tanggal {
-        margin: 0 0 6px;
-        font-size: .74rem;
-        font-weight: 700;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: #94a3b8;
+    .dsb-kepala-avatar {
+        display: grid;
+        place-items: center;
+        width: 50px;
+        height: 50px;
+        flex: 0 0 50px;
+        border-radius: 17px;
+        background: var(--dsb-ungu);
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 800;
+        box-shadow: 0 12px 22px -14px #6366f1;
+    }
+
+    .dsb-kepala-teks {
+        flex: 1 1 260px;
+        min-width: 0;
     }
 
     .dsb-judul {
         margin: 0;
-        font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+        font-size: clamp(1.15rem, 1.9vw, 1.5rem);
         font-weight: 800;
         letter-spacing: -.03em;
-        line-height: 1.2;
+        line-height: 1.25;
         background: linear-gradient(to right, #1e293b 0%, #6366f1 100%);
         -webkit-background-clip: text;
         background-clip: text;
@@ -65,48 +94,38 @@
     }
 
     .dsb-sub {
-        margin: 6px 0 0;
-        font-size: .88rem;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 4px 0 0;
+        font-size: .82rem;
         color: var(--dsb-tinta-3);
+    }
+
+    .dsb-tanggal {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: var(--dsb-tinta-3);
+        white-space: nowrap;
+    }
+
+    .dsb-tanggal i {
+        font-size: 12px;
+        color: #a5b4fc;
+    }
+
+    .dsb-pemisah {
+        color: #cbd5e1;
     }
 
     .dsb-kepala-aksi {
         display: flex;
         align-items: center;
-        gap: 12px;
-    }
-
-    .dsb-pemilih {
-        display: inline-flex;
-        gap: 4px;
-        padding: 4px;
-        background: #f1f5f9;
-        border: 1px solid var(--dsb-garis);
-        border-radius: 14px;
-    }
-
-    .dsb-pemilih button {
-        border: 0;
-        background: transparent;
-        border-radius: 11px;
-        padding: 8px 14px;
-        font-family: inherit;
-        font-size: .8rem;
-        font-weight: 700;
-        color: var(--dsb-tinta-3);
-        cursor: pointer;
-        transition: all .25s ease;
-        white-space: nowrap;
-    }
-
-    .dsb-pemilih button:hover:not(:disabled) {
-        color: #6366f1;
-    }
-
-    .dsb-pemilih button.aktif {
-        background: #fff;
-        color: #6366f1;
-        box-shadow: 0 6px 14px -8px rgba(15, 23, 42, .5);
+        gap: 10px;
+        margin-left: auto;
     }
 
     .dsb-segar {
@@ -154,7 +173,9 @@
         to { transform: rotate(360deg); }
     }
 
-    /* tabel alternatif untuk pembaca layar */
+    /* Tabel alternatif grafik: hanya untuk pembaca layar, tidak boleh
+       terlihat. Tanpa aturan ini, isinya muncul sebagai daftar angka
+       panjang di bawah judul grafik. */
     .dsb-khusus-pembaca {
         position: absolute;
         width: 1px;
