@@ -7,8 +7,11 @@
         --dsb-tinta-3: #64748b;
         --dsb-garis: #e2e8f0;
         --dsb-kartu: rgba(255, 255, 255, .92);
-        --dsb-radius: 22px;
-        --dsb-bayang: 0 18px 38px rgba(15, 23, 42, .06);
+        /* Disamakan dengan .mis-* dan dasbor lemon: radius lebih kecil,
+           bayangan tipis + tepi 1px. Yang lama membuat tiap kartu tampak
+           mengambang dan kebesaran. */
+        --dsb-radius: 18px;
+        --dsb-bayang: 0 6px 16px -12px rgba(15, 23, 42, .55);
         --dsb-ungu: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         --dsb-hijau: linear-gradient(135deg, #10b981 0%, #34d399 100%);
         --dsb-merah: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
@@ -19,7 +22,7 @@
         font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         color: var(--dsb-tinta-2);
         display: grid;
-        gap: 22px;
+        gap: var(--mis-jarak, 14px);
     }
 
     .dsb *,
@@ -56,10 +59,10 @@
         background:
             radial-gradient(520px 200px at 0% 0%, rgba(99, 102, 241, .07), transparent 70%),
             var(--dsb-kartu);
-        border: 1px solid rgba(255, 255, 255, .8);
+        border: 1px solid var(--dsb-garis);
         border-radius: var(--dsb-radius);
         box-shadow: var(--dsb-bayang);
-        padding: 18px 22px;
+        padding: 14px 18px;
     }
 
     .dsb-kepala-avatar {
@@ -235,10 +238,10 @@
 
     .dsb-kartu {
         background: var(--dsb-kartu);
-        border: 1px solid rgba(255, 255, 255, .8);
+        border: 1px solid var(--dsb-garis);
         border-radius: var(--dsb-radius);
         box-shadow: var(--dsb-bayang);
-        padding: 22px 24px;
+        padding: clamp(16px, 2.2vw, 22px);
     }
 
     .dsb-kartu-kepala {
@@ -419,7 +422,7 @@
     .dsb-kisi {
         display: flex;
         flex-wrap: wrap;
-        gap: 22px;
+        gap: var(--mis-jarak, 14px);
         align-items: stretch;
     }
 
@@ -811,10 +814,10 @@
 
     .dsb-pil {
         display: inline-block;
-        padding: 5px 11px;
-        border-radius: 10px;
-        font-size: .7rem;
-        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: .68rem;
+        font-weight: 700;
         white-space: nowrap;
     }
 
@@ -892,9 +895,10 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 12px 16px;
+        height: 42px;
+        padding: 0 16px;
         border: 0;
-        border-radius: 14px;
+        border-radius: 12px;
         font-family: inherit;
         font-size: .85rem;
         font-weight: 700;

@@ -11,7 +11,7 @@
 <style>
     .prof {
         display: grid;
-        gap: 22px;
+        gap: var(--mis-jarak);
     }
 
     .prof *,
@@ -25,10 +25,10 @@
     }
 
     .prof-kepala-foto {
-        width: 50px;
-        height: 50px;
-        flex: 0 0 50px;
-        border-radius: 17px;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        border-radius: 14px;
         overflow: hidden;
         background: var(--mis-ungu);
         box-shadow: 0 12px 22px -14px #6366f1;
@@ -50,16 +50,16 @@
      */
     .prof-tata {
         display: grid;
-        grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-        gap: 22px;
+        grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+        gap: var(--mis-jarak);
         align-items: start;
     }
 
     .prof-sisi {
         display: grid;
-        gap: 22px;
+        gap: var(--mis-jarak);
         position: sticky;
-        top: 92px;
+        top: 88px;
     }
 
     .prof-utama {
@@ -80,11 +80,11 @@
 
     .prof-foto-bingkai {
         position: relative;
-        width: 124px;
-        height: 124px;
+        width: 104px;
+        height: 104px;
         display: grid;
         place-items: center;
-        border-radius: 38px;
+        border-radius: 32px;
         background: var(--mis-ungu);
         padding: 4px;
         box-shadow: 0 18px 32px -18px #6366f1;
@@ -94,8 +94,8 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 34px;
-        border: 4px solid #fff;
+        border-radius: 28px;
+        border: 3px solid #fff;
         background: #fff;
         display: block;
     }
@@ -106,12 +106,12 @@
         bottom: -4px;
         display: grid;
         place-items: center;
-        width: 34px;
-        height: 34px;
-        border-radius: 12px;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
         border: 3px solid #fff;
         color: #fff;
-        font-size: .72rem;
+        font-size: .66rem;
         background: var(--warna, var(--mis-hijau));
     }
 
@@ -151,8 +151,8 @@
         display: grid;
         justify-items: center;
         gap: 5px;
-        padding: 12px 6px;
-        border-radius: 15px;
+        padding: 10px 6px;
+        border-radius: 13px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
@@ -199,8 +199,8 @@
         display: flex;
         align-items: center;
         gap: 11px;
-        padding: 12px 14px;
-        border-radius: 16px;
+        padding: 10px 12px;
+        border-radius: 13px;
         border: 1.5px dashed #c7d2fe;
         background: #f8faff;
         cursor: pointer;
@@ -250,9 +250,9 @@
     .prof-cincin {
         display: grid;
         place-items: center;
-        width: 66px;
-        height: 66px;
-        flex: 0 0 66px;
+        width: 58px;
+        height: 58px;
+        flex: 0 0 58px;
         border-radius: 50%;
         background: conic-gradient(#6366f1 calc(var(--nilai, 0) * 1%), #e2e8f0 0);
     }
@@ -260,8 +260,8 @@
     .prof-cincin-isi {
         display: grid;
         place-items: center;
-        width: 52px;
-        height: 52px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         background: #fff;
     }
@@ -294,9 +294,9 @@
         align-items: center;
         gap: 11px;
         width: 100%;
-        padding: 10px 12px;
+        padding: 9px 11px;
         border: 1px solid var(--mis-garis);
-        border-radius: 15px;
+        border-radius: 13px;
         background: #f8fafc;
         text-align: left;
         cursor: pointer;
@@ -333,8 +333,8 @@
         align-items: center;
         gap: 8px;
         margin: 0;
-        padding: 12px 14px;
-        border-radius: 15px;
+        padding: 10px 12px;
+        border-radius: 13px;
         background: #ecfdf5;
         border: 1px solid #a7f3d0;
         font-size: .8rem;
@@ -348,8 +348,8 @@
         display: flex;
         align-items: center;
         gap: 13px;
-        padding: 12px 14px;
-        border-radius: 16px;
+        padding: 10px 12px;
+        border-radius: 13px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
@@ -382,18 +382,18 @@
     }
 
     .prof-tab-kepala {
-        padding: 20px 22px 0;
+        padding: 16px 18px 0;
     }
 
     .prof-tab {
         display: flex;
         gap: 6px;
         list-style: none;
-        margin: 0 0 20px;
-        padding: 6px;
+        margin: 0 0 16px;
+        padding: 5px;
         background: #f1f5f9;
         border: 1px solid var(--mis-garis);
-        border-radius: 18px;
+        border-radius: 14px;
     }
 
     .prof-tab > li {
@@ -409,9 +409,9 @@
         justify-content: center;
         gap: 8px;
         width: 100%;
-        padding: 11px 10px;
-        border-radius: 14px;
-        font-size: .82rem;
+        padding: 9px 10px;
+        border-radius: 11px;
+        font-size: .8rem;
         font-weight: 700;
         color: var(--mis-tinta-3);
         background: transparent;
@@ -439,22 +439,22 @@
     }
 
     .prof-tab-isi {
-        padding: 0 22px 22px;
+        padding: 0 18px 18px;
     }
 
     /* --------------------------------------------------- bagian isian */
 
     .prof-bagian + .prof-bagian {
-        margin-top: 24px;
-        padding-top: 24px;
+        margin-top: 20px;
+        padding-top: 20px;
         border-top: 1px dashed var(--mis-garis);
     }
 
     .prof-bagian-kepala {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 11px;
+        margin-bottom: 14px;
     }
 
     .prof-bagian-judul {
@@ -476,9 +476,9 @@
     .prof-statis {
         display: flex;
         align-items: center;
-        gap: 11px;
-        padding: 12px 14px;
-        border-radius: 16px;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 13px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
@@ -506,8 +506,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-top: 22px;
-        padding-top: 18px;
+        margin-top: 18px;
+        padding-top: 16px;
         border-top: 1px dashed var(--mis-garis);
     }
 
@@ -545,9 +545,9 @@
         display: flex;
         align-items: center;
         gap: 13px;
-        padding: 14px 16px;
-        border-radius: 16px;
-        margin-bottom: 20px;
+        padding: 12px 14px;
+        border-radius: 13px;
+        margin-bottom: 16px;
         border: 1px solid #fde68a;
         background: #fffbeb;
     }
@@ -579,8 +579,8 @@
         width: 100%;
         margin: 8vh auto;
         background: #fff;
-        padding: 28px;
-        border-radius: 24px;
+        padding: 22px;
+        border-radius: 18px;
         box-shadow: 0 30px 60px -20px rgba(15, 23, 42, .4);
         font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     }
@@ -634,11 +634,11 @@
     /* Enam angka berjarak lebar supaya mudah dicocokkan dengan email. */
     .prof-kode {
         text-align: center;
-        font-size: 1.4rem !important;
+        font-size: 1.25rem !important;
         font-weight: 800 !important;
-        letter-spacing: .5em;
-        text-indent: .5em;
-        padding: 14px !important;
+        letter-spacing: .45em;
+        text-indent: .45em;
+        padding: 11px !important;
     }
 
     /* -------------------------------------------------------- kata sandi */
@@ -648,7 +648,7 @@
     }
 
     .prof-sandi .form-control-modern {
-        padding-right: 44px;
+        padding-right: 40px;
     }
 
     .password-toggle-inside {
