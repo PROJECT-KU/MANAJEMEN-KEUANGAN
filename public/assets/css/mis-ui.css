@@ -395,6 +395,39 @@ body.sidebar-show .main-sidebar {
     z-index: 890;
 }
 
+/* ------------------------------------------------------------- footer --- */
+
+/*
+ * Footer dipasang position:fixed selebar layar penuh dengan z-index 1000,
+ * sedangkan sidebar ber-z-index 890. Akibatnya bilah footer menutupi bagian
+ * bawah sidebar -- butir menu terakhir tertimpa. Di layar yang sidebarnya
+ * tampil, footer kini dimulai setelah sidebar.
+ *
+ * Pemilih diawali `body` supaya lebih spesifik daripada gaya sebaris di
+ * layouts/version.blade.php, tanpa perlu !important.
+ */
+@media (min-width: 1025px) {
+    body .main-footer {
+        left: 250px;
+        right: 0;
+        width: auto;
+    }
+
+    body.sidebar-mini .main-footer {
+        left: 90px;
+    }
+}
+
+/* saat laci menu terbuka di layar kecil, footer tidak boleh menimpanya */
+body.sidebar-show .main-footer {
+    display: none;
+}
+
+/* ruang di bawah menu supaya butir terakhir tidak mepet tepi layar */
+.main-sidebar .sidebar-menu {
+    padding-bottom: 72px;
+}
+
 /* ------------------------------------------------- kepala tiap halaman --- */
 
 .section-header {
