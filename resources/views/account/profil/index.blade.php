@@ -134,10 +134,8 @@ Profil | MIS
                 accept="image/jpeg,image/png,image/gif">
               <label for="foto" class="prof-unggah">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-camera"></i></span>
-                <span class="prof-unggah-teks">
-                  <span class="prof-unggah-nama" id="prf-nama-berkas">Pilih foto baru</span>
-                  <span class="mis-bantuan">JPG, PNG, atau GIF &middot; maksimal 3 MB</span>
-                </span>
+                <span class="prof-unggah-nama" id="prf-nama-berkas">Pilih foto baru</span>
+                <span class="mis-bantuan">JPG, PNG, atau GIF &middot; maksimal 3 MB</span>
               </label>
               <button type="submit" id="updatePhotoBtn" class="mis-tombol mis-tombol-ungu prof-penuh" disabled>
                 <i class="fas fa-cloud-upload-alt"></i> Simpan foto
@@ -228,10 +226,8 @@ Profil | MIS
                       <span class="mis-medali kecil mis-{{ $butir['warna'] }}" aria-hidden="true">
                         <i class="fas {{ $butir['ikon'] }}"></i>
                       </span>
-                      <span class="prof-lengkap-butir-teks">
-                        <span class="prof-lengkap-butir-judul">{{ $butir['judul'] }}</span>
-                        <span class="mis-bantuan">{{ $butir['catatan'] }}</span>
-                      </span>
+                      <span class="prof-lengkap-butir-judul">{{ $butir['judul'] }}</span>
+                      <span class="mis-bantuan">{{ $butir['catatan'] }}</span>
                       <i class="fas fa-chevron-right prof-lengkap-panah" aria-hidden="true"></i>
                     </button>
                   </li>
@@ -303,10 +299,8 @@ Profil | MIS
                     <div class="prof-bagian">
                       <div class="prof-bagian-kepala">
                         <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-id-badge"></i></span>
-                        <div>
-                          <h4 class="prof-bagian-judul">Nama &amp; kontak</h4>
-                          <p class="prof-bagian-sub">Yang tampil di sistem dan cara kami menghubungi Anda.</p>
-                        </div>
+                        <h4 class="prof-bagian-judul">Nama &amp; kontak</h4>
+                        <p class="prof-bagian-sub">Yang tampil di sistem dan cara kami menghubungi Anda.</p>
                       </div>
 
                       <div class="mis-kisi-isian">
@@ -381,10 +375,8 @@ Profil | MIS
                       <div class="prof-bagian">
                         <div class="prof-bagian-kepala">
                           <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-wallet"></i></span>
-                          <div>
-                            <h4 class="prof-bagian-judul">Rekening penggajian</h4>
-                            <p class="prof-bagian-sub">Ke rekening inilah gaji Anda dikirim.</p>
-                          </div>
+                          <h4 class="prof-bagian-judul">Rekening penggajian</h4>
+                          <p class="prof-bagian-sub">Ke rekening inilah gaji Anda dikirim.</p>
                         </div>
 
                         <div class="mis-kisi-isian">
@@ -425,10 +417,8 @@ Profil | MIS
                     <div class="prof-bagian">
                       <div class="prof-bagian-kepala">
                         <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-user-shield"></i></span>
-                        <div>
-                          <h4 class="prof-bagian-judul">Ditetapkan oleh admin</h4>
-                          <p class="prof-bagian-sub">Hanya bisa diubah lewat halaman pengelolaan pengguna.</p>
-                        </div>
+                        <h4 class="prof-bagian-judul">Ditetapkan oleh admin</h4>
+                        <p class="prof-bagian-sub">Hanya bisa diubah lewat halaman pengelolaan pengguna.</p>
                       </div>
 
                       <div class="mis-kisi-isian prof-kisi-admin">
@@ -488,10 +478,8 @@ Profil | MIS
                     <div class="prof-bagian">
                       <div class="prof-bagian-kepala">
                         <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-key"></i></span>
-                        <div>
-                          <h4 class="prof-bagian-judul">Ganti kata sandi</h4>
-                          <p class="prof-bagian-sub">Setelah berhasil, Anda akan diminta masuk ulang.</p>
-                        </div>
+                        <h4 class="prof-bagian-judul">Ganti kata sandi</h4>
+                        <p class="prof-bagian-sub">Setelah berhasil, Anda akan diminta masuk ulang.</p>
                       </div>
 
                       <div class="mis-kisi-isian">
