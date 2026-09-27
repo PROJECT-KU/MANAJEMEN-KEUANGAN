@@ -271,4 +271,22 @@ class WewenangAkunTest extends TestCase
             ->assertOk()
             ->assertDontSee('Nama Rekan');
     }
+
+    public function test_bank_penggajian_selalu_bri(): void
+    {
+        $pengguna = $this->buatPengguna('manager');
+        $pengguna->forceFill(['bank' => '008', 'norek' => '123456'])->save();
+
+        // Kode bank lain dikirim langsung ke alamat penyimpanan, seolah lewat
+        // alat pengembang. Penguncian di layar saja tidak cukup.
+        $this->actingAs($pengguna)->post(route('account.profil.update'), [
+            'bank' => '014',      // BCA
+            'norek' => '123456',
+        ]);
+
+        $pengguna->refresh();
+
+        // 002 = BRI. Akun lama yang memakai bank lain ikut dibetulkan.
+        $this->assertSame('002', $pengguna->bank);
+    }
 }
