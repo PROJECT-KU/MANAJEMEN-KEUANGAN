@@ -910,68 +910,118 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        background: rgba(15, 23, 42, .55);
-        backdrop-filter: blur(6px);
+        background: rgba(15, 23, 42, .5);
+        backdrop-filter: blur(5px);
         padding: 16px;
         overflow-y: auto;
     }
 
+    /*
+     * Lebarnya dipatok 380px: isinya cuma dua isian, dan kotak selebar
+     * 440px membuat tiap baris terlihat menganga.
+     */
     .custom-popup-content {
         position: relative;
-        max-width: 440px;
+        max-width: 380px;
         width: 100%;
-        margin: 8vh auto;
+        margin: 10vh auto;
         background: #fff;
-        padding: 22px;
+        padding: 18px;
         border-radius: 18px;
-        box-shadow: 0 30px 60px -20px rgba(15, 23, 42, .4);
+        border: 1px solid rgba(255, 255, 255, .7);
+        box-shadow: 0 24px 48px -18px rgba(15, 23, 42, .45);
         font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        /* Muncul dengan naik sedikit dan membesar tipis, bukan menyembul
+           begitu saja. */
+        animation: prof-jendela-masuk .22s cubic-bezier(.22, .61, .36, 1);
     }
 
+    @keyframes prof-jendela-masuk {
+        from { opacity: 0; transform: translateY(10px) scale(.97); }
+        to { opacity: 1; transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .custom-popup-content {
+            animation: none;
+        }
+    }
+
+    /* Tombol tutup memakai rupa tombol ikon sistem, bukan tanda silang polos. */
     .custom-popup-close {
         position: absolute;
-        right: 16px;
-        top: 12px;
+        right: 14px;
+        top: 14px;
         display: grid;
         place-items: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 11px;
-        font-size: 20px;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 9px;
+        background: #fff;
+        font-size: .72rem;
         line-height: 1;
-        color: var(--mis-tinta-4);
+        color: var(--mis-tinta-3);
         cursor: pointer;
         transition: all .2s ease;
     }
 
-    .custom-popup-close:hover {
-        background: #f1f5f9;
-        color: var(--mis-tinta);
+    /* Tanpa ini tanda silangnya 20px oleh aturan global layout, dan nyaris
+       memenuhi tombol 28px-nya. */
+    .custom-popup-close i {
+        font-size: inherit;
+        line-height: 1;
     }
 
+    .custom-popup-close:hover {
+        background: #fff1f2;
+        border-color: #fecdd3;
+        color: #e11d48;
+    }
+
+    /*
+     * Kepala jendela memakai pola yang sama dengan kepala bagian: ubin ikon
+     * merentang dua baris lalu dirata-tengahkan, jadi sejajar dengan blok
+     * judul + keterangan. Garis putus-putus memisahkannya dari isian.
+     */
     .prof-modal-kepala {
-        display: flex;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 1px;
         align-items: center;
-        gap: 14px;
-        margin-bottom: 20px;
-        padding-right: 34px;
+        margin-bottom: 14px;
+        padding: 0 34px 14px 0;
+        border-bottom: 1px dashed var(--mis-garis);
+    }
+
+    .prof-modal-kepala > .mis-medali {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
     .prof-modal-judul {
+        grid-column: 2;
+        grid-row: 1;
         margin: 0;
-        font-size: 1rem;
+        font-size: .95rem;
         font-weight: 800;
+        line-height: 1.25;
         color: var(--mis-tinta);
     }
 
     .prof-modal-sub {
-        margin: 2px 0 0;
-        font-size: .76rem;
+        grid-column: 2;
+        grid-row: 2;
+        margin: 0;
+        font-size: .75rem;
+        line-height: 1.35;
         color: var(--mis-tinta-3);
     }
 
     .prof-rapat {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     /* Enam angka berjarak lebar supaya mudah dicocokkan dengan email. */

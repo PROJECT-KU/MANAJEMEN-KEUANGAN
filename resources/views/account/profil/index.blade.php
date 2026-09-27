@@ -576,13 +576,11 @@ Profil | MIS
 
       <div id="customPopupEmail" class="custom-popup">
         <div class="custom-popup-content">
-          <span class="custom-popup-close" id="customPopupCloseEmail">&times;</span>
+          <button type="button" class="custom-popup-close" id="customPopupCloseEmail" aria-label="Tutup"><i class="fas fa-times"></i></button>
           <div class="prof-modal-kepala">
-            <span class="mis-medali mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-            <div>
-              <h5 class="prof-modal-judul">Ganti alamat email</h5>
-              <p class="prof-modal-sub">Alamat baru wajib diverifikasi ulang.</p>
-            </div>
+            <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+            <h5 class="prof-modal-judul">Ganti alamat email</h5>
+            <p class="prof-modal-sub">Alamat baru wajib diverifikasi ulang.</p>
           </div>
           <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
             @csrf
@@ -610,13 +608,11 @@ Profil | MIS
 
       <div id="customPopup" class="custom-popup" style="display:none;">
         <div class="custom-popup-content">
-          <span class="custom-popup-close" id="customPopupClose">&times;</span>
+          <button type="button" class="custom-popup-close" id="customPopupClose" aria-label="Tutup"><i class="fas fa-times"></i></button>
           <div class="prof-modal-kepala">
-            <span class="mis-medali mis-kuning" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
-            <div>
-              <h5 class="prof-modal-judul">Masukkan kode verifikasi</h5>
-              <p class="prof-modal-sub">Enam angka yang baru dikirim ke email Anda.</p>
-            </div>
+            <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
+            <h5 class="prof-modal-judul">Masukkan kode verifikasi</h5>
+            <p class="prof-modal-sub">Enam angka yang baru dikirim ke email Anda.</p>
           </div>
           <form id="verification-form" action="{{ route('account.profil.verify.code') }}" method="POST">
             @csrf
@@ -1005,14 +1001,32 @@ Profil | MIS
       return;
     }
 
-    buka.addEventListener('click', function () {
+    function bukaJendela() {
       jendela.style.display = 'block';
+      // Kursor langsung di isian pertama: satu ketukan lebih sedikit, dan
+      // pembaca layar tahu fokusnya sudah pindah ke dalam jendela.
+      const pertama = jendela.querySelector('input:not([type=hidden])');
+      if (pertama) {
+        pertama.focus();
+        pertama.select();
+      }
+    }
+
+    function tutupJendela() {
+      jendela.style.display = 'none';
+      buka.focus();
+    }
+
+    buka.addEventListener('click', bukaJendela);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && jendela.style.display === 'block') {
+        tutupJendela();
+      }
     });
 
     if (tutup) {
-      tutup.addEventListener('click', function () {
-        jendela.style.display = 'none';
-      });
+      tutup.addEventListener('click', tutupJendela);
     }
 
     window.addEventListener('click', function (e) {
