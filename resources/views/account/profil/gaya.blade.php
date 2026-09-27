@@ -432,7 +432,8 @@
     /* Keterangan menjorok selebar ubin + jaraknya, jadi ia segaris dengan
        alamat email di atasnya, bukan dengan ikonnya. */
     .prof-baris-ket {
-        padding-left: 36px;
+        /* selebar ubin (22px) + jarak (10px) */
+        padding-left: 32px;
     }
 
     /* Tombol ubah di baris ini lebih kecil daripada tombol ikon di tabel,
