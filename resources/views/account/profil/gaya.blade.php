@@ -575,8 +575,8 @@
     /* --------------------------------------------------- bagian isian */
 
     .prof-bagian + .prof-bagian {
-        margin-top: 20px;
-        padding-top: 20px;
+        margin-top: 16px;
+        padding-top: 16px;
         border-top: 1px dashed var(--mis-garis);
     }
 
@@ -592,10 +592,18 @@
     .prof-bagian-kepala {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
-        column-gap: 14px;
-        row-gap: 2px;
+        column-gap: 12px;
+        /*
+         * row-gap 0, bukan 2px.
+         *
+         * Ubin 30px lebih tinggi daripada judul 18px, jadi baris judul sudah
+         * ikut setinggi ubin dan menyisakan 6px di bawah judulnya. Menambah
+         * row-gap di atas itu membuat keterangan terdorong 8px — terasa
+         * renggang padahal angkanya kecil.
+         */
+        row-gap: 0;
         align-items: center;
-        margin-bottom: 14px;
+        margin-bottom: 10px;
     }
 
     .prof-bagian-kepala > .mis-medali {
@@ -623,9 +631,11 @@
     }
 
     .prof-bagian-sub {
-        margin: 0;
-        line-height: 1.4;
-        font-size: .76rem;
+        /* -2px menutup sisa ruang bawaan baris judul yang tingginya
+           mengikuti ubin, bukan mengikuti hurufnya. */
+        margin: -2px 0 0;
+        line-height: 1.35;
+        font-size: .75rem;
         color: var(--mis-tinta-3);
     }
 
