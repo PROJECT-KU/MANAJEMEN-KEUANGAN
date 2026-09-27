@@ -143,6 +143,47 @@ Profil | MIS
                 <i class="fas fa-cloud-upload-alt"></i> Simpan foto
               </button>
             </form>
+
+            {{-- Email ikut di kartu ini, bukan kartu sendiri: isinya sama-sama
+                 "siapa saya dan bagaimana dihubungi", dan satu kartu terpisah
+                 untuk satu baris membuat kolom kiri jauh lebih tinggi daripada
+                 kolom kanan sehingga menyisakan petak kosong. --}}
+            <div class="prof-email-blok">
+
+              {{-- Judulnya cukup satu baris kecil; ikon besar dan kalimat
+                   penjelas di atas baris ini hanya mengulang apa yang sudah
+                   terlihat, sementara tingginya ikut menekan kolom kanan. --}}
+              <p class="mis-label prof-email-label">Alamat email</p>
+
+              <div class="prof-baris">
+                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                <div class="prof-baris-teks">
+                  <p class="prof-nilai">{{ $user->email }}</p>
+                  @if ($user->email_verified_at)
+                    <p class="mis-bantuan"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
+                  @else
+                    <p class="mis-bantuan"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
+                  @endif
+                </div>
+                <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
+                  <i class="fas fa-pen"></i>
+                </button>
+              </div>
+
+              @if (! $user->email_verified_at)
+                <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
+                  class="prof-verif">
+                  @csrf
+                  <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
+                  <div id="container-verify-btn">
+                    <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
+                      <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
+                    </button>
+                    <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
+                  </div>
+                </form>
+              @endif
+            </div>
           </section>
 
           {{-- Kelengkapan profil. Bukan hiasan: tanpa ini profil yang separuh
@@ -199,45 +240,6 @@ Profil | MIS
             @endif
           </section>
 
-          {{-- Email berdiri sendiri: menggantinya wajib disertai kata sandi,
-               jadi ia tidak ikut tombol "Simpan perubahan" di sebelah. --}}
-          <section class="mis-kartu">
-            <div class="mis-kartu-kepala">
-              <div>
-                <h3 class="mis-kartu-judul"><i class="fas fa-envelope mis-ikon-biru"></i> Alamat email</h3>
-                <p class="mis-kartu-sub">Dipakai untuk memulihkan akun, jadi menggantinya butuh kata sandi.</p>
-              </div>
-            </div>
-
-            <div class="prof-baris">
-              <span class="mis-medali mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-              <div class="prof-baris-teks">
-                <p class="prof-nilai">{{ $user->email }}</p>
-                @if ($user->email_verified_at)
-                  <p class="mis-bantuan"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
-                @else
-                  <p class="mis-bantuan"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
-                @endif
-              </div>
-              <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
-                <i class="fas fa-pen"></i>
-              </button>
-            </div>
-
-            @if (! $user->email_verified_at)
-              <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
-                class="prof-verif">
-                @csrf
-                <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
-                <div id="container-verify-btn">
-                  <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
-                    <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
-                  </button>
-                  <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
-                </div>
-              </form>
-            @endif
-          </section>
         </aside>
 
         {{-- ================================================= kolom kanan --}}

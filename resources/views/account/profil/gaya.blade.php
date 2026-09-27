@@ -20,6 +20,17 @@
         box-sizing: border-box;
     }
 
+    /*
+     * Jarak antar kartu hanya dari gap kolomnya; margin bawaan .mis-kartu
+     * dimatikan di sini. Tanpa ini gap 16px + margin 16px jadi 32px, dan
+     * halamannya terasa renggang padahal tokennya sudah dirapatkan.
+     */
+    .prof > .mis-kepala,
+    .prof-sisi > .mis-kartu,
+    .prof-utama > .mis-kartu {
+        margin-bottom: 0;
+    }
+
     .prof-titik {
         color: #cbd5e1;
     }
@@ -52,18 +63,34 @@
         display: grid;
         grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
         gap: var(--mis-jarak);
-        align-items: start;
+        /* stretch, bukan start: kalau satu kolom lebih pendek, sisanya jadi
+           bagian dalam kartu — bukan petak kosong di sebelah kartu lain. */
+        align-items: stretch;
     }
 
     .prof-sisi {
         display: grid;
+        grid-auto-rows: max-content;
         gap: var(--mis-jarak);
+        align-content: start;
         position: sticky;
         top: 88px;
     }
 
     .prof-utama {
         min-width: 0;
+        display: flex;
+    }
+
+    .prof-utama > .mis-kartu {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Isi tab memanjang mengisi tinggi kartunya. */
+    .prof-tab-isi {
+        flex: 1 1 auto;
     }
 
     .prof-penuh {
@@ -80,11 +107,11 @@
 
     .prof-foto-bingkai {
         position: relative;
-        width: 104px;
-        height: 104px;
+        width: 92px;
+        height: 92px;
         display: grid;
         place-items: center;
-        border-radius: 32px;
+        border-radius: 28px;
         background: var(--mis-ungu);
         padding: 4px;
         box-shadow: 0 18px 32px -18px #6366f1;
@@ -94,7 +121,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 28px;
+        border-radius: 24px;
         border: 3px solid #fff;
         background: #fff;
         display: block;
@@ -116,7 +143,7 @@
     }
 
     .prof-nama {
-        margin: 16px 0 0;
+        margin: 12px 0 0;
         font-size: 1.08rem;
         font-weight: 800;
         color: var(--mis-tinta);
@@ -125,7 +152,7 @@
     }
 
     .prof-username {
-        margin: 3px 0 12px;
+        margin: 2px 0 10px;
         font-size: .8rem;
         color: var(--mis-tinta-4);
         font-weight: 600;
@@ -136,7 +163,7 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 7px;
-        margin-bottom: 18px;
+        margin-bottom: 14px;
     }
 
     /* Tiga angka ringkas; kolomnya tetap supaya lebarnya rata. */
@@ -151,8 +178,8 @@
         display: grid;
         justify-items: center;
         gap: 5px;
-        padding: 10px 6px;
-        border-radius: 13px;
+        padding: 8px 6px;
+        border-radius: 12px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
@@ -180,8 +207,8 @@
         width: 100%;
         display: grid;
         gap: 10px;
-        margin-top: 18px;
-        padding-top: 18px;
+        margin-top: 14px;
+        padding-top: 14px;
         border-top: 1px dashed var(--mis-garis);
     }
 
@@ -235,8 +262,8 @@
     .prof-lengkap-atas {
         display: flex;
         align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
+        gap: 14px;
+        margin-bottom: 12px;
     }
 
     .prof-lengkap-teks {
@@ -284,7 +311,7 @@
         margin: 0;
         padding: 0;
         display: grid;
-        gap: 8px;
+        gap: 6px;
     }
 
     /* Tiap butir sebuah tombol: menekannya membuka tab yang tepat dan
@@ -294,9 +321,9 @@
         align-items: center;
         gap: 11px;
         width: 100%;
-        padding: 9px 11px;
+        padding: 8px 10px;
         border: 1px solid var(--mis-garis);
-        border-radius: 13px;
+        border-radius: 12px;
         background: #f8fafc;
         text-align: left;
         cursor: pointer;
@@ -340,6 +367,19 @@
         font-size: .8rem;
         font-weight: 600;
         color: #047857;
+    }
+
+    /* Blok email di dalam kartu identitas, dipisah garis putus-putus. */
+    .prof-email-blok {
+        width: 100%;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--mis-garis);
+        text-align: left;
+    }
+
+    .prof-email-label {
+        margin-bottom: 8px;
     }
 
     /* ------------------------------------------------------ baris email */
@@ -516,6 +556,34 @@
         font-size: .74rem;
         color: var(--mis-tinta-4);
         flex: 1 1 180px;
+    }
+
+    /*
+     * Baris tombol turun ke dasar kartu.
+     *
+     * Di layar lebar kolom kanan jadi lebih pendek daripada kolom kiri, dan
+     * sisanya muncul sebagai petak putih di bawah tombol. Dengan margin-top
+     * auto, baris tombolnya menempel ke dasar kartu seperti kaki — ruang itu
+     * jadi bagian dari tata letak, bukan lubang.
+     */
+    .prof-tab-isi .tab-content {
+        height: 100%;
+    }
+
+    .prof-tab-isi .tab-pane.active {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    .prof-tab-isi .tab-pane.active > form {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .prof-tab-isi .prof-aksi {
+        margin-top: auto;
     }
 
     /* Bintang merah hanya untuk isian yang validatornya memang wajib. */
