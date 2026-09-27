@@ -1180,40 +1180,55 @@ textarea:focus-visible,
        di layar MIS yang isiannya lebih rapat ubin sebesar itu masih terasa
        mendominasi. Perbandingan glif terhadap ubin tetap seperti lemon
        (sekitar 0,28x), jadi ikonnya tidak ikut tenggelam. */
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    border-radius: 12px;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 10px;
     background: var(--warna, var(--mis-ungu));
     color: #fff;
-    font-size: 1.12rem;
-    box-shadow: 0 7px 14px -9px rgba(15, 23, 42, .45);
+    font-size: .95rem;
+    box-shadow: 0 6px 12px -8px rgba(15, 23, 42, .4);
 }
 
-/* Bootstrap/FontAwesome menyisakan ruang bawah pada pseudo-element-nya;
-   line-height 1 membuat glifnya benar-benar di tengah ubin. */
+/*
+ * Glif ikon mengikuti font-size ubinnya.
+ *
+ * Layout admin memasang `.fas, .far, .fab, .fal { font-size: 20px }` untuk
+ * SELURUH halaman. Aturan itu menang atas pewarisan, jadi selama ini glif
+ * di dalam ubin selalu 20px berapa pun font-size yang disetel di .mis-medali
+ * — mengecilkan ubinnya tidak pernah mengecilkan ikonnya. Beberapa ikon yang
+ * lebar (fa-user-check, fa-user-tag) bahkan jadi 25px dan meluber dari ubin
+ * 22px, sehingga terlihat bergeser 2px dari titik tengah.
+ *
+ * display:block + line-height 1 menghilangkan ruang bawah bawaan
+ * pseudo-element FontAwesome; width 100% + text-align center menengahkan
+ * glif yang lebarnya tidak sama dengan tingginya.
+ */
 .mis-medali i {
     display: block;
+    width: 100%;
+    font-size: inherit;
     line-height: 1;
+    text-align: center;
 }
 
 .mis-medali.kecil {
-    width: 33px;
-    height: 33px;
-    flex: 0 0 33px;
-    border-radius: 10px;
-    font-size: .92rem;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 9px;
+    font-size: .8rem;
 }
 
 /* Untuk kartu yang isinya cuma label + satu nilai; ubin 38px di situ
    lebih tinggi daripada teksnya sendiri dan membuat kartunya menggemuk. */
 .mis-medali.mini {
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
-    border-radius: 8px;
-    font-size: .72rem;
-    box-shadow: 0 5px 10px -7px rgba(15, 23, 42, .45);
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 7px;
+    font-size: .64rem;
+    box-shadow: 0 4px 9px -6px rgba(15, 23, 42, .4);
 }
 
 .mis-medali i {
