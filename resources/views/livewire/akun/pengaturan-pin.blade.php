@@ -25,8 +25,7 @@
                 @endif
             </div>
         </div>
-        <span class="badge {{ $pengguna->pinAktif() ? 'badge-info' : 'badge-secondary' }} px-3 py-2"
-            style="border-radius: 10px;">
+        <span class="lencana-pin {{ $pengguna->pinAktif() ? 'lencana-aktif' : 'lencana-mati' }}">
             {{ $pengguna->pinAktif() ? 'AKTIF' : 'NONAKTIF' }}
         </span>
     </div>
@@ -129,20 +128,11 @@
             </label>
         </div>
 
-        <div class="alert border-0 mb-4" style="border-radius: 14px; background: #fffbeb;">
-            <div class="small text-dark">
-                <i class="fas fa-shield-alt text-warning mr-2"></i>
-                Hindari angka yang mudah ditebak: berulang (111111), berurutan (123456), atau tanggal lahir.
-                Setelah {{ config('auth.pin.batas_gagal', 5) }} kali PIN salah di halaman masuk, PIN dinonaktifkan
-                otomatis dan Anda diberi tahu lewat email — masuk tetap bisa dengan kata sandi.
-            </div>
-            <div class="small text-dark mt-2">
-                <i class="fas fa-laptop text-warning mr-2"></i>
-                PIN berlaku di <strong>perangkat ini</strong>: peramban ini akan mengingat username Anda supaya di
-                halaman masuk cukup mengetik PIN, tanpa username dan kata sandi. Di perangkat lain, masuk dulu dengan
-                kata sandi lalu aktifkan PIN dari sini.
-            </div>
-        </div>
+        <ul class="catatan-pin mb-4">
+            <li><i class="fas fa-shield-alt"></i> Hindari angka berulang, berurutan, atau tanggal lahir.</li>
+            <li><i class="fas fa-ban"></i> Salah {{ config('auth.pin.batas_gagal', 5) }} kali di halaman masuk &rarr; PIN mati sendiri, Anda dikabari lewat email.</li>
+            <li><i class="fas fa-laptop"></i> Berlaku per perangkat. Di perangkat lain: masuk dengan kata sandi, lalu daftarkan dari sini.</li>
+        </ul>
 
         <div class="form-group mt-2 d-flex flex-column flex-sm-row" style="gap: 10px;">
             <button type="submit" class="btn-modern btn-gradient flex-grow-1" wire:loading.attr="disabled">
@@ -160,10 +150,68 @@
     </form>
 
     <style>
+        /* Senada dengan kotak kode di halaman masuk. */
         .pin-isian {
-            letter-spacing: .35em;
-            font-weight: 700;
+            height: 58px;
             text-align: center;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: .5em;
+            text-indent: .5em;
+            color: #0b1324;
+        }
+
+        .pin-isian::placeholder {
+            font-size: 1rem;
+            letter-spacing: .3em;
+            font-weight: 600;
+        }
+
+        .lencana-pin {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .06em;
+            white-space: nowrap;
+        }
+
+        .lencana-aktif {
+            color: #0e7490;
+            background: #cffafe;
+            border: 1px solid #a5f3fc;
+        }
+
+        .lencana-mati {
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        .catatan-pin {
+            list-style: none;
+            margin: 0;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            display: grid;
+            gap: 8px;
+        }
+
+        .catatan-pin li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: .82rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        .catatan-pin li i {
+            margin-top: 3px;
+            color: #d97706;
+            flex: 0 0 14px;
         }
     </style>
 </div>

@@ -1,52 +1,23 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| Sengaja kosong.
 |
+| Endpoint /api/v1/* (masuk, daftar, saldo, debit, kredit, kategori, dan
+| laporan) DIHAPUS pada 27 September 2026 karena tidak dipakai satu pun
+| bagian aplikasi, sementara jalur masuknya melewati penjagaan yang berlaku
+| di halaman masuk: tidak ada pembatas per akun, tidak tercatat di jejak
+| masuk, dan tidak memicu pemberitahuan perangkat baru.
+|
+| Rute /oauth/* bawaan Passport juga dimatikan (lihat AuthServiceProvider).
+| Paketnya sendiri dibiarkan terpasang supaya pencabutan token pada saat
+| kata sandi diganti tetap berjalan bila suatu saat API dihidupkan lagi.
+|
+| Kalau nanti API dibutuhkan, hidupkan kembali dengan penjagaan yang sama
+| dengan halaman masuk: pembatas per akun, pencatatan ke AktivitasMasuk,
+| pemeriksaan status akun, dan pemberitahuan perangkat baru.
 */
-
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
-/**
- * Api Auth
- */
-Route::post('/v1/login', 'api\v1\Auth\LoginController@index')->middleware('throttle:10,1')->name('api.login');
-Route::post('/v1/register', 'api\v1\Auth\RegisterController@index')->middleware('throttle:5,60')->name('api.register');
-
-
-/**
- * Account
- */
-Route::prefix('/v1/account')->group(function () {
-
-    Route::group(['middleware' => ['auth:api']], function () {
-        //saldo
-        Route::get('/saldo', 'api\v1\account\SaldoController@index')->name('account.api.saldo');
-        //categories debit
-        Route::get('/categories_debit', 'api\v1\account\CategoriesDebitController@index')->name('account.api.categories_debit.index');
-        Route::post('/categories_debit/store', 'api\v1\account\CategoriesDebitController@store')->name('account.api.categories_debit.store');
-        //categories credit
-        Route::get('/categories_credit', 'api\v1\account\CategoriesCreditController@index')->name('account.api.categories_credit.index');
-        Route::post('/categories_credit/store', 'api\v1\account\CategoriesCreditController@store')->name('account.api.categories_credit.store');
-        //debit
-        Route::get('/debit', 'api\v1\account\DebitController@index')->name('account.api.debit.index');
-        Route::post('/debit/store', 'api\v1\account\DebitController@store')->name('account.api.debit.store');
-        //credit
-        Route::get('/credit', 'api\v1\account\CreditController@index')->name('account.api.credit.index');
-        Route::post('/credit/store', 'api\v1\account\CreditController@store')->name('account.api.credit.store');
-        //laporan debit
-        Route::get('/laporan_debit', 'api\v1\account\LaporanDebitController@index')->name('account.api.laporan_debit.index');
-        //laporan credit
-        Route::get('/laporan_credit', 'api\v1\account\LaporanCreditController@index')->name('account.api.laporan_credit.index');
-    });
-});

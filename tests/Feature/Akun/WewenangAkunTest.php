@@ -177,4 +177,43 @@ class WewenangAkunTest extends TestCase
             ->post(route('account.aktivitas-masuk.buka-kunci'), ['identitas' => 'siapa_saja'])
             ->assertForbidden();
     }
+
+    public function test_pengelola_bisa_mematikan_pin_karyawan(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $manajer = $this->buatPengguna('manager');
+        $anggota = $this->buatPengguna('karyawan');
+        $anggota->aturPin('482913');
+
+        $this->actingAs($manajer)
+            ->post(route('account.pengguna.matikan-pin', $anggota->getKey()))
+            ->assertRedirect();
+
+        $this->assertFalse($anggota->refresh()->pinAktif());
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\PemberitahuanPinMail::class);
+    }
+
+    public function test_pengguna_biasa_tidak_bisa_mematikan_pin_orang_lain(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $korban = $this->buatPengguna();
+        $korban->aturPin('482913');
+
+        $this->actingAs($pengguna)
+            ->post(route('account.pengguna.matikan-pin', $korban->getKey()))
+            ->assertForbidden();
+
+        $this->assertTrue($korban->refresh()->pinAktif());
+    }
+
+    public function test_api_lama_sudah_tidak_ada(): void
+    {
+        // API dihapus: jalur masuk itu melewati pembatas per akun, pencatatan
+        // jejak, dan pemberitahuan perangkat baru yang berlaku di halaman masuk.
+        $this->postJson('/api/v1/login', ['username' => 'a', 'password' => 'b'])->assertNotFound();
+        $this->postJson('/api/v1/register', [])->assertNotFound();
+        $this->get('/oauth/authorize')->assertNotFound();
+    }
 }

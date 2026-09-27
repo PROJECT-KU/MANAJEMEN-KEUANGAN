@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,11 +17,18 @@ class AuthServiceProvider extends ServiceProvider
     ];
 
     /**
-     * Register any authentication / authorization services.
+     * Rute Passport (/oauth/*) dimatikan.
      *
-     * Rute Passport (/oauth/*) sudah didaftarkan otomatis sejak Passport 11,
-     * jadi Passport::routes() tidak dipanggil lagi.
+     * API aplikasi ini dihapus pada 27 September 2026 dan tidak ada klien
+     * OAuth yang dipakai, jadi membiarkan belasan endpoint /oauth/* terbuka
+     * hanya menambah permukaan serangan tanpa manfaat. Paketnya tetap
+     * terpasang supaya pencabutan token saat kata sandi diganti tidak galat.
      */
+    public function register(): void
+    {
+        Passport::ignoreRoutes();
+    }
+
     public function boot(): void
     {
         //

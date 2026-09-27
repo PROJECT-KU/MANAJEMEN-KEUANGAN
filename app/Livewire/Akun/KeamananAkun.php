@@ -6,6 +6,7 @@ use App\AktivitasMasuk;
 use App\Support\PenandaPerangkat;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -77,6 +78,57 @@ class KeamananAkun extends Component
         $this->pesan = 'Sesi di perangkat lain sudah diakhiri. Perangkat ini tetap masuk.';
     }
 
+    /** Akhiri satu sesi tertentu (perangkat lain) tanpa menyentuh sesi ini. */
+    public function akhiriSesi(string $id): void
+    {
+        $this->pesan = '';
+
+        if ($id === session()->getId()) {
+            $this->jenisPesan = 'galat';
+            $this->pesan = 'Itu perangkat yang sedang Anda pakai. Pakai tombol Keluar di pojok kanan atas.';
+
+            return;
+        }
+
+        $terhapus = DB::table('sessions')
+            ->where('id', $id)
+            ->where('user_id', $this->pengguna()->getKey())
+            ->delete();
+
+        $this->jenisPesan = $terhapus ? 'sukses' : 'galat';
+        $this->pesan = $terhapus
+            ? 'Sesi di perangkat itu sudah diakhiri.'
+            : 'Sesi itu sudah tidak ada.';
+    }
+
+    /**
+     * Daftar sesi yang masih hidup milik pengguna ini.
+     *
+     * Hanya bisa dibaca bila sesi disimpan di basis data; dengan driver
+     * 'file' daftar ini kosong dan bagiannya tidak ditampilkan.
+     */
+    private function daftarSesi()
+    {
+        if (config('session.driver') !== 'database') {
+            return collect();
+        }
+
+        $umur = (int) config('session.lifetime', 120);
+
+        return DB::table('sessions')
+            ->where('user_id', $this->pengguna()->getKey())
+            ->where('last_activity', '>=', now()->subMinutes($umur)->getTimestamp())
+            ->orderByDesc('last_activity')
+            ->limit(20)
+            ->get()
+            ->map(function ($sesi) {
+                $sesi->ini = $sesi->id === session()->getId();
+                $sesi->waktu = \Illuminate\Support\Carbon::createFromTimestamp($sesi->last_activity);
+
+                return $sesi;
+            });
+    }
+
     private function pengguna(): User
     {
         return auth()->user();
@@ -89,6 +141,7 @@ class KeamananAkun extends Component
         return view('livewire.akun.keamanan-akun', [
             'pengguna' => $pengguna,
             'perangkatIni' => PenandaPerangkat::ambil(),
+            'sesi' => $this->daftarSesi(),
             'riwayat' => AktivitasMasuk::where('user_id', $pengguna->getKey())
                 ->latest('id')
                 ->limit(self::JUMLAH_RIWAYAT)

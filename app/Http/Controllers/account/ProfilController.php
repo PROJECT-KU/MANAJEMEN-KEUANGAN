@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PemberitahuanPinMail;
+use App\Support\BerkasGambar;
 use App\Mail\VerifikasiEmailMail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules\Password as AturanKataSandi;
 
@@ -80,18 +82,16 @@ class ProfilController extends Controller
 
     if ($request->hasFile('gambar')) {
 
-      // 3. Hapus foto lama (Proteksi agar tidak menghapus foto default)
-      if ($user->gambar && !in_array($user->gambar, ['default.png', 'no-image.jpg'])) {
-        $oldPath = public_path('assets/img/profil/' . $user->gambar);
-        if (file_exists($oldPath)) {
-          unlink($oldPath);
-        }
+      // 3. Simpan berkas baru lebih dulu. Namanya dibuat di sisi peladen dan
+      //    ekstensinya ditebak dari isi berkas, bukan dari nama kiriman.
+      $fileName = BerkasGambar::simpan($request->file('gambar'), 'assets/img/profil', 'profil-' . $user->id);
+
+      if (! $fileName) {
+        return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar. Gunakan JPG, PNG, GIF, atau WEBP.');
       }
 
-      // 4. Proses Upload
-      $file = $request->file('gambar');
-      $fileName = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-      $file->move(public_path('assets/img/profil'), $fileName);
+      // 4. Foto lama baru dihapus setelah yang baru aman tersimpan.
+      BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
 
       // 5. Simpan ke DB
       $user->gambar = $fileName;
@@ -136,10 +136,22 @@ class ProfilController extends Controller
   public function verify(Request $request)
   {
     $user = Auth::user();
-    $verificationCode = $request->input('verification_code');
+    $verificationCode = (string) $request->input('verification_code');
 
-    // Check if the code is correct and was sent within the last 2 minutes
-    if ($user->code_verified_mail == $verificationCode) {
+    // Kode hanya enam angka, jadi tanpa pembatas ia bisa ditebak beruntun
+    // selama jendela dua menit itu.
+    $kunci = 'kode-verifikasi|' . $user->getKey();
+
+    if (RateLimiter::tooManyAttempts($kunci, 5)) {
+      return response()->json([
+        'statustidakvalid' => 'error',
+        'message' => 'Terlalu banyak percobaan. Minta kode baru dalam ' . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.',
+      ]);
+    }
+
+    // hash_equals, bukan '==': dua string angka dibandingkan sebagai bilangan
+    // oleh PHP, sehingga kode "000123" cocok dengan tebakan "123".
+    if ($user->code_verified_mail !== null && hash_equals((string) $user->code_verified_mail, $verificationCode)) {
       if ((int) now()->diffInMinutes($user->code_verified_mail_sent_at, true) <= 2) {
         // Mark email as verified
         $user->email_verified_at = now();
@@ -147,6 +159,8 @@ class ProfilController extends Controller
         $user->code_verified_mail = null;
         $user->code_verified_mail_sent_at = null;
         $user->save();
+
+        RateLimiter::clear($kunci);
 
         return response()->json([
           'statusvalid' => 'success',
@@ -159,6 +173,16 @@ class ProfilController extends Controller
         ]);
       }
     } else {
+      RateLimiter::hit($kunci, 600);
+
+      // Sesudah batasnya tercapai, kodenya dibuang sekalian supaya tebakan
+      // berikutnya tidak punya sasaran.
+      if (RateLimiter::attempts($kunci) >= 5) {
+        $user->code_verified_mail = null;
+        $user->code_verified_mail_sent_at = null;
+        $user->save();
+      }
+
       return response()->json([
         'statustidakvalid' => 'error',
         'message' => 'Kode verifikasi tidak valid!',
@@ -301,7 +325,7 @@ class ProfilController extends Controller
       'old_password' => 'required',
       // Aturan yang sama dengan pendaftaran & atur ulang: minimal 8, ada huruf
       // dan angka, serta bukan kata sandi yang pernah bocor.
-      'password' => ['required', 'string', 'confirmed', AturanKataSandi::defaults()],
+      'password' => ['required', 'string', 'max:72', 'confirmed', AturanKataSandi::defaults()],
     ]);
 
     // Check if old password matches

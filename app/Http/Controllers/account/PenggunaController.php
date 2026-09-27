@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\account;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PemberitahuanPinMail;
+use App\Support\BerkasGambar;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -11,6 +13,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class PenggunaController extends Controller
 {
@@ -249,16 +253,23 @@ class PenggunaController extends Controller
     {
         $this->pastikanBoleh($id);
 
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        // Menghapus foto lama jika ada
-        if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
-            unlink(public_path('assets/img/profil/' . $user->gambar));
+        $request->validate([
+            'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:3072',
+        ], [
+            'gambar.image' => 'Berkas harus berupa gambar.',
+            'gambar.max' => 'Ukuran gambar maksimal 3 MB.',
+        ]);
+
+        // Nama berkas dibuat peladen; ekstensinya dari isi berkas.
+        $fileName = BerkasGambar::simpan($request->file('gambar'), 'assets/img/profil', 'profil-' . $user->id);
+
+        if (! $fileName) {
+            return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar.');
         }
 
-        // Menyimpan foto baru di assets/public/img/profil
-        $fileName = time() . '.' . $request->gambar->extension();
-        $request->gambar->move(public_path('assets/img/profil'), $fileName);
+        BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
 
         // Update nama file gambar di database
         $user->gambar = $fileName;
@@ -383,6 +394,37 @@ class PenggunaController extends Controller
 
     // <!--================== END ==================-->
 
+    /**
+     * Matikan PIN masuk milik pengguna lain.
+     *
+     * Dipakai saat karyawan keluar atau perangkatnya hilang: tanpa ini, satu-
+     * satunya yang bisa mematikan PIN adalah pemilik akun itu sendiri.
+     */
+    public function matikanPin($id)
+    {
+        $this->pastikanPengelola();
+
+        $user = User::findOrFail($id);
+
+        if (! $user->pinAktif()) {
+            return redirect()->back()->with('statuspin', 'PIN akun ini memang sudah tidak aktif.');
+        }
+
+        $user->matikanPin();
+
+        try {
+            Mail::to($user->email)->send(
+                new PemberitahuanPinMail($user, 'dinonaktifkan', (string) request()->ip())
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim pemberitahuan PIN dimatikan: ' . $e->getMessage());
+        }
+
+        Log::info('PIN ' . $user->username . ' dimatikan oleh ' . Auth::user()->username);
+
+        return redirect()->back()->with('statuspin', 'PIN masuk untuk ' . ($user->full_name ?? $user->username) . ' sudah dimatikan.');
+    }
+
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
@@ -398,9 +440,7 @@ class PenggunaController extends Controller
         }
 
         // Hapus foto jika ada (Opsional tapi disarankan)
-        if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
-            unlink(public_path('assets/img/profil/' . $user->gambar));
-        }
+        BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
 
         $user->delete();
 
@@ -429,10 +469,15 @@ class PenggunaController extends Controller
 
         // Save image to path if provided
         if ($request->hasFile('logo_company')) {
-            $image = $request->file('logo_company');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = $imageName;
-            $image->move(public_path('images'), $imageName); // Store the image
+            $request->validate([
+                'logo_company' => 'image|mimes:jpeg,png,jpg,gif,webp|max:3072',
+            ]);
+
+            $imagePath = BerkasGambar::simpan($request->file('logo_company'), 'images', 'logo');
+
+            if (! $imagePath) {
+                return redirect()->back()->with('error', 'Logo tidak dikenali sebagai gambar.');
+            }
         } else {
             // If no new image uploaded, keep using the old image path
             $imagePath = $user->logo_company;

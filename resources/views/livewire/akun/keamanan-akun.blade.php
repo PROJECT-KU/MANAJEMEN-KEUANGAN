@@ -32,6 +32,40 @@
         @enderror
     </div>
 
+    {{-- Perangkat yang sedang masuk --}}
+    @if ($sesi->isNotEmpty())
+        <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">
+            Perangkat Yang Sedang Masuk
+        </h6>
+
+        <div class="mb-4">
+            @foreach ($sesi as $baris)
+                <div class="d-flex align-items-center p-3 mb-2"
+                    style="border-radius: 14px; background: {{ $baris->ini ? '#ecfeff' : '#f8fafc' }}; border: 1px solid {{ $baris->ini ? '#a5f3fc' : '#e2e8f0' }};">
+                    <i class="fas {{ $baris->ini ? 'fa-laptop text-info' : 'fa-desktop text-muted' }} mr-3"></i>
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="small font-weight-bold text-dark">
+                            {{ \Illuminate\Support\Str::limit(strip_tags((string) $baris->user_agent), 60) ?: 'Peramban tidak dikenali' }}
+                            @if ($baris->ini)
+                                <span class="badge badge-info ml-1" style="border-radius: 8px;">perangkat ini</span>
+                            @endif
+                        </div>
+                        <div class="small text-muted">
+                            {{ $baris->ip_address ?: 'IP tidak tercatat' }} &middot;
+                            aktif {{ $baris->waktu->locale('id')->diffForHumans() }}
+                        </div>
+                    </div>
+                    @unless ($baris->ini)
+                        <button type="button" class="btn btn-sm btn-outline-danger font-weight-bold"
+                            style="border-radius: 10px;" wire:click="akhiriSesi('{{ $baris->id }}')">
+                            Akhiri
+                        </button>
+                    @endunless
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Riwayat masuk --}}
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h6 class="text-uppercase small font-weight-800 text-muted mb-0" style="letter-spacing: 1px;">

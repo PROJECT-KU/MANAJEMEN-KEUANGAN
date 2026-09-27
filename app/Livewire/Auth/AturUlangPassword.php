@@ -43,7 +43,7 @@ class AturUlangPassword extends Component
         return [
             'email' => ['required', 'string', 'email:rfc', 'max:150'],
             'token' => ['required', 'string'],
-            'kataSandi' => ['required', 'string', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
+            'kataSandi' => ['required', 'string', 'max:72', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
             'kataSandiKonfirmasi' => ['required', 'string'],
         ];
     }
@@ -54,6 +54,7 @@ class AturUlangPassword extends Component
             'email.required' => 'Alamat email tidak terbaca dari tautan.',
             'email.email' => 'Format alamat email tidak valid.',
             'token.required' => 'Tautan tidak lengkap. Silakan minta tautan baru.',
+            'kataSandi.max' => 'Kata sandi maksimal 72 karakter.',
             'kataSandi.required' => 'Masukkan kata sandi baru.',
             'kataSandi.min' => 'Kata sandi minimal 8 karakter.',
             'kataSandi.letters' => 'Kata sandi harus memuat huruf.',
