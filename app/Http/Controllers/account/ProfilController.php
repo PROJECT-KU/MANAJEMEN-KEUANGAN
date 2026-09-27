@@ -24,6 +24,10 @@ use Illuminate\Validation\Rules\Password as AturanKataSandi;
 
 class ProfilController extends Controller
 {
+  /** Kode kliring BRI; lihat config/bank.php. */
+  private const BANK_PENGGAJIAN = '002';
+
+
   public function show($uuid)
   {
     // Dicari lewat UUID, bukan id berurutan: dengan id, siapa pun yang sudah
@@ -404,12 +408,19 @@ class ProfilController extends Controller
       $user->norek = $request->input('norek');
     }
 
-    if ($request->has('bank')) {
-      $request->validate([
-        'bank' => ['nullable', 'string', 'max:5'],
-      ]);
-
-      $user->bank = $request->input('bank');
+    /*
+     * Bank penggajian dikunci ke BRI.
+     *
+     * Gaji dikirim lewat satu bank, jadi rekening yang didaftarkan harus
+     * rekening BRI. Nilainya ditetapkan di sini, BUKAN diambil dari
+     * kiriman — kalau hanya dikunci di layar, siapa pun masih bisa
+     * mengirim kode bank lain langsung ke alamat ini.
+     *
+     * Akun lama yang terlanjur memakai bank lain ikut dibetulkan begitu
+     * pemiliknya menyimpan profilnya.
+     */
+    if ($request->has('norek')) {
+      $user->bank = self::BANK_PENGGAJIAN;
     }
 
     // Nomor telepon dan jabatan ikut formulir ini, bukan jendela terpisah:

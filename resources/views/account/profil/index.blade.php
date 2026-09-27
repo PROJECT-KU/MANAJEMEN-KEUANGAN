@@ -410,24 +410,20 @@ Profil | MIS
                         </div>
 
                         <div class="mis-kisi-isian">
+                          {{-- Bank penggajian dikunci ke BRI: gaji dikirim lewat satu bank,
+                               jadi rekening yang didaftarkan harus rekening BRI. Dulu di sini ada
+                               kotak ketik berisi 58 bank, padahal memilih bank lain tidak pernah
+                               boleh. Penguncian sebenarnya ada di peladen; ini hanya tampilannya. --}}
                           <div class="mis-isian">
-                            <label class="mis-label" for="prof-bank-nama">Nama bank</label>
-                            {{-- Diketik, bukan digulir: daftarnya 58 baris. Kotak ini
-                                 mencari namanya, kode banknya disimpan di input tersembunyi. --}}
-                            <input class="form-control-modern @error('bank') is-invalid @enderror"
-                              id="prof-bank-nama" type="text" list="daftar-bank" autocomplete="off"
-                              placeholder="Ketik nama bank, misal mandiri" value="{{ $namaBank }}">
-                            <datalist id="daftar-bank">
-                              @foreach ($daftarBank as $kode => $nama)
-                                <option value="{{ $nama }}"></option>
-                              @endforeach
-                            </datalist>
-                            <input type="hidden" name="bank" id="bank" value="{{ old('bank', $user->bank) }}">
-                            @error('bank')
-                              <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
-                            @else
-                              <p class="mis-bantuan" id="prof-bank-kabar">Ketik sebagian namanya saja, misal "mandiri".</p>
-                            @enderror
+                            <label class="mis-label"><i class="fas fa-lock"></i> Nama bank</label>
+                            <div class="prof-statis">
+                              <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-university"></i></span>
+                              <div>
+                                <p class="prof-statis-label">Ditetapkan perusahaan</p>
+                                <p class="prof-statis-nilai">{{ config('bank')['002'] }}</p>
+                              </div>
+                            </div>
+                            <p class="mis-bantuan">Gaji dikirim lewat BRI, jadi rekeningnya harus rekening BRI.</p>
                           </div>
 
                           <div class="mis-isian">
@@ -996,141 +992,6 @@ Profil | MIS
       misToast('gagal', @json($errors->count() === 1 ? $errors->first() : 'Ada ' . $errors->count() . ' isian yang perlu diperbaiki.'));
     @endif
   });
-</script>
-
-<!--================== PILIH BANK DENGAN MENGETIK ==================-->
-<script>
-  /*
-   * Memilih bank dengan mengetik.
-   *
-   * Versi sebelumnya hanya menerima nama yang SAMA PERSIS. Akibatnya cuma
-   * bank yang namanya pendek yang bisa dipilih — mengetik "bri" berhasil
-   * karena nama banknya memang "BRI", sedangkan "mandiri" atau "Bank BCA"
-   * dianggap tidak ada lalu kode banknya DIHAPUS diam-diam, dan pilihan
-   * yang sudah tersimpan ikut hilang begitu formulirnya disimpan.
-   *
-   * Sekarang pencocokannya memaafkan: sama persis, atau nama bank memuat
-   * yang diketik, atau sebaliknya. Kalau tetap tidak jelas, nilai lama
-   * dikembalikan — tidak pernah dibiarkan kosong tanpa disengaja.
-   */
-  (function () {
-    const kotak = document.getElementById('prof-bank-nama');
-    const tersembunyi = document.getElementById('bank');
-    const kabar = document.getElementById('prof-bank-kabar');
-
-    if (!kotak || !tersembunyi) {
-      return;
-    }
-
-    const peta = @json(config('bank'));              // kode -> nama
-    const daftar = Object.keys(peta).map(function (kode) {
-      return { kode: String(kode), nama: peta[kode] };
-    });
-
-    function rapikan(teks) {
-      return String(teks || '').trim().toUpperCase().replace(/\s+/g, ' ');
-    }
-
-    // Nama terakhir yang benar-benar cocok, dipakai untuk memulihkan
-    // ketikan yang tidak jelas.
-    let terakhirSah = daftar.find(function (b) { return b.kode === tersembunyi.value; }) || null;
-
-    function cari(teks) {
-      const cari = rapikan(teks);
-
-      if (cari === '') {
-        return null;
-      }
-
-      const persis = daftar.filter(function (b) { return rapikan(b.nama) === cari; });
-      if (persis.length === 1) {
-        return persis[0];
-      }
-
-      // "mandiri" -> "BANK MANDIRI"
-      const memuat = daftar.filter(function (b) { return rapikan(b.nama).includes(cari); });
-      if (memuat.length === 1) {
-        return memuat[0];
-      }
-
-      // "Bank BCA" -> "BCA"
-      const dimuat = daftar.filter(function (b) { return cari.includes(rapikan(b.nama)); });
-      if (dimuat.length === 1) {
-        return dimuat[0];
-      }
-
-      return null;
-    }
-
-    function beriKabar(teks) {
-      if (kabar) {
-        kabar.textContent = teks;
-      }
-    }
-
-    kotak.addEventListener('input', function () {
-      const cocok = cari(kotak.value);
-
-      if (cocok) {
-        tersembunyi.value = cocok.kode;
-        terakhirSah = cocok;
-        kotak.classList.remove('is-invalid');
-        beriKabar('Bank dipilih: ' + cocok.nama + '.');
-        return;
-      }
-
-      if (kotak.value.trim() === '') {
-        kotak.classList.remove('is-invalid');
-        beriKabar('Ketik nama banknya, misal "mandiri" atau "BCA".');
-        return;
-      }
-
-      beriKabar('Terus ketik, lalu pilih dari daftar yang muncul.');
-    });
-
-    kotak.addEventListener('blur', function () {
-      const cocok = cari(kotak.value);
-
-      if (cocok) {
-        // Ketikan dirapikan jadi nama resminya supaya tidak ada dua ejaan
-        // untuk bank yang sama.
-        kotak.value = cocok.nama;
-        tersembunyi.value = cocok.kode;
-        terakhirSah = cocok;
-        kotak.classList.remove('is-invalid');
-        beriKabar('Bank dipilih: ' + cocok.nama + '.');
-        return;
-      }
-
-      if (kotak.value.trim() === '') {
-        // Dikosongkan dengan sengaja: itu memang boleh.
-        tersembunyi.value = '';
-        terakhirSah = null;
-        kotak.classList.remove('is-invalid');
-        beriKabar('Belum ada bank yang dipilih.');
-        return;
-      }
-
-      // Ketikan tidak jelas — kembalikan yang lama, jangan sampai hilang.
-      if (terakhirSah) {
-        kotak.value = terakhirSah.nama;
-        tersembunyi.value = terakhirSah.kode;
-        kotak.classList.remove('is-invalid');
-        beriKabar('Bank dipilih: ' + terakhirSah.nama + '.');
-        misToast('peringatan', 'Nama bank itu belum jelas, jadi pilihan sebelumnya dipakai lagi.');
-      } else {
-        tersembunyi.value = '';
-        kotak.classList.add('is-invalid');
-        beriKabar('Bank itu tidak ada di daftar. Coba ketik sebagian namanya.');
-      }
-    });
-
-    // Samakan tampilan dengan kode yang tersimpan saat halaman dibuka.
-    if (terakhirSah) {
-      kotak.value = terakhirSah.nama;
-      beriKabar('Bank dipilih: ' + terakhirSah.nama + '.');
-    }
-  })();
 </script>
 
 <!--================== JENDELA GANTI EMAIL ==================-->
