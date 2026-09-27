@@ -64,17 +64,34 @@ Profil | MIS
           </p>
         </div>
 
-        <div class="mis-kepala-aksi">
+        {{-- Lencana status. Titik di kirinya berdenyut supaya keadaan akun
+             terbaca sekilas tanpa harus membaca tulisannya dulu. Denyutnya
+             hanya untuk keadaan yang BAIK dan sedang berjalan; keadaan yang
+             perlu ditindak dibiarkan diam supaya tidak terasa seperti alarm
+             yang menuntut perhatian terus-menerus. --}}
+        <div class="mis-kepala-aksi prof-lencana-deret">
           @if ($user->email_verified_at)
-            <span class="mis-pil mis-pil-hijau"><i class="fas fa-check-circle"></i> Email terverifikasi</span>
+            <span class="prof-lencana prof-lencana-hijau">
+              <span class="prof-lencana-titik berdenyut" aria-hidden="true"></span>
+              Email terverifikasi
+            </span>
           @else
-            <span class="mis-pil mis-pil-kuning"><i class="fas fa-exclamation-circle"></i> Email belum terverifikasi</span>
+            <span class="prof-lencana prof-lencana-kuning">
+              <span class="prof-lencana-titik" aria-hidden="true"></span>
+              Email belum terverifikasi
+            </span>
           @endif
 
           @if ($user->status === 'active')
-            <span class="mis-pil mis-pil-biru"><i class="fas fa-circle"></i> Akun aktif</span>
+            <span class="prof-lencana prof-lencana-biru">
+              <span class="prof-lencana-titik berdenyut" aria-hidden="true"></span>
+              Akun aktif
+            </span>
           @else
-            <span class="mis-pil mis-pil-merah"><i class="fas fa-ban"></i> Akun nonaktif</span>
+            <span class="prof-lencana prof-lencana-merah">
+              <span class="prof-lencana-titik" aria-hidden="true"></span>
+              Akun nonaktif
+            </span>
           @endif
         </div>
       </header>
