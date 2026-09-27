@@ -249,4 +249,26 @@ class WewenangAkunTest extends TestCase
             $pengguna->uuid
         );
     }
+
+    public function test_profil_orang_lain_dikembalikan_ke_profil_sendiri(): void
+    {
+        $manager = $this->buatPengguna('manager');
+        $manager->forceFill(['company' => 'PT Uji'])->save();
+
+        $rekan = $this->buatPengguna('karyawan');
+        $rekan->forceFill(['company' => 'PT Uji', 'full_name' => 'Nama Rekan'])->save();
+
+        // Dulu halaman ini terbuka untuk manager dan menampilkan dua orang
+        // sekaligus: kotak isian terisi data rekan, tombol Simpan menulis
+        // ke akun manager sendiri.
+        $this->actingAs($manager)
+            ->get(route('account.profil.show', $rekan->uuid))
+            ->assertRedirect(route('account.profil.show', $manager->uuid));
+
+        // Dan halaman tujuannya tidak boleh memuat nama rekan di mana pun.
+        $this->actingAs($manager)
+            ->get(route('account.profil.show', $manager->uuid))
+            ->assertOk()
+            ->assertDontSee('Nama Rekan');
+    }
 }
