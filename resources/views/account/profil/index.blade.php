@@ -334,7 +334,13 @@ Profil | MIS
                             <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                           @enderror
                         </div>
+                      </div>
 
+                      {{-- Kisi kedua. Lima isian di satu kisi tiga kolom menyisakan
+                           satu sel kosong sesudah tanggal lahir; dipecah 3 + 2 supaya
+                           tiap baris terisi penuh. auto-fit meniadakan jalur yang tidak
+                           terpakai, jadi dua isian ini melebar mengisi barisnya. --}}
+                      <div class="mis-kisi-isian prof-kisi-dua">
                         @if ($user->level !== 'user')
                           <div class="mis-isian">
                             <label class="mis-label" for="prof-jobdesk">Posisi / jabatan</label>
@@ -420,9 +426,9 @@ Profil | MIS
                         </div>
                       </div>
 
-                      <div class="mis-kisi-isian">
+                      <div class="mis-kisi-isian prof-kisi-admin">
                         <div class="prof-statis">
-                          <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-user-check"></i></span>
+                          <span class="mis-medali mini mis-hijau" aria-hidden="true"><i class="fas fa-user-check"></i></span>
                           <div>
                             <p class="prof-statis-label">Status akun</p>
                             <p class="prof-statis-nilai">{{ $user->status === 'active' ? 'Aktif' : 'Nonaktif' }}</p>
@@ -430,7 +436,7 @@ Profil | MIS
                         </div>
 
                         <div class="prof-statis">
-                          <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                          <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
                           <div>
                             <p class="prof-statis-label">Peran di sistem</p>
                             <p class="prof-statis-nilai">{{ $labelPeran }}</p>
@@ -438,7 +444,7 @@ Profil | MIS
                         </div>
 
                         <div class="prof-statis">
-                          <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-user-tag"></i></span>
+                          <span class="mis-medali mini mis-jingga" aria-hidden="true"><i class="fas fa-user-tag"></i></span>
                           <div>
                             <p class="prof-statis-label">Jenis akun</p>
                             <p class="prof-statis-nilai">{{ $labelJenis }}</p>
@@ -447,7 +453,7 @@ Profil | MIS
 
                         @if ($user->level !== 'user')
                           <div class="prof-statis">
-                            <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-building"></i></span>
+                            <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-building"></i></span>
                             <div>
                               <p class="prof-statis-label">Perusahaan</p>
                               <p class="prof-statis-nilai">{{ $user->company ?: 'Tidak ada' }}</p>
@@ -612,15 +618,17 @@ Profil | MIS
 
 <!--================== FORMAT NOMOR REKENING ==================-->
 <script>
+  /*
+   * Nomor rekening hanya dibersihkan dari karakter selain angka.
+   *
+   * Sebelumnya ia dipaksa ke pola 4-2-6-2-1, yaitu format BRI. Akibatnya
+   * nomor 15 angka milik bank mana pun tampil sebagai "1234-56-789012-34-5",
+   * padahal tiap bank punya panjang dan pengelompokan sendiri — Mandiri 13
+   * angka, BCA 10, BNI 10. Tidak ada satu pola yang benar untuk semuanya,
+   * jadi lebih baik tidak memaksakan pola apa pun.
+   */
   function formatNoRek(input) {
-    // Menghapus semua karakter non-digit
-    var NoRek = input.value.replace(/\D/g, '');
-
-    // Menggunakan ekspresi reguler untuk memformat nomor telepon
-    NoRek = NoRek.replace(/(\d{4})(\d{2})(\d{6})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5');
-
-    // Mengatur nilai input dengan nomor telepon yang diformat
-    input.value = NoRek;
+    input.value = input.value.replace(/\D/g, '');
   }
 </script>
 
