@@ -1461,6 +1461,8 @@ select.form-control-modern {
 }
 
 /* tombol garis untuk tindakan sekunder di dalam tabel */
+/* Ikonnya berwarna aksen, bukan abu-abu: abu-abu dipakai khusus untuk
+   ketiadaan data, dan tombol ini justru tindakan yang bisa dipakai. */
 .mis-tombol-garis,
 .btn-outline-modern {
     display: inline-grid;
@@ -1471,7 +1473,7 @@ select.form-control-modern {
     border: 1px solid var(--mis-garis);
     border-radius: 10px;
     background: #fff;
-    color: var(--mis-tinta-3);
+    color: #6366f1;
     font-size: .78rem;
     cursor: pointer;
     transition: all .25s ease;
@@ -1519,6 +1521,22 @@ select.form-control-modern {
     box-shadow: none;
     cursor: not-allowed;
     transform: none;
+}
+
+/*
+ * Ikon di dalam tombol ikut font-size tombolnya.
+ *
+ * Jebakan yang sama dengan ubin dan ikon sebaris: layout admin memaksa
+ * `.fas { font-size: 20px }`, jadi pensil di tombol 28px tergambar 20px dan
+ * nyaris memenuhi tombolnya. Nilai font-size yang sudah disetel di tombol
+ * tidak pernah sampai ke glifnya.
+ */
+.mis-tombol i,
+.mis-tombol-garis i,
+.mis-tombol-bahaya i,
+.mis-cari-hapus i {
+    font-size: inherit;
+    line-height: 1;
 }
 
 /* --------------------------------------------------------------- tabel */
