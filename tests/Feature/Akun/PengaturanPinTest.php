@@ -42,7 +42,7 @@ class PengaturanPinTest extends TestCase
         $pengguna = $this->buatPengguna();
 
         $this->actingAs($pengguna)
-            ->get(route('account.profil.show', $pengguna->getKey()))
+            ->get(route('account.profil.show', $pengguna->uuid))
             ->assertOk()
             ->assertSee('PIN masuk')
             ->assertSeeLivewire(PengaturanPin::class)
@@ -236,7 +236,9 @@ class PengaturanPinTest extends TestCase
         Livewire::test(PengaturanPin::class)
             ->set('kataSandi', self::SANDI)
             ->call('nonaktifkan')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            // Pemberitahuannya lewat toast bersama, bukan kotak .alert.
+            ->assertDispatched('toast', jenis: 'berhasil');
 
         $pengguna->refresh();
 

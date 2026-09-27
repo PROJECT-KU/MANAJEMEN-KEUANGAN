@@ -1003,7 +1003,7 @@ Detail Karyawan | MIS
                 timerProgressBar: true,
                 showConfirmButton: false,
                 willClose: () => {
-                  window.location.href = "{{ route('account.profil.show', ['id' => $user->id]) }}";
+                  window.location.href = "{{ route('account.profil.show', ['uuid' => $user->uuid]) }}";
                 }
               });
             }

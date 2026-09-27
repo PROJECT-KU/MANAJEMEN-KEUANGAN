@@ -44,7 +44,7 @@
                 <strong>Email Anda belum diverifikasi.</strong>
                 Sebagian fitur dikunci sampai verifikasi selesai.
             </div>
-            <a href="{{ route('account.profil.show', $this->pengguna->getKey()) }}" class="dsb-kabar-tombol">Verifikasi</a>
+            <a href="{{ route('account.profil.show', $this->pengguna->uuid) }}" class="dsb-kabar-tombol">Verifikasi</a>
         </div>
     @endif
 
@@ -101,7 +101,7 @@
             </div>
 
             <div class="dsb-tindakan-kisi">
-                <a href="{{ route('account.profil.show', $this->pengguna->getKey()) }}" class="dsb-tindakan-item dsb-ungu">
+                <a href="{{ route('account.profil.show', $this->pengguna->uuid) }}" class="dsb-tindakan-item dsb-ungu">
                     <span class="dsb-medali kecil"><i class="fas fa-user-cog"></i></span>
                     <span class="dsb-tindakan-teks">
                         <strong>1. Lengkapi profil</strong>
@@ -682,7 +682,7 @@
                     <span class="dsb-avatar besar">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($this->pengguna->full_name, 0, 1)) }}</span>
                     <h3 class="dsb-kartu-judul">{{ $this->pengguna->full_name }}</h3>
                     <p class="dsb-kartu-sub">{{ $this->pengguna->email }}</p>
-                    <a href="{{ route('account.profil.show', $this->pengguna->getKey()) }}" class="dsb-tombol dsb-tombol-ungu">
+                    <a href="{{ route('account.profil.show', $this->pengguna->uuid) }}" class="dsb-tombol dsb-tombol-ungu">
                         <i class="fas fa-user-cog"></i> Kelola akun
                     </a>
                 </section>
