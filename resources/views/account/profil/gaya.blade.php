@@ -127,19 +127,34 @@
         display: block;
     }
 
+    /*
+     * Lencana terverifikasi mengikuti centang WhatsApp: lingkaran penuh
+     * berwarna hijau khas WhatsApp dengan centang putih di tengah, bukan
+     * kotak membulat bergradien.
+     */
     .prof-foto-lencana {
         position: absolute;
-        right: -4px;
-        bottom: -4px;
+        right: -2px;
+        bottom: -2px;
         display: grid;
         place-items: center;
-        width: 30px;
-        height: 30px;
-        border-radius: 10px;
-        border: 3px solid #fff;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2.5px solid #fff;
         color: #fff;
-        font-size: .66rem;
-        background: var(--warna, var(--mis-hijau));
+        font-size: .62rem;
+        background: #25d366;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
+    }
+
+    /* Belum terverifikasi tetap kuning supaya bedanya langsung terlihat. */
+    .prof-foto-lencana.belum {
+        background: #f59e0b;
+    }
+
+    .prof-foto-lencana i {
+        line-height: 1;
     }
 
     .prof-nama {
@@ -384,14 +399,50 @@
 
     /* ------------------------------------------------------ baris email */
 
+    /*
+     * Rata atas, bukan rata tengah.
+     *
+     * Isinya dua baris (alamat email lalu keterangan terverifikasi), jadi
+     * ubin ikon yang rata tengah membuat alamat emailnya duduk 11px lebih
+     * tinggi daripada ikonnya. Dengan rata atas, ikon, alamat, dan tombol
+     * ubah semuanya sejajar di baris pertama.
+     */
     .prof-baris {
-        display: flex;
-        align-items: center;
-        gap: 13px;
+        display: grid;
+        gap: 5px;
         padding: 10px 12px;
         border-radius: 13px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
+    }
+
+    /* Ikon, alamat, dan tombol ubah: satu baris, rata tengah satu sama lain. */
+    .prof-baris-atas {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .prof-baris-atas .prof-nilai {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* Keterangan menjorok selebar ubin + jaraknya, jadi ia segaris dengan
+       alamat email di atasnya, bukan dengan ikonnya. */
+    .prof-baris-ket {
+        padding-left: 36px;
+    }
+
+    /* Tombol ubah di baris ini lebih kecil daripada tombol ikon di tabel,
+       dan flex: 0 0 auto supaya tidak terjepit jadi 31x34 seperti sebelumnya. */
+    .prof-baris .mis-tombol-garis {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+        border-radius: 9px;
+        font-size: .68rem;
     }
 
     .prof-baris-teks {
