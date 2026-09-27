@@ -79,6 +79,49 @@ table .far,
     box-shadow: 0 0 40px rgba(15, 23, 42, .04);
 }
 
+/*
+ * Sidebar dipasang position:fixed setinggi layar dengan overflow hidden,
+ * sementara daftar menunya mencapai 1865px. Akibatnya seluruh butir di
+ * bawah lipatan -- termasuk Laporan dan Aktivitas Masuk -- tidak pernah
+ * bisa dijangkau: menggulir halaman tidak menggerakkannya karena posisinya
+ * tetap. Di sini isinya dijadikan daerah gulir sendiri.
+ */
+.main-sidebar #sidebar-wrapper {
+    height: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.main-sidebar #sidebar-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-sidebar #sidebar-wrapper::-webkit-scrollbar-thumb {
+    background: #dbe2ea;
+    border-radius: 99px;
+}
+
+.main-sidebar #sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+.main-sidebar #sidebar-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* merek tetap terlihat saat menu digulir */
+.main-sidebar .sidebar-brand:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ui-kartu);
+    box-shadow: 0 10px 14px -12px rgba(15, 23, 42, .45);
+}
+
 .main-sidebar .sidebar-brand {
     height: auto;
     padding: 22px 18px 14px;
