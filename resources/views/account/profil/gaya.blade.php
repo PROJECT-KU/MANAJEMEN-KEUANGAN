@@ -455,48 +455,46 @@
     /* ------------------------------------------------------ baris email */
 
     /*
-     * Rata atas, bukan rata tengah.
-     *
-     * Isinya dua baris (alamat email lalu keterangan terverifikasi), jadi
-     * ubin ikon yang rata tengah membuat alamat emailnya duduk 11px lebih
-     * tinggi daripada ikonnya. Dengan rata atas, ikon, alamat, dan tombol
-     * ubah semuanya sejajar di baris pertama.
+     * Satu kisi tiga kolom. Ubin dan tombol merentang dua baris lalu
+     * dirata-tengahkan, jadi keduanya sejajar dengan BLOK teksnya — aturan
+     * yang sama dengan kepala bagian. Keterangan menjorok dengan sendirinya
+     * karena ia berada di kolom kedua, bukan lewat padding yang harus
+     * dihitung ulang tiap kali ubinnya berubah ukuran.
      */
     .prof-baris {
         display: grid;
-        gap: 5px;
-        padding: 10px 12px;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: 11px;
+        row-gap: 1px;
+        align-items: center;
+        padding: 9px 11px;
         border-radius: 13px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
 
-    /* Ikon, alamat, dan tombol ubah: satu baris, rata tengah satu sama lain. */
-    .prof-baris-atas {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        min-width: 0;
+    .prof-baris > .mis-medali,
+    .prof-baris > .mis-tombol-garis {
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
-    .prof-baris-atas .prof-nilai {
-        flex: 1 1 auto;
-        min-width: 0;
+    .prof-baris > .prof-nilai {
+        grid-column: 2;
+        grid-row: 1;
     }
 
-    /* Keterangan menjorok selebar ubin + jaraknya, jadi ia segaris dengan
-       alamat email di atasnya, bukan dengan ikonnya. */
     .prof-baris-ket {
-        /* selebar ubin (25px) + jarak (13px) */
-        padding-left: 38px;
+        grid-column: 2;
+        grid-row: 2;
     }
 
     /* Tombol ubah di baris ini lebih kecil daripada tombol ikon di tabel,
        dan flex: 0 0 auto supaya tidak terjepit jadi 31x34 seperti sebelumnya. */
     .prof-baris .mis-tombol-garis {
+        grid-column: 3;
         width: 28px;
         height: 28px;
-        flex: 0 0 28px;
         border-radius: 9px;
         /* 0,72rem ~ 11,5px pada tombol 28px: pensilnya jelas terbaca tetapi
            masih menyisakan ruang di sekelilingnya. */
