@@ -1176,17 +1176,18 @@ textarea:focus-visible,
 .mis-medali {
     display: grid;
     place-items: center;
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
-    border-radius: 14px;
+    /* Diperkecil lagi atas permintaan pemiliknya: lemon memakai 46px, tetapi
+       di layar MIS yang isiannya lebih rapat ubin sebesar itu masih terasa
+       mendominasi. Perbandingan glif terhadap ubin tetap seperti lemon
+       (sekitar 0,28x), jadi ikonnya tidak ikut tenggelam. */
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 12px;
     background: var(--warna, var(--mis-ungu));
     color: #fff;
-    /* Glifnya disamakan dengan ubin ikon lemon: 1,3rem pada ubin 46px.
-       Sebelumnya 1,02rem, sehingga ikonnya tampak kecil dan tenggelam di
-       tengah ubin yang justru terasa kebesaran. */
-    font-size: 1.3rem;
-    box-shadow: 0 8px 16px -10px rgba(15, 23, 42, .45);
+    font-size: 1.12rem;
+    box-shadow: 0 7px 14px -9px rgba(15, 23, 42, .45);
 }
 
 /* Bootstrap/FontAwesome menyisakan ruang bawah pada pseudo-element-nya;
@@ -1197,22 +1198,22 @@ textarea:focus-visible,
 }
 
 .mis-medali.kecil {
-    width: 38px;
-    height: 38px;
-    flex: 0 0 38px;
-    border-radius: 11px;
-    font-size: .98rem;
+    width: 33px;
+    height: 33px;
+    flex: 0 0 33px;
+    border-radius: 10px;
+    font-size: .92rem;
 }
 
 /* Untuk kartu yang isinya cuma label + satu nilai; ubin 38px di situ
    lebih tinggi daripada teksnya sendiri dan membuat kartunya menggemuk. */
 .mis-medali.mini {
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
-    border-radius: 9px;
-    font-size: .8rem;
-    box-shadow: 0 6px 12px -8px rgba(15, 23, 42, .45);
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    border-radius: 8px;
+    font-size: .72rem;
+    box-shadow: 0 5px 10px -7px rgba(15, 23, 42, .45);
 }
 
 .mis-medali i {
