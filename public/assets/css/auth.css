@@ -344,6 +344,37 @@ img {
     stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
+    /* penyeimbang optis, lihat catatan di bawah */
+    transform: translate(var(--imbang-x, 0px), var(--imbang-y, 0px));
+}
+
+/*
+ * Menengahkan kotak ikon tidak selalu membuatnya TERLIHAT di tengah.
+ * place-items: center menyamakan kotak pembatas, padahal mata membaca titik
+ * berat tintanya. Keduanya berbeda jauh kalau ikonnya punya bagian kecil
+ * yang terpisah: tanda tambah pada ikon "tambah orang" melebarkan kotak ke
+ * kanan, sehingga sosok orangnya — yang justru dibaca mata — terdorong ke
+ * kiri.
+ *
+ * Angkanya bukan kira-kira. Tiap ikon dipotret pada 2x, piksel putihnya
+ * dihitung, lalu titik beratnya dibandingkan dengan titik tengah kotak.
+ * Hasilnya, dalam px CSS pada lencana 58px:
+ *
+ *   orang+tambah  -0,95 / -0,61   <- dikoreksi
+ *   panah masuk   +2,93 / -0,25
+ *   gembok        -0,52 / +1,08
+ *   surat+panah   +0,47 / -1,15
+ *
+ * Hanya yang pertama yang dikoreksi. Tiga sisanya sudah dibandingkan
+ * berdampingan pada perbesaran 6x — nol, separuh, dan penuh — dan
+ * koreksinya tidak terlihat memperbaiki apa pun; pada panah masuk, koreksi
+ * penuh malah membuat ikonnya jelas terdorong ke kiri karena batang
+ * panahnya yang panjang tetapi tipis menarik titik berat ke kanan.
+ * Jangan menambah koreksi baru tanpa membandingkan seperti itu dulu.
+ */
+.lencana-ikon.imbang-orang-tambah {
+    --imbang-x: .95px;
+    --imbang-y: .6px;
 }
 
 .judul-form {
@@ -1181,8 +1212,20 @@ img {
         border-radius: 0 0 30px 30px;
     }
 
+    /*
+     * Di bawah 1024px panel ini berubah jadi hero yang melebar penuh.
+     * Logo yang tetap menempel di kiri meninggalkan pita kosong panjang
+     * di sebelah kanannya, jadi di sini ia ditengahkan.
+     */
+    .merek-atas {
+        text-align: center;
+    }
+
     .merek-logo {
         width: 150px;
+        /* text-align saja tidak cukup: gambar di sini display:block,
+           jadi ia tetap menempel di kiri. */
+        margin-inline: auto;
     }
 
     .merek-judul {
