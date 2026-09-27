@@ -27,11 +27,17 @@ class PengaturanPin extends Component
 
     public string $pinKonfirmasi = '';
 
+    /** Dipakai saat mendaftarkan perangkat baru memakai PIN yang sudah ada. */
+    public string $pinPerangkat = '';
+
     /** Pesan hasil aksi terakhir, ditampilkan di dalam tab. */
     public string $pesan = '';
 
     /** 'sukses' atau 'galat'. */
     public string $jenisPesan = 'sukses';
+
+    /** Berapa kali PIN boleh salah saat mendaftarkan perangkat. */
+    private const BATAS_PIN_SALAH = 5;
 
     /** Berapa kali kata sandi boleh salah sebelum ditunda. */
     private const BATAS_SANDI_SALAH = 5;
@@ -56,6 +62,96 @@ class PengaturanPin extends Component
             'pinKonfirmasi.required' => 'Ulangi PIN baru Anda.',
             'pinKonfirmasi.same' => 'Ulangan PIN tidak sama dengan PIN baru.',
         ];
+    }
+
+    /**
+     * Apakah peramban ini sudah terdaftar sebagai perangkat PIN milik akun
+     * yang sedang dibuka. PIN berlaku per perangkat, sebab di halaman masuk
+     * akun dikenali dari ingatan perangkat, bukan dari isian.
+     */
+    public function perangkatSiap(): bool
+    {
+        $ingatan = IngatanMasuk::baca();
+
+        return $ingatan !== null
+            && $ingatan['mode'] === 'pin'
+            && $this->ingatanMilikSaya($ingatan, $this->pengguna());
+    }
+
+    /**
+     * Daftarkan perangkat yang sedang dipakai memakai PIN yang sudah ada.
+     * Inilah jalan untuk memakai PIN di HP setelah PIN dibuat di komputer:
+     * masuk sekali dengan kata sandi di HP, lalu masukkan PIN di sini.
+     */
+    public function aktifkanDiPerangkat(): void
+    {
+        $this->pesan = '';
+
+        $pengguna = $this->pengguna();
+
+        if (! $pengguna->pinAktif()) {
+            $this->jenisPesan = 'galat';
+            $this->pesan = 'PIN belum aktif pada akun ini. Buat PIN dulu di bawah.';
+
+            return;
+        }
+
+        $this->validateOnly('pinPerangkat', [
+            'pinPerangkat' => ['required', 'digits:' . $this->panjangPin()],
+        ], [
+            'pinPerangkat.required' => 'Masukkan PIN Anda.',
+            'pinPerangkat.digits' => 'PIN terdiri dari ' . $this->panjangPin() . ' angka.',
+        ]);
+
+        $kunci = 'pin-perangkat|' . $pengguna->getKey();
+
+        if (RateLimiter::tooManyAttempts($kunci, self::BATAS_PIN_SALAH)) {
+            throw ValidationException::withMessages([
+                'pinPerangkat' => 'Terlalu banyak PIN salah. Coba lagi dalam '
+                    . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.',
+            ]);
+        }
+
+        if (! $pengguna->pinCocok($this->pinPerangkat)) {
+            RateLimiter::hit($kunci, self::LAMA_KUNCI);
+
+            $this->reset('pinPerangkat');
+
+            throw ValidationException::withMessages([
+                'pinPerangkat' => 'PIN tidak cocok.',
+            ]);
+        }
+
+        RateLimiter::clear($kunci);
+
+        $ingatan = IngatanMasuk::baca();
+
+        IngatanMasuk::simpan(
+            (string) $pengguna->username,
+            'pin',
+            $this->ingatanMilikSaya($ingatan, $pengguna) ? $ingatan['ingat'] : false,
+            (int) $pengguna->getKey()
+        );
+
+        $this->reset('pinPerangkat');
+
+        $this->jenisPesan = 'sukses';
+        $this->pesan = 'Perangkat ini sekarang bisa dipakai masuk dengan PIN.';
+    }
+
+    /** Perangkat ini tidak lagi boleh memakai PIN (akun tetap berPIN). */
+    public function lupakanPerangkat(): void
+    {
+        $this->pesan = '';
+
+        $ingatan = IngatanMasuk::baca();
+
+        if ($this->ingatanMilikSaya($ingatan, $this->pengguna())) {
+            IngatanMasuk::lupakan();
+        }
+
+        $this->jenisPesan = 'sukses';
+        $this->pesan = 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.';
     }
 
     /** Aktifkan PIN, atau ganti PIN yang sudah ada. */

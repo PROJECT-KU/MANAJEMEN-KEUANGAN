@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Log;
+use App\Mail\PemberitahuanPinMail;
 use App\Mail\VerifikasiEmailMail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -193,6 +194,13 @@ class ProfilController extends Controller
     $emailBerubah = false;
 
     if ($request->has('email') && $request->input('email') !== $user->email) {
+      // Ganti email wajib disertai kata sandi saat ini. Tanpa ini, sesi yang
+      // terlanjur dibajak bisa memindahkan alamat email lalu memakai "lupa
+      // kata sandi" untuk mengambil alih akun sepenuhnya.
+      if (! $request->filled('kata_sandi_email') || ! Hash::check($request->input('kata_sandi_email'), $user->password)) {
+        return redirect()->back()->with('errorsandiemail', 'Kata sandi salah. Alamat email tidak jadi diganti.');
+      }
+
       $user->email = $request->input('email');
       $user->email_verified_at = null; // Reset email verification if email changes
       $emailBerubah = true;
@@ -255,27 +263,24 @@ class ProfilController extends Controller
       $user->bank = $request->input('bank');
     }
 
-    if ($request->has('status')) {
-      $user->status = $request->input('status');
-    }
-
-    if ($request->has('level')) {
-      $user->level = $request->input('level');
-    }
-
-    if ($request->has('company')) {
-      $user->company = $request->input('company');
-    }
-
-    if ($request->has('jenis')) {
-      $user->jenis = $request->input('jenis');
-    }
+    // status, level, company, dan jenis SENGAJA tidak diambil dari permintaan.
+    // Formulir ini milik pengguna sendiri; di layar isian itu memang dikunci,
+    // tetapi penguncian di layar bisa dilewati. Perubahan peran hanya boleh
+    // lewat halaman pengelolaan pengguna oleh admin/manager/CEO.
 
     if ($request->has('full_name')) {
+      $request->validate(['full_name' => 'nullable|string|max:255']);
       $user->full_name = $request->input('full_name');
     }
 
     if ($request->has('username')) {
+      // Username dipakai untuk masuk, jadi tidak boleh bentrok dengan akun lain.
+      $request->validate([
+        'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
+      ], [
+        'username.unique' => 'Username sudah dipakai akun lain.',
+      ]);
+
       $user->username = $request->input('username');
     }
 
@@ -310,6 +315,21 @@ class ProfilController extends Controller
     // Update password
     $user->password = Hash::make($request->input('password'));
     $user->save();
+
+    // PIN ikut dimatikan: kata sandi berganti berarti akses lama harus
+    // berhenti seluruhnya, termasuk jalan pintas enam angka di perangkat
+    // yang mungkin sudah tidak dipegang pemiliknya.
+    if ($user->pinAktif()) {
+      $user->matikanPin();
+
+      try {
+        Mail::to($user->email)->send(
+          new PemberitahuanPinMail($user, 'dinonaktifkan', (string) $request->ip())
+        );
+      } catch (\Throwable $e) {
+        Log::error('Gagal mengirim pemberitahuan PIN dimatikan: ' . $e->getMessage());
+      }
+    }
 
     // Token API ikut dicabut: kata sandi berganti berarti akses lama harus
     // berhenti, bukan hanya sesi peramban.

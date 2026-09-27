@@ -193,6 +193,11 @@
                 <button type="button" class="tombol-teks" wire:click="gantiMode('sandi')">
                     Lupa PIN? Masuk dengan kata sandi
                 </button>
+                <button type="button" class="tombol-teks tombol-teks-lembut" wire:click="mintaMatikanPin"
+                    wire:loading.attr="disabled" wire:target="mintaMatikanPin">
+                    <span wire:loading.remove wire:target="mintaMatikanPin">Matikan PIN lewat email</span>
+                    <span wire:loading wire:target="mintaMatikanPin">Mengirim…</span>
+                </button>
             </div>
         @else
             <div class="baris-sela">

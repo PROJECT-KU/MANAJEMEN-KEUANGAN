@@ -85,8 +85,39 @@
             </button>
         </form>
 
+        {{-- Tiga langkah: mengisi ruang kosong sekaligus menjelaskan apa yang
+             akan terjadi sesudah tombol ditekan. --}}
+        <ol class="langkah">
+            <li>
+                <span class="langkah-nomor">1</span>
+                <span>
+                    <strong>Masukkan email</strong>
+                    Alamat yang Anda pakai saat membuat akun.
+                </span>
+            </li>
+            <li>
+                <span class="langkah-nomor">2</span>
+                <span>
+                    <strong>Buka email dari kami</strong>
+                    Cek juga folder spam atau promosi bila belum terlihat.
+                </span>
+            </li>
+            <li>
+                <span class="langkah-nomor">3</span>
+                <span>
+                    <strong>Buat kata sandi baru</strong>
+                    Sesudah itu PIN masuk ikut dimatikan demi keamanan.
+                </span>
+            </li>
+        </ol>
+
         <p class="kaki-kartu">
             Ingat kata sandi Anda? <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
+            <br>
+            <span style="display:inline-block;margin-top:8px">
+                Emailnya sudah tidak bisa dibuka?
+                <a href="{{ route('ketentuan') }}#kontak" class="tautan">Hubungi admin</a>
+            </span>
         </p>
     @endif
 </div>

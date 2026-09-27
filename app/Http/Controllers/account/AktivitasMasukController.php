@@ -6,6 +6,10 @@ use App\AktivitasMasuk;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\RateLimiter;
+use App\User;
 
 /**
  * Menampilkan jejak percobaan masuk. Hanya untuk peran yang memegang
@@ -50,6 +54,54 @@ class AktivitasMasukController extends Controller
     }
 
     /** Unduh hasil saringan sebagai CSV, untuk keperluan penelusuran. */
+    /**
+     * Buka kunci akun yang tertahan pembatas percobaan masuk.
+     *
+     * Tanpa ini, pengelola hanya bisa menyuruh pemilik akun menunggu sampai
+     * masa kuncinya habis. Kunci per IP ikut dibersihkan memakai daftar IP
+     * yang tercatat pada percobaan gagal terakhir.
+     */
+    public function bukaKunci(Request $request)
+    {
+        $pengguna = Auth::user();
+
+        if (! in_array($pengguna->level, self::PERAN_BOLEH, true)) {
+            abort(403, 'Anda tidak berhak membuka kunci akun.');
+        }
+
+        $data = $request->validate([
+            'identitas' => ['required', 'string', 'max:150'],
+        ]);
+
+        $identitas = Str::lower(trim($data['identitas']));
+
+        RateLimiter::clear('masuk-akun|' . $identitas);
+
+        $ipTerakhir = AktivitasMasuk::where('identitas', $data['identitas'])
+            ->where('berhasil', false)
+            ->where('created_at', '>=', now()->subDays(2))
+            ->whereNotNull('ip')
+            ->distinct()
+            ->limit(50)
+            ->pluck('ip');
+
+        foreach ($ipTerakhir as $ip) {
+            RateLimiter::clear('masuk|' . $identitas . '|' . $ip);
+        }
+
+        $akun = User::where('username', $data['identitas'])
+            ->orWhere('email', $data['identitas'])
+            ->first();
+
+        if ($akun) {
+            RateLimiter::clear('masuk-pin|' . $akun->getKey());
+        }
+
+        Log::info('Kunci masuk dibuka oleh ' . $pengguna->username . ' untuk identitas ' . $data['identitas']);
+
+        return redirect()->back()->with('statusbukakunci', 'Kunci masuk untuk "' . $data['identitas'] . '" sudah dibuka.');
+    }
+
     public function ekspor(Request $request)
     {
         $pengguna = Auth::user();

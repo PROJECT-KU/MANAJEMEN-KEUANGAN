@@ -840,9 +840,61 @@ img {
     cursor: pointer;
 }
 
+.tombol-teks-lembut {
+    color: var(--dasar-500);
+    font-weight: 600;
+}
+
+.tombol-teks-lembut:hover {
+    color: var(--merah);
+}
+
 .tombol-teks:disabled {
     color: var(--dasar-500);
     cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------- tiga langkah */
+
+.langkah {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 18px 0 0;
+    border-top: 1px dashed rgba(148, 163, 184, .4);
+    display: grid;
+    gap: 14px;
+}
+
+.langkah li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.langkah-nomor {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    border-radius: 9px;
+    background: var(--aksen-lembut);
+    color: var(--aksen-teks);
+    font-size: .8rem;
+    font-weight: 800;
+}
+
+.langkah li span:last-child {
+    display: block;
+    font-size: .82rem;
+    line-height: 1.55;
+    color: var(--dasar-500);
+}
+
+.langkah li strong {
+    display: block;
+    font-size: .875rem;
+    color: var(--dasar-700);
 }
 
 /* ------------------------------------------------------------ kaki halaman */

@@ -31,6 +31,21 @@ class DaftarTest extends TestCase
         ], $ubah);
     }
 
+    /**
+     * Buka formulir pendaftaran lalu majukan waktu sejenak.
+     *
+     * Komponen menolak kiriman yang datang beberapa detik setelah formulir
+     * dibuka (perangkap bot), jadi tes harus meniru jeda mengetik manusia.
+     */
+    private function formulir()
+    {
+        $uji = Livewire::test(Daftar::class);
+
+        $this->travel(6)->seconds();
+
+        return $uji;
+    }
+
     public function test_halaman_daftar_bisa_dibuka_tamu(): void
     {
         $this->get('/register')->assertOk()->assertSeeLivewire(Daftar::class);
@@ -40,7 +55,7 @@ class DaftarTest extends TestCase
     {
         $isian = $this->isianSah();
 
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($isian)
             ->call('daftar')
             ->assertRedirect(route('login'));
@@ -63,7 +78,7 @@ class DaftarTest extends TestCase
             'password' => Hash::make('RahasiaUji2026'),
         ]);
 
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['username' => $adaDulu->username, 'email' => $adaDulu->email]))
             ->call('daftar')
             ->assertHasErrors(['username' => 'unique', 'email' => 'unique']);
@@ -71,7 +86,7 @@ class DaftarTest extends TestCase
 
     public function test_konfirmasi_kata_sandi_harus_cocok(): void
     {
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['kataSandiKonfirmasi' => 'BedaSekali2026']))
             ->call('daftar')
             ->assertHasErrors(['kataSandi' => 'same']);
@@ -81,7 +96,7 @@ class DaftarTest extends TestCase
     {
         // Aturannya kini Password::defaults() (minimal 8, ada huruf & angka,
         // dan tidak pernah bocor), jadi yang diperiksa keberadaan galatnya.
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['kataSandi' => 'pendek', 'kataSandiKonfirmasi' => 'pendek']))
             ->call('daftar')
             ->assertHasErrors('kataSandi');
@@ -89,7 +104,7 @@ class DaftarTest extends TestCase
 
     public function test_kata_sandi_tanpa_angka_ditolak(): void
     {
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['kataSandi' => 'hanyahurufsaja', 'kataSandiKonfirmasi' => 'hanyahurufsaja']))
             ->call('daftar')
             ->assertHasErrors('kataSandi');
@@ -97,7 +112,7 @@ class DaftarTest extends TestCase
 
     public function test_harus_menyetujui_ketentuan(): void
     {
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['setuju' => false]))
             ->call('daftar')
             ->assertHasErrors(['setuju' => 'accepted']);
@@ -105,7 +120,7 @@ class DaftarTest extends TestCase
 
     public function test_username_tidak_boleh_berisi_spasi(): void
     {
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['username' => 'ada spasi']))
             ->call('daftar')
             ->assertHasErrors(['username' => 'alpha_dash']);
@@ -116,7 +131,7 @@ class DaftarTest extends TestCase
         Mail::fake();
         $isian = $this->isianSah();
 
-        Livewire::test(Daftar::class)->set($isian)->call('daftar')->assertHasNoErrors();
+        $this->formulir()->set($isian)->call('daftar')->assertHasNoErrors();
 
         $pengguna = User::where('username', $isian['username'])->first();
         $this->assertNull($pengguna->email_verified_at, 'Akun baru belum boleh terverifikasi.');
@@ -132,7 +147,7 @@ class DaftarTest extends TestCase
     {
         Mail::fake();
         $isian = $this->isianSah();
-        Livewire::test(Daftar::class)->set($isian)->call('daftar');
+        $this->formulir()->set($isian)->call('daftar');
         $pengguna = User::where('username', $isian['username'])->first();
 
         $tautan = null;
@@ -153,7 +168,7 @@ class DaftarTest extends TestCase
     {
         Mail::fake();
         $isian = $this->isianSah();
-        Livewire::test(Daftar::class)->set($isian)->call('daftar');
+        $this->formulir()->set($isian)->call('daftar');
         $pengguna = User::where('username', $isian['username'])->first();
 
         $tautan = null;
@@ -174,7 +189,7 @@ class DaftarTest extends TestCase
         Mail::fake();
         $isian = $this->isianSah(['kodePos2' => 'https://spam.example']);
 
-        Livewire::test(Daftar::class)->set($isian)->call('daftar')->assertHasErrors('kodePos2');
+        $this->formulir()->set($isian)->call('daftar')->assertHasErrors('kodePos2');
 
         $this->assertNull(User::where('username', $isian['username'])->first());
         Mail::assertNothingSent();
@@ -186,10 +201,10 @@ class DaftarTest extends TestCase
         RateLimiter::clear('daftar|127.0.0.1');
 
         for ($i = 0; $i < 5; $i++) {
-            Livewire::test(Daftar::class)->set($this->isianSah())->call('daftar')->assertHasNoErrors();
+            $this->formulir()->set($this->isianSah())->call('daftar')->assertHasNoErrors();
         }
 
-        Livewire::test(Daftar::class)->set($this->isianSah())->call('daftar')->assertHasErrors('email');
+        $this->formulir()->set($this->isianSah())->call('daftar')->assertHasErrors('email');
 
         RateLimiter::clear('daftar|127.0.0.1');
     }
@@ -198,7 +213,7 @@ class DaftarTest extends TestCase
     {
         Mail::fake();
 
-        Livewire::test(Daftar::class)
+        $this->formulir()
             ->set($this->isianSah(['email' => 'tico@mailinator.com']))
             ->call('daftar')
             ->assertHasErrors('email');
@@ -210,12 +225,26 @@ class DaftarTest extends TestCase
     {
         // Aturan 'same' menempel pada kataSandi, sehingga galatnya dulu
         // bertahan di layar meski konfirmasinya sudah diperbaiki.
-        $uji = Livewire::test(Daftar::class)
+        $uji = $this->formulir()
             ->set('kataSandi', 'kataSandiKuat2026')
             ->set('kataSandiKonfirmasi', 'BedaSekali2026')
             ->assertHasErrors('kataSandi');
 
         $uji->set('kataSandiKonfirmasi', 'kataSandiKuat2026')
             ->assertHasNoErrors('kataSandi');
+    }
+
+    public function test_kiriman_terlalu_cepat_ditolak(): void
+    {
+        // Tanpa jeda: seperti skrip yang mengirim formulir seketika.
+        Livewire::test(Daftar::class)
+            ->set('namaLengkap', 'Robot Cepat')
+            ->set('username', 'robot_' . uniqid())
+            ->set('email', uniqid() . '@contoh.test')
+            ->set('kataSandi', 'SandiUji2026')
+            ->set('kataSandiKonfirmasi', 'SandiUji2026')
+            ->set('setuju', true)
+            ->call('daftar')
+            ->assertHasErrors('email');
     }
 }

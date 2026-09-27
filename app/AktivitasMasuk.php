@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Support\PenandaPerangkat;
 use Illuminate\Database\Eloquent\Model;
 
 class AktivitasMasuk extends Model
@@ -12,7 +13,7 @@ class AktivitasMasuk extends Model
     public const UPDATED_AT = null;
 
     protected $fillable = [
-        'user_id', 'identitas', 'berhasil', 'alasan', 'ip', 'peramban',
+        'user_id', 'identitas', 'berhasil', 'alasan', 'ip', 'peramban', 'perangkat',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class AktivitasMasuk extends Model
                 'alasan' => $alasan,
                 'ip' => request()->ip(),
                 'peramban' => mb_substr((string) request()->userAgent(), 0, 255),
+                'perangkat' => PenandaPerangkat::ambil(),
             ]);
         } catch (\Throwable $e) {
             report($e);

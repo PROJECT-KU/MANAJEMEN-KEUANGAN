@@ -4,14 +4,19 @@ namespace App\Livewire\Auth;
 
 use App\AktivitasMasuk;
 use App\Mail\PemberitahuanPinMail;
+use App\Mail\MasukPerangkatBaruMail;
 use App\Mail\PeringatanKeamananMail;
+use App\Mail\TautanMatikanPinMail;
 use App\Support\IngatanMasuk;
+use App\Support\PenandaPerangkat;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -189,6 +194,49 @@ class Masuk extends Component
         $this->resetValidation();
     }
 
+    /**
+     * Lupa PIN: kirim tautan ke email pemilik akun untuk mematikan PIN.
+     * Tautannya tidak bisa dipakai masuk, hanya mencabut jalan pintas.
+     */
+    public function mintaMatikanPin(): void
+    {
+        $pengguna = $this->penggunaPerangkat();
+
+        if ($pengguna === null || ! $pengguna->pinAktif()) {
+            $this->mode = 'sandi';
+
+            session()->flash('error', 'PIN tidak aktif di perangkat ini. Silakan masuk dengan kata sandi.');
+
+            return;
+        }
+
+        $kunci = 'matikan-pin|' . $pengguna->getKey();
+
+        if (RateLimiter::tooManyAttempts($kunci, 3)) {
+            throw ValidationException::withMessages([
+                'pin' => 'Permintaan terlalu sering. Coba lagi dalam '
+                    . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.',
+            ]);
+        }
+
+        RateLimiter::hit($kunci, 3600);
+
+        $tautan = URL::temporarySignedRoute('pin.matikan', now()->addMinutes(30), [
+            'id' => $pengguna->getKey(),
+            'hash' => sha1($pengguna->getEmailForVerification()),
+        ]);
+
+        try {
+            Mail::to($pengguna->email)->send(new TautanMatikanPinMail($pengguna, $tautan, 30));
+
+            session()->flash('success', 'Tautan untuk mematikan PIN sudah dikirim ke email akun ini. Tautannya berlaku 30 menit.');
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim tautan matikan PIN: ' . $e->getMessage());
+
+            session()->flash('error', 'Email gagal dikirim. Silakan masuk dengan kata sandi, lalu ubah PIN dari halaman profil.');
+        }
+    }
+
     public function masuk()
     {
         $this->validate();
@@ -227,9 +275,12 @@ class Masuk extends Component
         $kolom = $this->kolomIdentitas($this->identitas);
         $pengguna = User::where($kolom, $this->identitas)->first();
 
-        $this->pastikanAkunAktif($pengguna);
+        // Kata sandi diperiksa lebih dulu. Kalau urutannya dibalik, pesan
+        // "akun dinonaktifkan" akan memberi tahu orang asing bahwa username
+        // itu memang ada.
+        $cocok = $pengguna && Hash::check($this->kataSandi, (string) $pengguna->password);
 
-        if (! Auth::attempt([$kolom => $this->identitas, 'password' => $this->kataSandi], $this->ingatSaya)) {
+        if (! $cocok) {
             RateLimiter::hit($kunci, self::LAMA_KUNCI);
             RateLimiter::hit($kunciAkun, self::LAMA_KUNCI_AKUN);
 
@@ -242,10 +293,25 @@ class Masuk extends Component
             ]);
         }
 
+        $this->pastikanAkunAktif($pengguna);
+
+        // Ikut menyegarkan sidik kata sandi bila tingkat pengacakannya berubah.
+        if (Hash::needsRehash((string) $pengguna->password)) {
+            $pengguna->forceFill(['password' => Hash::make($this->kataSandi)])->save();
+        }
+
+        $perangkatBaru = $this->perangkatBaru($pengguna);
+
+        Auth::login($pengguna, $this->ingatSaya);
+
         RateLimiter::clear($kunci);
         RateLimiter::clear($kunciAkun);
 
-        AktivitasMasuk::catat(Auth::user(), $this->identitas, true);
+        AktivitasMasuk::catat($pengguna, $this->identitas, true);
+
+        if ($perangkatBaru) {
+            $this->beriTahuPerangkatBaru($pengguna, 'kata sandi');
+        }
 
         return $this->selesaikanMasuk('sandi');
     }
@@ -319,9 +385,15 @@ class Masuk extends Component
 
         RateLimiter::clear($kunciPin);
 
+        $perangkatBaru = $this->perangkatBaru($pengguna);
+
         Auth::login($pengguna, $ingatan['ingat']);
 
         AktivitasMasuk::catat($pengguna, $this->identitas, true, 'masuk dengan PIN');
+
+        if ($perangkatBaru) {
+            $this->beriTahuPerangkatBaru($pengguna, 'PIN');
+        }
 
         return $this->selesaikanMasuk('pin');
     }
@@ -485,6 +557,39 @@ class Masuk extends Component
             );
         } catch (\Throwable $e) {
             Log::error('Gagal mengirim peringatan keamanan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Peramban ini belum pernah dipakai masuk ke akun tersebut. Akun yang
+     * belum pernah dipakai masuk sama sekali tidak dihitung, supaya orang
+     * yang baru mendaftar tidak langsung dikirimi peringatan.
+     */
+    private function perangkatBaru(User $pengguna): bool
+    {
+        $berhasilSebelumnya = AktivitasMasuk::where('user_id', $pengguna->getKey())
+            ->where('berhasil', true);
+
+        if ((clone $berhasilSebelumnya)->count() === 0) {
+            return false;
+        }
+
+        return ! (clone $berhasilSebelumnya)
+            ->where('perangkat', PenandaPerangkat::ambil())
+            ->exists();
+    }
+
+    private function beriTahuPerangkatBaru(User $pengguna, string $cara): void
+    {
+        try {
+            Mail::to($pengguna->email)->send(new MasukPerangkatBaruMail(
+                $pengguna,
+                (string) request()->ip(),
+                mb_substr((string) request()->userAgent(), 0, 180),
+                $cara
+            ));
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim pemberitahuan perangkat baru: ' . $e->getMessage());
         }
     }
 

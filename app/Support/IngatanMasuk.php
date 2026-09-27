@@ -25,12 +25,33 @@ class IngatanMasuk
     /** @return array{identitas:string,mode:string,ingat:bool,uid:int|null}|null */
     public static function baca(): ?array
     {
+        // Kue yang baru diantre pada permintaan ini didahulukan. Tanpa ini,
+        // layar yang baru saja mendaftarkan perangkat masih melaporkan
+        // keadaan lama sampai halamannya dimuat ulang.
+        $antre = Cookie::queued(self::NAMA);
+
+        if ($antre !== null) {
+            $nilai = $antre->getValue();
+
+            if (! is_string($nilai) || $nilai === '') {
+                return null;
+            }
+
+            return self::uraikan($nilai);
+        }
+
         $isi = Cookie::get(self::NAMA);
 
         if (! is_string($isi) || $isi === '') {
             return null;
         }
 
+        return self::uraikan($isi);
+    }
+
+    /** @return array{identitas:string,mode:string,ingat:bool,uid:int|null}|null */
+    private static function uraikan(string $isi): ?array
+    {
         $data = json_decode($isi, true);
 
         if (! is_array($data) || ! isset($data['identitas']) || ! is_string($data['identitas'])) {

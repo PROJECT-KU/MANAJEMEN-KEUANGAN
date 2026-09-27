@@ -51,6 +51,16 @@ class Daftar extends Component
     /** Lama tautan verifikasi berlaku (jam). */
     private const JAM_VERIFIKASI = 48;
 
+    /** Ambang paling cepat manusia bisa mengisi formulir ini (detik). */
+    private const DETIK_TERCEPAT = 4;
+
+    public function mount(): void
+    {
+        // Waktu buka disimpan di sesi, bukan di properti komponen, supaya
+        // tidak bisa disetel ulang dari sisi peramban.
+        session(['daftar_dibuka' => now()->timestamp]);
+    }
+
     protected function rules(): array
     {
         return [
@@ -115,6 +125,19 @@ class Daftar extends Component
         }
 
         $data = $this->validate();
+
+        // Perangkap waktu: formulir yang terkirim beberapa milidetik setelah
+        // dibuka hampir pasti bukan diketik manusia. Honeypot menangkap
+        // pengisi otomatis, bagian ini menangkap skrip yang mengirim langsung.
+        $dibuka = (int) session('daftar_dibuka', 0);
+
+        if ($dibuka > 0 && (now()->timestamp - $dibuka) < self::DETIK_TERCEPAT) {
+            RateLimiter::hit($kunci, 3600);
+
+            throw ValidationException::withMessages([
+                'email' => 'Formulir terkirim terlalu cepat. Periksa kembali isiannya, lalu kirim sekali lagi.',
+            ]);
+        }
 
         RateLimiter::hit($kunci, 3600);
 

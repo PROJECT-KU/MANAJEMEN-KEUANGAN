@@ -15,6 +15,37 @@ use Illuminate\Support\Facades\Hash;
 class PenggunaController extends Controller
 {
     /**
+     * Peran yang boleh mengelola akun orang lain. Di luar peran ini, seseorang
+     * hanya boleh menyentuh akunnya sendiri.
+     */
+    private const PERAN_PENGELOLA = ['admin', 'manager', 'ceo'];
+
+    private function pengelola(): bool
+    {
+        return in_array((string) Auth::user()?->level, self::PERAN_PENGELOLA, true);
+    }
+
+    /** Halaman/aksi pengelolaan akun: hanya untuk admin, manager, dan CEO. */
+    private function pastikanPengelola(): void
+    {
+        abort_unless($this->pengelola(), 403, 'Anda tidak berhak mengelola data pengguna.');
+    }
+
+    /**
+     * Aksi yang boleh dikerjakan pemilik akun sendiri ATAU pengelola.
+     * Tanpa penjagaan ini, siapa pun yang sudah masuk bisa mengirim nomor id
+     * milik orang lain dan mengubah akun itu.
+     */
+    private function pastikanBoleh($id): void
+    {
+        if ((int) $id === (int) Auth::id()) {
+            return;
+        }
+
+        $this->pastikanPengelola();
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -23,6 +54,8 @@ class PenggunaController extends Controller
     // <!--================== TAMPILAN DATA ==================-->
     public function index()
     {
+        $this->pastikanPengelola();
+
         $user = Auth::user();
 
         if ($user->level == 'manager' || $user->level == 'ceo') {
@@ -46,6 +79,8 @@ class PenggunaController extends Controller
     // <!--================== SEARCH ==================-->
     public function search(Request $request)
     {
+        $this->pastikanPengelola();
+
         $search = $request->get('q');
         $user = Auth::user();
 
@@ -82,11 +117,15 @@ class PenggunaController extends Controller
     // <!--================== CREATE DATA ==================-->
     public function create()
     {
+        $this->pastikanPengelola();
+
         return view('account.pengguna.create');
     }
 
     public function store(Request $request)
     {
+        $this->pastikanPengelola();
+
         $validator = Validator::make($request->all(), [
             'full_name' => 'required',
             'company' => 'required',
@@ -161,6 +200,8 @@ class PenggunaController extends Controller
     // <!--================== UPDATE DATA ==================-->
     public function edit($id)
     {
+        $this->pastikanBoleh($id);
+
         $user = User::findOrFail($id);
 
         // Calculate work duration if email is verified and status is active
@@ -195,6 +236,8 @@ class PenggunaController extends Controller
     // <!--================== DETAIL DATA ==================-->
     public function detail($id)
     {
+        $this->pastikanBoleh($id);
+
         $user = User::findOrFail($id);
 
         return view('account.pengguna.detail', compact('user'));
@@ -204,6 +247,8 @@ class PenggunaController extends Controller
     // <!--================== UPDATE FOTO PROFIL ==================-->
     public function updatePhoto(Request $request, $id)
     {
+        $this->pastikanBoleh($id);
+
         $user = User::find($id);
 
         // Menghapus foto lama jika ada
@@ -227,7 +272,9 @@ class PenggunaController extends Controller
     // <!--================== UPDATE DATA DIRI ==================-->
     public function updatediri(Request $request, $id)
     {
-        $user = User::find($id);
+        $this->pastikanBoleh($id);
+
+        $user = User::findOrFail($id);
 
         // Validate input data
         try {
@@ -249,6 +296,15 @@ class PenggunaController extends Controller
 
         // Update email only if provided and different from the current email
         if ($request->has('email') && $request->input('email') !== $user->email) {
+            // Mengganti email akun sendiri wajib disertai kata sandi saat ini.
+            // Tanpa ini, sesi yang terlanjur dibajak bisa memindahkan alamat
+            // email lalu memakai "lupa kata sandi" untuk mengambil alih akun.
+            if (! $this->pengelola()) {
+                if (! $request->filled('kata_sandi_email') || ! Hash::check($request->input('kata_sandi_email'), $user->password)) {
+                    return redirect()->back()->with('errorsandiemail', 'Kata sandi salah. Alamat email tidak jadi diganti.');
+                }
+            }
+
             $user->email = $request->input('email');
             $user->email_verified_at = null; // Reset email verification if email changes
         }
@@ -273,18 +329,34 @@ class PenggunaController extends Controller
     // <!--================== UPDATE DATA DIRI PENGGUNA ==================-->
     public function update(Request $request, $id)
     {
+        $this->pastikanBoleh($id);
+
         $user = User::findOrFail($id);
+
+        $request->validate([
+            'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
+            'full_name' => 'nullable|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+        ], [
+            'username.unique' => 'Username sudah dipakai akun lain.',
+        ]);
 
         // Use old data if no new input is provided
         $user->full_name = $request->input('full_name') ?? $user->full_name;
         $user->username = $request->input('username') ?? $user->username;
-        $user->company = $request->input('company') ?? $user->company;
-        $user->level = $request->input('level') ?? $user->level;
-        $user->status = $request->input('status') ?? $user->status;
-        $user->jenis = $request->input('jenis') ?? $user->jenis;
         $user->tanggal_lahir = $request->input('tanggal_lahir') ?? $user->tanggal_lahir;
         $user->norek = $request->input('norek') ?? $user->norek;
         $user->bank = $request->input('bank') ?? $user->bank;
+
+        // Peran, status, perusahaan, dan jenis akun menentukan hak akses, jadi
+        // hanya pengelola yang boleh mengubahnya. Tanpa pembatas ini, siapa pun
+        // yang sudah masuk bisa mengangkat dirinya sendiri menjadi manager.
+        if ($this->pengelola()) {
+            $user->company = $request->input('company') ?? $user->company;
+            $user->level = $request->input('level') ?? $user->level;
+            $user->status = $request->input('status') ?? $user->status;
+            $user->jenis = $request->input('jenis') ?? $user->jenis;
+        }
 
         // Save the updated user data
         $user->save();
@@ -297,6 +369,9 @@ class PenggunaController extends Controller
     // <!--================== VERIFIKASI EMAIL ==================-->
     public function verifyEmail($id)
     {
+        // Menandai email terverifikasi tanpa bukti apa pun: hanya pengelola.
+        $this->pastikanPengelola();
+
         $user = User::findOrFail($id);
         $user->email_verified_at = now(); // Mark email as verified
         $user->status = 'active';
@@ -311,6 +386,8 @@ class PenggunaController extends Controller
     // <!--================== DELETE DATA ==================-->
     public function destroy($id)
     {
+        $this->pastikanPengelola();
+
         $user = User::find($id);
 
         if (!$user) {
@@ -337,12 +414,16 @@ class PenggunaController extends Controller
     // <!--================== UPDATE COMPANY ==================-->
     public function company($id)
     {
+        $this->pastikanPengelola();
+
         $user = User::findOrFail($id);
 
         return view('account.company.index', compact('user'));
     }
     public function updateCompany(Request $request, $id)
     {
+        $this->pastikanPengelola();
+
         // Find the user by ID
         $user = User::findOrFail($id);
 

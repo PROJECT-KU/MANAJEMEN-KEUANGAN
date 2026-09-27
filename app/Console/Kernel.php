@@ -19,6 +19,10 @@ class Kernel extends ConsoleKernel
 
         // Pangkas jejak masuk supaya tabelnya tidak tumbuh tanpa batas.
         $schedule->command('aktivitas:pangkas')->dailyAt('02:30');
+
+        // Ingatkan sekali akun yang mendaftar dua hari lalu tapi emailnya
+        // belum diverifikasi.
+        $schedule->command('verifikasi:ingatkan')->dailyAt('09:00');
     }
 
     protected function commands()

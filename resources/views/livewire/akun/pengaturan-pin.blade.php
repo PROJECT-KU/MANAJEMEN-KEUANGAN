@@ -31,6 +31,53 @@
         </span>
     </div>
 
+    {{-- Perangkat: PIN dikenali per peramban, jadi HP perlu didaftarkan sendiri --}}
+    @if ($pengguna->pinAktif())
+        @if ($this->perangkatSiap())
+            <div class="d-flex align-items-center mb-4 p-3"
+                style="border-radius: 16px; background: #ecfdf5; border: 1px solid #a7f3d0;">
+                <i class="fas fa-check-circle text-success fa-lg mr-3"></i>
+                <div class="flex-grow-1">
+                    <div class="font-weight-800 text-dark">Perangkat ini sudah terdaftar</div>
+                    <div class="small text-muted">
+                        Di peramban ini, halaman masuk langsung meminta PIN — tanpa username dan kata sandi.
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold"
+                    style="border-radius: 12px;" wire:click="lupakanPerangkat">
+                    Lupakan perangkat
+                </button>
+            </div>
+        @else
+            <div class="p-3 mb-4" style="border-radius: 16px; background: #eff6ff; border: 1px solid #bfdbfe;">
+                <div class="d-flex align-items-start mb-3">
+                    <i class="fas fa-mobile-alt text-primary fa-lg mr-3 mt-1"></i>
+                    <div>
+                        <div class="font-weight-800 text-dark">Pakai PIN di perangkat ini juga</div>
+                        <div class="small text-muted">
+                            PIN Anda sudah aktif, tetapi peramban ini belum terdaftar. Masukkan PIN Anda sekali di
+                            sini, lalu halaman masuk di perangkat ini cukup meminta PIN.
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-column flex-sm-row" style="gap: 10px;">
+                    <input type="password"
+                        class="form-control-modern pin-isian flex-grow-1 @error('pinPerangkat') is-invalid @enderror"
+                        wire:model="pinPerangkat" inputmode="numeric" maxlength="{{ $panjangPin }}"
+                        autocomplete="off" placeholder="{{ str_repeat('•', $panjangPin) }}"
+                        oninput="this.value = this.value.replace(/\D/g, '')">
+                    <button type="button" class="btn-modern btn-gradient px-4" wire:click="aktifkanDiPerangkat"
+                        wire:loading.attr="disabled">
+                        <i class="fas fa-plus-circle mr-2"></i> DAFTARKAN
+                    </button>
+                </div>
+                @error('pinPerangkat')
+                    <div class="text-danger small font-weight-bold mt-2">{{ $message }}</div>
+                @enderror
+            </div>
+        @endif
+    @endif
+
     <form wire:submit="simpan">
         <div class="row">
             <div class="col-md-12 form-group">

@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts.account')
 @extends('layouts.loader')
 
@@ -13,6 +14,10 @@ Jejak Aktivitas Masuk | MIS
         </div>
 
         <div class="section-body">
+            @if (session('statusbukakunci'))
+                <div class="alert alert-success">{{ session('statusbukakunci') }}</div>
+            @endif
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="card card-statistic-1">
@@ -76,6 +81,7 @@ Jejak Aktivitas Masuk | MIS
                                     <th>Status</th>
                                     <th>Alasan</th>
                                     <th>IP</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,10 +99,25 @@ Jejak Aktivitas Masuk | MIS
                                         </td>
                                         <td>{{ $baris->alasan ?? '-' }}</td>
                                         <td>{{ $baris->ip }}</td>
+                                        <td class="text-center">
+                                            @if (! $baris->berhasil && Str::contains((string) $baris->alasan, 'dikunci'))
+                                                <form action="{{ route('account.aktivitas-masuk.buka-kunci') }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="identitas" value="{{ $baris->identitas }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                        title="Hapus penguncian sementara untuk identitas ini">
+                                                        Buka kunci
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">Belum ada catatan.</td>
+                                        <td colspan="7" class="text-center">Belum ada catatan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

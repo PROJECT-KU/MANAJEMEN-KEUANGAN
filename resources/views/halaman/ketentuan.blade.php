@@ -76,7 +76,7 @@
             kewajiban pencatatan kami.
         </p>
 
-        <h3>7. Kontak</h3>
+        <h3 id="kontak">7. Kontak</h3>
         <p>
             Rumah Scopus Foundation — <a href="mailto:{{ config('mail.from.address') }}" class="tautan">{{ config('mail.from.address') }}</a>
         </p>

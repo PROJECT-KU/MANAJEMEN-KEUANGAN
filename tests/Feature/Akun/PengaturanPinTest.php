@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
+use Livewire\Features\SupportTesting\Testable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -285,5 +286,73 @@ class PengaturanPinTest extends TestCase
             ->assertHasErrors('kataSandi');
 
         $this->assertFalse($pengguna->refresh()->pinAktif());
+    }
+
+    public function test_pin_dari_komputer_bisa_didaftarkan_di_perangkat_lain(): void
+    {
+        // Ini jawaban untuk "PIN dibuat di komputer, mau dipakai di HP":
+        // masuk sekali dengan kata sandi di perangkat baru, lalu masukkan PIN
+        // yang sudah ada di sini.
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('482913');
+        $this->actingAs($pengguna);
+
+        $uji = Livewire::test(PengaturanPin::class);
+
+        $this->assertFalse($uji->instance()->perangkatSiap(), 'Perangkat baru belum boleh langsung memakai PIN.');
+
+        $uji->set('pinPerangkat', '482913')
+            ->call('aktifkanDiPerangkat')
+            ->assertHasNoErrors();
+
+        $kue = Cookie::queued(IngatanMasuk::NAMA);
+
+        $this->assertNotNull($kue);
+
+        $isi = json_decode((string) $kue->getValue(), true);
+
+        $this->assertSame('pin', $isi['mode']);
+        $this->assertSame($pengguna->getKey(), $isi['uid']);
+    }
+
+    public function test_daftar_perangkat_menolak_pin_yang_salah(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('482913');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('pin-perangkat|' . $pengguna->getKey());
+
+        Livewire::test(PengaturanPin::class)
+            ->set('pinPerangkat', '111333')
+            ->call('aktifkanDiPerangkat')
+            ->assertHasErrors('pinPerangkat');
+
+        $this->assertNull(Cookie::queued(IngatanMasuk::NAMA));
+    }
+
+    public function test_perangkat_bisa_dilupakan_tanpa_mematikan_pin(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('482913');
+        $this->actingAs($pengguna);
+
+        // Kue dikirimkan seperti yang dilakukan peramban pada kunjungan
+        // berikutnya; harness Livewire tidak mengembalikan kue yang baru
+        // diantre ke permintaan setelahnya.
+        Testable::create(PengaturanPin::class, [], [], [
+            IngatanMasuk::NAMA => json_encode([
+                'identitas' => $pengguna->username,
+                'mode' => 'pin',
+                'ingat' => false,
+                'uid' => $pengguna->getKey(),
+            ]),
+        ])->call('lupakanPerangkat');
+
+        $kue = Cookie::queued(IngatanMasuk::NAMA);
+
+        $this->assertNotNull($kue);
+        $this->assertNull($kue->getValue(), 'Ingatan perangkat harus dihapus.');
+        $this->assertTrue($pengguna->refresh()->pinAktif(), 'PIN akun harus tetap aktif.');
     }
 }

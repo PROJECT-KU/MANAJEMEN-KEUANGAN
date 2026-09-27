@@ -50,6 +50,14 @@ class AppServiceProvider extends ServiceProvider
             );
         }
 
+        // Kue sesi tanpa penanda Secure ikut terkirim lewat HTTP biasa, jadi
+        // bisa dibaca di jaringan yang tidak tepercaya.
+        if ($this->app->environment('production') && ! config('session.secure')) {
+            \Illuminate\Support\Facades\Log::warning(
+                'SESSION_SECURE_COOKIE belum dinyalakan di produksi; kue sesi bisa terkirim tanpa HTTPS.'
+            );
+        }
+
         Auth::guard('web')->setRememberDuration(
             (int) config('auth.ingat_saya_menit', 60 * 24 * 30)
         );

@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use App\Mail\PasswordResetSuccessMail;
+use App\Mail\PemberitahuanPinMail;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -88,6 +89,16 @@ class AturUlangPassword extends Component
                 // bisa dipakai walau kata sandinya sudah diganti.
                 $this->cabutTokenApi($pengguna);
 
+                // PIN ikut dimatikan. Kalau tidak, orang yang menguasai
+                // perangkat lama tetap bisa masuk dengan enam angka walaupun
+                // pemiliknya sudah buru-buru mengganti kata sandi.
+                $pinTadinyaAktif = $pengguna->pinAktif();
+
+                if ($pinTadinyaAktif) {
+                    $pengguna->matikanPin();
+                    $this->beriTahuPinMati($pengguna);
+                }
+
                 event(new PasswordReset($pengguna));
 
                 try {
@@ -125,6 +136,18 @@ class AturUlangPassword extends Component
     public function render()
     {
         return view('livewire.auth.atur-ulang-password');
+    }
+
+    /** Beri tahu pemilik akun bahwa PIN ikut dimatikan. */
+    private function beriTahuPinMati($pengguna): void
+    {
+        try {
+            Mail::to($pengguna->email)->send(
+                new PemberitahuanPinMail($pengguna, 'dinonaktifkan', (string) request()->ip())
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim pemberitahuan PIN dimatikan: ' . $e->getMessage());
+        }
     }
 
     /** Cabut seluruh token API milik pengguna (Passport). */

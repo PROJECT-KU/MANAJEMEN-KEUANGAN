@@ -299,9 +299,17 @@ Profil | MIS
             <h5 class="font-weight-800 mb-4 text-primary">Update Email</h5>
             <form action="{{ route('account.pengguna.update.datadiri', Auth::user()->id) }}" method="POST">
               @csrf
-              <div class="form-group mb-4">
+              <div class="form-group mb-3">
                 <label>Masukkan Email Terbaru</label>
                 <input type="email" class="form-control-modern" name="email" value="{{ Auth::user()->email }}" required>
+              </div>
+              <div class="form-group mb-3">
+                <label>Kata Sandi Akun Anda</label>
+                <input type="password" class="form-control-modern" name="kata_sandi_email" placeholder="••••••••"
+                  autocomplete="current-password" required>
+                <small class="text-muted">
+                  Diminta karena alamat email dipakai untuk memulihkan akun. Email baru wajib diverifikasi ulang.
+                </small>
               </div>
               <button type="submit" class="btn-modern btn-gradient w-100">Simpan Email</button>
             </form>
@@ -389,6 +397,13 @@ Profil | MIS
                     id="pills-pin-tab" data-toggle="pill" href="#pin" role="tab"
                     style="border-radius: 14px; padding: 12px; transition: 0.3s;">
                     <i class="fas fa-mobile-alt mr-2"></i> PIN Masuk
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link font-weight-bold d-flex align-items-center justify-content-center"
+                    id="pills-keamanan-tab" data-toggle="pill" href="#keamanan" role="tab"
+                    style="border-radius: 14px; padding: 12px; transition: 0.3s;">
+                    <i class="fas fa-user-shield mr-2"></i> Keamanan
                   </a>
                 </li>
               </ul>
@@ -631,6 +646,12 @@ Profil | MIS
                   <livewire:akun.pengaturan-pin />
                 </div>
                 <!--================== END TAB PIN MASUK ==================-->
+
+                <!--================== TAB 4: KEAMANAN AKUN ==================-->
+                <div class="tab-pane fade" id="keamanan" role="tabpanel">
+                  <livewire:akun.keamanan-akun />
+                </div>
+                <!--================== END TAB KEAMANAN ==================-->
 
               </div>
             </div>
@@ -1138,6 +1159,16 @@ Profil | MIS
       timerProgressBar: true
     }).then(() => {
       location.reload(); // Automatically refresh the page after the alert
+    });
+    @endif
+
+    @if(session('errorsandiemail'))
+    Swal.fire({
+      icon: 'error',
+      title: 'Kata sandi salah',
+      text: '{{ session("errorsandiemail") }}',
+      showConfirmButton: true,
+      confirmButtonColor: '#6366f1'
     });
     @endif
   });

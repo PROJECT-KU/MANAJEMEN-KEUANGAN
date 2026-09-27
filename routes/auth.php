@@ -13,6 +13,7 @@
 */
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\MatikanPinController;
 use App\Http\Controllers\Auth\VerifikasiEmailController;
 use App\Livewire\Auth\AturUlangPassword;
 use App\Livewire\Auth\Daftar;
@@ -40,6 +41,12 @@ Route::redirect('/K4rY4w4N', '/login')->name('login.karyawan');
 Route::get('/verifikasi-email/{id}/{hash}', VerifikasiEmailController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+// Matikan PIN lewat tautan dari email, untuk yang lupa PIN-nya. Tautan ini
+// hanya mencabut jalan pintas, tidak pernah bisa dipakai untuk masuk.
+Route::get('/matikan-pin/{id}/{hash}', MatikanPinController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('pin.matikan');
 
 // Kirim ulang tautan verifikasi. Sengaja di luar grup 'guest' supaya pengguna
 // yang sudah masuk tapi belum terverifikasi juga bisa memakainya.
