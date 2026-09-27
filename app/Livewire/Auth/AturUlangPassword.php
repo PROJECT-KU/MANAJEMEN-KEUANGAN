@@ -1,0 +1,178 @@
+<?php
+
+namespace App\Livewire\Auth;
+
+use App\Mail\PasswordResetSuccessMail;
+use App\Mail\PemberitahuanPinMail;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as AturanKataSandi;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+
+#[Layout('components.layouts.auth', [
+    'judulHalaman' => 'Atur Ulang Kata Sandi',
+    'kelasHalaman' => 'halaman-atur-ulang',
+    'warnaTema' => '#7c3aed',
+    'merekJudul' => 'Buat kata sandi baru.',
+    'merekTeks' => 'Tentukan kata sandi baru untuk akun Anda, lalu masuk seperti biasa.',
+    'poinMerek' => [
+        ['ikon' => 'perisai', 'judul' => 'Tautan terverifikasi', 'teks' => 'Hanya berlaku untuk akun Anda.'],
+        ['ikon' => 'kunci', 'judul' => 'Kata sandi baru', 'teks' => 'Minimal 8 karakter, ada huruf dan angka.'],
+        ['ikon' => 'jejak', 'judul' => 'Sesi lama berakhir', 'teks' => 'Perangkat lain otomatis dikeluarkan.'],
+    ],
+])]
+class AturUlangPassword extends Component
+{
+    public string $email = '';
+
+    public string $token = '';
+
+    public string $kataSandi = '';
+
+    public string $kataSandiKonfirmasi = '';
+
+    public function mount(?string $token = null): void
+    {
+        // Token datang dari parameter rute, email dari query string tautan.
+        $this->token = $token ?? '';
+        $this->email = (string) request()->query('email', '');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'email' => ['required', 'string', 'email:rfc', 'max:150'],
+            'token' => ['required', 'string'],
+            'kataSandi' => ['required', 'string', 'max:72', AturanKataSandi::defaults(), 'same:kataSandiKonfirmasi'],
+            'kataSandiKonfirmasi' => ['required', 'string'],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'email.required' => 'Alamat email tidak terbaca dari tautan.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'token.required' => 'Tautan tidak lengkap. Silakan minta tautan baru.',
+            'kataSandi.max' => 'Kata sandi maksimal 72 karakter.',
+            'kataSandi.required' => 'Masukkan kata sandi baru.',
+            'kataSandi.min' => 'Kata sandi minimal 8 karakter.',
+            'kataSandi.letters' => 'Kata sandi harus memuat huruf.',
+            'kataSandi.numbers' => 'Kata sandi harus memuat angka.',
+            'kataSandi.uncompromised' => 'Kata sandi ini pernah bocor di internet. Pilih yang lain.',
+            'kataSandi.same' => 'Konfirmasi kata sandi tidak cocok.',
+            'kataSandiKonfirmasi.required' => 'Ulangi kata sandi baru Anda.',
+        ];
+    }
+
+    public function simpan()
+    {
+        // Sama seperti pada pendaftaran: properti publik ikut tersimpan di
+        // wire:snapshot, jadi kata sandi dibersihkan pada tiap kegagalan.
+        try {
+            $this->validate();
+        } catch (ValidationException $e) {
+            $this->reset('kataSandi', 'kataSandiKonfirmasi');
+
+            throw $e;
+        }
+
+        // Password broker memeriksa token (tersimpan sebagai hash), masa
+        // berlakunya, lalu menghapusnya setelah dipakai.
+        $hasil = Password::reset(
+            [
+                'email' => $this->email,
+                'password' => $this->kataSandi,
+                'password_confirmation' => $this->kataSandiKonfirmasi,
+                'token' => $this->token,
+            ],
+            function ($pengguna, $kataSandiBaru) {
+                $pengguna->forceFill([
+                    'password' => bcrypt($kataSandiBaru),
+                    'remember_token' => Str::random(60),
+                    'reset_token' => null,
+                ])->save();
+
+                // Sesi peramban sudah berakhir sendiri lewat AuthenticateSession,
+                // tetapi token API tidak. Tanpa ini, token yang sudah bocor tetap
+                // bisa dipakai walau kata sandinya sudah diganti.
+                $this->cabutTokenApi($pengguna);
+
+                // PIN ikut dimatikan. Kalau tidak, orang yang menguasai
+                // perangkat lama tetap bisa masuk dengan enam angka walaupun
+                // pemiliknya sudah buru-buru mengganti kata sandi.
+                $pinTadinyaAktif = $pengguna->pinAktif();
+
+                if ($pinTadinyaAktif) {
+                    $pengguna->matikanPin();
+                    $this->beriTahuPinMati($pengguna);
+                }
+
+                event(new PasswordReset($pengguna));
+
+                try {
+                    Mail::to($pengguna->email)->send(
+                        new PasswordResetSuccessMail($pengguna, 'Rumah Scopus Foundation')
+                    );
+                } catch (\Throwable $e) {
+                    // Kata sandi sudah terganti; surat pemberitahuan hanya
+                    // pelengkap, jadi kegagalannya cukup dicatat.
+                    Log::error('Gagal mengirim pemberitahuan kata sandi berhasil diubah: ' . $e->getMessage());
+                }
+            }
+        );
+
+        if ($hasil !== Password::PASSWORD_RESET) {
+            $this->reset('kataSandi', 'kataSandiKonfirmasi');
+
+            throw ValidationException::withMessages([
+                'token' => $this->pesanGagal($hasil),
+            ]);
+        }
+
+        session()->flash('success', 'Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru Anda.');
+
+        return redirect()->route('login');
+    }
+
+    private function pesanGagal(string $hasil): string
+    {
+        return match ($hasil) {
+            Password::INVALID_TOKEN => 'Tautan sudah kedaluwarsa atau pernah dipakai. Silakan minta tautan baru.',
+            Password::INVALID_USER => 'Akun dengan alamat email tersebut tidak ditemukan.',
+            default => 'Kata sandi gagal diperbarui. Silakan minta tautan baru.',
+        };
+    }
+
+    public function render()
+    {
+        return view('livewire.auth.atur-ulang-password');
+    }
+
+    /** Beri tahu pemilik akun bahwa PIN ikut dimatikan. */
+    private function beriTahuPinMati($pengguna): void
+    {
+        try {
+            Mail::to($pengguna->email)->send(
+                new PemberitahuanPinMail($pengguna, 'dinonaktifkan', (string) request()->ip())
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim pemberitahuan PIN dimatikan: ' . $e->getMessage());
+        }
+    }
+
+    /** Cabut seluruh token API milik pengguna (Passport). */
+    private function cabutTokenApi($pengguna): void
+    {
+        try {
+            $pengguna->tokens()->update(['revoked' => true]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+}

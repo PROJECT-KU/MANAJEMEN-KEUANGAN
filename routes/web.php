@@ -15,7 +15,6 @@ use App\Http\Middleware\CheckTestimoniToken;
 use Illuminate\Support\Facades\Broadcast;
 
 
-Route::get('/K4rY4w4N', 'Auth\LoginController@showLoginForm');
 
 Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
@@ -70,12 +69,11 @@ Route::get('/cek-ppn-sesi/Clinik-Scopus', 'Publict\PublicClinikScopusController@
 Route::post('/Clinik-Scopus/Pemesanan', 'Publict\PublicClinikScopusController@store')->name('public.ClinikScopusPemesanan.store');
 Route::post('/Clinik-Scopus/Pemesanan/upload-bukti', 'Publict\PublicClinikScopusController@uploadBukti')->name('public.ClinikScopusPemesanan.uploadBukti');
 
-Auth::routes();
 /**
  * account
  */
 Route::prefix('account')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'terverifikasi'])
     ->group(
         function () {
 
@@ -91,12 +89,14 @@ Route::prefix('account')
             Route::delete('/karir/{id}', 'account\KarirController@destroy')->name('account.karir.destroy');
 
             //reset password
-            Route::get('formemail/reset', 'Auth\ResetPasswordController@showResetForm')->name('formemail.reset');
-            Route::get('newpassword/reset', 'Auth\ResetPasswordController@formpassword')->name('newpassword.reset');
-            Route::post('cekemail/reset', 'Auth\ResetPasswordController@resetPassword')->name('cekemail.reset');
 
             //dashboard account
             Route::get('/dashboard', 'account\DashboardController@index')->name('account.dashboard.index');
+
+            // Jejak percobaan masuk (manager, ceo, admin)
+            Route::get('/aktivitas-masuk', 'account\AktivitasMasukController@index')->name('account.aktivitas-masuk.index');
+            Route::get('/aktivitas-masuk/ekspor', 'account\AktivitasMasukController@ekspor')->name('account.aktivitas-masuk.ekspor');
+            Route::post('/aktivitas-masuk/buka-kunci', 'account\AktivitasMasukController@bukaKunci')->name('account.aktivitas-masuk.buka-kunci');
 
             // pengguna
             Route::get('/pengguna', 'account\PenggunaController@index')->name('account.pengguna.index');
@@ -108,6 +108,7 @@ Route::prefix('account')
             Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
             Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
             Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
+            Route::post('/pengguna/{id}/matikan-pin', 'account\PenggunaController@matikanPin')->name('account.pengguna.matikan-pin');
             Route::delete('/pengguna/delete/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
             Route::get('/pengguna/search', 'account\PenggunaController@search')->name('account.pengguna.search');
 
@@ -121,8 +122,6 @@ Route::prefix('account')
             Route::get('/profil/{id}/show', 'account\ProfilController@show')->name('account.profil.show');
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
             Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
-            Route::get('/profil/{id}/password', 'account\PenggunaController@password')->name('account.profil.password');
-            Route::post('/profil/{id}/resetpassword', 'account\PenggunaController@resetPassword')->name('account.profil.resetpassword');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
             Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
             Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');
@@ -148,26 +147,21 @@ Route::prefix('account')
 
             //tambah barang
             Route::get('/tambah_barang/search', 'account\TambahBarangController@search')->name('account.tambah_barang.search');
-            Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account']);
-            Route::delete('account/tambah_barang/{id}', 'TambahBarangController@destroy')->name('account.tambah_barang.destroy');
+            Route::Resource('/tambah_barang', 'account\TambahBarangController', ['as' => 'account', 'except' => ['show']]);
 
             //categories debit
             Route::get('/categories_debit/search', 'account\CategoriesDebitController@search')->name('account.categories_debit.search');
-            Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account']);
-            Route::delete('account/categories_debit/{id}', 'CategoriesDebitController@destroy')->name('account.categories_debit.destroy');
+            Route::Resource('/categories_debit', 'account\CategoriesDebitController', ['as' => 'account', 'except' => ['show']]);
 
-            //debit
-            Route::get('/debit/search', 'account\DebitController@search')->name('account.debit.search');
-            Route::Resource('/debit', 'account\DebitController', ['as' => 'account']);
+            // Fitur Uang Masuk (debit) dan Uang Keluar (credit) dihapus
+            // 27 September 2026 atas permintaan pemilik. Tabelnya sengaja
+            // TIDAK ikut dihapus karena Neraca, Laporan Semua, dan Pesanan
+            // masih membaca data yang sudah terlanjur tercatat di sana.
 
             //categories credit
             Route::get('/categories_credit/search', 'account\CategoriesCreditController@search')->name('account.categories_credit.search');
-            Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account']);
-            Route::delete('account/categories_credit/{id}', 'CategoriesCreditController@destroy')->name('account.categories_credit.destroy');
+            Route::Resource('/categories_credit', 'account\CategoriesCreditController', ['as' => 'account', 'except' => ['show']]);
 
-            //credit
-            Route::get('/credit/search', 'account\CreditController@search')->name('account.credit.search');
-            Route::Resource('/credit', 'account\CreditController', ['as' => 'account']);
 
             //laporan debit
             Route::get('/laporan_debit', 'account\LaporanDebitController@index')->name('account.laporan_debit.index');
@@ -178,13 +172,10 @@ Route::prefix('account')
             Route::get('/laporan_credit/check', 'account\LaporanCreditController@check')->name('account.laporan_credit.check');
 
             //laporan semua
-            Route::get('/laporan_semua/search', 'account\LaporanSemuaController@search')->name('account.laporan_semua.search');
-            Route::Resource('/laporan_semua', 'account\LaporanSemuaController', ['as' => 'account']);
-            Route::get('/account/laporan-semua/filter', [LaporanSemuaController::class, 'filterByDate'])->name('laporan_semua.filter');
+            Route::get('/laporan_semua', 'account\LaporanSemuaController@index')->name('account.laporan_semua.index');
 
             //laporan neraca
-            Route::get('/neraca/search', 'account\NeracaController@search')->name('account.neraca.search');
-            Route::Resource('/neraca', 'account\NeracaController', ['as' => 'account']);
+            Route::get('/neraca', 'account\NeracaController@index')->name('account.neraca.index');
 
             //gaji
             Route::get('/gaji', 'account\GajiController@index')->name('account.gaji.index');
@@ -210,18 +201,15 @@ Route::prefix('account')
             Route::delete('/presensi/{id}', 'account\PresensiController@destroy')->name('account.presensi.destroy');
             Route::get('/presensi/search', 'account\PresensiController@search')->name('account.presensi.search');
             Route::get('/presensi/filter', 'account\PresensiController@filter')->name('account.presensi.filter');
-            Route::get('/laporan_presensi/download-pdf', 'account\PresensiController@downloadPdf')->name('account.laporan_presensi.download-pdf');
             Route::get('/laporan_presensi/download-excel', 'account\PresensiController@downloadExcel')->name('account.laporan_presensi.download-excel');
 
             //email
-            Route::get('/email', 'account\EmailController@index')->name('account.email.index');
 
             // company
             Route::get('/company/{id}/edit', 'account\PenggunaController@company')->name('account.company.edit');
             Route::put('/company/{id}', 'account\PenggunaController@updateCompany')->name('account.company.update');
 
             // notifikasi
-            Route::get('/notifikasi', 'account\NotifikasiController@showNotifications')->name('account.notifikasi.index');
 
             // maintenance
             Route::get('/maintenance', 'account\MaintenanceController@index')->name('account.maintenance.index');
@@ -384,7 +372,6 @@ Route::prefix('account')
             // data cutomer
             Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
             Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
-            Route::get('/customer/data/filter', 'account\CustomerController@filter')->name('account.customer.filter');
             Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
             Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
             Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
@@ -397,7 +384,6 @@ Route::prefix('account')
             Route::post('/clinikscopus/data/update-data/{id}', 'account\ClinikScopusTrainerController@update')->name('account.clinikscopus.update');
             Route::delete('/clinikscopus/data/{id}', 'account\ClinikScopusTrainerController@destroy')->name('account.clinikscopus.destroy');
             Route::get('/clinikscopus/search', 'account\ClinikScopusTrainerController@search')->name('account.clinikscopus.search');
-            Route::get('/clinikscopus/filter', 'account\ClinikScopusTrainerController@filter')->name('account.clinikscopus.filter');
 
             // kategori scopus camp
             Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');
@@ -424,7 +410,6 @@ Route::prefix('account')
             Route::post('/Clinik-Scopus-Promo/data/update-data/{id}', 'account\ClinikScopusPromoController@update')->name('account.Clinik-Scopus-Promo.update');
             Route::delete('/Clinik-Scopus-Promo/data/{id}', 'account\ClinikScopusPromoController@destroy')->name('account.Clinik-Scopus-Promo.destroy');
             Route::get('/Clinik-Scopus-Promo/search', 'account\ClinikScopusPromoController@search')->name('account.Clinik-Scopus-Promo.search');
-            Route::get('/Clinik-Scopus-Promo/filter', 'account\ClinikScopusPromoController@filter')->name('account.Clinik-Scopus-Promo.filter');
 
             //clinik scopus biaya persesi
             Route::get('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@index')->name('account.Clinik-Scopus-Biaya-Persesi.index');
@@ -449,7 +434,6 @@ Route::prefix('account')
             Route::post('/clinik-scopus/chat/clear/{pemesanan}', 'account\ClinikScopusChatController@clearChat')->name('chat.clear');
 
             // clinik scopus testimoni
-            Route::get('/Clinik-Scopus-Testimoni/data', 'account\ClinikScopusTestimoniController@index')->name('account.Clinik-Scopus-Testimoni.index');
             Route::post('/Clinik-Scopus-Testimoni/data/store', 'account\ClinikScopusTestimoniController@store')->name('account.Clinik-Scopus-Testimoni.store');
         }
     );

@@ -22,6 +22,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Penyimpanan pembatas percobaan
+    |--------------------------------------------------------------------------
+    | Dipisahkan dari cache bawaan supaya `php artisan cache:clear` saat deploy
+    | tidak ikut melepas penguncian akun yang sedang berjalan.
+    */
+
+    'limiter' => env('CACHE_LIMITER', 'database'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |

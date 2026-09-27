@@ -46,7 +46,7 @@ class AssignTaskTodolist extends Mailable
 
         $mail = $this->view('account.todolist.AssignTaskMail')
             ->subject('Assign Task Baru')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

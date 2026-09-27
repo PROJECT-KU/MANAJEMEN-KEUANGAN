@@ -61,6 +61,74 @@ class GajiController extends Controller
     return $id;
   }
 
+  // <!--================== HITUNG JAM LEMBUR DARI PRESENSI ==================-->
+  /**
+   * Menghitung total jam lembur karyawan dari tabel presensi.
+   * Jam lembur = selisih jam pulang (time_pulang) dengan jam masuk (created_at)
+   * pada presensi yang berstatus 'lembur'.
+   * Contoh: masuk 08.00 pulang 10.00 => 2 jam.
+   *
+   * @param  int|null    $userId  Batasi ke satu karyawan. Null = semua karyawan.
+   * @param  string      $start   Awal periode (Y-m-d H:i:s)
+   * @param  string      $end     Akhir periode (Y-m-d H:i:s)
+   * @return \Illuminate\Support\Collection  Dipetakan: user_id => total jam (float)
+   */
+  private function jamLemburPresensi($userId, $start, $end)
+  {
+    $query = DB::table('presensi')
+      ->select(
+        'presensi.user_id',
+        DB::raw('SUM(TIMESTAMPDIFF(MINUTE, presensi.created_at, presensi.time_pulang)) / 60 as jam_lembur')
+      )
+      ->where('presensi.status', 'lembur')
+      ->whereNotNull('presensi.time_pulang')
+      // Abaikan data tidak wajar (jam pulang lebih awal dari jam masuk)
+      ->whereRaw('presensi.time_pulang > presensi.created_at')
+      ->whereBetween('presensi.created_at', [$start, $end])
+      ->groupBy('presensi.user_id');
+
+    if (!empty($userId)) {
+      $query->where('presensi.user_id', $userId);
+    }
+
+    // Catatan: pakai get() lalu pluck() di Collection.
+    // pluck() langsung di query builder akan menimpa select() sehingga alias jam_lembur hilang.
+    return $query->get()
+      ->pluck('jam_lembur', 'user_id')
+      ->map(function ($jam) {
+        return round((float) $jam, 2);
+      });
+  }
+
+  /**
+   * Total jam lembur satu karyawan pada satu periode.
+   *
+   * @return float
+   */
+  private function totalJamLemburPresensi($userId, $start, $end)
+  {
+    return (float) $this->jamLemburPresensi($userId, $start, $end)->get($userId, 0);
+  }
+
+  /**
+   * Total jam lembur yang TERSIMPAN di data gaji (jumlah_lembur + jumlah_lembur1..10).
+   * Dipakai slip gaji & email supaya angkanya sama persis dengan yang dibayarkan.
+   *
+   * @return float
+   */
+  private function totalJamLemburGaji($gaji)
+  {
+    $total = (float) str_replace(',', '.', $gaji->jumlah_lembur);
+
+    for ($i = 1; $i <= 10; $i++) {
+      $field = 'jumlah_lembur' . $i;
+      $total += (float) str_replace(',', '.', $gaji->{$field});
+    }
+
+    return round($total, 2);
+  }
+  // <!--================== END ==================-->
+
   // <!--================== TAMPILAN DATA ==================-->
   public function index(Request $request)
   {
@@ -478,6 +546,12 @@ class GajiController extends Controller
         ->orderBy('users.created_at', 'DESC')
         ->get();
 
+      // JAM LEMBUR OTOMATIS DARI PRESENSI (periode bulan berjalan)
+      $jamLembur = $this->jamLemburPresensi(null, now()->startOfMonth(), now()->endOfMonth());
+      foreach ($datas as $data) {
+        $data->jam_lembur = $jamLembur->get($data->id, 0);
+      }
+
       // dd($datas);
       return view('account.gaji.create', compact('datas'));
     } else {
@@ -612,10 +686,14 @@ class GajiController extends Controller
     $pph = $cleanNum($request->input('pph'));
 
     // PENGHITUNGAN MATEMATIKA
-    $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) +
-      ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) +
-      ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) +
-      ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
+    // Dibulatkan: jam lembur bisa desimal (mis. 1,1 jam) sehingga hasil kali
+    // menghasilkan pecahan floating point (25000 * 1.1 = 27500.000000000004).
+    $total_lembur = round(
+      ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) +
+        ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) +
+        ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) +
+        ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10)
+    );
 
     $total_bonus = ($bonus * $jumlah_bonus) + ($bonus1 * $jumlah_bonus1) + ($bonus2 * $jumlah_bonus2) +
       ($bonus3 * $jumlah_bonus3) + ($bonus4 * $jumlah_bonus4) + ($bonus5 * $jumlah_bonus5) +
@@ -791,7 +869,17 @@ class GajiController extends Controller
       ->orderBy('users.created_at', 'DESC')
       ->get();
 
-    return view('account.gaji.edit', compact('gaji', 'users', 'datas')); // Sesuaikan path template dengan benar
+    // JAM LEMBUR OTOMATIS DARI PRESENSI
+    // Periode mengikuti tanggal gaji, supaya data lama tidak tertimpa bulan berjalan.
+    $periode = $gaji->tanggal ? Carbon::parse($gaji->tanggal) : Carbon::now();
+    $jamLemburPresensi = $this->totalJamLemburPresensi(
+      $gaji->user_id,
+      $periode->copy()->startOfMonth(),
+      $periode->copy()->endOfMonth()
+    );
+    $periodeLembur = $periode->format('m/Y');
+
+    return view('account.gaji.edit', compact('gaji', 'users', 'datas', 'jamLemburPresensi', 'periodeLembur')); // Sesuaikan path template dengan benar
   }
 
   public function update(Request $request, $id)
@@ -981,7 +1069,9 @@ class GajiController extends Controller
     $jumlah_bonus_luar10 = $request->input('jumlah_bonus_luar10') ?? null;
     //end jumlah bonus luar kota
 
-    $total_lembur = ($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10);
+    // Dibulatkan: jam lembur bisa desimal (mis. 1,1 jam) sehingga hasil kali
+    // menghasilkan pecahan floating point (25000 * 1.1 = 27500.000000000004).
+    $total_lembur = round(($lembur * $jumlah_lembur) + ($lembur1 * $jumlah_lembur1) + ($lembur2 * $jumlah_lembur2) + ($lembur3 * $jumlah_lembur3) + ($lembur4 * $jumlah_lembur4) + ($lembur5 * $jumlah_lembur5) + ($lembur6 * $jumlah_lembur6) + ($lembur7 * $jumlah_lembur7) + ($lembur8 * $jumlah_lembur8) + ($lembur9 * $jumlah_lembur9) + ($lembur10 * $jumlah_lembur10));
     $total_lembur = empty($total_lembur) ? 0 : str_replace(",", "", $total_lembur);
 
     // $total_bonus =
@@ -1178,7 +1268,17 @@ class GajiController extends Controller
       ->orderBy('users.created_at', 'DESC')
       ->get();
 
-    return view('account.gaji.detail', compact('gaji', 'users', 'datas')); // Pass 'user' to the view
+    // JAM LEMBUR OTOMATIS DARI PRESENSI
+    // Periode mengikuti tanggal gaji, supaya data lama tidak tertimpa bulan berjalan.
+    $periode = $gaji->tanggal ? Carbon::parse($gaji->tanggal) : Carbon::now();
+    $jamLemburPresensi = $this->totalJamLemburPresensi(
+      $gaji->user_id,
+      $periode->copy()->startOfMonth(),
+      $periode->copy()->endOfMonth()
+    );
+    $periodeLembur = $periode->format('m/Y');
+
+    return view('account.gaji.detail', compact('gaji', 'users', 'datas', 'jamLemburPresensi', 'periodeLembur')); // Pass 'user' to the view
   }
   // <!--================== END ==================-->
 
@@ -1292,7 +1392,10 @@ class GajiController extends Controller
       return response('Image not found', 404);
     }
 
-    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank', 'userLogoPath'))->render();
+    // TOTAL JAM LEMBUR (diambil dari data gaji yang tersimpan agar sama dengan yang dibayarkan)
+    $jamLembur = $this->totalJamLemburGaji($gaji);
+
+    $html = view('account.gaji.slipgaji', compact('gaji', 'totalGaji', 'user', 'terbilang', 'employee', 'userWithNorekBank', 'userLogoPath', 'jamLembur'))->render();
 
     // Instantiate Dompdf with the default configuration
     $dompdf = new Dompdf();

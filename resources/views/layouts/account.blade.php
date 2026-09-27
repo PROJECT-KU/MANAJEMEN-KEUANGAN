@@ -16,7 +16,7 @@ $agent = new Agent();
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/mis-favicon.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
@@ -30,6 +30,10 @@ $agent = new Agent();
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    {{-- Huruf yang sama dengan dasbor & halaman auth --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="{{ asset('assets/modules/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/modules/moment.min.js') }}"></script>
@@ -40,6 +44,10 @@ $agent = new Agent();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
     <!-- end -->
+
+    {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=14">
+
     <style>
         .fas,
         .far,
@@ -139,6 +147,37 @@ $agent = new Agent();
             }
         }
     </style>
+    <style>
+        /* Logo MIS berbentuk lebar; di sidebar yang menyempit hanya bagian
+           ikon grafiknya yang ditampilkan supaya tetap terbaca. */
+        /* Logo MIS lebih tinggi daripada logo lama, jadi bidang merek sidebar
+           diberi ruang agar tidak terpotong. */
+        .sidebar-brand:not(.sidebar-brand-sm) {
+            height: auto;
+            min-height: 76px;
+            padding: 12px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-brand:not(.sidebar-brand-sm) img {
+            max-height: 58px;
+            width: auto;
+        }
+
+        .merek-ikon-kecil {
+            display: block;
+            width: 52px;
+            height: auto;
+            margin: 0 auto;
+        }
+    </style>
+
+    {{-- Gaya khusus halaman. Harus di sini, bukan di badan berkas: tanpa ini
+         lembar gaya halaman terbit SEBELUM CSS Bootstrap, sehingga aturan
+         dengan bobot sama (misal .prf-tab lawan .nav) selalu kalah. --}}
+    @stack('gaya')
 </head>
 @php
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
@@ -160,7 +199,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             @if ($agent->isMobile())
             <nav class="navbar navbar-expand-lg main-navbar shadow-sm">
                 <form class="form-inline mr-auto d-flex align-items-center">
-                    <p id="greeting" class="text-dark font-weight-bold mb-0 ml-4 mt-3" style="font-size:13px;"></p>
+                    {{-- Tombol menu: tanpa ini sidebar di ponsel tidak bisa dibuka
+                         sama sekali, sehingga halaman lain tak terjangkau. --}}
+                    <a href="#" data-toggle="sidebar" class="mis-burger" aria-label="Buka menu">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                    <p id="greeting" class="text-dark font-weight-bold mb-0 ml-2 mt-3" style="font-size:13px;"></p>
                 </form>
 
                 <!-- Dropdown Profil -->
@@ -205,8 +249,44 @@ $isTenggatExpired = $tenggatDate < $currentDate;
 
             <nav class="navbar navbar-expand-lg main-navbar">
                 <form class="form-inline mr-auto d-flex align-items-center" style="height: 100%;">
-                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-3 d-flex align-items-center mt-3"></p>
+                    {{-- Di tablet sidebar juga tersembunyi; tombol ini yang membukanya. --}}
+                    <a href="#" data-toggle="sidebar" class="mis-burger" aria-label="Buka menu">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                    <p id="greeting" class="text-white font-weight-bold mb-0 ml-2 d-flex align-items-center mt-3"></p>
                 </form>
+
+                {{-- Pintasan pemberitahuan. Angkanya dihitung sekali per
+                     permintaan oleh AppServiceProvider, jadi bagian ini tidak
+                     menambah satu pun kueri. --}}
+                <ul class="navbar-nav mis-notif">
+                    @if (Auth::user()->level !== 'user')
+                        <li>
+                            <a href="{{ route('account.todolist.index') }}" class="mis-notif-tombol" title="Tugas ditugaskan">
+                                <i class="fas fa-tasks"></i>
+                                @if (($totalAssignTask ?? 0) > 0)
+                                    <span class="mis-notif-angka">{{ $totalAssignTask > 99 ? '99+' : $totalAssignTask }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('account.PerjalananDinas.index') }}" class="mis-notif-tombol" title="Perjalanan dinas">
+                                <i class="fas fa-plane-departure"></i>
+                                @if (($countAjukan ?? 0) > 0)
+                                    <span class="mis-notif-angka">{{ $countAjukan > 99 ? '99+' : $countAjukan }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
+                    <li>
+                        <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="mis-notif-tombol" title="Pemesanan Clinik Scopus">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            @if (($countScopusPending ?? 0) > 0)
+                                <span class="mis-notif-angka">{{ $countScopusPending > 99 ? '99+' : $countScopusPending }}</span>
+                            @endif
+                        </a>
+                    </li>
+                </ul>
 
                 <!-- Dropdown Profil -->
                 @if (Auth::check())
@@ -244,10 +324,11 @@ $isTenggatExpired = $tenggatDate < $currentDate;
             <div class="main-sidebar sidebar-style-2" id="SidebarPwa" style="position: fixed;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <img src="{{ asset('assets/img/logo-header.png') }}" alt="logo" width="150">
+                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS — Management Integration System" width="150">
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <img src="{{ asset('assets/img/logo-pwa.png') }}" alt="logo" width="50px">
+                        {{-- logo tampil utuh, hanya diperkecil --}}
+                        <img src="{{ asset('assets/img/newlogogeneration.png') }}" alt="MIS" class="merek-ikon-kecil">
                     </div>
                     <ul class="sidebar-menu">
 
@@ -498,27 +579,12 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 @endif
                                 <!--================== END ==================-->
 
-                                <!--================== KEUANGAN ==================-->
-                                @if (Auth::user()->level !== 'user')
-                                <li class="menu-header">KEUANGAN</li>
-                                <li class="dropdown {{ setActive('account/categories_debit'). setActive('account/debit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Masuk</span></a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_debit') }}"><a class="nav-link" href="{{ route('account.categories_debit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
-                                        <li class="{{ setActive('account/debit') }}"><a class="nav-link" href="{{ route('account.debit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Masuk</a></li>
-                                    </ul>
-                                </li>
-                                <li class="dropdown {{ setActive('account/categories_credit'). setActive('account/credit') }}">
-                                    <a href="#" class="nav-link has-dropdown"><i class="fas fa-wallet"></i><span>Uang Keluar</span></a>
-                                    <ul class="dropdown-menu">
-                                        <li class="{{ setActive('account/categories_credit') }}"><a class="nav-link" href="{{ route('account.categories_credit.index') }}"><i class="fas fa-dice-d6"></i> Kategori</a></li>
-                                        <li class="{{ setActive('account/credit') }}"><a class="nav-link" href="{{ route('account.credit.index') }}"><i class="fas fa-money-check-alt"></i> Uang Keluar</a></li>
-                                    </ul>
-                                </li>
-                                @endif
-                                <!--================== END ==================-->
+                                {{-- Menu KEUANGAN (Uang Masuk & Uang Keluar beserta kategorinya)
+                                     dihapus 27 September 2026 atas permintaan pemilik.
+                                     Laporan Uang Masuk/Keluar di bagian LAPORAN sengaja
+                                     dibiarkan karena membaca data lama yang masih tersimpan. --}}
 
-                                <!-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
+                                {{-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
                                     <ul class="dropdown-menu">
@@ -527,7 +593,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                         <li class="{{ setActive('account/penyewaan') }}"><a class="nav-link" href="{{ route('account.penyewaan.index') }}"><i class="fas fa-list"></i>PENYEWAAN</a></li>
                                     </ul>
                                 </li>
-                                @endif -->
+                                @endif --}}
 
                                 <!--================== LAPORAN ==================-->
                                 @if (Auth::user()->level !== 'user' && Auth::user()->level !== 'karyawan')
@@ -565,16 +631,21 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                                 </li> -->
                                 @endif
 
+                                <!--================== KEAMANAN ==================-->
+                                @if (in_array(Auth::user()->level, ['manager', 'ceo', 'admin']))
+                                <li class="{{ setActive('account/aktivitas-masuk') }}">
+                                    <a class="nav-link" href="{{ route('account.aktivitas-masuk.index') }}">
+                                        <i class="fas fa-user-shield"></i> <span>Aktivitas Masuk</span>
+                                    </a>
+                                </li>
+                                @endif
+                                <!--================== END ==================-->
+
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->
                                 @if (Auth::user()->level === 'admin')
                                 <li class="{{ setActive('account/maintenance') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
                                         <i class="fas fa-users-cog"></i> <span>MAINTENANCE</span>
-                                    </a>
-                                </li>
-                                <li class="{{ setActive('account/sewa') . setActive('account/pengguna/search') }}">
-                                    <a class="nav-link" href="{{ route('account.sewa.index') }}">
-                                        <i class="fas fa-bell"></i> <span>NOTIF SEWA</span>
                                     </a>
                                 </li>
                                 @endif
@@ -640,6 +711,8 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
+    {{-- Mengingat posisi gulir sidebar antar halaman. --}}
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=3"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')

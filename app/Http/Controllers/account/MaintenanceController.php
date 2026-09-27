@@ -26,9 +26,17 @@ class MaintenanceController extends Controller
 
     public function maintenance()
     {
+        // View ini menampilkan satu pengumuman (title/start_date/end_date/note),
+        // jadi yang dikirim satu baris terbaru, bukan paginator.
         $maintenance = DB::table('maintenance')
             ->orderBy('created_at', 'DESC')
-            ->paginate(10);
+            ->first();
+
+        if (! $maintenance) {
+            return redirect()->route('account.maintenance.index')
+                ->with('error', 'Belum ada data maintenance.');
+        }
+
         return view('account.maintenance.blank', compact('maintenance'));
     }
 

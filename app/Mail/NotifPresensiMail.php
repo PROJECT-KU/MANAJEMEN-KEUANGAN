@@ -43,7 +43,7 @@ class NotifPresensiMail extends Mailable
 
         return $this->view('account.presensi.notif_send_mail')
             ->subject('Presensi Masuk Berhasil')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }

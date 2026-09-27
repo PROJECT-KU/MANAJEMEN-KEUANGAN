@@ -35,11 +35,10 @@ class PasswordResetSuccessMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/LogoRSC.png');
-
+        // Logo disisipkan di dalam badan surat lewat $message->embed(),
+        // jadi tidak perlu dilampirkan sebagai berkas terpisah.
         return $this->view('auth.email_lupa_password')
-            ->subject('Reset Password Berhasil')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
-            ->attach($logoPath, ['mime' => 'image/png']);
+            ->subject('Kata Sandi Berhasil Diubah')
+            ->from(config('mail.from.address'), $this->appName);
     }
 }

@@ -153,7 +153,7 @@ Maintenance | MIS
             if (isConfirm) {
                 // Ajax delete
                 $.ajax({
-                    url: "{{ route('account.maintenance.destroy', '') }}/" + id,
+                    url: "{{ url('account/maintenance') }}/" + id,
                     data: {
                         "_token": token,
                         "_method": "DELETE"

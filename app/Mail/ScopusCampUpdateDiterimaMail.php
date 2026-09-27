@@ -43,6 +43,6 @@ class ScopusCampUpdateDiterimaMail extends Mailable
     {
         return $this->view('account.pendaftaran_scopus_camp.mail_diterima')
             ->subject('Pendaftaran Scopus Camp Berhasil Diterima')
-            ->from('info@rumahscopusfoundation.com', $this->appName);
+            ->from(config('mail.from.address'), $this->appName);
     }
 }

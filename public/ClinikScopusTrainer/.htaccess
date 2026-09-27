@@ -1,0 +1,31 @@
+# Folder berkas unggahan: tidak boleh ada yang dijalankan sebagai program.
+#
+# Nama berkas sudah dibuat di sisi peladen, tetapi berkas lama dan jalur
+# unggah lain di aplikasi ini masih memakai ekstensi kiriman pengunggah.
+# Berkas ini menutup akibat terburuknya: kode yang terlanjur terunggah tidak
+# akan pernah dieksekusi.
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(?i:php|php3|php4|php5|php7|php8|phtml|phar|pht|phps|inc|cgi|pl|py|sh|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Jangan biarkan peramban menebak jenis berkas (mis. HTML di dalam .jpg).
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

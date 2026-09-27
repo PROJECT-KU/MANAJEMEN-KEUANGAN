@@ -43,7 +43,7 @@ class UpdatePresensiMail extends Mailable
 
         return $this->view('account.presensi.update_send_mail')
             ->subject('Presensi Hari Ini Selesai')
-            ->from('info@rumahscopusfoundation.com', $this->appName)
+            ->from(config('mail.from.address'), $this->appName)
             ->attach($logoPath, ['mime' => 'image/png']);
     }
 }
