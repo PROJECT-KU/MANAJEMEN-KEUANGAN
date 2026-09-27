@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     {{-- Inter: huruf yang sama dengan dasbor --}}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=19">
+    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}?v=22">
     <script src="{{ asset('assets/js/auth.js') }}?v=2"></script>
     @livewireStyles
 </head>
