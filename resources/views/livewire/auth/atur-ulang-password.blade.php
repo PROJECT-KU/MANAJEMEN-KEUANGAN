@@ -2,6 +2,13 @@
 
     @if (empty($token))
         {{-- Halaman ini semestinya dibuka lewat tautan dari email. --}}
+        <span class="lencana-ikon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5M12 16h.01" />
+            </svg>
+        </span>
+
         <h2 class="judul-form">Tautan tidak lengkap</h2>
         <p class="teks-bantu">
             Buka halaman ini melalui tautan yang kami kirim ke email Anda. Bila tautannya sudah kedaluwarsa,
@@ -22,6 +29,14 @@
             <a href="{{ route('login') }}" class="tautan">Kembali ke halaman masuk</a>
         </p>
     @else
+        <span class="lencana-ikon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="10" rx="2" />
+                <path d="M7 11V8a5 5 0 0110 0v3" />
+                <path d="M12 15v2" />
+            </svg>
+        </span>
+
         <h2 class="judul-form">Buat kata sandi baru</h2>
         <p class="teks-bantu">
             Untuk akun <strong>{{ $email }}</strong>. Pilih kata sandi yang belum pernah Anda pakai sebelumnya.

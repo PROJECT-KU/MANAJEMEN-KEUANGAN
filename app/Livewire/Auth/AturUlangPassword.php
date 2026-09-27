@@ -20,6 +20,11 @@ use Livewire\Component;
     'warnaTema' => '#7c3aed',
     'merekJudul' => 'Buat kata sandi baru.',
     'merekTeks' => 'Tentukan kata sandi baru untuk akun Anda, lalu masuk seperti biasa.',
+    'poinMerek' => [
+        ['ikon' => 'perisai', 'judul' => 'Tautan terverifikasi', 'teks' => 'Hanya berlaku untuk akun Anda.'],
+        ['ikon' => 'kunci', 'judul' => 'Kata sandi baru', 'teks' => 'Minimal 8 karakter, ada huruf dan angka.'],
+        ['ikon' => 'jejak', 'judul' => 'Sesi lama berakhir', 'teks' => 'Perangkat lain otomatis dikeluarkan.'],
+    ],
 ])]
 class AturUlangPassword extends Component
 {
@@ -67,7 +72,15 @@ class AturUlangPassword extends Component
 
     public function simpan()
     {
-        $this->validate();
+        // Sama seperti pada pendaftaran: properti publik ikut tersimpan di
+        // wire:snapshot, jadi kata sandi dibersihkan pada tiap kegagalan.
+        try {
+            $this->validate();
+        } catch (ValidationException $e) {
+            $this->reset('kataSandi', 'kataSandiKonfirmasi');
+
+            throw $e;
+        }
 
         // Password broker memeriksa token (tersimpan sebagai hash), masa
         // berlakunya, lalu menghapusnya setelah dipakai.
@@ -115,6 +128,8 @@ class AturUlangPassword extends Component
         );
 
         if ($hasil !== Password::PASSWORD_RESET) {
+            $this->reset('kataSandi', 'kataSandiKonfirmasi');
+
             throw ValidationException::withMessages([
                 'token' => $this->pesanGagal($hasil),
             ]);

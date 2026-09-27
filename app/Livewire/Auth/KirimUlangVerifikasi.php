@@ -19,6 +19,11 @@ use Livewire\Component;
     'warnaTema' => '#0d9488',
     'merekJudul' => 'Belum menerima emailnya?',
     'merekTeks' => 'Kami kirimkan ulang tautan verifikasi ke alamat email yang Anda daftarkan.',
+    'poinMerek' => [
+        ['ikon' => 'surel', 'judul' => 'Cek kotak masuk', 'teks' => 'Termasuk folder spam dan promosi.'],
+        ['ikon' => 'jam', 'judul' => 'Berlaku 48 jam', 'teks' => 'Lewat dari itu, minta tautan baru di sini.'],
+        ['ikon' => 'centang', 'judul' => 'Sekali klik', 'teks' => 'Akun langsung aktif setelah diverifikasi.'],
+    ],
 ])]
 class KirimUlangVerifikasi extends Component
 {

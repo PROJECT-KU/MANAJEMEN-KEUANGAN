@@ -210,6 +210,34 @@ Profil | MIS
     min-height: calc(1.5em + 1.2rem + 2px);
   }
 
+  /* Empat tab menumpuk jadi empat baris di ponsel (226px) sebelum isinya
+     mulai. Di layar kecil strip-nya dibuat satu baris yang bisa digeser. */
+  @media (max-width: 767.98px) {
+    #pills-tab {
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+    }
+
+    #pills-tab::-webkit-scrollbar {
+      display: none;
+    }
+
+    #pills-tab .nav-item {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+    }
+
+    #pills-tab .nav-link {
+      white-space: nowrap;
+      padding: 10px 16px !important;
+      font-size: 13px;
+    }
+  }
+
   @media (max-width: 576px) {
     .row {
       margin-left: 0 !important;

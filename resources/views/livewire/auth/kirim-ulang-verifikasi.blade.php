@@ -27,6 +27,14 @@
             </span>
         </p>
     @else
+        <span class="lencana-ikon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
+                <path d="M16 3l5 5-5 5" />
+            </svg>
+        </span>
+
         <h2 class="judul-form">Kirim ulang verifikasi</h2>
         <p class="teks-bantu">
             Masukkan email akun Anda. Kami kirimkan tautan verifikasi yang baru.

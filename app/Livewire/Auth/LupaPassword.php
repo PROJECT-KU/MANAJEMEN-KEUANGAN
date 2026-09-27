@@ -16,6 +16,11 @@ use Livewire\Component;
     'warnaTema' => '#ea580c',
     'merekJudul' => 'Tidak bisa masuk? Tenang.',
     'merekTeks' => 'Kami kirimkan tautan aman ke email Anda untuk membuat kata sandi baru.',
+    'poinMerek' => [
+        ['ikon' => 'surel', 'judul' => 'Masukkan email', 'teks' => 'Alamat yang Anda pakai saat membuat akun.'],
+        ['ikon' => 'jam', 'judul' => 'Tautan 60 menit', 'teks' => 'Sekali pakai, lalu hangus dengan sendirinya.'],
+        ['ikon' => 'kunci', 'judul' => 'Buat sandi baru', 'teks' => 'PIN ikut dimatikan demi keamanan.'],
+    ],
 ])]
 class LupaPassword extends Component
 {

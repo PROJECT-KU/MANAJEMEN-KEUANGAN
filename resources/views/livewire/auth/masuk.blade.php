@@ -1,4 +1,11 @@
 <div class="kartu">
+    <span class="lencana-ikon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+            <path d="M10 17l5-5-5-5M15 12H3" />
+        </svg>
+    </span>
+
     <h2 class="judul-form">Masuk ke akun Anda</h2>
     <p class="teks-bantu">
         @if ($mode === 'pin')

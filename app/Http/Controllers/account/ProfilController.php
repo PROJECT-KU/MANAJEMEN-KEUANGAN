@@ -117,8 +117,10 @@ class ProfilController extends Controller
     // Generate a new verification code
     $verificationCode = sprintf('%06d', random_int(0, 999999));
 
-    // Log for debugging purposes
-    Log::info('Generating verification code: ' . $verificationCode);
+    // Kodenya SENGAJA tidak ikut dicatat: berkas log dibaca banyak pihak
+    // (admin hosting, cadangan), dan kode itu cukup untuk memverifikasi email
+    // orang lain.
+    Log::info('Kode verifikasi dibuat untuk pengguna ' . $user->getKey());
 
     // Update user's verification code and timestamp
     $user->code_verified_mail = $verificationCode;

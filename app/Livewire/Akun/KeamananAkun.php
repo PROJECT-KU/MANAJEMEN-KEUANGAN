@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -90,15 +91,27 @@ class KeamananAkun extends Component
             return;
         }
 
+        $pengguna = $this->pengguna();
+
         $terhapus = DB::table('sessions')
             ->where('id', $id)
-            ->where('user_id', $this->pengguna()->getKey())
+            ->where('user_id', $pengguna->getKey())
             ->delete();
 
-        $this->jenisPesan = $terhapus ? 'sukses' : 'galat';
-        $this->pesan = $terhapus
-            ? 'Sesi di perangkat itu sudah diakhiri.'
-            : 'Sesi itu sudah tidak ada.';
+        if (! $terhapus) {
+            $this->jenisPesan = 'galat';
+            $this->pesan = 'Sesi itu sudah tidak ada.';
+
+            return;
+        }
+
+        // Menghapus baris sesi saja tidak cukup: perangkat yang mencentang
+        // "Ingat saya" akan memakai kue pengingatnya dan masuk lagi begitu
+        // halaman dibuka. Penanda ingat-saya karena itu ikut diputar.
+        $pengguna->forceFill(['remember_token' => Str::random(60)])->save();
+
+        $this->jenisPesan = 'sukses';
+        $this->pesan = 'Sesi di perangkat itu sudah diakhiri. Perangkat yang memakai "Ingat saya" juga harus masuk ulang.';
     }
 
     /**

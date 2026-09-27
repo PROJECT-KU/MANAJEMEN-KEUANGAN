@@ -1,4 +1,12 @@
 <div class="kartu kartu-lebar">
+    <span class="lencana-ikon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M19 8v6M22 11h-6" />
+        </svg>
+    </span>
+
     <h2 class="judul-form">Buat akun Anda</h2>
     <p class="teks-bantu">Isi data di bawah ini. Tanda <span class="wajib">*</span> berarti wajib diisi.</p>
 
@@ -115,7 +123,7 @@
             </div>
         </div>
 
-        <div class="baris-medan"
+        <div class="baris-medan baris-sandi"
             x-data="{
                 tampil: false,
                 tampil2: false,

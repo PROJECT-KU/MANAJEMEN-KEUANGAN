@@ -159,7 +159,15 @@ class PengaturanPin extends Component
     {
         $this->pesan = '';
 
-        $this->validate();
+        // Kata sandi dan PIN ikut terkirim balik ke peramban lewat
+        // wire:snapshot; pada tiap kegagalan keduanya dibuang.
+        try {
+            $this->validate();
+        } catch (ValidationException $e) {
+            $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
+
+            throw $e;
+        }
 
         $pengguna = $this->pengguna();
         $sudahAda = $pengguna->pinAktif();
@@ -246,7 +254,7 @@ class PengaturanPin extends Component
         if (! Hash::check($this->kataSandi, (string) $pengguna->password)) {
             RateLimiter::hit($kunci, self::LAMA_KUNCI);
 
-            $this->reset('kataSandi');
+            $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
 
             throw ValidationException::withMessages([
                 'kataSandi' => 'Kata sandi tidak cocok.',

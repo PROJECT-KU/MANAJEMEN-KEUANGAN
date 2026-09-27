@@ -36,9 +36,14 @@ use Livewire\Component;
 #[Layout('components.layouts.auth', [
     'judulHalaman' => 'Masuk Akun',
     'kelasHalaman' => 'halaman-masuk',
-    'warnaTema' => '#0891b2',
+    'warnaTema' => '#3730a3',
     'merekJudul' => 'Selamat datang kembali.',
     'merekTeks' => 'Masuk untuk melanjutkan ke layanan Rumah Scopus Foundation.',
+    'poinMerek' => [
+        ['ikon' => 'kunci', 'judul' => 'Kata sandi atau PIN', 'teks' => 'Pilih cara masuk yang paling cepat untuk Anda.'],
+        ['ikon' => 'perisai', 'judul' => 'Akun terjaga', 'teks' => 'Percobaan masuk dibatasi dan dicatat.'],
+        ['ikon' => 'jejak', 'judul' => 'Riwayat terpantau', 'teks' => 'Masuk dari perangkat baru langsung dikabari.'],
+    ],
 ])]
 class Masuk extends Component
 {

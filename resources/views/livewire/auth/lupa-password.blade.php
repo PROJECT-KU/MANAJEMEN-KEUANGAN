@@ -46,6 +46,14 @@
             </span>
         </p>
     @else
+        <span class="lencana-ikon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="10" rx="2" />
+                <path d="M7 11V8a5 5 0 019.9-1" />
+                <path d="M12 15v2" />
+            </svg>
+        </span>
+
         <h2 class="judul-form">Lupa kata sandi?</h2>
         <p class="teks-bantu">Masukkan email akun Anda. Kami kirimkan tautan aman untuk membuat kata sandi baru.</p>
 

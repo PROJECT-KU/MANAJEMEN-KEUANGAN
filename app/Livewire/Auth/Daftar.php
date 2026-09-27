@@ -22,6 +22,11 @@ use Livewire\Component;
     'warnaTema' => '#0d9488',
     'merekJudul' => 'Mulai dari satu akun.',
     'merekTeks' => 'Buat akun untuk mengikuti Scopus Camp, Clinik Scopus, dan layanan Rumah Scopus Foundation lainnya.',
+    'poinMerek' => [
+        ['ikon' => 'orang', 'judul' => 'Isi data diri', 'teks' => 'Nama, username, email, dan kata sandi.'],
+        ['ikon' => 'surel', 'judul' => 'Verifikasi email', 'teks' => 'Kami kirim tautan aman ke alamat Anda.'],
+        ['ikon' => 'centang', 'judul' => 'Langsung dipakai', 'teks' => 'Akun siap untuk semua layanan kami.'],
+    ],
 ])]
 class Daftar extends Component
 {
@@ -114,6 +119,17 @@ class Daftar extends Component
         }
     }
 
+    /**
+     * Livewire mengirim seluruh properti publik kembali ke peramban dan
+     * menyimpannya di atribut wire:snapshot. Kalau kiriman gagal, kata sandi
+     * yang baru diketik akan menganggur di dalam DOM dalam bentuk terbaca.
+     * Karena itu setiap kegagalan membersihkan isian rahasianya.
+     */
+    private function bersihkanRahasia(): void
+    {
+        $this->reset('kataSandi', 'kataSandiKonfirmasi');
+    }
+
     public function daftar()
     {
         $kunci = 'daftar|' . request()->ip();
@@ -125,7 +141,13 @@ class Daftar extends Component
             ]);
         }
 
-        $data = $this->validate();
+        try {
+            $data = $this->validate();
+        } catch (ValidationException $e) {
+            $this->bersihkanRahasia();
+
+            throw $e;
+        }
 
         // Perangkap waktu: formulir yang terkirim beberapa milidetik setelah
         // dibuka hampir pasti bukan diketik manusia. Honeypot menangkap
@@ -134,6 +156,7 @@ class Daftar extends Component
 
         if ($dibuka > 0 && (now()->timestamp - $dibuka) < self::DETIK_TERCEPAT) {
             RateLimiter::hit($kunci, 3600);
+            $this->bersihkanRahasia();
 
             throw ValidationException::withMessages([
                 'email' => 'Formulir terkirim terlalu cepat. Periksa kembali isiannya, lalu kirim sekali lagi.',
