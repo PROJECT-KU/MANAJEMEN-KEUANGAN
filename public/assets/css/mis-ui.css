@@ -1015,3 +1015,667 @@ textarea:focus-visible,
         transition: none !important;
     }
 }
+
+/* ==================================================================== *
+ *  SISTEM KOMPONEN  —  .mis-*                                          *
+ *                                                                      *
+ *  Kosakata bersama untuk SELURUH layar back office. Nilainya disalin  *
+ *  dari .dsb- (dasbor) dan .prf- (profil) supaya ketiganya benar-benar *
+ *  satu keluarga, bukan sekadar mirip.                                 *
+ *                                                                      *
+ *  Layar baru memakai kelas ini dan TIDAK membuat <style> sendiri.     *
+ *  Kalau memang perlu gaya khusus halaman, letakkan di @push('gaya')   *
+ *  supaya terbit di dalam <head>, sesudah Bootstrap.                   *
+ * ==================================================================== */
+
+:root {
+    --mis-tinta: #0f172a;
+    --mis-tinta-2: #475569;
+    --mis-tinta-3: #64748b;
+    --mis-tinta-4: #94a3b8;
+    --mis-garis: #e2e8f0;
+    --mis-kartu: rgba(255, 255, 255, .92);
+    --mis-radius: 22px;
+    --mis-bayang: 0 18px 38px rgba(15, 23, 42, .06);
+    --mis-ungu: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    --mis-hijau: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --mis-merah: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+    --mis-biru: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    --mis-kuning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --mis-jingga: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+}
+
+/* ------------------------------------------------------ kepala halaman */
+
+.mis-kepala,
+.section-header-modern {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background:
+        radial-gradient(520px 200px at 0% 0%, rgba(99, 102, 241, .07), transparent 70%),
+        var(--mis-kartu);
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: var(--mis-radius);
+    box-shadow: var(--mis-bayang);
+    padding: 18px 22px;
+    margin-bottom: 22px;
+}
+
+.mis-kepala-teks {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.mis-judul,
+.section-header-modern h1 {
+    margin: 0;
+    font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1.25;
+    background: linear-gradient(to right, #1e293b 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mis-sub,
+.section-header-modern p {
+    margin: 4px 0 0;
+    font-size: .82rem;
+    font-weight: 500;
+    color: var(--mis-tinta-3);
+}
+
+.mis-kepala-aksi,
+.search-action-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------------- kartu */
+
+.mis-kartu,
+.card-neo {
+    background: var(--mis-kartu);
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: var(--mis-radius);
+    box-shadow: var(--mis-bayang);
+    padding: 22px 24px;
+    margin-bottom: 22px;
+}
+
+/* .card-neo lama sering dipakai sebagai pembungkus tabel tanpa padding;
+   biarkan .card-body di dalamnya yang mengatur jaraknya. */
+.card-neo:has(> .card-body) {
+    padding: 0;
+    overflow: hidden;
+}
+
+.mis-kartu-kepala {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.mis-kartu-judul {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--mis-tinta);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.mis-kartu-sub {
+    margin: 4px 0 0;
+    font-size: .8rem;
+    color: var(--mis-tinta-3);
+}
+
+/* --------------------------------------------------- lencana ikon warna */
+
+/*
+ * Ikon SELALU di tengah lewat grid + place-items, bukan padding kira-kira.
+ * Warnanya lewat --warna supaya satu kelas cukup untuk enam variasi.
+ */
+.mis-medali {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 15px;
+    background: var(--warna, var(--mis-ungu));
+    color: #fff;
+    font-size: 1.02rem;
+    box-shadow: 0 12px 22px -12px rgba(15, 23, 42, .6);
+}
+
+.mis-medali.kecil {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 13px;
+    font-size: .88rem;
+}
+
+.mis-medali i {
+    line-height: 1;
+}
+
+.mis-ungu { --warna: var(--mis-ungu); }
+.mis-hijau { --warna: var(--mis-hijau); }
+.mis-merah { --warna: var(--mis-merah); }
+.mis-biru { --warna: var(--mis-biru); }
+.mis-kuning { --warna: var(--mis-kuning); }
+.mis-jingga { --warna: var(--mis-jingga); }
+
+.mis-ikon-ungu { color: #6366f1; }
+.mis-ikon-hijau { color: #10b981; }
+.mis-ikon-merah { color: #f43f5e; }
+.mis-ikon-biru { color: #0ea5e9; }
+.mis-ikon-kuning { color: #f59e0b; }
+.mis-ikon-jingga { color: #f97316; }
+
+/* ----------------------------------------------------------------- pil */
+
+.mis-pil,
+.badge-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 10px;
+    font-size: .7rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.mis-pil i {
+    font-size: 10px;
+}
+
+.mis-pil-hijau { color: #047857; background: #d1fae5; }
+.mis-pil-abu { color: #64748b; background: #f1f5f9; }
+.mis-pil-biru { color: #0369a1; background: #e0f2fe; }
+.mis-pil-kuning { color: #92400e; background: #fef3c7; }
+.mis-pil-merah { color: #be123c; background: #ffe4e6; }
+.mis-pil-ungu { color: #4338ca; background: #e0e7ff; }
+
+/* ----------------------------------------------------------------- kisi */
+
+/* auto-fit + minmax: jumlah kolomnya menyesuaikan sendiri, jadi tidak ada
+   titik putus yang harus dijaga satu per satu seperti col-md-*. */
+.mis-kisi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+.mis-kisi-isian {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.mis-isian-penuh {
+    grid-column: 1 / -1;
+}
+
+.mis-isian {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    /* tanpa ini, isian tanpa teks bantuan ikut meregang setinggi tetangganya */
+    align-content: start;
+}
+
+.mis-label {
+    margin: 0;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--mis-tinta-3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mis-bantuan {
+    margin: 0;
+    font-size: .72rem;
+    color: var(--mis-tinta-4);
+}
+
+/* --------------------------------------------------------------- isian */
+
+.form-control-modern {
+    width: 100%;
+    height: auto;
+    padding: 12px 16px;
+    border: 1.5px solid var(--mis-garis);
+    border-radius: 14px;
+    background: #f8fafc;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--mis-tinta);
+    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.form-control-modern::placeholder {
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.form-control-modern:focus {
+    border-color: #6366f1;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+}
+
+.form-control-modern.is-invalid {
+    border-color: #f43f5e;
+    background: #fff1f2;
+}
+
+select.form-control-modern {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2394a3b8'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 38px;
+}
+
+/* kotak cari dengan ikon di dalamnya */
+.mis-cari,
+.search-container {
+    position: relative;
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.mis-cari > i,
+.search-container > i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: #a5b4fc;
+    pointer-events: none;
+}
+
+.mis-cari .form-control-modern,
+.search-container .form-control-modern {
+    padding-left: 40px;
+}
+
+/* -------------------------------------------------------------- tombol */
+
+.mis-tombol,
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 14px;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+}
+
+.mis-tombol-ungu,
+.btn-gradient {
+    background: var(--mis-ungu);
+    color: #fff !important;
+    box-shadow: 0 10px 20px -12px #6366f1;
+}
+
+.mis-tombol-hijau { background: var(--mis-hijau); color: #fff !important; box-shadow: 0 10px 20px -12px #10b981; }
+.mis-tombol-biru { background: var(--mis-biru); color: #fff !important; box-shadow: 0 10px 20px -12px #0ea5e9; }
+
+.mis-tombol-ungu:hover,
+.mis-tombol-hijau:hover,
+.mis-tombol-biru:hover,
+.btn-gradient:hover:not(:disabled) {
+    transform: translateY(-2px);
+    color: #fff !important;
+}
+
+/* tombol garis untuk tindakan sekunder di dalam tabel */
+.mis-tombol-garis,
+.btn-outline-modern {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--mis-garis);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--mis-tinta-3);
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.mis-tombol-garis:hover,
+.btn-outline-modern:hover {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+    transform: translateY(-2px);
+}
+
+/* Hapus/batalkan selalu merah dan terlihat merah tanpa perlu disentuh. */
+.mis-tombol-bahaya {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    background: #fff1f2;
+    color: #e11d48;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.mis-tombol-bahaya:hover {
+    background: #e11d48;
+    border-color: #e11d48;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.mis-aksi-baris {
+    display: inline-flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.mis-tombol:disabled,
+.btn-modern:disabled {
+    background: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --------------------------------------------------------------- tabel */
+
+.mis-tabel-bungkus {
+    background: var(--mis-kartu);
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: var(--mis-radius);
+    box-shadow: var(--mis-bayang);
+    overflow: hidden;
+}
+
+.mis-tabel,
+.table-modern {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: .85rem;
+}
+
+.mis-tabel thead th,
+.table-modern thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 14px 18px;
+    border: 0;
+    border-bottom: 1px solid var(--mis-garis);
+    background: #f8fafc;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--mis-tinta-3);
+    white-space: nowrap;
+}
+
+.mis-tabel tbody td,
+.table-modern tbody td {
+    padding: 14px 18px;
+    border: 0;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: var(--mis-tinta-2);
+}
+
+.mis-tabel tbody tr:last-child td,
+.table-modern tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.mis-tabel tbody tr,
+.table-modern tbody tr {
+    transition: background .2s ease;
+}
+
+.mis-tabel tbody tr:hover,
+.table-modern tbody tr:hover {
+    background: #f8faff;
+}
+
+/* sel utama: lencana warna + nama, pola yang sama di semua daftar */
+.mis-sel-utama {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.mis-sel-teks {
+    min-width: 0;
+}
+
+.mis-sel-judul {
+    margin: 0;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--mis-tinta);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.mis-sel-catatan {
+    margin: 2px 0 0;
+    font-size: .74rem;
+    color: var(--mis-tinta-4);
+}
+
+/* ------------------------------------------------------- keadaan kosong */
+
+.mis-kosong {
+    display: grid;
+    place-items: center;
+    gap: 10px;
+    padding: 46px 20px;
+    text-align: center;
+}
+
+.mis-kosong-ikon {
+    display: grid;
+    place-items: center;
+    width: 66px;
+    height: 66px;
+    border-radius: 22px;
+    background: #f1f5f9;
+    color: #cbd5e1;
+    font-size: 1.5rem;
+}
+
+.mis-kosong-judul {
+    margin: 0;
+    font-size: .95rem;
+    font-weight: 800;
+    color: var(--mis-tinta);
+}
+
+.mis-kosong-teks {
+    margin: 0;
+    font-size: .82rem;
+    color: var(--mis-tinta-3);
+    max-width: 360px;
+}
+
+/* ----------------------------------------------------------- responsif */
+
+@media (max-width: 991.98px) {
+    .mis-kepala-aksi,
+    .search-action-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .mis-kepala,
+    .section-header-modern,
+    .mis-kartu,
+    .card-neo,
+    .mis-tabel-bungkus {
+        padding: 18px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+    }
+
+    .card-neo:has(> .card-body) {
+        padding: 0;
+    }
+
+    .mis-kisi,
+    .mis-kisi-isian {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .mis-kepala-aksi .mis-tombol,
+    .search-action-wrapper .btn-modern {
+        width: 100%;
+    }
+
+    /*
+     * Tabel jadi kartu di ponsel. Tabel lima kolom pada layar 390px hanya
+     * bisa dibaca dengan menggeser ke samping, dan itu yang paling sering
+     * bikin orang menyerah. Tiap <td> memakai data-judul="..." sebagai
+     * label kirinya; tanpa atribut itu selnya tampil polos, bukan rusak.
+     */
+    /* Tanpa display:block, <table> tetap memakai algoritma tabel dan
+       lebarnya jadi 800px walau tiap <tr> sudah grid.
+       min-width menimpa Stisla style.css:948, yang memaksa SEMUA tabel di
+       dalam .table-responsive selebar 800px di bawah 576px — aturan itulah
+       yang selama ini membuat tiap daftar harus digeser ke samping. */
+    .mis-tabel.mis-tabel-kartu,
+    .mis-tabel.mis-tabel-kartu tbody,
+    .table-responsive .mis-tabel.mis-tabel-kartu {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .mis-tabel.mis-tabel-kartu thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .mis-tabel.mis-tabel-kartu tbody tr {
+        display: grid;
+        gap: 8px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .mis-tabel.mis-tabel-kartu tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 0;
+        border: 0;
+        text-align: right;
+    }
+
+    .mis-tabel.mis-tabel-kartu tbody td[data-judul]::before {
+        content: attr(data-judul);
+        flex: 0 0 auto;
+        font-size: .66rem;
+        font-weight: 800;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        color: var(--mis-tinta-4);
+        text-align: left;
+    }
+
+    /* Nomor urut tidak ada gunanya di mode kartu — tiap kartu sudah
+       terpisah sendiri. Beri kelas ini pada sel yang boleh hilang di ponsel. */
+    .mis-tabel.mis-tabel-kartu tbody td.mis-td-samar {
+        display: none;
+    }
+
+    /* sel utama tetap rata kiri dan memenuhi lebar kartu */
+    .mis-tabel.mis-tabel-kartu tbody td.mis-td-utama {
+        justify-content: flex-start;
+        text-align: left;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed var(--mis-garis);
+    }
+
+    .mis-tabel.mis-tabel-kartu tbody td.mis-td-utama::before {
+        display: none;
+    }
+}
+
+/* tombol kecil untuk mengosongkan kotak cari */
+.mis-cari-hapus {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: var(--mis-tinta-3);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.mis-cari-hapus:hover {
+    background: #e2e8f0;
+    color: var(--mis-tinta);
+}
