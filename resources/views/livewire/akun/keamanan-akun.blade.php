@@ -1,129 +1,155 @@
+{{--
+  Tab "Keamanan" di halaman profil.
+
+  Mengikuti pola tab Data diri: tiap bagian punya kepala bermedali, dan
+  gayanya tinggal di account/profil/gaya.blade.php lewat @push('gaya') —
+  bukan <style> atau style sebaris di badan berkas.
+--}}
 <div>
-    {{-- Akhiri sesi di perangkat lain --}}
-    <div class="p-3 mb-4" style="border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
-        <div class="d-flex align-items-start mb-3">
-            <i class="fas fa-power-off text-danger fa-lg mr-3 mt-1"></i>
-            <div>
-                <div class="font-weight-800 text-dark">Keluarkan saya dari perangkat lain</div>
-                <div class="small text-muted">
-                    Mengakhiri sesi di semua peramban lain yang masih terbuka. Perangkat yang sedang Anda pakai
-                    sekarang tetap masuk. Berguna kalau Anda lupa keluar di komputer bersama.
-                </div>
-            </div>
+    <div class="prof-bagian">
+        <div class="prof-bagian-kepala">
+            <span class="mis-medali kecil mis-merah" aria-hidden="true"><i class="fas fa-power-off"></i></span>
+            <h4 class="prof-bagian-judul">Keluarkan saya dari perangkat lain</h4>
+            <p class="prof-bagian-sub">
+                Peramban lain yang masih terbuka ikut keluar. Perangkat ini tetap masuk.
+            </p>
         </div>
-        <div class="d-flex flex-column flex-sm-row" style="gap: 10px;">
-            <input type="password" class="form-control-modern flex-grow-1 @error('kataSandi') is-invalid @enderror"
-                wire:model="kataSandi" autocomplete="current-password" placeholder="Kata sandi akun Anda">
-            <button type="button" class="btn btn-outline-danger font-weight-bold px-4" style="border-radius: 14px;"
-                wire:click="keluarkanPerangkatLain" wire:loading.attr="disabled">
-                <i class="fas fa-sign-out-alt mr-2"></i> KELUARKAN
+
+        <div class="prof-baris-aksi">
+            <input type="password" class="form-control-modern @error('kataSandi') is-invalid @enderror"
+                wire:model="kataSandi" autocomplete="current-password" aria-label="Kata sandi akun Anda"
+                placeholder="Kata sandi akun Anda">
+            <button type="button" class="mis-tombol prof-tombol-bahaya-teks" wire:click="keluarkanPerangkatLain"
+                wire:loading.attr="disabled">
+                <i class="fas fa-sign-out-alt"></i> Keluarkan
             </button>
         </div>
+
         @error('kataSandi')
-            <div class="text-danger small font-weight-bold mt-2">{{ $message }}</div>
+            <p class="prof-salah mt-2"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
         @enderror
     </div>
 
-    {{-- Perangkat yang sedang masuk --}}
     @if ($sesi->isNotEmpty())
-        <h6 class="text-uppercase small font-weight-800 text-muted mb-3" style="letter-spacing: 1px;">
-            Perangkat Yang Sedang Masuk
-        </h6>
+        <div class="prof-bagian">
+            <div class="prof-bagian-kepala">
+                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-laptop"></i></span>
+                <h4 class="prof-bagian-judul">Perangkat yang sedang masuk</h4>
+                <p class="prof-bagian-sub">Ada yang bukan Anda? Akhiri sesinya dari sini.</p>
+            </div>
 
-        <div class="mb-4">
-            @foreach ($sesi as $baris)
-                <div class="d-flex align-items-center p-3 mb-2"
-                    style="border-radius: 14px; background: {{ $baris->ini ? '#ecfeff' : '#f8fafc' }}; border: 1px solid {{ $baris->ini ? '#a5f3fc' : '#e2e8f0' }};">
-                    <i class="fas {{ $baris->ini ? 'fa-laptop text-info' : 'fa-desktop text-muted' }} mr-3"></i>
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="small font-weight-bold text-dark">
-                            {{ \Illuminate\Support\Str::limit(strip_tags((string) $baris->user_agent), 60) ?: 'Peramban tidak dikenali' }}
-                            @if ($baris->ini)
-                                <span class="badge badge-info ml-1" style="border-radius: 8px;">perangkat ini</span>
-                            @endif
+            <div class="kmn-daftar">
+                @foreach ($sesi as $baris)
+                    <div class="kmn-perangkat {{ $baris->ini ? 'ini' : '' }}">
+                        <span class="mis-medali mini {{ $baris->ini ? 'mis-hijau' : 'mis-biru' }}" aria-hidden="true">
+                            <i class="fas {{ $baris->ini ? 'fa-laptop' : 'fa-desktop' }}"></i>
+                        </span>
+
+                        <div class="kmn-perangkat-teks">
+                            <p class="kmn-perangkat-nama">
+                                {{ \App\Support\NamaPerangkat::ringkas($baris->user_agent) }}
+                            </p>
+                            <p class="kmn-perangkat-ket">
+                                {{ $baris->ip_address ?: 'IP tidak tercatat' }} &middot;
+                                aktif {{ $baris->waktu->locale('id')->diffForHumans() }}
+                            </p>
                         </div>
-                        <div class="small text-muted">
-                            {{ $baris->ip_address ?: 'IP tidak tercatat' }} &middot;
-                            aktif {{ $baris->waktu->locale('id')->diffForHumans() }}
-                        </div>
+
+                        @if ($baris->ini)
+                            <span class="mis-pil mis-pil-hijau">Perangkat ini</span>
+                        @else
+                            <button type="button" class="mis-tombol prof-tombol-bahaya-teks kmn-tombol-kecil"
+                                wire:click="akhiriSesi('{{ $baris->id }}')">
+                                <i class="fas fa-times-circle"></i> Akhiri
+                            </button>
+                        @endif
                     </div>
-                    @unless ($baris->ini)
-                        <button type="button" class="btn btn-sm btn-outline-danger font-weight-bold"
-                            style="border-radius: 10px;" wire:click="akhiriSesi('{{ $baris->id }}')">
-                            Akhiri
-                        </button>
-                    @endunless
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     @endif
 
-    {{-- Riwayat masuk --}}
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h6 class="text-uppercase small font-weight-800 text-muted mb-0" style="letter-spacing: 1px;">
-            Riwayat Masuk Terakhir
-        </h6>
-        @if ($gagalTerakhir > 0)
-            <span class="badge badge-warning px-3 py-2" style="border-radius: 10px;">
-                {{ $gagalTerakhir }} percobaan gagal dalam 30 hari
-            </span>
+    <div class="prof-bagian">
+        <div class="prof-bagian-kepala {{ $gagalTerakhir > 0 ? 'punya-aksi' : '' }}">
+            <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
+            <h4 class="prof-bagian-judul">Riwayat masuk terakhir</h4>
+            <p class="prof-bagian-sub">Percobaan masuk ke akun Anda, yang berhasil maupun yang gagal.</p>
+            @if ($gagalTerakhir > 0)
+                <span class="mis-pil mis-pil-kuning prof-bagian-lencana">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    {{ $gagalTerakhir }} gagal dalam 30 hari
+                </span>
+            @endif
+        </div>
+
+        @if ($riwayat->isEmpty())
+            <div class="mis-kosong">
+                <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                <p class="mis-kosong-judul">Belum ada catatan masuk</p>
+                <p class="mis-kosong-teks">Riwayatnya muncul di sini setelah Anda masuk lagi.</p>
+            </div>
+        @else
+            {{-- mis-tabel-kartu: di bawah 576px tabelnya berubah jadi tumpukan
+                 kartu, jadi tidak perlu digeser ke samping di ponsel. --}}
+            <div class="mis-tabel-bungkus kmn-tabel">
+                <table class="mis-tabel mis-tabel-kartu">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Hasil</th>
+                            <th>Alamat IP</th>
+                            <th>Perangkat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($riwayat as $baris)
+                            <tr>
+                                <td class="mis-td-utama">
+                                    <span class="kmn-waktu">
+                                        {{ $baris->created_at?->locale('id')->translatedFormat('d M Y, H:i') }} WIB
+                                    </span>
+                                </td>
+                                {{-- Lencana menjawab "berhasil atau tidak", barisan kecil di
+                                     bawahnya menjelaskan caranya. Dulu keduanya dijadikan satu
+                                     lencana, jadi ada lencana hijau bertuliskan "kata sandi"
+                                     yang tidak menyatakan apa pun soal berhasil. --}}
+                                <td data-judul="Hasil">
+                                    <div class="kmn-hasil">
+                                        @if ($baris->berhasil)
+                                            <span class="mis-pil mis-pil-hijau">
+                                                <i class="fas fa-check"></i> Berhasil
+                                            </span>
+                                        @else
+                                            <span class="mis-pil mis-pil-merah">
+                                                <i class="fas fa-xmark"></i> Gagal
+                                            </span>
+                                        @endif
+                                        @if ($baris->alasan)
+                                            <span class="kmn-samar">{{ $baris->alasan }}</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td data-judul="Alamat IP" class="kmn-samar">{{ $baris->ip ?: '-' }}</td>
+                                <td data-judul="Perangkat">
+                                    @if ($baris->perangkat && $baris->perangkat === $perangkatIni)
+                                        <span class="mis-pil mis-pil-biru">Perangkat ini</span>
+                                    @else
+                                        <span class="kmn-samar">
+                                            {{ \App\Support\NamaPerangkat::ringkas($baris->peramban) }}
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="prof-aksi-catatan kmn-catatan">
+                <i class="fas fa-circle-info mis-ikon-biru"></i>
+                Ada baris yang bukan Anda? Segera ganti kata sandi — sesi di perangkat lain ikut berakhir dan
+                PIN masuk dimatikan.
+            </p>
         @endif
     </div>
-
-    @if ($riwayat->isEmpty())
-        <div class="text-center text-muted py-4">
-            <i class="fas fa-history fa-2x mb-2 d-block" style="opacity: .35;"></i>
-            <div class="small">Belum ada catatan masuk.</div>
-        </div>
-    @else
-        <div class="table-responsive">
-            <table class="table table-sm mb-0">
-                <thead>
-                    <tr class="small text-muted text-uppercase" style="letter-spacing: .5px;">
-                        <th style="border-top: 0;">Waktu</th>
-                        <th style="border-top: 0;">Hasil</th>
-                        <th style="border-top: 0;">Alamat IP</th>
-                        <th style="border-top: 0;">Perangkat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($riwayat as $baris)
-                        <tr>
-                            <td class="small">
-                                {{ $baris->created_at?->locale('id')->translatedFormat('d M Y, H:i') }}
-                                <span class="text-muted">WIB</span>
-                            </td>
-                            <td class="small">
-                                @if ($baris->berhasil)
-                                    <span class="text-success font-weight-bold">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        {{ $baris->alasan ?: 'berhasil' }}
-                                    </span>
-                                @else
-                                    <span class="text-danger font-weight-bold">
-                                        <i class="fas fa-times-circle mr-1"></i>
-                                        {{ $baris->alasan ?: 'gagal' }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="small text-muted">{{ $baris->ip ?: '-' }}</td>
-                            <td class="small text-muted">
-                                @if ($baris->perangkat && $baris->perangkat === $perangkatIni)
-                                    <span class="badge badge-info px-2" style="border-radius: 8px;">perangkat ini</span>
-                                @else
-                                    {{ \Illuminate\Support\Str::limit(strip_tags((string) $baris->peramban), 42) ?: '-' }}
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <p class="small text-muted mt-3 mb-0">
-            <i class="fas fa-info-circle mr-1"></i>
-            Ada baris yang bukan Anda? Segera ganti kata sandi — sesi di perangkat lain akan ikut berakhir dan PIN
-            masuk dimatikan.
-        </p>
-    @endif
 </div>
