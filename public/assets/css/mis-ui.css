@@ -1450,6 +1450,19 @@ select.form-control-modern {
     transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
 }
 
+/*
+ * Tombol yang berupa <a> ikut kena "a:hover { text-decoration: underline }"
+ * dari bootstrap: bobotnya (0,1,1) mengalahkan text-decoration: none milik
+ * .mis-tombol (0,1,0), jadi garis bawahnya baru muncul saat disentuh.
+ * Dua selektor ini berbobot (0,2,0) sehingga menang tanpa perlu !important.
+ */
+.mis-tombol:hover,
+.mis-tombol:focus,
+.btn-modern:hover,
+.btn-modern:focus {
+    text-decoration: none;
+}
+
 .mis-tombol-ungu,
 .btn-gradient {
     background: var(--mis-ungu);
