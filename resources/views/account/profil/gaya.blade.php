@@ -1797,11 +1797,21 @@
         }
     }
 
-    /* Di ponsel lencana tidak lagi muat di samping batang; begitu ia sendirian
-       di satu baris, rata kiri lebih rapi daripada didorong ke kanan. */
+    /* Di ponsel lencana tidak lagi muat di samping batang dan jatuh sendirian
+       ke satu baris penuh. Dua lencana ini terbaca sebagai satu pasangan
+       pendek, dan di bawah batang kemajuan yang selebar kartu, pasangan itu
+       ditengahkan — bukan dirapatkan ke kiri, yang menyisakan petak kosong
+       lebar di kanannya. Di layar lebar letaknya tetap kanan.
+       width: 100% perlu dikembalikan di sini: aturan <=1399.98px di atas
+       menyetelnya auto supaya lencana bisa berbagi baris dengan batang
+       kemajuan, dan selama lebarnya auto, wadahnya sempit sepas isinya
+       sehingga justify-content tidak punya ruang sisa untuk menengahkan
+       apa pun. */
     @media (max-width: 575.98px) {
         .prof-kepala .mis-kepala-aksi {
+            width: 100%;
             margin-left: 0;
+            justify-content: center;
         }
     }
 
