@@ -256,8 +256,10 @@ class PengaturanPin extends Component
 
         $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
         $this->addError('pin', 'Isikan PIN yang sekarang dipakai, bukan PIN baru.');
-        $this->toast('gagal', 'PIN tidak diganti. Perangkat ini belum terdaftar, jadi PIN hanya bisa diganti dari '
-            . 'perangkat yang sudah memakainya. Lupa PIN-nya? Matikan dulu PIN lama, lalu buat yang baru.');
+        // Pendek saja: kotak peringatan kuning di layar sudah menerangkan
+        // kedua jalan keluarnya, dan toast setinggi lima baris justru
+        // menutupi kotak itu.
+        $this->toast('gagal', 'PIN tidak diganti — perangkat ini belum terdaftar.');
 
         return false;
     }

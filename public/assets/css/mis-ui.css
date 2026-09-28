@@ -1821,49 +1821,158 @@ body.mis-latar-terkunci {
 /* ======================================================= TOAST ======= */
 
 /*
- * Rupa toast SweetAlert2 disamakan dengan kartu sistem ini: sudut membulat,
- * bayangan lembut, dan satu pita warna di tepi kiri sebagai penanda jenis.
+ * Toast memakai rupa kartu sistem ini: ubin bergradien berisi ikon, judul
+ * pendek, lalu pesannya. Ikon bawaan SweetAlert2 tidak dipakai — lihat
+ * alasannya di mis-ui.js.
  */
-.swal2-container .mis-toast {
-    padding: 14px 16px;
-    border: 1px solid var(--mis-garis);
-    border-left: 4px solid var(--mis-toast-warna, #6366f1);
-    border-radius: 16px;
-    box-shadow: 0 18px 38px rgba(15, 23, 42, .12);
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+/*
+ * Turun sampai di bawah bilah atas, bukan menimpanya.
+ *
+ * Bilah atas tingginya 80px dan position: fixed, jadi toast yang menempel
+ * di 0 selalu menutupi tombol pemberitahuan dan nama pengguna — termasuk
+ * saat halaman digulir. 92px = tinggi bilah + 12px sela.
+ */
+.swal2-container.swal2-top-end {
+    padding: 92px 16px 0;
 }
 
-.swal2-container .mis-toast .swal2-title {
+.swal2-container .mis-toast {
+    width: min(360px, calc(100vw - 32px));
+    /* padding bawah lebih besar: di situ ada pita waktu */
+    padding: 13px 15px 17px;
+    background: #fff;
+    border: 1px solid var(--mis-garis);
+    border-radius: 15px;
+    box-shadow: 0 16px 34px -18px rgba(15, 23, 42, .5);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    /* supaya pita waktu di dasarnya ikut membulat mengikuti sudut kartu */
+    overflow: hidden;
+}
+
+/* SweetAlert2 memberi wadah html-nya margin dan perataan tengah bawaan. */
+.swal2-container .mis-toast .mis-toast-wadah {
     margin: 0;
     padding: 0;
-    font-size: .86rem;
-    font-weight: 700;
-    line-height: 1.45;
-    color: var(--mis-tinta);
     text-align: left;
+    font-size: inherit;
+    color: inherit;
+    overflow: visible;
 }
 
-.swal2-container .mis-toast .swal2-icon {
-    width: 1.7em;
-    height: 1.7em;
-    margin: 0 12px 0 0;
+.mis-toast-isi {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+/*
+ * Ubin ikon: sama seperti .mis-medali. place-items yang menengahkan
+ * glifnya, bukan padding kira-kira — dan glifnya diberi width 100% +
+ * text-align center supaya ikon yang lebarnya tidak sama dengan tingginya
+ * (fa-exclamation-triangle) tidak bergeser dari titik tengah.
+ */
+.mis-toast-ubin {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 9px;
+    background: var(--mis-toast-warna, var(--mis-ungu));
+    color: #fff;
+    font-size: .8rem;
+    box-shadow: 0 6px 12px -8px rgba(15, 23, 42, .55);
+}
+
+.mis-toast-ubin i {
+    display: block;
+    width: 100%;
+    font-size: inherit;
+    line-height: 1;
+    text-align: center;
+}
+
+.mis-toast-teks {
+    min-width: 0;
+    /* Sejajar optis dengan ubin: tinggi baris judul 1,25 x 0,8rem membuat
+       teksnya duduk sedikit lebih tinggi daripada tengah ubin. */
+    padding-top: 1px;
+}
+
+.mis-toast-judul {
+    margin: 0 0 1px;
+    font-size: .8rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--mis-tinta);
+}
+
+.mis-toast-pesan {
+    margin: 0;
+    font-size: .76rem;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--mis-tinta-3);
+    overflow-wrap: anywhere;
+}
+
+/*
+ * Pita waktu jadi pil pendek yang masuk ke dalam, bukan garis selebar kartu
+ * di tepi paling bawah. Di tepi itu ia terpotong sudut membulat kartunya,
+ * sehingga ujungnya tampak lebih pendek sebelah dan terbaca seperti cacat.
+ */
+.swal2-container .mis-toast .swal2-timer-progress-bar-container {
+    left: 15px;
+    right: 15px;
+    bottom: 7px;
+    width: auto;
+    height: 3px;
+    border-radius: 999px;
+    background: #eef2f7;
+    overflow: hidden;
 }
 
 .swal2-container .mis-toast .swal2-timer-progress-bar {
-    background: var(--mis-toast-warna, #6366f1);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--mis-toast-pita, #6366f1);
 }
 
 @media (max-width: 575.98px) {
-    /* Di ponsel toast melebar penuh dan turun ke bawah, supaya tidak
-       menutupi tombol atau judul yang sedang dibaca. */
-    .swal2-container.swal2-top-end {
-        align-items: flex-end !important;
-        justify-content: stretch !important;
+    /*
+     * Di ponsel toast melebar penuh dan turun ke dasar layar, supaya tidak
+     * menutupi bilah atas maupun judul yang sedang dibaca.
+     *
+     * Dua hal yang membuat ini tidak semudah kelihatannya:
+     *
+     * 1. Wadah toast-nya menyusut mengikuti isi dan ditambat ke kanan
+     *    (left: auto; right: 0), jadi selebar apa pun toast dibuat ia tidak
+     *    pernah melewati lebar wadahnya sendiri. Wadahnya yang harus
+     *    ditambat ke kedua tepi lebih dulu.
+     * 2. SweetAlert2 v11 menata wadahnya sebagai kisi 3x3 lewat
+     *    grid-template-areas dan memasang align-self: start; justify-self:
+     *    end langsung pada toast — aturan align-items pada wadah kalah oleh
+     *    itu dan tidak berpengaruh sama sekali.
+     *
+     * !important dipakai karena lembar gaya SweetAlert2 disuntikkan saat
+     * jalan, sehingga urutannya terhadap berkas ini tidak bisa dipastikan.
+     */
+    body.swal2-toast-shown > .swal2-container.swal2-top-end {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: auto !important;
         padding: 0 12px 14px;
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .swal2-container .mis-toast {
-        width: 100%;
+    .swal2-container.swal2-top-end > .mis-toast {
+        grid-area: 1 / 1 / -1 / -1;
+        align-self: end;
+        justify-self: stretch;
+        width: auto;
         margin: 0;
     }
 }
