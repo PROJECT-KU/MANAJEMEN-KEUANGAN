@@ -37,12 +37,28 @@
                 {{-- "sedang masuk sekarang", bukan sekadar "sedang masuk":
                      di bawahnya ada daftar kedua yang isinya izin permanen,
                      dan bedanya harus terbaca dari judulnya. --}}
+                {{--
+                  Keterangannya menyebut AKIBAT, bukan hanya isi daftarnya.
+
+                  Dua daftar ini terlihat kembar kalau seseorang memakai satu
+                  mesin saja — baris yang sama persis muncul di keduanya. Yang
+                  membedakannya bukan rupa barisnya, melainkan apa yang terjadi
+                  ketika tombolnya ditekan, dan itu yang harus tertulis.
+                --}}
                 <h4 class="prof-bagian-judul">Sedang masuk sekarang</h4>
-                <p class="prof-bagian-sub">Sesi yang masih terbuka. Ada yang bukan Anda? Akhiri dari sini.</p>
+                <p class="prof-bagian-sub">
+                    Jendela yang masih terbuka. Berakhir sendiri setelah 2 jam tidak dipakai.
+                </p>
                 @if ($sesi->count() > 1)
                     <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $sesi->count() }} perangkat</span>
                 @endif
             </div>
+
+            <p class="kmn-catatan-beda">
+                <i class="fas fa-info-circle mis-ikon-biru" aria-hidden="true"></i>
+                <span>Mengakhiri sesi <strong>tidak</strong> mencabut izin PIN-nya.
+                    Perangkatnya masih bisa masuk lagi dengan enam angka.</span>
+            </p>
 
             <div class="kmn-daftar">
                 @foreach ($sesiTampil as $baris)
@@ -115,12 +131,18 @@
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
                 <h4 class="prof-bagian-judul">Boleh masuk dengan PIN</h4>
                 <p class="prof-bagian-sub">
-                    Izin ini menetap walau sesinya sudah berakhir. Kehilangan perangkatnya? Cabut dari sini.
+                    Izin masuk cukup dengan 6 angka, tanpa kata sandi. Menetap sampai dicabut.
                 </p>
                 @if ($perangkatPin->count() > 1)
                     <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $perangkatPin->count() }} perangkat</span>
                 @endif
             </div>
+
+            <p class="kmn-catatan-beda">
+                <i class="fas fa-info-circle mis-ikon-biru" aria-hidden="true"></i>
+                <span>Mencabut izin <strong>tidak</strong> mengakhiri sesi yang sedang berjalan.
+                    Perangkatnya tetap terbuka sampai Anda akhiri di daftar atas.</span>
+            </p>
 
             <div class="kmn-daftar">
                 @foreach ($perangkatPin as $perangkat)

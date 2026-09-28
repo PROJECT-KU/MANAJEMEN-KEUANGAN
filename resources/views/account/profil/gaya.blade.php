@@ -1680,6 +1680,41 @@
         line-height: 1.45;
     }
 
+    /*
+     * Keterangan yang menjelaskan beda kedua daftar perangkat.
+     *
+     * Ditaruh di antara kepala bagian dan daftarnya, bukan di bawah daftar:
+     * yang perlu tahu justru orang yang sedang memilih tombol mana yang akan
+     * ditekan.
+     */
+    .kmn-catatan-beda {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 0 0 9px;
+        padding: 8px 11px;
+        border-radius: 11px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        font-size: .74rem;
+        line-height: 1.45;
+        color: #0369a1;
+    }
+
+    .kmn-catatan-beda i {
+        font-size: inherit;
+        line-height: 1.45;
+        flex: 0 0 auto;
+    }
+
+    /* Kalimatnya dibungkus satu <span>, bukan dibiarkan telanjang.
+       Pada flex, tiap penggal teks yang terpisah unsur lain jadi item
+       tersendiri — sehingga gap 8px ikut menyelip mengapit <strong>, dan
+       kata "tidak" tampak berspasi ganda. */
+    .kmn-catatan-beda > span {
+        min-width: 0;
+    }
+
     /* Lencana yang bisa ditekan: rupanya tetap lencana, tetapi ia tombol. */
     .kmn-saring {
         border: 0;
