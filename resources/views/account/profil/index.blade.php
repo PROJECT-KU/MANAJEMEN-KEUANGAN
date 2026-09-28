@@ -65,15 +65,21 @@ Profil | MIS
 
         <div class="mis-kepala-teks">
           <h1 class="mis-judul">Profil saya</h1>
-          <p class="mis-sub">
-            <span>{{ $user->full_name ?: $user->username }}</span>
-            <span class="prof-titik" aria-hidden="true">&middot;</span>
-            <span>{{ $user->jobdesk ?: 'Tanpa jabatan' }}</span>
-            @if ($user->level !== 'user' && $user->company)
-              <span class="prof-titik" aria-hidden="true">&middot;</span>
-              <span>{{ $user->company }}</span>
-            @endif
-          </p>
+          {{--
+            Keterangan kepala menjelaskan HALAMANNYA, bukan mengulang orangnya.
+
+            Dulu di sini ada "nama · jabatan · perusahaan". Tiga hal itu sudah
+            tampil di kartu identitas tepat di bawahnya — bahkan jabatan dan
+            perusahaannya memakai pil yang sama persis — sedangkan namanya
+            sudah disebut dua kali di bilah sapaan di atas. Selain mengulang,
+            barisnya juga jelek dibaca: nama tersimpan huruf kecil, jabatan
+            huruf besar semua, perusahaan huruf kecil lagi, ketiganya sewarna,
+            sehingga jabatan yang paling tidak penting justru paling ramai.
+
+            Kalimat ini juga menyamakan kepala profil dengan kepala layar MIS
+            lain, yang keterangannya selalu menyebut isi halaman.
+          --}}
+          <p class="mis-sub">Data diri, keamanan akun, dan rekening penggajian Anda.</p>
         </div>
 
         {{-- Batang kelengkapan. Sebelumnya bagian tengah kepala kosong

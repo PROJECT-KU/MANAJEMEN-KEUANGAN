@@ -1098,6 +1098,14 @@ textarea:focus-visible,
     font-weight: 500;
     color: var(--mis-tinta-3);
 }
+/* Tanpa ini keterangan kepala mewarisi line-height 28px dari Stisla — 2,13x
+   ukuran hurufnya. Pada keterangan satu baris bedanya tidak kentara, tapi
+   begitu ia terpatah dua baris di ponsel jaraknya menganga. Hanya .mis-sub
+   yang disetel; .section-header-modern p dibiarkan supaya kepala layar lama
+   tidak ikut berubah tinggi. */
+.mis-sub {
+    line-height: 1.45;
+}
 
 .mis-kepala-aksi,
 .search-action-wrapper {
