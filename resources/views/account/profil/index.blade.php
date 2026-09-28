@@ -36,15 +36,17 @@ Profil | MIS
     $daftarBank = config('bank');
     $namaBank = $daftarBank[$user->bank] ?? '';
 
-    $fotoProfil = $user->gambar
-        ? asset('assets/img/profil/' . $user->gambar)
-        : asset('assets/img/profil/no-image.jpg');
+    $fotoProfil = $user->foto_url;
 
     /* Gambar pengganti "no-image.jpg" hanya pantas di kartu identitas yang
        memang menyediakan tombol unggah di sebelahnya. Di kepala halaman ia
        cuma jadi kotak krem bergambar kamera dicoret — di situ dipakai ubin
-       bergradien saja. Ukurannya sama, jadi tata letaknya tidak bergeser. */
-    $punyaFoto = filled($user->gambar) && $user->gambar !== 'no-image.jpg';
+       bergradien saja. Ukurannya sama, jadi tata letaknya tidak bergeser.
+
+       punya_foto memeriksa berkasnya benar-benar ada, di storage maupun di
+       folder lama; kolom yang terisi tetapi berkasnya sudah hilang tidak
+       lagi memunculkan tombol Hapus foto yang tidak bisa berbuat apa-apa. */
+    $punyaFoto = $user->punya_foto;
 @endphp
 
 <div class="main-content" style="padding-top: 110px; background-color: #f4f7ff; min-height: 100vh;">
@@ -202,11 +204,11 @@ Profil | MIS
               enctype="multipart/form-data" class="prof-unggah-bungkus">
               @csrf
               <input type="file" name="gambar" id="foto" class="prof-berkas"
-                accept="image/jpeg,image/png,image/gif">
+                accept="image/jpeg,image/png,image/gif,image/webp">
               <label for="foto" class="prof-unggah">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-camera"></i></span>
                 <span class="prof-unggah-nama" id="prf-nama-berkas">Pilih foto baru</span>
-                <span class="mis-bantuan">JPG, PNG, atau GIF &middot; maksimal 3 MB</span>
+                <span class="mis-bantuan">JPG, PNG, GIF, atau WebP &middot; maksimal 3 MB</span>
               </label>
               <button type="submit" id="updatePhotoBtn" class="mis-tombol mis-tombol-ungu prof-penuh" disabled>
                 <i class="fas fa-cloud-upload-alt"></i> Simpan foto

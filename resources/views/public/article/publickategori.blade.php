@@ -230,7 +230,7 @@ Kategori Blog | Rumah Scopus
                                 @if ($article->gambar == null)
                                 <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 55px; height:55px;">
                                 @else
-                                <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ asset('assets/img/profil/' .  $article->gambar) }}" alt="Preview Image" style="width: 55px; height:55px;">
+                                <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ \App\Support\FotoProfil::url($article->gambar) }}" alt="Preview Image" style="width: 55px; height:55px;">
                                 @endif
                                 <div style="font-size: 15px; margin-left: 10px;" class="mt-3">
                                     <p>{{ $article->full_name }}</p>

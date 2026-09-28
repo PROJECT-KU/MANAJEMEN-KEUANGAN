@@ -5,6 +5,7 @@ namespace App\Http\Controllers\account;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
+use App\Support\FotoProfil;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -152,16 +153,24 @@ class CustomerController extends Controller
     {
         $user = User::find($id);
 
-        // Menghapus foto lama jika ada
-        if ($user->gambar && file_exists(public_path('assets/img/profil/' . $user->gambar))) {
-            unlink(public_path('assets/img/profil/' . $user->gambar));
+        /*
+         * Lewat FotoProfil, sama seperti dua layar lainnya.
+         *
+         * Yang lama merangkai nama berkas dari extension() — ekstensi yang
+         * DIKETIK pengunggah — lalu memindahkannya apa adanya ke bawah
+         * public/. Berkas berisi gambar sah yang dinamai "x.php" karena itu
+         * tersimpan sebagai .php di folder yang dijalankan peladen. Sekarang
+         * namanya dibuat peladen dan isinya digambar ulang jadi WebP.
+         */
+        $fileName = FotoProfil::simpan($request->file('gambar'), 'customer-' . $user->id);
+
+        if (! $fileName) {
+            return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar.');
         }
 
-        // Menyimpan foto baru di assets/public/img/profil
-        $fileName = time() . '.' . $request->gambar->extension();
-        $request->gambar->move(public_path('assets/img/profil'), $fileName);
+        // Foto lama baru dibuang setelah yang baru aman tersimpan.
+        FotoProfil::hapus($user->gambar);
 
-        // Update nama file gambar di database
         $user->gambar = $fileName;
         $user->save();
 

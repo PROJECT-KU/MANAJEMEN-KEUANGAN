@@ -165,9 +165,9 @@ Detail Karyawan | MIS
                 <div class="card-body box-profile">
                   <div class="text-center">
                     @if ($user->gambar == null)
-                    <img alt="User profile picture" id="image-preview" src="{{ asset('assets/img/profil/no-image.jpg') }}" class="profile-user-img img-fluid img-circle" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <img alt="User profile picture" id="image-preview" src="{{ \App\Support\FotoProfil::bawaan() }}" class="profile-user-img img-fluid img-circle" style="width: 128px; height: 128px; border-radius: 50%;">
                     @else
-                    <img id="image-preview" class="profile-user-img img-fluid img-circle" src="{{ asset('assets/img/profil/' . $user->gambar) }}" alt="User profile picture" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <img id="image-preview" class="profile-user-img img-fluid img-circle" src="{{ \App\Support\FotoProfil::url($user->gambar) }}" alt="User profile picture" style="width: 128px; height: 128px; border-radius: 50%;">
                     @endif
                   </div>
 
@@ -320,9 +320,9 @@ Detail Karyawan | MIS
                         <div class="user-block d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center">
                             @if ($user->gambar == null)
-                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/no-image.jpg') }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            <img class="img-circle img-bordered-sm" src="{{ \App\Support\FotoProfil::bawaan() }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
                             @else
-                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/' . $user->gambar) }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            <img class="img-circle img-bordered-sm" src="{{ \App\Support\FotoProfil::url($user->gambar) }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
                             @endif
                             <span class="username ml-2">
                               <span>{{ $user->full_name }}</span>

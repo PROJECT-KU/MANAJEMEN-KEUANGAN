@@ -242,7 +242,7 @@ $articlesInCategory = $artikel->where('categories_artikel_id', $category->id)
 
                         <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
                             <div class="d-flex align-items-center">
-                                <img src="{{ $article->gambar ? asset('assets/img/profil/' . $article->gambar) : asset('assets/img/avatar/avatar-1.png') }}"
+                                <img src="{{ $article->gambar ? \App\Support\FotoProfil::url($article->gambar) : asset('assets/img/avatar/avatar-1.png') }}"
                                     class="rounded-circle author-img me-2" alt="Author">
                                 <small class="fw-bold text-secondary">{{ Str::limit($article->full_name, 15) }}</small>
                             </div>

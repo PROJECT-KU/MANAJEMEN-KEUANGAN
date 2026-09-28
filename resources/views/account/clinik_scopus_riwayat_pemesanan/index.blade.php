@@ -570,8 +570,9 @@ Clinik Scopus Riwayat Pemesanan | MIS
 
             <div class="profile-stack mt-4 d-flex align-items-center bg-white p-3 shadow-sm" style="border-radius: 20px;">
               <div class="avatar-stack shadow-sm" style="width: 45px; height: 45px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #f1f5f9;">
-                @if($item->customer && $item->customer->gambar && file_exists(public_path('assets/img/profil/' . $item->customer->gambar)))
-                <img src="{{ asset('assets/img/profil/' . $item->customer->gambar) }}"
+                {{-- punyaFoto() memeriksa storage DAN folder lama; file_exists ke satu folder saja akan menyembunyikan foto yang sudah pindah. --}}
+                @if($item->customer && \App\Support\FotoProfil::punyaFoto($item->customer->gambar))
+                <img src="{{ \App\Support\FotoProfil::url($item->customer->gambar) }}"
                   alt="Profile {{ $item->customer->full_name }}"
                   style="width: 100%; height: 100%; object-fit: cover;">
                 @else

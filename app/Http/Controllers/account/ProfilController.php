@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PemberitahuanPinMail;
-use App\Support\BerkasGambar;
+use App\Support\FotoProfil;
 use App\Mail\VerifikasiEmailMail;
 use App\Mail\EmailAkunDipindahMail;
 use App\AktivitasMasuk;
@@ -191,7 +191,10 @@ class ProfilController extends Controller
   {
     // 1. Validasi input (Sesuaikan max dengan script JS Anda: 3MB = 3072)
     $request->validate([
-      'gambar' => 'required|image|mimes:jpeg,png,jpg,gif|max:3072',
+      // webp ikut diterima: layar pengelolaan pengguna sudah menerimanya,
+      // dan sejak semua foto disimpan sebagai webp, menolaknya di sini berarti
+      // foto yang baru diunduh dari sistem ini sendiri tidak bisa diunggah balik.
+      'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:3072',
     ]);
 
     // 2. Langsung ambil User yang sedang login (Hanya diri sendiri)
@@ -199,16 +202,16 @@ class ProfilController extends Controller
 
     if ($request->hasFile('gambar')) {
 
-      // 3. Simpan berkas baru lebih dulu. Namanya dibuat di sisi peladen dan
-      //    ekstensinya ditebak dari isi berkas, bukan dari nama kiriman.
-      $fileName = BerkasGambar::simpan($request->file('gambar'), 'assets/img/profil', 'profil-' . $user->id);
+      // 3. Simpan berkas baru lebih dulu. Namanya dibuat di sisi peladen,
+      //    isinya digambar ulang jadi WebP, dan yang asli tidak ikut tersimpan.
+      $fileName = FotoProfil::simpan($request->file('gambar'), 'profil-' . $user->id);
 
       if (! $fileName) {
         return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar. Gunakan JPG, PNG, GIF, atau WEBP.');
       }
 
       // 4. Foto lama baru dihapus setelah yang baru aman tersimpan.
-      BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
+      FotoProfil::hapus($user->gambar);
 
       // 5. Simpan ke DB
       $user->gambar = $fileName;
@@ -234,13 +237,13 @@ class ProfilController extends Controller
   {
     $user = Auth::user();
 
-    if (! filled($user->gambar) || in_array($user->gambar, ['default.png', 'no-image.jpg'], true)) {
+    if (! FotoProfil::punyaFoto($user->gambar)) {
       return redirect()->back()->with('error', 'Tidak ada foto yang perlu dihapus.');
     }
 
     // Berkasnya dihapus lebih dulu; kalau gagal, kolomnya tetap dikosongkan
     // supaya pengguna tidak terjebak dengan foto yang tidak bisa dibuang.
-    BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
+    FotoProfil::hapus($user->gambar);
 
     $user->gambar = null;
     $user->save();

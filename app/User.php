@@ -95,6 +95,25 @@ class User extends Authenticatable
         return blank($uuid) ? null : static::where('uuid', $uuid)->first();
     }
 
+    /**
+     * Alamat foto profil yang siap dipasang di src.
+     *
+     * Satu pintu untuk seluruh sistem: sebelumnya tiap tampilan merangkai
+     * sendiri asset('assets/img/profil/' . $user->gambar), jadi memindahkan
+     * berkasnya ke storage berarti menyunting lima belas tempat dan pasti
+     * ada yang terlewat. Lihat App\Support\FotoProfil.
+     */
+    public function getFotoUrlAttribute(): string
+    {
+        return \App\Support\FotoProfil::url($this->gambar);
+    }
+
+    /** Punya foto sendiri, bukan gambar bawaan. */
+    public function getPunyaFotoAttribute(): bool
+    {
+        return \App\Support\FotoProfil::punyaFoto($this->gambar);
+    }
+
     public function pinAktif(): bool
     {
         return (bool) $this->pin_aktif && ! empty($this->pin);

@@ -104,7 +104,7 @@ Artikel | Rumah Scopus
                                     @if ($user->gambar == null)
                                     <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
                                     @else
-                                    <img src="{{ asset('assets/img/profil/' . $user->gambar) }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
+                                    <img src="{{ \App\Support\FotoProfil::url($user->gambar) }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
                                     @endif
                                     <a href="" style="margin-left: 10px;">{{ $user->full_name }}</a>
                                 </li>
