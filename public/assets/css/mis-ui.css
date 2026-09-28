@@ -1669,6 +1669,19 @@ select.form-control-modern {
     max-width: 360px;
 }
 
+/* -------------------------------------------------- kunci gulir latar --- */
+
+/* Dipasang mis-ui.js selagi ada jendela .custom-popup terbuka. Jendelanya
+   sendiri position: fixed dengan overflow-y: auto, jadi isi jendela yang
+   panjang tetap bisa digulir — yang dikunci hanya halaman di belakangnya. */
+body.mis-latar-terkunci {
+    overflow: hidden;
+    /* Ganjalan selebar bilah gulir yang barusan hilang; nilainya diukur dan
+       ditanam mis-ui.js. Di peramban yang bilahnya menumpang (macOS, ponsel)
+       nilainya 0. */
+    padding-right: var(--mis-bilah-gulir, 0px);
+}
+
 /* ----------------------------------------------------------- responsif */
 
 @media (max-width: 991.98px) {
