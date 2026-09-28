@@ -75,7 +75,9 @@
                             <div class="card mt-5 mb-5" style="width: 35rem;">
                                 <div style="text-align: center;" class="login-brand">
                                     <a href="https://rumahscopusfoundation.com/">
-                                        <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}" alt="logo" width="250">
+                                        <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                                    alt="MIS — Management Integration System by Rumah Scopus" width="190"
+                                    style="display:block;border:0;width:190px;max-width:60%;height:auto">
                                     </a>
                                 </div>
                                 <div class="card-body">
