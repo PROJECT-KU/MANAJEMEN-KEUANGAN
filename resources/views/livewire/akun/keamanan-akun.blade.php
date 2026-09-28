@@ -219,7 +219,7 @@
                      dia yang paling cepat sadar ada baris yang bukan dirinya. --}}
                 <a href="{{ route('account.profil.ekspor.riwayat') }}"
                     class="mis-tombol prof-tombol-halus kmn-tombol-kecil">
-                    <i class="fas fa-download"></i> Unduh CSV
+                    <i class="fas fa-file-pdf"></i> Unduh PDF
                 </a>
             </div>
         </div>
