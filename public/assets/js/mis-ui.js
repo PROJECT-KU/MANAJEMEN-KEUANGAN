@@ -170,3 +170,85 @@
         dariMuatan(e && e.detail);
     });
 })();
+
+/* ===================================================== kunci gulir latar ===
+
+   Selagi jendela .custom-popup terbuka, halaman di belakangnya tidak boleh
+   ikut tergulir. Tanpa ini, menggulir di atas lapisan gelap justru
+   menggerakkan isi halaman di baliknya: jendelanya seolah melayang lepas
+   dari halaman, dan di ponsel orang sering kehilangan jendelanya sendiri.
+
+   Dikerjakan lewat pengamat perubahan atribut, bukan dengan menyulih tiap
+   tempat yang menyalakan jendela. Jendela .custom-popup tersebar di lima
+   layar dan dinyalakan dari puluhan tempat — sebagian di dalam callback
+   fetch — jadi menyentuh satu per satu berisiko ada yang terlewat, dan
+   jendela baru yang ditulis nanti tidak akan ikut terjaga. Yang diamati
+   keadaan akhirnya: apa pun yang mengubah display-nya, hasilnya tertangkap.
+   ========================================================================= */
+(function () {
+    var PILIH = '.custom-popup';
+    var KELAS = 'mis-latar-terkunci';
+
+    function adaYangTerbuka() {
+        var jendela = document.querySelectorAll(PILIH);
+
+        for (var i = 0; i < jendela.length; i++) {
+            if (getComputedStyle(jendela[i]).display !== 'none') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function segarkan() {
+        var badan = document.body;
+
+        if (! badan) {
+            return;
+        }
+
+        var perlu = adaYangTerbuka();
+
+        if (perlu === badan.classList.contains(KELAS)) {
+            return;
+        }
+
+        if (perlu) {
+            // Bilah gulir ikut hilang saat overflow dikunci, dan lebarnya itu
+            // membuat seluruh halaman melompat ke kanan sesaat jendela dibuka.
+            // Diukur sekarang, bukan dipatok: di macOS bilahnya menumpang di
+            // atas isi halaman sehingga nilainya 0 dan tidak ada yang berubah.
+            var bilah = window.innerWidth - document.documentElement.clientWidth;
+
+            badan.style.setProperty('--mis-bilah-gulir', Math.max(0, bilah) + 'px');
+            badan.classList.add(KELAS);
+        } else {
+            badan.classList.remove(KELAS);
+            badan.style.removeProperty('--mis-bilah-gulir');
+        }
+    }
+
+    function pasang() {
+        var jendela = document.querySelectorAll(PILIH);
+
+        if (! jendela.length || typeof MutationObserver !== 'function') {
+            return;
+        }
+
+        var pengamat = new MutationObserver(segarkan);
+
+        for (var i = 0; i < jendela.length; i++) {
+            pengamat.observe(jendela[i], { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+        }
+
+        // Halaman bisa saja dimuat dengan jendela sudah terbuka.
+        segarkan();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', pasang);
+    } else {
+        pasang();
+    }
+})();
