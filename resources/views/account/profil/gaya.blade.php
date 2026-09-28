@@ -1392,6 +1392,29 @@
         color: var(--mis-tinta-3);
     }
 
+    /* Kotak kabar yang isinya dua hal (kalimat + tombol) perlu menumpuk,
+       bukan sejajar seperti kabar satu kalimat. */
+    .prof-kabar-teks .mis-tombol {
+        margin-top: 9px;
+    }
+
+    .pin-tombol-lupa {
+        height: 32px;
+        padding: 0 12px;
+        font-size: .76rem;
+    }
+
+    /* Atur ulang membuang PIN lama dan mencabut izin semua perangkat; itu
+       bukan kabar biasa. */
+    .pin-kabar-bahaya {
+        border-color: #fecdd3;
+        background: #fff1f2;
+    }
+
+    .pin-kabar-bahaya .prof-kabar-teks {
+        color: #9f1239;
+    }
+
     .pin-perangkat {
         padding: 12px 13px;
         margin-bottom: 14px;
@@ -1655,6 +1678,18 @@
         align-items: flex-start;
         margin-top: 12px;
         line-height: 1.45;
+    }
+
+    /* Lencana yang bisa ditekan: rupanya tetap lencana, tetapi ia tombol. */
+    .kmn-saring {
+        border: 0;
+        font-family: inherit;
+        cursor: pointer;
+        transition: filter .2s ease;
+    }
+
+    .kmn-saring:hover {
+        filter: brightness(.94);
     }
 
     /* Lencana dan tombol unduh berbagi satu sel kisi di kepala bagian. */

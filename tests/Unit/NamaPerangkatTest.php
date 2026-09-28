@@ -64,6 +64,22 @@ class NamaPerangkatTest extends TestCase
     }
 
     #[Test]
+    public function ikon_mengikuti_jenis_perangkat_bukan_pemiliknya(): void
+    {
+        $ponsel = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+        $laptop = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+        $tablet = 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15';
+
+        $this->assertSame('fa-mobile-alt', NamaPerangkat::ikon($ponsel));
+        $this->assertSame('fa-tablet-alt', NamaPerangkat::ikon($tablet));
+        $this->assertSame('fa-laptop', NamaPerangkat::ikon($laptop));
+
+        // Yang tidak dikenali tetap dapat ikon, bukan kotak kosong.
+        $this->assertSame('fa-desktop', NamaPerangkat::ikon('curl/8.4.0'));
+        $this->assertSame('fa-desktop', NamaPerangkat::ikon(null));
+    }
+
+    #[Test]
     public function user_agent_kosong_dinyatakan_tidak_dikenali(): void
     {
         $this->assertSame('Peramban tidak dikenali', NamaPerangkat::ringkas(null));

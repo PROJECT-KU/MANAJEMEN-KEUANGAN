@@ -31,6 +31,17 @@ class PengaturanPin extends Component
     /** Dipakai saat mendaftarkan perangkat baru memakai PIN yang sudah ada. */
     public string $pinPerangkat = '';
 
+    /**
+     * Pemiliknya menyatakan lupa PIN dan ingin menggantinya dengan yang baru.
+     *
+     * Bedanya dengan sekadar mengetik angka baru: ini pernyataan MAKSUD yang
+     * disengaja. Pengaman "perangkat asing tidak boleh mengganti PIN" ada
+     * untuk mencegah orang tidak sadar menimpa PIN semua perangkat; kalau
+     * maksudnya memang itu dan kata sandinya benar, tidak ada gunanya
+     * memaksanya lewat dua langkah (matikan PIN dulu, lalu buat lagi).
+     */
+    public bool $aturUlang = false;
+
 
 
     /** Berapa kali PIN boleh salah saat mendaftarkan perangkat. */
@@ -149,6 +160,15 @@ class PengaturanPin extends Component
         $this->toast('berhasil', 'Perangkat ini sekarang bisa dipakai masuk dengan PIN.');
     }
 
+    /** Nyalakan mode "lupa PIN", atau batalkan. */
+    public function ubahAturUlang(): void
+    {
+        $this->aturUlang = ! $this->aturUlang;
+
+        $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
+        $this->resetErrorBag();
+    }
+
     /** Perangkat ini tidak lagi boleh memakai PIN (akun tetap berPIN). */
     public function lupakanPerangkat(): void
     {
@@ -164,44 +184,6 @@ class PengaturanPin extends Component
         $this->toast('berhasil', 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.');
     }
 
-    /**
-     * Cabut izin PIN sebuah perangkat LAIN, dari perangkat yang sedang dipakai.
-     *
-     * Inilah yang dulu tidak ada: izin PIN cuma hidup di kue peramban, jadi
-     * HP yang hilang tidak bisa dicabut izinnya kecuali dengan mematikan PIN
-     * untuk semua perangkat sekaligus.
-     */
-    public function lupakanPerangkatLain(int $id): void
-    {
-        $pengguna = $this->pengguna();
-
-        $perangkat = PerangkatPin::where('user_id', $pengguna->getKey())->find($id);
-
-        if ($perangkat === null) {
-            $this->toast('gagal', 'Perangkat itu sudah tidak terdaftar.');
-
-            return;
-        }
-
-        if ($perangkat->ini) {
-            $this->toast('gagal', 'Itu perangkat yang sedang Anda pakai. Gunakan tombol "Lupakan perangkat" di atas.');
-
-            return;
-        }
-
-        $perangkat->delete();
-
-        $this->toast('berhasil', 'Perangkat itu tidak bisa lagi masuk dengan PIN.');
-    }
-
-    /** Perangkat yang boleh masuk dengan PIN, yang sedang dipakai lebih dulu. */
-    public function daftarPerangkatPin()
-    {
-        return PerangkatPin::where('user_id', $this->pengguna()->getKey())
-            ->get()
-            ->sortByDesc(fn ($p) => $p->ini ? PHP_INT_MAX : optional($p->terakhir_dipakai_pada)->getTimestamp() ?? 0)
-            ->values();
-    }
 
     /**
      * Apakah PIN boleh diganti dari perangkat yang sedang dipakai.
@@ -213,7 +195,7 @@ class PengaturanPin extends Component
      */
     public function bolehGantiPin(): bool
     {
-        return ! $this->pengguna()->pinAktif() || $this->perangkatSiap();
+        return ! $this->pengguna()->pinAktif() || $this->perangkatSiap() || $this->aturUlang;
     }
 
     /** Aktifkan PIN, atau ganti PIN yang sudah ada. */
@@ -249,7 +231,7 @@ class PengaturanPin extends Component
          * yang tahu PIN sekarang. Yang benar-benar lupa tetap punya jalan
          * keluar: matikan PIN dulu (cukup kata sandi), lalu buat yang baru.
          */
-        if ($sudahAda && ! $this->perangkatSiap()) {
+        if ($sudahAda && ! $this->perangkatSiap() && ! $this->aturUlang) {
             if (! $this->pinSekarangTerbukti($pengguna)) {
                 return;
             }
@@ -272,8 +254,22 @@ class PengaturanPin extends Component
         // halaman masuk cukup mengetik PIN tanpa username dan kata sandi.
         // Penanda "Ingat saya" dibiarkan apa adanya: mengaktifkan PIN tidak
         // ikut membuat isian username terisi otomatis kalau tidak diminta.
+        /*
+         * Atur ulang karena lupa: izin SEMUA perangkat dicabut lebih dulu.
+         *
+         * Orang yang lupa PIN-nya tidak bisa menjamin perangkat mana yang
+         * masih pantas punya izin — dan kalau PIN-nya lupa karena akunnya
+         * memang sedang dipegang orang lain, membiarkan izin lama berlaku
+         * dengan PIN baru justru memberi jalan masuk yang segar.
+         */
+        if ($this->aturUlang) {
+            PerangkatPin::lupakanSemua($pengguna);
+        }
+
         $this->ingatPerangkat($pengguna);
         PerangkatPin::daftarkanPerangkatIni($pengguna);
+
+        $this->aturUlang = false;
 
         $this->beriTahu($pengguna, $sudahAda ? 'diubah' : 'diaktifkan');
 

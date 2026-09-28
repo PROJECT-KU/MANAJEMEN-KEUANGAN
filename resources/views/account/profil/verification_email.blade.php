@@ -64,7 +64,9 @@
                     <tr>
                         <td align="center" style="padding: 40px 20px 20px 20px;">
                             <a href="https://rumahscopusfoundation.com/" target="_blank">
-                                <img src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus Foundation" style="max-width: 200px; height: auto; border: 0; outline: none;">
+                                <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                                    alt="MIS — Management Integration System by Rumah Scopus" width="190"
+                                    style="display:block;border:0;width:190px;max-width:60%;height:auto">
                             </a>
                         </td>
                     </tr>

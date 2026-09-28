@@ -80,56 +80,6 @@
             </div>
         @endif
 
-        {{--
-          Daftar perangkat yang boleh masuk dengan PIN.
-
-          Ini yang dulu tidak ada sama sekali. Izin PIN cuma hidup di kue
-          peramban, jadi pemiliknya tidak bisa melihat perangkat apa saja yang
-          punya izin, apalagi mencabutnya dari jauh. HP hilang berarti satu-
-          satunya jalan adalah mematikan PIN untuk semua perangkat sekaligus.
-        --}}
-        @php ($perangkatPin = $this->daftarPerangkatPin())
-        @if ($perangkatPin->count() > 1 || ($perangkatPin->count() === 1 && ! $this->perangkatSiap()))
-            <div class="prof-bagian">
-                <div class="prof-bagian-kepala punya-aksi">
-                    <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
-                    <h4 class="prof-bagian-judul">Perangkat yang boleh pakai PIN</h4>
-                    <p class="prof-bagian-sub">Kehilangan salah satunya? Cabut izinnya dari sini.</p>
-                    <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $perangkatPin->count() }} perangkat</span>
-                </div>
-
-                <div class="kmn-daftar">
-                    @foreach ($perangkatPin as $perangkat)
-                        <div class="kmn-perangkat {{ $perangkat->ini ? 'ini' : '' }}">
-                            <span class="mis-medali mini {{ $perangkat->ini ? 'mis-hijau' : 'mis-ungu' }}" aria-hidden="true">
-                                <i class="fas {{ $perangkat->ini ? 'fa-mobile-alt' : 'fa-desktop' }}"></i>
-                            </span>
-
-                            <div class="kmn-perangkat-teks">
-                                <p class="kmn-perangkat-nama">
-                                    {{ \App\Support\NamaPerangkat::ringkas($perangkat->peramban) }}
-                                </p>
-                                <p class="kmn-perangkat-ket">
-                                    {{ $perangkat->ip ?: 'IP tidak tercatat' }}
-                                    @if ($perangkat->terakhir_dipakai_pada)
-                                        &middot; dipakai {{ $perangkat->terakhir_dipakai_pada->locale('id')->diffForHumans(null, true) }} lalu
-                                    @endif
-                                </p>
-                            </div>
-
-                            @if ($perangkat->ini)
-                                <span class="mis-pil mis-pil-hijau">Perangkat ini</span>
-                            @else
-                                <button type="button" class="mis-tombol prof-tombol-bahaya-teks kmn-tombol-kecil"
-                                    wire:click="lupakanPerangkatLain({{ $perangkat->id }})">
-                                    <i class="fas fa-unlink"></i> Cabut
-                                </button>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
     @endif
 
     <form wire:submit="simpan">
@@ -163,7 +113,7 @@
         <div class="prof-bagian">
             <div class="prof-bagian-kepala">
                 <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-key"></i></span>
-                <h4 class="prof-bagian-judul">{{ $pengguna->pinAktif() ? 'PIN baru' : 'Buat PIN' }}</h4>
+                <h4 class="prof-bagian-judul">{{ $aturUlang ? 'Atur ulang PIN' : ($pengguna->pinAktif() ? 'PIN baru' : 'Buat PIN') }}</h4>
                 <p class="prof-bagian-sub">{{ $panjangPin }} angka yang Anda ketik di halaman masuk.</p>
             </div>
 
@@ -174,13 +124,38 @@
             @unless ($this->bolehGantiPin())
                 <div class="prof-kabar">
                     <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-lock"></i></span>
-                    <p class="prof-kabar-teks">
-                        Perangkat ini belum terdaftar, jadi PIN belum bisa diganti dari sini — satu akun hanya
-                        punya satu PIN. Isikan PIN yang sekarang untuk memakainya di perangkat ini. Lupa PIN-nya?
-                        Matikan dulu PIN lama lewat tombol di bawah, lalu buat yang baru.
-                    </p>
+                    <div class="prof-kabar-teks">
+                        <p class="mb-0">
+                            Perangkat ini belum terdaftar, jadi PIN belum bisa diganti dari sini — satu akun hanya
+                            punya satu PIN. Isikan PIN yang sekarang untuk memakainya di perangkat ini.
+                        </p>
+                        {{-- Dulu di sini tertulis "matikan dulu PIN lama, lalu buat
+                             yang baru" — dua langkah untuk satu maksud. Sekarang
+                             maksudnya dinyatakan sekali lewat tombol ini. --}}
+                        <button type="button" class="mis-tombol prof-tombol-halus pin-tombol-lupa"
+                            wire:click="ubahAturUlang">
+                            <i class="fas fa-undo-alt"></i> Lupa PIN? Atur ulang
+                        </button>
+                    </div>
                 </div>
             @endunless
+
+            @if ($aturUlang)
+                <div class="prof-kabar pin-kabar-bahaya">
+                    <span class="mis-medali kecil mis-merah" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div class="prof-kabar-teks">
+                        <p class="mb-0">
+                            <strong>Mengatur ulang PIN.</strong> PIN lama dibuang dan izin PIN di
+                            <strong>semua perangkat lain dicabut</strong> — masing-masing harus didaftarkan lagi.
+                            Masukkan kata sandi akun dan PIN baru Anda di bawah.
+                        </p>
+                        <button type="button" class="mis-tombol prof-tombol-halus pin-tombol-lupa"
+                            wire:click="ubahAturUlang">
+                            <i class="fas fa-times"></i> Batal, saya ingat PIN-nya
+                        </button>
+                    </div>
+                </div>
+            @endif
 
             <div class="mis-kisi-isian prof-kisi-dua">
                 <div class="mis-isian">
@@ -253,7 +228,7 @@
 
             <button type="submit" class="mis-tombol mis-tombol-ungu" wire:loading.attr="disabled">
                 <i class="fas fa-key"></i>
-                {{ $pengguna->pinAktif() ? 'Simpan PIN baru' : 'Aktifkan PIN' }}
+                {{ $aturUlang ? 'Atur ulang PIN' : ($pengguna->pinAktif() ? 'Simpan PIN baru' : 'Aktifkan PIN') }}
             </button>
         </div>
     </form>
