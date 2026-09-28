@@ -881,9 +881,71 @@
      * besar; 200px membuatnya empat kolom berdampingan di layar lebar dan
      * dua di tablet, dengan tinggi baris yang jauh lebih pendek.
      */
+    /*
+     * Flex, bukan grid.
+     *
+     * Dengan kisi auto-fit, jumlah kolomnya ikut lebar layar sementara
+     * jumlah kartunya tetap empat — begitu keduanya tidak habis dibagi,
+     * baris terakhir menyisakan petak kosong (empat kartu di tiga kolom
+     * meninggalkan dua lubang). Tidak ada aturan CSS yang bisa menambal itu,
+     * sebab jumlah kolomnya tidak diketahui di muka.
+     *
+     * Pada flex-wrap, kartu di baris terakhir melar membagi sisa lebarnya
+     * sendiri, berapa pun yang tersisa. Jadi barisnya selalu penuh.
+     */
     .prof-kisi-admin {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
+    }
+
+    /*
+     * Lebarnya pecahan, bukan piksel tetap.
+     *
+     * Dengan basis 200px, jumlah kartu per baris ikut lebar wadah dan pada
+     * banyak ukuran hasilnya 3 + 1 — satu kartu sendirian melar selebar
+     * penuh. Tidak ada lubang, tetapi jelas tidak seimbang.
+     *
+     * Kartunya ada empat, jadi yang rapi hanya dua kemungkinan: 4 sejajar
+     * atau 2x2. Basis 50% memastikan dua per baris; di layar yang memang
+     * lebar dinaikkan jadi empat. Tiga per baris tidak pernah terjadi.
+     */
+    .prof-kisi-admin > .prof-statis {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 0;
+    }
+
+    /*
+     * 1600px, bukan angka karangan: pada lebar itu wadahnya terukur 1236px,
+     * sehingga empat kartu masih 302px masing-masing — masih lega. Di
+     * 1440px wadahnya tinggal 756px dan empat kartu jadi terlalu sempit.
+     */
+    @media (min-width: 1600px) {
+        .prof-kisi-admin > .prof-statis {
+            flex: 1 1 calc(25% - 7.5px);
+        }
+    }
+
+    /*
+     * Kalau kartunya tepat TIGA, sejajarkan ketiganya dalam satu baris.
+     *
+     * Akun ber-level 'user' tidak punya kartu Perusahaan, jadi jumlahnya tiga
+     * — dan basis 50% membuatnya 2 + 1 dengan satu kartu melar sendirian.
+     * Pemilih ini bentuk baku untuk "hitung jumlah anak": anak pertama yang
+     * sekaligus anak ketiga dari belakang hanya ada bila jumlahnya persis
+     * tiga, lalu ~ * menjangkau kedua saudaranya.
+     */
+    .prof-kisi-admin > :first-child:nth-last-child(3),
+    .prof-kisi-admin > :first-child:nth-last-child(3) ~ .prof-statis {
+        flex: 1 1 calc(33.333% - 6.67px);
+    }
+
+    @media (max-width: 575.98px) {
+        .prof-kisi-admin > .prof-statis,
+        .prof-kisi-admin > :first-child:nth-last-child(3),
+        .prof-kisi-admin > :first-child:nth-last-child(3) ~ .prof-statis {
+            flex: 1 1 100%;
+        }
     }
 
     /* Ubinnya ikut dikecilkan: di kartu sekecil ini ubin 25px mendominasi. */
