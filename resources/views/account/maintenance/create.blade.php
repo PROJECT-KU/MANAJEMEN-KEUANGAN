@@ -184,7 +184,6 @@ Tambah Maintenance | MIS
             $("#level").val('');
             $("#jenis").val('');
             $("#password").val('');
-            $("#nik").val('');
             $("#norek").val('');
             $("#bank").val('');
         }, 500);

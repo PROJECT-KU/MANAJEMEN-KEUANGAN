@@ -146,7 +146,7 @@ class CampController extends Controller
         $user = Auth::user();
 
         $users = User::where('company', $user->company)
-            ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
+            ->select('id', 'full_name', 'norek', 'bank', 'telp')
             ->get();
         return view('account.camp.create', compact('users'));
     }

@@ -371,7 +371,7 @@ class MoreController extends Controller
                 ->first()->total_gaji ?? 0;
 
             $gaji = DB::table('gaji')
-                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.norek as norek', 'users.bank as bank')
                 ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
                 ->where('users.company', $user->company)
                 ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -386,7 +386,7 @@ class MoreController extends Controller
                 ->first()->total_gaji ?? 0;
 
             $gaji = DB::table('gaji')
-                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+                ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.norek as norek', 'users.bank as bank')
                 ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
                 ->where('gaji.user_id', $user->id)  // Display only the salary data for the logged-in user
                 ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])

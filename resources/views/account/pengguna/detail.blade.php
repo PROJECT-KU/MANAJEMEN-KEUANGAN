@@ -428,10 +428,6 @@ Detail Karyawan | MIS
 
                           <div class="row mt-3">
                             <div class="col-md-4">
-                              <label>NIK</label>
-                              <input type="text" id="nik" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57">
-                            </div>
-                            <div class="col-md-4">
                               <label>No Rekening</label>
                               <input type="text" id="norek" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)">
                             </div>
@@ -606,13 +602,12 @@ Detail Karyawan | MIS
       document.addEventListener("DOMContentLoaded", function() {
         const levelInput = document.getElementById('level');
         const statusInput = document.getElementById('status');
-        const nikInput = document.getElementById('nik');
         const norekInput = document.getElementById('norek');
         const bankInput = document.getElementById('bank');
         const submitContainerBank = document.getElementById('submit-container-bank');
 
         function checkForChanges() {
-          if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || nikInput.value !== nikInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
+          if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
             submitContainerBank.style.display = 'block'; // Show the submit button
           } else {
             submitContainerBank.style.display = 'none'; // Hide the submit button
@@ -621,7 +616,6 @@ Detail Karyawan | MIS
 
         levelInput.addEventListener('input', checkForChanges);
         statusInput.addEventListener('input', checkForChanges);
-        nikInput.addEventListener('input', checkForChanges);
         norekInput.addEventListener('input', checkForChanges);
         bankInput.addEventListener('input', checkForChanges);
       });
