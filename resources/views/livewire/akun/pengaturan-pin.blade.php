@@ -62,7 +62,7 @@
                     </p>
                 </div>
 
-                <div class="pin-daftar-baris">
+                <div class="prof-baris-aksi">
                     <input type="password"
                         class="form-control-modern pin-isian @error('pinPerangkat') is-invalid @enderror"
                         wire:model="pinPerangkat" inputmode="numeric" maxlength="{{ $panjangPin }}"

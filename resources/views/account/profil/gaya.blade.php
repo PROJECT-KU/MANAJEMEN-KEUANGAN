@@ -741,6 +741,19 @@
         grid-row: 2;
     }
 
+    /* Kepala dengan satu lencana di kanan, mis. "3 gagal dalam 30 hari".
+       Lencananya membentang dua baris supaya ia rata tengah terhadap
+       seluruh blok judul, bukan terhadap baris judulnya saja. */
+    .prof-bagian-kepala.punya-aksi {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .prof-bagian-lencana {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        align-self: center;
+    }
+
     .prof-bagian-judul {
         margin: 0;
         line-height: 1.25;
@@ -1145,11 +1158,6 @@
         color: #6366f1;
     }
 
-    /* Tab Keamanan masih memakai kelas Bootstrap dari komponen Livewire. */
-    .prof-tab-isi .table {
-        font-size: .82rem;
-    }
-
     /* ------------------------------------------------ tombol teks sekunder */
 
     /*
@@ -1261,7 +1269,9 @@
         margin-bottom: 10px;
     }
 
-    .pin-daftar-baris {
+    /* Satu kotak isian + satu tombol yang berdampingan. Dipakai di tab PIN
+       ("Daftarkan") dan tab Keamanan ("Keluarkan"). */
+    .prof-baris-aksi {
         display: flex;
         gap: 10px;
     }
@@ -1274,13 +1284,13 @@
      * kotaknya masih lebih lega daripada isian biasa, tombolnya tidak
      * terlihat kekecilan.
      */
-    .pin-daftar-baris .pin-isian {
+    .prof-baris-aksi > .form-control-modern {
         flex: 1 1 auto;
         min-width: 0;
         height: 46px;
     }
 
-    .pin-daftar-baris .mis-tombol {
+    .prof-baris-aksi .mis-tombol {
         flex: 0 0 auto;
         height: 46px;
     }
@@ -1347,6 +1357,108 @@
         font-weight: 600;
         line-height: 1.4;
         color: var(--mis-tinta-3);
+    }
+
+    /* ---------------------------------------------------- tab keamanan */
+
+    .kmn-daftar {
+        display: grid;
+        gap: 8px;
+    }
+
+    .kmn-perangkat {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 11px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid var(--mis-garis);
+    }
+
+    /* Perangkat yang sedang dipakai diberi warna, bukan hanya label: itu
+       baris yang TIDAK boleh diakhiri, jadi harus terbaca sekilas. */
+    .kmn-perangkat.ini {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+    }
+
+    .kmn-perangkat-teks {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .kmn-perangkat-nama {
+        margin: 0 0 1px;
+        line-height: 1.25;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--mis-tinta);
+        overflow-wrap: anywhere;
+    }
+
+    .kmn-perangkat-ket {
+        margin: 0;
+        line-height: 1.3;
+        font-size: .72rem;
+        color: var(--mis-tinta-4);
+    }
+
+    .kmn-perangkat .mis-pil,
+    .kmn-perangkat .mis-tombol {
+        flex: 0 0 auto;
+    }
+
+    /* Tombol di dalam baris daftar: lebih pendek daripada tombol formulir
+       supaya barisnya tidak ikut tinggi. */
+    .kmn-tombol-kecil {
+        height: 32px;
+        padding: 0 12px;
+        font-size: .76rem;
+    }
+
+    /* Tabel riwayat duduk di dalam kartu profil yang sudah punya bayangan,
+       jadi bungkusnya cukup bergaris — bayangan di atas bayangan membuatnya
+       tampak mengambang. */
+    .kmn-tabel {
+        box-shadow: none;
+        border-radius: var(--mis-radius-kecil);
+    }
+
+    .kmn-tabel .mis-tabel thead th,
+    .kmn-tabel .mis-tabel tbody td {
+        padding: 10px 14px;
+    }
+
+    .kmn-waktu {
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--mis-tinta);
+        white-space: nowrap;
+    }
+
+    /* Lencana di atas, alasannya di bawah. Di mode kartu (ponsel) sel ini
+       rata kanan, jadi keduanya ikut rata kanan tanpa aturan tambahan. */
+    .kmn-hasil {
+        display: grid;
+        gap: 3px;
+        justify-items: start;
+    }
+
+    .kmn-samar {
+        font-size: .78rem;
+        color: var(--mis-tinta-4);
+        overflow-wrap: anywhere;
+    }
+
+    .kmn-catatan {
+        align-items: flex-start;
+        margin-top: 12px;
+        line-height: 1.45;
+    }
+
+    .kmn-catatan i {
+        margin-top: 2px;
     }
 
     /* --------------------------------------------------------- responsif */
@@ -1430,12 +1542,43 @@
             margin-left: 0;
         }
 
-        .pin-daftar-baris {
+        .prof-baris-aksi {
             flex-direction: column;
         }
 
-        .pin-daftar-baris .mis-tombol {
+        .prof-baris-aksi .mis-tombol {
             width: 100%;
+        }
+
+        /* Lencana "n gagal dalam 30 hari" turun ke bawah keterangannya;
+           dipaksa tetap di kanan, judulnya terpatah tiap kata. */
+        .prof-bagian-kepala.punya-aksi {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .prof-bagian-lencana {
+            grid-column: 2;
+            grid-row: 3;
+            justify-self: start;
+            margin-top: 6px;
+        }
+
+        /* Tombol "Akhiri" pindah ke baris sendiri: di 390px, nama perangkat
+           dan tombol berdampingan menyisakan dua kata per baris. */
+        .kmn-perangkat {
+            flex-wrap: wrap;
+        }
+
+        .kmn-perangkat > .mis-pil,
+        .kmn-perangkat > .mis-tombol {
+            margin-left: 36px;
+        }
+
+        /* Di mode kartu, sel nilai berada di sisi kanan; lencana dan
+           alasannya ikut rata kanan supaya tepinya lurus dengan nilai
+           baris lain. */
+        .kmn-hasil {
+            justify-items: end;
         }
     }
 
