@@ -179,8 +179,6 @@ class PenggunaController extends Controller
         $user->jenis = $request->input('jenis');
         $user->telp = $request->input('telp');
         $user->notif = $request->input('notif');
-        $user->tenggat = $request->input('tenggat');
-        $user->title = $request->input('title');
         $user->tanggal_lahir = $request->input('tanggal_lahir');
         $user->norek = $request->input('norek');
         $user->bank = $request->input('bank');
