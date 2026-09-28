@@ -32,14 +32,17 @@
 
     @if ($sesi->isNotEmpty())
         <div class="prof-bagian">
-            <div class="prof-bagian-kepala">
+            <div class="prof-bagian-kepala {{ $sesi->count() > 1 ? 'punya-aksi' : '' }}">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-laptop"></i></span>
                 <h4 class="prof-bagian-judul">Perangkat yang sedang masuk</h4>
                 <p class="prof-bagian-sub">Ada yang bukan Anda? Akhiri sesinya dari sini.</p>
+                @if ($sesi->count() > 1)
+                    <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $sesi->count() }} perangkat</span>
+                @endif
             </div>
 
             <div class="kmn-daftar">
-                @foreach ($sesi as $baris)
+                @foreach ($sesiTampil as $baris)
                     <div class="kmn-perangkat {{ $baris->ini ? 'ini' : '' }}">
                         <span class="mis-medali mini {{ $baris->ini ? 'mis-hijau' : 'mis-biru' }}" aria-hidden="true">
                             <i class="fas {{ $baris->ini ? 'fa-laptop' : 'fa-desktop' }}"></i>
@@ -49,9 +52,14 @@
                             <p class="kmn-perangkat-nama">
                                 {{ \App\Support\NamaPerangkat::ringkas($baris->user_agent) }}
                             </p>
+                            {{-- "aktif 8 menit lalu", bukan "8 menit yang lalu":
+                                 bentuk pendeknya bawaan Carbon berbunyi "8mnt"
+                                 dan "1hr" — tidak terbaca. Membuang kata "yang"
+                                 cukup untuk memuat barisnya di layar 390px
+                                 tanpa mengorbankan kejelasan. --}}
                             <p class="kmn-perangkat-ket">
                                 {{ $baris->ip_address ?: 'IP tidak tercatat' }} &middot;
-                                aktif {{ $baris->waktu->locale('id')->diffForHumans() }}
+                                aktif {{ $baris->waktu->locale('id')->diffForHumans(null, true) }} lalu
                             </p>
                         </div>
 
@@ -66,6 +74,20 @@
                     </div>
                 @endforeach
             </div>
+
+            {{-- Daftarnya dilipat, bukan digulir: perangkat yang jarang dibuka
+                 tidak perlu dilihat tiap kali, dan riwayat di bawahnya tidak
+                 ikut terdorong jauh ke bawah. --}}
+            @if ($sisaPerangkat > 0)
+                <button type="button" class="kmn-lipat" wire:click="$toggle('semuaPerangkat')">
+                    @if ($semuaPerangkat)
+                        <i class="fas fa-chevron-up" aria-hidden="true"></i> Sembunyikan lagi
+                    @else
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        Tampilkan {{ $sisaPerangkat }} perangkat lain
+                    @endif
+                </button>
+            @endif
         </div>
     @endif
 

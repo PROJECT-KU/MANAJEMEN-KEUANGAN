@@ -1474,17 +1474,30 @@
 
     .kmn-daftar {
         display: grid;
-        gap: 8px;
+        gap: 6px;
     }
 
+    /*
+     * Barisnya dirapatkan dari 70px jadi sekitar 52px. Daftarnya bisa
+     * memuat sampai 20 perangkat, dan pada tinggi semula saja tiga baris
+     * sudah mengubur riwayat keamanan di bawahnya.
+     */
     .kmn-perangkat {
         display: flex;
         align-items: center;
-        gap: 11px;
-        padding: 9px 11px;
-        border-radius: 12px;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 11px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
+    }
+
+    .kmn-perangkat .mis-medali.mini {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        border-radius: 8px;
+        font-size: .7rem;
     }
 
     /* Perangkat yang sedang dipakai diberi warna, bukan hanya label: itu
@@ -1500,9 +1513,9 @@
     }
 
     .kmn-perangkat-nama {
-        margin: 0 0 1px;
-        line-height: 1.25;
-        font-size: .82rem;
+        margin: 0;
+        line-height: 1.3;
+        font-size: .8rem;
         font-weight: 700;
         color: var(--mis-tinta);
         overflow-wrap: anywhere;
@@ -1511,7 +1524,7 @@
     .kmn-perangkat-ket {
         margin: 0;
         line-height: 1.3;
-        font-size: .72rem;
+        font-size: .7rem;
         color: var(--mis-tinta-4);
     }
 
@@ -1523,9 +1536,41 @@
     /* Tombol di dalam baris daftar: lebih pendek daripada tombol formulir
        supaya barisnya tidak ikut tinggi. */
     .kmn-tombol-kecil {
-        height: 32px;
-        padding: 0 12px;
-        font-size: .76rem;
+        height: 28px;
+        padding: 0 11px;
+        font-size: .74rem;
+    }
+
+    /* Tombol pelipat daftar: selebar daftarnya, rupa tautan yang tenang —
+       ia bukan aksi yang mengubah apa pun. */
+    .kmn-lipat {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        margin-top: 6px;
+        padding: 7px 10px;
+        border: 1px dashed var(--mis-garis);
+        border-radius: 11px;
+        background: transparent;
+        font-family: inherit;
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--mis-tinta-3);
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .kmn-lipat:hover {
+        border-color: #c7d2fe;
+        background: #f5f7ff;
+        color: #4f46e5;
+    }
+
+    .kmn-lipat i {
+        font-size: .66rem;
+        line-height: 1;
     }
 
     /* Tabel riwayat duduk di dalam kartu profil yang sudah punya bayangan,
@@ -1721,15 +1766,26 @@
             margin-top: 6px;
         }
 
-        /* Tombol "Akhiri" pindah ke baris sendiri: di 390px, nama perangkat
-           dan tombol berdampingan menyisakan dua kata per baris. */
+        /*
+         * Tombol tetap sebaris dengan namanya, TIDAK turun ke baris sendiri.
+         *
+         * Dulu ia diturunkan supaya namanya tidak terpotong; akibatnya tiap
+         * baris jadi 91px, dan daftar yang bisa memuat banyak perangkat itulah
+         * yang paling terasa di layar sempit. Sekarang blok teksnya yang
+         * mengalah: namanya boleh membungkus, tombolnya tidak ikut melar.
+         */
         .kmn-perangkat {
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .kmn-perangkat > .mis-pil,
         .kmn-perangkat > .mis-tombol {
-            margin-left: 36px;
+            flex: 0 0 auto;
+            margin-left: 0;
+        }
+
+        .kmn-perangkat-nama {
+            overflow-wrap: anywhere;
         }
 
         /* Di mode kartu, sel nilai berada di sisi kanan; lencana dan
