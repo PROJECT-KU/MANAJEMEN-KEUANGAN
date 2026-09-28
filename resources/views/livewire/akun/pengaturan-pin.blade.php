@@ -1,209 +1,194 @@
+{{--
+  Tab "PIN masuk" di halaman profil.
+
+  Mengikuti pola tab Data diri: kepala bagian bermedali (ubin + judul +
+  keterangan), isian di dalam .mis-kisi-isian, dan satu baris .prof-aksi di
+  dasar formulir. Gayanya ada di account/profil/gaya.blade.php yang terbit
+  lewat @push('gaya') — bukan <style> di badan berkas, karena aturan di badan
+  terbit sebelum CSS <head> sehingga aturan berbobot sama selalu kalah.
+--}}
 <div>
-    {{-- Keadaan PIN saat ini --}}
-    <div class="d-flex align-items-center mb-4 p-3"
-        style="border-radius: 16px; background: {{ $pengguna->pinAktif() ? '#ecfeff' : '#f8fafc' }}; border: 1px solid {{ $pengguna->pinAktif() ? '#a5f3fc' : '#e2e8f0' }};">
-        <i class="fas {{ $pengguna->pinAktif() ? 'fa-mobile-alt text-info' : 'fa-lock text-muted' }} fa-lg mr-3"></i>
-        <div class="flex-grow-1">
-            <div class="font-weight-800 text-dark">
+    {{-- Keadaan PIN saat ini: satu baris ringkas, bukan paragraf --}}
+    <div class="pin-keadaan {{ $pengguna->pinAktif() ? 'nyala' : '' }}">
+        <span class="mis-medali {{ $pengguna->pinAktif() ? 'mis-biru' : 'mis-kuning' }}" aria-hidden="true">
+            <i class="fas {{ $pengguna->pinAktif() ? 'fa-mobile-alt' : 'fa-lock-open' }}"></i>
+        </span>
+
+        <div class="pin-keadaan-teks">
+            <p class="pin-keadaan-judul">
                 {{ $pengguna->pinAktif() ? 'PIN masuk aktif' : 'PIN masuk belum aktif' }}
-            </div>
-            <div class="small text-muted">
+            </p>
+            <p class="pin-keadaan-sub">
                 @if ($pengguna->pinAktif())
                     Terakhir diubah
                     {{ $pengguna->pin_diubah_pada ? $pengguna->pin_diubah_pada->locale('id')->translatedFormat('d F Y H:i') : '-' }}
                     WIB
                 @else
-                    Aktifkan untuk bisa masuk hanya dengan {{ $panjangPin }} angka, tanpa mengetik kata sandi.
+                    Masuk cukup dengan {{ $panjangPin }} angka, tanpa mengetik kata sandi.
                 @endif
-            </div>
+            </p>
         </div>
-        <span class="lencana-pin {{ $pengguna->pinAktif() ? 'lencana-aktif' : 'lencana-mati' }}">
-            {{ $pengguna->pinAktif() ? 'AKTIF' : 'NONAKTIF' }}
+
+        <span class="prof-lencana {{ $pengguna->pinAktif() ? 'prof-lencana-hijau' : 'prof-lencana-kuning' }}">
+            <span class="prof-lencana-titik berdenyut" aria-hidden="true"></span>
+            {{ $pengguna->pinAktif() ? 'Aktif' : 'Belum aktif' }}
         </span>
     </div>
 
-    {{-- Perangkat: PIN dikenali per peramban, jadi HP perlu didaftarkan sendiri --}}
+    {{-- PIN dikenali per peramban, jadi tiap HP/komputer perlu didaftarkan sendiri --}}
     @if ($pengguna->pinAktif())
         @if ($this->perangkatSiap())
-            <div class="d-flex align-items-center mb-4 p-3"
-                style="border-radius: 16px; background: #ecfdf5; border: 1px solid #a7f3d0;">
-                <i class="fas fa-check-circle text-success fa-lg mr-3"></i>
-                <div class="flex-grow-1">
-                    <div class="font-weight-800 text-dark">Perangkat ini sudah terdaftar</div>
-                    <div class="small text-muted">
-                        Di peramban ini, halaman masuk langsung meminta PIN — tanpa username dan kata sandi.
-                    </div>
+            <div class="pin-perangkat siap">
+                <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-check"></i></span>
+
+                <div class="pin-perangkat-teks">
+                    <p class="pin-keadaan-judul">Perangkat ini sudah terdaftar</p>
+                    <p class="pin-keadaan-sub">
+                        Halaman masuk di peramban ini langsung meminta PIN.
+                    </p>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold"
-                    style="border-radius: 12px;" wire:click="lupakanPerangkat">
-                    Lupakan perangkat
+
+                <button type="button" class="mis-tombol prof-tombol-halus" wire:click="lupakanPerangkat">
+                    <i class="fas fa-unlink"></i> Lupakan perangkat
                 </button>
             </div>
         @else
-            <div class="p-3 mb-4" style="border-radius: 16px; background: #eff6ff; border: 1px solid #bfdbfe;">
-                <div class="d-flex align-items-start mb-3">
-                    <i class="fas fa-mobile-alt text-primary fa-lg mr-3 mt-1"></i>
-                    <div>
-                        <div class="font-weight-800 text-dark">Pakai PIN di perangkat ini juga</div>
-                        <div class="small text-muted">
-                            PIN Anda sudah aktif, tetapi peramban ini belum terdaftar. Masukkan PIN Anda sekali di
-                            sini, lalu halaman masuk di perangkat ini cukup meminta PIN.
-                        </div>
-                    </div>
+            <div class="pin-perangkat">
+                <div class="prof-bagian-kepala">
+                    <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
+                    <h4 class="prof-bagian-judul">Pakai PIN di perangkat ini juga</h4>
+                    <p class="prof-bagian-sub">
+                        PIN Anda sudah aktif, tetapi peramban ini belum terdaftar. Masukkan PIN sekali di sini.
+                    </p>
                 </div>
-                <div class="d-flex flex-column flex-sm-row" style="gap: 10px;">
+
+                <div class="pin-daftar-baris">
                     <input type="password"
-                        class="form-control-modern pin-isian flex-grow-1 @error('pinPerangkat') is-invalid @enderror"
+                        class="form-control-modern pin-isian @error('pinPerangkat') is-invalid @enderror"
                         wire:model="pinPerangkat" inputmode="numeric" maxlength="{{ $panjangPin }}"
                         autocomplete="off" placeholder="{{ str_repeat('•', $panjangPin) }}"
-                        oninput="this.value = this.value.replace(/\D/g, '')">
-                    <button type="button" class="btn-modern btn-gradient px-4" wire:click="aktifkanDiPerangkat"
+                        aria-label="PIN Anda" oninput="this.value = this.value.replace(/\D/g, '')">
+                    <button type="button" class="mis-tombol mis-tombol-biru" wire:click="aktifkanDiPerangkat"
                         wire:loading.attr="disabled">
-                        <i class="fas fa-plus-circle mr-2"></i> DAFTARKAN
+                        <i class="fas fa-plus-circle"></i> Daftarkan
                     </button>
                 </div>
+
                 @error('pinPerangkat')
-                    <div class="text-danger small font-weight-bold mt-2">{{ $message }}</div>
+                    <p class="prof-salah mt-2"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                 @enderror
             </div>
         @endif
     @endif
 
     <form wire:submit="simpan">
-        <div class="row">
-            <div class="col-md-12 form-group">
-                <label class="small font-weight-bold">
-                    Kata Sandi Akun <span class="text-danger">*</span>
-                </label>
-                <input type="password" class="form-control-modern @error('kataSandi') is-invalid @enderror"
-                    wire:model="kataSandi" autocomplete="current-password" placeholder="••••••••">
-                <small class="text-muted">Dipakai untuk memastikan yang mengubah PIN memang Anda.</small>
-                @error('kataSandi')
-                    <div class="text-danger small font-weight-bold mt-1">{{ $message }}</div>
-                @enderror
+        <div class="prof-bagian">
+            <div class="prof-bagian-kepala">
+                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                <h4 class="prof-bagian-judul">Pastikan ini Anda</h4>
+                <p class="prof-bagian-sub">Masukkan kata sandi yang dipakai sekarang.</p>
+            </div>
+
+            <div class="mis-kisi-isian prof-kisi-dua">
+                <div class="mis-isian">
+                    <label class="mis-label" for="pin-kata-sandi">
+                        Kata sandi akun <span class="prof-wajib" aria-hidden="true">*</span>
+                    </label>
+                    <input type="password" id="pin-kata-sandi"
+                        class="form-control-modern @error('kataSandi') is-invalid @enderror"
+                        wire:model="kataSandi" autocomplete="current-password" placeholder="••••••••">
+                    @error('kataSandi')
+                        <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <p class="prof-catatan-samping">
+                    <i class="fas fa-circle-info mis-ikon-biru"></i>
+                    Kata sandi diminta supaya orang lain yang memakai komputer Anda tidak bisa mengganti PIN.
+                </p>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <label class="small font-weight-bold">
-                    {{ $pengguna->pinAktif() ? 'PIN Baru' : 'PIN' }} ({{ $panjangPin }} Angka)
-                    <span class="text-danger">*</span>
-                </label>
-                <input type="password" class="form-control-modern pin-isian @error('pin') is-invalid @enderror"
-                    wire:model="pin" inputmode="numeric" maxlength="{{ $panjangPin }}" autocomplete="off"
-                    placeholder="{{ str_repeat('•', $panjangPin) }}"
-                    oninput="this.value = this.value.replace(/\D/g, '')">
-                @error('pin')
-                    <div class="text-danger small font-weight-bold mt-1">{{ $message }}</div>
-                @enderror
+        <div class="prof-bagian">
+            <div class="prof-bagian-kepala">
+                <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-key"></i></span>
+                <h4 class="prof-bagian-judul">{{ $pengguna->pinAktif() ? 'PIN baru' : 'Buat PIN' }}</h4>
+                <p class="prof-bagian-sub">{{ $panjangPin }} angka yang Anda ketik di halaman masuk.</p>
             </div>
-            <div class="col-md-6 form-group">
-                <label class="small font-weight-bold">
-                    Ulangi PIN <span class="text-danger">*</span>
-                </label>
-                <input type="password" class="form-control-modern pin-isian @error('pinKonfirmasi') is-invalid @enderror"
-                    wire:model="pinKonfirmasi" inputmode="numeric" maxlength="{{ $panjangPin }}" autocomplete="off"
-                    placeholder="{{ str_repeat('•', $panjangPin) }}"
-                    oninput="this.value = this.value.replace(/\D/g, '')">
-                @error('pinKonfirmasi')
-                    <div class="text-danger small font-weight-bold mt-1">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label class="small text-muted mb-0" style="cursor: pointer;">
+            <div class="mis-kisi-isian prof-kisi-dua">
+                <div class="mis-isian">
+                    <label class="mis-label" for="pin-baru">
+                        {{ $pengguna->pinAktif() ? 'PIN baru' : 'PIN' }}
+                        <span class="prof-wajib" aria-hidden="true">*</span>
+                    </label>
+                    <input type="password" id="pin-baru"
+                        class="form-control-modern pin-isian @error('pin') is-invalid @enderror"
+                        wire:model="pin" inputmode="numeric" maxlength="{{ $panjangPin }}" autocomplete="off"
+                        placeholder="{{ str_repeat('•', $panjangPin) }}"
+                        oninput="this.value = this.value.replace(/\D/g, '')">
+                    @error('pin')
+                        <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mis-isian">
+                    <label class="mis-label" for="pin-ulangi">
+                        Ulangi PIN <span class="prof-wajib" aria-hidden="true">*</span>
+                    </label>
+                    <input type="password" id="pin-ulangi"
+                        class="form-control-modern pin-isian @error('pinKonfirmasi') is-invalid @enderror"
+                        wire:model="pinKonfirmasi" inputmode="numeric" maxlength="{{ $panjangPin }}"
+                        autocomplete="off" placeholder="{{ str_repeat('•', $panjangPin) }}"
+                        oninput="this.value = this.value.replace(/\D/g, '')">
+                    @error('pinKonfirmasi')
+                        <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Angka PIN disembunyikan seperti kata sandi; sakelar ini untuk
+                 memastikan yang diketik memang benar sebelum disimpan. --}}
+            <label class="pin-lihat">
                 <input type="checkbox"
                     onchange="document.querySelectorAll('.pin-isian').forEach(function (i) { i.type = this.checked ? 'text' : 'password' }, this)">
-                Tampilkan angka PIN
+                <span>Tampilkan angka PIN</span>
             </label>
+
+            <ul class="pin-tip">
+                <li>
+                    <span class="mis-medali mini mis-merah" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
+                    Hindari angka berulang, berurutan, atau tanggal lahir.
+                </li>
+                <li>
+                    <span class="mis-medali mini mis-kuning" aria-hidden="true"><i class="fas fa-ban"></i></span>
+                    Salah {{ config('auth.pin.batas_gagal', 5) }} kali di halaman masuk &rarr; PIN mati sendiri,
+                    Anda dikabari lewat email.
+                </li>
+                <li>
+                    <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-laptop"></i></span>
+                    Berlaku per perangkat. Di perangkat lain: masuk dengan kata sandi, lalu daftarkan dari sini.
+                </li>
+            </ul>
         </div>
 
-        <ul class="catatan-pin mb-4">
-            <li><i class="fas fa-shield-alt"></i> Hindari angka berulang, berurutan, atau tanggal lahir.</li>
-            <li><i class="fas fa-ban"></i> Salah {{ config('auth.pin.batas_gagal', 5) }} kali di halaman masuk &rarr; PIN mati sendiri, Anda dikabari lewat email.</li>
-            <li><i class="fas fa-laptop"></i> Berlaku per perangkat. Di perangkat lain: masuk dengan kata sandi, lalu daftarkan dari sini.</li>
-        </ul>
-
-        <div class="form-group mt-2 d-flex flex-column flex-sm-row" style="gap: 10px;">
-            <button type="submit" class="btn-modern btn-gradient flex-grow-1" wire:loading.attr="disabled">
-                <i class="fas fa-key mr-2"></i>
-                {{ $pengguna->pinAktif() ? 'SIMPAN PIN BARU' : 'AKTIFKAN PIN' }}
-            </button>
-
+        <div class="prof-aksi">
             @if ($pengguna->pinAktif())
-                <button type="button" class="btn btn-outline-danger font-weight-bold px-4"
-                    style="border-radius: 14px;" wire:click="nonaktifkan" wire:loading.attr="disabled">
-                    <i class="fas fa-times-circle mr-2"></i> NONAKTIFKAN
+                <button type="button" class="mis-tombol prof-tombol-bahaya-teks" wire:click="nonaktifkan"
+                    wire:loading.attr="disabled">
+                    <i class="fas fa-times-circle"></i> Nonaktifkan PIN
                 </button>
+            @else
+                <p class="prof-aksi-catatan">
+                    <i class="fas fa-bolt mis-ikon-kuning"></i>
+                    Sesudah aktif, masuk cukup {{ $panjangPin }} angka.
+                </p>
             @endif
+
+            <button type="submit" class="mis-tombol mis-tombol-ungu" wire:loading.attr="disabled">
+                <i class="fas fa-key"></i>
+                {{ $pengguna->pinAktif() ? 'Simpan PIN baru' : 'Aktifkan PIN' }}
+            </button>
         </div>
     </form>
-
-    <style>
-        /* Senada dengan kotak kode di halaman masuk. */
-        .pin-isian {
-            height: 58px;
-            text-align: center;
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: .5em;
-            text-indent: .5em;
-            color: #0b1324;
-        }
-
-        .pin-isian::placeholder {
-            font-size: 1rem;
-            letter-spacing: .3em;
-            font-weight: 600;
-        }
-
-        .lencana-pin {
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: .72rem;
-            font-weight: 800;
-            letter-spacing: .06em;
-            white-space: nowrap;
-        }
-
-        .lencana-aktif {
-            color: #0e7490;
-            background: #cffafe;
-            border: 1px solid #a5f3fc;
-        }
-
-        .lencana-mati {
-            color: #64748b;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-        }
-
-        .catatan-pin {
-            list-style: none;
-            margin: 0;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            display: grid;
-            gap: 8px;
-        }
-
-        .catatan-pin li {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: .82rem;
-            line-height: 1.5;
-            color: #334155;
-        }
-
-        .catatan-pin li i {
-            margin-top: 3px;
-            color: #d97706;
-            flex: 0 0 14px;
-        }
-    </style>
 </div>
