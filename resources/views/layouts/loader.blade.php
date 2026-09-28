@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo-pwa.png') }}">
+    {{-- Sama dengan halaman masuk: tab peramban butuh gambar persegi, jadi
+         yang dipakai potongan logo, bukan logo utuh. --}}
+    <link rel="icon" href="{{ asset('assets/img/mis-favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/mis-favicon.png') }}">
     <style>
         /* Animasi loader yang lebih menarik */
         .loader {
