@@ -257,13 +257,19 @@ class ProfilController extends Controller
   // <!--================== END ==================-->
 
   /**
-   * Unduh riwayat keamanan milik sendiri sebagai CSV.
+   * Unduh riwayat keamanan milik sendiri sebagai PDF.
    *
    * Ekspor yang sudah ada hanya tersedia di halaman jejak aktivitas milik
    * admin, dan halaman itu memang ditutup untuk sebagian besar peran. Jadi
    * pemilik akun bisa MELIHAT riwayatnya tetapi tidak bisa menyimpannya —
    * padahal justru dia yang paling cepat sadar kalau ada baris yang bukan
    * dirinya, dan mungkin perlu menunjukkannya ke orang lain.
+   *
+   * PDF, bukan CSV maupun Excel: berkas ini hampir selalu diunduh untuk
+   * DITUNJUKKAN, bukan diolah. PDF membawa logo, warna, dan penomoran
+   * halaman, dan tampil sama persis di mana pun dibuka. Yang ditukar adalah
+   * kemampuan menyaring dan mengurutkan sendiri — untuk itu, saringan
+   * "gagal saja" sudah tersedia di layarnya.
    *
    * Yang keluar hanya baris miliknya sendiri; $pengguna diambil dari sesi,
    * tidak pernah dari kiriman.
@@ -272,40 +278,37 @@ class ProfilController extends Controller
   {
     $pengguna = Auth::user();
 
-    $kueri = AktivitasMasuk::where('user_id', $pengguna->getKey())->latest('id');
+    $baris = AktivitasMasuk::where('user_id', $pengguna->getKey())
+      ->latest('id')
+      ->get();
 
-    $nama = 'riwayat-keamanan-' . Str::slug((string) $pengguna->username) . '-' . now()->format('Ymd-His') . '.csv';
+    $html = view('account.profil.riwayat-keamanan-pdf', compact('pengguna', 'baris'))->render();
 
-    return response()->streamDownload(function () use ($kueri) {
-      $keluaran = fopen('php://output', 'w');
+    $dompdf = new Dompdf();
 
-      // BOM supaya Excel membaca huruf beraksen dengan benar.
-      fwrite($keluaran, "\xEF\xBB\xBF");
-      /*
-       * Parameter $escape diisi eksplisit dengan '' .
-       *
-       * PHP 8.4 memperingatkan bahwa nilai bawaannya akan BERUBAH, dan
-       * perubahan itu mengubah isi berkas yang dihasilkan — bukan sekadar
-       * pesan di log. '' mematikan escaping gaya lama, yang memang bukan
-       * bagian dari CSV dan sering membuat Excel salah membaca.
-       */
-      fputcsv($keluaran, ['Waktu', 'Hasil', 'Keterangan', 'Alamat IP', 'Perangkat'], ',', '"', '');
+    // isPhpEnabled: dibutuhkan penomoran halaman, yang baru bisa dihitung
+    // saat render karena pemenggalan halamannya belum diketahui sebelum itu.
+    $pengaturan = $dompdf->getOptions();
+    $pengaturan->setIsPhpEnabled(true);
+    $pengaturan->setIsRemoteEnabled(false);
+    $dompdf->setOptions($pengaturan);
 
-      $kueri->chunk(500, function ($baris) use ($keluaran) {
-        foreach ($baris as $a) {
-          fputcsv($keluaran, [
-            optional($a->created_at)->format('d/m/Y H:i:s'),
-            $a->berhasil ? 'Berhasil' : 'Gagal',
-            $a->alasan,
-            $a->ip,
-            // Nama yang bisa dibaca orang, sama seperti yang tampil di layar.
-            \App\Support\NamaPerangkat::ringkas($a->peramban),
-          ], ',', '"', '');
-        }
-      });
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
 
-      fclose($keluaran);
-    }, $nama, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    $nama = 'riwayat-keamanan-' . Str::slug((string) $pengguna->username) . '-' . now()->format('Ymd-His') . '.pdf';
+
+    // Dikembalikan sebagai Response, BUKAN $dompdf->stream(): stream()
+    // memanggil header() dan echo sendiri, sehingga kepalanya lewat dari
+    // lapisan respons Laravel — middleware tidak bisa menyentuhnya dan
+    // Content-Disposition-nya tidak ikut terbawa.
+    // attachment supaya berkasnya benar-benar diunduh, bukan dibuka di tab
+    // baru lalu tertinggal di sana.
+    return response($dompdf->output(), 200, [
+      'Content-Type' => 'application/pdf',
+      'Content-Disposition' => 'attachment; filename="' . $nama . '"',
+    ]);
   }
   // <!--================== END ==================-->
 
