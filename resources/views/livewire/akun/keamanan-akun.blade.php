@@ -131,7 +131,8 @@
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
                 <h4 class="prof-bagian-judul">Boleh masuk dengan PIN</h4>
                 <p class="prof-bagian-sub">
-                    Izin masuk cukup dengan 6 angka, tanpa kata sandi. Menetap sampai dicabut.
+                    Izin masuk cukup dengan 6 angka, tanpa kata sandi. Berhenti berlaku kalau
+                    {{ \App\PerangkatPin::BULAN_KEDALUWARSA }} bulan tidak dipakai.
                 </p>
                 @if ($perangkatPin->count() > 1)
                     <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $perangkatPin->count() }} perangkat</span>
@@ -162,6 +163,13 @@
                                 @endif
                             </p>
                         </div>
+
+                        {{-- Kedaluwarsa ditandai, bukan disembunyikan: barisnya
+                             tetap terlihat supaya pemiliknya tahu perangkat itu
+                             pernah punya izin dan kenapa sekarang tidak. --}}
+                        @if ($perangkat->kedaluwarsa)
+                            <span class="mis-pil mis-pil-abu">Kedaluwarsa</span>
+                        @endif
 
                         @if ($perangkat->ini)
                             <span class="mis-pil mis-pil-hijau">Perangkat ini</span>

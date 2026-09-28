@@ -495,6 +495,20 @@
         white-space: nowrap;
     }
 
+    /*
+     * Blok email di dalam tab, bukan lagi di kartu kiri.
+     *
+     * Di kartu kiri ia dipisah garis putus-putus dari isi di atasnya; di
+     * sini ia satu kisi dengan isian lain, jadi cukup memenuhi lebar
+     * barisnya dan berjarak seperti isian biasa.
+     */
+    .prof-email-di-tab {
+        grid-column: 1 / -1;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--mis-garis);
+    }
+
     /* ------------------------------------------------ kelengkapan profil */
 
     .prof-lengkap-atas {

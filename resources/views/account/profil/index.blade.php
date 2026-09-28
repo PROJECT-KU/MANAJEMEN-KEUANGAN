@@ -244,44 +244,6 @@ Profil | MIS
                  "siapa saya dan bagaimana dihubungi", dan satu kartu terpisah
                  untuk satu baris membuat kolom kiri jauh lebih tinggi daripada
                  kolom kanan sehingga menyisakan petak kosong. --}}
-            <div class="prof-email-blok">
-
-              {{-- Judulnya cukup satu baris kecil; ikon besar dan kalimat
-                   penjelas di atas baris ini hanya mengulang apa yang sudah
-                   terlihat, sementara tingginya ikut menekan kolom kanan. --}}
-              <p class="mis-label prof-email-label">Alamat email</p>
-
-              <div class="prof-baris">
-                {{-- Ubin, alamat, keterangan, dan tombol ubah dalam satu kisi: ubin dan
-                     tombol merentang dua baris lalu dirata-tengahkan, jadi keduanya
-                     sejajar dengan BLOK teksnya — aturan yang sama dengan kepala
-                     bagian. Keterangan otomatis menjorok karena ia di kolom kedua. --}}
-                <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                <p class="prof-nilai">{{ $user->email }}</p>
-                @if ($user->email_verified_at)
-                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
-                @else
-                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
-                @endif
-                <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
-                  <i class="fas fa-pen"></i>
-                </button>
-              </div>
-
-              @if (! $user->email_verified_at)
-                <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
-                  class="prof-verif">
-                  @csrf
-                  <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
-                  <div id="container-verify-btn">
-                    <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
-                      <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
-                    </button>
-                    <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
-                  </div>
-                </form>
-              @endif
-            </div>
           </section>
 
           {{-- Kelengkapan profil. Bukan hiasan: tanpa ini profil yang separuh
@@ -362,25 +324,42 @@ Profil | MIS
                 <p class="prof-bagian-sub">Data diri, kata sandi, PIN masuk, dan riwayat keamanan.</p>
               </div>
 
+              {{--
+                aria-selected dan aria-controls WAJIB ada di tiap tab.
+
+                role="tablist" dan role="tab" saja hanya memberi tahu pembaca
+                layar bahwa ini deretan tab — bukan tab mana yang sedang
+                terbuka, dan bukan panel mana yang dikendalikannya. Tanpa
+                keduanya, pengguna pembaca layar mendengar empat tab tanpa
+                cara mengetahui di mana ia berada. Kelas .active hanya rupa;
+                ia tidak terbaca sama sekali.
+
+                Nilainya ditulis di markah dan ikut diperbarui skrip di bawah,
+                karena Bootstrap 4 tidak mengurusnya sendiri.
+              --}}
               <ul class="prof-tab nav nav-pills" id="pills-tab" role="tablist">
-                <li class="nav-item">
-                  <a class="nav-link active" id="pills-activity-tab" data-toggle="pill" href="#activity" role="tab">
-                    <i class="fas fa-user-circle mis-ikon-ungu"></i> Data diri
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link active" id="pills-activity-tab" data-toggle="pill" href="#activity"
+                    role="tab" aria-controls="activity" aria-selected="true">
+                    <i class="fas fa-user-circle mis-ikon-ungu" aria-hidden="true"></i> Data diri
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-settings-tab" data-toggle="pill" href="#settings" role="tab">
-                    <i class="fas fa-key mis-ikon-jingga"></i> Kata sandi
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="pills-settings-tab" data-toggle="pill" href="#settings"
+                    role="tab" aria-controls="settings" aria-selected="false">
+                    <i class="fas fa-key mis-ikon-jingga" aria-hidden="true"></i> Kata sandi
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-pin-tab" data-toggle="pill" href="#pin" role="tab">
-                    <i class="fas fa-mobile-alt mis-ikon-biru"></i> PIN masuk
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="pills-pin-tab" data-toggle="pill" href="#pin"
+                    role="tab" aria-controls="pin" aria-selected="false">
+                    <i class="fas fa-mobile-alt mis-ikon-biru" aria-hidden="true"></i> PIN masuk
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-keamanan-tab" data-toggle="pill" href="#keamanan" role="tab">
-                    <i class="fas fa-user-shield mis-ikon-hijau"></i> Keamanan
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="pills-keamanan-tab" data-toggle="pill" href="#keamanan"
+                    role="tab" aria-controls="keamanan" aria-selected="false">
+                    <i class="fas fa-user-shield mis-ikon-hijau" aria-hidden="true"></i> Keamanan
                   </a>
                 </li>
               </ul>
@@ -390,7 +369,7 @@ Profil | MIS
               <div class="tab-content" id="profileTabContent">
 
                 {{-- ---------------------------------------- tab 1: data diri --}}
-                <div class="tab-pane fade show active" id="activity" role="tabpanel">
+                <div class="tab-pane fade show active" id="activity" role="tabpanel" aria-labelledby="pills-activity-tab" tabindex="0">
                   @if (! $user->email_verified_at)
                     <div class="prof-kabar">
                       <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
@@ -441,6 +420,55 @@ Profil | MIS
                             <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                           @enderror
                         </div>
+                      </div>
+
+                      {{--
+                        Alamat email pindah ke sini dari kartu identitas.
+
+                        Tempatnya memang di bagian ini: judulnya "Nama & kontak
+                        — yang tampil di sistem dan cara kami menghubungi Anda",
+                        dan alamat email persis itu. Di kartu kiri ia menumpuk
+                        pada kolom yang sudah jadi unsur terpanjang halaman,
+                        sehingga tab yang isinya pendek menyisakan petak kosong
+                        di sebelah kanan.
+                      --}}
+                      <div class="prof-email-blok prof-email-di-tab">
+
+                        {{-- Judulnya cukup satu baris kecil; ikon besar dan kalimat
+                             penjelas di atas baris ini hanya mengulang apa yang sudah
+                             terlihat, sementara tingginya ikut menekan kolom kanan. --}}
+                        <p class="mis-label prof-email-label">Alamat email</p>
+
+                        <div class="prof-baris">
+                          {{-- Ubin, alamat, keterangan, dan tombol ubah dalam satu kisi: ubin dan
+                               tombol merentang dua baris lalu dirata-tengahkan, jadi keduanya
+                               sejajar dengan BLOK teksnya — aturan yang sama dengan kepala
+                               bagian. Keterangan otomatis menjorok karena ia di kolom kedua. --}}
+                          <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                          <p class="prof-nilai">{{ $user->email }}</p>
+                          @if ($user->email_verified_at)
+                            <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
+                          @else
+                            <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
+                          @endif
+                          <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
+                            <i class="fas fa-pen"></i>
+                          </button>
+                        </div>
+
+                        @if (! $user->email_verified_at)
+                          <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
+                            class="prof-verif">
+                            @csrf
+                            <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
+                            <div id="container-verify-btn">
+                              <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
+                                <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
+                              </button>
+                              <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
+                            </div>
+                          </form>
+                        @endif
                       </div>
 
                       {{-- Kisi kedua. Lima isian di satu kisi tiga kolom menyisakan
@@ -586,7 +614,7 @@ Profil | MIS
                 </div>
 
                 {{-- ------------------------------------- tab 2: kata sandi --}}
-                <div class="tab-pane fade" id="settings" role="tabpanel">
+                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="pills-settings-tab" tabindex="0">
                   <form id="register-form" action="{{ route('account.profil.reset.password') }}" method="POST">
                     @csrf
 
@@ -675,12 +703,12 @@ Profil | MIS
                 </div>
 
                 {{-- --------------------------------------- tab 3: PIN masuk --}}
-                <div class="tab-pane fade" id="pin" role="tabpanel">
+                <div class="tab-pane fade" id="pin" role="tabpanel" aria-labelledby="pills-pin-tab" tabindex="0">
                   <livewire:akun.pengaturan-pin />
                 </div>
 
                 {{-- --------------------------------------- tab 4: keamanan --}}
-                <div class="tab-pane fade" id="keamanan" role="tabpanel">
+                <div class="tab-pane fade" id="keamanan" role="tabpanel" aria-labelledby="pills-keamanan-tab" tabindex="0">
                   <livewire:akun.keamanan-akun />
                 </div>
 
