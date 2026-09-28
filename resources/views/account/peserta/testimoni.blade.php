@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Evaluasi | RUMAH SCOPUS</title>
-    <link rel="shortcut icon" href="{{ asset('assets/img/logonew1.png') }}">
+    {{-- Sama dengan halaman masuk: tab peramban butuh gambar persegi, jadi
+         yang dipakai potongan logo, bukan logo utuh. --}}
+    <link rel="icon" href="{{ asset('assets/img/mis-favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/mis-favicon.png') }}">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
