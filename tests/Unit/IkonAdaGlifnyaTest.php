@@ -61,6 +61,17 @@ class IkonAdaGlifnyaTest extends TestCase
             }
         }
 
+        // Ikut dipindai: toast merakit ikonnya dari sini, bukan dari Blade.
+        preg_match_all(
+            '/\bfa-[a-z0-9-]{2,}/',
+            (string) file_get_contents($akar . '/public/assets/js/mis-ui.js'),
+            $cJs
+        );
+
+        foreach ($cJs[0] as $nama) {
+            $ketemu[$nama][] = 'public/assets/js/mis-ui.js';
+        }
+
         $hilang = [];
 
         foreach ($ketemu as $nama => $tempat) {

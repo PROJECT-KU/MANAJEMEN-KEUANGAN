@@ -116,12 +116,59 @@
 (function () {
     'use strict';
 
+    /*
+     * Ikon bawaan SweetAlert2 tidak dipakai lagi.
+     *
+     * Ikon itu digambar dari beberapa garis yang posisinya dipatok dalam em
+     * terhadap font-size ikonnya sendiri, dan angkanya disetel untuk ukuran
+     * bawaan. Begitu ubinnya dikecilkan lewat width/height, garis silangnya
+     * tetap di tempat lama sehingga tandanya melenceng dari titik tengah.
+     * Diganti ubin bergradien berisi glif Font Awesome — sama seperti
+     * .mis-medali di seluruh sistem ini, dan titik tengahnya diurus grid.
+     *
+     * Nama glifnya harus ada di Font Awesome 5.5; lihat IkonAdaGlifnyaTest.
+     */
     var JENIS = {
-        berhasil: { icon: 'success', warna: '#10b981' },
-        gagal: { icon: 'error', warna: '#f43f5e' },
-        peringatan: { icon: 'warning', warna: '#f59e0b' },
-        info: { icon: 'info', warna: '#0ea5e9' }
+        berhasil: { judul: 'Berhasil', glif: 'fa-check', warna: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)', pita: '#10b981' },
+        gagal: { judul: 'Gagal', glif: 'fa-times', warna: 'linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)', pita: '#f43f5e' },
+        peringatan: { judul: 'Perhatian', glif: 'fa-exclamation-triangle', warna: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)', pita: '#f59e0b' },
+        info: { judul: 'Info', glif: 'fa-info-circle', warna: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)', pita: '#0ea5e9' }
     };
+
+    /* Isi toast dirakit sebagai simpul, bukan untaian HTML: pesannya masuk
+       lewat textContent, jadi tanda < atau & di dalamnya tidak pernah
+       tertafsir sebagai markah. */
+    function rakitIsi(pilih, pesan) {
+        var bungkus = document.createElement('div');
+        bungkus.className = 'mis-toast-isi';
+
+        var ubin = document.createElement('span');
+        ubin.className = 'mis-toast-ubin';
+        ubin.setAttribute('aria-hidden', 'true');
+
+        var glif = document.createElement('i');
+        glif.className = 'fas ' + pilih.glif;
+        ubin.appendChild(glif);
+
+        var teks = document.createElement('div');
+        teks.className = 'mis-toast-teks';
+
+        var judul = document.createElement('p');
+        judul.className = 'mis-toast-judul';
+        judul.textContent = pilih.judul;
+
+        var isi = document.createElement('p');
+        isi.className = 'mis-toast-pesan';
+        isi.textContent = pesan;
+
+        teks.appendChild(judul);
+        teks.appendChild(isi);
+
+        bungkus.appendChild(ubin);
+        bungkus.appendChild(teks);
+
+        return bungkus;
+    }
 
     function tampilkan(jenis, pesan, lama) {
         var pilih = JENIS[jenis] || JENIS.info;
@@ -135,14 +182,14 @@
         window.Swal.fire({
             toast: true,
             position: 'top-end',
-            icon: pilih.icon,
-            title: pesan,
+            html: rakitIsi(pilih, pesan),
             showConfirmButton: false,
             timer: lama || (jenis === 'gagal' ? 5000 : 3000),
             timerProgressBar: true,
-            customClass: { popup: 'mis-toast' },
+            customClass: { popup: 'mis-toast', htmlContainer: 'mis-toast-wadah' },
             didOpen: function (el) {
                 el.style.setProperty('--mis-toast-warna', pilih.warna);
+                el.style.setProperty('--mis-toast-pita', pilih.pita);
                 el.addEventListener('mouseenter', window.Swal.stopTimer);
                 el.addEventListener('mouseleave', window.Swal.resumeTimer);
             }
