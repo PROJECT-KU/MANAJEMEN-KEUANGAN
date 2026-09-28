@@ -116,6 +116,21 @@
                 <p class="prof-bagian-sub">{{ $panjangPin }} angka yang Anda ketik di halaman masuk.</p>
             </div>
 
+            {{-- Peringatan lebih dulu, bukan pesan galat sesudah tombol ditekan.
+                 Peladen tetap yang memutuskan (lihat simpan()); ini supaya orang
+                 tidak terlanjur mengetik angka baru dan mengira PIN di perangkat
+                 lain ikut aman. --}}
+            @unless ($this->bolehGantiPin())
+                <div class="prof-kabar">
+                    <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                    <p class="prof-kabar-teks">
+                        Perangkat ini belum terdaftar, jadi PIN belum bisa diganti dari sini — satu akun hanya
+                        punya satu PIN. Isikan PIN yang sekarang untuk memakainya di perangkat ini. Lupa PIN-nya?
+                        Matikan dulu PIN lama lewat tombol di bawah, lalu buat yang baru.
+                    </p>
+                </div>
+            @endunless
+
             <div class="mis-kisi-isian prof-kisi-dua">
                 <div class="mis-isian">
                     <label class="mis-label" for="pin-baru">

@@ -145,6 +145,19 @@ class PengaturanPin extends Component
         $this->toast('berhasil', 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.');
     }
 
+    /**
+     * Apakah PIN boleh diganti dari perangkat yang sedang dipakai.
+     *
+     * Boleh kalau akun ini memang belum punya PIN, atau kalau peramban ini
+     * sudah terdaftar — artinya pemakainya pernah membuktikan tahu PIN yang
+     * sekarang. Dipakai tampilan untuk memberi peringatan lebih dulu, bukan
+     * membiarkan orang mentok di pesan galat.
+     */
+    public function bolehGantiPin(): bool
+    {
+        return ! $this->pengguna()->pinAktif() || $this->perangkatSiap();
+    }
+
     /** Aktifkan PIN, atau ganti PIN yang sudah ada. */
     public function simpan(): void
     {
@@ -164,20 +177,44 @@ class PengaturanPin extends Component
 
         $this->pastikanKataSandiBenar($pengguna);
 
+        /*
+         * Pengaman: perangkat yang belum terdaftar tidak boleh MENGGANTI PIN.
+         *
+         * PIN milik akun, bukan milik perangkat — kolomnya cuma satu. Jadi
+         * mengetik angka baru di sini bukan "mendaftarkan HP", melainkan
+         * menimpa PIN yang dipakai semua perangkat. Orang mudah salah kira:
+         * di HP ia mengetik angka lain, lalu PIN di laptopnya mati tanpa ia
+         * sadari — dan kalau di laptop angka lama dicoba sampai lima kali,
+         * PIN-nya dimatikan sistem.
+         *
+         * Karena itu dari perangkat asing PIN hanya bisa diganti oleh orang
+         * yang tahu PIN sekarang. Yang benar-benar lupa tetap punya jalan
+         * keluar: matikan PIN dulu (cukup kata sandi), lalu buat yang baru.
+         */
+        if ($sudahAda && ! $this->perangkatSiap()) {
+            if (! $this->pinSekarangTerbukti($pengguna)) {
+                return;
+            }
+
+            // Angkanya sama dengan PIN yang sekarang. Yang sebenarnya diminta
+            // orang ini bukan mengganti PIN, melainkan memakai PIN-nya di
+            // perangkat ini — jadi itu yang dikerjakan, tanpa menyentuh PIN.
+            $this->ingatPerangkat($pengguna);
+
+            $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
+
+            $this->toast('berhasil', 'Perangkat ini sekarang bisa dipakai masuk dengan PIN. PIN Anda tidak diubah.');
+
+            return;
+        }
+
         $pengguna->aturPin($this->pin);
 
         // Perangkat yang dipakai mengaktifkan PIN langsung diingat, supaya di
         // halaman masuk cukup mengetik PIN tanpa username dan kata sandi.
         // Penanda "Ingat saya" dibiarkan apa adanya: mengaktifkan PIN tidak
         // ikut membuat isian username terisi otomatis kalau tidak diminta.
-        $ingatan = IngatanMasuk::baca();
-
-        IngatanMasuk::simpan(
-            $this->ingatanMilikSaya($ingatan, $pengguna) ? $ingatan['identitas'] : (string) $pengguna->username,
-            'pin',
-            $this->ingatanMilikSaya($ingatan, $pengguna) ? $ingatan['ingat'] : false,
-            (int) $pengguna->getKey()
-        );
+        $this->ingatPerangkat($pengguna);
 
         $this->beriTahu($pengguna, $sudahAda ? 'diubah' : 'diaktifkan');
 
@@ -186,6 +223,57 @@ class PengaturanPin extends Component
         $this->toast('berhasil', $sudahAda
             ? 'PIN berhasil diubah. PIN lama sudah tidak berlaku.'
             : 'PIN berhasil diaktifkan. Di halaman masuk, pilih tab PIN lalu masukkan ' . $this->panjangPin() . ' angka PIN Anda.');
+    }
+
+    /**
+     * Benarkah angka yang diketik sama dengan PIN yang sekarang?
+     *
+     * Jatah salahnya satu kantong dengan aktifkanDiPerangkat(), supaya
+     * formulir ini tidak bisa dipakai menebak PIN setelah jatah di kotak
+     * pendaftaran habis.
+     */
+    private function pinSekarangTerbukti(User $pengguna): bool
+    {
+        $kunci = 'pin-perangkat|' . $pengguna->getKey();
+
+        if (RateLimiter::tooManyAttempts($kunci, self::BATAS_PIN_SALAH)) {
+            $menit = ceil(RateLimiter::availableIn($kunci) / 60);
+
+            $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
+            $this->addError('pin', 'Terlalu banyak PIN salah. Coba lagi dalam ' . $menit . ' menit.');
+            $this->toast('gagal', 'PIN tidak diganti. Terlalu banyak percobaan salah — coba lagi dalam ' . $menit . ' menit.');
+
+            return false;
+        }
+
+        if ($pengguna->pinCocok($this->pin)) {
+            RateLimiter::clear($kunci);
+
+            return true;
+        }
+
+        RateLimiter::hit($kunci, self::LAMA_KUNCI);
+
+        $this->reset('kataSandi', 'pin', 'pinKonfirmasi');
+        $this->addError('pin', 'Isikan PIN yang sekarang dipakai, bukan PIN baru.');
+        $this->toast('gagal', 'PIN tidak diganti. Perangkat ini belum terdaftar, jadi PIN hanya bisa diganti dari '
+            . 'perangkat yang sudah memakainya. Lupa PIN-nya? Matikan dulu PIN lama, lalu buat yang baru.');
+
+        return false;
+    }
+
+    /** Ingat perangkat ini supaya halaman masuk langsung meminta PIN. */
+    private function ingatPerangkat(User $pengguna): void
+    {
+        $ingatan = IngatanMasuk::baca();
+        $milikSaya = $this->ingatanMilikSaya($ingatan, $pengguna);
+
+        IngatanMasuk::simpan(
+            $milikSaya ? $ingatan['identitas'] : (string) $pengguna->username,
+            'pin',
+            $milikSaya ? $ingatan['ingat'] : false,
+            (int) $pengguna->getKey()
+        );
     }
 
     /** Matikan PIN; masuk kembali hanya dengan kata sandi. */
