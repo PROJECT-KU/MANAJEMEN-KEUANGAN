@@ -1034,6 +1034,75 @@
         padding: 11px !important;
     }
 
+    /* ------------------------------------------------- syarat kata sandi */
+
+    .prof-syarat {
+        list-style: none;
+        margin: 12px 0 0;
+        padding: 10px 12px;
+        display: grid;
+        gap: 6px;
+        background: #f8fafc;
+        border: 1px solid var(--mis-garis);
+        border-radius: 13px;
+    }
+
+    .prof-syarat li {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: .76rem;
+        font-weight: 600;
+        line-height: 1.35;
+        color: var(--mis-tinta-3);
+        transition: color .2s ease;
+    }
+
+    /* Penanda bulat di kiri: kosong selagi belum terpenuhi, berisi centang
+       begitu terpenuhi. Bentuknya tetap sama supaya barisnya tidak bergeser. */
+    .prof-syarat li::before {
+        content: "";
+        flex: 0 0 15px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 1.5px solid var(--mis-garis);
+        background: #fff;
+        transition: all .2s ease;
+    }
+
+    .prof-syarat li.oke {
+        color: #047857;
+    }
+
+    .prof-syarat li.oke::before {
+        border-color: #10b981;
+        background: #10b981 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/9px no-repeat;
+    }
+
+    /* Catatan di samping isian, bukan di bawahnya: kisi dua kolom jadi
+       terisi penuh dan tabnya tidak menyisakan petak kosong di kanan. */
+    .prof-catatan-samping {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 0;
+        align-self: center;
+        padding: 10px 12px;
+        border-radius: 13px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        font-size: .76rem;
+        line-height: 1.45;
+        color: #0369a1;
+    }
+
+    .prof-catatan-samping i {
+        font-size: inherit;
+        line-height: 1.45;
+        flex: 0 0 auto;
+    }
+
     /* -------------------------------------------------------- kata sandi */
 
     .prof-sandi {
@@ -1046,18 +1115,26 @@
 
     .password-toggle-inside {
         position: absolute;
-        right: 14px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
         cursor: pointer;
         color: var(--mis-tinta-4);
-        transition: color .2s ease;
+        transition: all .2s ease;
         z-index: 3;
-        font-size: 13px;
-        padding: 5px;
+        /* !important memang perlu: aturan global layout memakai selektor
+           .fas yang bobotnya sama, dan ia terbit belakangan. */
+        font-size: .8rem !important;
+        line-height: 1;
     }
 
     .password-toggle-inside:hover {
+        background: #eef2ff;
         color: #6366f1;
     }
 
