@@ -1145,9 +1145,208 @@
         color: #6366f1;
     }
 
-    /* Tab PIN & Keamanan memakai kelas Bootstrap dari komponen Livewire. */
+    /* Tab Keamanan masih memakai kelas Bootstrap dari komponen Livewire. */
     .prof-tab-isi .table {
         font-size: .82rem;
+    }
+
+    /* ------------------------------------------------ tombol teks sekunder */
+
+    /*
+     * .mis-tombol-garis dan .mis-tombol-bahaya di mis-ui.css sengaja 34x34
+     * untuk tombol berisi ikon saja. Dua kelas di bawah ini memakai kerangka
+     * .mis-tombol (tinggi, sudut, jarak ikon) tapi berwarna lembut, untuk
+     * tombol sekunder yang berteks: "Lupakan perangkat", "Nonaktifkan PIN".
+     */
+    .prof-tombol-halus {
+        background: #fff;
+        border: 1px solid var(--mis-garis);
+        color: var(--mis-tinta-2);
+    }
+
+    .prof-tombol-halus:hover:not(:disabled) {
+        border-color: #c7d2fe;
+        background: #eef2ff;
+        color: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    /* Merahnya terlihat tanpa harus disentuh dulu — tombol yang mematikan
+       sesuatu tidak boleh menyamar jadi tombol biasa. */
+    .prof-tombol-bahaya-teks {
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #e11d48;
+    }
+
+    .prof-tombol-bahaya-teks:hover:not(:disabled) {
+        background: #e11d48;
+        border-color: #e11d48;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    /* ---------------------------------------------------- tab PIN masuk */
+
+    /*
+     * Dua kotak keterangan di atas formulir: keadaan PIN dan keadaan
+     * perangkat. Keduanya sebaris supaya tidak memakan tinggi — yang penting
+     * bagi pengguna cuma "sudah aktif atau belum".
+     */
+    .pin-keadaan {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 13px;
+        margin-bottom: 14px;
+        border-radius: 13px;
+        background: #f8fafc;
+        border: 1px solid var(--mis-garis);
+    }
+
+    .pin-keadaan.nyala {
+        background: linear-gradient(135deg, #f0fdfa, #f5f3ff);
+        border-color: #c7d2fe;
+    }
+
+    .pin-keadaan-teks {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .pin-keadaan-judul {
+        margin: 0 0 1px;
+        line-height: 1.25;
+        font-size: .86rem;
+        font-weight: 800;
+        color: var(--mis-tinta);
+    }
+
+    .pin-keadaan-sub {
+        margin: 0;
+        line-height: 1.35;
+        font-size: .74rem;
+        color: var(--mis-tinta-3);
+    }
+
+    .pin-perangkat {
+        padding: 12px 13px;
+        margin-bottom: 14px;
+        border-radius: 13px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+    }
+
+    .pin-perangkat.siap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+    }
+
+    .pin-perangkat-teks {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .pin-perangkat.siap .prof-tombol-halus {
+        height: 38px;
+        padding: 0 14px;
+        font-size: .8rem;
+        flex: 0 0 auto;
+    }
+
+    .pin-perangkat .prof-bagian-kepala {
+        margin-bottom: 10px;
+    }
+
+    .pin-daftar-baris {
+        display: flex;
+        gap: 10px;
+    }
+
+    /*
+     * Tinggi keduanya disamakan di 46px.
+     *
+     * .pin-isian aslinya 50px dan .mis-tombol 42px, jadi kotak dan tombol
+     * yang berdampingan tidak rata atas-bawah. 46px di tengah keduanya:
+     * kotaknya masih lebih lega daripada isian biasa, tombolnya tidak
+     * terlihat kekecilan.
+     */
+    .pin-daftar-baris .pin-isian {
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 46px;
+    }
+
+    .pin-daftar-baris .mis-tombol {
+        flex: 0 0 auto;
+        height: 46px;
+    }
+
+    /*
+     * Kotak angka PIN: sedikit lebih tinggi daripada isian biasa dan angkanya
+     * direnggangkan, senada dengan kotak kode di halaman masuk. Bedanya
+     * disengaja — inilah yang akan diketik orang tiap kali masuk.
+     */
+    .pin-isian {
+        height: 50px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: .45em;
+        /* letter-spacing menambah jarak SESUDAH huruf terakhir juga, jadi
+           deretnya condong ke kiri; text-indent menggesernya balik. */
+        text-indent: .45em;
+        color: var(--mis-tinta);
+    }
+
+    .pin-isian::placeholder {
+        font-size: .95rem;
+        letter-spacing: .3em;
+        font-weight: 600;
+    }
+
+    .pin-lihat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0 0;
+        font-size: .76rem;
+        font-weight: 600;
+        color: var(--mis-tinta-3);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .pin-lihat input {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        accent-color: #6366f1;
+        cursor: pointer;
+    }
+
+    .pin-tip {
+        list-style: none;
+        margin: 12px 0 0;
+        padding: 11px 12px;
+        display: grid;
+        gap: 9px;
+        background: #f8fafc;
+        border: 1px solid var(--mis-garis);
+        border-radius: 13px;
+    }
+
+    .pin-tip li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .76rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--mis-tinta-3);
     }
 
     /* --------------------------------------------------------- responsif */
@@ -1206,6 +1405,36 @@
         }
 
         .prof-aksi .mis-tombol {
+            width: 100%;
+        }
+
+        /* Lencana keadaan turun ke baris sendiri, rata dengan teksnya —
+           kalau dipaksa tetap di kanan, judulnya terpatah dua baris. */
+        .pin-keadaan {
+            flex-wrap: wrap;
+        }
+
+        .pin-keadaan > .prof-lencana {
+            order: 3;
+            margin-left: 48px;
+        }
+
+        /* Tombol dan isian melebar penuh: di ponsel tidak ada ruang untuk
+           dua hal berdampingan tanpa salah satunya jadi terlalu sempit. */
+        .pin-perangkat.siap {
+            flex-wrap: wrap;
+        }
+
+        .pin-perangkat.siap .prof-tombol-halus {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .pin-daftar-baris {
+            flex-direction: column;
+        }
+
+        .pin-daftar-baris .mis-tombol {
             width: 100%;
         }
     }
