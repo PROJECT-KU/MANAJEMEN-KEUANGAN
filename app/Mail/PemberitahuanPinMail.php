@@ -17,7 +17,10 @@ class PemberitahuanPinMail extends Mailable
 
     public User $user;
 
-    /** 'diaktifkan' | 'diubah' | 'dinonaktifkan' | 'dinonaktifkan-otomatis' */
+    /**
+     * 'diaktifkan' | 'diubah' | 'dinonaktifkan' | 'dinonaktifkan-otomatis'
+     * | 'perangkat-didaftarkan'
+     */
     public string $aksi;
 
     public string $ip;
@@ -37,6 +40,7 @@ class PemberitahuanPinMail extends Mailable
             'diaktifkan' => 'PIN Masuk Diaktifkan',
             'diubah' => 'PIN Masuk Diubah',
             'dinonaktifkan-otomatis' => 'PIN Masuk Dinonaktifkan Otomatis',
+            'perangkat-didaftarkan' => 'Perangkat Baru Bisa Masuk dengan PIN',
             default => 'PIN Masuk Dinonaktifkan',
         };
 

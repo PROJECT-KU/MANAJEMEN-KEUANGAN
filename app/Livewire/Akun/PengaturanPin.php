@@ -3,6 +3,7 @@
 namespace App\Livewire\Akun;
 
 use App\Mail\PemberitahuanPinMail;
+use App\PerangkatPin;
 use App\Rules\PinAman;
 use App\Support\IngatanMasuk;
 use App\User;
@@ -71,7 +72,11 @@ class PengaturanPin extends Component
 
         return $ingatan !== null
             && $ingatan['mode'] === 'pin'
-            && $this->ingatanMilikSaya($ingatan, $this->pengguna());
+            && $this->ingatanMilikSaya($ingatan, $this->pengguna())
+            // Catatan di peladen ikut menentukan. Tanpa syarat ini, perangkat
+            // yang izinnya sudah dicabut dari jauh masih melapor "terdaftar"
+            // selama kuenya utuh.
+            && PerangkatPin::perangkatIniTerdaftar($this->pengguna());
     }
 
     /**
@@ -127,6 +132,18 @@ class PengaturanPin extends Component
             (int) $pengguna->getKey()
         );
 
+        PerangkatPin::daftarkanPerangkatIni($pengguna);
+
+        /*
+         * Kabari pemilik akun.
+         *
+         * Mendaftarkan perangkat memberi ia jalan masuk PERMANEN dengan enam
+         * angka, tanpa kata sandi — sama besarnya dengan mengubah PIN, yang
+         * sejak dulu memang dikabari. Sampai sekarang justru pendaftaran
+         * perangkat yang lolos tanpa kabar apa pun.
+         */
+        $this->beriTahu($pengguna, 'perangkat-didaftarkan');
+
         $this->reset('pinPerangkat');
 
         $this->toast('berhasil', 'Perangkat ini sekarang bisa dipakai masuk dengan PIN.');
@@ -142,7 +159,48 @@ class PengaturanPin extends Component
             IngatanMasuk::lupakan();
         }
 
+        PerangkatPin::lupakanPerangkatIni($this->pengguna());
+
         $this->toast('berhasil', 'Perangkat ini dilupakan. PIN Anda tetap aktif dan bisa dipakai di perangkat lain.');
+    }
+
+    /**
+     * Cabut izin PIN sebuah perangkat LAIN, dari perangkat yang sedang dipakai.
+     *
+     * Inilah yang dulu tidak ada: izin PIN cuma hidup di kue peramban, jadi
+     * HP yang hilang tidak bisa dicabut izinnya kecuali dengan mematikan PIN
+     * untuk semua perangkat sekaligus.
+     */
+    public function lupakanPerangkatLain(int $id): void
+    {
+        $pengguna = $this->pengguna();
+
+        $perangkat = PerangkatPin::where('user_id', $pengguna->getKey())->find($id);
+
+        if ($perangkat === null) {
+            $this->toast('gagal', 'Perangkat itu sudah tidak terdaftar.');
+
+            return;
+        }
+
+        if ($perangkat->ini) {
+            $this->toast('gagal', 'Itu perangkat yang sedang Anda pakai. Gunakan tombol "Lupakan perangkat" di atas.');
+
+            return;
+        }
+
+        $perangkat->delete();
+
+        $this->toast('berhasil', 'Perangkat itu tidak bisa lagi masuk dengan PIN.');
+    }
+
+    /** Perangkat yang boleh masuk dengan PIN, yang sedang dipakai lebih dulu. */
+    public function daftarPerangkatPin()
+    {
+        return PerangkatPin::where('user_id', $this->pengguna()->getKey())
+            ->get()
+            ->sortByDesc(fn ($p) => $p->ini ? PHP_INT_MAX : optional($p->terakhir_dipakai_pada)->getTimestamp() ?? 0)
+            ->values();
     }
 
     /**
@@ -215,6 +273,7 @@ class PengaturanPin extends Component
         // Penanda "Ingat saya" dibiarkan apa adanya: mengaktifkan PIN tidak
         // ikut membuat isian username terisi otomatis kalau tidak diminta.
         $this->ingatPerangkat($pengguna);
+        PerangkatPin::daftarkanPerangkatIni($pengguna);
 
         $this->beriTahu($pengguna, $sudahAda ? 'diubah' : 'diaktifkan');
 
@@ -294,6 +353,8 @@ class PengaturanPin extends Component
 
         $this->pastikanKataSandiBenar($pengguna);
 
+        // matikanPin() sendiri yang mencabut izin semua perangkat, supaya
+        // ketiga jalan yang memanggilnya berperilaku sama.
         $pengguna->matikanPin();
 
         // Ingatan perangkat: kalau tadinya hanya dipasang untuk PIN, sekalian
