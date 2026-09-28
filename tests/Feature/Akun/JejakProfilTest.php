@@ -71,6 +71,25 @@ class JejakProfilTest extends TestCase
         );
     }
 
+    /**
+     * Penjaga terhadap kesalahan yang sudah pernah terjadi: jendela ganti
+     * email di halaman profil sempat mengirim ke rute pengelolaan pengguna,
+     * yang tidak mengirim tautan verifikasi, tidak mengabari alamat lama,
+     * dan tidak mencatat apa pun. Ujinya lolos karena menembak rutenya
+     * langsung, bukan lewat layar.
+     */
+    #[Test]
+    public function jendela_ganti_email_menembak_rute_profil(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        $this->actingAs($pengguna)
+            ->get(route('account.profil.show', $pengguna->uuid))
+            ->assertOk()
+            ->assertSee(route('account.profil.update.datadiri'), false)
+            ->assertDontSee(route('account.pengguna.update.datadiri', $pengguna->id), false);
+    }
+
     #[Test]
     public function kata_sandi_salah_tidak_memindahkan_email_dan_tidak_mengabari_siapa_pun(): void
     {
