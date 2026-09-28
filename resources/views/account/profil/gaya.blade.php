@@ -1608,6 +1608,13 @@
         font-size: .74rem;
     }
 
+    /* Tombol unduh di kepala bagian: memakai ungu .mis-tombol-ungu, tetapi
+       bayangannya disetel ulang — nilai bawaannya dirancang untuk tombol
+       setinggi 42px dan terlihat menggantung pada tombol 28px ini. */
+    .kmn-unduh {
+        box-shadow: 0 6px 14px -9px #6366f1;
+    }
+
     /* Tombol pelipat daftar: selebar daftarnya, rupa tautan yang tenang —
        ia bukan aksi yang mengubah apa pun. */
     .kmn-lipat {
