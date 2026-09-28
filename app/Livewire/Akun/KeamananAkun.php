@@ -24,6 +24,12 @@ class KeamananAkun extends Component
 {
     public string $kataSandi = '';
 
+    /** Tampilkan seluruh perangkat, bukan hanya beberapa yang teratas. */
+    public bool $semuaPerangkat = false;
+
+    /** Berapa perangkat yang tampil sebelum daftarnya dilipat. */
+    private const PERANGKAT_TAMPIL = 3;
+
 
 
     /** Berapa banyak baris riwayat yang ditampilkan. */
@@ -131,7 +137,17 @@ class KeamananAkun extends Component
                 $sesi->waktu = \Illuminate\Support\Carbon::createFromTimestamp($sesi->last_activity);
 
                 return $sesi;
-            });
+            })
+            /*
+             * Perangkat yang sedang dipakai selalu di urutan pertama.
+             *
+             * Urutan menurut keaktifan saja tidak menjamin itu: perangkat lain
+             * yang halamannya baru saja terbuka bisa lebih baru. Padahal justru
+             * baris inilah yang TIDAK boleh diakhiri, jadi ia tidak boleh
+             * tersembunyi di balik lipatan daftar.
+             */
+            ->sortByDesc(fn ($sesi) => $sesi->ini ? PHP_INT_MAX : $sesi->last_activity)
+            ->values();
     }
 
     private function pengguna(): User
@@ -146,7 +162,11 @@ class KeamananAkun extends Component
         return view('livewire.akun.keamanan-akun', [
             'pengguna' => $pengguna,
             'perangkatIni' => PenandaPerangkat::ambil(),
-            'sesi' => $this->daftarSesi(),
+            'sesi' => $sesi = $this->daftarSesi(),
+            // Yang tampil dibatasi sampai daftarnya dibuka; 20 perangkat
+            // berjajar memakan seluruh layar dan mengubur riwayat di bawahnya.
+            'sesiTampil' => $this->semuaPerangkat ? $sesi : $sesi->take(self::PERANGKAT_TAMPIL),
+            'sisaPerangkat' => max(0, $sesi->count() - self::PERANGKAT_TAMPIL),
             'riwayat' => AktivitasMasuk::where('user_id', $pengguna->getKey())
                 ->latest('id')
                 ->limit(self::JUMLAH_RIWAYAT)
