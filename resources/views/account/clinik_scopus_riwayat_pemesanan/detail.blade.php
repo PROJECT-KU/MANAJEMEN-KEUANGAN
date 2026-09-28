@@ -180,7 +180,7 @@ Detail Pemesanan | MIS
                         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to bottom, rgba(99, 102, 241, 0.05), transparent);"></div>
 
                         <div class="position-relative">
-                            <img src="{{ isset($datas->trainer->gambar) ? asset('assets/img/profil/' . $datas->trainer->gambar) : asset('assets/img/profil/no-image.jpg') }}"
+                            <img src="{{ isset($datas->trainer->gambar) ? \App\Support\FotoProfil::url($datas->trainer->gambar) : \App\Support\FotoProfil::bawaan() }}"
                                 style="width: 140px; height: 140px; border-radius: 45px; object-fit: cover; border: 6px solid #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: transform 0.3s ease;" class="hover-zoom">
 
                             <div style="position: absolute; bottom: 10px; right: 25%; width: 22px; height: 22px; background: #22c55e; border: 4px solid #fff; border-radius: 50%; shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>

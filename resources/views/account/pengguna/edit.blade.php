@@ -178,7 +178,7 @@ Update Data Karyawan | MIS
             <div class="row">
                 <div class="col-lg-4 col-md-5">
                     <div class="card-neo p-4 text-center">
-                        <img src="{{ $user->gambar ? asset('assets/img/profil/' . $user->gambar) : asset('assets/img/profil/no-image.jpg') }}"
+                        <img src="{{ $user->gambar ? \App\Support\FotoProfil::url($user->gambar) : \App\Support\FotoProfil::bawaan() }}"
                             style="width: 130px; height: 130px; border-radius: 40px; object-fit: cover; border: 5px solid #fff; box-shadow: var(--shadow-soft);">
 
                         <h5 class="mt-3 font-weight-800">{{ $user->full_name }}</h5>

@@ -299,3 +299,73 @@
         pasang();
     }
 })();
+
+/* ================================================== tombol sedang sibuk ===
+
+   Formulir biasa (bukan Livewire, bukan fetch) tidak memberi tanda apa pun
+   setelah tombolnya ditekan: halaman diam sampai peladen menjawab. Di
+   sambungan lambat orang mengira tombolnya tidak kena lalu menekannya lagi,
+   dan kiriman kedua itulah yang menimpa yang pertama.
+
+   Dipasang lewat atribut data-sibuk pada <form>, bukan otomatis ke semua
+   formulir: sebagian formulir membatalkan kirimannya lalu memakai fetch
+   sendiri, dan tombol yang dikunci di situ tidak akan pernah pulih.
+   ========================================================================= */
+(function () {
+    var ASLI = 'data-tombol-asli';
+
+    function tombolnya(form) {
+        return Array.prototype.filter.call(
+            form.querySelectorAll('button'),
+            function (b) { return ! b.type || b.type === 'submit'; }
+        );
+    }
+
+    function kunci(form) {
+        tombolnya(form).forEach(function (b) {
+            if (b.hasAttribute(ASLI)) {
+                return;
+            }
+
+            b.setAttribute(ASLI, b.innerHTML);
+            b.innerHTML = '<span class="mis-putar" aria-hidden="true"></span> ' + (b.getAttribute('data-sibuk-teks') || 'Menyimpan…');
+            b.disabled = true;
+        });
+    }
+
+    function pulih(form) {
+        tombolnya(form).forEach(function (b) {
+            if (! b.hasAttribute(ASLI)) {
+                return;
+            }
+
+            b.innerHTML = b.getAttribute(ASLI);
+            b.removeAttribute(ASLI);
+            b.disabled = false;
+        });
+    }
+
+    // Fase gelembung, bukan tangkap: penangan milik halaman harus sempat
+    // berjalan dulu, supaya yang memanggil preventDefault() ketahuan di sini.
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+
+        if (! (form instanceof HTMLFormElement) || ! form.hasAttribute('data-sibuk') || e.defaultPrevented) {
+            return;
+        }
+
+        // Ditunda satu putaran: tombol yang dinonaktifkan pada detik yang sama
+        // dengan kirimannya tidak ikut terkirim nilainya.
+        setTimeout(function () { kunci(form); }, 0);
+    });
+
+    // Kembali lewat tombol "back" memakai halaman dari cache, lengkap dengan
+    // tombol yang masih terkunci dari kiriman sebelumnya.
+    window.addEventListener('pageshow', function (e) {
+        if (! e.persisted) {
+            return;
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('form[data-sibuk]'), pulih);
+    });
+})();

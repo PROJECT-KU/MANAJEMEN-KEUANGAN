@@ -3,6 +3,7 @@
 namespace Tests\Feature\Akun;
 
 use App\Support\BerkasGambar;
+use App\Support\FotoProfil;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
@@ -34,7 +35,7 @@ class UnggahGambarTest extends TestCase
     private function bersihkan(?string $nama): void
     {
         if ($nama) {
-            @unlink(public_path('assets/img/profil/' . $nama));
+            FotoProfil::hapus($nama);
         }
     }
 
@@ -55,7 +56,10 @@ class UnggahGambarTest extends TestCase
         $nama = $pengguna->refresh()->gambar;
 
         $this->assertNotNull($nama);
-        $this->assertStringEndsWith('.png', $nama);
+        // Sejak foto profil selalu diubah ke WebP, ekstensinya tidak lagi
+        // mengikuti berkas masuk sama sekali — apa pun yang dikirim keluar
+        // sebagai .webp, jadi nama kiriman tidak punya jalan sama sekali.
+        $this->assertStringEndsWith('.webp', $nama);
         $this->assertStringNotContainsString('.html', $nama);
         $this->assertStringNotContainsString('serangan', $nama);
 

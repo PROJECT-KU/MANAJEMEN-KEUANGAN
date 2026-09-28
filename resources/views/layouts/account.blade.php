@@ -46,7 +46,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=37">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=38">
 
     <style>
         .fas,
@@ -214,7 +214,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             @if (Auth::user()->gambar == null)
                             <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @else
-                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
+                            <img alt="image" src="{{ \App\Support\FotoProfil::url(Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -296,7 +296,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                             @if (Auth::user()->gambar == null)
                             <img alt="image" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @else
-                            <img alt="image" src="{{ asset('assets/img/profil/' .  Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
+                            <img alt="image" src="{{ \App\Support\FotoProfil::url(Auth::user()->gambar) }}" class="img-thumbnail rounded-circle" style="width: 50px; height:50px; margin: 5px 10px;">
                             @endif
                             <div class="d-sm-none d-lg-inline-block">Hi, {{ Auth::user()->full_name }}</div>
                         </a>
@@ -712,7 +712,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     {{-- Mengingat posisi gulir sidebar antar halaman. --}}
-    <script src="{{ asset('assets/js/mis-ui.js') }}?v=7"></script>
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=8"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')

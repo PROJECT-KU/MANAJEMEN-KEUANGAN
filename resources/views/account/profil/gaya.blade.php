@@ -875,20 +875,33 @@
      * menyisakan dua sel kosong. Dengan lebar minimum 300px ia jatuh ke dua
      * kolom, jadi empat kartu mengisi 2x2 penuh.
      */
+    /*
+     * Empat nilai yang TIDAK bisa disunting tidak pantas memakan ruang
+     * sebesar isian yang bisa. minmax 300px memaksanya jadi dua kolom kartu
+     * besar; 200px membuatnya empat kolom berdampingan di layar lebar dan
+     * dua di tablet, dengan tinggi baris yang jauh lebih pendek.
+     */
     .prof-kisi-admin {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
     }
 
-    /* Kalau jumlahnya ganjil (akun 'user' tidak punya kartu Perusahaan),
-       kartu terakhir melebar mengisi sisa barisnya. */
-    .prof-kisi-admin > :last-child:nth-child(2n + 1) {
-        grid-column: span 2;
+    /* Ubinnya ikut dikecilkan: di kartu sekecil ini ubin 25px mendominasi. */
+    .prof-kisi-admin .prof-statis {
+        gap: 9px;
+        padding: 7px 9px;
     }
 
-    @media (max-width: 767.98px) {
-        .prof-kisi-admin > :last-child:nth-child(2n + 1) {
-            grid-column: auto;
-        }
+    .prof-kisi-admin .mis-medali.mini {
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+        border-radius: 7px;
+        font-size: .66rem;
+    }
+
+    .prof-kisi-admin .prof-statis-nilai {
+        font-size: .78rem;
     }
 
     /* Kartu ini hanya menampilkan label + satu nilai, jadi tingginya cukup
