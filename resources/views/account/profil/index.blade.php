@@ -39,6 +39,12 @@ Profil | MIS
     $fotoProfil = $user->gambar
         ? asset('assets/img/profil/' . $user->gambar)
         : asset('assets/img/profil/no-image.jpg');
+
+    /* Gambar pengganti "no-image.jpg" hanya pantas di kartu identitas yang
+       memang menyediakan tombol unggah di sebelahnya. Di kepala halaman ia
+       cuma jadi kotak krem bergambar kamera dicoret — di situ dipakai ubin
+       bergradien saja. Ukurannya sama, jadi tata letaknya tidak bergeser. */
+    $punyaFoto = filled($user->gambar) && $user->gambar !== 'no-image.jpg';
 @endphp
 
 <div class="main-content" style="padding-top: 110px; background-color: #f4f7ff; min-height: 100vh;">
@@ -46,10 +52,16 @@ Profil | MIS
     <div class="prof">
 
       {{-- ========================================================= kepala --}}
-      <header class="mis-kepala">
-        <span class="prof-kepala-foto" aria-hidden="true">
-          <img src="{{ $fotoProfil }}" alt="">
-        </span>
+      <header class="mis-kepala prof-kepala">
+        @if ($punyaFoto)
+          <span class="prof-kepala-foto" aria-hidden="true">
+            <img src="{{ $fotoProfil }}" alt="">
+          </span>
+        @else
+          <span class="mis-medali mis-ungu prof-kepala-ubin" aria-hidden="true">
+            <i class="fas fa-id-badge"></i>
+          </span>
+        @endif
 
         <div class="mis-kepala-teks">
           <h1 class="mis-judul">Profil saya</h1>
@@ -62,6 +74,30 @@ Profil | MIS
               <span>{{ $user->company }}</span>
             @endif
           </p>
+        </div>
+
+        {{-- Batang kelengkapan. Sebelumnya bagian tengah kepala kosong
+             sekitar 700px di layar 1440; angka inilah yang paling berguna
+             di situ, sebab ia satu-satunya hal di halaman ini yang masih
+             menunggu dikerjakan. Kartu di kolom kiri yang menyediakan
+             tombol-tombolnya; di sini cukup keadaannya. --}}
+        <div class="prof-kepala-kemajuan" style="--nilai: {{ $kelengkapan['persen'] }}">
+          <p class="prof-kemajuan-teks">
+            @if ($kelengkapan['persen'] === 100)
+              <i class="fas fa-check-circle mis-ikon-hijau" aria-hidden="true"></i>
+              Profil sudah lengkap
+            @else
+              <strong>{{ $kelengkapan['persen'] }}%</strong>
+              profil terisi
+              <span class="prof-kemajuan-sisa">
+                &middot; {{ $kelengkapan['total'] - $kelengkapan['selesai'] }} lagi
+              </span>
+            @endif
+          </p>
+          <div class="prof-kemajuan-jalur" role="img"
+            aria-label="Profil {{ $kelengkapan['persen'] }} persen lengkap">
+            <span class="prof-kemajuan-isi {{ $kelengkapan['persen'] === 100 ? 'tuntas' : '' }}"></span>
+          </div>
         </div>
 
         {{-- Lencana status. Titik di kirinya berdenyut supaya keadaan akun
@@ -521,7 +557,7 @@ Profil | MIS
                         </div>
 
                         <p class="prof-catatan-samping">
-                          <i class="fas fa-circle-info mis-ikon-biru"></i>
+                          <i class="fas fa-info-circle mis-ikon-biru"></i>
                           Lupa kata sandi lama? Keluar dulu, lalu pakai "Lupa kata sandi" di halaman masuk.
                         </p>
                       </div>

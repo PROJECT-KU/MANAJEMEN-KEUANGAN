@@ -76,7 +76,7 @@
             <p class="prof-bagian-sub">Percobaan masuk ke akun Anda, yang berhasil maupun yang gagal.</p>
             @if ($gagalTerakhir > 0)
                 <span class="mis-pil mis-pil-kuning prof-bagian-lencana">
-                    <i class="fas fa-triangle-exclamation"></i>
+                    <i class="fas fa-exclamation-triangle"></i>
                     {{ $gagalTerakhir }} gagal dalam 30 hari
                 </span>
             @endif
@@ -121,7 +121,7 @@
                                             </span>
                                         @else
                                             <span class="mis-pil mis-pil-merah">
-                                                <i class="fas fa-xmark"></i> Gagal
+                                                <i class="fas fa-times"></i> Gagal
                                             </span>
                                         @endif
                                         @if ($baris->alasan)
@@ -146,7 +146,7 @@
             </div>
 
             <p class="prof-aksi-catatan kmn-catatan">
-                <i class="fas fa-circle-info mis-ikon-biru"></i>
+                <i class="fas fa-info-circle mis-ikon-biru"></i>
                 Ada baris yang bukan Anda? Segera ganti kata sandi — sesi di perangkat lain ikut berakhir dan
                 PIN masuk dimatikan.
             </p>

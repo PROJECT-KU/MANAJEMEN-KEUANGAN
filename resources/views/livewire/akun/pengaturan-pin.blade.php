@@ -103,7 +103,7 @@
                 </div>
 
                 <p class="prof-catatan-samping">
-                    <i class="fas fa-circle-info mis-ikon-biru"></i>
+                    <i class="fas fa-info-circle mis-ikon-biru"></i>
                     Kata sandi diminta supaya orang lain yang memakai komputer Anda tidak bisa mengganti PIN.
                 </p>
             </div>

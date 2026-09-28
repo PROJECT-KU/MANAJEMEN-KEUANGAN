@@ -52,6 +52,97 @@
         display: block;
     }
 
+    /* Ubin pengganti saat pengguna belum mengunggah foto. Ukurannya disamakan
+       dengan .prof-kepala-foto supaya kepala tidak berubah tinggi. */
+    .prof-kepala-ubin {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        border-radius: 14px;
+        font-size: 1.22rem;
+        box-shadow: 0 12px 22px -14px #6366f1;
+    }
+
+    /* ------------------------------------------------- kemajuan di kepala */
+
+    /*
+     * Batang ini yang mengisi bagian tengah kepala.
+     *
+     * flex 1 1 190px dengan batas 300px: ia melar mengisi ruang yang tersisa
+     * antara judul dan lencana, tetapi berhenti sebelum jadi garis panjang
+     * yang kehilangan bentuk. Di bawah 900px ia turun ke baris sendiri.
+     */
+    .prof-kepala-kemajuan {
+        flex: 1 1 190px;
+        min-width: 0;
+        /* Tambahan di atas gap 16px kepala: 16px saja membuat ujung batang
+           hampir menyentuh kata terakhir keterangan. */
+        margin-left: 12px;
+        display: grid;
+        gap: 6px;
+    }
+
+    /* Blok judul berhenti selebar tulisannya, bukan ikut melar. Kalau ia
+       melar, ruang sisanya jadi petak kosong DI DALAM blok judul dan
+       batangnya terdorong ke kanan; begini ruang itu jatuh ke batang. */
+    .prof-kepala .mis-kepala-teks {
+        flex: 0 1 auto;
+    }
+
+    .prof-kemajuan-teks {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin: 0;
+        font-size: .74rem;
+        font-weight: 600;
+        color: var(--mis-tinta-3);
+        white-space: nowrap;
+    }
+
+    .prof-kemajuan-teks i {
+        font-size: inherit;
+        line-height: 1;
+    }
+
+    .prof-kemajuan-teks strong {
+        font-size: .86rem;
+        font-weight: 800;
+        color: var(--mis-tinta);
+    }
+
+    .prof-kemajuan-sisa {
+        color: var(--mis-tinta-4);
+    }
+
+    .prof-kemajuan-jalur {
+        height: 6px;
+        border-radius: 999px;
+        background: #eef2f7;
+        overflow: hidden;
+    }
+
+    .prof-kemajuan-isi {
+        display: block;
+        height: 100%;
+        width: calc(var(--nilai, 0) * 1%);
+        border-radius: inherit;
+        background: var(--mis-ungu);
+        transition: width .6s cubic-bezier(.22, .61, .36, 1);
+    }
+
+    .prof-kemajuan-isi.tuntas {
+        background: var(--mis-hijau);
+    }
+
+    /* Lencana status berdiri di seberang batang kemajuan, dipisah garis
+       setipis rambut supaya keduanya terbaca sebagai dua kelompok. */
+    .prof-kepala .mis-kepala-aksi {
+        margin-left: 0;
+        padding-left: 16px;
+        border-left: 1px solid var(--mis-garis);
+    }
+
     /* ---------------------------------------------------- lencana status */
 
     .prof-lencana-deret {
@@ -1462,6 +1553,53 @@
     }
 
     /* --------------------------------------------------------- responsif */
+
+    /*
+     * Di bawah 1200px judul, batang, dan lencana tidak lagi muat berjajar.
+     * Yang dibiarkan membungkus sendiri hasilnya buruk: lencananya yang
+     * turun, batangnya tetap di baris pertama, dan garis pemisah menggantung
+     * tanpa ada apa pun di sebelahnya. Jadi urutannya diatur — lencana tetap
+     * di baris pertama bersama judul, batang turun selebar kepala.
+     */
+    @media (max-width: 1199.98px) {
+        /* calc(100% - 60px) = lebar kepala dikurangi ubin 44px + gap 16px.
+           Blok judul karena itu menghabiskan sisa baris pertama, dan batang
+           kemajuan pasti turun ke baris kedua — bukan kebetulan membungkus. */
+        .prof-kepala .mis-kepala-teks {
+            flex: 1 1 calc(100% - 60px);
+        }
+
+        /* Batang dan lencana berbagi baris kedua: batang melar mengisi kiri,
+           lencana menempel kanan. Kalau batang dibiarkan selebar penuh,
+           lencananya turun lagi dan tiap barisnya menyisakan petak kosong
+           di kanan. */
+        .prof-kepala-kemajuan {
+            flex: 1 1 240px;
+            margin-left: 0;
+        }
+
+        /*
+         * width: auto menimpa mis-ui.css, yang memberi .mis-kepala-aksi
+         * width: 100% di bawah 992px. Aturan itu benar untuk kepala yang
+         * aksinya berupa tombol — tombol memang enak selebar layar. Di sini
+         * isinya lencana keadaan, dan lencana selebar layar memaksa batang
+         * kemajuan turun lagi ke baris ketiga.
+         */
+        .prof-kepala .mis-kepala-aksi {
+            width: auto;
+            margin-left: auto;
+            padding-left: 0;
+            border-left: 0;
+        }
+    }
+
+    /* Di ponsel lencana tidak lagi muat di samping batang; begitu ia sendirian
+       di satu baris, rata kiri lebih rapi daripada didorong ke kanan. */
+    @media (max-width: 575.98px) {
+        .prof-kepala .mis-kepala-aksi {
+            margin-left: 0;
+        }
+    }
 
     /* Tablet: kartu identitas berhenti menempel supaya tidak memakan tinggi
        layar, dan dua kolom jadi satu. */
