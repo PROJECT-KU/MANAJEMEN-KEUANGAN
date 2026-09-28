@@ -73,6 +73,25 @@ class NamaPerangkat
         return \Illuminate\Support\Str::limit($ua, 40);
     }
 
+    /**
+     * Nama ikon Font Awesome yang cocok dengan jenis perangkatnya.
+     *
+     * Sebelumnya tampilan memilih ikon dari "ini perangkat saya atau bukan",
+     * sehingga baris bertuliskan "Safari di iPhone" bisa bergambar komputer.
+     * Nama ikonnya harus ada di Font Awesome 5.5; lihat IkonAdaGlifnyaTest.
+     */
+    public static function ikon(?string $userAgent): string
+    {
+        $ua = trim(strip_tags((string) $userAgent));
+
+        return match (self::cocok(self::SISTEM, $ua)) {
+            'iPhone', 'Android' => 'fa-mobile-alt',
+            'iPad' => 'fa-tablet-alt',
+            'Mac', 'Windows', 'Linux' => 'fa-laptop',
+            default => 'fa-desktop',
+        };
+    }
+
     private static function cocok(array $pola, string $ua): ?string
     {
         foreach ($pola as $nama => $regex) {

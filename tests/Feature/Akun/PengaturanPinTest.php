@@ -523,75 +523,6 @@ class PengaturanPinTest extends TestCase
         $this->assertNull(Cookie::queued(IngatanMasuk::NAMA));
     }
 
-    /** Perangkat lain dibuatkan barisnya langsung; ia tidak punya kue di sini. */
-    private function perangkatLain(User $pengguna, string $peramban = 'Peramban HP'): PerangkatPin
-    {
-        return PerangkatPin::create([
-            'user_id' => $pengguna->getKey(),
-            'penanda' => str_repeat('c', 32),
-            'peramban' => $peramban,
-            'ip' => '114.10.22.9',
-            'terakhir_dipakai_pada' => now()->subHour(),
-        ]);
-    }
-
-    /**
-     * Inilah yang dulu tidak mungkin: mencabut izin PIN sebuah perangkat dari
-     * perangkat lain. Sebelum ada catatan di peladen, HP yang hilang hanya
-     * bisa dilumpuhkan dengan mematikan PIN untuk semua perangkat sekaligus.
-     */
-    public function test_izin_perangkat_lain_bisa_dicabut_dari_sini(): void
-    {
-        $pengguna = $this->buatPengguna();
-        $pengguna->aturPin('482913');
-        $this->actingAs($pengguna);
-
-        $lain = $this->perangkatLain($pengguna);
-
-        Testable::create(PengaturanPin::class, [], [], $this->kuePerangkatTerdaftar($pengguna))
-            ->call('lupakanPerangkatLain', $lain->id)
-            ->assertDispatched('toast', jenis: 'berhasil');
-
-        $this->assertNull(PerangkatPin::find($lain->id));
-
-        // PIN akunnya sendiri tidak ikut mati — yang dicabut izin perangkatnya.
-        $this->assertTrue($pengguna->refresh()->pinAktif());
-    }
-
-    public function test_perangkat_yang_sedang_dipakai_tidak_dicabut_lewat_jalan_itu(): void
-    {
-        $pengguna = $this->buatPengguna();
-        $pengguna->aturPin('482913');
-        $this->actingAs($pengguna);
-
-        $kue = $this->kuePerangkatTerdaftar($pengguna);
-        $ini = PerangkatPin::where('user_id', $pengguna->getKey())->first();
-
-        Testable::create(PengaturanPin::class, [], [], $kue)
-            ->call('lupakanPerangkatLain', $ini->id)
-            ->assertDispatched('toast', jenis: 'gagal');
-
-        $this->assertNotNull(PerangkatPin::find($ini->id));
-    }
-
-    /** Nomor baris milik orang lain tidak boleh bisa dicabut dari sini. */
-    public function test_perangkat_milik_akun_lain_tidak_bisa_dicabut(): void
-    {
-        $pengguna = $this->buatPengguna();
-        $pengguna->aturPin('482913');
-
-        $orangLain = $this->buatPengguna();
-        $milikOrangLain = $this->perangkatLain($orangLain);
-
-        $this->actingAs($pengguna);
-
-        Testable::create(PengaturanPin::class, [], [], $this->kuePerangkatTerdaftar($pengguna))
-            ->call('lupakanPerangkatLain', $milikOrangLain->id)
-            ->assertDispatched('toast', jenis: 'gagal');
-
-        $this->assertNotNull(PerangkatPin::find($milikOrangLain->id));
-    }
-
     /**
      * PIN mati berarti tidak ada perangkat yang boleh memakainya. Kalau
      * catatannya tertinggal, perangkat itu langsung terdaftar kembali begitu
@@ -605,7 +536,13 @@ class PengaturanPinTest extends TestCase
         $pengguna->aturPin('482913');
         $this->actingAs($pengguna);
 
-        $this->perangkatLain($pengguna);
+        PerangkatPin::create([
+            'user_id' => $pengguna->getKey(),
+            'penanda' => str_repeat('c', 32),
+            'peramban' => 'Peramban HP',
+            'ip' => '114.10.22.9',
+            'terakhir_dipakai_pada' => now()->subHour(),
+        ]);
         $kue = $this->kuePerangkatTerdaftar($pengguna);
 
         $this->assertSame(2, PerangkatPin::where('user_id', $pengguna->getKey())->count());
@@ -618,23 +555,95 @@ class PengaturanPinTest extends TestCase
         $this->assertSame(0, PerangkatPin::where('user_id', $pengguna->getKey())->count());
     }
 
-    public function test_daftar_perangkat_menaruh_yang_sedang_dipakai_di_atas(): void
+    /**
+     * "Lupa PIN? Atur ulang" adalah pernyataan maksud yang disengaja, jadi
+     * pengaman "perangkat asing tidak boleh mengganti PIN" tidak berlaku
+     * untuknya. Pengaman itu ada untuk mencegah orang TIDAK SADAR menimpa
+     * PIN semua perangkat — bukan untuk melarang yang memang bermaksud.
+     */
+    public function test_atur_ulang_pin_boleh_dari_perangkat_asing(): void
     {
+        Mail::fake();
+
         $pengguna = $this->buatPengguna();
-        $pengguna->aturPin('482913');
+        $pengguna->aturPin('070698');
         $this->actingAs($pengguna);
 
-        // Perangkat lain ini terakhir dipakai lebih BARU daripada yang sedang
-        // dibuka, jadi urutan menurut waktu saja akan menaruhnya di atas.
-        $lain = $this->perangkatLain($pengguna);
-        $lain->forceFill(['terakhir_dipakai_pada' => now()->addHour()])->save();
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
 
-        $kue = $this->kuePerangkatTerdaftar($pengguna);
+        $uji = Livewire::test(PengaturanPin::class);
 
-        $daftar = Testable::create(PengaturanPin::class, [], [], $kue)->instance()->daftarPerangkatPin();
+        $this->assertFalse($uji->instance()->perangkatSiap());
 
-        $this->assertTrue($daftar->first()->ini, 'Perangkat yang sedang dipakai harus di baris pertama.');
-        $this->assertCount(2, $daftar);
+        $uji->call('ubahAturUlang')
+            ->assertSet('aturUlang', true)
+            ->set('kataSandi', self::SANDI)
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasNoErrors()
+            ->assertSet('aturUlang', false);
+
+        $this->assertTrue($pengguna->refresh()->pinCocok('980607'));
+        $this->assertFalse($pengguna->pinCocok('070698'));
+    }
+
+    /**
+     * Yang lupa PIN tidak bisa menjamin perangkat mana yang masih pantas
+     * punya izin — apalagi kalau lupanya karena akunnya sedang dipegang
+     * orang lain. Semua izin dicabut, lalu perangkat yang dipakai mengatur
+     * ulang didaftarkan kembali.
+     */
+    public function test_atur_ulang_mencabut_izin_perangkat_lain(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $this->actingAs($pengguna);
+
+        PerangkatPin::create([
+            'user_id' => $pengguna->getKey(),
+            'penanda' => str_repeat('d', 32),
+            'peramban' => 'HP yang hilang',
+            'ip' => '114.10.22.9',
+            'terakhir_dipakai_pada' => now()->subDay(),
+        ]);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+
+        Livewire::test(PengaturanPin::class)
+            ->call('ubahAturUlang')
+            ->set('kataSandi', self::SANDI)
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $tersisa = PerangkatPin::where('user_id', $pengguna->getKey())->get();
+
+        $this->assertCount(1, $tersisa, 'Hanya perangkat yang mengatur ulang yang boleh tersisa.');
+        $this->assertNotSame(str_repeat('d', 32), $tersisa->first()->penanda);
+    }
+
+    /** Kata sandi tetap wajib; atur ulang bukan jalan pintas tanpa bukti. */
+    public function test_atur_ulang_tetap_butuh_kata_sandi_yang_benar(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+
+        Livewire::test(PengaturanPin::class)
+            ->call('ubahAturUlang')
+            ->set('kataSandi', 'SandiKeliru2026')
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasErrors('kataSandi');
+
+        $this->assertTrue($pengguna->refresh()->pinCocok('070698'));
     }
 
     public function test_perangkat_bisa_dilupakan_tanpa_mematikan_pin(): void

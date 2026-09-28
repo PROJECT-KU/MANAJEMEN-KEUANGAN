@@ -34,8 +34,11 @@
         <div class="prof-bagian">
             <div class="prof-bagian-kepala {{ $sesi->count() > 1 ? 'punya-aksi' : '' }}">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-laptop"></i></span>
-                <h4 class="prof-bagian-judul">Perangkat yang sedang masuk</h4>
-                <p class="prof-bagian-sub">Ada yang bukan Anda? Akhiri sesinya dari sini.</p>
+                {{-- "sedang masuk sekarang", bukan sekadar "sedang masuk":
+                     di bawahnya ada daftar kedua yang isinya izin permanen,
+                     dan bedanya harus terbaca dari judulnya. --}}
+                <h4 class="prof-bagian-judul">Sedang masuk sekarang</h4>
+                <p class="prof-bagian-sub">Sesi yang masih terbuka. Ada yang bukan Anda? Akhiri dari sini.</p>
                 @if ($sesi->count() > 1)
                     <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $sesi->count() }} perangkat</span>
                 @endif
@@ -45,7 +48,10 @@
                 @foreach ($sesiTampil as $baris)
                     <div class="kmn-perangkat {{ $baris->ini ? 'ini' : '' }}">
                         <span class="mis-medali mini {{ $baris->ini ? 'mis-hijau' : 'mis-biru' }}" aria-hidden="true">
-                            <i class="fas {{ $baris->ini ? 'fa-laptop' : 'fa-desktop' }}"></i>
+                            {{-- Ikonnya mengikuti jenis perangkatnya, bukan
+                                 "ini saya atau bukan" — kalau tidak, baris
+                                 "Safari di iPhone" bisa bergambar komputer. --}}
+                            <i class="fas {{ \App\Support\NamaPerangkat::ikon($baris->user_agent) }}"></i>
                         </span>
 
                         <div class="kmn-perangkat-teks">
@@ -91,6 +97,64 @@
         </div>
     @endif
 
+    {{--
+      Daftar kedua: izin PIN.
+
+      Pindah ke tab ini dari tab PIN. Dua daftar perangkat di dua tab berbeda
+      memaksa orang tahu lebih dulu bedanya "sedang masuk" dan "boleh pakai
+      PIN" hanya untuk menemukan yang dicarinya — padahal keduanya menjawab
+      satu pertanyaan yang sama: perangkat apa saja yang bisa membuka akun
+      saya. Keduanya sengaja TIDAK digabung jadi satu daftar: baris sesi dan
+      baris izin PIN tidak punya penanda bersama yang bisa dicocokkan, jadi
+      menggabungkannya hanya akan menebak-nebak.
+    --}}
+    @php ($perangkatPin = $this->daftarPerangkatPin())
+    @if ($perangkatPin->isNotEmpty())
+        <div class="prof-bagian">
+            <div class="prof-bagian-kepala {{ $perangkatPin->count() > 1 ? 'punya-aksi' : '' }}">
+                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
+                <h4 class="prof-bagian-judul">Boleh masuk dengan PIN</h4>
+                <p class="prof-bagian-sub">
+                    Izin ini menetap walau sesinya sudah berakhir. Kehilangan perangkatnya? Cabut dari sini.
+                </p>
+                @if ($perangkatPin->count() > 1)
+                    <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $perangkatPin->count() }} perangkat</span>
+                @endif
+            </div>
+
+            <div class="kmn-daftar">
+                @foreach ($perangkatPin as $perangkat)
+                    <div class="kmn-perangkat {{ $perangkat->ini ? 'ini' : '' }}">
+                        <span class="mis-medali mini {{ $perangkat->ini ? 'mis-hijau' : 'mis-ungu' }}" aria-hidden="true">
+                            <i class="fas {{ \App\Support\NamaPerangkat::ikon($perangkat->peramban) }}"></i>
+                        </span>
+
+                        <div class="kmn-perangkat-teks">
+                            <p class="kmn-perangkat-nama">
+                                {{ \App\Support\NamaPerangkat::ringkas($perangkat->peramban) }}
+                            </p>
+                            <p class="kmn-perangkat-ket">
+                                {{ $perangkat->ip ?: 'IP tidak tercatat' }}
+                                @if ($perangkat->terakhir_dipakai_pada)
+                                    &middot; dipakai {{ $perangkat->terakhir_dipakai_pada->locale('id')->diffForHumans(null, true) }} lalu
+                                @endif
+                            </p>
+                        </div>
+
+                        @if ($perangkat->ini)
+                            <span class="mis-pil mis-pil-hijau">Perangkat ini</span>
+                        @else
+                            <button type="button" class="mis-tombol prof-tombol-bahaya-teks kmn-tombol-kecil"
+                                wire:click="cabutIzinPin({{ $perangkat->id }})">
+                                <i class="fas fa-unlink"></i> Cabut
+                            </button>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div class="prof-bagian">
         {{-- Selalu punya-aksi: tombol Unduh CSV ada walau tidak ada percobaan
              gagal, jadi kolom ketiganya selalu terpakai. --}}
@@ -105,11 +169,18 @@
                  kelas itu menempati sel kisi yang sama, jadi dua di antaranya
                  akan saling menimpa. --}}
             <div class="prof-bagian-lencana kmn-kepala-aksi">
+                {{-- Lencananya sekaligus saringan: halaman ini gunanya
+                     menjawab "ada yang bukan saya?", dan baris gagal itulah
+                     yang paling mungkin menjawabnya — tetapi di akun yang
+                     sering dipakai ia tenggelam di antara puluhan baris wajar. --}}
                 @if ($gagalTerakhir > 0)
-                    <span class="mis-pil mis-pil-kuning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        {{ $gagalTerakhir }} gagal dalam 30 hari
-                    </span>
+                    <button type="button"
+                        class="mis-pil {{ $hanyaGagal ? 'mis-pil-merah' : 'mis-pil-kuning' }} kmn-saring"
+                        wire:click="$toggle('hanyaGagal')"
+                        title="{{ $hanyaGagal ? 'Tampilkan semua catatan' : 'Tampilkan yang gagal saja' }}">
+                        <i class="fas {{ $hanyaGagal ? 'fa-times' : 'fa-exclamation-triangle' }}"></i>
+                        {{ $hanyaGagal ? 'Tampilkan semua' : $gagalTerakhir . ' gagal dalam 30 hari' }}
+                    </button>
                 @endif
 
                 {{-- Ekspornya dulu hanya ada di halaman jejak milik admin, yang
@@ -126,8 +197,12 @@
         @if ($riwayat->isEmpty())
             <div class="mis-kosong">
                 <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
-                <p class="mis-kosong-judul">Belum ada catatan masuk</p>
-                <p class="mis-kosong-teks">Riwayatnya muncul di sini setelah Anda masuk lagi.</p>
+                <p class="mis-kosong-judul">
+                    {{ $hanyaGagal ? 'Tidak ada percobaan yang gagal' : 'Belum ada catatan masuk' }}
+                </p>
+                <p class="mis-kosong-teks">
+                    {{ $hanyaGagal ? 'Semua catatan yang ada berhasil.' : 'Riwayatnya muncul di sini setelah Anda masuk lagi.' }}
+                </p>
             </div>
         @else
             {{-- mis-tabel-kartu: di bawah 576px tabelnya berubah jadi tumpukan
