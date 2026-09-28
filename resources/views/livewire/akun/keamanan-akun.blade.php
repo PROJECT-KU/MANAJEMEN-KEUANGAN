@@ -218,7 +218,7 @@
                      melihat riwayatnya tetapi tidak bisa menyimpannya — padahal
                      dia yang paling cepat sadar ada baris yang bukan dirinya. --}}
                 <a href="{{ route('account.profil.ekspor.riwayat') }}"
-                    class="mis-tombol prof-tombol-halus kmn-tombol-kecil">
+                    class="mis-tombol mis-tombol-ungu kmn-tombol-kecil kmn-unduh">
                     <i class="fas fa-file-pdf"></i> Unduh PDF
                 </a>
             </div>
