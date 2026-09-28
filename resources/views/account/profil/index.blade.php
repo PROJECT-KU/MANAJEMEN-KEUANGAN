@@ -200,9 +200,17 @@ Profil | MIS
               petak kosong di sebelah kartu kanan.
             --}}
             @if ($masaKerjaRingkas)
+              {{-- Yang dipakai $masaKerjaRingkas, bukan $masaKerja: yang panjang
+                   memuat bagian bernilai nol apa adanya, sehingga akun yang baru
+                   dibuat berbunyi "Bergabung 0 hari". Untuk yang benar-benar
+                   baru, kalimatnya dibalik supaya tetap berbunyi wajar. --}}
               <p class="prof-bergabung">
                 <i class="fas fa-hourglass-half mis-ikon-jingga" aria-hidden="true"></i>
-                Bergabung {{ $masaKerja }}
+                @if ($masaKerjaRingkas === 'Baru')
+                  Baru bergabung
+                @else
+                  Bergabung {{ $masaKerjaRingkas }}
+                @endif
               </p>
             @endif
 
@@ -241,9 +249,51 @@ Profil | MIS
             @endif
 
             {{-- Email ikut di kartu ini, bukan kartu sendiri: isinya sama-sama
-                 "siapa saya dan bagaimana dihubungi", dan satu kartu terpisah
-                 untuk satu baris membuat kolom kiri jauh lebih tinggi daripada
-                 kolom kanan sehingga menyisakan petak kosong. --}}
+                 "siapa saya dan bagaimana dihubungi".
+
+                 Sempat dipindah ke bagian "Nama & kontak" di tab sebelah untuk
+                 memendekkan kolom kiri; dikembalikan atas permintaan pemiliknya.
+                 Akibatnya kolom kiri kembali lebih tinggi daripada kartu kanan
+                 di tab yang isinya pendek — itu ditukar dengan alamat email yang
+                 selalu terlihat tanpa perlu membuka tab mana pun. --}}
+            <div class="prof-email-blok">
+
+              {{-- Judulnya cukup satu baris kecil; ikon besar dan kalimat
+                   penjelas di atas baris ini hanya mengulang apa yang sudah
+                   terlihat, sementara tingginya ikut menekan kolom kanan. --}}
+              <p class="mis-label prof-email-label">Alamat email</p>
+
+              <div class="prof-baris">
+                {{-- Ubin, alamat, keterangan, dan tombol ubah dalam satu kisi: ubin dan
+                     tombol merentang dua baris lalu dirata-tengahkan, jadi keduanya
+                     sejajar dengan BLOK teksnya — aturan yang sama dengan kepala
+                     bagian. Keterangan otomatis menjorok karena ia di kolom kedua. --}}
+                <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                <p class="prof-nilai">{{ $user->email }}</p>
+                @if ($user->email_verified_at)
+                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
+                @else
+                  <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
+                @endif
+                <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
+                  <i class="fas fa-pen"></i>
+                </button>
+              </div>
+
+              @if (! $user->email_verified_at)
+                <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
+                  class="prof-verif">
+                  @csrf
+                  <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
+                  <div id="container-verify-btn">
+                    <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
+                      <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
+                    </button>
+                    <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
+                  </div>
+                </form>
+              @endif
+            </div>
           </section>
 
           {{-- Kelengkapan profil. Bukan hiasan: tanpa ini profil yang separuh
@@ -420,55 +470,6 @@ Profil | MIS
                             <p class="prof-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
                           @enderror
                         </div>
-                      </div>
-
-                      {{--
-                        Alamat email pindah ke sini dari kartu identitas.
-
-                        Tempatnya memang di bagian ini: judulnya "Nama & kontak
-                        — yang tampil di sistem dan cara kami menghubungi Anda",
-                        dan alamat email persis itu. Di kartu kiri ia menumpuk
-                        pada kolom yang sudah jadi unsur terpanjang halaman,
-                        sehingga tab yang isinya pendek menyisakan petak kosong
-                        di sebelah kanan.
-                      --}}
-                      <div class="prof-email-blok prof-email-di-tab">
-
-                        {{-- Judulnya cukup satu baris kecil; ikon besar dan kalimat
-                             penjelas di atas baris ini hanya mengulang apa yang sudah
-                             terlihat, sementara tingginya ikut menekan kolom kanan. --}}
-                        <p class="mis-label prof-email-label">Alamat email</p>
-
-                        <div class="prof-baris">
-                          {{-- Ubin, alamat, keterangan, dan tombol ubah dalam satu kisi: ubin dan
-                               tombol merentang dua baris lalu dirata-tengahkan, jadi keduanya
-                               sejajar dengan BLOK teksnya — aturan yang sama dengan kepala
-                               bagian. Keterangan otomatis menjorok karena ia di kolom kedua. --}}
-                          <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                          <p class="prof-nilai">{{ $user->email }}</p>
-                          @if ($user->email_verified_at)
-                            <p class="mis-bantuan prof-baris-ket"><i class="fas fa-check-circle mis-ikon-hijau"></i> Sudah diverifikasi</p>
-                          @else
-                            <p class="mis-bantuan prof-baris-ket"><i class="fas fa-exclamation-circle mis-ikon-kuning"></i> Belum diverifikasi</p>
-                          @endif
-                          <button type="button" class="mis-tombol-garis" id="openPopupButtonEmail" title="Ganti alamat email">
-                            <i class="fas fa-pen"></i>
-                          </button>
-                        </div>
-
-                        @if (! $user->email_verified_at)
-                          <form id="verify-email-form" action="{{ route('account.profil.verify.email') }}" method="POST"
-                            class="prof-verif">
-                            @csrf
-                            <input type="hidden" name="code_verified_mail" value="{{ $user->code_verified_mail }}">
-                            <div id="container-verify-btn">
-                              <button type="button" id="btn-verify-email" class="mis-tombol mis-tombol-biru prof-penuh">
-                                <i class="fas fa-paper-plane"></i> Kirim kode verifikasi
-                              </button>
-                              <p class="mis-bantuan">Kode 6 angka dikirim ke alamat di atas.</p>
-                            </div>
-                          </form>
-                        @endif
                       </div>
 
                       {{-- Kisi kedua. Lima isian di satu kisi tiga kolom menyisakan
