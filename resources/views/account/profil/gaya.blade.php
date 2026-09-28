@@ -31,10 +31,6 @@
         margin-bottom: 0;
     }
 
-    .prof-titik {
-        color: #cbd5e1;
-    }
-
     .prof-kepala-foto {
         width: 44px;
         height: 44px;
@@ -1555,13 +1551,13 @@
     /* --------------------------------------------------------- responsif */
 
     /*
-     * Di bawah 1200px judul, batang, dan lencana tidak lagi muat berjajar.
+     * Di bawah 1400px judul, batang, dan lencana tidak lagi muat berjajar.
      * Yang dibiarkan membungkus sendiri hasilnya buruk: lencananya yang
      * turun, batangnya tetap di baris pertama, dan garis pemisah menggantung
      * tanpa ada apa pun di sebelahnya. Jadi urutannya diatur — lencana tetap
      * di baris pertama bersama judul, batang turun selebar kepala.
      */
-    @media (max-width: 1199.98px) {
+    @media (max-width: 1399.98px) {
         /* calc(100% - 60px) = lebar kepala dikurangi ubin 44px + gap 16px.
            Blok judul karena itu menghabiskan sisa baris pertama, dan batang
            kemajuan pasti turun ke baris kedua — bukan kebetulan membungkus. */
