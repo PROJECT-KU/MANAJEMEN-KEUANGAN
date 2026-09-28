@@ -92,19 +92,35 @@
     @endif
 
     <div class="prof-bagian">
-        <div class="prof-bagian-kepala {{ $gagalTerakhir > 0 ? 'punya-aksi' : '' }}">
+        {{-- Selalu punya-aksi: tombol Unduh CSV ada walau tidak ada percobaan
+             gagal, jadi kolom ketiganya selalu terpakai. --}}
+        <div class="prof-bagian-kepala punya-aksi">
             <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
             {{-- Bukan lagi "riwayat masuk": daftar ini sekarang juga memuat
                  perubahan penting seperti alamat email, username, dan nomor
                  rekening penggajian. --}}
             <h4 class="prof-bagian-judul">Riwayat keamanan</h4>
             <p class="prof-bagian-sub">Percobaan masuk dan perubahan penting pada akun Anda.</p>
-            @if ($gagalTerakhir > 0)
-                <span class="mis-pil mis-pil-kuning prof-bagian-lencana">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    {{ $gagalTerakhir }} gagal dalam 30 hari
-                </span>
-            @endif
+            {{-- Satu wadah, bukan dua .prof-bagian-lencana berdampingan:
+                 kelas itu menempati sel kisi yang sama, jadi dua di antaranya
+                 akan saling menimpa. --}}
+            <div class="prof-bagian-lencana kmn-kepala-aksi">
+                @if ($gagalTerakhir > 0)
+                    <span class="mis-pil mis-pil-kuning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ $gagalTerakhir }} gagal dalam 30 hari
+                    </span>
+                @endif
+
+                {{-- Ekspornya dulu hanya ada di halaman jejak milik admin, yang
+                     tertutup untuk sebagian besar peran. Jadi pemilik akun bisa
+                     melihat riwayatnya tetapi tidak bisa menyimpannya — padahal
+                     dia yang paling cepat sadar ada baris yang bukan dirinya. --}}
+                <a href="{{ route('account.profil.ekspor.riwayat') }}"
+                    class="mis-tombol prof-tombol-halus kmn-tombol-kecil">
+                    <i class="fas fa-download"></i> Unduh CSV
+                </a>
+            </div>
         </div>
 
         @if ($riwayat->isEmpty())
@@ -169,6 +185,23 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Pemotongan daftarnya disebutkan, tidak dibiarkan diam-diam:
+                 di halaman yang gunanya menjawab "ada yang bukan saya?",
+                 menyembunyikan baris tanpa memberi tahu itu menyesatkan. --}}
+            @if ($riwayatTerpotong)
+                <button type="button" class="kmn-lipat" wire:click="$toggle('riwayatPanjang')">
+                    @if ($riwayatPanjang)
+                        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                        Tampilkan yang terbaru saja
+                    @else
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        Tampilkan lebih banyak &middot; {{ $totalRiwayat }} catatan seluruhnya
+                    @endif
+                </button>
+            @elseif ($totalRiwayat > $riwayat->count())
+                <p class="kmn-catatan-kecil">Menampilkan seluruh {{ $totalRiwayat }} catatan.</p>
+            @endif
 
             <p class="prof-aksi-catatan kmn-catatan">
                 <i class="fas fa-info-circle mis-ikon-biru"></i>

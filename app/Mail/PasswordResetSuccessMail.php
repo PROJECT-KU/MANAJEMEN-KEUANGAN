@@ -16,16 +16,24 @@ class PasswordResetSuccessMail extends Mailable
     public $appName;
 
     /**
+     * Alamat IP pengubah. Opsional supaya dua pemanggil lama (alur "lupa
+     * kata sandi") tidak perlu ikut diubah; kalau kosong, baris IP-nya
+     * memang tidak ditampilkan.
+     */
+    public string $ip;
+
+    /**
      * Create a new message instance.
      *
      * @param User $user
      * @param string $appName
      * @return void
      */
-    public function __construct(User $user, $appName)
+    public function __construct(User $user, $appName, string $ip = '')
     {
         $this->user = $user;
         $this->appName = $appName;
+        $this->ip = $ip;
     }
 
     /**
