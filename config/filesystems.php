@@ -55,6 +55,31 @@ return [
             'visibility' => 'public',
         ],
 
+        /*
+         * Foto profil. Sengaja disk sendiri, bukan 'public' — root disk itu
+         * sudah dialihkan ke public/images dan dipakai ratusan berkas lain.
+         *
+         * Berkasnya tinggal di storage/app/public/profil dan disajikan lewat
+         * tautan simbolik public/storage yang dibuat `php artisan storage:link`.
+         */
+        'profil' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/profil'),
+            /*
+             * Sengaja RELATIF, bukan env('APP_URL') . '/storage/profil'.
+             *
+             * Storage::url() menempelkan nilai ini apa adanya, tidak seperti
+             * asset() yang memakai host permintaan yang sedang berjalan. Kalau
+             * dipatok ke APP_URL, semua foto menunjuk ke host itu — dan di sini
+             * APP_URL masih http://localhost sementara aplikasinya dibuka di
+             * 127.0.0.1:8000, jadi tidak satu pun foto tampil. Alamat relatif
+             * selalu ikut host yang sedang dipakai.
+             */
+            'url' => '/storage/profil',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

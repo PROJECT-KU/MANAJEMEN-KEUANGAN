@@ -165,9 +165,9 @@ Detail Karyawan | MIS
                 <div class="card-body box-profile">
                   <div class="text-center">
                     @if ($user->gambar == null)
-                    <img alt="User profile picture" id="image-preview" src="{{ asset('assets/img/profil/no-image.jpg') }}" class="profile-user-img img-fluid img-circle" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <img alt="User profile picture" id="image-preview" src="{{ \App\Support\FotoProfil::bawaan() }}" class="profile-user-img img-fluid img-circle" style="width: 128px; height: 128px; border-radius: 50%;">
                     @else
-                    <img id="image-preview" class="profile-user-img img-fluid img-circle" src="{{ asset('assets/img/profil/' . $user->gambar) }}" alt="User profile picture" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <img id="image-preview" class="profile-user-img img-fluid img-circle" src="{{ \App\Support\FotoProfil::url($user->gambar) }}" alt="User profile picture" style="width: 128px; height: 128px; border-radius: 50%;">
                     @endif
                   </div>
 
@@ -320,9 +320,9 @@ Detail Karyawan | MIS
                         <div class="user-block d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center">
                             @if ($user->gambar == null)
-                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/no-image.jpg') }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            <img class="img-circle img-bordered-sm" src="{{ \App\Support\FotoProfil::bawaan() }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
                             @else
-                            <img class="img-circle img-bordered-sm" src="{{ asset('assets/img/profil/' . $user->gambar) }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
+                            <img class="img-circle img-bordered-sm" src="{{ \App\Support\FotoProfil::url($user->gambar) }}" alt="user image" style="width: 50px; height: 50px; border-radius: 50%;">
                             @endif
                             <span class="username ml-2">
                               <span>{{ $user->full_name }}</span>
@@ -427,10 +427,6 @@ Detail Karyawan | MIS
                           </div>
 
                           <div class="row mt-3">
-                            <div class="col-md-4">
-                              <label>NIK</label>
-                              <input type="text" id="nik" name="nik" class="form-control" value="{{ old('nik', $user->nik) }}" placeholder="Masukan NIK" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57">
-                            </div>
                             <div class="col-md-4">
                               <label>No Rekening</label>
                               <input type="text" id="norek" name="norek" class="form-control" value="{{ old('norek', $user->norek) }}" placeholder="Masukan Nomor Rekening" maxlength="40" minlength="5" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatNoRek(this)">
@@ -606,13 +602,12 @@ Detail Karyawan | MIS
       document.addEventListener("DOMContentLoaded", function() {
         const levelInput = document.getElementById('level');
         const statusInput = document.getElementById('status');
-        const nikInput = document.getElementById('nik');
         const norekInput = document.getElementById('norek');
         const bankInput = document.getElementById('bank');
         const submitContainerBank = document.getElementById('submit-container-bank');
 
         function checkForChanges() {
-          if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || nikInput.value !== nikInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
+          if (levelInput.value !== levelInput.defaultValue || statusInput.value !== statusInput.defaultValue || norekInput.value !== norekInput.defaultValue || bankInput.value !== bankInput.defaultValue) {
             submitContainerBank.style.display = 'block'; // Show the submit button
           } else {
             submitContainerBank.style.display = 'none'; // Hide the submit button
@@ -621,7 +616,6 @@ Detail Karyawan | MIS
 
         levelInput.addEventListener('input', checkForChanges);
         statusInput.addEventListener('input', checkForChanges);
-        nikInput.addEventListener('input', checkForChanges);
         norekInput.addEventListener('input', checkForChanges);
         bankInput.addEventListener('input', checkForChanges);
       });

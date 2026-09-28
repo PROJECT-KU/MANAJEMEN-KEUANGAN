@@ -183,7 +183,7 @@ class GajiController extends Controller
         ->value('total') ?? 0;
 
       $gaji = DB::table('gaji')
-        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.gaji_pokok_ethes_digital', 'gaji.total_gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.nik as nik', 'users.norek as norek', 'users.bank as bank')
+        ->select('gaji.id', 'gaji.id_transaksi', 'gaji.token', 'gaji.gaji_pokok', 'gaji.gaji_pokok_ethes_digital', 'gaji.total_gaji_pokok', 'gaji.lembur', 'gaji.bonus', 'gaji.tunjangan', 'gaji.tanggal', 'gaji.pph', 'gaji.total', 'gaji.status', 'users.id as user_id', 'users.full_name as full_name', 'users.norek as norek', 'users.bank as bank')
         ->leftJoin('users', 'gaji.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
@@ -235,7 +235,6 @@ class GajiController extends Controller
           'gaji.status',
           'users.id as user_id',
           'users.full_name',
-          'users.nik',
           'users.norek',
           'users.bank'
         )
@@ -321,7 +320,6 @@ class GajiController extends Controller
         'gaji.status',
         'users.id as user_id',
         'users.full_name',
-        'users.nik',
         'users.norek',
         'users.bank',
       ]);
@@ -432,7 +430,7 @@ class GajiController extends Controller
         'gaji.status',
         'users.id as user_id',
         'users.full_name as full_name',
-        'users.nik as nik',
+        
         'users.norek as norek',
         'users.bank as bank'
       )
@@ -511,7 +509,7 @@ class GajiController extends Controller
 
     if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'admin') {
       // $users = User::where('company', $user->company)
-      //   ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
+      //   ->select('id', 'full_name', 'norek', 'bank', 'telp')
       //   ->get();
       // $presensi = DB::table('presensi')
       //   ->get();
@@ -525,7 +523,6 @@ class GajiController extends Controller
         ->select(
           'users.id',
           'users.full_name',
-          'users.nik',
           'users.norek',
           'users.bank',
           'users.telp',
@@ -542,7 +539,7 @@ class GajiController extends Controller
         ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-        ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
+        ->groupBy('users.id', 'users.full_name', 'users.norek', 'users.bank', 'users.telp', 'users.email')
         ->orderBy('users.created_at', 'DESC')
         ->get();
 
@@ -556,7 +553,7 @@ class GajiController extends Controller
       return view('account.gaji.create', compact('datas'));
     } else {
       $users = User::where('id', $user->id)
-        ->select('id', 'full_name', 'nik', 'norek', 'bank', 'telp')
+        ->select('id', 'full_name', 'norek', 'bank', 'telp')
         ->get();
       return view('account.gaji.create', compact('users'));
     }
@@ -848,7 +845,6 @@ class GajiController extends Controller
       ->select(
         'users.id',
         'users.full_name',
-        'users.nik',
         'users.norek',
         'users.bank',
         'users.telp',
@@ -865,7 +861,7 @@ class GajiController extends Controller
       ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-      ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
+      ->groupBy('users.id', 'users.full_name', 'users.norek', 'users.bank', 'users.telp', 'users.email')
       ->orderBy('users.created_at', 'DESC')
       ->get();
 
@@ -1247,7 +1243,6 @@ class GajiController extends Controller
       ->select(
         'users.id',
         'users.full_name',
-        'users.nik',
         'users.norek',
         'users.bank',
         'users.telp',
@@ -1264,7 +1259,7 @@ class GajiController extends Controller
       ->leftJoin('presensi', 'presensi.user_id', '=', 'users.id')
       ->where('users.company', $user->company)
       ->whereBetween('presensi.created_at', [now()->startOfMonth(), now()->endOfMonth()])
-      ->groupBy('users.id', 'users.full_name', 'users.nik', 'users.norek', 'users.bank', 'users.telp', 'users.email')
+      ->groupBy('users.id', 'users.full_name', 'users.norek', 'users.bank', 'users.telp', 'users.email')
       ->orderBy('users.created_at', 'DESC')
       ->get();
 
@@ -1334,7 +1329,7 @@ class GajiController extends Controller
         'gaji.status',
         'users.id as user_id',
         'users.full_name as full_name',
-        'users.nik as nik',
+        
         'users.norek as norek',
         'users.bank as bank'
       )

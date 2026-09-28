@@ -139,7 +139,7 @@
 
                             // Tentukan gambar profil (default jika null)
                             $userImage = Auth::user()->gambar
-                            ? asset('assets/img/profil/' . Auth::user()->gambar)
+                            ? \App\Support\FotoProfil::url(Auth::user()->gambar)
                             : asset('assets/img/avatar/avatar-1.png');
                             @endphp
 

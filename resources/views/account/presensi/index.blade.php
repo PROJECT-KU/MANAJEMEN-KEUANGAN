@@ -374,7 +374,7 @@ Data Presensi Karyawan | MIS
       <div class="customer-card">
         <div class="card-top">
           <div class="avatar-wrap">
-            <img src="{{ !empty($hasil->user_gambar) ? asset('assets/img/profil/' . $hasil->user_gambar) : asset('assets/img/profil/no-image.jpg') }}" class="avatar-img" alt="Profile">
+            <img src="{{ !empty($hasil->user_gambar) ? \App\Support\FotoProfil::url($hasil->user_gambar) : \App\Support\FotoProfil::bawaan() }}" class="avatar-img" alt="Profile">
             <div class="status-indicator" style="background: {{ $hasil->time_pulang ? '#22c55e' : '#f59e0b' }};"></div>
           </div>
           <div class="text-right">

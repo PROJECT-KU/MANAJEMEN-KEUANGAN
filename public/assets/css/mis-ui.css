@@ -1669,6 +1669,35 @@ select.form-control-modern {
     max-width: 360px;
 }
 
+/* ------------------------------------------------- tombol sedang sibuk --- */
+
+/* Cincin berputar di dalam tombol selagi kiriman berjalan. Ukurannya ikut
+   huruf tombolnya, jadi satu aturan cukup untuk semua ukuran tombol. */
+.mis-putar {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -.12em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: mis-berputar .6s linear infinite;
+}
+
+@keyframes mis-berputar {
+    to { transform: rotate(360deg); }
+}
+
+/* Yang memilih gerak minimal tetap mendapat tandanya, hanya tidak berputar:
+   tombolnya sudah mati dan tulisannya sudah berubah jadi "Menyimpan…". */
+@media (prefers-reduced-motion: reduce) {
+    .mis-putar {
+        animation: none;
+        border-right-color: currentColor;
+        opacity: .45;
+    }
+}
+
 /* -------------------------------------------------- kunci gulir latar --- */
 
 /* Dipasang mis-ui.js selagi ada jendela .custom-popup terbuka. Jendelanya

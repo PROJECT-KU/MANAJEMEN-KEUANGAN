@@ -4,7 +4,9 @@ namespace Tests\Feature\Akun;
 
 use App\AktivitasMasuk;
 use App\Mail\EmailAkunDipindahMail;
+use App\Support\FotoProfil;
 use App\User;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -69,6 +71,25 @@ class JejakProfilTest extends TestCase
         );
     }
 
+    /**
+     * Penjaga terhadap kesalahan yang sudah pernah terjadi: jendela ganti
+     * email di halaman profil sempat mengirim ke rute pengelolaan pengguna,
+     * yang tidak mengirim tautan verifikasi, tidak mengabari alamat lama,
+     * dan tidak mencatat apa pun. Ujinya lolos karena menembak rutenya
+     * langsung, bukan lewat layar.
+     */
+    #[Test]
+    public function jendela_ganti_email_menembak_rute_profil(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        $this->actingAs($pengguna)
+            ->get(route('account.profil.show', $pengguna->uuid))
+            ->assertOk()
+            ->assertSee(route('account.profil.update.datadiri'), false)
+            ->assertDontSee(route('account.pengguna.update.datadiri', $pengguna->id), false);
+    }
+
     #[Test]
     public function kata_sandi_salah_tidak_memindahkan_email_dan_tidak_mengabari_siapa_pun(): void
     {
@@ -128,7 +149,10 @@ class JejakProfilTest extends TestCase
     public function foto_profil_bisa_dihapus_dan_tercatat(): void
     {
         $pengguna = $this->buatPengguna();
-        $pengguna->forceFill(['gambar' => 'berkas-yang-tidak-ada.jpg'])->save();
+
+        $nama = 'uji-hapus-' . uniqid() . '.webp';
+        Storage::disk(FotoProfil::DISK)->put($nama, 'bukan-webp-sungguhan');
+        $pengguna->forceFill(['gambar' => $nama])->save();
 
         $this->actingAs($pengguna)
             ->post(route('account.profil.hapusFoto'))
@@ -136,6 +160,7 @@ class JejakProfilTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertNull($pengguna->refresh()->gambar);
+        $this->assertFalse(Storage::disk(FotoProfil::DISK)->exists($nama), 'Berkasnya harus ikut terhapus.');
         $this->assertContains('foto profil dihapus', $this->jejak($pengguna));
     }
 
@@ -150,6 +175,21 @@ class JejakProfilTest extends TestCase
             ->assertSessionHas('error');
 
         $this->assertSame([], $this->jejak($pengguna));
+    }
+
+    #[Test]
+    public function kolom_terisi_tetapi_berkasnya_hilang_bukan_berarti_punya_foto(): void
+    {
+        // Kalau ini dianggap "punya foto", tombol Hapus foto muncul di layar
+        // padahal tidak ada yang bisa dihapus.
+        $pengguna = $this->buatPengguna();
+        $pengguna->forceFill(['gambar' => 'berkas-yang-tidak-ada.webp'])->save();
+
+        $this->assertFalse($pengguna->refresh()->punya_foto);
+
+        $this->actingAs($pengguna)
+            ->post(route('account.profil.hapusFoto'))
+            ->assertSessionHas('error');
     }
 
     #[Test]

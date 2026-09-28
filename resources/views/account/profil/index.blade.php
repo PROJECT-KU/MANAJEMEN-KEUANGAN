@@ -36,15 +36,17 @@ Profil | MIS
     $daftarBank = config('bank');
     $namaBank = $daftarBank[$user->bank] ?? '';
 
-    $fotoProfil = $user->gambar
-        ? asset('assets/img/profil/' . $user->gambar)
-        : asset('assets/img/profil/no-image.jpg');
+    $fotoProfil = $user->foto_url;
 
     /* Gambar pengganti "no-image.jpg" hanya pantas di kartu identitas yang
        memang menyediakan tombol unggah di sebelahnya. Di kepala halaman ia
        cuma jadi kotak krem bergambar kamera dicoret — di situ dipakai ubin
-       bergradien saja. Ukurannya sama, jadi tata letaknya tidak bergeser. */
-    $punyaFoto = filled($user->gambar) && $user->gambar !== 'no-image.jpg';
+       bergradien saja. Ukurannya sama, jadi tata letaknya tidak bergeser.
+
+       punya_foto memeriksa berkasnya benar-benar ada, di storage maupun di
+       folder lama; kolom yang terisi tetapi berkasnya sudah hilang tidak
+       lagi memunculkan tombol Hapus foto yang tidak bisa berbuat apa-apa. */
+    $punyaFoto = $user->punya_foto;
 @endphp
 
 <div class="main-content" style="padding-top: 110px; background-color: #f4f7ff; min-height: 100vh;">
@@ -199,14 +201,14 @@ Profil | MIS
             </div>
 
             <form action="{{ route('account.profil.updatePhoto') }}" method="POST"
-              enctype="multipart/form-data" class="prof-unggah-bungkus">
+              enctype="multipart/form-data" class="prof-unggah-bungkus" data-sibuk data-sibuk-teks="Mengunggah…">
               @csrf
               <input type="file" name="gambar" id="foto" class="prof-berkas"
-                accept="image/jpeg,image/png,image/gif">
+                accept="image/jpeg,image/png,image/gif,image/webp">
               <label for="foto" class="prof-unggah">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-camera"></i></span>
                 <span class="prof-unggah-nama" id="prf-nama-berkas">Pilih foto baru</span>
-                <span class="mis-bantuan">JPG, PNG, atau GIF &middot; maksimal 3 MB</span>
+                <span class="mis-bantuan">JPG, PNG, GIF, atau WebP &middot; maksimal 3 MB</span>
               </label>
               <button type="submit" id="updatePhotoBtn" class="mis-tombol mis-tombol-ungu prof-penuh" disabled>
                 <i class="fas fa-cloud-upload-alt"></i> Simpan foto
@@ -219,7 +221,7 @@ Profil | MIS
                  penutup. --}}
             @if ($punyaFoto)
               <form action="{{ route('account.profil.hapusFoto') }}" method="POST"
-                id="form-hapus-foto" class="prof-hapus-foto">
+                id="form-hapus-foto" class="prof-hapus-foto" data-sibuk data-sibuk-teks="Menghapus…">
                 @csrf
                 <button type="submit" class="mis-tombol prof-tombol-bahaya-teks prof-penuh">
                   <i class="fas fa-trash-alt"></i> Hapus foto
@@ -379,7 +381,7 @@ Profil | MIS
                     </div>
                   @endif
 
-                  <form id="form-update-data" action="{{ route('account.profil.update') }}" method="POST">
+                  <form id="form-update-data" action="{{ route('account.profil.update') }}" method="POST" data-sibuk>
                     @csrf
 
                     <div class="prof-bagian">
@@ -667,7 +669,18 @@ Profil | MIS
             <h5 class="prof-modal-judul">Ganti alamat email</h5>
             <p class="prof-modal-sub">Alamat baru wajib diverifikasi ulang.</p>
           </div>
-          <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+          {{--
+            Ke rute PROFIL, bukan rute pengelolaan pengguna.
+
+            Jendela ini dulu mengirim ke account.pengguna.update.datadiri,
+            penangan milik layar admin. Penangan itu memang memeriksa kata
+            sandi, tetapi tidak mengirim tautan verifikasi ke alamat baru,
+            tidak mengabari alamat lama, dan tidak mencatat apa pun — jadi
+            orang berpindah alamat email lalu terdampar tanpa cara
+            memverifikasinya. Penangan profil mengerjakan ketiganya.
+          --}}
+          <form action="{{ route('account.profil.update.datadiri') }}" method="POST"
+            data-sibuk data-sibuk-teks="Menyimpan…">
             @csrf
             <div class="mis-isian prof-rapat">
               <label class="mis-label" for="prof-email-baru">

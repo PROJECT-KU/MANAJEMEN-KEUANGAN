@@ -296,7 +296,7 @@ Data Customer | MIS
       <div class="customer-card">
         <div class="card-top">
           <div class="avatar-wrap">
-            <img src="{{ $item->gambar ? asset('assets/img/profil/' . $item->gambar) : asset('assets/img/avatar/avatar-1.png') }}" class="avatar-img">
+            <img src="{{ $item->gambar ? \App\Support\FotoProfil::url($item->gambar) : asset('assets/img/avatar/avatar-1.png') }}" class="avatar-img">
             <div class="status-indicator {{ $item->status != 'active' ? 'non-active' : '' }}"></div>
           </div>
           <div>

@@ -339,7 +339,7 @@ Data Karyawan | MIS
       <div class="customer-card">
         <div class="card-top">
           <div class="avatar-wrap">
-            <img src="{{ $item->gambar ? asset('assets/img/profil/' . $item->gambar) : asset('assets/img/profil/no-image.jpg') }}" class="avatar-img" alt="Profile">
+            <img src="{{ $item->gambar ? \App\Support\FotoProfil::url($item->gambar) : \App\Support\FotoProfil::bawaan() }}" class="avatar-img" alt="Profile">
             <div class="status-indicator {{ $item->status == 'active' ? '' : 'non-active' }}"></div>
           </div>
           <div class="text-right">

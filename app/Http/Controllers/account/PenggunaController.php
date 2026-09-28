@@ -4,7 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\Http\Controllers\Controller;
 use App\Mail\PemberitahuanPinMail;
-use App\Support\BerkasGambar;
+use App\Support\FotoProfil;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -262,14 +262,14 @@ class PenggunaController extends Controller
             'gambar.max' => 'Ukuran gambar maksimal 3 MB.',
         ]);
 
-        // Nama berkas dibuat peladen; ekstensinya dari isi berkas.
-        $fileName = BerkasGambar::simpan($request->file('gambar'), 'assets/img/profil', 'profil-' . $user->id);
+        // Nama berkas dibuat peladen; isinya digambar ulang jadi WebP.
+        $fileName = FotoProfil::simpan($request->file('gambar'), 'profil-' . $user->id);
 
         if (! $fileName) {
             return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar.');
         }
 
-        BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
+        FotoProfil::hapus($user->gambar);
 
         // Update nama file gambar di database
         $user->gambar = $fileName;
@@ -440,7 +440,7 @@ class PenggunaController extends Controller
         }
 
         // Hapus foto jika ada (Opsional tapi disarankan)
-        BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
+        FotoProfil::hapus($user->gambar);
 
         $user->delete();
 
