@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PemberitahuanPinMail;
+use App\Mail\PasswordResetSuccessMail;
 use App\Support\FotoProfil;
 use App\Mail\VerifikasiEmailMail;
 use App\Mail\EmailAkunDipindahMail;
 use App\AktivitasMasuk;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -254,6 +256,59 @@ class ProfilController extends Controller
   }
   // <!--================== END ==================-->
 
+  /**
+   * Unduh riwayat keamanan milik sendiri sebagai CSV.
+   *
+   * Ekspor yang sudah ada hanya tersedia di halaman jejak aktivitas milik
+   * admin, dan halaman itu memang ditutup untuk sebagian besar peran. Jadi
+   * pemilik akun bisa MELIHAT riwayatnya tetapi tidak bisa menyimpannya —
+   * padahal justru dia yang paling cepat sadar kalau ada baris yang bukan
+   * dirinya, dan mungkin perlu menunjukkannya ke orang lain.
+   *
+   * Yang keluar hanya baris miliknya sendiri; $pengguna diambil dari sesi,
+   * tidak pernah dari kiriman.
+   */
+  public function eksporRiwayat()
+  {
+    $pengguna = Auth::user();
+
+    $kueri = AktivitasMasuk::where('user_id', $pengguna->getKey())->latest('id');
+
+    $nama = 'riwayat-keamanan-' . Str::slug((string) $pengguna->username) . '-' . now()->format('Ymd-His') . '.csv';
+
+    return response()->streamDownload(function () use ($kueri) {
+      $keluaran = fopen('php://output', 'w');
+
+      // BOM supaya Excel membaca huruf beraksen dengan benar.
+      fwrite($keluaran, "\xEF\xBB\xBF");
+      /*
+       * Parameter $escape diisi eksplisit dengan '' .
+       *
+       * PHP 8.4 memperingatkan bahwa nilai bawaannya akan BERUBAH, dan
+       * perubahan itu mengubah isi berkas yang dihasilkan — bukan sekadar
+       * pesan di log. '' mematikan escaping gaya lama, yang memang bukan
+       * bagian dari CSV dan sering membuat Excel salah membaca.
+       */
+      fputcsv($keluaran, ['Waktu', 'Hasil', 'Keterangan', 'Alamat IP', 'Perangkat'], ',', '"', '');
+
+      $kueri->chunk(500, function ($baris) use ($keluaran) {
+        foreach ($baris as $a) {
+          fputcsv($keluaran, [
+            optional($a->created_at)->format('d/m/Y H:i:s'),
+            $a->berhasil ? 'Berhasil' : 'Gagal',
+            $a->alasan,
+            $a->ip,
+            // Nama yang bisa dibaca orang, sama seperti yang tampil di layar.
+            \App\Support\NamaPerangkat::ringkas($a->peramban),
+          ], ',', '"', '');
+        }
+      });
+
+      fclose($keluaran);
+    }, $nama, ['Content-Type' => 'text/csv; charset=UTF-8']);
+  }
+  // <!--================== END ==================-->
+
   // <!--================== VERIFIKASI EMAIL ==================-->
   public function verifyEmail(Request $request)
   {
@@ -272,8 +327,15 @@ class ProfilController extends Controller
     // orang lain.
     Log::info('Kode verifikasi dibuat untuk pengguna ' . $user->getKey());
 
-    // Update user's verification code and timestamp
-    $user->code_verified_mail = $verificationCode;
+    /*
+     * Kodenya disimpan TERACAK, bukan apa adanya.
+     *
+     * Kata sandi diacak, PIN diacak, kode ini dulu tidak — padahal enam angka
+     * itu cukup untuk memverifikasi alamat email orang lain. Siapa pun yang
+     * bisa membaca basis data atau berkas cadangannya sempat memakainya
+     * selama jendela dua menit. Yang dikirim lewat surat tetap angka aslinya.
+     */
+    $user->code_verified_mail = Hash::make($verificationCode);
     $user->code_verified_mail_sent_at = now();
     $user->save();
 
@@ -301,9 +363,10 @@ class ProfilController extends Controller
       ]);
     }
 
-    // hash_equals, bukan '==': dua string angka dibandingkan sebagai bilangan
-    // oleh PHP, sehingga kode "000123" cocok dengan tebakan "123".
-    if ($user->code_verified_mail !== null && hash_equals((string) $user->code_verified_mail, $verificationCode)) {
+    // Hash::check, bukan '==': selain karena kodenya kini tersimpan teracak,
+    // pembandingan '==' memperlakukan dua string angka sebagai bilangan
+    // sehingga kode "000123" cocok dengan tebakan "123".
+    if ($user->code_verified_mail !== null && Hash::check($verificationCode, (string) $user->code_verified_mail)) {
       if ((int) now()->diffInMinutes($user->code_verified_mail_sent_at, true) <= 2) {
         // Mark email as verified
         $user->email_verified_at = now();
@@ -573,6 +636,25 @@ class ProfilController extends Controller
     $user->save();
 
     $this->catatPerubahan($user, 'kata sandi diganti');
+
+    /*
+     * Kabari pemilik akun.
+     *
+     * Sampai sekarang mengganti kata sandi dari halaman profil adalah
+     * satu-satunya perubahan besar yang tidak mengirim apa pun: PIN diubah
+     * mengirim surat, alamat email dipindah mengirim surat, kata sandi
+     * tidak. Padahal justru itu yang paling menentukan — siapa pun yang
+     * berhasil mengubahnya sudah memegang akunnya sepenuhnya.
+     *
+     * Kegagalan kirim tidak boleh membatalkan perubahan yang sudah tersimpan.
+     */
+    try {
+      Mail::to($user->email)->send(
+        new PasswordResetSuccessMail($user, 'Rumah Scopus Foundation', (string) $request->ip())
+      );
+    } catch (\Throwable $e) {
+      Log::error('Gagal mengirim kabar kata sandi diganti: ' . $e->getMessage());
+    }
 
     // PIN ikut dimatikan: kata sandi berganti berarti akses lama harus
     // berhenti seluruhnya, termasuk jalan pintas enam angka di perangkat

@@ -4,6 +4,7 @@ namespace Tests\Feature\Akun;
 
 use App\AktivitasMasuk;
 use App\Mail\EmailAkunDipindahMail;
+use App\Mail\PasswordResetSuccessMail;
 use App\Support\FotoProfil;
 use App\User;
 use Illuminate\Support\Facades\Storage;
@@ -143,6 +144,57 @@ class JejakProfilTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame([], $this->jejak($pengguna));
+    }
+
+    /**
+     * Mengganti kata sandi adalah perubahan paling menentukan — siapa pun
+     * yang berhasil melakukannya sudah memegang akunnya sepenuhnya — dan
+     * sampai sekarang itulah satu-satunya yang tidak mengirim kabar apa pun.
+     */
+    #[Test]
+    public function mengganti_kata_sandi_mengabari_pemilik_akun_dan_tercatat(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+
+        $this->actingAs($pengguna)
+            ->post(route('account.profil.reset.password'), [
+                'old_password' => self::SANDI,
+                'password' => 'SandiBaruUji2026',
+                'password_confirmation' => 'SandiBaruUji2026',
+            ])
+            ->assertOk();
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('SandiBaruUji2026', $pengguna->refresh()->password));
+        $this->assertContains('kata sandi diganti', $this->jejak($pengguna));
+
+        Mail::assertSent(
+            PasswordResetSuccessMail::class,
+            fn ($surat) => $surat->hasTo($pengguna->email) && $surat->ip !== ''
+        );
+    }
+
+    #[Test]
+    public function kata_sandi_lama_salah_tidak_mengabari_siapa_pun(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $lama = $pengguna->password;
+
+        $this->actingAs($pengguna)
+            ->post(route('account.profil.reset.password'), [
+                'old_password' => 'SandiKeliru2026',
+                'password' => 'SandiBaruUji2026',
+                'password_confirmation' => 'SandiBaruUji2026',
+            ])
+            ->assertOk();
+
+        $this->assertSame($lama, $pengguna->refresh()->password);
+        $this->assertSame([], $this->jejak($pengguna));
+
+        Mail::assertNothingSent();
     }
 
     #[Test]

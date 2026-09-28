@@ -123,6 +123,7 @@ Route::prefix('account')
             Route::post('/profil/update-bank', 'account\ProfilController@update')->name('account.profil.update');
             Route::post('/profil/update/foto', 'account\ProfilController@updatePhoto')->name('account.profil.updatePhoto');
             Route::post('/profil/hapus-foto', 'account\ProfilController@hapusFoto')->name('account.profil.hapusFoto');
+            Route::get('/profil/riwayat-keamanan/ekspor', 'account\ProfilController@eksporRiwayat')->name('account.profil.ekspor.riwayat');
             Route::post('/profil/verify-email', 'account\ProfilController@verifyEmail')->name('account.profil.verify.email');
             Route::post('/profil/verify-code', 'account\ProfilController@verify')->name('account.profil.verify.code');
             Route::post('/profil/update-diri', 'account\ProfilController@updatediri')->name('account.profil.update.datadiri');

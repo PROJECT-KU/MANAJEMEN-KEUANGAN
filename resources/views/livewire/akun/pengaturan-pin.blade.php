@@ -79,6 +79,57 @@
                 @enderror
             </div>
         @endif
+
+        {{--
+          Daftar perangkat yang boleh masuk dengan PIN.
+
+          Ini yang dulu tidak ada sama sekali. Izin PIN cuma hidup di kue
+          peramban, jadi pemiliknya tidak bisa melihat perangkat apa saja yang
+          punya izin, apalagi mencabutnya dari jauh. HP hilang berarti satu-
+          satunya jalan adalah mematikan PIN untuk semua perangkat sekaligus.
+        --}}
+        @php ($perangkatPin = $this->daftarPerangkatPin())
+        @if ($perangkatPin->count() > 1 || ($perangkatPin->count() === 1 && ! $this->perangkatSiap()))
+            <div class="prof-bagian">
+                <div class="prof-bagian-kepala punya-aksi">
+                    <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-mobile-alt"></i></span>
+                    <h4 class="prof-bagian-judul">Perangkat yang boleh pakai PIN</h4>
+                    <p class="prof-bagian-sub">Kehilangan salah satunya? Cabut izinnya dari sini.</p>
+                    <span class="mis-pil mis-pil-abu prof-bagian-lencana">{{ $perangkatPin->count() }} perangkat</span>
+                </div>
+
+                <div class="kmn-daftar">
+                    @foreach ($perangkatPin as $perangkat)
+                        <div class="kmn-perangkat {{ $perangkat->ini ? 'ini' : '' }}">
+                            <span class="mis-medali mini {{ $perangkat->ini ? 'mis-hijau' : 'mis-ungu' }}" aria-hidden="true">
+                                <i class="fas {{ $perangkat->ini ? 'fa-mobile-alt' : 'fa-desktop' }}"></i>
+                            </span>
+
+                            <div class="kmn-perangkat-teks">
+                                <p class="kmn-perangkat-nama">
+                                    {{ \App\Support\NamaPerangkat::ringkas($perangkat->peramban) }}
+                                </p>
+                                <p class="kmn-perangkat-ket">
+                                    {{ $perangkat->ip ?: 'IP tidak tercatat' }}
+                                    @if ($perangkat->terakhir_dipakai_pada)
+                                        &middot; dipakai {{ $perangkat->terakhir_dipakai_pada->locale('id')->diffForHumans(null, true) }} lalu
+                                    @endif
+                                </p>
+                            </div>
+
+                            @if ($perangkat->ini)
+                                <span class="mis-pil mis-pil-hijau">Perangkat ini</span>
+                            @else
+                                <button type="button" class="mis-tombol prof-tombol-bahaya-teks kmn-tombol-kecil"
+                                    wire:click="lupakanPerangkatLain({{ $perangkat->id }})">
+                                    <i class="fas fa-unlink"></i> Cabut
+                                </button>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @endif
 
     <form wire:submit="simpan">

@@ -5,7 +5,9 @@ namespace Tests\Feature\Auth;
 use App\AktivitasMasuk;
 use App\Livewire\Auth\Masuk;
 use App\Mail\PemberitahuanPinMail;
+use App\PerangkatPin;
 use App\Support\IngatanMasuk;
+use App\Support\PenandaPerangkat;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cookie;
@@ -49,7 +51,7 @@ class MasukPinTest extends TestCase
      * Testable::create supaya sudah ada saat mount() berjalan; Livewire::test
      * tidak menyediakan jalan untuk itu.
      */
-    private function bukaMasuk(?User $pengguna = null, string $mode = 'pin', bool $ingat = false): Testable
+    private function bukaMasuk(?User $pengguna = null, string $mode = 'pin', bool $ingat = false, bool $izinPerangkat = true): Testable
     {
         $kue = [];
 
@@ -60,9 +62,73 @@ class MasukPinTest extends TestCase
                 'ingat' => $ingat,
                 'uid' => $pengguna->getKey(),
             ]);
+
+            /*
+             * Kue penanda perangkat DAN barisnya di tabel perangkat_pin.
+             *
+             * Sejak izin PIN diperiksa di peladen, kue saja tidak cukup —
+             * memang itu maksudnya: perangkat yang izinnya dicabut tidak boleh
+             * bisa masuk walau kuenya masih utuh. $izinPerangkat = false
+             * dipakai uji yang justru menguji keadaan itu.
+             */
+            $penanda = str_repeat('a', 32);
+            $kue[PenandaPerangkat::NAMA] = $penanda;
+
+            if ($izinPerangkat) {
+                PerangkatPin::create([
+                    'user_id' => $pengguna->getKey(),
+                    'penanda' => $penanda,
+                    'peramban' => 'Peramban uji',
+                    'ip' => '127.0.0.1',
+                    'terakhir_dipakai_pada' => now(),
+                ]);
+            }
         }
 
         return Testable::create(Masuk::class, [], [], $kue);
+    }
+
+    /**
+     * Inti dari pencabutan izin jarak jauh.
+     *
+     * Kue di perangkat yang hilang jelas tidak bisa dihapus dari jauh, jadi
+     * kalau izinnya hanya hidup di kue, mencabutnya dari perangkat lain tidak
+     * berarti apa-apa. Uji ini memastikan PIN yang BENAR pun ditolak ketika
+     * barisnya di peladen sudah tidak ada.
+     */
+    public function test_perangkat_yang_izinnya_dicabut_ditolak_walau_pinnya_benar(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        RateLimiter::clear('pin|' . $pengguna->getKey());
+
+        $this->bukaMasuk($pengguna, 'pin', false, izinPerangkat: false)
+            ->set('pin', self::PIN)
+            ->call('masuk')
+            ->assertHasErrors('pin');
+
+        $this->assertGuest();
+
+        // Dan kejadiannya tercatat, supaya pemiliknya bisa melihat bahwa
+        // perangkat yang sudah dicabut masih mencoba masuk.
+        $this->assertSame(
+            'izin PIN perangkat dicabut',
+            AktivitasMasuk::where('user_id', $pengguna->getKey())->latest('id')->first()?->alasan
+        );
+    }
+
+    /** PIN-nya tetap utuh: yang dicabut izin perangkatnya, bukan PIN akunnya. */
+    public function test_pencabutan_izin_tidak_mematikan_pin_akun(): void
+    {
+        $pengguna = $this->buatPengguna();
+
+        $this->bukaMasuk($pengguna, 'pin', false, izinPerangkat: false)
+            ->set('pin', self::PIN)
+            ->call('masuk')
+            ->assertHasErrors('pin');
+
+        $this->assertTrue($pengguna->refresh()->pinAktif());
+        $this->assertTrue($pengguna->pinCocok(self::PIN));
     }
 
     public function test_tab_pin_mati_bila_perangkat_belum_mengaktifkan_pin(): void

@@ -81,7 +81,11 @@ Profil | MIS
             Kalimat ini juga menyamakan kepala profil dengan kepala layar MIS
             lain, yang keterangannya selalu menyebut isi halaman.
           --}}
-          <p class="mis-sub">Data diri, keamanan akun, dan rekening penggajian Anda.</p>
+          {{-- Dipendekkan dari "Data diri, keamanan akun, dan rekening
+               penggajian Anda." Kata "akun" dan "Anda" tidak menambah apa pun
+               — seluruh halaman ini memang tentang akun Anda — tetapi cukup
+               untuk memaksa kalimatnya terpatah dua baris di layar 390px. --}}
+          <p class="mis-sub">Data diri, keamanan, dan rekening gaji.</p>
         </div>
 
         {{-- Batang kelengkapan. Sebelumnya bagian tengah kepala kosong
@@ -176,29 +180,31 @@ Profil | MIS
             <p class="prof-username">&#64;{{ $user->username }}</p>
 
             <div class="prof-pil-baris">
-              <span class="mis-pil mis-pil-ungu"><i class="fas fa-briefcase"></i> {{ $user->jobdesk ?: 'Tanpa jabatan' }}</span>
+              <span class="mis-pil mis-pil-ungu"><i class="fas fa-briefcase"></i> {{ $user->jobdesk ? \Illuminate\Support\Str::title($user->jobdesk) : 'Tanpa jabatan' }}</span>
               @if ($user->level !== 'user' && $user->company)
                 <span class="mis-pil mis-pil-abu"><i class="fas fa-building"></i> {{ $user->company }}</span>
               @endif
             </div>
 
-            <div class="prof-mini-kisi">
-              <div class="prof-mini">
-                <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-user-check"></i></span>
-                <p class="prof-mini-angka">{{ $user->status === 'active' ? 'Aktif' : 'Nonaktif' }}</p>
-                <p class="prof-mini-label">Status</p>
-              </div>
-              <div class="prof-mini">
-                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
-                <p class="prof-mini-angka">{{ $labelPeran }}</p>
-                <p class="prof-mini-label">Peran</p>
-              </div>
-              <div class="prof-mini">
-                <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-hourglass-half"></i></span>
-                <p class="prof-mini-angka" title="{{ $masaKerja ?: 'Belum dihitung' }}">{{ $masaKerjaRingkas ?: '—' }}</p>
-                <p class="prof-mini-label">Bergabung</p>
-              </div>
-            </div>
+            {{--
+              Tiga kotak Status / Peran / Bergabung dibuang.
+
+              Status dan Peran sudah tampil sebagai kartu di bagian
+              "Ditetapkan oleh admin" pada tab Data diri — nilai yang sama,
+              dua kali, di satu layar. Dan peran juga sudah terbaca dari pil
+              tepat di atas baris ini.
+
+              Yang benar-benar hanya ada di sini cuma masa kerja, dan itu satu
+              kalimat pendek, bukan kotak sendiri. Tiga kotak itu menyumbang
+              sekitar 110px pada kolom kiri, yang di tab pendek meninggalkan
+              petak kosong di sebelah kartu kanan.
+            --}}
+            @if ($masaKerjaRingkas)
+              <p class="prof-bergabung">
+                <i class="fas fa-hourglass-half mis-ikon-jingga" aria-hidden="true"></i>
+                Bergabung {{ $masaKerja }}
+              </p>
+            @endif
 
             <form action="{{ route('account.profil.updatePhoto') }}" method="POST"
               enctype="multipart/form-data" class="prof-unggah-bungkus" data-sibuk data-sibuk-teks="Mengunggah…">
@@ -210,7 +216,12 @@ Profil | MIS
                 <span class="prof-unggah-nama" id="prf-nama-berkas">Pilih foto baru</span>
                 <span class="mis-bantuan">JPG, PNG, GIF, atau WebP &middot; maksimal 3 MB</span>
               </label>
-              <button type="submit" id="updatePhotoBtn" class="mis-tombol mis-tombol-ungu prof-penuh" disabled>
+              {{-- Disembunyikan, bukan sekadar dimatikan. Tombol mati yang
+                   selalu terlihat hanya memakan ruang di kartu yang sudah
+                   padat, dan tidak menerangkan apa pun sampai ada berkas
+                   yang dipilih. --}}
+              <button type="submit" id="updatePhotoBtn" class="mis-tombol mis-tombol-ungu prof-penuh"
+                hidden disabled>
                 <i class="fas fa-cloud-upload-alt"></i> Simpan foto
               </button>
             </form>
@@ -277,13 +288,18 @@ Profil | MIS
                terisi tampak sama saja dengan yang lengkap, dan orang baru
                tahu ada yang kurang saat sistem lain menolaknya. --}}
           <section class="mis-kartu prof-lengkap">
+            {{--
+              Cincin persennya dibuang, angkanya tidak diulang.
+
+              Persentase yang sama sudah terbaca lebih dulu di kepala halaman
+              sebagai batang kemajuan. Menampilkannya lagi di sini berarti dua
+              angka yang harus selalu cocok untuk satu hal yang sama — dan
+              kartu ini gunanya bukan mengumumkan angka, melainkan menunjukkan
+              APA yang kurang dan menyediakan jalan ke sana.
+            --}}
             <div class="prof-lengkap-atas">
-              <span class="prof-cincin" role="img"
-                aria-label="Profil {{ $kelengkapan['persen'] }} persen lengkap"
-                style="--nilai: {{ $kelengkapan['persen'] }}">
-                <span class="prof-cincin-isi">
-                  <strong>{{ $kelengkapan['persen'] }}<small>%</small></strong>
-                </span>
+              <span class="mis-medali mis-{{ $kelengkapan['persen'] === 100 ? 'hijau' : 'ungu' }}" aria-hidden="true">
+                <i class="fas {{ $kelengkapan['persen'] === 100 ? 'fa-check' : 'fa-list-ul' }}"></i>
               </span>
 
               <div class="prof-lengkap-teks">
@@ -291,11 +307,15 @@ Profil | MIS
                   @if ($kelengkapan['persen'] === 100)
                     Profil Anda lengkap
                   @else
-                    Lengkapi profil Anda
+                    Yang masih kurang
                   @endif
                 </h3>
                 <p class="mis-kartu-sub">
-                  {{ $kelengkapan['selesai'] }} dari {{ $kelengkapan['total'] }} hal sudah terisi.
+                  @if ($kelengkapan['persen'] === 100)
+                    Semua {{ $kelengkapan['total'] }} hal sudah terisi.
+                  @else
+                    {{ $kelengkapan['total'] - $kelengkapan['selesai'] }} hal lagi, semuanya bisa Anda isi sendiri.
+                  @endif
                 </p>
               </div>
             </div>
@@ -434,8 +454,13 @@ Profil | MIS
                             <select class="form-control-modern @error('jobdesk') is-invalid @enderror"
                               id="prof-jobdesk" name="jobdesk">
                               <option value="">Belum ditentukan</option>
+                              {{-- Nilainya tetap huruf besar — itu yang tersimpan
+                                   di basis data dan dibaca layar lain — hanya
+                                   tulisannya yang disamakan dengan kartu
+                                   "Peran di sistem" di bawah, yang memakai
+                                   huruf kapital di awal saja. --}}
                               @foreach (['MANAGER', 'STAFF', 'ASISTEN TRAINER', 'KARYAWAN'] as $posisi)
-                                <option value="{{ $posisi }}" @selected(old('jobdesk', $user->jobdesk) === $posisi)>{{ $posisi }}</option>
+                                <option value="{{ $posisi }}" @selected(old('jobdesk', $user->jobdesk) === $posisi)>{{ \Illuminate\Support\Str::title($posisi) }}</option>
                               @endforeach
                             </select>
                             @error('jobdesk')
@@ -543,9 +568,15 @@ Profil | MIS
                     </div>
 
                     <div class="prof-aksi">
+                      {{-- Dulu tertulis "Semua kolom di atas boleh dikosongkan",
+                           sementara kartu kelengkapan di sebelah kiri bilang
+                           "Rekening penggajian — tanpa ini gaji tidak bisa
+                           dikirim". Keduanya benar secara teknis, tetapi dibaca
+                           berurutan keduanya bertentangan. --}}
                       <p class="prof-aksi-catatan">
                         <i class="fas fa-info-circle mis-ikon-ungu"></i>
-                        Semua kolom di atas boleh dikosongkan.
+                        Tidak ada kolom yang wajib, tetapi yang kosong membuat
+                        sebagian layanan tidak bisa berjalan.
                       </p>
                       <button type="submit" class="mis-tombol mis-tombol-ungu">
                         <i class="fas fa-save"></i> Simpan perubahan
@@ -777,13 +808,17 @@ Profil | MIS
     const pratinjau = document.getElementById('prf-pratinjau');
     const fotoAwal = pratinjau ? pratinjau.src : null;
     const maxFileSize = 3 * 1024 * 1024; // 3MB
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    // Samakan dengan aturan peladen: webp ikut diterima. Kalau tidak,
+    // peramban menolak berkas yang sebenarnya boleh — termasuk foto yang
+    // baru diunduh dari sistem ini sendiri, yang memang selalu .webp.
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     // Kembali ke keadaan semula: tombol mati, nama berkas dan foto seperti
     // sebelum orang memilih apa pun.
     function batalkan() {
       fileInput.value = '';
       btn.disabled = true;
+      btn.hidden = true;
       namaBerkas.textContent = 'Pilih foto baru';
     }
 
@@ -793,7 +828,7 @@ Profil | MIS
 
       // 1. Validasi Ekstensi
       if (!allowedExtensions.includes(extension)) {
-        misToast('gagal', 'Hanya JPG, PNG, atau GIF yang bisa dipakai.');
+        misToast('gagal', 'Hanya JPG, PNG, GIF, atau WebP yang bisa dipakai.');
         batalkan();
         return;
       }
@@ -808,6 +843,7 @@ Profil | MIS
       // Jika lolos semua validasi, aktifkan tombol. Fotonya langsung
       // ditampilkan supaya orang tahu yang mana yang akan tersimpan.
       btn.disabled = false;
+      btn.hidden = false;
       namaBerkas.textContent = file.name;
 
       if (pratinjau) {

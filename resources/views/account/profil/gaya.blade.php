@@ -375,6 +375,24 @@
     }
 
     /* Tiga angka ringkas; kolomnya tetap supaya lebarnya rata. */
+    /* Satu baris tenang menggantikan tiga kotak; lihat alasannya di
+       index.blade.php. */
+    .prof-bergabung {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        margin: 0;
+        font-size: .75rem;
+        font-weight: 600;
+        color: var(--mis-tinta-4);
+    }
+
+    .prof-bergabung i {
+        font-size: inherit;
+        line-height: 1;
+    }
+
     .prof-mini-kisi {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -488,42 +506,6 @@
 
     .prof-lengkap-teks {
         min-width: 0;
-    }
-
-    /*
-     * Cincin kemajuan dari conic-gradient: satu elemen, tanpa SVG dan tanpa
-     * skrip. --nilai diisi dari PHP sebagai angka 0-100.
-     */
-    .prof-cincin {
-        display: grid;
-        place-items: center;
-        width: 58px;
-        height: 58px;
-        flex: 0 0 58px;
-        border-radius: 50%;
-        background: conic-gradient(#6366f1 calc(var(--nilai, 0) * 1%), #e2e8f0 0);
-    }
-
-    .prof-cincin-isi {
-        display: grid;
-        place-items: center;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: #fff;
-    }
-
-    .prof-cincin-isi strong {
-        font-size: .92rem;
-        font-weight: 800;
-        color: var(--mis-tinta);
-        line-height: 1;
-    }
-
-    .prof-cincin-isi small {
-        font-size: .6rem;
-        font-weight: 700;
-        color: var(--mis-tinta-4);
     }
 
     .prof-lengkap-daftar {
@@ -1673,6 +1655,24 @@
         align-items: flex-start;
         margin-top: 12px;
         line-height: 1.45;
+    }
+
+    /* Lencana dan tombol unduh berbagi satu sel kisi di kepala bagian. */
+    .kmn-kepala-aksi {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    /* Keterangan "menampilkan seluruh N catatan": setenang mungkin, ia hanya
+       menutup daftar, bukan mengajak berbuat sesuatu. */
+    .kmn-catatan-kecil {
+        margin: 8px 0 0;
+        text-align: center;
+        font-size: .72rem;
+        color: var(--mis-tinta-4);
     }
 
     .kmn-catatan i {

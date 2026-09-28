@@ -341,6 +341,26 @@ class Masuk extends Component
             ]);
         }
 
+        /*
+         * Izin perangkatnya diperiksa di PELADEN, bukan hanya dari kue.
+         *
+         * Inilah yang membuat "cabut izin perangkat lain" berarti sesuatu:
+         * tanpa pemeriksaan ini, perangkat yang izinnya sudah dicabut tetap
+         * bisa masuk dengan PIN selama kue di peramban itu masih utuh — dan
+         * kue di perangkat yang hilang jelas tidak bisa dihapus dari jauh.
+         */
+        if (! \App\PerangkatPin::perangkatIniTerdaftar($pengguna)) {
+            $this->mode = 'sandi';
+            $this->reset('pin');
+
+            AktivitasMasuk::catat($pengguna, $ingatan['identitas'], false, 'izin PIN perangkat dicabut');
+
+            throw ValidationException::withMessages([
+                'pin' => 'Izin PIN di perangkat ini sudah dicabut. Masuk dengan kata sandi, lalu daftarkan '
+                    . 'lagi dari halaman Profil.',
+            ]);
+        }
+
         $this->identitas = $ingatan['identitas'];
 
         $kunciPin = $this->kunciPembatasPin($pengguna);
@@ -393,6 +413,11 @@ class Masuk extends Component
         $perangkatBaru = $this->perangkatBaru($pengguna);
 
         Auth::login($pengguna, $ingatan['ingat']);
+
+        // Supaya daftar perangkat di halaman profil menunjukkan kapan
+        // masing-masing terakhir dipakai — itu yang membuat baris asing
+        // gampang dikenali.
+        \App\PerangkatPin::tandaiDipakai($pengguna);
 
         AktivitasMasuk::catat($pengguna, $this->identitas, true, 'masuk dengan PIN');
 
