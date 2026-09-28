@@ -72,8 +72,11 @@
     <div class="prof-bagian">
         <div class="prof-bagian-kepala {{ $gagalTerakhir > 0 ? 'punya-aksi' : '' }}">
             <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
-            <h4 class="prof-bagian-judul">Riwayat masuk terakhir</h4>
-            <p class="prof-bagian-sub">Percobaan masuk ke akun Anda, yang berhasil maupun yang gagal.</p>
+            {{-- Bukan lagi "riwayat masuk": daftar ini sekarang juga memuat
+                 perubahan penting seperti alamat email, username, dan nomor
+                 rekening penggajian. --}}
+            <h4 class="prof-bagian-judul">Riwayat keamanan</h4>
+            <p class="prof-bagian-sub">Percobaan masuk dan perubahan penting pada akun Anda.</p>
             @if ($gagalTerakhir > 0)
                 <span class="mis-pil mis-pil-kuning prof-bagian-lencana">
                     <i class="fas fa-exclamation-triangle"></i>
