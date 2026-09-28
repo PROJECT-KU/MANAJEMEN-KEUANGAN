@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\PemberitahuanPinMail;
 use App\Support\BerkasGambar;
 use App\Mail\VerifikasiEmailMail;
+use App\Mail\EmailAkunDipindahMail;
+use App\AktivitasMasuk;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -212,10 +214,40 @@ class ProfilController extends Controller
       $user->gambar = $fileName;
       $user->save();
 
+      $this->catatPerubahan($user, 'foto profil diganti');
+
       return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
     }
 
     return redirect()->back()->with('error', 'Gagal memperbarui foto.');
+  }
+  // <!--================== END ==================-->
+
+  /**
+   * Hapus foto profil dan kembali ke gambar bawaan.
+   *
+   * Sebelumnya foto hanya bisa diganti, tidak bisa dihapus: begitu ada yang
+   * salah unggah — foto orang lain, tangkapan layar, berkas pribadi — satu-
+   * satunya jalan mundur adalah mengunggah gambar lain sebagai penutup.
+   */
+  public function hapusFoto()
+  {
+    $user = Auth::user();
+
+    if (! filled($user->gambar) || in_array($user->gambar, ['default.png', 'no-image.jpg'], true)) {
+      return redirect()->back()->with('error', 'Tidak ada foto yang perlu dihapus.');
+    }
+
+    // Berkasnya dihapus lebih dulu; kalau gagal, kolomnya tetap dikosongkan
+    // supaya pengguna tidak terjebak dengan foto yang tidak bisa dibuang.
+    BerkasGambar::hapus('assets/img/profil', $user->gambar, ['default.png', 'no-image.jpg']);
+
+    $user->gambar = null;
+    $user->save();
+
+    $this->catatPerubahan($user, 'foto profil dihapus');
+
+    return redirect()->back()->with('success', 'Foto profil dihapus.');
   }
   // <!--================== END ==================-->
 
@@ -342,6 +374,8 @@ class ProfilController extends Controller
         return redirect()->back()->with('errorsandiemail', 'Kata sandi salah. Alamat email tidak jadi diganti.');
       }
 
+      $emailLama = (string) $user->email;
+
       $user->email = $request->input('email');
       $user->email_verified_at = null; // Reset email verification if email changes
       $emailBerubah = true;
@@ -360,6 +394,25 @@ class ProfilController extends Controller
     $user->save();
 
     if ($emailBerubah) {
+      $this->catatPerubahan($user, 'alamat email diganti');
+
+      /*
+       * Kabar ke alamat LAMA, bukan hanya ke yang baru.
+       *
+       * Tautan verifikasi memang dikirim ke alamat baru, tetapi yang perlu
+       * tahu justru pemilik alamat lama: alamat email adalah jalan
+       * memulihkan akun, jadi memindahkannya diam-diam sama dengan
+       * mengambil alih akun. Kegagalan kirim tidak boleh membatalkan
+       * perubahan yang sudah tersimpan.
+       */
+      try {
+        Mail::to($emailLama)->send(
+          new EmailAkunDipindahMail($user, $emailLama, (string) $user->email, (string) $request->ip())
+        );
+      } catch (\Throwable $e) {
+        Log::error('Gagal mengabari alamat email lama: ' . $e->getMessage());
+      }
+
       // Status verifikasi sudah direset di atas; kirimkan tautan baru supaya
       // pengguna tidak tertinggal tanpa cara memverifikasi alamat barunya.
       $terkirim = $this->kirimTautanVerifikasi($user);
@@ -466,7 +519,25 @@ class ProfilController extends Controller
       $user->username = $request->input('username');
     }
 
+    /*
+     * Dicatat SEBELUM save(): wasChanged() baru terisi sesudahnya, tetapi
+     * yang dibandingkan di sini nilai lama dari basis data, jadi keduanya
+     * harus diambil selagi modelnya masih kotor.
+     */
+    $usernameBerubah = $user->isDirty('username');
+    $norekBerubah = $user->isDirty('norek');
+
     $user->save();
+
+    // Dua hal ini yang paling layak ditelusuri: username adalah cara masuk,
+    // dan nomor rekening adalah ke mana gaji dikirim.
+    if ($usernameBerubah) {
+      $this->catatPerubahan($user, 'username diganti');
+    }
+
+    if ($norekBerubah) {
+      $this->catatPerubahan($user, 'nomor rekening diganti');
+    }
 
     // Return a success message
     return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
@@ -497,6 +568,8 @@ class ProfilController extends Controller
     // Update password
     $user->password = Hash::make($request->input('password'));
     $user->save();
+
+    $this->catatPerubahan($user, 'kata sandi diganti');
 
     // PIN ikut dimatikan: kata sandi berganti berarti akses lama harus
     // berhenti seluruhnya, termasuk jalan pintas enam angka di perangkat
@@ -530,6 +603,23 @@ class ProfilController extends Controller
 
 
   /** Kirim tautan verifikasi ke alamat email pengguna saat ini. */
+  /**
+   * Catat satu perubahan penting pada akun ke riwayat keamanan.
+   *
+   * Sebelumnya hanya percobaan masuk yang tercatat, padahal yang paling
+   * perlu ditelusuri justru perubahan seperti alamat email, username, dan
+   * nomor rekening penggajian — semuanya bisa dipakai mengalihkan akun atau
+   * mengalihkan gaji, dan tidak meninggalkan jejak apa pun di mana pun.
+   *
+   * Tabelnya memang bernama aktivitas_masuk, tetapi sejak awal juga sudah
+   * dipakai mencatat "keluar" dan "keluar dari perangkat lain"; tab di
+   * halaman profil karena itu disebut Riwayat keamanan, bukan riwayat masuk.
+   */
+  private function catatPerubahan(User $user, string $apa): void
+  {
+    AktivitasMasuk::catat($user, (string) ($user->username ?? $user->email), true, $apa);
+  }
+
   private function kirimTautanVerifikasi($user): bool
   {
     $tautan = URL::temporarySignedRoute('verification.verify', now()->addHours(48), [

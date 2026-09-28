@@ -59,6 +59,17 @@
         box-shadow: 0 12px 22px -14px #6366f1;
     }
 
+    /* Tombol hapus foto: rapat di bawah tombol simpan, bukan berjarak
+       seperti bagian baru — keduanya satu urusan.
+       width 100% pada formulirnya, bukan hanya pada tombolnya: kartu
+       identitas menata anaknya sebagai kolom rata tengah, jadi formulir
+       tanpa lebar menyusut mengikuti tulisannya dan tombolnya jadi lebih
+       sempit daripada "Simpan foto" tepat di atasnya. */
+    .prof-hapus-foto {
+        width: 100%;
+        margin-top: 8px;
+    }
+
     /* ------------------------------------------------- kemajuan di kepala */
 
     /*
