@@ -131,9 +131,15 @@
         display: grid;
         grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
         gap: var(--mis-jarak);
-        /* stretch, bukan start: kalau satu kolom lebih pendek, sisanya jadi
-           bagian dalam kartu — bukan petak kosong di sebelah kartu lain. */
-        align-items: stretch;
+        /*
+         * start, bukan stretch.
+         *
+         * Dengan stretch, kartu kanan ikut setinggi kolom kiri. Di tab yang
+         * isinya pendek (Kata sandi, PIN, Keamanan) sisanya jadi petak putih
+         * ratusan piksel DI DALAM kartu — lebih mengganggu daripada kartu
+         * yang memang berhenti di ujung isinya.
+         */
+        align-items: start;
     }
 
     .prof-sisi {
@@ -849,7 +855,6 @@
     .prof-tab-isi .tab-pane.active {
         display: flex;
         flex-direction: column;
-        min-height: 100%;
     }
 
     .prof-tab-isi .tab-pane.active > form {
@@ -858,8 +863,10 @@
         flex-direction: column;
     }
 
+    /* Tidak lagi didorong ke dasar kartu: kartunya sekarang berhenti di
+       ujung isinya, jadi baris tombol memang sudah di bawah. */
     .prof-tab-isi .prof-aksi {
-        margin-top: auto;
+        margin-top: 18px;
     }
 
     /* Bintang merah hanya untuk isian yang validatornya memang wajib. */
