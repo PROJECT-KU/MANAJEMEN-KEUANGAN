@@ -213,6 +213,20 @@ Profil | MIS
               </button>
             </form>
 
+            {{-- Hanya muncul kalau memang ada foto yang bisa dibuang. Dulu
+                 foto cuma bisa diganti: begitu ada yang salah unggah, satu-
+                 satunya jalan mundur adalah mengunggah gambar lain sebagai
+                 penutup. --}}
+            @if ($punyaFoto)
+              <form action="{{ route('account.profil.hapusFoto') }}" method="POST"
+                id="form-hapus-foto" class="prof-hapus-foto">
+                @csrf
+                <button type="submit" class="mis-tombol prof-tombol-bahaya-teks prof-penuh">
+                  <i class="fas fa-trash-alt"></i> Hapus foto
+                </button>
+              </form>
+            @endif
+
             {{-- Email ikut di kartu ini, bukan kartu sendiri: isinya sama-sama
                  "siapa saya dan bagaimana dihubungi", dan satu kartu terpisah
                  untuk satu baris membuat kolom kiri jauh lebih tinggi daripada
