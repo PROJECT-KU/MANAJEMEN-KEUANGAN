@@ -503,13 +503,13 @@ Profil | MIS
 
                     <div class="prof-bagian">
                       <div class="prof-bagian-kepala">
-                        <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-key"></i></span>
-                        <h4 class="prof-bagian-judul">Ganti kata sandi</h4>
-                        <p class="prof-bagian-sub">Setelah berhasil, Anda akan diminta masuk ulang.</p>
+                        <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                        <h4 class="prof-bagian-judul">Pastikan ini Anda</h4>
+                        <p class="prof-bagian-sub">Masukkan kata sandi yang dipakai sekarang.</p>
                       </div>
 
-                      <div class="mis-kisi-isian">
-                        <div class="mis-isian mis-isian-penuh">
+                      <div class="mis-kisi-isian prof-kisi-dua">
+                        <div class="mis-isian">
                           <label class="mis-label" for="old-password">
                             Kata sandi lama <span class="prof-wajib" aria-hidden="true">*</span>
                           </label>
@@ -520,6 +520,21 @@ Profil | MIS
                           </div>
                         </div>
 
+                        <p class="prof-catatan-samping">
+                          <i class="fas fa-circle-info mis-ikon-biru"></i>
+                          Lupa kata sandi lama? Keluar dulu, lalu pakai "Lupa kata sandi" di halaman masuk.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="prof-bagian">
+                      <div class="prof-bagian-kepala">
+                        <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-key"></i></span>
+                        <h4 class="prof-bagian-judul">Kata sandi baru</h4>
+                        <p class="prof-bagian-sub">Setelah berhasil, Anda akan diminta masuk ulang.</p>
+                      </div>
+
+                      <div class="mis-kisi-isian prof-kisi-dua">
                         <div class="mis-isian">
                           <label class="mis-label" for="password">
                             Kata sandi baru <span class="prof-wajib" aria-hidden="true">*</span>
@@ -543,15 +558,29 @@ Profil | MIS
                         </div>
                       </div>
 
-                      <div class="prof-aksi">
-                        <p class="prof-aksi-catatan">
-                          <i class="fas fa-shield-alt mis-ikon-hijau"></i>
-                          Minimal 8 huruf dan angka, dan jangan ulangi sandi dari layanan lain.
-                        </p>
-                        <button type="submit" class="mis-tombol mis-tombol-ungu">
-                          <i class="fas fa-key"></i> Perbarui kata sandi
-                        </button>
-                      </div>
+                      {{-- Syaratnya ditandai selagi diketik. Aturan ini juga
+                           diperiksa peladen; di sini gunanya supaya orang tahu
+                           lebih dulu, bukan baru tahu sesudah tombolnya ditolak. --}}
+                      <ul class="prof-syarat" id="prof-syarat">
+                        <li data-syarat="panjang">Minimal 8 karakter</li>
+                        <li data-syarat="hurufangka">Memuat huruf dan angka</li>
+                        <li data-syarat="sama">Ulangannya sama persis</li>
+                      </ul>
+
+                    </div>
+
+                    {{-- Baris tombol harus anak LANGSUNG formulir: margin-top
+                         auto yang menempelkannya ke dasar kartu hanya bekerja
+                         di dalam formulir yang jadi kolom flex, bukan di dalam
+                         .prof-bagian. --}}
+                    <div class="prof-aksi">
+                      <p class="prof-aksi-catatan">
+                        <i class="fas fa-shield-alt mis-ikon-hijau"></i>
+                        Jangan pakai kata sandi yang juga Anda pakai di layanan lain.
+                      </p>
+                      <button type="submit" class="mis-tombol mis-tombol-ungu">
+                        <i class="fas fa-key"></i> Perbarui kata sandi
+                      </button>
                     </div>
                   </form>
                 </div>
@@ -988,6 +1017,104 @@ Profil | MIS
       misToast('gagal', @json($errors->count() === 1 ? $errors->first() : 'Ada ' . $errors->count() . ' isian yang perlu diperbaiki.'));
     @endif
   });
+</script>
+
+<!--================== LOMPAT DARI DAFTAR KELENGKAPAN ==================-->
+<script>
+  /*
+   * Menekan butir yang masih kurang langsung membuka tabnya dan menaruh
+   * kursor di kotaknya. Tanpa ini orang harus menebak sendiri isian mana
+   * yang dimaksud di antara delapan kotak yang ada.
+   */
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.prof-lengkap-butir').forEach(function (tombol) {
+      tombol.addEventListener('click', function () {
+        const kunci = tombol.dataset.kunci;
+        const tab = tombol.dataset.tab;
+        const medan = tombol.dataset.medan;
+
+        // Dua butir tidak menunjuk isian: foto dan verifikasi email punya
+        // tempatnya sendiri di kolom kiri.
+        if (kunci === 'foto') {
+          document.getElementById('foto').click();
+          return;
+        }
+
+        if (kunci === 'email') {
+          const tombolVerif = document.getElementById('btn-verify-email');
+          if (tombolVerif) {
+            tombolVerif.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            tombolVerif.focus();
+          }
+          return;
+        }
+
+        if (tab) {
+          const pil = document.querySelector('#pills-tab a[href="#' + tab + '"]');
+          if (pil) {
+            pil.click();
+          }
+        }
+
+        if (medan) {
+          // Ditunda sebentar supaya tabnya sempat terbuka lebih dulu.
+          setTimeout(function () {
+            const isian = document.getElementById(medan);
+            if (isian) {
+              isian.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              isian.focus();
+            }
+          }, 220);
+        }
+      });
+    });
+  });
+</script>
+
+<!--================== SYARAT KATA SANDI ==================-->
+<script>
+  /*
+   * Menandai syarat kata sandi selagi diketik.
+   *
+   * Aturannya sama dengan yang diperiksa peladen (minimal 8, ada huruf dan
+   * angka, ulangannya cocok). Gunanya di sini bukan menggantikan pemeriksaan
+   * itu — melainkan supaya orang tahu lebih dulu, bukan baru tahu sesudah
+   * tombolnya ditolak.
+   */
+  (function () {
+    const daftar = document.getElementById('prof-syarat');
+    const baru = document.getElementById('password');
+    const ulang = document.getElementById('password_confirmation');
+
+    if (!daftar || !baru || !ulang) {
+      return;
+    }
+
+    const butir = {};
+    daftar.querySelectorAll('[data-syarat]').forEach(function (li) {
+      butir[li.dataset.syarat] = li;
+    });
+
+    function tandai(kunci, lulus) {
+      if (butir[kunci]) {
+        butir[kunci].classList.toggle('oke', lulus);
+      }
+    }
+
+    function periksa() {
+      const isi = baru.value;
+
+      tandai('panjang', isi.length >= 8);
+      tandai('hurufangka', /[a-zA-Z]/.test(isi) && /\d/.test(isi));
+      // Kosong tidak dihitung cocok, supaya butirnya tidak tercentang
+      // sebelum orangnya mengetik apa pun.
+      tandai('sama', isi !== '' && isi === ulang.value);
+    }
+
+    baru.addEventListener('input', periksa);
+    ulang.addEventListener('input', periksa);
+    periksa();
+  })();
 </script>
 
 <!--================== JENDELA GANTI EMAIL ==================-->
