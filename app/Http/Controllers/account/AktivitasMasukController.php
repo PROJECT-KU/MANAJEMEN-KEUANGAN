@@ -118,7 +118,8 @@ class AktivitasMasukController extends Controller
             $keluaran = fopen('php://output', 'w');
             // BOM supaya Excel membaca huruf beraksen dengan benar
             fwrite($keluaran, "\xEF\xBB\xBF");
-            fputcsv($keluaran, ['Waktu', 'Identitas', 'Akun', 'Status', 'Alasan', 'IP', 'Peramban']);
+            // $escape eksplisit; lihat alasannya di ProfilController@eksporRiwayat.
+            fputcsv($keluaran, ['Waktu', 'Identitas', 'Akun', 'Status', 'Alasan', 'IP', 'Peramban'], ',', '"', '');
 
             $kueri->chunk(500, function ($baris) use ($keluaran) {
                 foreach ($baris as $a) {
@@ -130,7 +131,7 @@ class AktivitasMasukController extends Controller
                         $a->alasan,
                         $a->ip,
                         $a->peramban,
-                    ]);
+                    ], ',', '"', '');
                 }
             });
 

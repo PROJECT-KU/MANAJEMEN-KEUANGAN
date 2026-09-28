@@ -30,10 +30,14 @@ class KeamananAkun extends Component
     /** Berapa perangkat yang tampil sebelum daftarnya dilipat. */
     private const PERANGKAT_TAMPIL = 3;
 
-
+    /** Tampilkan riwayat yang lebih panjang, bukan hanya yang terbaru. */
+    public bool $riwayatPanjang = false;
 
     /** Berapa banyak baris riwayat yang ditampilkan. */
     private const JUMLAH_RIWAYAT = 15;
+
+    /** Batas kedua, sesudah pemiliknya minta melihat lebih banyak. */
+    private const JUMLAH_RIWAYAT_PANJANG = 60;
 
     private const BATAS_SANDI_SALAH = 5;
 
@@ -155,6 +159,12 @@ class KeamananAkun extends Component
         return auth()->user();
     }
 
+    /** Batas baris riwayat yang berlaku sekarang. */
+    private function batasRiwayat(): int
+    {
+        return $this->riwayatPanjang ? self::JUMLAH_RIWAYAT_PANJANG : self::JUMLAH_RIWAYAT;
+    }
+
     public function render()
     {
         $pengguna = $this->pengguna();
@@ -167,10 +177,21 @@ class KeamananAkun extends Component
             // berjajar memakan seluruh layar dan mengubur riwayat di bawahnya.
             'sesiTampil' => $this->semuaPerangkat ? $sesi : $sesi->take(self::PERANGKAT_TAMPIL),
             'sisaPerangkat' => max(0, $sesi->count() - self::PERANGKAT_TAMPIL),
+            /*
+             * Riwayatnya dipotong, dan pemotongan itu HARUS terlihat.
+             *
+             * Sebelumnya 15 baris teratas diambil begitu saja tanpa penanda
+             * apa pun: orang tidak tahu ada yang lebih lama, dan tidak punya
+             * cara melihatnya. Pada halaman yang gunanya menjawab "ada yang
+             * bukan saya?", diam soal data yang disembunyikan itu menyesatkan.
+             */
             'riwayat' => AktivitasMasuk::where('user_id', $pengguna->getKey())
                 ->latest('id')
-                ->limit(self::JUMLAH_RIWAYAT)
+                ->limit($this->batasRiwayat())
                 ->get(),
+            'totalRiwayat' => $total = AktivitasMasuk::where('user_id', $pengguna->getKey())->count(),
+            'riwayatTerpotong' => $total > $this->batasRiwayat(),
+            'batasRiwayat' => $this->batasRiwayat(),
             'gagalTerakhir' => AktivitasMasuk::where('user_id', $pengguna->getKey())
                 ->where('berhasil', false)
                 ->where('created_at', '>=', now()->subDays(30))

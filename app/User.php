@@ -136,6 +136,16 @@ class User extends Authenticatable
             'pin_aktif' => false,
             'pin_diubah_pada' => null,
         ])->save();
+
+        /*
+         * Izin perangkat ikut dicabut, dan sengaja di SINI, bukan di
+         * pemanggilnya: matikanPin() dipanggil dari tiga tempat — halaman
+         * profil, halaman masuk saat PIN salah berulang, dan penggantian kata
+         * sandi. Kalau pembersihannya ditaruh di salah satu pemanggil, dua
+         * jalan lain meninggalkan catatan lama yang membuat perangkatnya
+         * langsung terdaftar kembali begitu PIN diaktifkan lagi.
+         */
+        \App\PerangkatPin::lupakanSemua($this);
     }
 
     public function pinCocok(string $pin): bool

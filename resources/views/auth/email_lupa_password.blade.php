@@ -55,6 +55,9 @@
                                         {{ optional($user->updated_at)->format('d/m/Y H:i') ?? now()->format('d/m/Y H:i') }} WIB<br>
                                         <strong>Akun</strong><br>
                                         {{ $user->email }}
+                                        @if (($ip ?? '') !== '')
+                                            <br><strong>Alamat IP</strong><br>{{ $ip }}
+                                        @endif
                                     </td>
                                 </tr>
                             </table>

@@ -41,6 +41,19 @@ class FotoProfil
     /** Mutu WebP. 82 sudah tidak terbedakan mata pada foto orang. */
     private const MUTU = 82;
 
+    /*
+     * Sisi terpanjang foto yang disimpan.
+     *
+     * Foto profil paling besar ditampilkan pada 96px (kartu identitas) dan
+     * paling kecil 25px. 512px sudah dua kali lipat kebutuhan layar padat
+     * sekalipun, sementara berkas 1200x900 yang tersimpan apa adanya
+     * memaksa tiap kunjungan mengunduh gambar berkali lipat lebih besar
+     * daripada yang pernah terlihat.
+     *
+     * Gambar yang sudah lebih kecil dari ini tidak ikut diperbesar.
+     */
+    private const SISI_MAKS = 512;
+
     /**
      * Simpan unggahan sebagai WebP dan kembalikan nama berkasnya.
      *
@@ -73,6 +86,9 @@ class FotoProfil
         // PNG dan GIF bisa punya bagian tembus pandang; tanpa dua baris ini
         // bagian itu jadi hitam pekat di hasil WebP-nya.
         imagepalettetotruecolor($sumber);
+
+        $sumber = self::kecilkan($sumber);
+
         imagealphablending($sumber, false);
         imagesavealpha($sumber, true);
 
@@ -165,6 +181,41 @@ class FotoProfil
     public static function bawaan(): string
     {
         return asset(self::FOLDER_LAMA . '/no-image.jpg');
+    }
+
+    /**
+     * Susutkan sampai sisi terpanjangnya SISI_MAKS, dengan perbandingan
+     * sisi tetap. Gambar yang sudah lebih kecil dikembalikan apa adanya —
+     * memperbesar foto kecil hanya menambah berkas tanpa menambah rincian.
+     *
+     * @return \GdImage
+     */
+    private static function kecilkan($gambar)
+    {
+        $lebar = imagesx($gambar);
+        $tinggi = imagesy($gambar);
+        $terpanjang = max($lebar, $tinggi);
+
+        if ($terpanjang <= self::SISI_MAKS) {
+            return $gambar;
+        }
+
+        $rasio = self::SISI_MAKS / $terpanjang;
+
+        // Pembulatan ke bawah bisa menghasilkan 0 pada gambar yang sangat
+        // memanjang; satu piksel adalah batas terkecil yang masih sah.
+        $lebarBaru = max(1, (int) round($lebar * $rasio));
+        $tinggiBaru = max(1, (int) round($tinggi * $rasio));
+
+        $kecil = imagescale($gambar, $lebarBaru, $tinggiBaru);
+
+        if ($kecil === false) {
+            return $gambar;
+        }
+
+        imagedestroy($gambar);
+
+        return $kecil;
     }
 
     /** @return \GdImage|null */

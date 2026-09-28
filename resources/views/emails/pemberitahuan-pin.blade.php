@@ -3,6 +3,7 @@
         'diaktifkan' => 'PIN masuk untuk akun Anda baru saja diaktifkan. Mulai sekarang Anda bisa masuk dengan enam angka PIN, selain dengan kata sandi.',
         'diubah' => 'PIN masuk untuk akun Anda baru saja diubah. PIN lama sudah tidak berlaku.',
         'dinonaktifkan-otomatis' => 'PIN masuk untuk akun Anda dinonaktifkan otomatis karena beberapa kali dimasukkan dengan salah. Masuk kembali memakai kata sandi, lalu aktifkan PIN baru dari halaman profil bila diperlukan.',
+        'perangkat-didaftarkan' => 'Sebuah perangkat baru saja didaftarkan untuk masuk dengan PIN. Mulai sekarang perangkat itu bisa membuka akun Anda cukup dengan enam angka PIN, tanpa kata sandi.',
         default => 'PIN masuk untuk akun Anda baru saja dinonaktifkan. Masuk kini hanya bisa memakai kata sandi.',
     };
 
@@ -10,10 +11,13 @@
         'diaktifkan' => 'PIN masuk diaktifkan',
         'diubah' => 'PIN masuk diubah',
         'dinonaktifkan-otomatis' => 'PIN masuk dinonaktifkan otomatis',
+        'perangkat-didaftarkan' => 'Perangkat baru bisa masuk dengan PIN',
         default => 'PIN masuk dinonaktifkan',
     };
 
-    $bahaya = $aksi === 'dinonaktifkan-otomatis';
+    // Perangkat baru yang bisa masuk tanpa kata sandi pantas ditandai
+    // seperti kejadian yang perlu diperiksa, bukan kabar biasa.
+    $bahaya = in_array($aksi, ['dinonaktifkan-otomatis', 'perangkat-didaftarkan'], true);
 @endphp
 <!DOCTYPE html>
 <html lang="id">
