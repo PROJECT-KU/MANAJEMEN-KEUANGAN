@@ -369,3 +369,35 @@
         Array.prototype.forEach.call(document.querySelectorAll('form[data-sibuk]'), pulih);
     });
 })();
+
+/* =================================================== tab: aria-selected ===
+
+   Bootstrap 4 memindahkan kelas .active saat tab diganti, tetapi TIDAK
+   memperbarui aria-selected. Akibatnya pembaca layar terus mengumumkan tab
+   pertama sebagai yang terpilih, berapa kali pun orang berpindah — kelas
+   .active hanya rupa, ia tidak terbaca sama sekali.
+
+   Dipasang di sini, bukan di satu halaman, supaya tiap deretan tab di sistem
+   ini ikut benar tanpa perlu diingat satu per satu.
+   ========================================================================= */
+(function () {
+    document.addEventListener('click', function (e) {
+        var tab = e.target.closest ? e.target.closest('[role="tab"]') : null;
+
+        if (! tab) {
+            return;
+        }
+
+        var daftar = tab.closest('[role="tablist"]');
+
+        if (! daftar) {
+            return;
+        }
+
+        var semua = daftar.querySelectorAll('[role="tab"]');
+
+        for (var i = 0; i < semua.length; i++) {
+            semua[i].setAttribute('aria-selected', semua[i] === tab ? 'true' : 'false');
+        }
+    });
+})();

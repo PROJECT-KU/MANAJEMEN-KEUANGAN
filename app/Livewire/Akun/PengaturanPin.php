@@ -132,6 +132,18 @@ class PengaturanPin extends Component
             ]);
         }
 
+        // Batas jumlah perangkat diperiksa SESUDAH PIN-nya benar, supaya
+        // pesan "sudah penuh" tidak jadi cara menebak apakah PIN-nya cocok.
+        if (PerangkatPin::penuh($pengguna)) {
+            $this->reset('pinPerangkat');
+
+            $this->addError('pinPerangkat', 'Sudah ada ' . PerangkatPin::BATAS . ' perangkat berizin PIN.');
+            $this->toast('gagal', 'Batas ' . PerangkatPin::BATAS . ' perangkat sudah tercapai. Cabut salah satunya '
+                . 'lebih dulu di tab Keamanan.');
+
+            return;
+        }
+
         RateLimiter::clear($kunci);
 
         $ingatan = IngatanMasuk::baca();

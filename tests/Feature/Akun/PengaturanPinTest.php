@@ -646,6 +646,66 @@ class PengaturanPinTest extends TestCase
         $this->assertTrue($pengguna->refresh()->pinCocok('070698'));
     }
 
+    /**
+     * Tanpa batas, daftar perangkat tumbuh terus dan tidak ada yang
+     * merapikannya. Batasnya diperiksa SESUDAH PIN-nya benar, supaya pesan
+     * "sudah penuh" tidak bisa dipakai menebak apakah PIN-nya cocok.
+     */
+    public function test_pendaftaran_ditolak_kalau_perangkatnya_sudah_penuh(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('482913');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('pin-perangkat|' . $pengguna->getKey());
+
+        for ($i = 0; $i < PerangkatPin::BATAS; $i++) {
+            PerangkatPin::create([
+                'user_id' => $pengguna->getKey(),
+                'penanda' => str_pad((string) $i, 32, 'x'),
+                'peramban' => 'Perangkat ke-' . $i,
+                'ip' => '127.0.0.1',
+                'terakhir_dipakai_pada' => now(),
+            ]);
+        }
+
+        Livewire::test(PengaturanPin::class)
+            ->set('pinPerangkat', '482913')
+            ->call('aktifkanDiPerangkat')
+            ->assertHasErrors('pinPerangkat')
+            ->assertDispatched('toast', jenis: 'gagal');
+
+        $this->assertSame(PerangkatPin::BATAS, PerangkatPin::where('user_id', $pengguna->getKey())->count());
+    }
+
+    /**
+     * Izin yang lama tidak dipakai berhenti berlaku. Bukan penghapusan
+     * diam-diam: barisnya tetap ada dan ditandai, dan pemiliknya selalu bisa
+     * masuk dengan kata sandi lalu mendaftarkannya lagi.
+     */
+    public function test_izin_yang_lama_tidak_dipakai_berhenti_berlaku(): void
+    {
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('482913');
+        $this->actingAs($pengguna);
+
+        $kue = $this->kuePerangkatTerdaftar($pengguna);
+
+        $perangkat = PerangkatPin::where('user_id', $pengguna->getKey())->first();
+        $perangkat->forceFill([
+            'terakhir_dipakai_pada' => now()->subMonths(PerangkatPin::BULAN_KEDALUWARSA + 1),
+        ])->save();
+
+        $this->assertTrue($perangkat->refresh()->kedaluwarsa);
+
+        $uji = Testable::create(PengaturanPin::class, [], [], $kue);
+
+        $this->assertFalse($uji->instance()->perangkatSiap(), 'Izin kedaluwarsa tidak boleh dianggap terdaftar.');
+
+        // Barisnya TETAP ada; yang hilang hanya berlakunya.
+        $this->assertNotNull(PerangkatPin::find($perangkat->id));
+    }
+
     public function test_perangkat_bisa_dilupakan_tanpa_mematikan_pin(): void
     {
         $pengguna = $this->buatPengguna();

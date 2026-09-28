@@ -49,7 +49,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=43">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=44">
 
     <style>
         .fas,
@@ -183,17 +183,17 @@ $agent = new Agent();
     @stack('gaya')
 </head>
 @php
+/*
+ * $tenggatDate dan $isTenggatExpired dibuang: keduanya dihitung enam kali di
+ * berkas ini dan tidak pernah dibaca satu kali pun. Kolom users.tenggat yang
+ * jadi sumbernya juga kosong di seluruh 146 baris dan ikut dihapus.
+ *
+ * Komentarnya gaya PHP, bukan {{-- --}}: di dalam @php Blade tidak mengolah
+ * komentar miliknya sendiri, sehingga tandanya lolos apa adanya ke PHP dan
+ * menjadikan berkas ini tidak sah.
+ */
 $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
-
-$tenggatDate = null;
-$currentDate = strtotime(date('Y-m-d'));
-$isTenggatExpired = false;
-
-if (Auth::check() && Auth::user()->tenggat) {
-$tenggatDate = strtotime(Auth::user()->tenggat);
-$isTenggatExpired = $tenggatDate < $currentDate;
-    }
-    @endphp
+@endphp
 
     <body style="background-color: #F5F5F5;" class="{{ $agent->isMobile() ? 'is-mobile' : '' }}">
     <div id="app">
@@ -402,13 +402,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
                         <!--================== END ==================-->
 
                         @if (Auth::check() && Auth::user()->email_verified_at)
-                        @php
-                        $tenggatDate = Auth::user()->tenggat;
-                        $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < strtotime(date('Y-m-d'))); @endphp @php $isStatusnonactive=(Auth::user()->status === 'nonactive');
-                            $tenggatDate = Auth::user()->tenggat;
-                            $currentDate = strtotime(date('Y-m-d')); // Current date in Unix timestamp
-                            $isTenggatExpired = ($tenggatDate && strtotime($tenggatDate) < $currentDate);
-                                @endphp
+                        @php $isStatusnonactive = (Auth::user()->status === 'nonactive'); @endphp
 
                                 <!--==================PERUSAHAAN==================-->
                                 @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
@@ -715,7 +709,7 @@ $isTenggatExpired = $tenggatDate < $currentDate;
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     {{-- Mengingat posisi gulir sidebar antar halaman. --}}
-    <script src="{{ asset('assets/js/mis-ui.js') }}?v=8"></script>
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=9"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')

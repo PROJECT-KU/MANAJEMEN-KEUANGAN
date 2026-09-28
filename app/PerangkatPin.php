@@ -24,6 +24,25 @@ class PerangkatPin extends Model
         'terakhir_dipakai_pada' => 'datetime',
     ];
 
+    /**
+     * Berapa perangkat yang boleh berizin PIN sekaligus.
+     *
+     * Tanpa batas, daftarnya tumbuh terus dan tidak ada yang merapikannya.
+     * Lima cukup untuk laptop, HP, dan beberapa cadangan; lebih dari itu
+     * biasanya berarti ada perangkat lama yang sudah tidak dipegang lagi.
+     */
+    public const BATAS = 5;
+
+    /**
+     * Izin berhenti berlaku setelah sekian bulan tidak dipakai.
+     *
+     * Bukan penghapusan diam-diam: barisnya tetap terlihat di halaman
+     * keamanan dengan penanda "kedaluwarsa", dan pemiliknya selalu bisa
+     * masuk dengan kata sandi lalu mendaftarkannya lagi. Yang hilang hanya
+     * jalan pintas enam angkanya.
+     */
+    public const BULAN_KEDALUWARSA = 6;
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -48,9 +67,31 @@ class PerangkatPin extends Model
     /** Apakah perangkat yang sedang dipakai boleh masuk dengan PIN? */
     public static function perangkatIniTerdaftar(User $pengguna): bool
     {
-        return static::where('user_id', $pengguna->getKey())
+        $perangkat = static::where('user_id', $pengguna->getKey())
             ->where('penanda', PenandaPerangkat::ambil())
-            ->exists();
+            ->first();
+
+        return $perangkat !== null && ! $perangkat->kedaluwarsa;
+    }
+
+    /** Sudah terlalu lama tidak dipakai, jadi izinnya tidak berlaku lagi. */
+    public function getKedaluwarsaAttribute(): bool
+    {
+        $dipakai = $this->terakhir_dipakai_pada ?? $this->created_at;
+
+        if ($dipakai === null) {
+            return false;
+        }
+
+        return $dipakai->lt(Carbon::now()->subMonths(self::BULAN_KEDALUWARSA));
+    }
+
+    /** Sudah mentok batas jumlah perangkat? Perangkat ini sendiri tidak dihitung. */
+    public static function penuh(User $pengguna): bool
+    {
+        return static::where('user_id', $pengguna->getKey())
+            ->where('penanda', '<>', PenandaPerangkat::ambil())
+            ->count() >= self::BATAS;
     }
 
     /** Cabut izin perangkat yang sedang dipakai. */
