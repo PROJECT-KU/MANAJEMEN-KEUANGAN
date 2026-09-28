@@ -210,7 +210,18 @@ class PengaturanPinTest extends TestCase
         $pengguna->aturPin('482913');
         $this->actingAs($pengguna);
 
-        Livewire::test(PengaturanPin::class)
+        // Kue perangkat dikirimkan supaya peramban ini dianggap sudah memakai
+        // PIN: sejak pengaman dipasang, mengganti PIN hanya boleh dari
+        // perangkat yang terdaftar — lihat
+        // test_perangkat_asing_tidak_bisa_mengganti_pin_dengan_angka_lain.
+        Testable::create(PengaturanPin::class, [], [], [
+            IngatanMasuk::NAMA => json_encode([
+                'identitas' => $pengguna->username,
+                'mode' => 'pin',
+                'ingat' => false,
+                'uid' => $pengguna->getKey(),
+            ]),
+        ])
             ->set('kataSandi', self::SANDI)
             ->set('pin', '739154')
             ->set('pinKonfirmasi', '739154')
@@ -315,6 +326,170 @@ class PengaturanPinTest extends TestCase
 
         $this->assertSame('pin', $isi['mode']);
         $this->assertSame($pengguna->getKey(), $isi['uid']);
+    }
+
+    /**
+     * Inti pengamannya: satu akun hanya punya satu PIN. Mengetik angka baru
+     * di HP bukan "mendaftarkan HP", melainkan menimpa PIN yang dipakai
+     * laptop juga — dan pemilik laptop tidak diberi tahu sampai ia terkunci.
+     */
+    public function test_perangkat_asing_tidak_bisa_mengganti_pin_dengan_angka_lain(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+        RateLimiter::clear('pin-perangkat|' . $pengguna->getKey());
+
+        $uji = Livewire::test(PengaturanPin::class);
+
+        $this->assertFalse($uji->instance()->perangkatSiap(), 'Perangkat uji harus dianggap belum terdaftar.');
+        $this->assertFalse($uji->instance()->bolehGantiPin());
+
+        $uji->set('kataSandi', self::SANDI)
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasErrors('pin')
+            ->assertDispatched('toast', jenis: 'gagal');
+
+        // PIN lama harus utuh: inilah yang dulu diam-diam tertimpa.
+        $this->assertTrue($pengguna->refresh()->pinCocok('070698'));
+        $this->assertFalse($pengguna->pinCocok('980607'));
+
+        // Perangkat asing juga tidak boleh ikut terdaftar dari percobaan gagal.
+        $this->assertNull(Cookie::queued(IngatanMasuk::NAMA));
+
+        Mail::assertNothingSent();
+    }
+
+    /**
+     * Kalau angkanya memang PIN yang sekarang, yang diminta orang ini
+     * sebenarnya "pakai PIN saya di perangkat ini" — dikerjakan, tanpa
+     * menyentuh PIN-nya.
+     */
+    public function test_perangkat_asing_yang_mengetik_pin_benar_malah_didaftarkan(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $diubahSemula = $pengguna->refresh()->pin;
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+        RateLimiter::clear('pin-perangkat|' . $pengguna->getKey());
+
+        Livewire::test(PengaturanPin::class)
+            ->set('kataSandi', self::SANDI)
+            ->set('pin', '070698')
+            ->set('pinKonfirmasi', '070698')
+            ->call('simpan')
+            ->assertHasNoErrors()
+            ->assertDispatched('toast', jenis: 'berhasil');
+
+        $kue = Cookie::queued(IngatanMasuk::NAMA);
+
+        $this->assertNotNull($kue, 'Perangkat seharusnya ikut terdaftar.');
+        $this->assertSame('pin', json_decode((string) $kue->getValue(), true)['mode']);
+
+        // PIN tidak diganti, jadi nilainya tidak ikut diacak ulang.
+        $this->assertSame($diubahSemula, $pengguna->refresh()->pin);
+
+        // Tidak ada yang berubah, jadi tidak ada kabar perubahan PIN.
+        Mail::assertNothingSent();
+    }
+
+    /** Dari perangkat yang sudah memakai PIN, menggantinya tetap boleh. */
+    public function test_perangkat_terdaftar_tetap_bisa_mengganti_pin(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+
+        $uji = Testable::create(PengaturanPin::class, [], [], [
+            IngatanMasuk::NAMA => json_encode([
+                'identitas' => $pengguna->username,
+                'mode' => 'pin',
+                'ingat' => false,
+                'uid' => $pengguna->getKey(),
+            ]),
+        ]);
+
+        $this->assertTrue($uji->instance()->bolehGantiPin());
+
+        $uji->set('kataSandi', self::SANDI)
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $this->assertTrue($pengguna->refresh()->pinCocok('980607'));
+    }
+
+    /** Akun yang memang belum punya PIN tidak ikut terkunci pengaman ini. */
+    public function test_akun_tanpa_pin_tetap_bisa_membuat_pin_di_perangkat_mana_pun(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+
+        $uji = Livewire::test(PengaturanPin::class);
+
+        $this->assertTrue($uji->instance()->bolehGantiPin());
+
+        $uji->set('kataSandi', self::SANDI)
+            ->set('pin', '980607')
+            ->set('pinKonfirmasi', '980607')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $this->assertTrue($pengguna->refresh()->pinCocok('980607'));
+    }
+
+    /**
+     * Formulir ganti PIN memakai kantong jatah yang sama dengan kotak
+     * pendaftaran perangkat, jadi ia tidak bisa dipakai menebak PIN setelah
+     * jatah di kotak itu habis.
+     */
+    public function test_tebakan_lewat_formulir_ikut_menghabiskan_jatah_pendaftaran(): void
+    {
+        Mail::fake();
+
+        $pengguna = $this->buatPengguna();
+        $pengguna->aturPin('070698');
+        $this->actingAs($pengguna);
+
+        RateLimiter::clear('atur-pin|' . $pengguna->getKey());
+        RateLimiter::clear('pin-perangkat|' . $pengguna->getKey());
+
+        $uji = Livewire::test(PengaturanPin::class);
+
+        for ($i = 0; $i < 5; $i++) {
+            $uji->set('kataSandi', self::SANDI)
+                ->set('pin', '111333')
+                ->set('pinKonfirmasi', '111333')
+                ->call('simpan')
+                ->assertHasErrors('pin');
+        }
+
+        // Jatahnya habis, jadi kotak pendaftaran ikut tertutup — walaupun
+        // sekarang PIN-nya diketik dengan benar.
+        $uji->set('pinPerangkat', '070698')
+            ->call('aktifkanDiPerangkat')
+            ->assertHasErrors('pinPerangkat');
+
+        $this->assertNull(Cookie::queued(IngatanMasuk::NAMA));
     }
 
     public function test_daftar_perangkat_menolak_pin_yang_salah(): void
