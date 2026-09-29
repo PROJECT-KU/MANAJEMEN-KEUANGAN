@@ -68,8 +68,54 @@ Data Pelanggan | MIS
     }
 
     .pel-saring-cari {
+        position: relative;
         flex: 1 1 240px;
         min-width: 0;
+    }
+
+    /* Cincin berputar kecil di dalam kotak cari. Muncul hanya saat ada
+       permintaan berjalan, dan berhenti mengambil tempat saat diam. */
+    .pel-sibuk {
+        position: absolute;
+        right: 12px;
+        bottom: 13px;
+        width: 15px;
+        height: 15px;
+        border: 2px solid #e2e8f0;
+        border-top-color: #6366f1;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease;
+    }
+
+    .pel-saring.sibuk .pel-sibuk {
+        opacity: 1;
+        animation: pel-putar .7s linear infinite;
+    }
+
+    @keyframes pel-putar {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Hasil diredupkan selagi diganti, supaya jelas angkanya sedang berubah
+       — tanpa menghilangkannya, yang membuat halaman berkedip dan melompat. */
+    #pel-hasil {
+        transition: opacity .15s ease;
+    }
+
+    #pel-hasil.sibuk {
+        opacity: .45;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pel-saring.sibuk .pel-sibuk {
+            animation: none;
+        }
+
+        #pel-hasil {
+            transition: none;
+        }
     }
 
     .pel-saring-pilih {
@@ -329,7 +375,9 @@ Data Pelanggan | MIS
             <div class="mis-isian pel-saring-cari">
                 <label class="mis-label" for="pel-cari">Cari</label>
                 <input type="search" class="form-control-modern" id="pel-cari" name="cari"
-                    value="{{ $cari }}" placeholder="Nama, username, email, atau telepon">
+                    value="{{ $cari }}" placeholder="Nama, username, email, atau telepon"
+                    autocomplete="off" aria-controls="pel-hasil">
+                <span class="pel-sibuk" id="pel-sibuk" aria-hidden="true"></span>
             </div>
 
             <div class="mis-isian pel-saring-pilih">
@@ -350,7 +398,11 @@ Data Pelanggan | MIS
                 </select>
             </div>
 
-            <button type="submit" class="mis-tombol mis-tombol-ungu" data-sibuk>
+            {{-- Tombolnya tetap ada di markah dan baru disembunyikan oleh
+                 skrip di bawah. Tanpa JavaScript — peramban lama, skrip gagal
+                 termuat, jaringan putus di tengah — penyaringnya masih bisa
+                 dipakai seperti formulir biasa. --}}
+            <button type="submit" class="mis-tombol mis-tombol-ungu" id="pel-terapkan">
                 <i class="fas fa-search"></i> Terapkan
             </button>
 
@@ -362,7 +414,11 @@ Data Pelanggan | MIS
         </form>
         </details>
 
-        {{-- -------------------------------------------------- daftar --}}
+        {{-- --------------------------------------------------- daftar --}}
+        {{-- Dibungkus dan diberi id: hanya bagian inilah yang ditukar saat
+             mengetik, jadi kepala halaman, ringkasan, dan kotak pencariannya
+             tidak ikut digambar ulang — dan fokus ketikan tidak hilang. --}}
+        <div id="pel-hasil">
         @if ($pelanggan->isEmpty())
             <div class="mis-kartu">
                 <div class="mis-kosong">
@@ -483,6 +539,7 @@ Data Pelanggan | MIS
                 {{ $pelanggan->links('vendor.pagination.bootstrap-4') }}
             </div>
         @endif
+        </div>
 
     </section>
 </div>
@@ -490,6 +547,136 @@ Data Pelanggan | MIS
 
 @push('scripts')
 <script>
+    /*
+     * Mencari sambil mengetik, tanpa menekan tombol apa pun.
+     *
+     * Yang ditukar HANYA #pel-hasil, bukan seluruh halaman: kalau halamannya
+     * dimuat ulang tiap ketikan, fokus keluar dari kotak cari dan huruf
+     * berikutnya hilang.
+     *
+     * Tiga hal yang membuat ini tidak sekadar "panggil fetch tiap ketikan":
+     *
+     *   1. Jeda 300 ms. Tanpa itu, mengetik "budi" mengirim empat permintaan
+     *      dan tiga di antaranya sia-sia.
+     *   2. Permintaan lama dibatalkan. Tanpa itu, jawaban untuk "bud" bisa
+     *      tiba SESUDAH jawaban untuk "budi" dan menimpanya — daftarnya lalu
+     *      tidak cocok dengan apa yang tertulis di kotak cari.
+     *   3. Alamat halaman ikut diperbarui. Tanpa itu, menyegarkan halaman
+     *      atau menyalin tautannya mengembalikan daftar tanpa saringan.
+     */
+    (function () {
+        const borang = document.getElementById('pel-borang');
+        const hasil = document.getElementById('pel-hasil');
+        const cari = document.getElementById('pel-cari');
+        const terapkan = document.getElementById('pel-terapkan');
+        if (!borang || !hasil || !cari) return;
+
+        // Baru disembunyikan di sini: kalau skrip ini tidak jalan, tombolnya
+        // tetap ada dan penyaringnya masih bisa dipakai.
+        if (terapkan) terapkan.hidden = true;
+
+        let jeda = null;
+        let batal = null;
+
+        const muat = function (alamat, doronganRiwayat) {
+            if (batal) batal.abort();
+            batal = new AbortController();
+
+            borang.classList.add('sibuk');
+            hasil.classList.add('sibuk');
+
+            fetch(alamat, {
+                signal: batal.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('status ' + r.status);
+                    return r.text();
+                })
+                .then(function (teks) {
+                    // Diurai sebagai dokumen, bukan disisipkan mentah: yang
+                    // dibutuhkan cuma satu bagiannya, dan mengurai lebih dulu
+                    // berarti skrip di dalamnya tidak ikut dijalankan.
+                    const doc = new DOMParser().parseFromString(teks, 'text/html');
+                    const baru = doc.getElementById('pel-hasil');
+                    if (baru) hasil.innerHTML = baru.innerHTML;
+
+                    if (doronganRiwayat) {
+                        history.replaceState(null, '', alamat);
+                    }
+
+                    /*
+                     * Isian tersembunyi urut/arah disamakan dengan alamat yang
+                     * baru dimuat.
+                     *
+                     * Tanpa ini, menekan kepala kolom memang mengubah urutan —
+                     * tetapi formulirnya masih memegang urutan lama, sehingga
+                     * huruf berikutnya yang diketik diam-diam mengembalikan
+                     * urutannya ke keadaan sebelum ditekan.
+                     */
+                    const par = new URL(alamat, location.origin).searchParams;
+                    borang.querySelectorAll('input[type=hidden]').forEach(function (i) {
+                        if (par.has(i.name)) i.value = par.get(i.name);
+                    });
+                })
+                .catch(function (e) {
+                    // Pembatalan bukan kegagalan: ia memang disengaja saat
+                    // huruf berikutnya diketik.
+                    if (e.name === 'AbortError') return;
+                    window.misToast('gagal', 'Gagal memuat daftar. Coba lagi.');
+                })
+                .finally(function () {
+                    borang.classList.remove('sibuk');
+                    hasil.classList.remove('sibuk');
+                });
+        };
+
+        const alamatSekarang = function () {
+            const data = new FormData(borang);
+            const p = new URLSearchParams();
+
+            for (const [k, v] of data.entries()) {
+                if (String(v).trim() !== '') p.set(k, v);
+            }
+
+            const q = p.toString();
+            return borang.action + (q ? '?' + q : '');
+        };
+
+        const jadwalkan = function (tundaan) {
+            clearTimeout(jeda);
+            jeda = setTimeout(function () { muat(alamatSekarang(), true); }, tundaan);
+        };
+
+        cari.addEventListener('input', function () { jadwalkan(300); });
+
+        // Menu pilihan tidak perlu ditunda: satu klik sudah keputusan penuh.
+        borang.querySelectorAll('select').forEach(function (s) {
+            s.addEventListener('change', function () { jadwalkan(0); });
+        });
+
+        // Enter tidak boleh memuat ulang halaman; hasilnya sudah tampil.
+        borang.addEventListener('submit', function (e) {
+            e.preventDefault();
+            jadwalkan(0);
+        });
+
+        /*
+         * Penomoran halaman dan kepala kolom pengurut ikut ditangani di sini.
+         * Keduanya berada DI DALAM bagian yang ditukar, jadi penangan harus
+         * dipasang di wadahnya — pemasangan langsung akan hilang begitu isinya
+         * diganti pertama kali.
+         */
+        hasil.addEventListener('click', function (e) {
+            const tautan = e.target.closest('.pagination a, .pel-urut');
+            if (!tautan || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+
+            e.preventDefault();
+            muat(tautan.href, true);
+            hasil.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        });
+    })();
+
     /*
      * Penyaring terbuka sendiri mulai 768px dan terlipat di bawah itu.
      *
