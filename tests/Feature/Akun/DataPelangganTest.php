@@ -118,6 +118,111 @@ class DataPelangganTest extends TestCase
     }
 
     #[Test]
+    public function daftarnya_bisa_diurutkan_menurut_nama(): void
+    {
+        $z = $this->buat('user');
+        $z->forceFill(['full_name' => 'Zulfa Uji Urut'])->save();
+        $a = $this->buat('user');
+        $a->forceFill(['full_name' => 'Ahmad Uji Urut'])->save();
+
+        $isi = $this->actingAs($this->buat('administrator'))
+            ->get(route('account.customer.index', ['urut' => 'nama', 'arah' => 'naik', 'cari' => 'Uji Urut']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertLessThan(
+            strpos($isi, 'Zulfa Uji Urut'),
+            strpos($isi, 'Ahmad Uji Urut'),
+            'Menaik menurut nama, Ahmad harus muncul sebelum Zulfa.'
+        );
+    }
+
+    #[Test]
+    public function kolom_urut_di_luar_daftar_putih_diabaikan(): void
+    {
+        // Tanpa daftar putih, nilai dari kiriman langsung jadi nama kolom —
+        // termasuk kolom yang tidak boleh disentuh siapa pun.
+        $this->buat('user');
+
+        $this->actingAs($this->buat('administrator'))
+            ->get(route('account.customer.index', ['urut' => 'password']))
+            ->assertOk();
+    }
+
+    #[Test]
+    public function ekspor_menghasilkan_pdf_dan_menghormati_saringan(): void
+    {
+        $aktif = $this->buat('user');
+        $aktif->forceFill(['full_name' => 'Pelanggan Terpakai'])->save();
+        $mati = $this->buat('user');
+        $mati->forceFill(['full_name' => 'Pelanggan Tersaring', 'status' => 'non active'])->save();
+
+        $jawaban = $this->actingAs($this->buat('administrator'))
+            ->get(route('account.customer.ekspor', ['status' => 'aktif', 'cari' => 'Pelanggan Ter']));
+
+        $jawaban->assertOk();
+        $this->assertStringContainsString('.pdf', (string) $jawaban->headers->get('Content-Disposition'));
+
+        $isi = $jawaban->getContent();
+        $this->assertStringStartsWith('%PDF', $isi);
+
+        // Isi PDF dibaca balik: nama yang tersaring tidak boleh ikut terbawa.
+        $teks = '';
+        foreach (preg_split('/stream\r?\n/', $isi) as $bagian) {
+            $mentah = @gzuncompress(explode('endstream', $bagian)[0]);
+            if ($mentah !== false) {
+                $teks .= str_replace("\x00", '', $mentah);
+            }
+        }
+
+        $this->assertStringContainsString('Pelanggan Terpakai', $teks);
+        $this->assertStringNotContainsString('Pelanggan Tersaring', $teks);
+    }
+
+    #[Test]
+    public function pelanggan_tidak_boleh_mengunduh_daftar(): void
+    {
+        $this->actingAs($this->buat('user'))
+            ->get(route('account.customer.ekspor'))
+            ->assertRedirect(route('account.dashboard.index'));
+    }
+
+    #[Test]
+    public function perubahan_akun_tercatat_beserta_pelakunya(): void
+    {
+        $pelanggan = $this->buat('user');
+        $pengelola = $this->buat('administrator');
+        $pengelola->forceFill(['full_name' => 'Pengelola Uji'])->save();
+
+        $this->actingAs($pengelola)
+            ->post(route('account.pengguna.update', $pelanggan), [
+                'status' => 'non active',
+            ])
+            ->assertRedirect();
+
+        $catatan = \App\AktivitasMasuk::where('user_id', $pelanggan->getKey())->latest('id')->first();
+
+        $this->assertNotNull($catatan, 'Perubahan harus meninggalkan catatan.');
+        $this->assertStringContainsString('status akun', $catatan->alasan);
+        // Pertanyaan pertama yang muncul saat melihat jejak adalah "oleh siapa".
+        $this->assertStringContainsString('Pengelola Uji', $catatan->alasan);
+    }
+
+    #[Test]
+    public function menyimpan_tanpa_mengubah_apa_pun_tidak_meninggalkan_catatan(): void
+    {
+        $pelanggan = $this->buat('user');
+
+        $this->actingAs($this->buat('administrator'))
+            ->post(route('account.pengguna.update', $pelanggan), [
+                'status' => $pelanggan->status,
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(0, \App\AktivitasMasuk::where('user_id', $pelanggan->getKey())->count());
+    }
+
+    #[Test]
     public function penyaring_status_dan_verifikasi_bekerja(): void
     {
         $aktif = $this->buat('user');
