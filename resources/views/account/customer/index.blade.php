@@ -235,7 +235,7 @@ Data Pelanggan | MIS
 @endpush
 
 @section('content')
-<div class="main-content">
+<div class="main-content mis-badan">
     <section class="section">
 
         {{-- ------------------------------------------------ kepala --}}

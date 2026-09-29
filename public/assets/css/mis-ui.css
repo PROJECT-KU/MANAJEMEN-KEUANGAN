@@ -58,6 +58,40 @@ body {
     background-color: var(--ui-latar);
 }
 
+/*
+ * Badan layar MIS.
+ *
+ * style.css bawaan Stisla memberi .main-content padding-top 80px, dan dengan
+ * angka itu kepala halaman menempel persis di bawah bilah atas yang melayang.
+ * Halaman profil sudah memakai 110px beserta latar #f4f7ff, tetapi lewat
+ * style SEBARIS di markahnya — jadi layar lain tidak bisa ikut kecuali
+ * menyalin angkanya. Ini versi bersamanya.
+ */
+.mis-badan {
+    padding-top: 110px;
+    background-color: #f4f7ff;
+    min-height: 100vh;
+}
+
+/*
+ * Ubin ikon di KEPALA HALAMAN lebih besar daripada ubin di kepala bagian: ia
+ * menaungi seluruh layar, bukan satu bagian saja. Angkanya disamakan dengan
+ * halaman profil, yang jadi acuan rupa.
+ */
+.mis-kepala > .mis-medali {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 14px;
+    font-size: 1.22rem;
+}
+
+/* Cahaya berwarna hanya untuk ubin ungu: warnanya harus sewarna ubinnya,
+   dan ungu adalah warna kepala halaman di seluruh MIS. */
+.mis-kepala > .mis-medali.mis-ungu {
+    box-shadow: 0 12px 22px -14px #6366f1;
+}
+
 /* Ikon bawaan layout dipaksa 20px; di dalam tombol & tabel itu kebesaran. */
 .btn .fas,
 .btn .far,
