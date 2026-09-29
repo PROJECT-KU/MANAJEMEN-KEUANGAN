@@ -1280,11 +1280,31 @@
 
     /* -------------------------------------------------------- kata sandi */
 
+    /*
+     * display: flex, bukan blok biasa.
+     *
+     * Ikon matanya diletakkan absolut terhadap pembungkus ini, jadi
+     * tingginya HARUS sama persis dengan tinggi isian. Sebagai blok biasa
+     * ia tidak begitu: isiannya inline-block yang duduk di garis alas, dan
+     * kotak barisnya masih menyediakan ruang turunan di bawah alas itu
+     * (line-height yang diwarisi 28px). Pembungkusnya jadi lebih tinggi
+     * daripada isiannya, dengan isian menempel ke atas — sehingga titik
+     * 50% pembungkus jatuh di BAWAH titik tengah isian.
+     *
+     * Besar selisihnya bergantung huruf yang berhasil termuat, jadi ia
+     * berbeda-beda antar peramban dan antar perangkat. Itu sebabnya ikon
+     * yang terukur lurus di satu mesin bisa terlihat meleset di mesin lain.
+     * Dengan flex, tinggi pembungkus = tinggi isian, di mana pun.
+     */
     .prof-sandi {
         position: relative;
+        display: flex;
+        align-items: center;
     }
 
     .prof-sandi .form-control-modern {
+        flex: 1 1 auto;
+        min-width: 0;
         padding-right: 40px;
     }
 
@@ -1304,8 +1324,16 @@
          * kiri lorong tetapi 16,92px dari tepi kanan isian.
          */
         right: 9px;
-        top: 50%;
-        transform: translateY(-50%);
+        /*
+         * Ditengahkan lewat top/bottom 0 + margin auto, bukan lewat
+         * top: 50% + translateY(-50%). Keduanya sama benar kalau tinggi
+         * pembungkusnya pasti, tetapi cara ini tidak memakai persentase sama
+         * sekali sehingga tidak ada pembulatan setengah piksel yang
+         * menumpuk pada tinggi isian yang ganjil.
+         */
+        top: 0;
+        bottom: 0;
+        margin-block: auto;
         display: grid;
         place-items: center;
         width: 24px;
@@ -1319,24 +1347,6 @@
            .fas yang bobotnya sama, dan ia terbit belakangan. */
         font-size: .8rem !important;
         line-height: 1;
-    }
-
-    /*
-     * Tinta glifnya, bukan kotaknya, yang meleset.
-     *
-     * Kotak <i> 24x24 itu sudah rata tengah terhadap isian — diukur selisih
-     * titik tengahnya 0,0px di 390, 575, 768 dan 1200px. Yang tidak rata
-     * adalah gambar hurufnya DI DALAM kotak em Font Awesome: tintanya jatuh
-     * sekitar 1,2px di atas titik tengah (terukur +1,53px dan +0,94px pada
-     * dua pembulatan sub-piksel yang berbeda).
-     *
-     * Digeser di ::before, bukan di <i>: latar :hover yang 24x24 itu harus
-     * tetap rata tengah, dan <i>-nya sudah memakai transform untuk
-     * menengahkan dirinya sendiri (translateY(-50%)), jadi transform kedua
-     * di situ akan saling menimpa.
-     */
-    .password-toggle-inside::before {
-        transform: translateY(1.25px);
     }
 
     .password-toggle-inside:hover {
