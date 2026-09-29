@@ -867,16 +867,68 @@
         const isian = document.getElementById('pel-foto');
         const nama = document.getElementById('pel-nama-berkas');
         const simpan = document.getElementById('pel-simpan-foto');
+        const bingkai = document.querySelector('.pel-identitas-avatar .mis-foto-bingkai')
+            || document.querySelector('.pel-identitas-avatar');
         if (!isian || !nama || !simpan) return;
 
         const BATAS = 3 * 1024 * 1024;
         const BOLEH = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        /*
+         * Pratinjau harus menangani DUA bentuk avatar.
+         *
+         * Kalau pelanggannya sudah berfoto, avatarnya <img> dan cukup ditukar
+         * src-nya. Kalau belum, avatarnya <span> berisi inisial — tidak ada
+         * gambar untuk ditukar sama sekali. Karena itu simpulnya disimpan
+         * dulu, diganti <img> saat memilih, lalu dikembalikan apa adanya kalau
+         * pilihannya dibatalkan.
+         */
+        const avatarAsli = bingkai ? bingkai.querySelector('.mis-avatar') : null;
+        const salinanAsli = avatarAsli ? avatarAsli.cloneNode(true) : null;
+        let alamatObjek = null;
+
+        const lepasAlamat = function () {
+            if (alamatObjek) {
+                URL.revokeObjectURL(alamatObjek);
+                alamatObjek = null;
+            }
+        };
+
+        const kembalikanAvatar = function () {
+            lepasAlamat();
+            if (!bingkai || !salinanAsli) return;
+            const sekarang = bingkai.querySelector('.mis-avatar');
+            if (sekarang) sekarang.replaceWith(salinanAsli.cloneNode(true));
+        };
+
+        const tampilkanPratinjau = function (berkas) {
+            if (!bingkai || !avatarAsli) return;
+
+            lepasAlamat();
+            alamatObjek = URL.createObjectURL(berkas);
+
+            const sekarang = bingkai.querySelector('.mis-avatar');
+            const ukuran = avatarAsli.style.width || '104px';
+
+            // Selalu <img> baru, bukan menyulap <span> jadi gambar: ukuran dan
+            // warnanya menempel pada style sebaris milik simpul inisial.
+            const gambar = document.createElement('img');
+            gambar.className = 'mis-avatar';
+            gambar.alt = 'Pratinjau foto yang dipilih';
+            gambar.style.width = ukuran;
+            gambar.style.height = avatarAsli.style.height || ukuran;
+            gambar.src = alamatObjek;
+
+            if (sekarang) sekarang.replaceWith(gambar);
+            else bingkai.prepend(gambar);
+        };
 
         const kosongkan = function (pesan) {
             isian.value = '';
             nama.textContent = 'Pilih foto baru';
             simpan.hidden = true;
             simpan.disabled = true;
+            kembalikanAvatar();
             if (pesan) window.misToast('gagal', pesan);
         };
 
@@ -895,6 +947,7 @@
             nama.textContent = berkas.name;
             simpan.hidden = false;
             simpan.disabled = false;
+            tampilkanPratinjau(berkas);
         });
     })();
 
