@@ -1485,6 +1485,28 @@ select.form-control-modern {
     color: #fff !important;
 }
 
+/*
+ * Tombol sekunder yang BERTEKS.
+ *
+ * .mis-tombol-garis dan .mis-tombol-bahaya di bawah sengaja 34x34 untuk
+ * tombol berisi ikon saja — diberi teks, keduanya memampatkan isinya jadi
+ * dua baris di dalam kotak 34px. Sampai sekarang tidak ada padanan berteks
+ * di sistem ini, sehingga tiap layar membuat kelasnya sendiri (halaman
+ * profil memakai .prof-tombol-halus). Ini versi bersamanya.
+ */
+.mis-tombol-halus {
+    background: #fff;
+    border: 1px solid var(--mis-garis);
+    color: var(--mis-tinta-2);
+}
+
+.mis-tombol-halus:hover:not(:disabled) {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+    color: #4f46e5;
+    transform: translateY(-2px);
+}
+
 /* tombol garis untuk tindakan sekunder di dalam tabel */
 /* Ikonnya berwarna aksen, bukan abu-abu: abu-abu dipakai khusus untuk
    ketiadaan data, dan tombol ini justru tindakan yang bisa dipakai. */

@@ -252,11 +252,11 @@ class PenggunaController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE FOTO PROFIL ==================-->
-    public function updatePhoto(Request $request, $id)
+    public function updatePhoto(Request $request, User $pengguna)
     {
-        $this->pastikanBoleh($id);
+        $this->pastikanBoleh($pengguna->getKey());
 
-        $user = User::findOrFail($id);
+        $user = $pengguna;
 
         $request->validate([
             'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:3072',
@@ -284,11 +284,11 @@ class PenggunaController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE DATA DIRI ==================-->
-    public function updatediri(Request $request, $id)
+    public function updatediri(Request $request, User $pengguna)
     {
-        $this->pastikanBoleh($id);
+        $this->pastikanBoleh($pengguna->getKey());
 
-        $user = User::findOrFail($id);
+        $user = $pengguna;
 
         // Validate input data
         try {
@@ -341,11 +341,11 @@ class PenggunaController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE DATA DIRI PENGGUNA ==================-->
-    public function update(Request $request, $id)
+    public function update(Request $request, User $pengguna)
     {
-        $this->pastikanBoleh($id);
+        $this->pastikanBoleh($pengguna->getKey());
 
-        $user = User::findOrFail($id);
+        $user = $pengguna;
 
         $request->validate([
             'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
@@ -382,12 +382,12 @@ class PenggunaController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== VERIFIKASI EMAIL ==================-->
-    public function verifyEmail($id)
+    public function verifyEmail(User $pengguna)
     {
         // Menandai email terverifikasi tanpa bukti apa pun: hanya pengelola.
         $this->pastikanPengelola();
 
-        $user = User::findOrFail($id);
+        $user = $pengguna;
         $user->email_verified_at = now(); // Mark email as verified
         $user->status = 'active';
         $user->save();

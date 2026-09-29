@@ -45,7 +45,7 @@ class WewenangAkunTest extends TestCase
         $pengguna = $this->buatPengguna();
 
         $this->actingAs($pengguna)
-            ->post(route('account.pengguna.update', $pengguna->getKey()), [
+            ->post(route('account.pengguna.update', $pengguna), [
                 'peran' => 'administrator',
                 'status' => 'active',
             ])
@@ -60,7 +60,7 @@ class WewenangAkunTest extends TestCase
         $korban = $this->buatPengguna();
 
         $this->actingAs($pengguna)
-            ->post(route('account.pengguna.update.datadiri', $korban->getKey()), [
+            ->post(route('account.pengguna.update.datadiri', $korban), [
                 'email' => 'pindah' . uniqid() . '@contoh.test',
             ])
             ->assertForbidden();
@@ -88,7 +88,7 @@ class WewenangAkunTest extends TestCase
         $belum->forceFill(['email_verified_at' => null])->save();
 
         $this->actingAs($pengguna)
-            ->post(route('account.pengguna.update.vertifikasiemail', $belum->getKey()))
+            ->post(route('account.pengguna.update.vertifikasiemail', $belum))
             ->assertForbidden();
 
         $this->assertNull($belum->refresh()->email_verified_at);
@@ -117,7 +117,7 @@ class WewenangAkunTest extends TestCase
         $anggota = $this->buatPengguna('karyawan');
 
         $this->actingAs($manajer)
-            ->post(route('account.pengguna.update', $anggota->getKey()), ['peran' => 'administrator'])
+            ->post(route('account.pengguna.update', $anggota), ['peran' => 'administrator'])
             ->assertRedirect();
 
         $this->assertSame('administrator', $anggota->refresh()->peran);
@@ -129,7 +129,7 @@ class WewenangAkunTest extends TestCase
         $emailBaru = 'baru' . uniqid() . '@contoh.test';
 
         $this->actingAs($pengguna)
-            ->post(route('account.pengguna.update.datadiri', $pengguna->getKey()), [
+            ->post(route('account.pengguna.update.datadiri', $pengguna), [
                 'email' => $emailBaru,
             ])
             ->assertSessionHas('errorsandiemail');
@@ -137,7 +137,7 @@ class WewenangAkunTest extends TestCase
         $this->assertNotSame($emailBaru, $pengguna->refresh()->email);
 
         $this->actingAs($pengguna)
-            ->post(route('account.pengguna.update.datadiri', $pengguna->getKey()), [
+            ->post(route('account.pengguna.update.datadiri', $pengguna), [
                 'email' => $emailBaru,
                 'kata_sandi_email' => self::SANDI,
             ]);

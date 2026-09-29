@@ -186,7 +186,7 @@ Update Data Karyawan | MIS
                             {{ strtoupper($user->jobdesk) }}
                         </span>
 
-                        <form action="{{ route('account.pengguna.update.updatePhoto', $user->id) }}" method="POST" enctype="multipart/form-data" class="mt-2 text-left">
+                        <form action="{{ route('account.pengguna.update.updatePhoto', $user) }}" method="POST" enctype="multipart/form-data" class="mt-2 text-left">
                             @csrf
                             <div class="form-group mb-3">
                                 <label>Ganti Foto</label>
@@ -238,7 +238,7 @@ Update Data Karyawan | MIS
                     <div class="custom-popup-content">
                         <span class="custom-popup-close" id="customPopupCloseEmail">&times;</span>
                         <h5 class="font-weight-800 mb-4 text-primary">Update Email</h5>
-                        <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                        <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                             @csrf
                             <div class="form-group mb-4">
                                 <label>Masukkan Email Terbaru</label>
@@ -254,7 +254,7 @@ Update Data Karyawan | MIS
                     <div class="custom-popup-content">
                         <span class="custom-popup-close" id="customPopupCloseJobdesk">&times;</span>
                         <h5 class="font-weight-800 mb-4 text-primary">Update Posisi / Jabatan</h5>
-                        <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                        <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                             @csrf
                             <div class="form-group mb-4">
                                 <label>Masukkan Posisi / Jabatan Anda</label>
@@ -276,7 +276,7 @@ Update Data Karyawan | MIS
                     <div class="custom-popup-content">
                         <span class="custom-popup-close" id="customPopupCloseTelp">&times;</span>
                         <h5 class="font-weight-800 mb-4 text-primary">Update No. Telp</h5>
-                        <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                        <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                             @csrf
                             <div class="form-group mb-4">
                                 <label>Masukkan Nomor WhatsApp Baru</label>
@@ -337,7 +337,7 @@ Update Data Karyawan | MIS
                             </div>
                             @endif
 
-                            <form id="verification-form" action="{{ route('account.pengguna.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                            <form id="verification-form" action="{{ route('account.pengguna.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
 
                                 <div class="mb-4">
@@ -498,7 +498,7 @@ Update Data Karyawan | MIS
                     </div>
                 </div>
 
-                <form id="verify-email-form" action="{{ route('account.pengguna.update.vertifikasiemail', $user->id) }}" method="POST" style="display:none;">
+                <form id="verify-email-form" action="{{ route('account.pengguna.update.vertifikasiemail', $user) }}" method="POST" style="display:none;">
                     @csrf
                 </form>
 
