@@ -11,7 +11,7 @@
 @push('gaya')
 <style>
     /*
-     * Sekali lagi memakai bahasa rupa bersama: .mis-kartu, .mis-medali,
+     * Sekali lagi memakai bahasa rupa bersama: .mis-bagian, .mis-medali,
      * .mis-pil, .mis-tombol. Yang ditulis di sini hanya yang khas layar ini.
      */
 
@@ -34,6 +34,38 @@
         border-radius: 28px;
         border: 3px solid #fff;
         box-shadow: 0 10px 24px -14px rgba(15, 23, 42, .5);
+    }
+
+    /*
+     * Keadaan kosong yang ringkas.
+     *
+     * .mis-kosong bawaan dirancang untuk layar yang SELURUHNYA kosong, jadi
+     * bantalannya lebar. Di dalam kartu sekunder seperti Riwayat pesanan dan
+     * Jejak perubahan — yang memang kosong pada sebagian besar pelanggan — ia
+     * memakan sekitar 400px untuk menyampaikan satu kalimat.
+     */
+    .pel-kosong-ringkas {
+        padding: 18px 12px;
+    }
+
+    .pel-kosong-ringkas .mis-kosong-ikon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 8px;
+    }
+
+    .pel-kosong-ringkas .mis-kosong-ikon > .fas {
+        font-size: 1rem !important;
+    }
+
+    .pel-kosong-ringkas .mis-kosong-judul {
+        font-size: .86rem;
+    }
+
+    .pel-kosong-ringkas .mis-kosong-teks {
+        margin-top: 2px;
+        line-height: 1.45;
+        font-size: .78rem;
     }
 
     /* ---------------------------------------------- daftar berbaris */
@@ -272,7 +304,7 @@
         <div class="pel-tata">
 
             {{-- ============================================ kolom kiri --}}
-            <aside class="mis-kartu pel-identitas">
+            <aside class="mis-bagian pel-identitas">
                 <div class="pel-identitas-avatar">
                     @include('partials.avatar', ['orang' => $user, 'ukuran' => 104])
                 </div>
@@ -317,7 +349,7 @@
             <div>
 
                 {{-- ------------------------------------- data akun --}}
-                <section class="mis-kartu pel-bagian">
+                <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-id-card"></i></span>
                         <h2 class="pel-kepala-judul">Data akun</h2>
@@ -373,7 +405,7 @@
                 </section>
 
                 {{-- --------------------------------------- kontak --}}
-                <section class="mis-kartu pel-bagian">
+                <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-address-book"></i></span>
                         <h2 class="pel-kepala-judul">Kontak</h2>
@@ -430,7 +462,7 @@
                 </section>
 
                 {{-- ------------------------------ riwayat pesanan --}}
-                <section class="mis-kartu pel-bagian">
+                <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                         <h2 class="pel-kepala-judul">Riwayat pesanan</h2>
@@ -438,7 +470,7 @@
                     </div>
 
                     @if ($pesanan->isEmpty())
-                        <div class="mis-kosong">
+                        <div class="mis-kosong pel-kosong-ringkas">
                             <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                             <p class="mis-kosong-judul">Belum ada pesanan</p>
                             <p class="mis-kosong-teks">Pesanannya muncul di sini setelah ia memesan layanan.</p>
@@ -481,7 +513,7 @@
                 </section>
 
                 {{-- ------------------------------ jejak perubahan --}}
-                <section class="mis-kartu pel-bagian">
+                <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
                         <h2 class="pel-kepala-judul">Jejak perubahan</h2>
@@ -489,7 +521,7 @@
                     </div>
 
                     @if ($jejak->isEmpty())
-                        <div class="mis-kosong">
+                        <div class="mis-kosong pel-kosong-ringkas">
                             <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
                             <p class="mis-kosong-judul">Belum ada catatan</p>
                             <p class="mis-kosong-teks">Perubahan pada akun ini akan tercatat di sini.</p>
