@@ -22,7 +22,7 @@ Clinik Scopus Data Promo | MIS
           <span id="clearSearch" style="display:none;">✕</span>
         </div>
 
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <a href="{{ route('account.Clinik-Scopus-Promo.create') }}" class="btn-modern btn-gradient text-white btn-create-animate">
           <i class="fas fa-plus-circle"></i> Tambah Data
         </a>

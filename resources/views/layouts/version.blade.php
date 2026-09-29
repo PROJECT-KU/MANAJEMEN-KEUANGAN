@@ -145,7 +145,7 @@ $agent = new Agent();
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
 {{-- ================= MOBILE MENU ================== --}}
-@if (Auth::user()->level === 'user')
+@if (Auth::user()->adalahPelanggan())
 <div class="mobile-bottom-nav">
   <a href="{{ route('account.dashboard.index') }}" class="{{ Request::routeIs('account.dashboard.index') ? 'active' : '' }}">
     <i class="fa-solid fa-house"></i><span>Dashboard</span>
@@ -170,7 +170,7 @@ $agent = new Agent();
   </a>
 </div>
 
-@elseif(Auth::user()->level !== 'user')
+@elseif(Auth::user()->adalahOrangDalam())
 <div class="mobile-bottom-nav">
   <a href="{{ route('account.dashboard.index') }}" class="{{ Request::routeIs('account.dashboard.index') ? 'active' : '' }}">
     <i class="fa-solid fa-house"></i><span>Dashboard</span>

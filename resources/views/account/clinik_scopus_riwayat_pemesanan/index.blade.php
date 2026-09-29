@@ -603,7 +603,7 @@ Clinik Scopus Riwayat Pemesanan | MIS
                 <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.detail', $item->id) }}" class="btn-modern btn-edit" style="display: inline-flex;">
                   <i class="fa fa-clipboard-list"></i>Detail
                 </a>
-                @if (Auth::user()->level === 'manager')
+                @if (Auth::user()->adalahAdministrator())
                 <button onclick="Delete('{{ $item->id  }}')" type="button" class="btn-modern btn-delete" style="display: inline-flex;">
                   <i class="fas fa-trash"></i>
                 </button>

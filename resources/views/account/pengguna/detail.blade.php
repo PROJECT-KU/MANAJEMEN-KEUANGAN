@@ -196,7 +196,7 @@ Detail Karyawan | MIS
                   <strong><i class="fas fa-envelope-open mr-1"></i> Email</strong>
                   <p class="text-muted">
                     {{ $user->email }}
-                    @if (Auth::user()->level === 'manager' || Auth::user()->level === 'admin')
+                    @if (Auth::user()->adalahAdministrator())
                     <button class="btn btn-sm btn-warning float-right" id="openPopupButtonEmail">
                       <i class="fas fa-pencil-alt"></i>
                     </button>
@@ -399,11 +399,11 @@ Detail Karyawan | MIS
                             <div class="col-md-6">
                               <label>Role Akun</label>
                               <select class="form-control" id="level" name="level">
-                                <option value="ceo" {{ $user->level == 'ceo' ? 'selected' : '' }}>CEO</option>
-                                <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager</option>
-                                <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff</option>
-                                <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
-                                <option value="trainer" {{ $user->level == 'trainer' ? 'selected' : '' }}>Trainer</option>
+                                {{-- Daftar ini JABATAN, bukan peran: isinya posisi di
+                                     perusahaan. Hak aksesnya ditentukan kolom peran. --}}
+                                @foreach (['ceo' => 'CEO', 'manager' => 'Manager', 'staff' => 'Staff', 'karyawan' => 'Karyawan', 'trainer' => 'Trainer'] as $nilai => $label)
+                                  <option value="{{ $nilai }}" {{ $user->level === $nilai ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
                               </select>
                             </div>
                             <div class="col-md-6">

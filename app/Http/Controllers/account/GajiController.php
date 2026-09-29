@@ -145,7 +145,7 @@ class GajiController extends Controller
     }
 
     $totalGaji = 0;
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
 
       // ===== TOTAL GAJI 3 PERIODE =====
 
@@ -189,7 +189,7 @@ class GajiController extends Controller
         ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
         ->orderBy('gaji.created_at', 'DESC')
         ->paginate(20);
-    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+    } else if ($user->adalahKaryawan()) {
 
       // ===== TOTAL GAJI 3 PERIODE (KHUSUS USER LOGIN) =====
 
@@ -282,7 +282,7 @@ class GajiController extends Controller
     $queryStats = DB::table('gaji')
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
 
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $queryStats->where('users.company', $user->company);
     } else {
       $queryStats->where('gaji.user_id', $user->id);
@@ -335,7 +335,7 @@ class GajiController extends Controller
     $baseQuery->whereBetween('gaji.tanggal', [$from, $to]);
 
     // 4) Filter berdasarkan level user
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $baseQuery->where('users.company', $user->company);
     } else {
       $baseQuery->where('gaji.user_id', $user->id);
@@ -365,7 +365,7 @@ class GajiController extends Controller
 
     // 8) Data pendukung lain
     $presensiExist = false;
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $presensiExist = Presensi::whereNotNull('status')
         ->whereBetween('created_at', [$from, $to])
         ->exists();
@@ -399,7 +399,7 @@ class GajiController extends Controller
     // =========================================================================
     $queryStats = DB::table('gaji')->leftJoin('users', 'gaji.user_id', '=', 'users.id');
 
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $queryStats->where('users.company', $user->company);
     } else {
       $queryStats->where('gaji.user_id', $user->id);
@@ -444,7 +444,7 @@ class GajiController extends Controller
     }
 
     // Filter Role User
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $gajiQuery->where('users.company', $user->company);
     } else {
       $gajiQuery->where('gaji.user_id', $user->id);
@@ -477,7 +477,7 @@ class GajiController extends Controller
 
     // Cek Presensi
     $presensiExist = false;
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       if (!empty($startDate) && !empty($endDate)) {
         $presensiExist = Presensi::whereNotNull('status')
           ->whereBetween('created_at', [$from, $to])
@@ -507,7 +507,7 @@ class GajiController extends Controller
   {
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'admin') {
+    if ($user->adalahAdministrator()) {
       // $users = User::where('company', $user->company)
       //   ->select('id', 'full_name', 'norek', 'bank', 'telp')
       //   ->get();
@@ -1336,7 +1336,7 @@ class GajiController extends Controller
       ->leftJoin('users', 'gaji.user_id', '=', 'users.id');
 
     // Filter role
-    if (in_array($user->level, ['manager', 'staff', 'ceo'])) {
+    if ($user->adalahAdministrator()) {
       $gajiQuery->where('users.company', $user->company);
     } else {
       $gajiQuery->where('gaji.user_id', $user->id);

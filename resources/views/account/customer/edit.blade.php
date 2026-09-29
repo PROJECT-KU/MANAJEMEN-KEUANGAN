@@ -267,12 +267,10 @@ Update Data Customer | MIS
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label>Level Sistem </label>
-                                        <select class="form-control-modern" name="level">
-                                            <option value="">-- Pilih Level --</option>
-                                            <option value="manager" {{ $user->level == 'manager' ? 'selected' : '' }}>Manager Sistem</option>
-                                            <option value="karyawan" {{ $user->level == 'karyawan' ? 'selected' : '' }}>Karyawan Sistem</option>
-                                            <option value="staff" {{ $user->level == 'staff' ? 'selected' : '' }}>Staff Sistem</option>
-                                            <option value="user" {{ $user->level == 'user' ? 'selected' : '' }}>User Sistem</option>
+                                        <select class="form-control-modern" name="peran">
+                                            <option value="administrator" {{ $user->adalahAdministrator() ? 'selected' : '' }}>Administrator</option>
+                                            <option value="karyawan" {{ $user->adalahKaryawan() ? 'selected' : '' }}>Karyawan</option>
+                                            <option value="user" {{ $user->adalahPelanggan() ? 'selected' : '' }}>User</option>
                                         </select>
                                     </div>
                                 </div>

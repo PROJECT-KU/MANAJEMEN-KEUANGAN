@@ -101,7 +101,7 @@ class AppServiceProvider extends ServiceProvider
             return $kosong;
         }
 
-        $pengelola = in_array($user->level, ['manager', 'ceo'], true);
+        $pengelola = $user->adalahAdministrator();
 
         // --- perjalanan dinas yang menunggu
         $countAjukan = DB::table('perjalanan_dinas')
@@ -117,7 +117,7 @@ class AppServiceProvider extends ServiceProvider
         // --- tugas yang ditugaskan
         $tugas = DB::table('todolist')->where('status', 'Assign Task');
 
-        if ($user->level !== 'manager') {
+        if (! $user->adalahAdministrator()) {
             $tugas->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
                     ->orWhere('user_id_kedua', $user->id);
@@ -128,9 +128,9 @@ class AppServiceProvider extends ServiceProvider
         $pesanan = DB::table('clinikscopus_pemesanan')
             ->selectRaw("SUM(status = 'pending') as menunggu, SUM(status = 'paid') as terbayar");
 
-        if ($user->level === 'user' && $user->jenis === 'perorangan') {
+        if ($user->adalahPelanggan() && $user->jenis === 'perorangan') {
             $pesanan->where('customer_id', $user->id);
-        } elseif ($user->level === 'karyawan') {
+        } elseif ($user->adalahKaryawan()) {
             $pesanan->where('trainer_id', $user->id)
                 ->whereExists(function ($q) use ($user) {
                     $q->select(DB::raw(1))

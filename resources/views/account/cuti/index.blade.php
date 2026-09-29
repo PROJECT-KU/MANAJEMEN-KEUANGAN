@@ -115,7 +115,7 @@ Data Cuti Karyawan | MIS
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            @if (Auth::user()->level == 'karyawan')
+                                            @if (Auth::user()->adalahKaryawan())
                                             @if($hasil->status == 'diajukan')
                                             <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                                                 <i class="fa fa-eye" style="margin-top:6px"></i>

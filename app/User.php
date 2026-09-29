@@ -26,6 +26,7 @@ class User extends Authenticatable
         'email',
         'password',
         'level',
+        'peran',
         'jenis',
         'telp',
         'company',
@@ -44,6 +45,63 @@ class User extends Authenticatable
         'code_verified_mail',
         'code_verified_mail_sent_at',
     ];
+
+    /**
+     * Tiga peran yang dikenal sistem.
+     *
+     * Peran menjawab "boleh membuka apa", jabatan menjawab "posisinya apa".
+     * Keduanya dulu ditumpuk di kolom `level`, sehingga menambah jabatan baru
+     * berarti menyentuh kontrol akses. Sekarang jabatan tinggal di `jobdesk`
+     * dan tidak berpengaruh sama sekali terhadap hak akses.
+     */
+    public const PERAN_ADMINISTRATOR = 'administrator';
+
+    public const PERAN_KARYAWAN = 'karyawan';
+
+    public const PERAN_PELANGGAN = 'user';
+
+    /** Urutan sengaja dari yang paling berhak ke yang paling sedikit. */
+    public const SEMUA_PERAN = [
+        self::PERAN_ADMINISTRATOR,
+        self::PERAN_KARYAWAN,
+        self::PERAN_PELANGGAN,
+    ];
+
+    /** Pengelola: boleh membuka pengaturan, keuangan, dan data orang lain. */
+    public function adalahAdministrator(): bool
+    {
+        return $this->peran === self::PERAN_ADMINISTRATOR;
+    }
+
+    /** Pegawai: boleh membuka pekerjaannya sendiri, bukan data orang lain. */
+    public function adalahKaryawan(): bool
+    {
+        return $this->peran === self::PERAN_KARYAWAN;
+    }
+
+    /** Pelanggan dari luar; hanya layanan yang dipesannya sendiri. */
+    public function adalahPelanggan(): bool
+    {
+        return $this->peran === self::PERAN_PELANGGAN;
+    }
+
+    /**
+     * Orang dalam — administrator maupun karyawan.
+     *
+     * Ditulis sebagai "bukan pelanggan", bukan "administrator atau karyawan":
+     * kalau nanti ada peran internal baru, ia otomatis ikut terhitung di sini
+     * tanpa perlu menyisir ulang seluruh pemeriksaan.
+     */
+    public function adalahOrangDalam(): bool
+    {
+        return $this->peran !== self::PERAN_PELANGGAN;
+    }
+
+    /** Cocok dengan salah satu peran yang disebut. */
+    public function punyaPeran(string ...$peran): bool
+    {
+        return in_array($this->peran, $peran, true);
+    }
 
     /**
      * The attributes that should be hidden for arrays.

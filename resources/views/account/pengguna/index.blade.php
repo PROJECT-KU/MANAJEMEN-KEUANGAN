@@ -323,7 +323,7 @@ Data Karyawan | MIS
           </button>
         </div>
 
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <a href="{{ route('account.pengguna.create') }}" class="btn-modern shadow-sm font-weight-bold btn-create-animate"
           style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
           <i class="fas fa-plus-circle" style="font-size: 18px;"></i>

@@ -55,7 +55,7 @@ class CutiController extends Controller
             ->leftJoin('users', 'cuti.user_id', '=', 'users.id')
             ->orderBy('cuti.created_at', 'DESC');
 
-        if ($user->level == 'manager') {
+        if ($user->adalahAdministrator()) {
             $Ajukan->where('cuti.status', 'diajukan')
                 ->where('users.company', $user->company);
         } else {
@@ -74,7 +74,7 @@ class CutiController extends Controller
         $countAjukan = DB::table('cuti')
             ->leftJoin('users', 'cuti.user_id', '=', 'users.id') // Join the users table
             ->where('cuti.status', 'diajukan')
-            ->when($user->level == 'manager', function ($query) use ($user) {
+            ->when($user->adalahAdministrator(), function ($query) use ($user) {
                 return $query->where('users.company', $user->company);
             }, function ($query) use ($user) {
                 return $query->where('cuti.user_id', $user->id);
@@ -88,7 +88,7 @@ class CutiController extends Controller
             ->where('cuti.status', 'diterima')
             ->orderBy('cuti.created_at', 'DESC');
 
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $Diterima->where('users.company', $user->company);
         } else {
             $Diterima->where('cuti.user_id', $user->id);
@@ -107,7 +107,7 @@ class CutiController extends Controller
             ->where('cuti.status', 'ditolak')
             ->orderBy('cuti.created_at', 'DESC');
 
-        if ($user->level == 'manager') {
+        if ($user->adalahAdministrator()) {
             $Ditolak->where('users.company', $user->company);
         } else {
             $Ditolak->where('cuti.user_id', $user->id);
@@ -137,7 +137,7 @@ class CutiController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
 
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $perjalanan_dinas = DB::table('perjalanan_dinas')
                 ->select('perjalanan_dinas.id', 'perjalanan_dinas.user_id', 'perjalanan_dinas.token', 'perjalanan_dinas.id_transaksi', 'perjalanan_dinas.status', 'perjalanan_dinas.tempat', 'perjalanan_dinas.camp', 'perjalanan_dinas.tanggal_mulai', 'perjalanan_dinas.tanggal_akhir', 'perjalanan_dinas.total_uang_masuk', 'perjalanan_dinas.total_uang_keluar', 'perjalanan_dinas.sisa_saldo', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
                 ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
@@ -178,7 +178,7 @@ class CutiController extends Controller
                     ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('perjalanan_dinas.created_at', 'DESC');
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $Ajukan->where('users.company', $user->company);
         } else {
             $Ajukan->where('perjalanan_dinas.user_id', $user->id);
@@ -197,7 +197,7 @@ class CutiController extends Controller
                     ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('perjalanan_dinas.created_at', 'DESC');
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $Diterima->where('users.company', $user->company);
         } else {
             $Diterima->where('perjalanan_dinas.user_id', $user->id);
@@ -216,7 +216,7 @@ class CutiController extends Controller
                     ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
             })
             ->orderBy('perjalanan_dinas.created_at', 'DESC');
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $Ditolak->where('users.company', $user->company);
         } else {
             $Ditolak->where('perjalanan_dinas.user_id', $user->id);

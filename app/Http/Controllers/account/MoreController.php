@@ -31,7 +31,7 @@ class MoreController extends Controller
         $user = Auth::user();
         $categories = [];
 
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $uang_masuk_bulan_ini  = DB::table('debit')
                 ->selectRaw('sum(nominal) as nominal')
                 ->whereYear('debit_date', Carbon::now()->year)
@@ -229,7 +229,7 @@ class MoreController extends Controller
 
         //statistik pemasukan perkategori
         if (
-            $user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo'
+            $user->adalahAdministrator()
         ) {
             $debit = DB::table('debit')
                 ->select('categories_debit.name', DB::raw('SUM(debit.nominal) as total_nominal'))
@@ -263,7 +263,7 @@ class MoreController extends Controller
         //end
 
         //statistik pengeluaran perkategori
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
             $credit = DB::table('credit')
                 ->select('categories_credit.name', DB::raw('SUM(credit.nominal) as total_nominal'))
@@ -297,7 +297,7 @@ class MoreController extends Controller
         //end
 
         // user baru
-        if ($user->level == 'manager') {
+        if ($user->adalahAdministrator()) {
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
@@ -362,7 +362,7 @@ class MoreController extends Controller
         }
 
         $totalGaji = 0;
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
 
             $totalGaji = DB::table('gaji')
                 ->selectRaw('SUM(total) as total_gaji')
@@ -377,7 +377,7 @@ class MoreController extends Controller
                 ->whereBetween('gaji.tanggal', [$currentMonth, $nextMonth])
                 ->orderBy('gaji.created_at', 'DESC')
                 ->paginate(20);
-        } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+        } else if ($user->adalahKaryawan()) {
 
             $totalGaji = DB::table('gaji')
                 ->selectRaw('SUM(total) as total_gaji')

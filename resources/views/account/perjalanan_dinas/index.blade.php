@@ -56,7 +56,7 @@ Data Perjalanan Dinas | MIS
 
         <!--================== ALERT JIKA DATA ADA YANG DI AJUKAN ==================-->
         <!-- @if ($DatasAjukan->where('status', 'ajukan')->isNotEmpty())
-        @if (Auth::user()->level == 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <div class="alert alert-danger" id="alertajukan" role="alert" style="text-align: center; padding: 15px; width: 100%; box-sizing: border-box; border-radius: 10px;">
           <b style="font-size: 20px;">Terdapat Pengajuan Data Perjalanan Dinas</b>
           <br>Silahkan periksa dan ambil tindakan yang diperlukan.<br><br>
@@ -189,7 +189,7 @@ Data Perjalanan Dinas | MIS
                       @endif
                     </td>
                     <td class="text-center">
-                      @if (Auth::user()->level == 'karyawan')
+                      @if (Auth::user()->adalahKaryawan())
                       @if($hasil->status == 'ajukan')
                       <a style="margin-right: 5px; margin-bottom:5px; height: 30px; width: 30px;" href="{{ route('account.PerjalananDinas.DetailAjukan', $hasil->id) }}" class="btn btn-sm btn-warning mt-2">
                         <i class="fa fa-eye" style="margin-top:6px"></i>

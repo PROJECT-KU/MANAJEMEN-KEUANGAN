@@ -17,7 +17,7 @@ Data Laporan Peserta | MIS
             <div class="card">
                 <div class="card-header  text-right">
                     <h4><i class="fas fa-filter"></i> FILTER</h4>
-                    <!-- @if (Auth::user()->level == 'karyawan')
+                    <!-- @if (Auth::user()->adalahKaryawan())
             @else
             <div class="card-header-action">
               <a href="{{ route('account.laporan_gaji.download-pdf') }}" id="generate-pdf-btn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</a>
@@ -119,7 +119,7 @@ Data Laporan Peserta | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->afiliasi }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
-                                        @if ( Auth::user()->level == 'ceo')
+                                        @if ( Auth::user()->adalahAdministrator())
                                         <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
                                                 <i class="fa fa-eye"></i>
                                             </a>

@@ -82,7 +82,7 @@ Dashboard | MIS
                             <a href="{{ route('account.presensi.index') }}"><i class="fas fa-user-clock" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: -2px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-left: -5px;">Presensi</span>
                         </div>
-                        @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                        @if (Auth::user()->adalahAdministrator())
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #00FF00, #008000, #7FFF00, #6B8E23); text-align: center;">
                             <a href="{{ route('account.pengguna.index') }}"><i class="fas fa-user" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px; margin-left: 2px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-left: -10px;">Pengguna</span>
@@ -103,7 +103,7 @@ Dashboard | MIS
                         @endif
                     </div>
 
-                    @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                    @if (Auth::user()->adalahAdministrator())
                     <hr>
                     <span style="margin-left: 20px; font-size:20px; font-weight: bold;">Peserta</span>
                     <div id="carousel" class="mb-5">
@@ -122,7 +122,7 @@ Dashboard | MIS
                     </div>
                     @endif
 
-                    @if (Auth::user()->level === 'admin' || Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                    @if (Auth::user()->adalahAdministrator())
                     <hr>
                     <span style="margin-left: 20px; font-size:20px; font-weight: bold;">Artikel</span>
                     <div id="carousel" class="mb-5">
