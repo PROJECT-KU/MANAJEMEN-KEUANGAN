@@ -416,10 +416,20 @@
                 <p class="pel-identitas-akun">&#64;{{ $user->username }}</p>
 
                 <div class="pel-lencana-deret">
+                    {{-- Titik berdenyut, bukan ikon centang: keadaannya terbaca
+                         sekilas tanpa membaca tulisannya dulu. Denyutnya hanya
+                         untuk akun yang aktif — keadaan yang perlu ditindak
+                         dibiarkan diam supaya tidak terasa seperti alarm. --}}
                     @if ($user->status === 'active')
-                        <span class="mis-pil mis-pil-hijau"><i class="fas fa-check"></i> Akun aktif</span>
+                        <span class="mis-lencana mis-lencana-hijau">
+                            <span class="mis-lencana-titik berdenyut" aria-hidden="true"></span>
+                            Akun aktif
+                        </span>
                     @else
-                        <span class="mis-pil mis-pil-abu"><i class="fas fa-pause"></i> Nonaktif</span>
+                        <span class="mis-lencana mis-lencana-abu">
+                            <span class="mis-lencana-titik" aria-hidden="true"></span>
+                            Akun nonaktif
+                        </span>
                     @endif
 
                     {{-- Keadaan verifikasi email tidak diulang sebagai pil:
@@ -619,6 +629,25 @@
                                     </div>
                                 </div>
                                 <p class="mis-bantuan">Diubah lewat halaman pengelolaan pengguna.</p>
+                            </div>
+
+                            {{-- Sel ketiga baris kedua. Diisi tanggal perubahan
+                                 terakhir, bukan diulang dari kolom kiri: ia
+                                 satu-satunya keterangan di kartu ini yang belum
+                                 ada di mana pun, dan sejalan dengan tab Jejak di
+                                 sebelahnya. --}}
+                            <div class="mis-isian">
+                                <label class="mis-label"><i class="fas fa-lock"></i> Terakhir diubah</label>
+                                <div class="mis-statis">
+                                    <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-clock"></i></span>
+                                    <div>
+                                        <p class="mis-statis-label">Perubahan terakhir</p>
+                                        <p class="mis-statis-nilai">
+                                            {{ optional($user->updated_at)->locale('id')->translatedFormat('d M Y, H:i') ?: 'Belum pernah' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="mis-bantuan">Rinciannya ada di tab Jejak.</p>
                             </div>
                         </div>
 
