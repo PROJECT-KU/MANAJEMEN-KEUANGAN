@@ -393,6 +393,27 @@
             padding-top: 8px;
             padding-left: 39px;
             border-top: 1px dashed var(--mis-garis);
+
+            /*
+             * Boleh pecah dua baris.
+             *
+             * .mis-pil berwatak white-space: nowrap, jadi lencana keadaan tidak
+             * pernah menyusut. Terukur di 320px: nilai (95px) + jarak + lencana
+             * terpanjang (158px) menuntut 261px, sementara barisnya cuma
+             * menyediakan 230px — lencananya meluber 74px keluar kartu. Tanpa
+             * wrap tidak ada jalan keluar: yang tersisa hanya memotong
+             * tulisannya, dan status yang terpotong justru yang paling perlu
+             * dibaca utuh.
+             */
+            flex-wrap: wrap;
+        }
+
+        /* Saat lencananya turun sendirian ke baris kedua, ia tetap rata kanan —
+           lurus dengan nilai di atasnya, bukan menggantung di kiri. Pada satu
+           baris aturan ini tidak berpengaruh: space-between sudah mendorongnya
+           ke kanan. */
+        .pel-pesanan-kanan > .mis-pil {
+            margin-left: auto;
         }
 
         /* Jorokan 39px = ubin 27px + jarak 11px, jadi garis dan nilainya lurus
@@ -806,7 +827,13 @@
                                         @if ($p['nilai'] > 0)
                                             <p class="pel-pesanan-nilai">Rp {{ number_format($p['nilai'], 0, ',', '.') }}</p>
                                         @endif
-                                        <span class="mis-pil mis-pil-abu">{{ \Illuminate\Support\Str::title($p['status']) }}</span>
+                                        {{-- Warna, label, dan ikonnya datang dari
+                                             PesananPelanggan::rupaStatus(): tiga layanan
+                                             memakai kosakata berbeda, jadi pemetaannya
+                                             ditaruh satu tempat, bukan disebar di Blade. --}}
+                                        <span class="mis-pil mis-pil-{{ $p['rupa']['warna'] }}">
+                                            <i class="fas {{ $p['rupa']['ikon'] }}"></i> {{ $p['rupa']['label'] }}
+                                        </span>
                                     </div>
                                 </div>
                             @endforeach

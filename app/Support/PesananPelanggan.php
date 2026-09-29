@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Menyatukan pesanan seorang pelanggan dari beberapa tabel layanan.
@@ -100,6 +101,10 @@ class PesananPelanggan
                     'nomor' => $baris->nomor,
                     'nilai' => (float) $baris->nilai,
                     'status' => (string) $baris->status,
+                    // Rupa status dirakit di sini, bukan di tampilan: tiga
+                    // layanan memakai kosakata yang berbeda, dan memilah-
+                    // milahnya di Blade berarti belasan @if di satu baris.
+                    'rupa' => self::rupaStatus((string) $baris->status),
                     'waktu' => $baris->created_at ? Carbon::parse($baris->created_at) : null,
                     'ikon' => $s['ikon'],
                     'warna' => $s['warna'],
@@ -108,6 +113,110 @@ class PesananPelanggan
         }
 
         return $hasil->sortByDesc(fn ($p) => $p['waktu']?->timestamp ?? 0)->values();
+    }
+
+    /**
+     * Warna, label Indonesia, dan ikon untuk satu nilai status.
+     *
+     * Tiga layanan mencatat statusnya dengan kosakata masing-masing, dan
+     * kolomnya varchar bebas — bukan enum — jadi tidak ada daftar tertutup
+     * yang dijamin basis datanya. Yang sah menurut borang tiap layanan:
+     *
+     *   Clinik Scopus          pending, paid, completed, canceled
+     *   Analisis Bibliometrik  diproses, Pendaftaran Diterima / Ditolak /
+     *                          Dibatalkan / Refund / Reschedule
+     *   Scopus Kafe            menunggu verifikasi, pembayaran diterima,
+     *                          pembayaran ditolak
+     *
+     * Lima belas nilai, dua bahasa, tiga gaya huruf. Sebelum ini semuanya
+     * tampil sebagai satu lencana abu-abu yang sama, sehingga pesanan yang
+     * sudah lunas tidak terbedakan dari yang dibatalkan tanpa membaca
+     * tulisannya satu per satu.
+     *
+     * Empat yang berbahasa Inggris diterjemahkan: ini layar orang dalam yang
+     * belum tentu paham "canceled", dan sisa layarnya berbahasa Indonesia.
+     *
+     * Sesudah daftar di atas ada penebak kata kunci. Ia bukan hiasan: karena
+     * kolomnya varchar, layanan berikutnya bisa menulis nilai baru kapan saja
+     * tanpa migrasi, dan yang belum terdaftar lebih baik jatuh ke warna yang
+     * masuk akal daripada ke abu-abu.
+     *
+     * @return array{label:string, warna:string, ikon:string}
+     */
+    public static function rupaStatus(string $status): array
+    {
+        // Dinormalkan supaya "Pendaftaran Diterima" dan "pendaftaran  diterima"
+        // tidak jadi dua keadaan yang berbeda.
+        $kunci = mb_strtolower(trim(preg_replace('/\s+/', ' ', $status) ?? ''));
+
+        $daftar = [
+            // selesai / uangnya sudah masuk
+            'completed' => ['Selesai', 'hijau', 'fa-check-circle'],
+            'paid' => ['Sudah dibayar', 'hijau', 'fa-check-circle'],
+            'pendaftaran diterima' => ['Pendaftaran diterima', 'hijau', 'fa-check-circle'],
+            'pembayaran diterima' => ['Pembayaran diterima', 'hijau', 'fa-check-circle'],
+
+            // masih menunggu tindakan orang
+            // "Belum dibayar" dan bukan "Menunggu pembayaran": lebih pendek
+            // 42px pada lebar ponsel tersempit, dan kalimatnya lebih lugas
+            // untuk yang tidak biasa membaca istilah sistem.
+            'pending' => ['Belum dibayar', 'kuning', 'fa-clock'],
+            'menunggu verifikasi' => ['Menunggu verifikasi', 'kuning', 'fa-clock'],
+
+            // sedang berjalan
+            'diproses' => ['Diproses', 'biru', 'fa-spinner'],
+            'pendaftaran reschedule' => ['Dijadwalkan ulang', 'biru', 'fa-calendar-alt'],
+
+            // tidak jadi
+            'canceled' => ['Dibatalkan', 'merah', 'fa-times-circle'],
+            'cancelled' => ['Dibatalkan', 'merah', 'fa-times-circle'],
+            'pendaftaran dibatalkan' => ['Pendaftaran dibatalkan', 'merah', 'fa-times-circle'],
+            'pendaftaran ditolak' => ['Pendaftaran ditolak', 'merah', 'fa-ban'],
+            'pembayaran ditolak' => ['Pembayaran ditolak', 'merah', 'fa-ban'],
+
+            // uangnya kembali — bukan gagal, tapi juga bukan selesai
+            'pendaftaran refund' => ['Dana dikembalikan', 'ungu', 'fa-undo'],
+        ];
+
+        if (isset($daftar[$kunci])) {
+            [$label, $warna, $ikon] = $daftar[$kunci];
+
+            return ['label' => $label, 'warna' => $warna, 'ikon' => $ikon];
+        }
+
+        /*
+         * Penebak kata kunci, diperiksa berurutan.
+         *
+         * Urutannya penting: "pembayaran ditolak" memuat kata "bayar" DAN
+         * kata "tolak". Yang menggagalkan diperiksa lebih dulu supaya
+         * pesanan yang ditolak tidak tampil hijau.
+         */
+        $tebakan = [
+            ['tolak|batal|gagal|cancel|reject|fail|expired|kedaluwarsa', 'merah', 'fa-times-circle'],
+            ['refund|kembali', 'ungu', 'fa-undo'],
+            ['tunggu|pending|belum', 'kuning', 'fa-clock'],
+            ['proses|jadwal|schedule|kerja', 'biru', 'fa-spinner'],
+            ['terima|selesai|lunas|bayar|paid|complete|sukses|success|verif', 'hijau', 'fa-check-circle'],
+        ];
+
+        foreach ($tebakan as [$pola, $warna, $ikon]) {
+            if (preg_match('/' . $pola . '/', $kunci)) {
+                return [
+                    'label' => Str::title($kunci),
+                    'warna' => $warna,
+                    'ikon' => $ikon,
+                ];
+            }
+        }
+
+        // Benar-benar tidak dikenali. Abu-abu, bukan warna yang menebak-nebak:
+        // lencana hijau pada keadaan yang tidak dipahami lebih menyesatkan
+        // daripada lencana netral.
+        return [
+            'label' => $kunci === '' ? 'Tanpa status' : Str::title($kunci),
+            'warna' => 'abu',
+            'ikon' => 'fa-circle-notch',
+        ];
     }
 
     /**
