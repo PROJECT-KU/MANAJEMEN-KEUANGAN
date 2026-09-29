@@ -100,7 +100,7 @@ class PeranBukanJabatanTest extends TestCase
         $anggota = $this->buat('karyawan');
 
         $this->actingAs($pengelola)
-            ->post(route('account.pengguna.update', $anggota->getKey()), ['peran' => 'karyawan'])
+            ->post(route('account.pengguna.update', $anggota), ['peran' => 'karyawan'])
             ->assertRedirect();
 
         $this->assertSame('karyawan', $anggota->refresh()->peran);
