@@ -477,11 +477,12 @@
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="pel-tab-pesanan" data-toggle="pill" href="#pel-panel-pesanan"
                             role="tab" aria-controls="pel-panel-pesanan" aria-selected="false">
-                            <i class="fas fa-receipt mis-ikon-jingga" aria-hidden="true"></i>
-                            Pesanan
-                            @if ($pesanan->isNotEmpty())
-                                <span class="mis-pil mis-pil-abu">{{ $pesanan->count() }}</span>
-                            @endif
+                            {{-- Tanpa angka jumlah: ia sudah tertulis dua kali di
+                                 layar yang sama — di ringkasan kolom kiri dan di
+                                 dalam panelnya — dan lencana di dalam tab membuat
+                                 deretnya lebih tinggi daripada deret tab di
+                                 halaman profil. --}}
+                            <i class="fas fa-receipt mis-ikon-jingga" aria-hidden="true"></i> Pesanan
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
