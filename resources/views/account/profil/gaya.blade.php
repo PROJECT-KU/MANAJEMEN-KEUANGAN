@@ -1872,24 +1872,61 @@
             width: 100%;
         }
 
-        /* Lencana keadaan turun ke baris sendiri, rata dengan teksnya —
-           kalau dipaksa tetap di kanan, judulnya terpatah dua baris. */
+        /*
+         * Dua kotak keadaan ini pindah ke kisi di ponsel, bukan flex yang
+         * membungkus.
+         *
+         * Dengan flex-wrap, tiga anaknya dibagi ke baris menurut lebar
+         * masing-masing, dan blok teks yang lebar memaksa DIRINYA turun ke
+         * baris kedua — meninggalkan ubin medali sendirian di baris pertama,
+         * judulnya melayang jauh di bawah ikonnya, dan lencananya menggantung
+         * di baris ketiga. Kisi menetapkan letak tiap anak, jadi medali dan
+         * teks pasti sebaris berapa pun panjang tulisannya.
+         *
+         * minmax(0, 1fr) bukan 1fr: tanpa batas bawah 0, kolom kisi tidak mau
+         * menyusut di bawah lebar min-content anaknya dan kartunya meluber
+         * keluar layar saat tanggalnya panjang.
+         */
+        .pin-keadaan,
+        .pin-perangkat.siap {
+            display: grid;
+            align-items: center;
+            column-gap: 12px;
+            row-gap: 9px;
+        }
+
+        /* Lencananya tetap sebaris, di kolom ketiga — bukan diturunkan ke
+           baris sendiri. Aturan lama menurunkannya dengan alasan judulnya
+           akan terpatah dua baris; diukur di 320, 360 dan 390px judulnya
+           tetap satu baris, dan baris tambahan itu justru menyisakan petak
+           kosong selebar kartu di sebelah lencananya. */
         .pin-keadaan {
-            flex-wrap: wrap;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+        }
+
+        .pin-perangkat.siap {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .pin-keadaan > .mis-medali,
+        .pin-perangkat.siap > .mis-medali {
+            grid-area: 1 / 1;
+        }
+
+        .pin-keadaan > .pin-keadaan-teks,
+        .pin-perangkat.siap > .pin-perangkat-teks {
+            grid-area: 1 / 2;
         }
 
         .pin-keadaan > .prof-lencana {
-            order: 3;
-            margin-left: 48px;
+            grid-area: 1 / 3;
         }
 
-        /* Tombol dan isian melebar penuh: di ponsel tidak ada ruang untuk
-           dua hal berdampingan tanpa salah satunya jadi terlalu sempit. */
-        .pin-perangkat.siap {
-            flex-wrap: wrap;
-        }
-
+        /* Tombol melebar penuh menyeberangi kedua kolom: di ponsel tidak ada
+           ruang untuk teks dan tombol berdampingan tanpa salah satunya jadi
+           terlalu sempit. */
         .pin-perangkat.siap .prof-tombol-halus {
+            grid-area: 2 / 1 / 3 / 3;
             width: 100%;
             margin-left: 0;
         }
@@ -1942,6 +1979,46 @@
            baris lain. */
         .kmn-hasil {
             justify-items: end;
+        }
+    }
+
+    /*
+     * Kapan lencananya harus turun ke baris sendiri bergantung pada ISI-nya,
+     * bukan cuma lebar layar — dan kedua keadaan kartu ini isinya jauh
+     * berbeda panjangnya:
+     *
+     *   aktif       -> "PIN masuk aktif"        + lencana "Aktif"
+     *   belum aktif -> "PIN masuk belum aktif"  + lencana "Belum aktif"
+     *
+     * Keadaan kedua judulnya enam huruf lebih panjang DAN lencananya lebih
+     * lebar, jadi ia kehabisan ruang jauh lebih dulu. Diukur: kartu aktif
+     * masih rapi sampai 360px, kartu belum-aktif sudah terpatah dua baris
+     * di 390px. Karena itu ambangnya dibedakan lewat kelas .nyala yang
+     * memang sudah menandai keadaannya.
+     *
+     * justify-self: start supaya lencananya tetap sepas tulisannya — anak
+     * kisi diblokkan, jadi tanpa itu pilnya melar selebar kolom.
+     */
+    @media (max-width: 575.98px) {
+        .pin-keadaan:not(.nyala) {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .pin-keadaan:not(.nyala) > .prof-lencana {
+            grid-area: 2 / 2;
+            justify-self: start;
+        }
+    }
+
+    /* Kartu yang aktif pun kehabisan ruang di bawah 360px. */
+    @media (max-width: 359.98px) {
+        .pin-keadaan {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .pin-keadaan > .prof-lencana {
+            grid-area: 2 / 2;
+            justify-self: start;
         }
     }
 
