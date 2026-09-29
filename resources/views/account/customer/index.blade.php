@@ -506,7 +506,16 @@ Data Pelanggan | MIS
                             <tr>
                                 <td class="mis-td-utama">
                                     <div class="pel-orang">
-                                        @include('partials.avatar', ['orang' => $orang, 'ukuran' => 38])
+                                        {{-- Lencana hanya untuk yang SUDAH terverifikasi.
+                                             Yang belum sudah disebut apa adanya oleh
+                                             lencana status di kolom sebelah, jadi
+                                             menandainya dua kali di satu baris cuma
+                                             menambah ramai tanpa menambah keterangan. --}}
+                                        @include('partials.avatar', [
+                                            'orang' => $orang,
+                                            'ukuran' => 38,
+                                            'lencana' => (bool) $orang->email_verified_at,
+                                        ])
                                         <div style="min-width: 0;">
                                             <p class="pel-nama">{{ $orang->full_name ?: $orang->username }}</p>
                                             <p class="pel-akun">&#64;{{ $orang->username }}</p>

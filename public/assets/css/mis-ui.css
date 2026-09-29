@@ -253,13 +253,22 @@ body {
     line-height: 0;
 }
 
+/*
+ * Ukurannya mengikuti avatarnya lewat --lencana, tidak dipatok.
+ *
+ * Angka 30px dulu dipilih untuk avatar 96px di halaman rincian. Begitu lencana
+ * yang sama dipasang di daftar, yang avatarnya 38px, lencana 30px itu nyaris
+ * sebesar fotonya sendiri. Nilai bawaan 30px dipertahankan supaya pemanggil
+ * lama tidak berubah sedikit pun; jorokannya ikut dihitung dari ukuran itu,
+ * -0,17 kali, yang pada 30px berarti -5px persis seperti sebelumnya.
+ */
 .mis-foto-lencana {
     position: absolute;
-    right: -5px;
-    bottom: -5px;
+    right: calc(var(--lencana, 30px) * -0.17);
+    bottom: calc(var(--lencana, 30px) * -0.17);
     display: block;
-    width: 30px;
-    height: 30px;
+    width: var(--lencana, 30px);
+    height: var(--lencana, 30px);
     line-height: 0;
     filter: drop-shadow(0 2px 4px rgba(15, 23, 42, .22));
 }
