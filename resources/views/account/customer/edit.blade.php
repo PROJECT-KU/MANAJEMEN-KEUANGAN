@@ -597,6 +597,29 @@
                                     <option value="perusahaan" @selected($user->jenis === 'perusahaan')>Perusahaan</option>
                                 </select>
                             </div>
+
+                            {{--
+                              Peran ditampilkan, bukan diketik.
+
+                              Ia memang tidak boleh diubah dari layar data pelanggan —
+                              menaikkan seseorang jadi karyawan atau administrator itu
+                              urusan pengelolaan pengguna. Ditampilkan begini, alasannya
+                              terbaca langsung; disembunyikan, baris kedua menyisakan
+                              dua sel kosong di samping Jenis akun dan orang tetap tidak
+                              tahu peran akun yang sedang dibukanya. Polanya sama dengan
+                              Nama bank di halaman profil.
+                            --}}
+                            <div class="mis-isian">
+                                <label class="mis-label"><i class="fas fa-lock"></i> Peran</label>
+                                <div class="mis-statis">
+                                    <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-user-shield"></i></span>
+                                    <div>
+                                        <p class="mis-statis-label">Ditetapkan pengelola</p>
+                                        <p class="mis-statis-nilai">{{ \Illuminate\Support\Str::title($user->peran) }}</p>
+                                    </div>
+                                </div>
+                                <p class="mis-bantuan">Diubah lewat halaman pengelolaan pengguna.</p>
+                            </div>
                         </div>
 
                         {{-- Peran TIDAK bisa diubah dari layar ini.
@@ -608,7 +631,7 @@
                         <div class="pel-baris-aksi">
                             <p class="pel-aksi-catatan">
                                 <i class="fas fa-info-circle mis-ikon-ungu"></i>
-                                Peran tidak bisa diubah dari sini; itu urusan pengelolaan pengguna.
+                                Perubahan tercatat di tab Jejak beserta nama Anda.
                             </p>
                             <button type="submit" class="mis-tombol mis-tombol-ungu">
                                 <i class="fas fa-save"></i> Simpan perubahan
