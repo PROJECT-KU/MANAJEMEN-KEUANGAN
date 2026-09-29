@@ -747,7 +747,17 @@
     }
 
     .prof-tab-isi {
-        padding: 0 18px 18px;
+        /*
+         * Badan tab diberi warna dasar lembut, bukan putih.
+         *
+         * Tiap bagian di dalamnya sekarang berupa kartu putih sendiri. Kartu
+         * putih di atas latar putih tidak terbaca sebagai kartu — yang
+         * membuatnya terpisah adalah bedanya dengan latar, bukan bayangannya.
+         * Garis atasnya memisahkan badan dari kepala tab yang tetap putih.
+         */
+        padding: 16px 16px 18px;
+        background: #f4f6fb;
+        border-top: 1px solid var(--mis-garis);
     }
 
     /* Kisi kedua "Nama & kontak" hanya berisi dua isian; auto-fit meniadakan
@@ -764,10 +774,33 @@
 
     /* --------------------------------------------------- bagian isian */
 
+    /*
+     * Tiap bagian berdiri sebagai kartunya sendiri.
+     *
+     * Sebelumnya semua bagian menempel jadi satu kolom panjang yang cuma
+     * dipisah garis putus-putus. Di tab Keamanan itu berarti empat urusan
+     * berbeda — mengeluarkan perangkat lain, daftar sesi, daftar izin PIN,
+     * dan riwayat — mengalir tanpa batas yang jelas, sehingga pembacanya
+     * harus melacak sendiri di mana satu urusan berakhir.
+     */
+    .prof-bagian {
+        padding: 15px 16px;
+        border: 1px solid #e7ecf5;
+        border-radius: 15px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+
+    /* Jarak antar kartu saja; pemisahnya sekarang tepi kartunya sendiri,
+       bukan garis putus-putus. */
     .prof-bagian + .prof-bagian {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px dashed var(--mis-garis);
+        margin-top: 12px;
+    }
+
+    /* Kepala bagian terakhir di dalam kartu tidak perlu jarak bawah lagi —
+       jarak itu dulu memisahkannya dari bagian berikutnya. */
+    .prof-bagian > .prof-bagian-kepala:last-child {
+        margin-bottom: 0;
     }
 
     /*
@@ -986,9 +1019,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-top: 18px;
-        padding-top: 16px;
-        border-top: 1px dashed var(--mis-garis);
+        margin-top: 14px;
     }
 
     .prof-aksi-catatan {
@@ -1417,8 +1448,8 @@
         align-items: center;
         gap: 12px;
         padding: 11px 13px;
-        margin-bottom: 14px;
-        border-radius: 13px;
+        margin-bottom: 12px;
+        border-radius: 15px;
         background: #f8fafc;
         border: 1px solid var(--mis-garis);
     }
@@ -1473,8 +1504,8 @@
 
     .pin-perangkat {
         padding: 12px 13px;
-        margin-bottom: 14px;
-        border-radius: 13px;
+        margin-bottom: 12px;
+        border-radius: 15px;
         background: #f0f9ff;
         border: 1px solid #bae6fd;
     }
@@ -1706,6 +1737,15 @@
     /* Tabel riwayat duduk di dalam kartu profil yang sudah punya bayangan,
        jadi bungkusnya cukup bergaris — bayangan di atas bayangan membuatnya
        tampak mengambang. */
+    /* Tabel riwayat sekarang berada di dalam kartu bagian, jadi tepi dan
+       bayangannya sendiri hanya membuat kotak di dalam kotak. */
+    .prof-bagian > .mis-tabel-bungkus {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+    }
+
     .kmn-tabel {
         box-shadow: none;
         border-radius: var(--mis-radius-kecil);
@@ -1896,7 +1936,7 @@
         }
 
         .prof-tab-isi {
-            padding: 0 16px 18px;
+            padding: 14px 13px 16px;
         }
 
         /* Empat tab tidak muat berjajar; jadikan satu baris yang bisa
@@ -2031,10 +2071,25 @@
                ketiga lalu tidak berisi apa-apa pada kepala ini, dan karena
                lebarnya auto ia menyusut sendiri ke 0 — jadi grid-template
                tidak perlu diubah dan :has() tidak perlu dipakai. */
-            grid-column: 2 / 4;
+            /* 1/4, bukan 2/4: mulai dari kolom ikon supaya barisnya selebar
+               kartu. Berhenti di kolom 2 ia hanya 228px pada layar 360px —
+               masih kurang dari 258px yang dibutuhkan pil saringan dan tombol
+               PDF untuk sebaris. */
+            grid-column: 1 / 4;
             grid-row: 3;
-            justify-self: start;
-            margin-top: 6px;
+            margin-top: 8px;
+
+            /*
+             * Selebar barisnya dan rata kiri, bukan menciut lalu rata kanan.
+             *
+             * Dengan justify-self: start wadahnya hanya selebar isinya (228px
+             * di layar 360px), padahal barisnya 304px — pil saringan dan
+             * tombol PDF jadi terpaksa bertumpuk dua baris meski jumlah
+             * lebarnya cuma 258px. Dilebarkan penuh, keduanya muat sebaris.
+             */
+            justify-self: stretch;
+            width: 100%;
+            justify-content: flex-start;
         }
 
         /*
