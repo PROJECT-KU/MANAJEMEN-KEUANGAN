@@ -59,6 +59,43 @@ body {
 }
 
 /*
+ * Medan TERKUNCI: nilai yang ditampilkan, bukan diketik.
+ *
+ * Diangkat dari .prof-statis di halaman profil, yang memakainya untuk nama
+ * bank penggajian. Dipakai saat sebuah nilai memang tidak boleh diubah dari
+ * layar itu: menampilkannya sebagai kotak ketik yang dimatikan membuat orang
+ * mencoba mengetik lalu bertanya-tanya kenapa tidak bisa.
+ */
+.mis-statis {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    background: #f8fafc;
+    border: 1px solid var(--ui-garis);
+}
+
+.mis-statis-label {
+    margin: 0 0 1px;
+    line-height: 1.2;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--ui-tinta-4);
+}
+
+.mis-statis-nilai {
+    margin: 0;
+    line-height: 1.3;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ui-tinta);
+    overflow-wrap: anywhere;
+}
+
+/*
  * Kartu BAGIAN — satu urusan di dalam satu layar.
  *
  * Berbeda dari .mis-kartu, yang menaungi seluruh blok: bantalannya lebih
@@ -1246,9 +1283,22 @@ body.sidebar-show .main-footer {
    digeser, bukan dibungkus jadi dua baris yang memakan tinggi. */
 @media (max-width: 767.98px) {
     .mis-tab {
+        /*
+         * flex-wrap: nowrap WAJIB disebut.
+         *
+         * .mis-tab dipakai bersama kelas .nav bawaan Bootstrap, dan .nav
+         * menyetel flex-wrap: wrap. Bobotnya sama, jadi selama .mis-tab tidak
+         * menyebut flex-wrap sama sekali, nilai Bootstrap-lah yang berlaku —
+         * overflow-x: auto tidak ada gunanya karena isinya tidak pernah
+         * meluber, ia membungkus jadi dua baris lebih dulu.
+         */
+        flex-wrap: nowrap;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        /* Geserannya berhenti pas di tepi tab, bukan di tengah-tengah. */
+        scroll-snap-type: x proximity;
+        border-radius: 16px;
     }
 
     .mis-tab::-webkit-scrollbar {
@@ -1257,6 +1307,12 @@ body.sidebar-show .main-footer {
 
     .mis-tab > li {
         flex: 0 0 auto;
+        scroll-snap-align: start;
+    }
+
+    .mis-tab .nav-link {
+        padding: 10px 14px;
+        font-size: .78rem;
     }
 }
 
