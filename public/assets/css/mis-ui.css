@@ -59,45 +59,6 @@ body {
 }
 
 /*
- * Kartu bertab: satu kepala, satu deret tab, satu badan berwarna.
- *
- * Diangkat dari .prof-tab-kartu di halaman profil. Tanpa pembungkus ini,
- * deret tabnya melayang sebagai kotak terpisah di atas panelnya dan tidak
- * terbaca sebagai satu kesatuan — persis yang membedakan rupanya dari profil.
- */
-.mis-tab-kartu {
-    padding: 0;
-    overflow: hidden;
-}
-
-.mis-tab-kepala {
-    padding: 16px 18px 0;
-}
-
-/*
- * Badan tab diberi warna dasar lembut, bukan putih.
- *
- * Bagian di dalamnya berupa kartu putih sendiri, dan kartu putih di atas
- * latar putih tidak terbaca sebagai kartu — yang memisahkannya adalah bedanya
- * dengan latar, bukan bayangannya.
- */
-.mis-tab-isi {
-    padding: 16px 16px 18px;
-    background: #f4f6fb;
-    border-top: 1px solid var(--ui-garis);
-}
-
-@media (max-width: 767.98px) {
-    .mis-tab-kepala {
-        padding: 16px 13px 0;
-    }
-
-    .mis-tab-isi {
-        padding: 14px 13px 16px;
-    }
-}
-
-/*
  * Kartu BAGIAN — satu urusan di dalam satu layar.
  *
  * Berbeda dari .mis-kartu, yang menaungi seluruh blok: bantalannya lebih
@@ -1589,6 +1550,65 @@ textarea:focus-visible,
     padding: var(--mis-isi-kartu);
     margin-bottom: var(--mis-jarak);
 }
+
+/*
+ * Kartu bertab ditaruh SESUDAH .mis-kartu, bukan sebelumnya.
+ *
+ * Keduanya berbobot sama — (0,1,0) — jadi yang menentukan urutan terbitnya.
+ * Ditaruh lebih dulu, padding 22px milik .mis-kartu menang dan seluruh isi
+ * kolom kanan terdorong masuk: deret tabnya jadi 744px sementara di halaman
+ * profil 786px, dan badan tabnya 780px lawan 822px. Halaman profil tidak kena
+ * karena .prof-tab-kartu terbit lewat @push('gaya'), yaitu sesudah berkas ini.
+ */
+/*
+ * Kartu bertab: satu kepala, satu deret tab, satu badan berwarna.
+ *
+ * Diangkat dari .prof-tab-kartu di halaman profil. Tanpa pembungkus ini,
+ * deret tabnya melayang sebagai kotak terpisah di atas panelnya dan tidak
+ * terbaca sebagai satu kesatuan — persis yang membedakan rupanya dari profil.
+ */
+.mis-tab-kartu {
+    padding: 0;
+    overflow: hidden;
+    /*
+     * Kolom flex supaya badan tabnya bisa memanjang mengisi sisa tinggi
+     * kartu. Tanpa ini, kartu yang diregangkan menyamai kolom sebelahnya
+     * menyisakan STRIP PUTIH di dasarnya: badan berwarna berhenti di ujung
+     * isinya sementara kartunya masih berlanjut. Halaman profil memakai cara
+     * yang sama lewat .prof-tab-isi { flex: 1 1 auto }.
+     */
+    display: flex;
+    flex-direction: column;
+}
+
+.mis-tab-kepala {
+    padding: 16px 18px 0;
+}
+
+/*
+ * Badan tab diberi warna dasar lembut, bukan putih.
+ *
+ * Bagian di dalamnya berupa kartu putih sendiri, dan kartu putih di atas
+ * latar putih tidak terbaca sebagai kartu — yang memisahkannya adalah bedanya
+ * dengan latar, bukan bayangannya.
+ */
+.mis-tab-isi {
+    flex: 1 1 auto;
+    padding: 16px 16px 18px;
+    background: #f4f6fb;
+    border-top: 1px solid var(--ui-garis);
+}
+
+@media (max-width: 767.98px) {
+    .mis-tab-kepala {
+        padding: 16px 13px 0;
+    }
+
+    .mis-tab-isi {
+        padding: 14px 13px 16px;
+    }
+}
+
 
 /* .card-neo lama sering dipakai sebagai pembungkus tabel tanpa padding;
    biarkan .card-body di dalamnya yang mengatur jaraknya. */
