@@ -375,12 +375,39 @@
             flex-wrap: wrap;
         }
 
+        /*
+         * Baris kedua dibaca seperti baris struk: nilainya di kiri, keadaannya
+         * di kanan, dipisah garis tipis dari nama layanannya.
+         *
+         * Sebelumnya keduanya dirapatkan ke kiri di belakang jorokan 39px,
+         * sehingga tampak menggantung — tidak sejajar dengan apa pun, dan
+         * separuh lebar barisnya kosong.
+         */
         .pel-pesanan-kanan {
             flex-direction: row;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
             width: 100%;
+            margin-top: 8px;
+            padding-top: 8px;
             padding-left: 39px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
+        /* Jorokan 39px = ubin 27px + jarak 11px, jadi garis dan nilainya lurus
+           dengan nama layanan di atasnya, bukan dengan tepi kartunya. */
+        .pel-pesanan-nilai {
+            font-size: .86rem;
+        }
+    }
+
+    /* Di bawah 360px jorokan 39px itu tidak lagi terbayar: terukur di 320px
+       lencana keadaannya meluber 7px keluar baris. Barisnya dipakai penuh,
+       dan kelurusannya dengan nama layanan dikorbankan. */
+    @media (max-width: 359.98px) {
+        .pel-pesanan-kanan {
+            padding-left: 0;
         }
     }
 </style>
