@@ -1995,14 +1995,43 @@
             width: 100%;
         }
 
-        /* Lencana "n gagal dalam 30 hari" turun ke bawah keterangannya;
-           dipaksa tetap di kanan, judulnya terpatah tiap kata. */
-        .prof-bagian-kepala.punya-aksi {
-            grid-template-columns: auto minmax(0, 1fr);
+        /*
+         * Yang turun ke baris sendiri HANYA wadah aksi .kmn-kepala-aksi —
+         * isinya pil saringan berteks panjang ("3 gagal dalam 30 hari")
+         * plus tombol Unduh PDF, dan itu memang tidak muat di samping judul.
+         *
+         * Lencana biasa seperti "2 perangkat" tidak ikut diturunkan. Ia cuma
+         * selebar ~85px dan tetap muat di kolom ketiga; diturunkan, ia malah
+         * menggantung sendirian di baris ketiga dengan petak kosong selebar
+         * kartu di sebelahnya — persis keluhan pada kartu keadaan PIN.
+         */
+        /*
+         * Lencana pendek seperti "2 perangkat" duduk SEBARIS dengan judul,
+         * lalu keterangannya melebar penuh di bawah keduanya.
+         *
+         * Alternatifnya — lencana merentang dua baris di kolom ketiga,
+         * seperti di layar lebar — membuat kolom keterangan menyempit
+         * sepanjang kepala, sehingga kalimatnya pecah jauh lebih banyak.
+         * Terukur di cabang ponsel: kepala "Sedang masuk sekarang" setinggi
+         * 103,5 / 87,3 / 69,0px pada 320/360/390px dengan cara itu, lawan
+         * 71,2 / 71,2 / 68,4px dengan cara ini, dan keterangannya 4/3/3
+         * baris lawan 2/2/2 baris.
+         */
+        .prof-bagian-lencana:not(.kmn-kepala-aksi) {
+            grid-row: 1;
+            align-self: center;
         }
 
-        .prof-bagian-lencana {
-            grid-column: 2;
+        .prof-bagian-kepala.punya-aksi .prof-bagian-sub {
+            grid-column: 2 / 4;
+        }
+
+        .prof-bagian-lencana.kmn-kepala-aksi {
+            /* Menyeberangi kolom teks dan kolom lencana sekaligus. Kolom
+               ketiga lalu tidak berisi apa-apa pada kepala ini, dan karena
+               lebarnya auto ia menyusut sendiri ke 0 — jadi grid-template
+               tidak perlu diubah dan :has() tidak perlu dipakai. */
+            grid-column: 2 / 4;
             grid-row: 3;
             justify-self: start;
             margin-top: 6px;
