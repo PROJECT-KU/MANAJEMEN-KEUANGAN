@@ -36,7 +36,7 @@ class PenyewaanController extends Controller
   {
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
       $penyewaan = Penyewaan::select('penyewaan.*', 'tambah_barang.nama_barang')
         ->join('tambah_barang', 'penyewaan.tambah_barang_id', '=', 'tambah_barang.id')
@@ -81,7 +81,7 @@ class PenyewaanController extends Controller
           ->orWhere('penyewaan.identitas', 'LIKE', '%' . $search . '%');
       });
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // If the user is 'manager' or 'staff', filter by company
       $penyewaan->where('users.company', $user->company);
     } else {
@@ -100,7 +100,7 @@ class PenyewaanController extends Controller
   public function create()
   {
     $user = Auth::user();
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $tambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->get(['tambah_barang.*']);
@@ -223,7 +223,7 @@ class PenyewaanController extends Controller
     $penyewaan = Penyewaan::findOrFail($id);
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $tambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->get(['tambah_barang.*']);
@@ -241,7 +241,7 @@ class PenyewaanController extends Controller
     $user = Auth::user();
     $penyewaan = Penyewaan::findOrFail($id);
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $tambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->get(['tambah_barang.*']);
@@ -377,7 +377,7 @@ class PenyewaanController extends Controller
 
 
     if (
-      $user->level == 'manager' || $user->level == 'staff'
+      $user->adalahAdministrator()
     ) {
       // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
       $penyewaan = Penyewaan::select('penyewaan.*', 'tambah_barang.nama_barang')

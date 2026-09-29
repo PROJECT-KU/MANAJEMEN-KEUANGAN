@@ -39,14 +39,14 @@ class ClinikScopusRiwayatPemesananController extends Controller
         // ===============================
         // USER - PERORANGAN
         // ===============================
-        if ($user->level === 'user' && $user->jenis === 'perorangan') {
+        if ($user->adalahPelanggan() && $user->jenis === 'perorangan') {
             $query->where('customer_id', $user->id);
         }
 
         // ===============================
         // MANAGER
         // ===============================
-        elseif ($user->level === 'manager') {
+        elseif ($user->adalahAdministrator()) {
             // tampilkan semua
             // (jika nanti mau filter company, bisa pakai whereHas)
         }
@@ -54,7 +54,7 @@ class ClinikScopusRiwayatPemesananController extends Controller
         // ===============================
         // KARYAWAN
         // ===============================
-        elseif ($user->level === 'karyawan') {
+        elseif ($user->adalahKaryawan()) {
             $query->where('trainer_id', $user->id)
                 ->whereHas('trainer', function ($q) use ($user) {
                     $q->where('company', $user->company);
@@ -86,11 +86,11 @@ class ClinikScopusRiwayatPemesananController extends Controller
         // ==========================================================
         // 🔐 ROLE FILTER (Disamakan persis dengan function index)
         // ==========================================================
-        if ($user->level === 'user' && $user->jenis === 'perorangan') {
+        if ($user->adalahPelanggan() && $user->jenis === 'perorangan') {
             $query->where('customer_id', $user->id);
-        } elseif ($user->level === 'manager') {
+        } elseif ($user->adalahAdministrator()) {
             // tampilkan semua
-        } elseif ($user->level === 'karyawan') {
+        } elseif ($user->adalahKaryawan()) {
             $query->where('trainer_id', $user->id)
                 ->whereHas('trainer', function ($q) use ($user) {
                     $q->where('company', $user->company);
@@ -214,7 +214,7 @@ class ClinikScopusRiwayatPemesananController extends Controller
     public function updateStatus(Request $request, $id)
     {
         // 🔒 Proteksi role
-        if (Auth::user()->level !== 'manager') {
+        if (! Auth::user()->adalahAdministrator()) {
             abort(403, 'Unauthorized');
         }
 
@@ -241,7 +241,7 @@ class ClinikScopusRiwayatPemesananController extends Controller
          * Hanya user dengan level 'manager' yang memiliki "kunci".
          * Jika bukan manager, hentikan proses dan kirim error 403.
          */
-        if (Auth::user()->level !== 'manager') {
+        if (! Auth::user()->adalahAdministrator()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized. Anda tidak memiliki akses.'

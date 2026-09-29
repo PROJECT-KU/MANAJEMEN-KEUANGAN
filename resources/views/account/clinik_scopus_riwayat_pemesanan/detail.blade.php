@@ -219,7 +219,7 @@ Detail Pemesanan | MIS
                         <div>
                             <label class="text-muted small font-weight-bold">Status Booking</label>
                             <div class="mt-1">
-                                @php $isManager = Auth::user()->level === 'manager'; @endphp
+                                @php $isManager = Auth::user()->adalahAdministrator(); @endphp
                                 @if($isManager)
                                 <form action="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.updateStatus', $datas->id) }}" method="POST">
                                     @csrf @method('PUT')
@@ -257,7 +257,7 @@ Detail Pemesanan | MIS
                                         <i class="fas fa-layer-group mr-2"></i> Detail Sesi
                                     </a>
                                 </li>
-                                @if (Auth::user()->level !== 'user')
+                                @if (Auth::user()->adalahOrangDalam())
                                 <li class="nav-item">
                                     <a class="nav-link font-weight-bold d-flex align-items-center justify-content-center"
                                         id="pills-testimoni-tab" data-toggle="pill" href="#testimoni" role="tab"

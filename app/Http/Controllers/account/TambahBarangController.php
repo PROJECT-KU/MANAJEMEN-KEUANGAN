@@ -27,7 +27,7 @@ class TambahBarangController extends Controller
     $user = Auth::user();
 
     // Get data based on user role and company
-    if ($user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $TambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->orderBy('tambah_barang.created_at', 'DESC')
@@ -47,7 +47,7 @@ class TambahBarangController extends Controller
     $search = $request->get('q');
     $user = Auth::user();
 
-    if ($user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // If the user is a 'staff', search products within the user's company
       $TambahBarang = TambahBarang::join('users', 'tambah_barang.user_id', '=', 'users.id')
         ->where('users.company', $user->company)

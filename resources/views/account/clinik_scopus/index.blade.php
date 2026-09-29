@@ -396,7 +396,7 @@ Clinik Scopus Data Trainer | MIS
           </button>
         </div>
 
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <a href="{{ route('account.clinikscopus.create') }}" class="btn-modern shadow-sm font-weight-bold btn-create-animate"
           style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
           <i class="fas fa-plus-circle" style="font-size: 18px;"></i>
@@ -470,12 +470,12 @@ Clinik Scopus Data Trainer | MIS
         </div>
 
         <div class="action-wrap">
-          @if (Auth::user()->level === 'manager' || Auth::user()->id === $item->user_id)
+          @if (Auth::user()->adalahAdministrator() || Auth::user()->id === $item->user_id)
           <a href="{{ route('account.clinikscopus.edit', $item->id) }}" class="btn-modern btn-edit">
             <i class="fas fa-user-edit"></i> Edit
           </a>
 
-          @if (Auth::user()->level === 'manager')
+          @if (Auth::user()->adalahAdministrator())
           <button type="button" onclick="Delete('{{ $item->id }}')" class="btn-modern btn-delete">
             <i class="fas fa-trash-alt"></i> Hapus
           </button>

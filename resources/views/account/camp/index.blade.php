@@ -81,7 +81,7 @@ Data Laporan Camp | MIS
             </div>
           </form>
 
-          @if ( Auth::user()->level == 'ceo')
+          @if ( Auth::user()->adalahAdministrator())
           @else
           <div class="row">
             <div class="col-12 mt-3">
@@ -173,7 +173,7 @@ Data Laporan Camp | MIS
                       @endif
                     </td>
 
-                    @if ( Auth::user()->level == 'ceo')
+                    @if ( Auth::user()->adalahAdministrator())
                     <td class="text-center">
                       <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.camp.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-info mt-2">
                         <i class="fa fa-eye"></i>

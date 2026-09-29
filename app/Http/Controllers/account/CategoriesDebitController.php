@@ -24,7 +24,7 @@ class CategoriesDebitController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->level == 'staff' || $user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->join('users', 'categories_debit.user_id', '=', 'users.id')
@@ -38,7 +38,7 @@ class CategoriesDebitController extends Controller
                 })
                 ->orderBy('categories_debit.created_at', 'DESC')
                 ->paginate(10);
-        } elseif ($user->level == 'karyawan' || $user->level == 'trainer') {
+        } elseif ($user->adalahKaryawan()) {
             $categories = DB::table('categories_debit')
                 ->select('categories_debit.id', 'categories_debit.kode', 'categories_debit.name')
                 ->where('categories_debit.user_id', $user->id)
@@ -60,7 +60,7 @@ class CategoriesDebitController extends Controller
         $user = Auth::user();
         $search = $request->get('q');
 
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             $categories = CategoriesDebit::where('user_id', $user->id)
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%')
@@ -72,7 +72,7 @@ class CategoriesDebitController extends Controller
                 // Jika tidak ada hasil, tampilkan error
                 return redirect()->back()->with('error', 'Data tidak ditemukan.');
             }
-        } else if ($user->level == 'staff') {
+        } else if ($user->adalahAdministrator()) {
             $manager = User::where('level', 'manager')
                 ->where('company', $user->company)
                 ->first();

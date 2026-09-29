@@ -300,12 +300,13 @@ Tambah Karyawan | MIS
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Level Sistem <span class="badge-required">*</span></label>
-                                        <select class="form-control-modern" name="level" required>
-                                            <option value="">-- Pilih Level --</option>
-                                            <option value="manager">Manager Sistem</option>
-                                            <option value="karyawan">Karyawan Sistem</option>
-                                            <option value="staff">Staff Sistem</option>
-                                            <option value="user">User Sistem</option>
+                                        {{-- Peran, bukan jabatan. Jabatan diisi di kolom
+                                             Posisi/Jabatan dan tidak berpengaruh ke hak akses. --}}
+                                        <select class="form-control-modern" name="peran" required>
+                                            <option value="">-- Pilih Peran --</option>
+                                            <option value="administrator">Administrator</option>
+                                            <option value="karyawan">Karyawan</option>
+                                            <option value="user">User</option>
                                         </select>
                                     </div>
                                 </div>

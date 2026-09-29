@@ -20,7 +20,7 @@ TO DO List | MIS
         <div class="row">
             <div class="col-12 mt-3">
                 <div class="form-group text-center">
-                    @if($user->level == 'manager')
+                    @if($user->adalahAdministrator())
                     <div class="input-group mb-3">
                         <a href="{{ route('account.todolist.create') }}" class="btn btn-primary btn-block">
                             <i class="fa fa-plus-circle"></i> TAMBAH DATA TO DO LIST
@@ -87,7 +87,7 @@ TO DO List | MIS
                                                         </div>
                                                     </div>
                                                 </div>
-                                                @if($user->level == 'manager')
+                                                @if($user->adalahAdministrator())
                                                 <div class="d-flex gap-2">
                                                     <a href="{{ route('account.todolist.edit', $task->id) }}" class="btn btn-info flex-grow-1">
                                                         <i class="fa fa-pen"></i> Edit Task

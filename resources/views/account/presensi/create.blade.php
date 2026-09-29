@@ -256,7 +256,7 @@ Tambah Presensi Karyawan | MIS
           <form action="{{ route('account.presensi.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+            @if (Auth::user()->adalahKaryawan())
             <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
             <div class="row">
               <div class="col-md-12">

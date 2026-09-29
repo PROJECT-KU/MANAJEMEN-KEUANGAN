@@ -48,7 +48,7 @@
               $terbayarCount = 0; // Count of terbayar records
               @endphp
               @foreach ($gaji as $hasil)
-              @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
+              @if ((Auth::user()->adalahKaryawan()) && $hasil->status == 'pending')
               <!-- Skip displaying records where user is karyawan and status is pending -->
               @continue
               @else

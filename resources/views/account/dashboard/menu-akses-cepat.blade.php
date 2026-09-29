@@ -134,7 +134,7 @@
     <div class="menu-grid" id="menuGrid">
         
         {{-- 1. FITUR UMUM --}}
-        @if (in_array(Auth::user()->level, ['manager', 'karyawan']))
+        @if (Auth::user()->adalahOrangDalam())
             <a href="{{ route('account.PerjalananDinas.index') }}" class="menu-item">
                 <div class="icon-circle bg-info"><i class="fas fa-suitcase-rolling"></i></div>
                 <span class="menu-label">Perjalanan Dinas</span>
@@ -155,7 +155,7 @@
             $user = Auth::user();
             $totalNotifPemesanan = 0;
 
-            if ($user->level === 'manager') {
+            if ($user->adalahAdministrator()) {
                 // Manager melihat semua yang pending
                 $totalNotifPemesanan = DB::table('clinikscopus_pemesanan')
                     ->where('status', 'pending')
@@ -183,7 +183,7 @@
         @endif
 
         {{-- 2. FITUR KHUSUS MANAGER --}}
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
             <a href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}" class="menu-item">
                 <div class="icon-circle bg-manager"><i class="fas fa-building"></i></div>
                 <span class="menu-label">Company</span>
@@ -204,7 +204,7 @@
 
         {{-- --- MENU HIDDEN (Lainnya) --- --}}
 
-        @if (in_array(Auth::user()->level, ['manager', 'karyawan']))
+        @if (Auth::user()->adalahOrangDalam())
             <a href="{{ route('account.todolist.index') }}" class="menu-item hidden">
                 <div class="icon-circle" style="background: #10b981;"><i class="fas fa-clipboard-list"></i></div>
                 <span class="menu-label">To Do List</span>
@@ -219,7 +219,7 @@
             </a>
         @endif
 
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
             <a href="{{ route('account.customer.index') }}" class="menu-item hidden">
                 <div class="icon-circle" style="background: #f97316;"><i class="fas fa-user-tag"></i></div>
                 <span class="menu-label">Data Customer</span>

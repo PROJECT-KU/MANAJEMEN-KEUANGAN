@@ -221,7 +221,7 @@ Laporan Transaksi Neraca | MIS
             </div>
             @endif
         </div>
-        @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
+        @if (Auth::user()->adalahAdministrator())
         <table class="table table-bordered mt-5" style="border: 2px solid red;">
             <thead>
                 <tr>

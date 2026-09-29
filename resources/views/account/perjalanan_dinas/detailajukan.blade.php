@@ -189,7 +189,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label>Status</label>
                     <div class="input-group">
-                      @if (Auth::user()->level == 'karyawan')
+                      @if (Auth::user()->adalahKaryawan())
                       <select class="form-control" name="status" disabled>
                         <option value="" disabled selected>-- PILIH STATUS --</option>
                         <option value="ajukan" {{ $DatasAjukan->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
@@ -262,7 +262,7 @@ Update Perjalanan Dinas Ajukan | MIS
                   <div class="form-group">
                     <label style=" font-weight: bold;">Catatan</label>
                     <div class="input-group" style=" border: 2px solid 	#FFA500; border-radius: 8px;">
-                      @if (Auth::user()->level == 'karyawan')
+                      @if (Auth::user()->adalahKaryawan())
                       <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" readonly>{{ $DatasAjukan->deskripsi }}</textarea>
                       @else
                       <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" required>{{ $DatasAjukan->deskripsi }}</textarea>
@@ -2527,7 +2527,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
           @if($DatasAjukan->tanggal36 == null)
           <div class="button-container">
-            @if (Auth::user()->level == 'karyawan')
+            @if (Auth::user()->adalahKaryawan())
             <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
               <i class="fa fa-undo mr-1"></i> KEMBALI
             </a>
@@ -2880,7 +2880,7 @@ Update Perjalanan Dinas Ajukan | MIS
 
           @if($DatasAjukan->tanggal36 !== null)
           <div class="button-container">
-            @if (Auth::user()->level == 'karyawan')
+            @if (Auth::user()->adalahKaryawan())
             <a href="{{ route('account.PerjalananDinas.index') }}" class="btn btn-info" role="button" style="width:100%; height:45px; font-size:14px; padding:10px;">
               <i class="fa fa-undo mr-1"></i> KEMBALI
             </a>

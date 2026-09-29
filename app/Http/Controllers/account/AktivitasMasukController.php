@@ -17,7 +17,8 @@ use App\User;
  */
 class AktivitasMasukController extends Controller
 {
-    private const PERAN_BOLEH = ['manager', 'ceo', 'admin'];
+    /* Dulu ['manager','ceo','admin'] pada kolom level; sekarang cukup
+       satu peran. */
 
     public function __construct()
     {
@@ -28,7 +29,7 @@ class AktivitasMasukController extends Controller
     {
         $pengguna = Auth::user();
 
-        if (! in_array($pengguna->level, self::PERAN_BOLEH, true)) {
+        if (! $pengguna->adalahAdministrator()) {
             return redirect()->route('account.dashboard.index')
                 ->with('error', 'Anda tidak punya akses ke jejak aktivitas masuk.');
         }
@@ -65,7 +66,7 @@ class AktivitasMasukController extends Controller
     {
         $pengguna = Auth::user();
 
-        if (! in_array($pengguna->level, self::PERAN_BOLEH, true)) {
+        if (! $pengguna->adalahAdministrator()) {
             abort(403, 'Anda tidak berhak membuka kunci akun.');
         }
 
@@ -106,7 +107,7 @@ class AktivitasMasukController extends Controller
     {
         $pengguna = Auth::user();
 
-        if (! in_array($pengguna->level, self::PERAN_BOLEH, true)) {
+        if (! $pengguna->adalahAdministrator()) {
             return redirect()->route('account.dashboard.index')
                 ->with('error', 'Anda tidak punya akses ke jejak aktivitas masuk.');
         }

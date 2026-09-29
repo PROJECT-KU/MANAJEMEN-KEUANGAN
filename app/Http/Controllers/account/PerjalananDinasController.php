@@ -68,7 +68,7 @@ class PerjalananDinasController extends Controller
       ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Ajukan->where('perjalanan_dinas.status', 'ajukan')
         ->where('users.company', $user->company);
     } else {
@@ -87,7 +87,7 @@ class PerjalananDinasController extends Controller
     $countAjukan = DB::table('perjalanan_dinas')
       ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id') // Join the users table
       ->where('perjalanan_dinas.status', 'ajukan')
-      ->when($user->level == 'manager' || $user->level == 'ceo', function ($query) use ($user) {
+      ->when($user->adalahAdministrator(), function ($query) use ($user) {
         return $query->where('users.company', $user->company);
       }, function ($query) use ($user) {
         return $query->where('perjalanan_dinas.user_id', $user->id);
@@ -102,7 +102,7 @@ class PerjalananDinasController extends Controller
       ->where('perjalanan_dinas.status', 'diterima')
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Diterima->where('users.company', $user->company);
     } else {
       $Diterima->where('perjalanan_dinas.user_id', $user->id);
@@ -122,7 +122,7 @@ class PerjalananDinasController extends Controller
       ->where('perjalanan_dinas.status', 'ditolak')
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
 
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Ditolak->where('users.company', $user->company);
     } else {
       $Ditolak->where('perjalanan_dinas.user_id', $user->id);
@@ -152,7 +152,7 @@ class PerjalananDinasController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $perjalanan_dinas = DB::table('perjalanan_dinas')
         ->select('perjalanan_dinas.id', 'perjalanan_dinas.user_id', 'perjalanan_dinas.token', 'perjalanan_dinas.id_transaksi', 'perjalanan_dinas.status', 'perjalanan_dinas.tempat', 'perjalanan_dinas.camp', 'perjalanan_dinas.tanggal_mulai', 'perjalanan_dinas.tanggal_akhir', 'perjalanan_dinas.total_uang_masuk', 'perjalanan_dinas.total_uang_keluar', 'perjalanan_dinas.sisa_saldo', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp')
         ->leftJoin('users', 'perjalanan_dinas.user_id', '=', 'users.id')
@@ -188,7 +188,7 @@ class PerjalananDinasController extends Controller
           ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Ajukan->where('users.company', $user->company);
     } else {
       $Ajukan->where('perjalanan_dinas.user_id', $user->id);
@@ -207,7 +207,7 @@ class PerjalananDinasController extends Controller
           ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Diterima->where('users.company', $user->company);
     } else {
       $Diterima->where('perjalanan_dinas.user_id', $user->id);
@@ -226,7 +226,7 @@ class PerjalananDinasController extends Controller
           ->orWhere('perjalanan_dinas.tempat', 'LIKE', '%' . $search . '%');
       })
       ->orderBy('perjalanan_dinas.created_at', 'DESC');
-    if ($user->level == 'manager' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $Ditolak->where('users.company', $user->company);
     } else {
       $Ditolak->where('perjalanan_dinas.user_id', $user->id);
