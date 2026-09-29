@@ -19,7 +19,67 @@
         display: grid;
         grid-template-columns: 320px minmax(0, 1fr);
         gap: 14px;
-        align-items: start;
+        /* stretch, bukan start: kartu identitas ikut setinggi kartu bertab di
+           sebelahnya, jadi tidak ada sisi yang berhenti di tengah sementara
+           sisi lain masih panjang. */
+        align-items: stretch;
+    }
+
+    .pel-identitas,
+    .pel-kanan {
+        /* Tingginya boleh melebihi isinya; isinya sendiri diatur di bawah. */
+        min-height: 0;
+    }
+
+    .pel-identitas {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Pengunggah foto didorong ke dasar kartu, jadi ruang lebih apa pun jatuh
+       di antara ringkasan dan pengunggahnya — bukan menggantung di bawah. */
+    .pel-unggah {
+        margin-top: auto;
+    }
+
+    /* ----------------------------------------------------- ringkasan */
+
+    .pel-ringkasan {
+        margin: 14px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: left;
+    }
+
+    .pel-ringkasan > div {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 12px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .pel-ringkasan dt {
+        margin: 0;
+        line-height: 1.4;
+        font-size: .74rem;
+        font-weight: 600;
+        color: var(--mis-tinta-3);
+    }
+
+    .pel-ringkasan dd {
+        margin: 0;
+        line-height: 1.4;
+        font-size: .8rem;
+        font-weight: 800;
+        color: var(--mis-tinta);
+        text-align: right;
+        white-space: nowrap;
     }
 
     /* --------------------------------------------------- kartu identitas */
@@ -244,6 +304,13 @@
     @media (max-width: 991.98px) {
         .pel-tata {
             grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+        }
+
+        /* Menumpuk, tidak ada tinggi yang perlu disamakan — jadi pengunggahnya
+           kembali menempel pada isinya. */
+        .pel-unggah {
+            margin-top: 14px;
         }
     }
 
@@ -325,10 +392,33 @@
                         <span class="mis-pil mis-pil-kuning"><i class="fas fa-clock"></i> Email belum terverifikasi</span>
                     @endif
 
-                    <span class="mis-pil mis-pil-ungu"><i class="fas fa-calendar-alt"></i>
-                        Bergabung {{ optional($user->created_at)->locale('id')->translatedFormat('d M Y') ?: '-' }}
-                    </span>
                 </div>
+
+                {{--
+                  Ringkasan tiga angka yang paling sering ditanyakan.
+
+                  Kolom kiri sebelumnya cuma berisi foto dan pengunggahnya,
+                  sehingga separuh tingginya kosong sementara kolom kanan penuh.
+                  Ketiganya juga menghemat satu klik: jumlah dan tanggal pesanan
+                  tidak perlu membuka tab Pesanan dulu.
+                --}}
+                <dl class="pel-ringkasan">
+                    <div>
+                        <dt>Bergabung</dt>
+                        <dd>{{ optional($user->created_at)->locale('id')->translatedFormat('d M Y') ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Jumlah pesanan</dt>
+                        <dd>{{ $pesanan->count() > 0 ? $pesanan->count() . '×' : 'Belum ada' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Terakhir memesan</dt>
+                        <dd>
+                            @php ($terakhir = $pesanan->first()['waktu'] ?? null)
+                            {{ $terakhir ? $terakhir->locale('id')->translatedFormat('d M Y') : '—' }}
+                        </dd>
+                    </div>
+                </dl>
 
                 <form class="pel-unggah" method="POST" enctype="multipart/form-data"
                     action="{{ route('account.pengguna.update.updatePhoto', $user) }}">
@@ -346,7 +436,16 @@
             </aside>
 
             {{-- =========================================== kolom kanan --}}
-            <div class="pel-kanan">
+            <div class="mis-kartu mis-tab-kartu pel-kanan">
+                <div class="mis-tab-kepala">
+                    {{-- Satu kepala untuk seluruh kartu, seperti "Pengaturan
+                         akun" di halaman profil — bukan kepala berulang di tiap
+                         panel, yang membuat judulnya terbaca dua kali. --}}
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-user-cog"></i></span>
+                        <h2 class="pel-kepala-judul">Pengaturan akun</h2>
+                        <p class="pel-kepala-sub">Data diri, kontak, riwayat pesanan, dan jejak perubahannya.</p>
+                    </div>
 
                 {{--
                   Empat urusan dipisah jadi tab, tidak ditumpuk.
@@ -393,17 +492,15 @@
                     </li>
                 </ul>
 
+                </div>
+
+                <div class="mis-tab-isi">
                 <div class="tab-content">
 
                 {{-- ------------------------------------- data akun --}}
                 <div class="tab-pane fade show active" id="pel-panel-akun" role="tabpanel"
                     aria-labelledby="pel-tab-akun" tabindex="0">
                 <section class="mis-bagian pel-bagian">
-                    <div class="pel-kepala">
-                        <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-id-card"></i></span>
-                        <h2 class="pel-kepala-judul">Data akun</h2>
-                        <p class="pel-kepala-sub">Nama, username, dan keadaan akunnya.</p>
-                    </div>
 
                     <form method="POST" action="{{ route('account.pengguna.update', $user) }}">
                         @csrf
@@ -459,11 +556,6 @@
                 <div class="tab-pane fade" id="pel-panel-kontak" role="tabpanel"
                     aria-labelledby="pel-tab-kontak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
-                    <div class="pel-kepala">
-                        <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-address-book"></i></span>
-                        <h2 class="pel-kepala-judul">Kontak</h2>
-                        <p class="pel-kepala-sub">Cara menghubungi pelanggan ini.</p>
-                    </div>
 
                     <div class="pel-email">
                         <span class="mis-medali kecil {{ $user->email_verified_at ? 'mis-hijau' : 'mis-kuning' }}" aria-hidden="true">
@@ -520,11 +612,6 @@
                 <div class="tab-pane fade" id="pel-panel-pesanan" role="tabpanel"
                     aria-labelledby="pel-tab-pesanan" tabindex="0">
                 <section class="mis-bagian pel-bagian">
-                    <div class="pel-kepala">
-                        <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-receipt"></i></span>
-                        <h2 class="pel-kepala-judul">Riwayat pesanan</h2>
-                        <p class="pel-kepala-sub">Layanan yang pernah dipesan orang ini.</p>
-                    </div>
 
                     @if ($pesanan->isEmpty())
                         <div class="mis-kosong pel-kosong-ringkas">
@@ -575,11 +662,6 @@
                 <div class="tab-pane fade" id="pel-panel-jejak" role="tabpanel"
                     aria-labelledby="pel-tab-jejak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
-                    <div class="pel-kepala">
-                        <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
-                        <h2 class="pel-kepala-judul">Jejak perubahan</h2>
-                        <p class="pel-kepala-sub">Siapa mengubah apa pada akun ini.</p>
-                    </div>
 
                     @if ($jejak->isEmpty())
                         <div class="mis-kosong pel-kosong-ringkas">
@@ -609,6 +691,7 @@
                 </div>
 
                 </div>{{-- tab-content --}}
+                </div>{{-- mis-tab-isi --}}
 
             </div>
         </div>

@@ -59,6 +59,45 @@ body {
 }
 
 /*
+ * Kartu bertab: satu kepala, satu deret tab, satu badan berwarna.
+ *
+ * Diangkat dari .prof-tab-kartu di halaman profil. Tanpa pembungkus ini,
+ * deret tabnya melayang sebagai kotak terpisah di atas panelnya dan tidak
+ * terbaca sebagai satu kesatuan — persis yang membedakan rupanya dari profil.
+ */
+.mis-tab-kartu {
+    padding: 0;
+    overflow: hidden;
+}
+
+.mis-tab-kepala {
+    padding: 16px 18px 0;
+}
+
+/*
+ * Badan tab diberi warna dasar lembut, bukan putih.
+ *
+ * Bagian di dalamnya berupa kartu putih sendiri, dan kartu putih di atas
+ * latar putih tidak terbaca sebagai kartu — yang memisahkannya adalah bedanya
+ * dengan latar, bukan bayangannya.
+ */
+.mis-tab-isi {
+    padding: 16px 16px 18px;
+    background: #f4f6fb;
+    border-top: 1px solid var(--ui-garis);
+}
+
+@media (max-width: 767.98px) {
+    .mis-tab-kepala {
+        padding: 16px 13px 0;
+    }
+
+    .mis-tab-isi {
+        padding: 14px 13px 16px;
+    }
+}
+
+/*
  * Deret tab bersama.
  *
  * Diangkat dari .prof-tab di halaman profil, yang jadi acuan rupa. Dipakai
