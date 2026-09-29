@@ -147,6 +147,159 @@ body {
 }
 
 /*
+ * Pesan galat di bawah satu isian.
+ *
+ * Diangkat dari .prof-salah di halaman profil. Tanpa kelas ini, galat
+ * validasi di layar lain tetap tercetak tetapi tanpa warna dan tanpa ikon,
+ * jadi tidak terbaca sebagai galat.
+ */
+.mis-salah {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 0;
+    line-height: 1.45;
+    font-size: .74rem;
+    font-weight: 600;
+    color: #e11d48;
+}
+
+/* font-size: inherit supaya ikonnya ikut sekecil pesannya; aturan global
+   layout memaksa .fas jadi 20px. */
+.mis-salah > .fas {
+    font-size: inherit !important;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+/*
+ * Lencana terverifikasi di sudut foto.
+ *
+ * Tepinya bergerigi seperti tanda terverifikasi di Instagram, digambar
+ * sebagai satu path SVG 12 tonjolan — lingkaran CSS tidak bisa bergelombang
+ * seperti ini. Warnanya hijau, bukan biru, supaya sewarna dengan lencana
+ * "Email terverifikasi" di dekatnya.
+ *
+ * Diangkat dari .prof-foto-lencana di halaman profil.
+ */
+.mis-foto-bingkai {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+.mis-foto-lencana {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    display: block;
+    width: 30px;
+    height: 30px;
+    line-height: 0;
+    filter: drop-shadow(0 2px 4px rgba(15, 23, 42, .22));
+}
+
+.mis-foto-lencana svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* Tepi putihnya dibuat dari garis tebal pada bentuk yang sama, jadi ia
+   mengikuti gerigi persis tanpa perlu path kedua. */
+.mis-lencana-tepi {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 11;
+    stroke-linejoin: round;
+}
+
+.mis-lencana-isi {
+    fill: #16a34a;
+}
+
+.mis-foto-lencana.belum .mis-lencana-isi {
+    fill: #f59e0b;
+}
+
+.mis-lencana-centang {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 11;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/*
+ * Pemilih berkas bergaya: kotak bergaris putus-putus dengan ubin ikon,
+ * menggantikan <input type=file> bawaan yang bertuliskan "Choose file / No
+ * file chosen" dalam bahasa Inggris dan tidak bisa digayakan.
+ *
+ * Diangkat dari .prof-unggah di halaman profil.
+ */
+.mis-unggah-bungkus {
+    width: 100%;
+    display: grid;
+    gap: 10px;
+}
+
+/* Input bawaan disembunyikan tetapi tetap bisa dicapai Tab: labelnya yang
+   terlihat, dan ia mengaktifkan input lewat for=. display:none akan
+   membuatnya hilang dari urutan fokus sama sekali. */
+.mis-berkas {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mis-unggah {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: center;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 13px;
+    border: 1.5px dashed #c7d2fe;
+    background: #f8faff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .25s ease, background .25s ease;
+}
+
+.mis-unggah:hover,
+.mis-berkas:focus-visible + .mis-unggah {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.mis-unggah > .mis-medali {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+}
+
+.mis-unggah-nama {
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--ui-tinta);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mis-unggah > .mis-bantuan {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+/*
  * Badan layar MIS.
  *
  * style.css bawaan Stisla memberi .main-content padding-top 80px, dan dengan

@@ -373,7 +373,7 @@
             {{-- ============================================ kolom kiri --}}
             <aside class="mis-bagian pel-identitas">
                 <div class="pel-identitas-avatar">
-                    @include('partials.avatar', ['orang' => $user, 'ukuran' => 104])
+                    @include('partials.avatar', ['orang' => $user, 'ukuran' => 104, 'lencana' => true])
                 </div>
 
                 <p class="pel-identitas-nama">{{ $user->full_name ?: $user->username }}</p>
@@ -386,11 +386,9 @@
                         <span class="mis-pil mis-pil-abu"><i class="fas fa-pause"></i> Nonaktif</span>
                     @endif
 
-                    @if ($user->email_verified_at)
-                        <span class="mis-pil mis-pil-biru"><i class="fas fa-envelope-open"></i> Email terverifikasi</span>
-                    @else
-                        <span class="mis-pil mis-pil-kuning"><i class="fas fa-clock"></i> Email belum terverifikasi</span>
-                    @endif
+                    {{-- Keadaan verifikasi email tidak diulang sebagai pil:
+                         centang bergerigi di sudut foto sudah menyatakannya,
+                         hijau kalau sudah dan kuning kalau belum. --}}
 
                 </div>
 
@@ -420,17 +418,26 @@
                     </div>
                 </dl>
 
-                <form class="pel-unggah" method="POST" enctype="multipart/form-data"
-                    action="{{ route('account.pengguna.update.updatePhoto', $user) }}">
+                {{-- Pemilih berkas bergaya, bukan <input type=file> bawaan:
+                     yang bawaan bertuliskan "Choose file / No file chosen"
+                     dalam bahasa Inggris dan tidak bisa digayakan sama sekali.
+                     Tombol simpannya disembunyikan sampai ada berkas dipilih —
+                     tombol mati yang selalu terlihat hanya memakan ruang dan
+                     tidak menerangkan apa pun. --}}
+                <form class="pel-unggah mis-unggah-bungkus" method="POST" enctype="multipart/form-data"
+                    action="{{ route('account.pengguna.update.updatePhoto', $user) }}"
+                    data-sibuk data-sibuk-teks="Mengunggah…">
                     @csrf
-                    <div class="mis-isian">
-                        <label class="mis-label" for="pel-foto">Ganti foto</label>
-                        <input type="file" class="form-control-modern" id="pel-foto" name="gambar"
-                            accept="image/jpeg,image/png,image/gif,image/webp">
-                        <p class="mis-bantuan">JPG, PNG, GIF, atau WebP &middot; maksimal 3 MB.</p>
-                    </div>
-                    <button type="submit" class="mis-tombol mis-tombol-ungu" style="width: 100%;">
-                        <i class="fas fa-upload"></i> Simpan foto
+                    <input type="file" class="mis-berkas" id="pel-foto" name="gambar"
+                        accept="image/jpeg,image/png,image/gif,image/webp">
+                    <label class="mis-unggah" for="pel-foto">
+                        <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-camera"></i></span>
+                        <span class="mis-unggah-nama" id="pel-nama-berkas">Pilih foto baru</span>
+                        <span class="mis-bantuan">JPG, PNG, GIF, atau WebP &middot; maksimal 3 MB</span>
+                    </label>
+                    <button type="submit" class="mis-tombol mis-tombol-ungu" id="pel-simpan-foto"
+                        style="width: 100%;" hidden disabled>
+                        <i class="fas fa-cloud-upload-alt"></i> Simpan foto
                     </button>
                 </form>
             </aside>
@@ -508,15 +515,24 @@
                         <div class="mis-kisi-isian">
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-nama">Nama lengkap</label>
-                                <input type="text" class="form-control-modern" id="pel-nama" name="full_name"
+                                <input type="text" class="form-control-modern @error('full_name') is-invalid @enderror"
+                                    id="pel-nama" name="full_name"
                                     value="{{ old('full_name', $user->full_name) }}" maxlength="255">
+                                @error('full_name')
+                                    <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-username">Username</label>
-                                <input type="text" class="form-control-modern" id="pel-username" name="username"
+                                <input type="text" class="form-control-modern @error('username') is-invalid @enderror"
+                                    id="pel-username" name="username"
                                     value="{{ old('username', $user->username) }}" maxlength="150">
-                                <p class="mis-bantuan">Dipakai untuk masuk, jadi harus unik.</p>
+                                @error('username')
+                                    <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                                @else
+                                    <p class="mis-bantuan">Dipakai untuk masuk, jadi harus unik.</p>
+                                @enderror
                             </div>
 
                             <div class="mis-isian">
@@ -583,16 +599,25 @@
                         <div class="mis-kisi-isian">
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-email-baru">Alamat email</label>
-                                <input type="email" class="form-control-modern" id="pel-email-baru" name="email"
+                                <input type="email" class="form-control-modern @error('email') is-invalid @enderror"
+                                    id="pel-email-baru" name="email"
                                     value="{{ old('email', $user->email) }}" required>
-                                <p class="mis-bantuan">Mengganti email membuat verifikasinya kembali kosong.</p>
+                                @error('email')
+                                    <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                                @else
+                                    <p class="mis-bantuan">Mengganti email membuat verifikasinya kembali kosong.</p>
+                                @enderror
                             </div>
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-telp">Nomor WhatsApp</label>
-                                <input type="tel" class="form-control-modern" id="pel-telp" name="telp"
+                                <input type="tel" class="form-control-modern @error('telp') is-invalid @enderror"
+                                    id="pel-telp" name="telp"
                                     value="{{ old('telp', $user->telp) }}" inputmode="numeric"
                                     placeholder="08xxxxxxxxxx">
+                                @error('telp')
+                                    <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -711,6 +736,49 @@
 
 @push('scripts')
 <script>
+    /*
+     * Pemilih berkas: namanya ditampilkan, tombol simpan baru muncul setelah
+     * ada yang dipilih, dan ukuran serta jenisnya diperiksa di peramban.
+     *
+     * Pemeriksaan di peramban ini BUKAN pengaman — peladen tetap memeriksa
+     * ulang lewat FotoProfil. Gunanya cuma memberi tahu lebih cepat, sebelum
+     * orang menunggu 3 MB terkirim untuk ditolak.
+     */
+    (function () {
+        const isian = document.getElementById('pel-foto');
+        const nama = document.getElementById('pel-nama-berkas');
+        const simpan = document.getElementById('pel-simpan-foto');
+        if (!isian || !nama || !simpan) return;
+
+        const BATAS = 3 * 1024 * 1024;
+        const BOLEH = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        const kosongkan = function (pesan) {
+            isian.value = '';
+            nama.textContent = 'Pilih foto baru';
+            simpan.hidden = true;
+            simpan.disabled = true;
+            if (pesan) window.misToast('gagal', pesan);
+        };
+
+        isian.addEventListener('change', function () {
+            const berkas = isian.files && isian.files[0];
+            if (!berkas) return kosongkan(null);
+
+            const ext = (berkas.name.split('.').pop() || '').toLowerCase();
+            if (BOLEH.indexOf(ext) === -1) {
+                return kosongkan('Hanya JPG, PNG, GIF, atau WebP yang bisa diunggah.');
+            }
+            if (berkas.size > BATAS) {
+                return kosongkan('Berkasnya lebih dari 3 MB.');
+            }
+
+            nama.textContent = berkas.name;
+            simpan.hidden = false;
+            simpan.disabled = false;
+        });
+    })();
+
     /*
      * Menandai email terverifikasi berarti menyatakan alamatnya benar tanpa
      * bukti apa pun dari pemiliknya, jadi ia dikonfirmasi dulu — bukan

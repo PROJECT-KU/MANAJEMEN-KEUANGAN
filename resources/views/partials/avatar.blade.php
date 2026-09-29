@@ -42,6 +42,14 @@
     $punyaFoto = \App\Support\FotoProfil::punyaFoto($orang->gambar ?? null);
 @endphp
 
+{{-- $lencana: tampilkan lencana terverifikasi di sudut foto. Dimatikan
+     secara bawaan karena di dalam tabel ia hanya menambah keramaian. --}}
+@php ($lencana = $lencana ?? false)
+
+@if ($lencana)
+    <span class="mis-foto-bingkai">
+@endif
+
 @if ($punyaFoto)
     <img class="mis-avatar" alt="Foto {{ $namaLengkap }}"
         src="{{ \App\Support\FotoProfil::url($orang->gambar) }}"
@@ -54,4 +62,23 @@
         style="width: {{ $ukuran }}px; height: {{ $ukuran }}px;
                background: {{ $latar }}; color: {{ $tinta }};
                font-size: {{ max(11, (int) round($ukuran * 0.36)) }}px;">{{ $inisial }}</span>
+@endif
+
+@if ($lencana)
+        {{-- Bentuk bergerigi digambar sebagai SATU path SVG, bukan lingkaran
+             CSS: tepi bergelombang tidak bisa dibuat dengan border-radius. --}}
+        @php ($sudahVerif = (bool) ($orang->email_verified_at ?? null))
+        <span class="mis-foto-lencana {{ $sudahVerif ? '' : 'belum' }}"
+            title="{{ $sudahVerif ? 'Email sudah terverifikasi' : 'Email belum terverifikasi' }}">
+            <svg viewBox="-7 -7 114 114" aria-hidden="true">
+                <path class="mis-lencana-tepi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                <path class="mis-lencana-isi" d="M89.0 50.0 Q104.4 64.6 83.8 69.5 Q89.8 89.8 69.5 83.8 Q64.6 104.4 50.0 89.0 Q35.4 104.4 30.5 83.8 Q10.2 89.8 16.2 69.5 Q-4.4 64.6 11.0 50.0 Q-4.4 35.4 16.2 30.5 Q10.2 10.2 30.5 16.2 Q35.4 -4.4 50.0 11.0 Q64.6 -4.4 69.5 16.2 Q89.8 10.2 83.8 30.5 Q104.4 35.4 89.0 50.0Z" />
+                @if ($sudahVerif)
+                    <path class="mis-lencana-centang" d="M33 51 L45 63 L68 38" />
+                @else
+                    <path class="mis-lencana-centang" d="M50 30 L50 56 M50 68 L50 70" />
+                @endif
+            </svg>
+        </span>
+    </span>
 @endif
