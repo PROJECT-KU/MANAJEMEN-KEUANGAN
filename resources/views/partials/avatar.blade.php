@@ -47,7 +47,17 @@
 @php ($lencana = $lencana ?? false)
 
 @if ($lencana)
-    <span class="mis-foto-bingkai">
+    {{-- Ukuran lencananya dihitung dari ukuran avatarnya, bukan dipatok.
+
+         Nisbahnya 0,29 supaya halaman rincian — yang avatarnya 104px — tetap
+         mendapat lencana 30px, persis seperti sebelum ini; nisbah yang
+         kelihatan lebih bulat seperti 0,31 akan membesarkannya jadi 32px dan
+         diam-diam mengubah layar yang sudah benar.
+
+         Batas bawah 13px: pada avatar 38px di daftar, nisbah itu menghasilkan
+         11px dan centangnya tidak lagi terbaca sebagai centang, cuma titik
+         hijau. --}}
+    <span class="mis-foto-bingkai" style="--lencana: {{ max(13, (int) round($ukuran * 0.29)) }}px;">
 @endif
 
 @if ($punyaFoto)
