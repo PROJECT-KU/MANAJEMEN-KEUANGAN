@@ -46,6 +46,23 @@ class FotoProfilWebpTest extends TestCase
         return $pengguna->refresh();
     }
 
+    /**
+     * Administrator: satu-satunya peran yang boleh mengunggah foto untuk akun
+     * orang lain. Dipakai untuk menguji jalur layar pelanggan, yang memang
+     * dikerjakan orang dalam atas nama pelanggannya.
+     */
+    private function buatAdministrator(): User
+    {
+        $admin = $this->buatPengguna();
+
+        $admin->forceFill([
+            'full_name' => 'Uji Administrator Foto',
+            'peran' => User::PERAN_ADMINISTRATOR,
+        ])->save();
+
+        return $admin->refresh();
+    }
+
     /** Gambar sungguhan (bukan fake Laravel) supaya GD benar-benar membacanya. */
     private function gambar(string $jenis, string $nama): UploadedFile
     {
@@ -161,6 +178,69 @@ class FotoProfilWebpTest extends TestCase
 
         FotoProfil::hapus($nama);
         $this->assertFileDoesNotExist($jalur);
+    }
+
+    /**
+     * Rute yang dipakai layar pelanggan dan layar pengguna, BUKAN rute profil.
+     *
+     * Keduanya memang memanggil FotoProfil::simpan() yang sama, tetapi lewat
+     * pengendali yang berbeda dengan penjagaan hak, pengikatan {pengguna:uuid},
+     * dan pencatatan jejaknya sendiri. Sampai diuji di sini, jalur itu hanya
+     * kelihatan benar dari membaca kodenya.
+     */
+    #[Test]
+    #[DataProvider('bentukMasuk')]
+    public function unggahan_lewat_layar_pelanggan_tersimpan_sebagai_webp(string $jenis, string $nama): void
+    {
+        $pelanggan = $this->buatPengguna();
+        $admin = $this->buatAdministrator();
+
+        $this->actingAs($admin)
+            ->post(
+                route('account.pengguna.update.updatePhoto', $pelanggan->uuid),
+                ['gambar' => $this->gambar($jenis, $nama)]
+            )
+            ->assertRedirect();
+
+        $tersimpan = $pelanggan->refresh()->gambar;
+        $this->sampah[] = $tersimpan;
+
+        $this->assertNotNull($tersimpan, "Unggahan {$jenis} lewat layar pelanggan seharusnya tersimpan.");
+        $this->assertStringEndsWith('.webp', $tersimpan);
+
+        $this->assertTrue(Storage::disk(FotoProfil::DISK)->exists($tersimpan));
+        $this->assertFileDoesNotExist(public_path(FotoProfil::FOLDER_LAMA . '/' . $tersimpan));
+
+        $isi = Storage::disk(FotoProfil::DISK)->get($tersimpan);
+        $this->assertSame('RIFF', substr($isi, 0, 4));
+        $this->assertSame('WEBP', substr($isi, 8, 4));
+
+        // Satu berkas saja untuk pelanggan ini: yang asli tidak ikut mendarat.
+        $milikDia = array_filter(
+            Storage::disk(FotoProfil::DISK)->files(),
+            fn ($f) => str_starts_with($f, 'profil-' . $pelanggan->getKey() . '_')
+        );
+
+        $this->assertCount(1, $milikDia);
+    }
+
+    #[Test]
+    public function layar_pelanggan_membuang_foto_lama_saat_diganti(): void
+    {
+        $pelanggan = $this->buatPengguna();
+        $admin = $this->buatAdministrator();
+        $alamat = route('account.pengguna.update.updatePhoto', $pelanggan->uuid);
+
+        $this->actingAs($admin)->post($alamat, ['gambar' => $this->gambar('png', 'satu.png')]);
+        $pertama = $pelanggan->refresh()->gambar;
+
+        $this->actingAs($admin)->post($alamat, ['gambar' => $this->gambar('jpg', 'dua.jpg')]);
+        $kedua = $pelanggan->refresh()->gambar;
+        $this->sampah[] = $kedua;
+
+        $this->assertNotSame($pertama, $kedua);
+        $this->assertFalse(Storage::disk(FotoProfil::DISK)->exists($pertama), 'Foto lama seharusnya sudah dibuang.');
+        $this->assertTrue(Storage::disk(FotoProfil::DISK)->exists($kedua));
     }
 
     #[Test]
