@@ -1308,7 +1308,22 @@
         padding-right: 40px;
     }
 
-    .password-toggle-inside {
+    /*
+     * Selektornya sengaja didahului .prof-sandi, bukan .password-toggle-inside
+     * saja.
+     *
+     * Layout ponsel (layouts/version.blade.php) memuat Font Awesome 6.5.0
+     * dari CDN DI DALAM body — jadi sesudah @stack('gaya') yang ada di head.
+     * Aturan ".fa, .fas" milik FA6 menyetel display: inline-block dan
+     * bobotnya (0,1,0) sama dengan ".password-toggle-inside", sehingga yang
+     * terbit belakangan menang: display: grid di sini mati dan glifnya
+     * kembali ditata sebagai teks sebaris, menempel ke atas kotaknya.
+     *
+     * Itulah sebabnya ikon ini lurus di dekstop (hanya FA5) tetapi naik
+     * ~6,5px di ponsel (FA5 + FA6). Dengan .prof-sandi di depan, bobotnya
+     * jadi (0,2,0) dan tidak bisa ditimpa aturan .fas versi mana pun.
+     */
+    .prof-sandi .password-toggle-inside {
         position: absolute;
         /*
          * 9px, bukan 12px. Isiannya mencadangkan padding-right 40px untuk
