@@ -28,14 +28,69 @@
         text-align: center;
     }
 
-    .pel-identitas-foto {
-        width: 104px;
-        height: 104px;
+    /* Bingkai avatar: sudutnya lebih besar daripada avatar daftar karena
+       ukurannya jauh lebih besar; radius tetap akan terlihat kaku di 104px. */
+    .pel-identitas-avatar > .mis-avatar {
         border-radius: 28px;
-        object-fit: cover;
         border: 3px solid #fff;
         box-shadow: 0 10px 24px -14px rgba(15, 23, 42, .5);
-        background: #f1f5f9;
+    }
+
+    /* ---------------------------------------------- daftar berbaris */
+
+    .pel-pesanan {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pel-pesanan-baris {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 12px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 13px;
+        background: #f8fafc;
+    }
+
+    .pel-pesanan-teks {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .pel-pesanan-layanan {
+        margin: 0;
+        line-height: 1.3;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--mis-tinta);
+        overflow-wrap: anywhere;
+    }
+
+    .pel-pesanan-ket {
+        margin: 1px 0 0;
+        line-height: 1.45;
+        font-size: .73rem;
+        color: var(--mis-tinta-3);
+        overflow-wrap: anywhere;
+    }
+
+    .pel-pesanan-kanan {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+
+    .pel-pesanan-nilai {
+        margin: 0;
+        line-height: 1.3;
+        font-size: .82rem;
+        font-weight: 800;
+        color: var(--mis-tinta);
+        white-space: nowrap;
     }
 
     .pel-identitas-nama {
@@ -177,6 +232,21 @@
         .pel-email .mis-tombol {
             width: 100%;
         }
+
+        /* Nilai dan lencana turun ke bawah teksnya: dipertahankan di kanan,
+           kolom teksnya tinggal sekitar 120px dan nama layanan pecah tiap
+           kata. */
+        .pel-pesanan-baris {
+            flex-wrap: wrap;
+        }
+
+        .pel-pesanan-kanan {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding-left: 39px;
+        }
     }
 </style>
 @endpush
@@ -203,8 +273,9 @@
 
             {{-- ============================================ kolom kiri --}}
             <aside class="mis-kartu pel-identitas">
-                <img class="pel-identitas-foto" alt="Foto {{ $user->full_name ?: $user->username }}"
-                    src="{{ \App\Support\FotoProfil::url($user->gambar) }}">
+                <div class="pel-identitas-avatar">
+                    @include('partials.avatar', ['orang' => $user, 'ukuran' => 104])
+                </div>
 
                 <p class="pel-identitas-nama">{{ $user->full_name ?: $user->username }}</p>
                 <p class="pel-identitas-akun">&#64;{{ $user->username }}</p>
@@ -356,6 +427,91 @@
                             </button>
                         </div>
                     </form>
+                </section>
+
+                {{-- ------------------------------ riwayat pesanan --}}
+                <section class="mis-kartu pel-bagian">
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-receipt"></i></span>
+                        <h2 class="pel-kepala-judul">Riwayat pesanan</h2>
+                        <p class="pel-kepala-sub">Layanan yang pernah dipesan orang ini.</p>
+                    </div>
+
+                    @if ($pesanan->isEmpty())
+                        <div class="mis-kosong">
+                            <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-receipt"></i></span>
+                            <p class="mis-kosong-judul">Belum ada pesanan</p>
+                            <p class="mis-kosong-teks">Pesanannya muncul di sini setelah ia memesan layanan.</p>
+                        </div>
+                    @else
+                        <div class="pel-pesanan">
+                            @foreach ($pesanan as $p)
+                                <div class="pel-pesanan-baris">
+                                    <span class="mis-medali mini {{ $p['warna'] }}" aria-hidden="true">
+                                        <i class="fas {{ $p['ikon'] }}"></i>
+                                    </span>
+                                    <div class="pel-pesanan-teks">
+                                        <p class="pel-pesanan-layanan">{{ $p['layanan'] }}</p>
+                                        <p class="pel-pesanan-ket">
+                                            {{ $p['nomor'] ?: 'Tanpa nomor' }}
+                                            @if ($p['waktu'])
+                                                &middot; {{ $p['waktu']->locale('id')->translatedFormat('d M Y') }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div class="pel-pesanan-kanan">
+                                        @if ($p['nilai'] > 0)
+                                            <p class="pel-pesanan-nilai">Rp {{ number_format($p['nilai'], 0, ',', '.') }}</p>
+                                        @endif
+                                        <span class="mis-pil mis-pil-abu">{{ \Illuminate\Support\Str::title($p['status']) }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Keterbatasannya disebutkan, tidak disembunyikan: dua dari
+                             tiga layanan mencocokkan pemesannya lewat alamat email,
+                             jadi jejak sebelum email diganti tidak ikut terbaca. --}}
+                        <p class="mis-bantuan" style="margin-top: 10px;">
+                            <i class="fas fa-info-circle mis-ikon-biru"></i>
+                            Sebagian layanan mencatat pemesannya lewat alamat email, jadi pesanan
+                            sebelum emailnya diganti bisa tidak muncul di sini.
+                        </p>
+                    @endif
+                </section>
+
+                {{-- ------------------------------ jejak perubahan --}}
+                <section class="mis-kartu pel-bagian">
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
+                        <h2 class="pel-kepala-judul">Jejak perubahan</h2>
+                        <p class="pel-kepala-sub">Siapa mengubah apa pada akun ini.</p>
+                    </div>
+
+                    @if ($jejak->isEmpty())
+                        <div class="mis-kosong">
+                            <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                            <p class="mis-kosong-judul">Belum ada catatan</p>
+                            <p class="mis-kosong-teks">Perubahan pada akun ini akan tercatat di sini.</p>
+                        </div>
+                    @else
+                        <div class="pel-pesanan">
+                            @foreach ($jejak as $baris)
+                                <div class="pel-pesanan-baris">
+                                    <span class="mis-medali mini {{ $baris->berhasil ? 'mis-hijau' : 'mis-merah' }}" aria-hidden="true">
+                                        <i class="fas {{ $baris->berhasil ? 'fa-check' : 'fa-times' }}"></i>
+                                    </span>
+                                    <div class="pel-pesanan-teks">
+                                        <p class="pel-pesanan-layanan">{{ $baris->alasan ?: 'Perubahan tidak dijelaskan' }}</p>
+                                        <p class="pel-pesanan-ket">
+                                            {{ optional($baris->created_at)->locale('id')->translatedFormat('d M Y, H:i') }} WIB
+                                            @if ($baris->ip) &middot; {{ $baris->ip }} @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </section>
 
             </div>

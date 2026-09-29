@@ -42,6 +42,30 @@ class PenggunaController extends Controller
      * Tanpa penjagaan ini, siapa pun yang sudah masuk bisa mengirim nomor id
      * milik orang lain dan mengubah akun itu.
      */
+    /**
+     * Mencatat perubahan pada akun orang lain.
+     *
+     * Memakai tabel yang sama dengan riwayat keamanan profil — polanya sudah
+     * ada di ProfilController, jadi tidak perlu tabel jejak sendiri. Nama
+     * pelakunya ikut ditulis: tanpa itu, catatan "status diubah" tidak
+     * menjawab pertanyaan yang paling sering muncul, yaitu oleh siapa.
+     */
+    private function catatPerubahan(User $sasaran, string $apa): void
+    {
+        $pelaku = Auth::user();
+
+        $keterangan = $pelaku && $pelaku->getKey() !== $sasaran->getKey()
+            ? $apa . ' oleh ' . ($pelaku->full_name ?: $pelaku->username)
+            : $apa;
+
+        \App\AktivitasMasuk::catat(
+            $sasaran,
+            (string) ($sasaran->username ?: $sasaran->email),
+            true,
+            $keterangan
+        );
+    }
+
     private function pastikanBoleh($id): void
     {
         if ((int) $id === (int) Auth::id()) {
@@ -279,6 +303,8 @@ class PenggunaController extends Controller
         $user->save();
 
         // Redirect dengan session success
+        $this->catatPerubahan($user, 'foto profil diganti');
+
         return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
     }
     // <!--================== END ==================-->
@@ -308,6 +334,8 @@ class PenggunaController extends Controller
             throw $e;
         }
 
+        $berubah = [];
+
         // Update email only if provided and different from the current email
         if ($request->has('email') && $request->input('email') !== $user->email) {
             // Mengganti email akun sendiri wajib disertai kata sandi saat ini.
@@ -321,6 +349,7 @@ class PenggunaController extends Controller
 
             $user->email = $request->input('email');
             $user->email_verified_at = null; // Reset email verification if email changes
+            $berubah[] = 'alamat email';
         }
 
         // Update jobdesk and telp if present
@@ -328,12 +357,19 @@ class PenggunaController extends Controller
             $user->jobdesk = $request->input('jobdesk');
         }
 
-        if ($request->has('telp')) {
+        if ($request->has('telp') && $request->input('telp') !== $user->telp) {
             $user->telp = $request->input('telp');
+            $berubah[] = 'nomor telepon';
         }
 
         // Save user data
         $user->save();
+
+        // Dicatat SESUDAH tersimpan, dan hanya yang benar-benar berubah:
+        // menyimpan formulir tanpa mengubah apa pun tidak layak jadi catatan.
+        if (! empty($berubah)) {
+            $this->catatPerubahan($user, implode(' dan ', $berubah) . ' diubah');
+        }
 
         // Return success message
         return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
@@ -373,8 +409,22 @@ class PenggunaController extends Controller
             $user->jenis = $request->input('jenis') ?? $user->jenis;
         }
 
+        // Daftar kolom yang berubah dikumpulkan SEBELUM save(): sesudah
+        // tersimpan, nilai lamanya sudah tidak bisa dibandingkan lagi.
+        $berubah = [];
+        foreach (['full_name' => 'nama', 'username' => 'username', 'status' => 'status akun',
+                  'peran' => 'peran', 'jenis' => 'jenis akun'] as $kolom => $sebutan) {
+            if ($user->isDirty($kolom)) {
+                $berubah[] = $sebutan;
+            }
+        }
+
         // Save the updated user data
         $user->save();
+
+        if (! empty($berubah)) {
+            $this->catatPerubahan($user, implode(', ', $berubah) . ' diubah');
+        }
 
         // Redirect with a success message
         return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
@@ -391,6 +441,8 @@ class PenggunaController extends Controller
         $user->email_verified_at = now(); // Mark email as verified
         $user->status = 'active';
         $user->save();
+
+        $this->catatPerubahan($user, 'email ditandai terverifikasi');
 
         // Redirect with success message
         return redirect()->back()->with('statusverifikasiemail', 'Email berhasil diverifikasi.');
