@@ -98,86 +98,6 @@ body {
 }
 
 /*
- * Deret tab bersama.
- *
- * Diangkat dari .prof-tab di halaman profil, yang jadi acuan rupa. Dipakai
- * saat satu layar memuat beberapa urusan yang tidak perlu dilihat sekaligus —
- * menumpuknya jadi satu kolom panjang memaksa orang menggulir untuk menemukan
- * yang dicarinya, dan menyisakan petak kosong di kolom sebelahnya.
- *
- * Kelas Bootstrap .nav-link dipertahankan karena data-toggle="pill" yang
- * mengatur perpindahannya bersandar padanya.
- */
-.mis-tab {
-    display: flex;
-    gap: 6px;
-    list-style: none;
-    margin: 0 0 16px;
-    padding: 5px;
-    background: #f1f5f9;
-    border: 1px solid var(--ui-garis);
-    border-radius: 14px;
-}
-
-.mis-tab > li {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-.mis-tab .nav-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 9px 10px;
-    border-radius: 11px;
-    font-size: .8rem;
-    font-weight: 700;
-    color: var(--ui-tinta-3);
-    background: transparent;
-    white-space: nowrap;
-    transition: all .25s ease;
-}
-
-.mis-tab .nav-link > .fas {
-    font-size: 13px !important;
-}
-
-.mis-tab .nav-link:hover {
-    color: #4f46e5;
-    background: #fff;
-}
-
-.mis-tab .nav-link.active {
-    background: var(--ui-gradien);
-    color: #fff;
-    box-shadow: 0 10px 20px -12px var(--ui-aksen);
-}
-
-.mis-tab .nav-link.active > .fas {
-    color: #fff !important;
-}
-
-/* Empat tab tidak muat berjajar di ponsel; dijadikan satu baris yang bisa
-   digeser, bukan dibungkus jadi dua baris yang memakan tinggi. */
-@media (max-width: 767.98px) {
-    .mis-tab {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .mis-tab::-webkit-scrollbar {
-        display: none;
-    }
-
-    .mis-tab > li {
-        flex: 0 0 auto;
-    }
-}
-
-/*
  * Kartu BAGIAN — satu urusan di dalam satu layar.
  *
  * Berbeda dari .mis-kartu, yang menaungi seluruh blok: bantalannya lebih
@@ -1120,6 +1040,112 @@ body.sidebar-show .main-footer {
     background: var(--ui-gradien);
     box-shadow: 0 12px 22px -16px var(--ui-aksen);
 }
+
+/*
+ * Deret tab .mis-tab ditaruh SESUDAH .nav-pills, bukan sebelumnya.
+ *
+ * Keduanya berbobot sama — (0,2,0) — jadi yang menentukan adalah urutan
+ * terbitnya. Ditaruh lebih dulu, ".nav-pills .nav-link { font-size: .85rem }"
+ * di atas mengalahkan ukuran tab ini, dan tabnya tergambar 13,6px sementara
+ * tab di halaman profil 12,8px. Halaman profil tidak kena karena gayanya
+ * terbit lewat @push('gaya'), yaitu sesudah seluruh berkas ini.
+ */
+/*
+ * Deret tab bersama.
+ *
+ * Diangkat dari .prof-tab di halaman profil, yang jadi acuan rupa. Dipakai
+ * saat satu layar memuat beberapa urusan yang tidak perlu dilihat sekaligus —
+ * menumpuknya jadi satu kolom panjang memaksa orang menggulir untuk menemukan
+ * yang dicarinya, dan menyisakan petak kosong di kolom sebelahnya.
+ *
+ * Kelas Bootstrap .nav-link dipertahankan karena data-toggle="pill" yang
+ * mengatur perpindahannya bersandar padanya.
+ */
+.mis-tab {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 5px;
+    background: #f1f5f9;
+    border: 1px solid var(--ui-garis);
+    border-radius: 14px;
+}
+
+.mis-tab > li {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.mis-tab .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 11px;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--ui-tinta-3);
+    background: transparent;
+    white-space: nowrap;
+    transition: all .25s ease;
+}
+
+/* 12px, menyamai ukuran terukur ikon tab di halaman profil. !important perlu
+   karena aturan global layout memaksa .fas jadi 20px. */
+.mis-tab .nav-link > .fas {
+    font-size: 12px !important;
+}
+
+/*
+ * Lencana angka di dalam tab (mis. jumlah pesanan) dibuat seringkas mungkin.
+ *
+ * Dengan ukuran .mis-pil biasa, kotaknya lebih tinggi daripada baris teks tab
+ * dan MENARIK seluruh deretnya ikut meninggi — terukur 64px lawan 58px pada
+ * deret tab tanpa lencana. Akibatnya satu tab berlencana membuat seluruh
+ * deret berbeda tinggi dari layar lain yang tabnya polos.
+ */
+.mis-tab .nav-link .mis-pil {
+    padding: 0 6px;
+    font-size: .68rem;
+    line-height: 1.6;
+}
+
+.mis-tab .nav-link:hover {
+    color: #4f46e5;
+    background: #fff;
+}
+
+.mis-tab .nav-link.active {
+    background: var(--ui-gradien);
+    color: #fff;
+    box-shadow: 0 10px 20px -12px var(--ui-aksen);
+}
+
+.mis-tab .nav-link.active > .fas {
+    color: #fff !important;
+}
+
+/* Empat tab tidak muat berjajar di ponsel; dijadikan satu baris yang bisa
+   digeser, bukan dibungkus jadi dua baris yang memakan tinggi. */
+@media (max-width: 767.98px) {
+    .mis-tab {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .mis-tab::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mis-tab > li {
+        flex: 0 0 auto;
+    }
+}
+
 
 .nav-tabs {
     border-bottom: 1px solid var(--ui-garis);
