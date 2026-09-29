@@ -12,7 +12,7 @@ Data Pelanggan | MIS
 <style>
     /*
      * Layar ini memakai bahasa rupa yang sama dengan halaman profil: kartu
-     * .mis-kartu, ubin ikon .mis-medali, lencana .mis-pil, tombol .mis-tombol.
+     * .mis-bagian, ubin ikon .mis-medali, lencana .mis-pil, tombol .mis-tombol.
      * Yang ditulis di sini hanya yang khas layar ini.
      *
      * Versi sebelumnya menaruh 265 baris <style> beserta puluhan style sebaris
@@ -73,11 +73,47 @@ Data Pelanggan | MIS
         min-width: 0;
     }
 
-    /* Cincin berputar kecil di dalam kotak cari. Muncul hanya saat ada
-       permintaan berjalan, dan berhenti mengambil tempat saat diam. */
+    /* Tombol hapus di dalam kotak cari. */
+    .pel-hapus {
+        position: absolute;
+        right: 10px;
+        bottom: 9px;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--mis-tinta-4);
+        cursor: pointer;
+        transition: background .18s ease, color .18s ease;
+    }
+
+    .pel-hapus:hover {
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .pel-hapus > .fas {
+        /* Aturan global layout mengunci .fas ke 20px dengan bobot yang sama,
+           jadi di sini perlu lebih kuat. */
+        font-size: .78rem !important;
+    }
+
+    /* Isian diberi ruang di kanan supaya ketikan panjang tidak menyelinap
+       ke bawah tombol hapus. */
+    .pel-saring-cari .form-control-modern {
+        padding-right: 40px;
+    }
+
+    /* Cincin berputar kecil di dalam kotak cari. Menggantikan tempat tombol
+       hapus selagi permintaannya berjalan, bukan berdampingan dengannya —
+       dua tanda di sudut yang sama hanya membingungkan. */
     .pel-sibuk {
         position: absolute;
-        right: 12px;
+        right: 15px;
         bottom: 13px;
         width: 15px;
         height: 15px;
@@ -92,6 +128,10 @@ Data Pelanggan | MIS
     .pel-saring.sibuk .pel-sibuk {
         opacity: 1;
         animation: pel-putar .7s linear infinite;
+    }
+
+    .pel-saring.sibuk .pel-hapus {
+        visibility: hidden;
     }
 
     @keyframes pel-putar {
@@ -377,6 +417,15 @@ Data Pelanggan | MIS
                 <input type="search" class="form-control-modern" id="pel-cari" name="cari"
                     value="{{ $cari }}" placeholder="Nama, username, email, atau telepon"
                     autocomplete="off" aria-controls="pel-hasil">
+                {{-- Tombol hapus ketikan. Diberi type=button supaya tidak
+                     ikut mengirim formulir, dan disembunyikan saat kotaknya
+                     kosong — tanda silang di kotak kosong tidak ada gunanya
+                     dan hanya menambah satu hal untuk dipahami. --}}
+                <button type="button" class="pel-hapus" id="pel-hapus"
+                    aria-label="Hapus kata kunci pencarian" title="Hapus kata kunci"
+                    @if ($cari === '') hidden @endif>
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
                 <span class="pel-sibuk" id="pel-sibuk" aria-hidden="true"></span>
             </div>
 
@@ -420,7 +469,7 @@ Data Pelanggan | MIS
              tidak ikut digambar ulang — dan fokus ketikan tidak hilang. --}}
         <div id="pel-hasil">
         @if ($pelanggan->isEmpty())
-            <div class="mis-kartu">
+            <div class="mis-bagian">
                 <div class="mis-kosong">
                     <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-users"></i></span>
                     <p class="mis-kosong-judul">
@@ -535,9 +584,7 @@ Data Pelanggan | MIS
                 </table>
             </div>
 
-            <div class="mis-aksi-baris" style="justify-content: center; margin-top: 16px;">
-                {{ $pelanggan->links('vendor.pagination.bootstrap-4') }}
-            </div>
+            {{ $pelanggan->links('vendor.pagination.bootstrap-4') }}
         @endif
         </div>
 
@@ -648,7 +695,34 @@ Data Pelanggan | MIS
             jeda = setTimeout(function () { muat(alamatSekarang(), true); }, tundaan);
         };
 
-        cari.addEventListener('input', function () { jadwalkan(300); });
+        const hapus = document.getElementById('pel-hapus');
+
+        const setelHapus = function () {
+            if (hapus) hapus.hidden = cari.value === '';
+        };
+
+        cari.addEventListener('input', function () {
+            setelHapus();
+            jadwalkan(300);
+        });
+
+        if (hapus) {
+            hapus.addEventListener('click', function () {
+                cari.value = '';
+                setelHapus();
+                // Fokus dikembalikan ke kotaknya: yang menghapus kata kunci
+                // hampir selalu mau mengetik kata kunci lain.
+                cari.focus();
+                jadwalkan(0);
+            });
+        }
+
+        // Tombol silang bawaan <input type=search> di sebagian peramban
+        // mengosongkan isian tanpa memicu 'input', jadi 'search' ikut didengar.
+        cari.addEventListener('search', function () {
+            setelHapus();
+            jadwalkan(0);
+        });
 
         // Menu pilihan tidak perlu ditunda: satu klik sudah keputusan penuh.
         borang.querySelectorAll('select').forEach(function (s) {

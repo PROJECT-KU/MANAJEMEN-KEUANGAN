@@ -59,6 +59,31 @@ body {
 }
 
 /*
+ * Kartu BAGIAN — satu urusan di dalam satu layar.
+ *
+ * Berbeda dari .mis-kartu, yang menaungi seluruh blok: bantalannya lebih
+ * rapat, sudutnya lebih kecil, dan bayangannya jauh lebih tipis. Angkanya
+ * diambil dari .prof-bagian di halaman profil, yang jadi acuan rupa —
+ * sebelumnya nilai itu hanya ada di lembar gaya halaman profil, sehingga
+ * layar lain yang ingin seragam harus menyalinnya.
+ *
+ * Terukur sebelum disatukan: .mis-kartu berbantalan 22px, sudut 18px, dan
+ * bayangan rgba(15,23,42,.55) 0 6px 16px — hampir empat belas kali lebih
+ * pekat daripada bayangan kartu bagian di profil.
+ */
+.mis-bagian {
+    padding: 15px 16px;
+    border: 1px solid #e7ecf5;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.mis-bagian + .mis-bagian {
+    margin-top: 12px;
+}
+
+/*
  * Avatar bersama: foto kalau ada, inisial berwarna kalau tidak.
  * Lihat resources/views/partials/avatar.blade.php.
  */
@@ -861,17 +886,74 @@ body.sidebar-show .main-footer {
 
 /* -------------------------------------------------------- halaman & modal --- */
 
+/*
+ * Penomoran halaman: keterangan di kiri, tombol di kanan.
+ *
+ * Lihat resources/views/vendor/pagination/bootstrap-4.blade.php.
+ */
+.mis-halaman {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.mis-halaman-ket {
+    margin: 0;
+    /* Angka relatif: layout mewariskan line-height 28px MUTLAK, yang pada
+       huruf sekecil ini merenggangkan barisnya seperti daftar. */
+    line-height: 1.5;
+    font-size: .78rem;
+    color: var(--ui-tinta-3);
+}
+
+.mis-halaman-ket strong {
+    color: var(--ui-tinta);
+    font-weight: 800;
+}
+
 .pagination {
     gap: 5px;
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+/* Tombol arah dibuat persegi dan seukuran tombol angka, supaya deretannya
+   rata dan cukup besar untuk disentuh di ponsel. Bawaannya hanya tanda
+   kurung sudut selebar 6px. */
+.page-link.mis-halaman-arah {
+    display: inline-grid;
+    place-items: center;
+    min-width: 36px;
+    padding: 8px 0;
+}
+
+.page-link.mis-halaman-arah > .fas {
+    font-size: .72rem !important;
+}
+
+.page-link.mis-halaman-jeda {
+    border-color: transparent;
+    background: transparent;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .page-item .page-link {
+    display: inline-block;
+    /* min-width, bukan padding saja: tanpa itu tombol "9" jauh lebih sempit
+       daripada "10" dan seluruh deretnya bergeser saat berganti halaman. */
+    min-width: 36px;
     border: 1px solid var(--ui-garis);
     border-radius: 10px;
     color: var(--ui-tinta-2);
     font-size: .82rem;
     font-weight: 700;
-    padding: 8px 13px;
+    line-height: 1.35;
+    padding: 8px 11px;
+    text-align: center;
 }
 
 .page-item.active .page-link {
@@ -1819,6 +1901,18 @@ body.mis-latar-terkunci {
 }
 
 @media (max-width: 767.98px) {
+    /* Keterangan dan tombol ditumpuk lalu ditengahkan: berdampingan, di
+       layar 390px keduanya saling menghimpit dan angka terakhirnya
+       terdorong keluar. */
+    .mis-halaman {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .mis-halaman-daftar {
+        justify-content: center;
+    }
+
     /* Radius dan jarak sudah dari token clamp(); di sini cukup padding
        yang dirapatkan sedikit lagi untuk layar sempit. */
     .mis-kepala,
