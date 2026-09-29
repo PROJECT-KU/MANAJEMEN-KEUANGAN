@@ -1784,8 +1784,14 @@
         white-space: nowrap;
     }
 
-    /* Lencana di atas, alasannya di bawah. Di mode kartu (ponsel) sel ini
-       rata kanan, jadi keduanya ikut rata kanan tanpa aturan tambahan. */
+    /* Waktu di atas, keterangan kejadiannya di bawah — selalu rata kiri,
+       di layar lebar maupun sempit. */
+    .kmn-kejadian {
+        display: grid;
+        gap: 2px;
+        justify-items: start;
+    }
+
     .kmn-hasil {
         display: grid;
         gap: 3px;
@@ -2135,9 +2141,8 @@
             overflow-wrap: anywhere;
         }
 
-        /* Di mode kartu, sel nilai berada di sisi kanan; lencana dan
-           alasannya ikut rata kanan supaya tepinya lurus dengan nilai
-           baris lain. */
+        /* Di mode kartu, sel nilai berada di sisi kanan; lencananya ikut
+           rata kanan supaya tepinya lurus dengan nilai baris lain. */
         .kmn-hasil {
             justify-items: end;
         }
@@ -2191,6 +2196,194 @@
         /* Kotak ketiga mengisi sisa baris supaya tidak ada ruang menganga. */
         .prof-mini-kisi > .prof-mini:last-child {
             grid-column: 1 / -1;
+        }
+    }
+
+    /*
+     * ============================================ riwayat keamanan di ponsel
+     *
+     * Mode kartu bawaan .mis-tabel-kartu menumpuk tiap sel jadi baris
+     * "LABEL ............ nilai". Untuk tabel empat kolom itu berarti satu
+     * catatan memakan empat baris berlabel, dan labelnya — HASIL, ALAMAT IP,
+     * PERANGKAT — terulang di tiap catatan.
+     *
+     * Terukur di 390px sebelum diubah: SATU catatan setinggi 250px, tiap sel
+     * 47-54px untuk satu baris teks. Tujuh catatan menuntut 1.750px gulungan
+     * demi dua puluh delapan keterangan pendek. Sebabnya bukan bantalan
+     * kartunya melainkan `line-height: 28px` — angka MUTLAK yang dipasang
+     * cabang ponsel di layout untuk seluruh halaman, jadi sel berisi satu
+     * lencana 20px pun tetap setinggi 28px ditambah bantalan.
+     *
+     * Ditata ulang jadi dua baris, seperti catatan kejadian:
+     *
+     *     29 Sep 2026, 21:41 WIB        [v Berhasil]
+     *     127.0.0.1                   Safari di iPhone
+     *
+     * Baris atas menjawab "kapan, dan berhasil?", baris bawah "dari mana, dan
+     * dengan apa?". Labelnya dibuang: lencana hijau bertuliskan "Berhasil"
+     * tidak perlu didahului kata HASIL, dan sebuah alamat IP sudah kelihatan
+     * seperti alamat IP.
+     *
+     * Markahnya tidak diubah sama sekali — tabelnya tetap tabel, dan tampilan
+     * layar lebar tidak ikut tersentuh.
+     */
+    @media (max-width: 575.98px) {
+        /*
+         * Bantalan pembungkus dibuang di ponsel.
+         *
+         * Ditelusuri dari tepi layar, 147px dari 390px habis sebagai bantalan
+         * bertingkat: 14+14 (isi halaman), 13+13 (kartu tab), 16+16 (kartu
+         * bagian), 15+15 DI SINI, lalu 15+12 di barisnya sendiri. Lapis
+         * kelima itu tidak menghasilkan apa pun — barisnya sudah berbantalan
+         * — tetapi memakan 30px, dan 30px itulah selisih antara waktu yang
+         * muat sebaris dengan lencananya dan waktu yang terpatah dua.
+         */
+        .kmn-tabel {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr {
+            position: relative;
+            /*
+             * FLEX, bukan grid.
+             *
+             * Kisi memakai jalur yang sama untuk semua barisnya, jadi sel
+             * apa pun yang lebar di baris bawah ikut menyempitkan baris atas.
+             * Terukur: lebar yang tersedia 243px, waktu menuntut 150px,
+             * lencana 78px, nama perangkat 119px. Waktu + lencana muat
+             * (238px); waktu + perangkat tidak (279px). Dengan kisi, nama
+             * perangkat di baris bawah memaksa kolom kanan jadi 119px
+             * sehingga waktu di baris atas tinggal 114px dan tanggalnya
+             * terpatah tiga baris — padahal keduanya tidak pernah sebaris.
+             *
+             * Flex mengukur tiap baris sendiri-sendiri, jadi lebar nama
+             * perangkat tidak lagi menyentuh waktu.
+             */
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 10px;
+            row-gap: 2px;
+            padding: 9px 12px 9px 15px;
+            border-bottom: 1px solid var(--mis-garis-lembut);
+        }
+
+        /* Melawan line-height: 28px mutlak dari layout cabang ponsel. Tanpa
+           baris ini penataannya tetap benar tetapi tingginya tidak berubah —
+           itulah yang sebenarnya memakan ruang. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td,
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td span {
+            line-height: 1.35;
+        }
+
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul]::before {
+            display: none;
+        }
+
+        /* Baris 1 kiri: waktu dan keterangan kejadiannya. Boleh menyusut,
+           tetapi tidak di bawah 150px — itu lebar tanggal utuh, dan di
+           bawahnya tanggalnya terpatah. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td.mis-td-utama {
+            flex: 1 1 150px;
+            min-width: 0;
+            padding-bottom: 0;
+            /* Garis putus-putus pemisah kepala kartu ikut hilang: pemisah
+               antar catatan sudah dikerjakan garis bawah barisnya. */
+            border-bottom: 0;
+        }
+
+        /* Baris 1 kanan: lencana keadaan, selebar isinya. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Hasil"] {
+            flex: 0 0 auto;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        /* Baris 2 kiri: alamat IP.
+           flex-basis auto, BUKAN 100%: 100% memaksanya memenuhi barisnya
+           sendiri, sehingga nama perangkat terdorong ke baris ketiga dan tiap
+           catatan bertambah satu baris. Dengan auto ia cukup membungkus ke
+           bawah — sel waktu ber-flex-grow 1 sudah memastikan baris pertama
+           selalu penuh, jadi alamat IP tidak pernah menyelinap ke sana. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Alamat IP"] {
+            flex: 1 1 auto;
+            min-width: 0;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        /* Baris 2 kanan: nama perangkat, didorong ke kanan supaya tepinya
+           lurus dengan lencana di atasnya. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Perangkat"] {
+            flex: 0 1 auto;
+            justify-content: flex-end;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        /* Dua keterangan baris bawah memang pelengkap: ukurannya dikecilkan
+           supaya waktu dan lencana keadaan yang lebih dulu terbaca. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Alamat IP"],
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Perangkat"] {
+            font-size: .72rem;
+        }
+
+        .kmn-tabel .kmn-samar {
+            font-size: .72rem;
+        }
+
+        /* IPv6 panjangnya bisa 39 huruf dan tidak punya tempat patah alami.
+           Dibiarkan patah di mana saja supaya tidak mendorong lebar kartu. */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Alamat IP"] {
+            overflow-wrap: anywhere;
+        }
+
+        /*
+         * Catatan yang GAGAL diberi tanda merah di tepi kiri.
+         *
+         * Layar ini gunanya menjawab satu pertanyaan — "ada yang bukan saya?"
+         * — dan jawabannya hampir selalu ada di baris yang gagal. Tanpa
+         * penanda, baris itu setara dengan belasan baris wajar di sekitarnya
+         * dan harus dicari dengan membaca satu per satu.
+         *
+         * :has() dipakai supaya markahnya tidak perlu diubah; di peramban yang
+         * belum mengenalnya penandanya sekadar tidak muncul, tidak merusak.
+         */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr:has(.mis-pil-merah) {
+            background: #fffafa;
+        }
+
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr:has(.mis-pil-merah)::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            left: 5px;
+            width: 3px;
+            border-radius: 999px;
+            background: #f43f5e;
+        }
+    }
+
+    /*
+     * Di bawah 360px, waktu (150px) dan lencana (105px) tidak lagi muat
+     * sebaris pada 207px yang tersedia. Yang terjadi tanpa aturan ini:
+     * lencananya membungkus ke bawah dan MENDARAT DI SEBELAH alamat IP pada
+     * catatan yang alamatnya pendek, tetapi sendirian pada yang panjang —
+     * jadi tiap catatan tersusun berbeda dan daftarnya terbaca acak.
+     *
+     * Dipaksa selebar penuh, lencananya selalu turun ke barisnya sendiri dan
+     * semua catatan tersusun sama: waktu, lencana, lalu asal dan perangkat.
+     *
+     * HARUS ditulis SESUDAH blok 575.98px di atas: pemilihnya sama
+     * persis, jadi yang menang bukan yang ambangnya lebih sempit melainkan
+     * yang tertulis belakangan. Ditaruh sebelum blok itu, aturan ini
+     * memang terbaca peramban tetapi diam-diam kalah.
+     */
+    @media (max-width: 359.98px) {
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody td[data-judul="Hasil"] {
+            flex: 1 1 100%;
         }
     }
 
