@@ -103,10 +103,13 @@ Route::prefix('account')
             Route::get('/pengguna/create', 'account\PenggunaController@create')->name('account.pengguna.create');
             Route::post('/pengguna', 'account\PenggunaController@store')->name('account.pengguna.store');
             Route::get('/pengguna/{id}/edit', 'account\PenggunaController@edit')->name('account.pengguna.edit');
-            Route::post('/pengguna/update/foto/{id}', 'account\PenggunaController@updatePhoto')->name('account.pengguna.update.updatePhoto');
-            Route::post('/pengguna/update/data-diri/{id}', 'account\PenggunaController@updatediri')->name('account.pengguna.update.datadiri');
-            Route::post('/pengguna/update/data-diri-pengguna/{id}', 'account\PenggunaController@update')->name('account.pengguna.update');
-            Route::post('/pengguna/update/verifikasi-email/{id}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
+            // {pengguna:uuid}, bukan {id}: alamatnya ikut tercatat di riwayat
+            // peramban, catatan peladen, dan tautan yang disalin orang. id
+            // berurut membuat satu tautan cukup untuk menebak tautan akun lain.
+            Route::post('/pengguna/update/foto/{pengguna:uuid}', 'account\PenggunaController@updatePhoto')->name('account.pengguna.update.updatePhoto');
+            Route::post('/pengguna/update/data-diri/{pengguna:uuid}', 'account\PenggunaController@updatediri')->name('account.pengguna.update.datadiri');
+            Route::post('/pengguna/update/data-diri-pengguna/{pengguna:uuid}', 'account\PenggunaController@update')->name('account.pengguna.update');
+            Route::post('/pengguna/update/verifikasi-email/{pengguna:uuid}', 'account\PenggunaController@verifyEmail')->name('account.pengguna.update.vertifikasiemail');
             Route::get('/pengguna/{id}/detail', 'account\PenggunaController@detail')->name('account.pengguna.detail');
             Route::post('/pengguna/{id}/matikan-pin', 'account\PenggunaController@matikanPin')->name('account.pengguna.matikan-pin');
             Route::delete('/pengguna/delete/{id}', 'account\PenggunaController@destroy')->name('account.pengguna.destroy');
@@ -372,11 +375,14 @@ Route::prefix('account')
             Route::get('/cuti/data/create', 'account\CutiController@create')->name('account.cuti.create');
 
             // data cutomer
+            // {pelanggan:uuid}, bukan {id}: id berurut membuat tautan satu
+            // pelanggan bisa dipakai menebak tautan pelanggan lain.
+            // Rute search dan live dihapus — pencariannya sekarang jadi satu
+            // dengan daftar lewat parameter ?cari=, dan poll-nya tak pernah
+            // dipakai berkas mana pun.
             Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
-            Route::get('/customer/data/search', 'account\CustomerController@search')->name('account.customer.search');
-            Route::get('/customer/data/live', 'account\CustomerController@pollData')->name('account.customer.live');
-            Route::get('/customer/data/edit/{id}', 'account\CustomerController@edit')->name('account.customer.edit');
-            Route::delete('/customer/data/{id}', 'account\CustomerController@destroy')->name('account.customer.destroy');
+            Route::get('/customer/data/{pelanggan:uuid}', 'account\CustomerController@edit')->name('account.customer.edit');
+            Route::delete('/customer/data/{pelanggan:uuid}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 
             //clinik scopus trainer
             Route::get('/clinikscopus/data', 'account\ClinikScopusTrainerController@index')->name('account.clinikscopus.index');

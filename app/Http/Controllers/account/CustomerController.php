@@ -5,270 +5,119 @@ namespace App\Http\Controllers\account;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
-use App\Support\FotoProfil;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
+/**
+ * Data pelanggan — orang luar yang memakai layanan jasa.
+ *
+ * Pelanggan dikenali dari PERAN-nya, bukan jabatannya. Sebelumnya layar ini
+ * menyaring where('level','user'); sesudah peran dipisah dari jabatan, yang
+ * benar adalah peran = user.
+ */
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    /** Satu tempat untuk jumlah baris per halaman, dipakai daftar dan pencarian. */
+    private const PER_HALAMAN = 12;
 
-    // <!--================== TAMPILAN DATA ==================-->
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /** Hanya orang dalam yang boleh melihat data pelanggan. */
+    private function bolehMelihat(): bool
+    {
+        return (bool) Auth::user()?->adalahOrangDalam();
+    }
+
+    /**
+     * Daftar pelanggan.
+     *
+     * Penyaringnya sengaja tinggal tiga: kata kunci, status akun, dan status
+     * verifikasi email. Yang lama menyediakan enam parameter (email persis,
+     * tanggal mulai, tanggal akhir, jumlah per halaman) yang TIDAK punya
+     * satu pun kendali di layarnya — jadi tidak pernah bisa dipakai siapa pun
+     * kecuali dengan mengetik sendiri di bilah alamat.
+     */
     public function index(Request $request)
     {
-        $status = $request->get('status');
-        $verified = $request->get('verified');
-        $email = $request->get('email');
-        $start = $request->get('start');
-        $end = $request->get('end');
-        $perPage = $request->get('per_page', 10);
-
-        $users = DB::table('users')
-            ->where('level', 'user')
-            ->when($status, function ($q, $status) {
-                if ($status === 'active') {
-                    $q->where('status', 'active');
-                } elseif ($status === 'non active') {
-                    $q->whereNull('status')->orWhere('status', 'non active');
-                }
-            })
-            ->when($verified, function ($q, $verified) {
-                if ($verified === 'verified') {
-                    $q->whereNotNull('email_verified_at');
-                } elseif ($verified === 'unverified') {
-                    $q->whereNull('email_verified_at');
-                }
-            })
-            ->when($email, function ($q, $email) {
-                $q->where('email', $email);
-            })
-            ->when($start, function ($q, $start) {
-                $q->whereDate('created_at', '>=', $start);
-            })
-            ->when($end, function ($q, $end) {
-                $q->whereDate('created_at', '<=', $end);
-            })
-            ->orderBy('created_at', 'DESC')
-            ->paginate($perPage)
-            ->appends($request->all());
-
-        $allUsers = DB::table('users')->where('level', 'user')->get();
-
-        return view('account.customer.index', compact(
-            'users',
-            'allUsers',
-            'status',
-            'verified',
-            'email',
-            'start',
-            'end',
-            'perPage'
-        ));
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== REAL TIME DATA  ==================-->
-    public function pollData(Request $request)
-    {
-        $lastId = $request->get('last_id');
-
-        $newUsers = DB::table('users')
-            ->where('level', 'user')
-            ->when($lastId, function ($q) use ($lastId) {
-                $q->where('id', '>', $lastId);
-            })
-            ->orderBy('created_at', 'DESC')
-            ->get();
-
-        return response()->json($newUsers);
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== SEARCH ==================-->
-    public function search(Request $request)
-    {
-        $search = $request->get('q');
-        $user = Auth::user();
-
-        $users = DB::table('users')
-            ->select(
-                'users.*',
-                DB::raw("COALESCE(users.status, 'non active') as status"),
-                DB::raw("
-                CASE 
-                    WHEN users.email_verified_at IS NOT NULL 
-                    THEN 'Sudah Diverifikasi' 
-                    ELSE 'Belum Diverifikasi' 
-                END as verifikasi_status
-            ")
-            )
-            ->where('level', 'user')
-            ->where(function ($query) use ($search) {
-                $query->where('users.full_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.email', 'LIKE', "%{$search}%")
-                    ->orWhere('users.username', 'LIKE', "%{$search}%")
-                    ->orWhere('users.email_verified_at', 'LIKE', "%{$search}%")
-                    ->orWhere('users.jenis', 'LIKE', "%{$search}%")
-                    ->orWhere('users.level', 'LIKE', "%{$search}%")
-                    ->orWhere('users.status', 'LIKE', "%{$search}%")
-                    ->orWhere('users.telp', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("
-                    CASE 
-                        WHEN users.email_verified_at IS NOT NULL 
-                        THEN 'Sudah Diverifikasi' 
-                        ELSE 'Belum Diverifikasi' 
-                    END LIKE ?
-                ", ["%{$search}%"]);
-            })
-            ->orderBy('users.created_at', 'DESC')
-            ->paginate(10);
-
-        $users->appends(['q' => $search]);
-
-        $notFound = $users->isEmpty();
-
-        return view('account.customer.index', compact('users', 'search', 'notFound'));
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== UPDATE DATA ==================-->
-    public function edit($id)
-    {
-        $user = User::findOrFail($id);
-
-        return view('account.customer.edit', compact('user'));
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== UPDATE FOTO PROFIL ==================-->
-    public function updatePhoto(Request $request, $id)
-    {
-        $user = User::find($id);
-
-        /*
-         * Lewat FotoProfil, sama seperti dua layar lainnya.
-         *
-         * Yang lama merangkai nama berkas dari extension() — ekstensi yang
-         * DIKETIK pengunggah — lalu memindahkannya apa adanya ke bawah
-         * public/. Berkas berisi gambar sah yang dinamai "x.php" karena itu
-         * tersimpan sebagai .php di folder yang dijalankan peladen. Sekarang
-         * namanya dibuat peladen dan isinya digambar ulang jadi WebP.
-         */
-        $fileName = FotoProfil::simpan($request->file('gambar'), 'customer-' . $user->id);
-
-        if (! $fileName) {
-            return redirect()->back()->with('error', 'Berkas tidak dikenali sebagai gambar.');
+        if (! $this->bolehMelihat()) {
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke data pelanggan.');
         }
 
-        // Foto lama baru dibuang setelah yang baru aman tersimpan.
-        FotoProfil::hapus($user->gambar);
+        $cari = trim((string) $request->input('cari'));
+        $status = $request->input('status');
+        $verifikasi = $request->input('verifikasi');
 
-        $user->gambar = $fileName;
-        $user->save();
+        $dasar = User::query()->where('peran', User::PERAN_PELANGGAN);
 
-        // Redirect dengan session success
-        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui.');
+        // Ringkasan dihitung dari seluruh pelanggan, bukan dari halaman yang
+        // sedang tampil — angka yang berubah tiap ganti halaman menyesatkan.
+        $ringkasan = [
+            'total' => (clone $dasar)->count(),
+            'aktif' => (clone $dasar)->where('status', 'active')->count(),
+            'terverifikasi' => (clone $dasar)->whereNotNull('email_verified_at')->count(),
+            'baru' => (clone $dasar)->where('created_at', '>=', now()->subDays(30))->count(),
+        ];
+
+        $pelanggan = $dasar
+            ->when($cari !== '', function ($q) use ($cari) {
+                $q->where(function ($sub) use ($cari) {
+                    foreach (['full_name', 'username', 'email', 'telp'] as $kolom) {
+                        $sub->orWhere($kolom, 'LIKE', '%' . $cari . '%');
+                    }
+                });
+            })
+            ->when($status === 'aktif', fn ($q) => $q->where('status', 'active'))
+            ->when($status === 'nonaktif', fn ($q) => $q->where(function ($sub) {
+                $sub->whereNull('status')->orWhere('status', '!=', 'active');
+            }))
+            ->when($verifikasi === 'sudah', fn ($q) => $q->whereNotNull('email_verified_at'))
+            ->when($verifikasi === 'belum', fn ($q) => $q->whereNull('email_verified_at'))
+            ->latest('created_at')
+            ->paginate(self::PER_HALAMAN)
+            ->withQueryString();
+
+        return view('account.customer.index', compact('pelanggan', 'ringkasan', 'cari', 'status', 'verifikasi'));
     }
-    // <!--================== END ==================-->
 
-    // <!--================== UPDATE DATA DIRI ==================-->
-    public function updatediri(Request $request, $id)
+    /**
+     * Halaman satu pelanggan.
+     *
+     * Dicari lewat uuid, bukan id berurut: id yang berurut membuat siapa pun
+     * yang punya satu tautan bisa menebak tautan pelanggan lain hanya dengan
+     * menambah satu.
+     */
+    public function edit(User $pelanggan)
     {
-        $user = User::find($id);
-
-        // Validate input data
-        try {
-            $request->validate([
-                'email' => 'nullable|email|unique:users,email,' . $user->id,
-                'telp' => 'nullable|string',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Check if the validation error is for the email field
-            if ($e->validator->errors()->has('email')) {
-                // Return back with SweetAlert message for duplicate email
-                return redirect()->back()->with('erroremailterpakai', 'Email sudah terdaftar.')->withErrors($e->validator);
-            }
-
-            // Handle other validation errors
-            throw $e;
+        if (! $this->bolehMelihat()) {
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke data pelanggan.');
         }
 
-        // Update email only if provided and different from the current email
-        if ($request->has('email') && $request->input('email') !== $user->email) {
-            $user->email = $request->input('email');
-            $user->email_verified_at = null; // Reset email verification if email changes
-        }
+        abort_unless($pelanggan->adalahPelanggan(), 404);
 
-        if ($request->has('telp')) {
-            $user->telp = $request->input('telp');
-        }
-
-        // Save user data
-        $user->save();
-
-        // Return success message
-        return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== UPDATE DATA DIRI PENGGUNA ==================-->
-    public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        // Use old data if no new input is provided
-        $user->full_name = $request->input('full_name') ?? $user->full_name;
-        $user->username = $request->input('username') ?? $user->username;
-        $user->status = $request->input('status') ?? $user->status;
-
-        // Save the updated user data
-        $user->save();
-
-        // Redirect with a success message
-        return redirect()->back()->with('statusdataprofil', 'Data profil berhasil diperbarui.');
-    }
-    // <!--================== END ==================-->
-
-    // <!--================== VERIFIKASI EMAIL ==================-->
-    public function verifyEmail($id)
-    {
-        $user = User::findOrFail($id);
-        $user->email_verified_at = now(); // Mark email as verified
-        $user->status = 'active';
-        $user->save();
-
-        // Redirect with success message
-        return redirect()->back()->with('statusverifikasiemail', 'Email berhasil diverifikasi.');
+        return view('account.customer.edit', ['user' => $pelanggan]);
     }
 
-    // <!--================== END ==================-->
-
-    // <!--================== DELETE DATA ==================-->
-    public function destroy($id)
+    /** Menghapus pelanggan; hanya administrator. */
+    public function destroy(User $pelanggan)
     {
-        $user = User::find($id);
-
-        if (!$user) {
+        if (! Auth::user()?->adalahAdministrator()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer tidak ditemukan.'
-            ], 404);
+                'message' => 'Hanya administrator yang boleh menghapus pelanggan.',
+            ], 403);
         }
 
-        $user->delete();
+        abort_unless($pelanggan->adalahPelanggan(), 404);
+
+        $pelanggan->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Data customer berhasil dihapus!'
+            'message' => 'Data pelanggan berhasil dihapus.',
         ]);
     }
-    // <!--================== END ==================-->
 }

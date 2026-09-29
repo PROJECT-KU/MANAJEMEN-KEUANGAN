@@ -88,7 +88,7 @@ class JejakProfilTest extends TestCase
             ->get(route('account.profil.show', $pengguna->uuid))
             ->assertOk()
             ->assertSee(route('account.profil.update.datadiri'), false)
-            ->assertDontSee(route('account.pengguna.update.datadiri', $pengguna->id), false);
+            ->assertDontSee(route('account.pengguna.update.datadiri', $pengguna), false);
     }
 
     #[Test]

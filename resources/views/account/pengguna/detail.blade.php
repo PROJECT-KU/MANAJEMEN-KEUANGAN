@@ -174,7 +174,7 @@ Detail Karyawan | MIS
                   <h3 class="profile-username text-center">{{ $user->full_name }}</h3>
                   <p class="text-muted text-center">{{ $user->level }}</p>
 
-                  <form action="{{ route('account.pengguna.update.updatePhoto', $user->id) }}" method="POST" enctype="multipart/form-data">
+                  <form action="{{ route('account.pengguna.update.updatePhoto', $user) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
                       <label for="foto">Update Foto</label>
@@ -252,7 +252,7 @@ Detail Karyawan | MIS
               <div class="custom-popup-content">
                 <span class="custom-popup-close" id="customPopupCloseEmail">&times;</span>
                 <h5 class="custom-popup-title">Email</h5>
-                <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                   @csrf
                   <div class="mb-3">
                     <label for="email" class="form-label">Masukkan Email Terbaru</label>
@@ -268,7 +268,7 @@ Detail Karyawan | MIS
               <div class="custom-popup-content">
                 <span class="custom-popup-close" id="customPopupCloseJobdesk">&times;</span>
                 <h5 class="custom-popup-title">Job Desk</h5>
-                <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                   @csrf
                   <div class="mb-3">
                     <label for="jobdesk" class="form-label">Masukkan Job Desk Anda</label>
@@ -284,7 +284,7 @@ Detail Karyawan | MIS
               <div class="custom-popup-content">
                 <span class="custom-popup-close" id="customPopupCloseTelp">&times;</span>
                 <h5 class="custom-popup-title">No Telp</h5>
-                <form action="{{ route('account.pengguna.update.datadiri', $user->id) }}" method="POST">
+                <form action="{{ route('account.pengguna.update.datadiri', $user) }}" method="POST">
                   @csrf
                   <div class="mb-3">
                     <label for="telp" class="form-label">Masukkan No Telp Anda</label>
@@ -330,7 +330,7 @@ Detail Karyawan | MIS
                           </div>
                         </div>
 
-                        <form id="verification-form" action="{{ route('account.pengguna.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                        <form id="verification-form" action="{{ route('account.pengguna.update', $user) }}" method="POST" enctype="multipart/form-data">
                           @csrf
                           <div class="row mt-3">
                             <div class="col-md-6">
@@ -350,7 +350,7 @@ Detail Karyawan | MIS
                         <div class="row mt-3">
                           <!-- BUTTON VERIFIKASI EMAIL -->
                           <div class="col-md-12 col-lg-6">
-                            <form id="verify-email-form" action="{{ route('account.pengguna.update.vertifikasiemail', $user->id) }}" method="POST">
+                            <form id="verify-email-form" action="{{ route('account.pengguna.update.vertifikasiemail', $user) }}" method="POST">
                               @csrf
                               <div class="row">
                                 @if($user->email_verified_at)
@@ -380,7 +380,7 @@ Detail Karyawan | MIS
                           <!-- END -->
 
                           <div class="col-md-12 col-lg-6">
-                            <form id="verification-form-company" action="{{ route('account.pengguna.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                            <form id="verification-form-company" action="{{ route('account.pengguna.update', $user) }}" method="POST" enctype="multipart/form-data">
                               @csrf
                               <label>Nama Perusahaan</label>
                               <input class="form-control form-control-sm" type="text" id="company" name="company" placeholder="Nama Perusahaan" value="{{ $user->company }}">
@@ -392,7 +392,7 @@ Detail Karyawan | MIS
                         </form>
                       </div>
 
-                      <form id="verification-form-bank" action="{{ route('account.pengguna.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                      <form id="verification-form-bank" action="{{ route('account.pengguna.update', $user) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="post mt-3">
                           <div class="row">
