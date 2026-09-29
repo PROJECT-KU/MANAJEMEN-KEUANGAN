@@ -381,6 +381,9 @@ Route::prefix('account')
             // dengan daftar lewat parameter ?cari=, dan poll-nya tak pernah
             // dipakai berkas mana pun.
             Route::get('/customer/data', 'account\CustomerController@index')->name('account.customer.index');
+            // Ekspor didaftar SEBELUM rute ber-{uuid}: kalau sesudahnya,
+            // "ekspor" akan terbaca sebagai uuid dan tidak pernah tercapai.
+            Route::get('/customer/data/ekspor', 'account\CustomerController@ekspor')->name('account.customer.ekspor');
             Route::get('/customer/data/{pelanggan:uuid}', 'account\CustomerController@edit')->name('account.customer.edit');
             Route::delete('/customer/data/{pelanggan:uuid}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 

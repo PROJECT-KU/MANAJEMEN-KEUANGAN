@@ -94,14 +94,31 @@ Data Pelanggan | MIS
         min-width: 0;
     }
 
-    .pel-foto {
-        flex: 0 0 auto;
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        object-fit: cover;
-        border: 1px solid var(--mis-garis);
-        background: #f1f5f9;
+    /* Kepala kolom yang bisa diurutkan. Ikon panahnya samar sampai kolomnya
+       dipakai, supaya tiga panah sekaligus tidak ramai di kepala tabel. */
+    .pel-urut {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .pel-urut:hover {
+        color: #4f46e5;
+    }
+
+    .pel-urut > .fas {
+        font-size: .7rem !important;
+        opacity: .35;
+    }
+
+    .pel-urut.aktif {
+        color: #4f46e5;
+    }
+
+    .pel-urut.aktif > .fas {
+        opacity: 1;
     }
 
     .pel-nama {
@@ -245,6 +262,14 @@ Data Pelanggan | MIS
                 <h1 class="mis-judul">Data Pelanggan</h1>
                 <p class="mis-sub">Orang luar yang memakai layanan jasa Rumah Scopus.</p>
             </div>
+            <div class="mis-kepala-aksi">
+                {{-- Ekspor membawa saringan yang sedang dipakai, bukan seluruh
+                     tabel: yang diunduh orang hampir selalu yang dilihatnya. --}}
+                <a class="mis-tombol mis-tombol-halus"
+                    href="{{ route('account.customer.ekspor', request()->only('cari', 'status', 'verifikasi')) }}">
+                    <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                </a>
+            </div>
         </div>
 
         {{-- ---------------------------------------------- ringkasan --}}
@@ -296,7 +321,11 @@ Data Pelanggan | MIS
                 @endif
             </summary>
 
-        <form method="GET" action="{{ route('account.customer.index') }}" class="pel-saring">
+        <form method="GET" action="{{ route('account.customer.index') }}" class="pel-saring" id="pel-borang">
+            {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan Terapkan
+                 diam-diam mengembalikan urutannya ke bawaan. --}}
+            <input type="hidden" name="urut" value="{{ $urut }}">
+            <input type="hidden" name="arah" value="{{ $arah === 'asc' ? 'naik' : 'turun' }}">
             <div class="mis-isian pel-saring-cari">
                 <label class="mis-label" for="pel-cari">Cari</label>
                 <input type="search" class="form-control-modern" id="pel-cari" name="cari"
@@ -321,7 +350,7 @@ Data Pelanggan | MIS
                 </select>
             </div>
 
-            <button type="submit" class="mis-tombol mis-tombol-ungu">
+            <button type="submit" class="mis-tombol mis-tombol-ungu" data-sibuk>
                 <i class="fas fa-search"></i> Terapkan
             </button>
 
@@ -355,10 +384,15 @@ Data Pelanggan | MIS
                 <table class="mis-tabel mis-tabel-kartu">
                     <thead>
                         <tr>
-                            <th>Pelanggan</th>
+                            {{-- Kepala kolom yang bisa diurutkan berupa TAUTAN,
+                                 bukan tombol berskrip: ia tetap bekerja tanpa
+                                 JavaScript, bisa dibuka di tab baru, dan
+                                 urutannya ikut tersimpan di alamat halaman. --}}
+                            <th>@include('account.customer.partials.urut', ['kolom' => 'nama', 'label' => 'Pelanggan'])</th>
                             <th>Kontak</th>
-                            <th>Status</th>
-                            <th>Bergabung</th>
+                            <th>@include('account.customer.partials.urut', ['kolom' => 'status', 'label' => 'Status'])</th>
+                            <th>Pesanan</th>
+                            <th>@include('account.customer.partials.urut', ['kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -367,8 +401,7 @@ Data Pelanggan | MIS
                             <tr>
                                 <td class="mis-td-utama">
                                     <div class="pel-orang">
-                                        <img class="pel-foto" alt=""
-                                            src="{{ \App\Support\FotoProfil::url($orang->gambar) }}">
+                                        @include('partials.avatar', ['orang' => $orang, 'ukuran' => 38])
                                         <div style="min-width: 0;">
                                             <p class="pel-nama">{{ $orang->full_name ?: $orang->username }}</p>
                                             <p class="pel-akun">&#64;{{ $orang->username }}</p>
@@ -384,23 +417,38 @@ Data Pelanggan | MIS
                                 </td>
 
                                 <td data-judul="Status">
-                                    {{-- Dua keadaan yang berbeda, jadi dua lencana: akunnya
-                                         aktif atau tidak, dan emailnya terverifikasi atau
-                                         belum. Digabung jadi satu lencana, salah satunya
-                                         selalu tersembunyi. --}}
-                                    <div class="mis-baris-ikon" style="flex-wrap: wrap; gap: 5px;">
-                                        @if ($orang->status === 'active')
-                                            <span class="mis-pil mis-pil-hijau"><i class="fas fa-check"></i> Aktif</span>
-                                        @else
-                                            <span class="mis-pil mis-pil-abu"><i class="fas fa-pause"></i> Nonaktif</span>
-                                        @endif
+                                    {{--
+                                      SATU lencana, bukan dua.
 
-                                        @if ($orang->email_verified_at)
-                                            <span class="mis-pil mis-pil-biru"><i class="fas fa-envelope-open"></i> Terverifikasi</span>
-                                        @else
-                                            <span class="mis-pil mis-pil-kuning"><i class="fas fa-clock"></i> Belum verifikasi</span>
-                                        @endif
-                                    </div>
+                                      Dulu tiap baris memuat lencana status akun dan lencana
+                                      verifikasi email berdampingan. Keduanya praktis selalu
+                                      mengatakan hal yang sama — terukur pada data yang ada:
+                                      65 aktif, 65 terverifikasi, NOL yang berbeda. Bukan
+                                      kebetulan: verifyEmail() menyetel email_verified_at dan
+                                      status = active sekaligus, jadi keduanya terkunci.
+
+                                      Yang tersisa cuma satu keadaan yang benar-benar bisa
+                                      berbeda — aktif tetapi emailnya belum terverifikasi —
+                                      dan itulah yang disebutkan kalau terjadi.
+                                    --}}
+                                    @if ($orang->status !== 'active')
+                                        <span class="mis-pil mis-pil-abu"><i class="fas fa-pause"></i> Nonaktif</span>
+                                    @elseif ($orang->email_verified_at)
+                                        <span class="mis-pil mis-pil-hijau"><i class="fas fa-check"></i> Aktif</span>
+                                    @else
+                                        <span class="mis-pil mis-pil-kuning"><i class="fas fa-clock"></i> Aktif &middot; email belum terverifikasi</span>
+                                    @endif
+                                </td>
+
+                                <td data-judul="Pesanan">
+                                    @php ($p = $pesanan[$orang->id] ?? null)
+                                    @if ($p)
+                                        <span class="mis-pil mis-pil-biru" title="Terakhir {{ $p['terakhir']?->locale('id')->translatedFormat('d M Y') }}">
+                                            <i class="fas fa-receipt"></i> {{ $p['jumlah'] }}&times;
+                                        </span>
+                                    @else
+                                        <span class="pel-akun">Belum ada</span>
+                                    @endif
                                 </td>
 
                                 <td data-judul="Bergabung">

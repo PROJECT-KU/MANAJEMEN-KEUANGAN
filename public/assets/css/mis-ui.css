@@ -59,6 +59,30 @@ body {
 }
 
 /*
+ * Avatar bersama: foto kalau ada, inisial berwarna kalau tidak.
+ * Lihat resources/views/partials/avatar.blade.php.
+ */
+.mis-avatar {
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid var(--mis-garis);
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.mis-avatar-inisial {
+    border-color: transparent;
+    font-weight: 800;
+    letter-spacing: .01em;
+    /* line-height 1 perlu disebut: layout mewariskan 28px MUTLAK, yang pada
+       kotak 38px mendorong inisialnya turun dari tengah. */
+    line-height: 1;
+}
+
+/*
  * Badan layar MIS.
  *
  * style.css bawaan Stisla memberi .main-content padding-top 80px, dan dengan
