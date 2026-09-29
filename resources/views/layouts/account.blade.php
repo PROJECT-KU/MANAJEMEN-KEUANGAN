@@ -263,7 +263,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                      permintaan oleh AppServiceProvider, jadi bagian ini tidak
                      menambah satu pun kueri. --}}
                 <ul class="navbar-nav mis-notif">
-                    @if (Auth::user()->level !== 'user')
+                    @if (Auth::user()->adalahOrangDalam())
                         <li>
                             <a href="{{ route('account.todolist.index') }}" class="mis-notif-tombol" title="Tugas ditugaskan">
                                 <i class="fas fa-tasks"></i>
@@ -342,10 +342,10 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
 
                         <!--================== CLINIC SCOPUS ==================-->
                         @php
-                        $level = Auth::user()->level;
+                        $pengguna = Auth::user();
                         @endphp
                         <li class="menu-header">Clinik Scopus</li>
-                        @if (in_array($level, ['manager', 'ceo']))
+                        @if ($pengguna->adalahAdministrator())
                         <li class="{{ setActive('account/customer') . setActive('account/pengguna/search') }}">
                             <a class="nav-link" href="{{ route('account.customer.index') }}">
                                 <i class="fas fa-users"></i> <span>Data Customer</span>
@@ -364,7 +364,9 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         </li>
                         @endif
 
-                        @if (in_array($level, ['manager', 'karyawan']))
+                        {{-- Dulu manager ATAU karyawan; sesudah peran dipisah, keduanya
+                             berarti "orang dalam" — administrator maupun karyawan. --}}
+                        @if ($pengguna->adalahOrangDalam())
                         <li class="{{ setActive('account/clinikscopus') }}">
                             <a class="nav-link" href="{{ route('account.clinikscopus.index') }}">
                                 <i class="fas fa-home"></i> <span>Clinik Scopus</span>
@@ -396,7 +398,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         <!--================== END ==================-->
 
                         <!--================== REDIRECT TO BERANDA ==================-->
-                        @if (Auth::user()->level === 'user')
+                        @if (Auth::user()->adalahPelanggan())
                         <li><a class="nav-link" href="{{ route('public.clinikscopus.index') }}"><i class="fas fa-comment"></i> <span>Konsultasi Sekarang</span></a></li>
                         @endif
                         <!--================== END ==================-->
@@ -405,7 +407,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         @php $isStatusnonactive = (Auth::user()->status === 'nonactive'); @endphp
 
                                 <!--==================PERUSAHAAN==================-->
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="menu-header">PERUSAHAAN</li>
                                 <li class="{{ setActive('account/company/' . Auth::user()->id . '/edit') }}">
                                     <a class="nav-link" href="{{ route('account.company.edit', ['id' => Auth::user()->id]) }}">
@@ -416,11 +418,11 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 <!--================== END ==================-->
 
                                 <!--================== KARYAWAN ==================-->
-                                @if (Auth::user()->level !== 'user')
+                                @if (Auth::user()->adalahOrangDalam())
                                 <li class="menu-header">KARYAWAN</li>
                                 @endif
 
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="{{ setActive('account/pengguna') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.pengguna.index') }}">
                                         <i class="fas fa-users"></i> <span>Data Karyawan</span>
@@ -430,7 +432,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
 
                                 @if ($isStatusnonactive)
                                 @else
-                                @if (Auth::user()->level !== 'user')
+                                @if (Auth::user()->adalahOrangDalam())
                                 <li class="{{ setActive('account/gaji') }}">
                                     <a class="nav-link" href="{{ route('account.gaji.index') }}">
                                         <i class="fas fa-dollar-sign"></i> <span>Gaji Karyawan</span>
@@ -454,7 +456,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level !== 'karyawan' && Auth::user()->level !== 'user')
+                                @if (! Auth::user()->adalahKaryawan() && Auth::user()->adalahOrangDalam())
                                 <li class="{{ setActive('account/karir') }}">
                                     <a class="nav-link" href="{{ route('karir.list') }}">
                                         <i class="fas fa-user-tie"></i> <span>Karir</span>
@@ -470,7 +472,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level !== 'user')
+                                @if (Auth::user()->adalahOrangDalam())
                                 <li class="{{ setActive('account/todolist') }}">
                                     <a class="nav-link" href="{{ route('account.todolist.index') }}">
                                         <i class="fas fa-list-alt"></i> <span>To Do List</span>
@@ -485,7 +487,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
 
 
                                 <!--================== PAPER ==================-->
-                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager' )
+                                @if (Auth::user()->adalahAdministrator() )
                                 <li class="menu-header">PAPER</li>
                                 <li class="dropdown {{ setActive('account/meme/data') . setActive('account/meme/create-data') . setActive('account/meme/edit-data') . setActive('account/pendaftaran-scopus-kafe/data') }}">
                                     <a href="#" class="nav-link has-dropdown">
@@ -512,10 +514,15 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 </li>
                                 @endif
 
-                                @if (Auth::user()->level !== 'manager' && Auth::user()->level !== 'karyawan' && Auth::user()->level !== 'user')
+                                {{-- Dulu "bukan manager, bukan karyawan, bukan user" — yang
+                                     tersisa staff/ceo/trainer. Ketiganya sekarang berperan
+                                     karyawan, jadi syarat itu tidak pernah benar lagi. Judul ini
+                                     menaungi menu di bawahnya, jadi syaratnya disamakan dengan
+                                     isinya. --}}
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="menu-header">PAPER</li>
                                 @endif
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 99)
+                                @if (Auth::user()->adalahAdministrator() || Auth::user()->id === 99)
                                 <li class="{{ setActive('account/refrensi-paper/data') }}">
                                     <a class="nav-link" href="{{ route('account.refrensi-paper.index') }}">
                                         <i class="fas fa-folder"></i> <span>Refrensi Paper</span>
@@ -525,7 +532,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 <!--================== END ==================-->
 
                                 <!--================== BLOG ==================-->
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff' || Auth::user()->id === 83 || Auth::user()->id === 87)
+                                @if (Auth::user()->adalahAdministrator() || Auth::user()->id === 83 || Auth::user()->id === 87)
                                 <li class="menu-header">BLOG</li>
                                 <li class="dropdown {{ setActive('account/article') . setActive('account/artikel-kategori') }}">
                                     <a href="#" class="nav-link has-dropdown">
@@ -541,7 +548,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 <!--================== END ==================-->
 
                                 <!--================== ANALISIS BIBLIOMETRIK ==================-->
-                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="menu-header">ANALISIS BIBLIOMETRIK</li>
 
                                 <li class="{{ setActive('account/kategori') }}">
@@ -559,7 +566,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 <!--================== END ==================-->
 
                                 <!--================== SCOPUS CAMP ==================-->
-                                @if (Auth::user()->level == 'staff' || Auth::user()->level == 'manager')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="menu-header">SCOPUS CAMP</li>
 
                                 <li class="{{ setActive('account/scopus-camp') }}">
@@ -581,7 +588,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                      Laporan Uang Masuk/Keluar di bagian LAPORAN sengaja
                                      dibiarkan karena membaca data lama yang masih tersimpan. --}}
 
-                                {{-- @if (Auth::user()->level === 'admin' || Auth::user()->jenis === 'penyewaan')
+                                {{-- @if (Auth::user()->adalahAdministrator() || Auth::user()->jenis === 'penyewaan')
                                 <li class="dropdown {{ setActive('account/tambah_barang'). setActive('account/penyewaan') }}  show">
                                     <a href="#" class="nav-link has-dropdown"><i class="fas fa-car"></i><span>RENTAL KENDARAAN</span></a>
                                     <ul class="dropdown-menu">
@@ -593,9 +600,9 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 @endif --}}
 
                                 <!--================== LAPORAN ==================-->
-                                @if (Auth::user()->level !== 'user' && Auth::user()->level !== 'karyawan')
+                                @if (Auth::user()->adalahOrangDalam() && ! Auth::user()->adalahKaryawan())
                                 <li class="menu-header">LAPORAN</li>
-                                @if (Auth::user()->level === 'manager' || Auth::user()->level === 'ceo' || Auth::user()->level === 'staff')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="{{ setActive('account/camp') . setActive('account/camp/search') }}">
                                     <a class="nav-link" href="{{ route('account.camp.index') }}">
                                         <i class="fas fa-campground"></i> <span>Laporan Camp</span>
@@ -629,7 +636,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 @endif
 
                                 <!--================== KEAMANAN ==================-->
-                                @if (in_array(Auth::user()->level, ['manager', 'ceo', 'admin']))
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="{{ setActive('account/aktivitas-masuk') }}">
                                     <a class="nav-link" href="{{ route('account.aktivitas-masuk.index') }}">
                                         <i class="fas fa-user-shield"></i> <span>Aktivitas Masuk</span>
@@ -639,7 +646,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 <!--================== END ==================-->
 
                                 <!-- jika user dengan level admin maka dapat akses menu maintenance -->
-                                @if (Auth::user()->level === 'admin')
+                                @if (Auth::user()->adalahAdministrator())
                                 <li class="{{ setActive('account/maintenance') . setActive('account/pengguna/search') }}">
                                     <a class="nav-link" href="{{ route('account.maintenance.index') }}">
                                         <i class="fas fa-users-cog"></i> <span>MAINTENANCE</span>

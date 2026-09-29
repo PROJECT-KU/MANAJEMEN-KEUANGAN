@@ -58,7 +58,7 @@ class ToDoListController extends Controller
                 ->orderBy('todolist.created_at', 'DESC');
 
             // ✅ Jika bukan manajer, filter berdasarkan `user_id` atau `user_id_kedua`
-            if ($user->level !== 'manager') {
+            if (! $user->adalahAdministrator()) {
                 $query->where(function ($q) use ($user) {
                     $q->where('todolist.user_id', $user->id)
                         ->orWhere('todolist.user_id_kedua', $user->id);
@@ -80,7 +80,7 @@ class ToDoListController extends Controller
         // ✅ Hitung jumlah tugas dengan status 'Assign Task'
         $totalAssignTaskQuery = DB::table('todolist')->where('status', 'Assign Task');
 
-        if ($user->level !== 'manager') {
+        if (! $user->adalahAdministrator()) {
             $totalAssignTaskQuery->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
                     ->orWhere('user_id_kedua', $user->id);
@@ -101,7 +101,7 @@ class ToDoListController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'admin') {
+        if ($user->adalahAdministrator()) {
 
             $datas = DB::table('users')
                 ->select('users.id', 'users.full_name')

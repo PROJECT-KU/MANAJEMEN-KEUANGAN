@@ -60,7 +60,7 @@ class PresensiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -68,7 +68,7 @@ class PresensiController extends Controller
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
         ->paginate(12);
-    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+    } else if ($user->adalahKaryawan()) {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -84,7 +84,7 @@ class PresensiController extends Controller
         ->paginate(12);
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $presensihariini = DB::table('presensi')
         ->select(
           'presensi.id',
@@ -157,7 +157,7 @@ class PresensiController extends Controller
       $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -165,7 +165,7 @@ class PresensiController extends Controller
         ->whereBetween('presensi.created_at', [$currentMonth, $nextMonth])
         ->orderBy('presensi.created_at', 'DESC')
         ->paginate(12);
-    } else if ($user->level == 'karyawan' || $user->level == 'trainer') {
+    } else if ($user->adalahKaryawan()) {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -185,7 +185,7 @@ class PresensiController extends Controller
         ->paginate(12);
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $presensihariini = DB::table('presensi')
         ->select(
           'presensi.id',
@@ -256,7 +256,7 @@ class PresensiController extends Controller
     // 👇 TAMBAHKAN INI: Set bahasa MySQL ke Indonesia untuk format hari dan bulan
     DB::statement("SET lc_time_names = 'id_ID'");
 
-    if (Auth::user()->level == 'manager') {
+    if (Auth::user()->adalahAdministrator()) {
       $presensi = DB::table('presensi')
         ->select('presensi.id', 'presensi.status', 'presensi.status_pulang', 'presensi.note', 'presensi.gambar', 'presensi.gambar_pulang', 'presensi.time_pulang', 'presensi.status_pulang', 'presensi.latitude', 'presensi.longitude', 'presensi.created_at', 'presensi.updated_at', 'users.id as user_id', 'users.full_name as full_name', 'users.telp as telp', 'users.gambar as user_gambar')
         ->leftJoin('users', 'presensi.user_id', '=', 'users.id')
@@ -292,7 +292,7 @@ class PresensiController extends Controller
         ->paginate(12);
     }
 
-    if ($user->level == 'manager' || $user->level == 'staff' || $user->level == 'ceo') {
+    if ($user->adalahAdministrator()) {
       $presensihariini = DB::table('presensi')
         ->select(
           'presensi.id',
@@ -404,11 +404,11 @@ class PresensiController extends Controller
     $izin = $request->input('status') === 'izin' ? 1 : null;
     // End
 
-    $userRole = $user->level;
+    $bolehUbahPulang = $user->adalahAdministrator();
     $timePulang = null;
     $statusPulang = null;
 
-    if ($userRole === 'manager' && $request->input('status_pulang') === 'pulang') {
+    if ($bolehUbahPulang && $request->input('status_pulang') === 'pulang') {
       $timePulang = now(); // Use Carbon to get the current time
       $statusPulang = $request->input('status_pulang');
     }
@@ -463,7 +463,7 @@ class PresensiController extends Controller
     $user = Auth::user();
     $presensi = Presensi::findOrFail($id);
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $users = User::join('presensi', 'users.id', '=', 'presensi.user_id')
         ->where('users.company', $user->company)
         ->get(['users.*']);
@@ -607,9 +607,9 @@ class PresensiController extends Controller
       ->leftJoin('users', 'presensi.user_id', '=', 'users.id');
 
     // Role-based filter
-    if ($user->level === 'manager') {
+    if ($user->adalahAdministrator()) {
       $presensiQuery->where('users.company', $user->company);
-    } elseif ($user->level === 'karyawan') {
+    } elseif ($user->adalahKaryawan()) {
       $presensiQuery->where('presensi.user_id', $user->id);
     }
 

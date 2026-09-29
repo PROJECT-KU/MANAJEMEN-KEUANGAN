@@ -20,14 +20,19 @@ class WewenangAkunTest extends TestCase
 
     private const SANDI = 'RahasiaUji2026';
 
-    private function buatPengguna(string $level = 'user'): User
+    /**
+     * $peran menentukan hak akses; $jabatan hanya penanda posisi dan sengaja
+     * TIDAK ikut menentukan apa pun — justru itu yang diuji di berkas ini.
+     */
+    private function buatPengguna(string $peran = 'user', string $jabatan = 'karyawan'): User
     {
         $pengguna = User::create([
             'full_name' => 'Uji Wewenang',
             'username' => 'uji_wewenang_' . uniqid(),
             'email' => uniqid() . '@contoh.test',
             'password' => Hash::make(self::SANDI),
-            'level' => $level,
+            'peran' => $peran,
+            'level' => $jabatan,
         ]);
 
         $pengguna->forceFill(['status' => 'active', 'email_verified_at' => now()])->save();
@@ -41,12 +46,12 @@ class WewenangAkunTest extends TestCase
 
         $this->actingAs($pengguna)
             ->post(route('account.pengguna.update', $pengguna->getKey()), [
-                'level' => 'manager',
+                'peran' => 'administrator',
                 'status' => 'active',
             ])
             ->assertRedirect();
 
-        $this->assertSame('user', $pengguna->refresh()->level);
+        $this->assertSame('user', $pengguna->refresh()->peran);
     }
 
     public function test_pengguna_biasa_tidak_bisa_mengubah_akun_orang_lain(): void
@@ -101,21 +106,21 @@ class WewenangAkunTest extends TestCase
         // Sengaja satu permintaan per tes: sesi dan penjaga auth dipakai ulang
         // dalam satu proses PHP, sehingga dua actingAs berturut-turut saling
         // menimpa dan hasilnya menyesatkan.
-        $this->actingAs($this->buatPengguna('manager'))
+        $this->actingAs($this->buatPengguna('administrator', 'manager'))
             ->get(route('account.pengguna.index'))
             ->assertOk();
     }
 
     public function test_pengelola_tetap_bisa_mengubah_peran(): void
     {
-        $manajer = $this->buatPengguna('manager');
+        $manajer = $this->buatPengguna('administrator', 'manager');
         $anggota = $this->buatPengguna('karyawan');
 
         $this->actingAs($manajer)
-            ->post(route('account.pengguna.update', $anggota->getKey()), ['level' => 'staff'])
+            ->post(route('account.pengguna.update', $anggota->getKey()), ['peran' => 'administrator'])
             ->assertRedirect();
 
-        $this->assertSame('staff', $anggota->refresh()->level);
+        $this->assertSame('administrator', $anggota->refresh()->peran);
     }
 
     public function test_ganti_email_sendiri_butuh_kata_sandi(): void
@@ -147,7 +152,7 @@ class WewenangAkunTest extends TestCase
 
         $this->actingAs($pengguna)
             ->post(route('account.profil.update'), [
-                'level' => 'admin',
+                'peran' => 'administrator',
                 'status' => 'active',
                 'norek' => '1234567890',
             ])
@@ -155,7 +160,9 @@ class WewenangAkunTest extends TestCase
 
         $pengguna->refresh();
 
-        $this->assertSame('user', $pengguna->level);
+        // Yang dijaga peranNYA, bukan jabatannya: halaman profil memang boleh
+        // menyentuh jabatan, tetapi tidak boleh menaikkan hak akses.
+        $this->assertSame('user', $pengguna->peran);
         $this->assertSame('1234567890', $pengguna->norek);
     }
 
@@ -182,7 +189,7 @@ class WewenangAkunTest extends TestCase
     {
         \Illuminate\Support\Facades\Mail::fake();
 
-        $manajer = $this->buatPengguna('manager');
+        $manajer = $this->buatPengguna('administrator', 'manager');
         $anggota = $this->buatPengguna('karyawan');
         $anggota->aturPin('482913');
 
@@ -252,7 +259,7 @@ class WewenangAkunTest extends TestCase
 
     public function test_profil_orang_lain_dikembalikan_ke_profil_sendiri(): void
     {
-        $manager = $this->buatPengguna('manager');
+        $manager = $this->buatPengguna('administrator', 'manager');
         $manager->forceFill(['company' => 'PT Uji'])->save();
 
         $rekan = $this->buatPengguna('karyawan');
@@ -274,7 +281,7 @@ class WewenangAkunTest extends TestCase
 
     public function test_bank_penggajian_selalu_bri(): void
     {
-        $pengguna = $this->buatPengguna('manager');
+        $pengguna = $this->buatPengguna('administrator', 'manager');
         $pengguna->forceFill(['bank' => '008', 'norek' => '123456'])->save();
 
         // Kode bank lain dikirim langsung ke alamat penyimpanan, seolah lewat

@@ -28,7 +28,7 @@ class DebitController extends Controller
   {
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
       $debit = DB::table('debit')
         ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
@@ -65,7 +65,7 @@ class DebitController extends Controller
     $search = $request->get('q');
     $user = Auth::user();
 
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // Jika user adalah 'manager' atau 'staff', ambil semua data transaksi yang memiliki perusahaan yang sama dengan user
       $debit = DB::table('debit')
         ->select('debit.id', 'debit.category_id', 'debit.user_id', 'debit.nominal', 'debit.debit_date', 'debit.description', 'categories_debit.id as id_category', 'categories_debit.name')
@@ -114,7 +114,7 @@ class DebitController extends Controller
   public function create()
   {
     $user = Auth::user();
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->get(['categories_debit.*']);
@@ -130,7 +130,7 @@ class DebitController extends Controller
   {
     // Pastikan hanya user dengan role 'manager' atau 'staff' yang bisa melakukan create
     $user = Auth::user();
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // Lakukan validasi data yang diinputkan
       $this->validate(
         $request,
@@ -209,7 +209,7 @@ class DebitController extends Controller
     $user = Auth::user();
 
     // Get all categories for users who are managers and staff in the same company
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       $categories = CategoriesDebit::join('users', 'categories_debit.user_id', '=', 'users.id')
         ->where('users.company', $user->company)
         ->get(['categories_debit.*']);
@@ -230,7 +230,7 @@ class DebitController extends Controller
   {
     // Pastikan hanya user dengan role 'manager' atau 'staff' yang bisa melakukan edit
     $user = Auth::user();
-    if ($user->level == 'manager' || $user->level == 'staff') {
+    if ($user->adalahAdministrator()) {
       // Cek apakah user memiliki hak akses untuk mengedit data transaksi
       if ($debit->user_id == $user->id) {
         // Lakukan validasi data yang diubah

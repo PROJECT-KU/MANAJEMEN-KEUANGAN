@@ -230,7 +230,7 @@ Tambah laporan Camp | MIS
                 <div class="form-group">
                   <label>Status</label>
                   <div class="input-group">
-                    @if (Auth::user()->level == 'karyawan')
+                    @if (Auth::user()->adalahKaryawan())
                     <select class="form-control" name="status" required>
                       <option value="" disabled selected>-- PILIH STATUS --</option>
                       <option value="ajukan">AJUKAN</option>

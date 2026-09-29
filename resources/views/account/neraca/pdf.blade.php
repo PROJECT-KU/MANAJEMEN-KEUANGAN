@@ -131,7 +131,7 @@
             </table>
 
             <br><br>
-            @if (Auth::user()->level == 'manager' || Auth::user()->level == 'staff')
+            @if (Auth::user()->adalahAdministrator())
             <hr>
             <table class="table table-bordered mt-5" style="text-align: center; font-weight: bold;">
               <thead>

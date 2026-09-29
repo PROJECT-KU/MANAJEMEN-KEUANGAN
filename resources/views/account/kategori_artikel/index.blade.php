@@ -67,7 +67,7 @@ Kategori Artikel | MIS
                             </div>
                         </div>
                     </form>
-                    @if ( Auth::user()->level == 'ceo')
+                    @if ( Auth::user()->adalahAdministrator())
                     @else
                     <a href="{{ route('account.Kategori-Artikel.create') }}" class="btn btn-primary btn-block mt-3" style="padding-top: 10px;">
                         <i class="fa fa-plus-circle"></i> TAMBAH KATEGORI
@@ -90,7 +90,7 @@ Kategori Artikel | MIS
                                         <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KATEGORI</th>
                                         <th scope="col" rowspan="2" class="column-width" style="text-align: center;">JUMLAH ARTIKEL</th>
-                                        @if ( Auth::user()->level == 'ceo')
+                                        @if ( Auth::user()->adalahAdministrator())
                                         @else
                                         <th scope="col" rowspan="2" style="width: 15%;text-align: center">AKSI</th>
                                         @endif
@@ -108,7 +108,7 @@ Kategori Artikel | MIS
                                         <th scope="row" style="text-align: center">{{ $no }}</th>
                                         <td class="column-width" style="text-align: center;">{{ strtoupper($hasil->kategori) }}</td>
                                         <td class="column-width" style="text-align: center;">{{ strtoupper($hasil->jumlah_artikel) }}</td>
-                                        @if ( Auth::user()->level == 'ceo')
+                                        @if ( Auth::user()->adalahAdministrator())
                                         @else
                                         <td style="text-align: center;">
                                             <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.Kategori-Artikel.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">

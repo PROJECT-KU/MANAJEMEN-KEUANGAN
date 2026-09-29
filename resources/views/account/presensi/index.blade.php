@@ -329,7 +329,7 @@ Data Presensi Karyawan | MIS
           <i class="fas fa-filter text-primary"></i> FILTER
         </button>
 
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <a href="{{ route('account.presensi.create') }}" class="btn-modern shadow-sm font-weight-bold btn-create-animate"
           style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; height: 42px;">
           <i class="fas fa-plus-circle" style="font-size: 18px;"></i>
@@ -441,9 +441,9 @@ Data Presensi Karyawan | MIS
         </div>
 
         <div class="action-wrap" style="display:flex; gap:10px; margin-top:20px;">
-          @if (Auth::user()->level == 'staff' || Auth::user()->level == 'ceo')
+          @if (Auth::user()->adalahAdministrator())
           <a href="{{ route('account.presensi.detail', $hasil->id) }}" class="btn-modern btn-edit" style="background: #fffbeb; color: #d97706;"><i class="fas fa-eye"></i> Detail</a>
-          @elseif (Auth::user()->level == 'manager' || Auth::user()->level == 'admin')
+          @elseif (Auth::user()->adalahAdministrator())
           <a href="{{ route('account.presensi.edit', $hasil->id) }}" class="btn-modern btn-edit"><i class="fas fa-edit"></i> Edit</a>
           <button onclick="Delete('{{ $hasil->id }}')" class="btn-modern btn-delete"><i class="fas fa-trash"></i> Hapus</button>
           @endif
@@ -479,7 +479,7 @@ Data Presensi Karyawan | MIS
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @php
-$isManagerJS = (Auth::user()->level == 'manager') ? 1 : 0;
+$isManagerJS = (Auth::user()->adalahAdministrator()) ? 1 : 0;
 @endphp
 
 <!--================== POPUP FILTER ==================-->

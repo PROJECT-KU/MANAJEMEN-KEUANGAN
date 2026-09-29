@@ -229,7 +229,7 @@ Update Perjalanan Dinas | MIS
                 <div class="form-group">
                   <label>Status</label>
                   <div class="input-group">
-                    @if (Auth::user()->level == 'karyawan')
+                    @if (Auth::user()->adalahKaryawan())
                     <select class="form-control" name="status" required>
                       <option value="" disabled selected>-- PILIH STATUS --</option>
                       <option value="ajukan" {{ $DatasEdit->status == 'ajukan' ? 'selected' : '' }}>AJUKAN</option>
@@ -308,7 +308,7 @@ Update Perjalanan Dinas | MIS
               <div class="form-group">
                 <label style=" font-weight: bold;">Catatan</label>
                 <div class="input-group" style=" border: 2px solid 	#FFA500; border-radius: 8px;">
-                  @if (Auth::user()->level == 'karyawan')
+                  @if (Auth::user()->adalahKaryawan())
                   <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" readonly>{{ $DatasEdit->deskripsi }}</textarea>
                   @else
                   <textarea type="text" name="deskripsi" placeholder="Masukan Catatan" class="form-control" required>{{ $DatasEdit->deskripsi }}</textarea>

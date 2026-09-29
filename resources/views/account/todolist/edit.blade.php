@@ -162,7 +162,7 @@ Update Data TO DO LIST| MIS
                     <div class="card-body">
                         <div class="row">
                         </div>
-                        @if($user->level == 'manager')
+                        @if($user->adalahAdministrator())
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

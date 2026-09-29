@@ -362,7 +362,7 @@ Data Gaji Karyawan | MIS
 <div class="main-content">
   <section class="section">
 
-    @if ($gaji->count() > 0 && (Auth::user()->level == 'staff' || Auth::user()->level == 'manager' || Auth::user()->level == 'ceo'))
+    @if ($gaji->count() > 0 && (Auth::user()->adalahAdministrator()))
     @php $totalPendingSalaries = 0; @endphp
     @foreach ($gaji as $item)
     @if ($item->status === 'pending')
@@ -391,7 +391,7 @@ Data Gaji Karyawan | MIS
             $tampilTotalIni = $totalBulanIni;
 
             // Khusus selain manager: hitung ulang hanya yang berstatus "terbayar"
-            if (Auth::user()->level != 'manager') {
+            if (! Auth::user()->adalahAdministrator()) {
             $tampilTotalIni = DB::table('gaji')
             ->where('user_id', Auth::user()->id)
             ->where('status', 'terbayar')
@@ -417,7 +417,7 @@ Data Gaji Karyawan | MIS
             @php
             $tampilTotalLalu = $totalBulanLalu;
 
-            if (Auth::user()->level != 'manager') {
+            if (! Auth::user()->adalahAdministrator()) {
             $tampilTotalLalu = DB::table('gaji')
             ->where('user_id', Auth::user()->id)
             ->where('status', 'terbayar')
@@ -443,7 +443,7 @@ Data Gaji Karyawan | MIS
             @php
             $tampilTotalDuaLalu = $totalDuaBulanLalu;
 
-            if (Auth::user()->level != 'manager') {
+            if (! Auth::user()->adalahAdministrator()) {
             $tampilTotalDuaLalu = DB::table('gaji')
             ->where('user_id', Auth::user()->id)
             ->where('status', 'terbayar')
@@ -479,14 +479,14 @@ Data Gaji Karyawan | MIS
           <i class="fas fa-filter text-primary"></i> FILTER
         </button>
 
-        @if (Auth::user()->level == 'manager')
+        @if (Auth::user()->adalahAdministrator())
         <button type="button" id="downloadExcelBtn" class="btn-modern btn-export-glossy btn-create-animate">
           <i class="far fa-file-excel"></i> EXCEL
         </button>
         @endif
 
         @auth
-        @if (Auth::user()->level === 'manager')
+        @if (Auth::user()->adalahAdministrator())
         @if ($presensiExist)
         <a href="{{ route('account.gaji.create') }}" class="btn-modern shadow-sm font-weight-bold btn-create-animate"
           style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; height: 42px;">
@@ -537,7 +537,7 @@ Data Gaji Karyawan | MIS
             @endif
 
             @foreach ($gaji as $hasil)
-            @if ((Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer') && $hasil->status == 'pending')
+            @if ((Auth::user()->adalahKaryawan()) && $hasil->status == 'pending')
             @continue
             @endif
 
@@ -586,7 +586,7 @@ Data Gaji Karyawan | MIS
               <td class="nowrap-col text-center">
                 <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
 
-                  @if(Auth::user()->level == 'karyawan' || Auth::user()->level == 'trainer' || Auth::user()->level == 'ceo')
+                  @if(Auth::user()->adalahKaryawan())
 
                   <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoaration: none;" title="Detail">
                     <i class="fa fa-eye"></i>

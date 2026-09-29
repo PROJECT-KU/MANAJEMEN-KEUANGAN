@@ -257,7 +257,7 @@ Update Presensi Karyawan | MIS
           <form id="updateForm" action="{{ route('account.presensi.update', $presensi->id) }}" method="post" enctype="multipart/form-data">
             @csrf
 
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+            @if (Auth::user()->adalahKaryawan())
             @php
             $todayPresensi = \App\Presensi::where('user_id', Auth::user()->id)
             ->whereDate('created_at', now()->toDateString())
@@ -333,7 +333,7 @@ Update Presensi Karyawan | MIS
               </div>
             </div>
             @endif
-            @if (Auth::user()->level == 'karyawan' || Auth::user()->level == 'staff' || Auth::user()->level == 'trainer')
+            @if (Auth::user()->adalahKaryawan())
             @else
             <div class="d-flex flex-md-nowrap flex-wrap gap-3 mt-5">
               <button type="submit" class="btn-modern btn-update flex-grow-1">
@@ -351,7 +351,7 @@ Update Presensi Karyawan | MIS
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if(Auth::user()->level != 'manager' && Auth::user()->level != 'ceo')
+@if(! Auth::user()->adalahAdministrator())
 <script>
   window.onload = function() {
     Swal.fire({

@@ -22,11 +22,13 @@ class PenggunaController extends Controller
      * Peran yang boleh mengelola akun orang lain. Di luar peran ini, seseorang
      * hanya boleh menyentuh akunnya sendiri.
      */
-    private const PERAN_PENGELOLA = ['admin', 'manager', 'ceo'];
+    /* Dulu ['admin','manager','ceo'] pada kolom level. Ketiganya berarti
+       "boleh mengelola pengguna"; sesudah peran dipisah dari jabatan, yang
+       membawa hak itu hanya administrator. */
 
     private function pengelola(): bool
     {
-        return in_array((string) Auth::user()?->level, self::PERAN_PENGELOLA, true);
+        return (bool) Auth::user()?->adalahAdministrator();
     }
 
     /** Halaman/aksi pengelolaan akun: hanya untuk admin, manager, dan CEO. */
@@ -62,7 +64,7 @@ class PenggunaController extends Controller
 
         $user = Auth::user();
 
-        if ($user->level == 'manager' || $user->level == 'ceo') {
+        if ($user->adalahAdministrator()) {
             // Jika user adalah 'manager', ambil semua data pengguna staff yang memiliki perusahaan yang sama dengan user
             $users = DB::table('users')
                 ->where('company', $user->company)
@@ -143,7 +145,7 @@ class PenggunaController extends Controller
                 Rule::unique('users', 'username'), // Check username uniqueness in the 'users' table
             ],
             'password' => 'required',
-            'level' => 'required',
+            'peran' => ['required', Rule::in(\App\User::SEMUA_PERAN)],
             'jenis' => 'required',
             'telp' => 'required',
             'tanggal_lahir' => 'required',
@@ -175,6 +177,9 @@ class PenggunaController extends Controller
         $user->email = $request->input('email');
         $user->username = $request->input('username');
         $user->password = bcrypt($request->input('password'));
+        // Peran = hak akses. Jabatan disimpan terpisah di kolom level dan
+        // jobdesk, dan tidak berpengaruh sama sekali ke hak akses.
+        $user->peran = $request->input('peran');
         $user->level = $request->input('level');
         $user->jenis = $request->input('jenis');
         $user->telp = $request->input('telp');
@@ -362,6 +367,7 @@ class PenggunaController extends Controller
         // yang sudah masuk bisa mengangkat dirinya sendiri menjadi manager.
         if ($this->pengelola()) {
             $user->company = $request->input('company') ?? $user->company;
+            $user->peran = $request->input('peran') ?? $user->peran;
             $user->level = $request->input('level') ?? $user->level;
             $user->status = $request->input('status') ?? $user->status;
             $user->jenis = $request->input('jenis') ?? $user->jenis;
@@ -492,7 +498,7 @@ class PenggunaController extends Controller
         ]);
 
         // If the user is a manager, update the company data for employees in the same company
-        if ($user->level === 'manager') {
+        if ($user->adalahAdministrator()) {
             $managerCompany = $user->company;
 
             // Update company data for all users with the same company

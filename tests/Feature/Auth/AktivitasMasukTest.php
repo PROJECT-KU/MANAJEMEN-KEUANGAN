@@ -41,6 +41,7 @@ class AktivitasMasukTest extends TestCase
             'username' => 'pengawas' . substr(uniqid(), -6),
             'email' => uniqid() . '@contoh.test',
             'password' => Hash::make('RahasiaUji2026'),
+            'peran' => 'administrator',
             'level' => 'manager',
             'company' => 'rumahscopus',
         ]);
@@ -88,7 +89,7 @@ class AktivitasMasukTest extends TestCase
         $this->assertStringContainsString('ada-di-csv', $res->streamedContent());
 
         $biasa = $this->pengawas();
-        $biasa->forceFill(['level' => 'karyawan'])->save();
+        $biasa->forceFill(['peran' => 'karyawan'])->save();
 
         // Sesi dibersihkan: AuthenticateSession mengikat sesi pada hash kata
         // sandi, jadi berganti pengguna di tengah tes akan dianggap sesi basi.

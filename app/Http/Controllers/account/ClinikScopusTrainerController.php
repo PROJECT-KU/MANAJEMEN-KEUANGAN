@@ -74,9 +74,9 @@ class ClinikScopusTrainerController extends Controller
             ->select('clinikscopus.*', 'users.full_name');
 
         // 🔐 Role filter
-        if ($user->level === 'manager' && $user->company) {
+        if ($user->adalahAdministrator() && $user->company) {
             $query->where('users.company', $user->company);
-        } elseif ($user->level === 'staff') {
+        } elseif ($user->adalahAdministrator()) {
             $query->where('clinikscopus.user_id', $user->id);
         }
 
