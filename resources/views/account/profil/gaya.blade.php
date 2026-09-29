@@ -1290,7 +1290,20 @@
 
     .password-toggle-inside {
         position: absolute;
-        right: 12px;
+        /*
+         * 9px, bukan 12px. Isiannya mencadangkan padding-right 40px untuk
+         * ikon ini, dan kotak ikonnya 24px, jadi supaya kotak itu rata
+         * tengah DI DALAM lorong 40px tersebut sisanya harus (40-24)/2 = 8px
+         * dari tepi dalam, yaitu 9px dari tepi luar (tepi isiannya 1px).
+         *
+         * Angka yang sama juga membuat tepi kanan tinta glifnya jatuh 12,8px
+         * dari tepi dalam — praktis sama dengan padding-left 13px di sisi
+         * seberangnya, jadi jarak kiri dan kanannya seimbang.
+         *
+         * Dengan 12px ikonnya 4px terlalu ke kiri: terukur 8,75px dari sisi
+         * kiri lorong tetapi 16,92px dari tepi kanan isian.
+         */
+        right: 9px;
         top: 50%;
         transform: translateY(-50%);
         display: grid;
