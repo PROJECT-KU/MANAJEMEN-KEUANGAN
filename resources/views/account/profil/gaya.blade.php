@@ -2243,6 +2243,27 @@
             padding-right: 0;
         }
 
+        /*
+         * Tiap catatan jadi kartu tersendiri, bukan baris bergaris pemisah.
+         *
+         * Garis 1px berwarna --mis-garis-lembut memang ada sebelumnya, tetapi
+         * pada catatan yang isinya dua sampai tiga baris ia terlalu sepi untuk
+         * memberi tahu di mana satu catatan berakhir: waktu, alasan, alamat,
+         * dan perangkat terbaca seperti satu gumpalan panjang. Jarak antar
+         * kartu jauh lebih kuat daripada garis, sebab yang memisahkan bukan
+         * tanda yang harus diperhatikan melainkan ruang kosong yang langsung
+         * terlihat.
+         *
+         * Angkanya disamakan dengan .pel-pesanan-baris di layar Data
+         * Pelanggan, yang bentuknya memang sama — daftar kejadian berbaris —
+         * supaya dua layar itu tidak tampil dengan dua bahasa rupa.
+         */
+        .kmn-tabel .mis-tabel.mis-tabel-kartu tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr {
             position: relative;
             /*
@@ -2265,8 +2286,10 @@
             align-items: center;
             column-gap: 10px;
             row-gap: 2px;
-            padding: 9px 12px 9px 15px;
-            border-bottom: 1px solid var(--mis-garis-lembut);
+            padding: 10px 12px 10px 15px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 13px;
+            background: #f8fafc;
         }
 
         /* Melawan line-height: 28px mutlak dari layout cabang ponsel. Tanpa
@@ -2351,15 +2374,18 @@
          * belum mengenalnya penandanya sekadar tidak muncul, tidak merusak.
          */
         .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr:has(.mis-pil-merah) {
-            background: #fffafa;
+            background: #fff5f6;
+            border-color: #fecdd3;
         }
 
+        /* Penandanya di dalam kartu, dijorokkan dari sudut lengkungnya supaya
+           ujungnya tidak tampak terpotong tepi kartu. */
         .kmn-tabel .mis-tabel.mis-tabel-kartu tbody tr:has(.mis-pil-merah)::before {
             content: "";
             position: absolute;
-            top: 6px;
-            bottom: 6px;
-            left: 5px;
+            top: 9px;
+            bottom: 9px;
+            left: 6px;
             width: 3px;
             border-radius: 999px;
             background: #f43f5e;
