@@ -193,8 +193,9 @@
         <table width="100%">
             <tr>
                 <td width="70%">
-                    Jumlah pesanan dihitung dari tiga layanan yang mencatat pemesannya
-                    (Clinik Scopus, Analisis Bibliometrik, Scopus Kafe).
+                    Jumlah pesanan dihitung dari empat layanan (Clinik Scopus, Analisis
+                    Bibliometrik, Scopus Kafe, Scopus Camp), dicocokkan lewat nomor telepon,
+                    lalu email, lalu nama. Online Training tidak tercatat di sistem ini.
                 </td>
                 <td width="30%"></td>
             </tr>

@@ -828,7 +828,7 @@
                                             <p class="pel-pesanan-nilai">Rp {{ number_format($p['nilai'], 0, ',', '.') }}</p>
                                         @endif
                                         {{-- Warna, label, dan ikonnya datang dari
-                                             PesananPelanggan::rupaStatus(): tiga layanan
+                                             PesananPelanggan::rupaStatus(): empat layanan
                                              memakai kosakata berbeda, jadi pemetaannya
                                              ditaruh satu tempat, bukan disebar di Blade. --}}
                                         <span class="mis-pil mis-pil-{{ $p['rupa']['warna'] }}">
@@ -839,13 +839,18 @@
                             @endforeach
                         </div>
 
-                        {{-- Keterbatasannya disebutkan, tidak disembunyikan: dua dari
-                             tiga layanan mencocokkan pemesannya lewat alamat email,
-                             jadi jejak sebelum email diganti tidak ikut terbaca. --}}
+                        {{-- Keterbatasannya disebutkan, tidak disembunyikan.
+                             Tiga dari empat layanan tidak menyimpan rujukan ke
+                             akun pemesannya sama sekali, jadi penautannya
+                             menebak dari nomor telepon, email, lalu nama — dan
+                             sengaja menahan diri kalau pengenalnya dipakai lebih
+                             dari satu akun. Online Training tidak bisa ikut sebab
+                             layanannya berjalan di luar sistem ini. --}}
                         <p class="mis-bantuan" style="margin-top: 10px;">
                             <i class="fas fa-info-circle mis-ikon-biru"></i>
-                            Sebagian layanan mencatat pemesannya lewat alamat email, jadi pesanan
-                            sebelum emailnya diganti bisa tidak muncul di sini.
+                            Pesanan dicocokkan lewat nomor telepon, lalu email, lalu nama. Pesanan
+                            yang datanya berbeda dari data akun ini bisa tidak muncul, dan pesanan
+                            Online Training tidak tercatat di sini.
                         </p>
                     @endif
                 </section>
