@@ -255,16 +255,47 @@
         /* Angka relatif, bukan warisan line-height 28px mutlak dari layout —
            kalimat yang membungkus dua baris jadi merenggang seperti daftar. */
         line-height: 1.45;
-        font-size: .78rem;
+        /* .75rem, menyamai .prof-bagian-sub di halaman profil (12px). */
+        font-size: .75rem;
         color: var(--mis-tinta-3);
     }
 
+    /*
+     * Baris tombol mengikuti .prof-aksi di halaman profil: keterangan di kiri,
+     * tombol di kanan.
+     *
+     * TANPA garis putus-putus di atasnya. Garis itu dulu memang ada, tetapi
+     * dibuang dari profil begitu tiap bagian jadi kartu bersudut sendiri —
+     * tepi kartunya sudah memisahkan, dan garis kedua di dalamnya hanya
+     * menambah coretan. Terukur di profil: padding-top 0, border none.
+     */
     .pel-baris-aksi {
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 14px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .pel-aksi-catatan {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        /* Angka relatif: layout mewariskan line-height 28px MUTLAK, yang pada
+           huruf sekecil ini merenggangkan barisnya seperti daftar. */
+        line-height: 1.5;
+        /* .74rem / 400 / #94a3b8 — menyamai .prof-aksi-catatan di profil. */
+        font-size: .74rem;
+        font-weight: 400;
+        color: #94a3b8;
+    }
+
+    .pel-aksi-catatan > .fas {
+        font-size: inherit !important;
+        line-height: 1;
+        flex: 0 0 auto;
     }
 
     /* Baris email: nilai di kiri, tombol verifikasi di kanan. */
@@ -318,6 +349,11 @@
         .pel-baris-aksi {
             flex-direction: column-reverse;
             align-items: stretch;
+        }
+
+        .pel-aksi-catatan {
+            justify-content: center;
+            text-align: center;
         }
 
         .pel-baris-aksi .mis-tombol {
@@ -509,6 +545,16 @@
                 <div class="tab-pane fade show active" id="pel-panel-akun" role="tabpanel"
                     aria-labelledby="pel-tab-akun" tabindex="0">
                 <section class="mis-bagian pel-bagian">
+                    {{-- Kepala bagian tetap ada walau kartunya sudah berkepala,
+                         sama seperti di halaman profil: kepala kartu menamai
+                         seluruh pengaturan, kepala bagian menamai satu urusan
+                         di dalamnya. Sempat dibuang karena dikira mengulang —
+                         padahal di profil keduanya memang berdampingan. --}}
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-id-card"></i></span>
+                        <h3 class="pel-kepala-judul">Data akun</h3>
+                        <p class="pel-kepala-sub">Nama, username, dan keadaan akunnya.</p>
+                    </div>
 
                     <form method="POST" action="{{ route('account.pengguna.update', $user) }}">
                         @csrf
@@ -560,6 +606,10 @@
                              pengguna, dan menaruh kendalinya di sini membuat satu
                              salah klik mengubah hak akses tanpa disengaja. --}}
                         <div class="pel-baris-aksi">
+                            <p class="pel-aksi-catatan">
+                                <i class="fas fa-info-circle mis-ikon-ungu"></i>
+                                Peran tidak bisa diubah dari sini; itu urusan pengelolaan pengguna.
+                            </p>
                             <button type="submit" class="mis-tombol mis-tombol-ungu">
                                 <i class="fas fa-save"></i> Simpan perubahan
                             </button>
@@ -573,6 +623,11 @@
                 <div class="tab-pane fade" id="pel-panel-kontak" role="tabpanel"
                     aria-labelledby="pel-tab-kontak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-address-book"></i></span>
+                        <h3 class="pel-kepala-judul">Kontak</h3>
+                        <p class="pel-kepala-sub">Cara menghubungi pelanggan ini.</p>
+                    </div>
 
                     <div class="pel-email">
                         <span class="mis-medali kecil {{ $user->email_verified_at ? 'mis-hijau' : 'mis-kuning' }}" aria-hidden="true">
@@ -604,8 +659,6 @@
                                     value="{{ old('email', $user->email) }}" required>
                                 @error('email')
                                     <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
-                                @else
-                                    <p class="mis-bantuan">Mengganti email membuat verifikasinya kembali kosong.</p>
                                 @enderror
                             </div>
 
@@ -625,6 +678,10 @@
                              dikirim ke alamat yang sama, dan dulu dipecah jadi dua
                              formulir terpisah berisi satu isian masing-masing. --}}
                         <div class="pel-baris-aksi">
+                            <p class="pel-aksi-catatan">
+                                <i class="fas fa-shield-alt mis-ikon-hijau"></i>
+                                Mengganti email membuat verifikasinya kembali kosong.
+                            </p>
                             <button type="submit" class="mis-tombol mis-tombol-ungu">
                                 <i class="fas fa-save"></i> Simpan kontak
                             </button>
@@ -638,6 +695,11 @@
                 <div class="tab-pane fade" id="pel-panel-pesanan" role="tabpanel"
                     aria-labelledby="pel-tab-pesanan" tabindex="0">
                 <section class="mis-bagian pel-bagian">
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-receipt"></i></span>
+                        <h3 class="pel-kepala-judul">Riwayat pesanan</h3>
+                        <p class="pel-kepala-sub">Layanan yang pernah dipesan orang ini.</p>
+                    </div>
 
                     @if ($pesanan->isEmpty())
                         <div class="mis-kosong pel-kosong-ringkas">
@@ -688,6 +750,11 @@
                 <div class="tab-pane fade" id="pel-panel-jejak" role="tabpanel"
                     aria-labelledby="pel-tab-jejak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
+                    <div class="pel-kepala">
+                        <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
+                        <h3 class="pel-kepala-judul">Jejak perubahan</h3>
+                        <p class="pel-kepala-sub">Siapa mengubah apa pada akun ini.</p>
+                    </div>
 
                     @if ($jejak->isEmpty())
                         <div class="mis-kosong pel-kosong-ringkas">
