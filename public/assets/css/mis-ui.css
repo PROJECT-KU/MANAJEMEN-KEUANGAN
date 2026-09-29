@@ -1181,6 +1181,10 @@ textarea:focus-visible,
     margin: 4px 0 0;
     font-size: .8rem;
     color: var(--mis-tinta-3);
+    /* Sama seperti .mis-sub di atas: tanpa ini ia mewarisi line-height 28px
+       dari Stisla, yaitu 2,19x ukuran hurufnya. Baru kelihatan saat
+       kalimatnya membungkus dua baris. */
+    line-height: 1.5;
 }
 
 /*

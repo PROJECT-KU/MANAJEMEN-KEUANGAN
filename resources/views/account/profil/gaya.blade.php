@@ -1026,6 +1026,9 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        /* Di ponsel kalimatnya membungkus, dan tanpa angka relatif ia memakai
+           line-height 28px warisan layout — 2,36x ukuran hurufnya. */
+        line-height: 1.5;
         margin: 0;
         font-size: .74rem;
         color: var(--mis-tinta-4);
@@ -1107,6 +1110,24 @@
         font-weight: 600;
         color: #78350f;
         flex: 1 1 auto;
+        /*
+         * line-height ditulis di sini, walau kelihatannya tidak perlu.
+         *
+         * Layout menyetel line-height: 28px — nilai MUTLAK, bukan
+         * perbandingan — dan itu terwarisi apa adanya ke teks sekecil apa
+         * pun. Pada 13,1px huruf, 28px berarti perbandingan 2,13: kalimat
+         * yang membungkus dua baris jadi merenggang seperti daftar.
+         * Angka relatif ikut mengecil bersama ukuran hurufnya.
+         */
+        line-height: 1.5;
+    }
+
+    /* Paragraf di dalamnya mewarisi dari elemen yang salah kalau tidak
+       disebut: .prof-kabar-teks kadang berupa <div> berisi <p class="mb-0">,
+       dan <p> itu mengambil 28px langsung dari layout. */
+    .prof-kabar-teks p {
+        margin-bottom: 0;
+        line-height: inherit;
     }
 
     /* ------------------------------------------------------------ modal */
