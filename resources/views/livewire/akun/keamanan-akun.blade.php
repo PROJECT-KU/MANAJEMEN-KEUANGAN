@@ -250,15 +250,33 @@
                     <tbody>
                         @foreach ($riwayat as $baris)
                             <tr>
+                                {{-- Waktu DAN keterangan kejadiannya dalam satu sel:
+                                     "kapan" dan "apa yang terjadi" adalah satu
+                                     kalimat, dan keduanya sama-sama rata kiri.
+
+                                     Keterangannya dulu menumpang di sel Hasil, di
+                                     bawah lencananya. Di ponsel sel itu sempit dan
+                                     rata kanan, jadi kalimat sepanjang "PIN salah
+                                     tiga kali berturut-turut" terpatah tiga baris
+                                     bergerigi — dan, karena lebar kolomnya diukur
+                                     dari isi terlebar, kalimat itu pula yang
+                                     memaksa kolom waktu menyempit sampai
+                                     tanggalnya ikut terpatah. --}}
                                 <td class="mis-td-utama">
-                                    <span class="kmn-waktu">
-                                        {{ $baris->created_at?->locale('id')->translatedFormat('d M Y, H:i') }} WIB
-                                    </span>
+                                    <div class="kmn-kejadian">
+                                        <span class="kmn-waktu">
+                                            {{ $baris->created_at?->locale('id')->translatedFormat('d M Y, H:i') }} WIB
+                                        </span>
+                                        @if ($baris->alasan)
+                                            <span class="kmn-samar">{{ $baris->alasan }}</span>
+                                        @endif
+                                    </div>
                                 </td>
-                                {{-- Lencana menjawab "berhasil atau tidak", barisan kecil di
-                                     bawahnya menjelaskan caranya. Dulu keduanya dijadikan satu
-                                     lencana, jadi ada lencana hijau bertuliskan "kata sandi"
-                                     yang tidak menyatakan apa pun soal berhasil. --}}
+                                {{-- Tinggal lencananya: satu kata yang menjawab
+                                     "berhasil atau tidak". Dulu cara masuknya ikut
+                                     dijadikan lencana, jadi ada lencana hijau
+                                     bertuliskan "kata sandi" yang tidak menyatakan
+                                     apa pun soal berhasil. --}}
                                 <td data-judul="Hasil">
                                     <div class="kmn-hasil">
                                         @if ($baris->berhasil)
@@ -269,9 +287,6 @@
                                             <span class="mis-pil mis-pil-merah">
                                                 <i class="fas fa-times"></i> Gagal
                                             </span>
-                                        @endif
-                                        @if ($baris->alasan)
-                                            <span class="kmn-samar">{{ $baris->alasan }}</span>
                                         @endif
                                     </div>
                                 </td>
