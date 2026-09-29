@@ -1308,6 +1308,24 @@
         line-height: 1;
     }
 
+    /*
+     * Tinta glifnya, bukan kotaknya, yang meleset.
+     *
+     * Kotak <i> 24x24 itu sudah rata tengah terhadap isian — diukur selisih
+     * titik tengahnya 0,0px di 390, 575, 768 dan 1200px. Yang tidak rata
+     * adalah gambar hurufnya DI DALAM kotak em Font Awesome: tintanya jatuh
+     * sekitar 1,2px di atas titik tengah (terukur +1,53px dan +0,94px pada
+     * dua pembulatan sub-piksel yang berbeda).
+     *
+     * Digeser di ::before, bukan di <i>: latar :hover yang 24x24 itu harus
+     * tetap rata tengah, dan <i>-nya sudah memakai transform untuk
+     * menengahkan dirinya sendiri (translateY(-50%)), jadi transform kedua
+     * di situ akan saling menimpa.
+     */
+    .password-toggle-inside::before {
+        transform: translateY(1.25px);
+    }
+
     .password-toggle-inside:hover {
         background: #eef2ff;
         color: #6366f1;
