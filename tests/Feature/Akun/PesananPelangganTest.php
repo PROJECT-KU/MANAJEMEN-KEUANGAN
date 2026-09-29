@@ -36,10 +36,27 @@ class PesananPelangganTest extends TestCase
         return (string) $id;
     }
 
-    /** Akun pengisi kolom wajib yang tidak sedang diuji. */
+    /**
+     * Akun pengisi kolom wajib yang tidak sedang diuji.
+     *
+     * Sengaja BUKAN berperan pelanggan. Sesudah penautan memakai customer_id
+     * sebagai kunci pertama, akun netral yang berperan pelanggan bukan lagi
+     * pengisi netral — ia jadi pemilik sah barisnya, sehingga uji yang hendak
+     * menguji pencocokan lewat email malah menaut ke akun netral itu. Sebagai
+     * karyawan ia tetap memenuhi kunci asing tetapi tidak pernah dianggap
+     * pemesan, dan itu juga lebih sesuai kenyataan: trainer_id memang diisi
+     * karyawan.
+     */
     private function netral(): User
     {
-        return $this->netral ??= $this->pelanggan('netral_' . uniqid() . '@contoh.test');
+        if ($this->netral) {
+            return $this->netral;
+        }
+
+        $this->netral = $this->pelanggan('netral_' . uniqid() . '@contoh.test');
+        $this->netral->forceFill(['peran' => User::PERAN_KARYAWAN])->save();
+
+        return $this->netral = $this->netral->refresh();
     }
 
     private function pelanggan(string $email): User
