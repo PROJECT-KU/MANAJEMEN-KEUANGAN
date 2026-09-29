@@ -346,9 +346,58 @@
             </aside>
 
             {{-- =========================================== kolom kanan --}}
-            <div>
+            <div class="pel-kanan">
+
+                {{--
+                  Empat urusan dipisah jadi tab, tidak ditumpuk.
+
+                  Ditumpuk, kolom kanan setinggi 1105px sementara kolom kiri
+                  hanya 409px — 696px petak kosong di kiri, dan halamannya
+                  harus digulir 477px hanya untuk melihat kartu terakhir.
+                  Halaman profil memecahkan hal yang sama dengan tab, dan ini
+                  memakai deret tab bersama yang sama.
+
+                  aria-selected dan aria-controls WAJIB ada: role="tab" saja
+                  hanya memberi tahu pembaca layar bahwa ini deretan tab —
+                  bukan tab mana yang terbuka, dan bukan panel mana yang
+                  dikendalikannya. Kelas .active cuma rupa; ia tidak terbaca.
+                --}}
+                <ul class="mis-tab nav nav-pills" id="pel-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="pel-tab-akun" data-toggle="pill" href="#pel-panel-akun"
+                            role="tab" aria-controls="pel-panel-akun" aria-selected="true">
+                            <i class="fas fa-id-card mis-ikon-biru" aria-hidden="true"></i> Data akun
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="pel-tab-kontak" data-toggle="pill" href="#pel-panel-kontak"
+                            role="tab" aria-controls="pel-panel-kontak" aria-selected="false">
+                            <i class="fas fa-address-book mis-ikon-hijau" aria-hidden="true"></i> Kontak
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="pel-tab-pesanan" data-toggle="pill" href="#pel-panel-pesanan"
+                            role="tab" aria-controls="pel-panel-pesanan" aria-selected="false">
+                            <i class="fas fa-receipt mis-ikon-jingga" aria-hidden="true"></i>
+                            Pesanan
+                            @if ($pesanan->isNotEmpty())
+                                <span class="mis-pil mis-pil-abu">{{ $pesanan->count() }}</span>
+                            @endif
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="pel-tab-jejak" data-toggle="pill" href="#pel-panel-jejak"
+                            role="tab" aria-controls="pel-panel-jejak" aria-selected="false">
+                            <i class="fas fa-history mis-ikon-ungu" aria-hidden="true"></i> Jejak
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
 
                 {{-- ------------------------------------- data akun --}}
+                <div class="tab-pane fade show active" id="pel-panel-akun" role="tabpanel"
+                    aria-labelledby="pel-tab-akun" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-id-card"></i></span>
@@ -404,7 +453,11 @@
                     </form>
                 </section>
 
+                </div>
+
                 {{-- --------------------------------------- kontak --}}
+                <div class="tab-pane fade" id="pel-panel-kontak" role="tabpanel"
+                    aria-labelledby="pel-tab-kontak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-address-book"></i></span>
@@ -461,7 +514,11 @@
                     </form>
                 </section>
 
+                </div>
+
                 {{-- ------------------------------ riwayat pesanan --}}
+                <div class="tab-pane fade" id="pel-panel-pesanan" role="tabpanel"
+                    aria-labelledby="pel-tab-pesanan" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-receipt"></i></span>
@@ -512,7 +569,11 @@
                     @endif
                 </section>
 
+                </div>
+
                 {{-- ------------------------------ jejak perubahan --}}
+                <div class="tab-pane fade" id="pel-panel-jejak" role="tabpanel"
+                    aria-labelledby="pel-tab-jejak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
                         <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-history"></i></span>
@@ -545,6 +606,9 @@
                         </div>
                     @endif
                 </section>
+                </div>
+
+                </div>{{-- tab-content --}}
 
             </div>
         </div>

@@ -59,6 +59,86 @@ body {
 }
 
 /*
+ * Deret tab bersama.
+ *
+ * Diangkat dari .prof-tab di halaman profil, yang jadi acuan rupa. Dipakai
+ * saat satu layar memuat beberapa urusan yang tidak perlu dilihat sekaligus —
+ * menumpuknya jadi satu kolom panjang memaksa orang menggulir untuk menemukan
+ * yang dicarinya, dan menyisakan petak kosong di kolom sebelahnya.
+ *
+ * Kelas Bootstrap .nav-link dipertahankan karena data-toggle="pill" yang
+ * mengatur perpindahannya bersandar padanya.
+ */
+.mis-tab {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 5px;
+    background: #f1f5f9;
+    border: 1px solid var(--ui-garis);
+    border-radius: 14px;
+}
+
+.mis-tab > li {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.mis-tab .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 11px;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--ui-tinta-3);
+    background: transparent;
+    white-space: nowrap;
+    transition: all .25s ease;
+}
+
+.mis-tab .nav-link > .fas {
+    font-size: 13px !important;
+}
+
+.mis-tab .nav-link:hover {
+    color: #4f46e5;
+    background: #fff;
+}
+
+.mis-tab .nav-link.active {
+    background: var(--ui-gradien);
+    color: #fff;
+    box-shadow: 0 10px 20px -12px var(--ui-aksen);
+}
+
+.mis-tab .nav-link.active > .fas {
+    color: #fff !important;
+}
+
+/* Empat tab tidak muat berjajar di ponsel; dijadikan satu baris yang bisa
+   digeser, bukan dibungkus jadi dua baris yang memakan tinggi. */
+@media (max-width: 767.98px) {
+    .mis-tab {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .mis-tab::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mis-tab > li {
+        flex: 0 0 auto;
+    }
+}
+
+/*
  * Kartu BAGIAN — satu urusan di dalam satu layar.
  *
  * Berbeda dari .mis-kartu, yang menaungi seluruh blok: bantalannya lebih
