@@ -109,6 +109,50 @@ Angkatan Layanan | MIS
     /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
     .ang-gandakan { display: inline-flex; margin: 0; }
 
+    .ang-ringkas {
+        margin: 0 0 12px;
+        line-height: 1.45; font-size: .78rem; color: var(--mis-tinta-3);
+    }
+
+    .ang-ringkas strong { color: var(--mis-tinta); }
+
+    .ang-sampul {
+        width: 38px; height: 38px;
+        object-fit: cover;
+        border-radius: 11px;
+        border: 1px solid var(--mis-garis);
+        flex: 0 0 auto;
+    }
+
+    .ang-nama a { color: inherit; }
+    .ang-nama a:hover { color: #4f46e5; text-decoration: none; }
+
+    /* Kolom centang: ukuran dan warnanya sama dengan Data Customer, layar
+       yang sudah lebih dulu punya aksi massal. Dibuat sendiri, kotak centang
+       jadi tiga ukuran berbeda di tiga layar yang tugasnya sama. */
+    .ang-centang-sel {
+        width: 34px;
+        padding-right: 0 !important;
+    }
+
+    .ang-centang-sel input {
+        width: 16px;
+        height: 16px;
+        accent-color: #4f46e5;
+        cursor: pointer;
+    }
+
+    .ang-massal {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+        padding: 11px 13px; margin-bottom: 12px;
+        border: 1px solid #c7d2fe; border-radius: 13px;
+        background: #eef2ff;
+    }
+
+    .ang-massal-jumlah { font-size: .8rem; color: #4338ca; }
+    .ang-massal-jumlah strong { font-size: .92rem; font-weight: 800; }
+    .ang-massal-tombol { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+
     .ang-tautan {
         display: inline-block;
         margin-top: 3px;
@@ -128,9 +172,15 @@ Angkatan Layanan | MIS
     .ang-nilai .ang-ket { display: block; }
     .ang-kuota strong { font-size: .92rem; font-weight: 800; color: var(--mis-tinta); }
 
+    /*
+     * Dua kolom DAN tombolnya ikut di baris kedua, bukan sendirian di baris
+     * ketiga: empat kendali dalam dua kolom sempat memakan 183px di 820–1000px,
+     * dengan menu urut sendirian di baris kedua dan tombol Saring sendirian di
+     * baris ketiga.
+     */
     @media (max-width: 1199.98px) {
         .ang-saring { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-        .ang-saring > .mis-tombol { grid-column: 1 / -1; }
+        .ang-saring > .mis-tombol { grid-column: 2; }
     }
 
     @media (max-width: 767.98px) {
@@ -147,6 +197,34 @@ Angkatan Layanan | MIS
            ada di layar lebar dan di berkas unduhan. */
         .mis-tabel-kartu.ang-tabel td[data-judul="Layanan"],
         .mis-tabel-kartu.ang-tabel td[data-judul="Biaya"] { display: none; }
+
+        /* Kotak centang dipindah ke sudut kanan-atas kartu, sama seperti Data
+           Customer. Dibiarkan jadi baris berlabel "Pilih", ia menambah satu
+           baris lagi ke kartu yang sudah 253px tingginya — dan label itu tidak
+           memberi tahu apa pun yang kotaknya belum katakan. */
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody tr { position: relative; }
+
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td.ang-centang-sel {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: auto;
+            padding: 0 !important;
+            justify-content: flex-end;
+        }
+
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td.ang-centang-sel::before { display: none; }
+
+        /* Kartu yang terpilih diberi warna: di antara kartu-kartu berjarak,
+           kotak 16px di sudut terlalu kecil untuk menunjukkan mana yang ikut. */
+        .mis-tabel-kartu.ang-tabel tbody tr:has(.ang-centang:checked) {
+            border-color: #c7d2fe;
+            background: #f5f6ff;
+        }
+
+        /* Nama angkatan diberi ruang kanan supaya nama panjang tidak menyelinap
+           ke bawah kotak centangnya. */
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td.mis-td-utama { padding-right: 28px; }
     }
 </style>
 @endpush
@@ -221,6 +299,20 @@ Angkatan Layanan | MIS
             @endforeach
         </div>
 
+        {{-- Lencana layanan menyebut totalnya; ini menyebut berapa yang sedang
+             berjalan, dan itu yang paling sering ditanya. Mengikuti saringan
+             yang sedang dipakai, bukan seluruh tabel. --}}
+        @if ($perStatus->sum() > 0)
+            <p class="ang-ringkas">
+                {{ $perStatus->sum() }} angkatan
+                @foreach (['active' => 'aktif', 'draft' => 'draf', 'non active' => 'nonaktif'] as $k => $l)
+                    @if (($perStatus[$k] ?? 0) > 0)
+                        &middot; <strong>{{ $perStatus[$k] }}</strong> {{ $l }}
+                    @endif
+                @endforeach
+            </p>
+        @endif
+
         <div class="mis-bagian">
             <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="ang-saring">
                 <input type="hidden" name="layanan" value="{{ $layanan }}">
@@ -289,6 +381,30 @@ Angkatan Layanan | MIS
                 </button>
             </form>
 
+            @if ($bolehUbah)
+                {{-- Bilah muncul HANYA saat ada yang dipilih. Bilah kosong yang
+                     bertuliskan "0 dipilih" menempati ruang tanpa memberi tahu
+                     apa pun, dan di ponsel ia menutupi barisnya. --}}
+                <div class="ang-massal" id="ang-massal" hidden>
+                    <span class="ang-massal-jumlah"><strong id="ang-massal-n">0</strong> dipilih</span>
+
+                    <div class="ang-massal-tombol">
+                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="active">
+                            <i class="fas fa-check-circle"></i> Aktifkan
+                        </button>
+                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="non active">
+                            <i class="fas fa-times-circle"></i> Nonaktifkan
+                        </button>
+                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="draft">
+                            <i class="fas fa-pen"></i> Jadikan draf
+                        </button>
+                        <button type="button" class="mis-tombol mis-tombol-halus" id="ang-massal-batal">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             @if ($angkatan->isEmpty())
                 {{-- Judulnya ikut berubah, bukan cuma subjudulnya: "Belum ada
                      angkatan" pada daftar yang sedang disaring adalah kalimat
@@ -320,6 +436,12 @@ Angkatan Layanan | MIS
                     <table class="mis-tabel mis-tabel-kartu ang-tabel">
                         <thead>
                             <tr>
+                                @if ($bolehUbah)
+                                    <th class="ang-centang-sel">
+                                        <input type="checkbox" id="ang-pilih-semua"
+                                            aria-label="Pilih semua angkatan di halaman ini">
+                                    </th>
+                                @endif
                                 <th>Angkatan</th>
                                 <th>Layanan</th>
                                 <th>Tanggal</th>
@@ -333,13 +455,33 @@ Angkatan Layanan | MIS
                             @foreach ($angkatan as $a)
                                 @php($tentang = $katalog[$a->layanan] ?? null)
                                 <tr>
+                                    @if ($bolehUbah)
+                                        <td class="ang-centang-sel">
+                                            {{-- Kelasnya ang-centang, BUKAN ang-pilih: nama itu
+                                                 sudah dipakai pil layanan di atas, dan
+                                                 querySelectorAll('.ang-pilih') ikut menjaring
+                                                 keenam pil sehingga centang-semua tak pernah
+                                                 bisa penuh. --}}
+                                            <input type="checkbox" class="ang-centang" value="{{ $a->id }}"
+                                                aria-label="Pilih {{ $a->nama }}">
+                                        </td>
+                                    @endif
                                     <td class="mis-td-utama">
                                         <span class="mis-sel-utama">
-                                            <span class="mis-medali kecil {{ $tentang['warna'] ?? 'mis-abu' }}" aria-hidden="true">
-                                                <i class="fas {{ $tentang['ikon'] ?? 'fa-layer-group' }}"></i>
-                                            </span>
+                                            {{-- Sampulnya ditampilkan kecil: angkatan tanpa sampul
+                                                 langsung terlihat di antara yang punya, dan itulah
+                                                 yang tampil di halaman publik. --}}
+                                            @if ($a->alamat_sampul)
+                                                <img src="{{ $a->alamat_sampul }}" alt="" class="ang-sampul" loading="lazy">
+                                            @else
+                                                <span class="mis-medali kecil {{ $tentang['warna'] ?? 'mis-abu' }}" aria-hidden="true">
+                                                    <i class="fas {{ $tentang['ikon'] ?? 'fa-layer-group' }}"></i>
+                                                </span>
+                                            @endif
                                             <span class="mis-sel-teks">
-                                                <p class="ang-nama">{{ $a->nama }}</p>
+                                                <p class="ang-nama">
+                                                    <a href="{{ route('account.kategori-layanan.detail', $a) }}">{{ $a->nama }}</a>
+                                                </p>
                                                 <p class="ang-ket">
                                                     {{ $a->nama_ke ? 'Angkatan ke-' . $a->nama_ke : 'Tanpa nomor' }}
                                                     @if ($a->lokasi) &middot; {{ $a->lokasi }} @endif
@@ -416,10 +558,21 @@ Angkatan Layanan | MIS
                                             {{-- Tidak ada apa pun yang menutup angkatan otomatis,
                                                  jadi ia bisa terpajang "Aktif" berbulan-bulan
                                                  sesudah acaranya selesai. --}}
-                                            <span class="mis-pil mis-pil-kuning"
-                                                title="Masih aktif padahal tanggalnya sudah lewat">
-                                                <i class="fas fa-exclamation-triangle"></i> Lewat
-                                            </span>
+                                            @if ($bolehUbah)
+                                                {{-- Memberi tahu tanpa menawarkan jalan keluar cuma
+                                                     setengah pekerjaan: menekannya menonaktifkan
+                                                     angkatan itu. --}}
+                                                <button type="button" class="mis-pil mis-pil-kuning tar-pil-tombol"
+                                                    data-nonaktifkan="{{ $a->id }}" data-nama="{{ $a->nama }}"
+                                                    title="Masih aktif padahal tanggalnya sudah lewat — tekan untuk menonaktifkan">
+                                                    <i class="fas fa-exclamation-triangle"></i> Lewat
+                                                </button>
+                                            @else
+                                                <span class="mis-pil mis-pil-kuning"
+                                                    title="Masih aktif padahal tanggalnya sudah lewat">
+                                                    <i class="fas fa-exclamation-triangle"></i> Lewat
+                                                </span>
+                                            @endif
                                         @endif
                                     </td>
 
@@ -483,6 +636,120 @@ Angkatan Layanan | MIS
             document.getElementById('ang-urut-arah').value = bagian[1];
             pilih.form.submit();
         });
+    })();
+
+    /*
+     * Pilihan massal. Bilahnya muncul hanya saat ada yang dipilih, dan
+     * pilihannya TIDAK bertahan antar halaman: daftar berhalaman yang diam-diam
+     * mengingat pilihan di halaman lain membuat orang mengubah baris yang tidak
+     * sedang dilihatnya.
+     */
+    (function () {
+        const bilah = document.getElementById('ang-massal');
+        if (!bilah) return;
+
+        const semua = document.getElementById('ang-pilih-semua');
+        const kotak = [...document.querySelectorAll('.ang-centang')];
+        const angka = document.getElementById('ang-massal-n');
+
+        function terpilih() {
+            return kotak.filter(function (k) { return k.checked; }).map(function (k) { return k.value; });
+        }
+
+        function segarkan() {
+            const n = terpilih().length;
+            angka.textContent = n;
+            bilah.hidden = n === 0;
+
+            if (semua) {
+                semua.checked = n > 0 && n === kotak.length;
+                // Sebagian terpilih ditandai setengah, bukan kosong: kosong
+                // terbaca seolah tidak ada yang dipilih sama sekali.
+                semua.indeterminate = n > 0 && n < kotak.length;
+            }
+        }
+
+        kotak.forEach(function (k) { k.addEventListener('change', segarkan); });
+
+        if (semua) {
+            semua.addEventListener('change', function () {
+                kotak.forEach(function (k) { k.checked = semua.checked; });
+                segarkan();
+            });
+        }
+
+        document.getElementById('ang-massal-batal').addEventListener('click', function () {
+            kotak.forEach(function (k) { k.checked = false; });
+            segarkan();
+        });
+
+        function ubahStatus(id, status, kalimat, sorot) {
+            window.misKonfirmasi({
+                judul: 'Ubah status angkatan?',
+                pesan: kalimat,
+                sorot: sorot,
+                tombol: 'Ya, ubah',
+                jenis: 'tanya',
+                glif: 'fa-layer-group',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                const isi = new FormData();
+                id.forEach(function (x) { isi.append('id[]', x); });
+                isi.append('status', status);
+
+                fetch(@json(route('account.kategori-layanan.massal')), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                    body: isi,
+                })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (j) {
+                        window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal',
+                            j.d.message || 'Tindakannya gagal.');
+
+                        /*
+                         * Dimuat ulang supaya lencana statusnya ikut berubah —
+                         * tetapi diberi jeda dulu. Dimuat ulang seketika, toast
+                         * "10 angkatan diubah jadi Nonaktif." ikut terbuang
+                         * sebelum terbaca, dan orangnya tidak tahu berapa yang
+                         * kena.
+                         */
+                        if (j.ok && j.d.success) setTimeout(function () { window.location.reload(); }, 900);
+                    })
+                    .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+            });
+        }
+
+        bilah.querySelectorAll('[data-massal]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                const id = terpilih();
+                if (id.length === 0) return;
+
+                ubahStatus(id, b.dataset.massal,
+                    '%s akan diubah statusnya. Angkatan yang sudah punya pendaftar tetap utuh; '
+                        + 'yang berubah cuma tampil atau tidaknya di halaman publik.',
+                    id.length + ' angkatan');
+            });
+        });
+
+        // Lencana "Lewat" memakai jalur yang sama dengan satu id.
+        document.addEventListener('click', function (e) {
+            const pil = e.target.closest('[data-nonaktifkan]');
+            if (!pil) return;
+
+            // %s disulih nama angkatannya, jadi kalimatnya harus dimulai
+            // dengan nama itu. "Tanggal %s sudah lewat" terbaca "Tanggal
+            // SCOPUS CAMP YOGYAKARTA sudah lewat" — bukan kalimat Indonesia.
+            ubahStatus([pil.dataset.nonaktifkan], 'non active',
+                '%s sudah selesai tanggalnya tetapi statusnya masih Aktif. Nonaktifkan sekarang?',
+                pil.dataset.nama);
+        });
+
+        segarkan();
     })();
 
     document.addEventListener('click', function (e) {
