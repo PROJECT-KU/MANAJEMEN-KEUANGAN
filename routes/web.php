@@ -426,14 +426,22 @@ Route::prefix('account')
             Route::delete('/Clinik-Scopus-Promo/data/{id}', 'account\ClinikScopusPromoController@destroy')->name('account.Clinik-Scopus-Promo.destroy');
             Route::get('/Clinik-Scopus-Promo/search', 'account\ClinikScopusPromoController@search')->name('account.Clinik-Scopus-Promo.search');
 
-            //clinik scopus biaya persesi
+            /*
+             * Clinik Scopus — tarif per sesi.
+             *
+             * Satu layar, bukan lagi daftar berikut halaman tambah dan ubah
+             * sendiri-sendiri: yang diatur di sini hanya SATU nilai, yaitu
+             * harga sesi yang berlaku sekarang. Rute create/edit/search yang
+             * dulu ada ikut dibuang bersama halamannya.
+             *
+             * {tarif} terikat ke kunci utamanya, dan kunci utama tabel ini
+             * memang UUID — jadi alamatnya tidak bisa ditebak dengan menambah
+             * satu seperti nomor berurut.
+             */
             Route::get('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@index')->name('account.Clinik-Scopus-Biaya-Persesi.index');
-            Route::get('/Clinik-Scopus-Biaya-Persesi/data/create', 'account\ClinikScopusBiayaPersesiController@create')->name('account.Clinik-Scopus-Biaya-Persesi.create');
-            Route::post('/Clinik-Scopus-Biaya-Persesi/data/store', 'account\ClinikScopusBiayaPersesiController@store')->name('account.Clinik-Scopus-Biaya-Persesi.store');
-            Route::get('/Clinik-Scopus-Biaya-Persesi/data/edit/{id}', 'account\ClinikScopusBiayaPersesiController@edit')->name('account.Clinik-Scopus-Biaya-Persesi.edit');
-            Route::post('/Clinik-Scopus-Biaya-Persesi/data/update-data/{id}', 'account\ClinikScopusBiayaPersesiController@update')->name('account.Clinik-Scopus-Biaya-Persesi.update');
-            Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{id}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
-            Route::get('/Clinik-Scopus-Biaya-Persesi/search', 'account\ClinikScopusBiayaPersesiController@search')->name('account.Clinik-Scopus-Biaya-Persesi.search');
+            Route::post('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@simpan')->name('account.Clinik-Scopus-Biaya-Persesi.simpan');
+            Route::post('/Clinik-Scopus-Biaya-Persesi/data/{tarif}/berlakukan', 'account\ClinikScopusBiayaPersesiController@berlakukan')->name('account.Clinik-Scopus-Biaya-Persesi.berlakukan');
+            Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{tarif}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
 
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
