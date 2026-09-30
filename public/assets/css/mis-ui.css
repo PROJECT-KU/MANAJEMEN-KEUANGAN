@@ -2890,3 +2890,90 @@ body.mis-dialog-terbuka {
 dialog {
     overscroll-behavior: contain;
 }
+
+/* =====================================================================
+   Keadaan kosong hasil pencarian
+   ===================================================================== */
+
+/*
+ * Dipakai KHUSUS saat pencarian tidak menemukan apa pun — bukan saat datanya
+ * memang belum ada. Keduanya terasa sama di layar padahal jalan keluarnya
+ * berbeda: yang satu ganti kata kunci, yang lain isi datanya dulu.
+ *
+ * Warnanya tetap keluarga abu-abu sesuai aturan "abu-abu hanya untuk data
+ * kosong"; yang hidup cuma cincin dendangnya, dan itu ungu tipis supaya
+ * terbaca sebagai gerak, bukan sebagai data.
+ */
+.mis-kosong-cari {
+    padding: 52px 20px 46px;
+}
+
+.mis-kosong-cari .mis-kosong-ikon {
+    position: relative;
+    background: #f1f5f9;
+    color: #94a3b8;
+    /* overflow terlihat supaya cincinnya boleh keluar dari ubinnya. */
+    overflow: visible;
+}
+
+/*
+ * Dua cincin yang memuai keluar bergantian. Dibuat dari ::before dan ::after
+ * ubinnya, bukan unsur tambahan di markah: keadaan kosong ini dipakai dua
+ * layar, dan markah yang lebih sedikit berarti lebih sedikit yang bisa lupa
+ * disalin.
+ */
+.mis-kosong-cari .mis-kosong-ikon::before,
+.mis-kosong-cari .mis-kosong-ikon::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 2px solid rgba(99, 102, 241, .35);
+    border-radius: 26px;
+    opacity: 0;
+    animation: mis-cari-denyut 2.6s ease-out infinite;
+}
+
+.mis-kosong-cari .mis-kosong-ikon::after {
+    animation-delay: 1.3s;
+}
+
+/* Kaca pembesarnya menyapu pelan, seperti sedang mencari. */
+.mis-kosong-cari .mis-kosong-ikon > .fas {
+    position: relative;
+    animation: mis-cari-sapu 2.6s ease-in-out infinite;
+}
+
+@keyframes mis-cari-denyut {
+    0% { transform: scale(.82); opacity: 0; }
+    35% { opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes mis-cari-sapu {
+    0%, 100% { transform: translate(-3px, -2px) rotate(-8deg); }
+    50% { transform: translate(3px, 2px) rotate(8deg); }
+}
+
+/* Tindakan di dalam keadaan kosong: jalan keluarnya ada di tempat orang
+   menyadari ada masalah, bukan di ujung lain halaman. */
+.mis-kosong-aksi {
+    margin-top: 4px;
+}
+
+/*
+ * Gerak dimatikan untuk yang memintanya. Keadaan kosong yang berdenyut terus
+ * menerus termasuk yang paling mengganggu bagi orang dengan sensitivitas
+ * gerak — dan ia muncul justru saat orangnya sedang bingung.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .mis-kosong-cari .mis-kosong-ikon::before,
+    .mis-kosong-cari .mis-kosong-ikon::after,
+    .mis-kosong-cari .mis-kosong-ikon > .fas {
+        animation: none;
+    }
+
+    .mis-kosong-cari .mis-kosong-ikon::before {
+        opacity: 1;
+        transform: scale(1.18);
+    }
+}

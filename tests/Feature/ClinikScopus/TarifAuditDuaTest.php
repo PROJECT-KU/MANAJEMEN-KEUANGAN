@@ -337,7 +337,24 @@ class TarifAuditDuaTest extends TestCase
 
         // Kalimatnya persis sama dengan Data Pelanggan.
         $this->assertStringContainsString('Tidak ada yang cocok', $isi);
-        $this->assertStringContainsString('Coba ganti kata kuncinya, atau hapus saringannya.', $isi);
+        $this->assertStringContainsString('Coba kata kunci lain, atau hapus saringannya.', $isi);
+
+        /*
+         * Keseragamannya dijaga dengan membandingkan KEDUA layar, bukan
+         * menyalin kalimatnya ke uji: disalin, mengubah salah satu layar saja
+         * tetap lolos dan keduanya diam-diam berbeda lagi.
+         */
+        // DENGAN kata kunci yang tidak mungkin ada: tanpa saringan, keadaan
+        // kosongnya memang tidak dirender sama sekali.
+        $pelanggan = $this->actingAs($admin)
+            ->get(route('account.customer.index', ['cari' => 'zzzqqqxxx-tidak-mungkin-ada']))
+            ->getContent();
+
+        foreach (['Tidak ada yang cocok', 'Coba kata kunci lain, atau hapus saringannya.',
+                  'mis-kosong-cari', 'Hapus saringan'] as $bagian) {
+            $this->assertStringContainsString($bagian, $pelanggan,
+                'Data Pelanggan harus memakai bentuk yang sama: ' . $bagian);
+        }
 
         // Labelnya ada; kotak cari tanpa label hanya bisa ditebak dari
         // placeholder, yang hilang begitu diketik.
