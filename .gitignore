@@ -11,3 +11,6 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 .DS_Store
+
+# Cadangan basis data: besar, dan isinya data nyata.
+/database/backup/*.sql

@@ -93,7 +93,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nama Batch</label>
-                                    <select name="categories_analisis_bibliometrik_id" id="kategoriSelect" class="form-control select2">
+                                    <select name="kategori_id" id="kategoriSelect" class="form-control select2">
                                         @foreach ($categories as $item)
                                         <option
                                             value="{{ $item->id }}"
@@ -103,7 +103,7 @@ Update Pendaftaran Analisis Bibliometrik | MIS
                                             data-biaya="{{ $item->biaya }}"
                                             data-kode_diskon="{{ $item->kode_diskon }}"
                                             data-group_wa="{{ $item->group_wa }}"
-                                            {{ $data->categories_analisis_bibliometrik_id == $item->id ? 'selected' : '' }}>
+                                            {{ $data->kategori_id == $item->id ? 'selected' : '' }}>
                                             {{ $item->nama }} #{{ $item->nama_ke }}
                                         </option>
                                         @endforeach

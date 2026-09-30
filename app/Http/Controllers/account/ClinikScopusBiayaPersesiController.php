@@ -118,6 +118,9 @@ class ClinikScopusBiayaPersesiController extends Controller
             'biaya_persesi' => ['required', 'string'],
             'ppn' => ['nullable', 'integer', 'min:0', 'max:100'],
             'fasilitas' => ['nullable', 'string', 'max:8000'],
+            'kegiatan' => ['nullable', 'string', 'max:8000'],
+            'kontak' => ['nullable', 'string', 'max:500'],
+            'template_deskripsi' => ['nullable', 'string', 'max:20000'],
             'perbaiki' => ['nullable', 'uuid'],
         ], [
             'layanan.required' => 'Layanannya tidak dikenali.',
@@ -147,7 +150,10 @@ class ClinikScopusBiayaPersesiController extends Controller
         }
 
         $ppn = $request->filled('ppn') ? (int) $data['ppn'] : null;
-        $fasilitas = $this->uraikanFasilitas($data['fasilitas'] ?? null);
+        $fasilitas = $this->uraikanDaftar($data['fasilitas'] ?? null, 'fasilitas');
+        $kegiatan = $this->uraikanDaftar($data['kegiatan'] ?? null, 'kegiatan');
+        $kontak = trim((string) ($data['kontak'] ?? '')) ?: null;
+        $cetakan = trim((string) ($data['template_deskripsi'] ?? '')) ?: null;
 
         $sebutan = $tentang['nama'] . ($varian ? ' (' . $tentang['varian'][$varian] . ')' : '');
 
@@ -159,6 +165,9 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'biaya_persesi' => $tarif,
                     'ppn' => $ppn,
                     'fasilitas' => $fasilitas,
+                    'kegiatan' => $kegiatan,
+                    'kontak' => $kontak,
+                    'template_deskripsi' => $cetakan,
                 ]);
                 $lama->jadikanBerlaku();
 
@@ -174,6 +183,9 @@ class ClinikScopusBiayaPersesiController extends Controller
             'biaya_persesi' => $tarif,
             'ppn' => $ppn,
             'fasilitas' => $fasilitas,
+            'kegiatan' => $kegiatan,
+            'kontak' => $kontak,
+            'template_deskripsi' => $cetakan,
             'status' => ClinikScopusBiayaPersesi::NONAKTIF,
         ]);
 
@@ -205,7 +217,7 @@ class ClinikScopusBiayaPersesiController extends Controller
      *
      * @return array<int, string>|null
      */
-    private function uraikanFasilitas(?string $teks): ?array
+    private function uraikanDaftar(?string $teks, string $kata = 'fasilitas'): ?array
     {
         $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
         $baris = array_map(fn ($b) => trim($b), $baris);
@@ -213,7 +225,7 @@ class ClinikScopusBiayaPersesiController extends Controller
         $mulai = null;
 
         foreach ($baris as $i => $b) {
-            if ($b !== '' && $this->judulFasilitas($b)) {
+            if ($b !== '' && $this->judulBagian($b, $kata)) {
                 $mulai = $i + 1;
                 break;
             }
@@ -252,20 +264,20 @@ class ClinikScopusBiayaPersesiController extends Controller
     }
 
     /**
-     * Apakah barisnya judul bagian fasilitas.
+     * Apakah barisnya judul bagian yang dicari.
      *
-     * Butir bernomor dan butir bertanda hubung dikecualikan supaya fasilitas
-     * yang kebetulan menyebut kata itu ("- Fasilitas olahraga") tidak disangka
+     * Butir bernomor dan butir bertanda hubung dikecualikan supaya butir yang
+     * kebetulan menyebut kata itu ("- Fasilitas olahraga") tidak disangka
      * judul. Judul di teks mereka ditandai emoji, bukan angka atau tanda
      * hubung — misalnya "\u{1F539} Fasilitas Peserta".
      */
-    private function judulFasilitas(string $baris): bool
+    private function judulBagian(string $baris, string $kata): bool
     {
         if (preg_match('/^(\\d+\\s*[.)]|[-*])\\s*/u', $baris)) {
             return false;
         }
 
-        return (bool) preg_match('/fasilitas/iu', $baris);
+        return (bool) preg_match('/' . preg_quote($kata, '/') . '/iu', $baris);
     }
 
     /** Apakah barisnya berbentuk butir daftar — bernomor, bertanda, atau bercentang. */

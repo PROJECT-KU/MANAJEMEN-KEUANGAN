@@ -19,7 +19,7 @@ class PublicScopusCampController extends Controller
     // <!--================== NAMPILIN KATEGORI ==================-->
     public function public(Request $request)
     {
-        $categories = DB::table('scopus_camp_kategori')
+        $categories = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
             ->where('status', 'active')
             ->orderBy('mulai', 'asc') // Mengurutkan berdasarkan kolom 'mulai' dari tanggal terawal ke akhir
             ->get();
@@ -56,7 +56,7 @@ class PublicScopusCampController extends Controller
             'kode_diterima' => $kode,
         ]);
 
-        $diskon = DB::table('scopus_camp_kategori')
+        $diskon = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
             ->where('id', $id)
             ->first();
 
@@ -122,12 +122,12 @@ class PublicScopusCampController extends Controller
         $id_transaksi = $this->generateRandomId(5);
 
         // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
-        $kategoriId = $request->input('scopus_camp_kategori_id');
+        $kategoriId = $request->input('kategori_id');
         $kategori = CategoriesScopusCamp::findOrFail($kategoriId);
 
         // Hitung jumlah pendaftar saat ini
         $jumlahPendaftarBaru = (int) $request->input('jumlah_pendaftar');
-        $totalTerdaftarSaatIni = PendaftaranScopusCamp::where('scopus_camp_kategori_id', $kategoriId)
+        $totalTerdaftarSaatIni = PendaftaranScopusCamp::where('kategori_id', $kategoriId)
             ->sum('jumlah_pendaftar');
 
         $totalSetelahPendaftaran = $totalTerdaftarSaatIni + $jumlahPendaftarBaru;
@@ -171,7 +171,7 @@ class PublicScopusCampController extends Controller
         $save = PendaftaranScopusCamp::create([
             'token'                                                     => $token,
             'id_transaksi'                                              => $id_transaksi,
-            'scopus_camp_kategori_id'                                   => $request->input('scopus_camp_kategori_id'),
+            'kategori_id'                                   => $request->input('kategori_id'),
             'email'                                                     => $request->input('email'),
             'nama'                                                      => $request->input('nama'),
             'telp'                                                      => $request->input('telp'),
@@ -189,7 +189,7 @@ class PublicScopusCampController extends Controller
 
         if ($save) {
             // UPDATE SISA KUOTA
-            $totalTerdaftar = PendaftaranScopusCamp::where('scopus_camp_kategori_id', $kategoriId)
+            $totalTerdaftar = PendaftaranScopusCamp::where('kategori_id', $kategoriId)
                 ->sum('jumlah_pendaftar');
 
             $kategori->sisa_kuota = max(0, $kategori->total_kuota - $totalTerdaftar);

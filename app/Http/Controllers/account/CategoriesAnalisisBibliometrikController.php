@@ -41,7 +41,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
 
         // Update status ke 'non active' jika waktu sekarang sudah melewati atau sama dengan kolom 'mulai'
         // (Misal: kolom mulai diset 2026-04-16 00:01:00, maka saat ini juga status akan berubah)
-        DB::table('categories_analisis_bibliometrik')
+        DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->where('status', 'active')
             ->where('mulai', '<=', $now->format('Y-m-d H:i:s'))
             ->update(['status' => 'non active']);
@@ -53,7 +53,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
         $search = $request->input('q');
 
         // Mulai query builder
-        $query = DB::table('categories_analisis_bibliometrik');
+        $query = DB::table('kategori_layanan')->where('layanan', 'bibliometrik');
 
         // Filter berdasarkan rentang tanggal jika ada
         if ($startDate && $endDate) {
@@ -198,7 +198,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
         // END
 
         // MENENTUKAN SISA KUOTA YANG SAMA DENGAN JUMLAH TOTAL KUOTA
-        $totalPendaftarTerdaftar = AnalisisBibliometrik::where('categories_analisis_bibliometrik_id', $id)
+        $totalPendaftarTerdaftar = AnalisisBibliometrik::where('kategori_id', $id)
             ->sum('jumlah_pendaftar');
 
         $totalKuota = (int) $request->input('total_kuota');
@@ -284,7 +284,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
             $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate));
         }
 
-        $query = DB::table('categories_analisis_bibliometrik')
+        $query = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->where(function ($query) use ($search) {
                 $query->where('nama', 'LIKE', '%' . $search . '%')
                     ->orWhere('nama_ke', 'LIKE', '%' . $search . '%')
@@ -328,7 +328,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
             $endDate = date('Y-m-d 23:59:59', strtotime($endDate));
         }
 
-        $categories = DB::table('categories_analisis_bibliometrik')
+        $categories = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('mulai', [$startDate, $endDate])
                     ->orWhereBetween('selesai', [$startDate, $endDate]);
@@ -352,7 +352,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
         $tanggal_akhir = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::now()->endOfMonth();
 
         // Query dasar berdasarkan tanggal dari kolom 'mulai'
-        $query = DB::table('categories_analisis_bibliometrik')
+        $query = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->select(
                 'id',
                 'token',

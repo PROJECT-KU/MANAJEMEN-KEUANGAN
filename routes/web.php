@@ -443,6 +443,20 @@ Route::prefix('account')
             Route::post('/Clinik-Scopus-Biaya-Persesi/data/{tarif}/berlakukan', 'account\ClinikScopusBiayaPersesiController@berlakukan')->name('account.Clinik-Scopus-Biaya-Persesi.berlakukan');
             Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{tarif}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
 
+            /*
+             * Angkatan seluruh layanan, satu layar. Penggantinya dua layar
+             * kategori yang lama; keduanya masih hidup sampai layar ini
+             * dipakai sehari-hari, supaya tidak ada pekerjaan yang terhenti
+             * di tengah jalan.
+             */
+            Route::get('/kategori-layanan', 'account\KategoriLayananController@index')->name('account.kategori-layanan.index');
+            Route::get('/kategori-layanan/baru', 'account\KategoriLayananController@create')->name('account.kategori-layanan.create');
+            Route::post('/kategori-layanan', 'account\KategoriLayananController@store')->name('account.kategori-layanan.store');
+            Route::post('/kategori-layanan/rakit', 'account\KategoriLayananController@rakit')->name('account.kategori-layanan.rakit');
+            Route::get('/kategori-layanan/{angkatan}/ubah', 'account\KategoriLayananController@edit')->name('account.kategori-layanan.edit');
+            Route::post('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@update')->name('account.kategori-layanan.update');
+            Route::delete('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@destroy')->name('account.kategori-layanan.destroy');
+
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');

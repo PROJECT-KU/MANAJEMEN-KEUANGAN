@@ -331,7 +331,7 @@ Form Pendaftaran Analisis Bibliometrik | Rumah Scopus
 
         <form id="formKonfirmasi" method="POST" action="{{ route('public.analisisbibliometrik.store') }}" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="categories_analisis_bibliometrik_id" id="analisisbibliometrikIdvalue" value="{{ $item->id }}">
+            <input type="hidden" name="kategori_id" id="analisisbibliometrikIdvalue" value="{{ $item->id }}">
 
             <div class="registration-grid mt-4">
 

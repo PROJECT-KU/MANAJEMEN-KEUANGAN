@@ -18,7 +18,7 @@ class AnalisisBibliometrik extends Model
     protected $fillable = [
         'token',
         'id_transaksi',
-        'categories_analisis_bibliometrik_id',
+        'kategori_id',
         'email',
         'nama',
         'telp',

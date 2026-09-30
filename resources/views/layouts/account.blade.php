@@ -353,7 +353,15 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         </li>
                         <li class="{{ setActive('account/Clinik-Scopus-Biaya-Persesi') }}">
                             <a class="nav-link" href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}">
-                                <i class="fas fa-coins"></i> <span>Biaya Persesi</span>
+                                <i class="fas fa-coins"></i> <span>Tarif Layanan</span>
+                            </a>
+                        </li>
+                        {{-- Angkatan seluruh layanan; menggantikan dua menu kategori yang
+                             terpisah, yang masih dibiarkan hidup sampai layar ini terpakai
+                             sehari-hari. --}}
+                        <li class="{{ setActive('account/kategori-layanan') }}">
+                            <a class="nav-link" href="{{ route('account.kategori-layanan.index') }}">
+                                <i class="fas fa-layer-group"></i> <span>Angkatan Layanan</span>
                             </a>
                         </li>
 
