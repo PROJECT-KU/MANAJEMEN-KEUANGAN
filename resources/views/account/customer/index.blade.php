@@ -442,6 +442,44 @@ Data Pelanggan | MIS
         }
 
         /*
+         * Tiap pelanggan jadi kartu tersendiri, bukan baris bergaris pemisah.
+         *
+         * Satu baris di mode kartu memuat enam keterangan berlabel — nama,
+         * kontak, status, pesanan, tanggal bergabung, dan tombol aksi. Garis
+         * 1px di antaranya terlalu sepi untuk memberi tahu di mana satu orang
+         * berakhir dan berikutnya mulai; keenamnya terbaca seperti satu
+         * gumpalan panjang. Jarak antar kartu jauh lebih kuat daripada garis,
+         * sebab yang memisahkan bukan tanda yang harus diperhatikan melainkan
+         * ruang kosong yang langsung terlihat.
+         *
+         * Angkanya disamakan dengan riwayat keamanan di halaman profil, yang
+         * sudah memakai perlakuan sama untuk bentuk daftar yang sama.
+         */
+        /* Pemilihnya menyebut .mis-tabel-kartu juga, bukan .pel-tabel saja:
+           mis-ui.css memasang display: block pada tbody dengan bobot (0,2,1),
+           dan aturan berbobot (0,1,1) kalah — terukur, jarak antar kartunya
+           tetap nol. */
+        .mis-tabel-kartu.pel-tabel tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mis-tabel-kartu.pel-tabel tbody tr {
+            border: 1px solid var(--mis-garis);
+            border-radius: 13px;
+            background: #f8fafc;
+        }
+
+        /* Baris terpilih ditandai latar dan tepi beraksen: di antara kartu
+           yang berjarak, kotak centang saja terlalu kecil untuk menunjukkan
+           mana yang sedang ikut terpilih. */
+        .mis-tabel-kartu.pel-tabel tbody tr:has(.pel-centang:checked) {
+            border-color: #c7d2fe;
+            background: #f5f6ff;
+        }
+
+        /*
          * Di mode kartu, kotak centangnya duduk di sudut kanan atas kartu.
          * Sebagai baris berlabel sendiri ia menambah satu baris di tiap kartu
          * untuk sesuatu yang tidak perlu dibaca; di sudut, ia tetap terjangkau
@@ -487,8 +525,16 @@ Data Pelanggan | MIS
          * dan dua di baris kedua — tepinya bergerigi dan tidak ada yang lurus.
          * Dalam kisi dua kolom, keempatnya sama lebar dan barisnya rata.
          */
+        /*
+         * display: grid HANYA pada .tampil.
+         *
+         * Ditaruh di aturan dasarnya, ia menimpa display: none — dan barisnya
+         * jadi selalu terlihat di ponsel, menutupi dua baris data sambil
+         * berbunyi "0 dipilih" padahal belum ada yang dipilih. Sifat kisinya
+         * boleh tinggal di aturan dasar: tanpa display, ia tidak berpengaruh
+         * apa-apa.
+         */
         .pel-massal {
-            display: grid;
             /* minmax(0, 1fr), bukan 1fr: 1fr tidak pernah menyusut di bawah
                isi terlebarnya, jadi kolom berisi "Nonaktifkan" merebut 144px
                sementara kolom "Batal" tinggal 119px — terukur di 320px. */
@@ -819,7 +865,7 @@ Data Pelanggan | MIS
             {{-- mis-tabel-kartu: di bawah 576px tabelnya berubah jadi tumpukan
                  kartu, jadi tidak perlu digeser ke samping di ponsel. --}}
             <div class="mis-tabel-bungkus">
-                <table class="mis-tabel mis-tabel-kartu">
+                <table class="mis-tabel mis-tabel-kartu pel-tabel">
                     <thead>
                         <tr>
                             {{-- Kepala kolom yang bisa diurutkan berupa TAUTAN,
