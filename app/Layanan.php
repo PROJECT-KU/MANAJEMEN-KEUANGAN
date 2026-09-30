@@ -80,6 +80,12 @@ class Layanan extends Model
     /** @var array<string, array<string, mixed>>|null */
     private static ?array $katalog = null;
 
+    /** @var array<string, array<string, int>>|null */
+    private static ?array $pemakaian = null;
+
+    /** @var \Illuminate\Support\Collection<string, self>|null */
+    private static $modelAktif = null;
+
     protected static function boot()
     {
         parent::boot();
@@ -92,8 +98,8 @@ class Layanan extends Model
 
         // Katalog yang disimpan di ingatan harus dibuang begitu isinya berubah,
         // kalau tidak layar yang sama masih memakai daftar yang lama.
-        static::saved(fn () => self::$katalog = null);
-        static::deleted(fn () => self::$katalog = null);
+        static::saved(fn () => self::lupakanKatalog());
+        static::deleted(fn () => self::lupakanKatalog());
     }
 
     /**
@@ -112,11 +118,7 @@ class Layanan extends Model
             return self::$katalog;
         }
 
-        return self::$katalog = static::query()
-            ->where('aktif', true)
-            ->orderBy('urutan')
-            ->orderBy('nama')
-            ->get()
+        return self::$katalog = self::aktifBerurutan()
             ->mapWithKeys(fn (self $l) => [$l->kode => [
                 'nama' => $l->nama,
                 'satuan' => $l->satuan,
@@ -127,10 +129,32 @@ class Layanan extends Model
             ->all();
     }
 
-    /** Membuang katalog yang disimpan di ingatan; dipakai uji. */
+    /** Membuang semua yang disimpan di ingatan; dipakai uji dan saat menyimpan. */
     public static function lupakanKatalog(): void
     {
         self::$katalog = null;
+        self::$pemakaian = null;
+        self::$modelAktif = null;
+    }
+
+    /**
+     * Model layanan aktif, terkunci per permintaan.
+     *
+     * Layar tarif butuh modelnya (untuk id dan varian aslinya) di samping
+     * katalognya, dan mengambil keduanya terpisah berarti tabel yang sama
+     * dibaca dua kali dalam satu halaman.
+     *
+     * @return \Illuminate\Support\Collection<string, self>
+     */
+    public static function aktifBerurutan()
+    {
+        if (self::$modelAktif !== null) {
+            return self::$modelAktif;
+        }
+
+        return self::$modelAktif = static::query()
+            ->where('aktif', true)->orderBy('urutan')->orderBy('nama')
+            ->get()->keyBy('kode');
     }
 
     /**
@@ -212,16 +236,39 @@ class Layanan extends Model
 
     // --------------------------------------------------------------- pemakai
 
+    /**
+     * Jumlah pemakaian SEMUA layanan sekaligus.
+     *
+     * Dua kueri berkelompok, bukan dua kueri per layanan. Dibaca satu per satu,
+     * layar dengan lima layanan menjalankan sepuluh `count(*)` — dan jumlahnya
+     * tumbuh seiring katalognya bertambah.
+     *
+     * @return array{tarif: array<string,int>, angkatan: array<string,int>}
+     */
+    public static function hitungPemakaian(): array
+    {
+        if (self::$pemakaian !== null) {
+            return self::$pemakaian;
+        }
+
+        return self::$pemakaian = [
+            'tarif' => DB::table('clinikscopus_biaya_persesi')
+                ->selectRaw('layanan, count(*) as n')->groupBy('layanan')->pluck('n', 'layanan')->all(),
+            'angkatan' => DB::table('kategori_layanan')
+                ->selectRaw('layanan, count(*) as n')->groupBy('layanan')->pluck('n', 'layanan')->all(),
+        ];
+    }
+
     /** Berapa baris tarif yang memakai layanan ini, termasuk riwayatnya. */
     public function getJumlahTarifAttribute(): int
     {
-        return DB::table('clinikscopus_biaya_persesi')->where('layanan', $this->kode)->count();
+        return self::hitungPemakaian()['tarif'][$this->kode] ?? 0;
     }
 
     /** Berapa angkatan yang memakai layanan ini. */
     public function getJumlahAngkatanAttribute(): int
     {
-        return DB::table('kategori_layanan')->where('layanan', $this->kode)->count();
+        return self::hitungPemakaian()['angkatan'][$this->kode] ?? 0;
     }
 
     /**

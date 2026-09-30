@@ -28,6 +28,10 @@ class TarifAuditDuaTest extends TestCase
     {
         parent::setUp();
         Layanan::lupakanKatalog();
+        // Penanda "jadwal sudah diperiksa" berumur satu permintaan di produksi,
+        // tetapi satu PROSES di uji — tanpa dibuang, uji berikutnya tidak
+        // pernah menaikkan tarif terjadwalnya.
+        \App\ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
     }
 
     private function akun(string $peran = User::PERAN_ADMINISTRATOR): User
@@ -208,6 +212,94 @@ class TarifAuditDuaTest extends TestCase
         $halaman->assertSee('Belum ada layanan yang dijual', false);
         $halaman->assertDontSee('Semua 0 tarif sudah disetel', false);
         $this->assertSame(0, $halaman->viewData('totalKartu'));
+    }
+
+    // ------------------------------------------------------------- cetak
+
+    #[Test]
+    public function daftar_harga_cetak_memuat_seluruh_fasilitas(): void
+    {
+        /*
+         * Kartu memotong fasilitas di empat butir untuk layar. Kalau
+         * pemotongan itu terjadi di MARKAH, daftar harga yang dicetak diam-diam
+         * tidak lengkap — Scopus Camp Pulau Jawa tercetak 4 dari 7 tanpa satu
+         * pun tanda ada yang dipotong. Jadi semuanya dirender, dan yang
+         * kelebihan disembunyikan lewat kelas.
+         */
+        $admin = $this->akun();
+
+        $tarif = T::berlaku('scopus_camp', 'jawa');
+        $this->assertGreaterThan(4, count($tarif->daftar_fasilitas),
+            'Uji ini perlu layanan dengan lebih dari empat fasilitas.');
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))->getContent();
+
+        foreach ($tarif->daftar_fasilitas as $f) {
+            $this->assertStringContainsString(e($f), $isi,
+                'Fasilitas "' . $f . '" harus ada di markah, walau tersembunyi di layar.');
+        }
+
+        $this->assertStringContainsString('tar-lebih', $isi,
+            'Yang kelebihan disembunyikan lewat kelas, bukan dibuang dari markah.');
+    }
+
+    #[Test]
+    public function cetakan_menyembunyikan_yang_tidak_pantas_dibagikan(): void
+    {
+        // Rencana kenaikan, layanan tanpa tarif, tombol, dan saringan tidak
+        // punya tempat di kertas yang diberikan ke calon peserta.
+        $berkas = resource_path('views/account/clinik_scopus_biaya_persesi/index.blade.php');
+        $isi = file_get_contents($berkas);
+
+        $awal = strpos($isi, '@media print');
+        $this->assertNotFalse($awal, 'Gaya cetaknya harus ada.');
+
+        $blok = substr($isi, $awal, 1400);
+
+        foreach (['.tar-atur', '.tar-jadwal', '.tar-kartu.kosong', '.tar-saring', '.tar-kaki'] as $sel) {
+            $this->assertStringContainsString($sel, $blok, $sel . ' harus disembunyikan saat dicetak.');
+        }
+
+        $this->assertStringContainsString('.tar-kepala-cetak', $blok,
+            'Kepala cetak berisi judul dan tanggal harus ditampilkan.');
+    }
+
+    #[Test]
+    public function daftar_harga_cetak_menyebut_tanggalnya(): void
+    {
+        // Daftar harga tanpa tanggal tidak bisa dipercaya siapa pun yang
+        // menerimanya seminggu kemudian.
+        $admin = $this->akun();
+
+        $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))
+            ->assertSee('Berlaku per ' . now()->locale('id')->translatedFormat('d F Y'), false);
+    }
+
+    // ----------------------------------------------------- tanggal & perbaiki
+
+    #[Test]
+    public function tanggal_bersama_perbaiki_ditolak_bukan_dibuang_diam_diam(): void
+    {
+        /*
+         * "Perbaiki" membetulkan yang sedang berlaku; tanggal menjadwalkan yang
+         * akan berlaku. Cabang perbaikan tidak memakai tanggalnya sama sekali,
+         * jadi dibiarkan, tanggal yang dikirim hilang tanpa kabar apa pun.
+         */
+        $admin = $this->akun();
+        $tarif = T::berlaku('scopus_kafe');
+
+        $this->actingAs($admin)
+            ->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+                'layanan' => 'scopus_kafe',
+                'biaya_persesi' => number_format((int) $tarif->biaya_persesi, 0, ',', '.'),
+                'perbaiki' => $tarif->getKey(),
+                'berlaku_mulai' => now()->addMonth()->toDateString(),
+            ])
+            ->assertSessionHasErrors('berlaku_mulai');
+
+        $this->assertSame(0, T::where('status', T::TERJADWAL)->count());
     }
 
     // ---------------------------------------------------------- keterangan
