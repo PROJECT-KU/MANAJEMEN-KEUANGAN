@@ -384,6 +384,7 @@ Route::prefix('account')
             // Ekspor didaftar SEBELUM rute ber-{uuid}: kalau sesudahnya,
             // "ekspor" akan terbaca sebagai uuid dan tidak pernah tercapai.
             Route::get('/customer/data/ekspor', 'account\CustomerController@ekspor')->name('account.customer.ekspor');
+            Route::get('/customer/data/ekspor-excel', 'account\CustomerController@eksporExcel')->name('account.customer.ekspor.excel');
             Route::get('/customer/data/{pelanggan:uuid}', 'account\CustomerController@edit')->name('account.customer.edit');
             Route::delete('/customer/data/{pelanggan:uuid}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 

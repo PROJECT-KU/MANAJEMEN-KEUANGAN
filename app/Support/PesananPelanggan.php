@@ -137,6 +137,21 @@ class PesananPelanggan
         return strlen($angka) >= 9 ? $angka : '';
     }
 
+    /**
+     * Nomor untuk tautan wa.me: berformat internasional, hanya angka.
+     *
+     * wa.me menolak tanda hubung, spasi, tanda tambah, dan nol di depan —
+     * "0877-8047-9158" harus jadi "62877 8047 9158" tanpa pemisah. Untaian
+     * kosong berarti nomornya tidak bisa dipakai, dan pemanggilnya menampilkan
+     * teks biasa alih-alih tautan yang menuntun ke halaman galat WhatsApp.
+     */
+    public static function nomorWa(?string $nomor): string
+    {
+        $baku = self::nomorBaku($nomor);
+
+        return $baku === '' ? '' : '62' . substr($baku, 1);
+    }
+
     /** Nama dalam satu bentuk baku: huruf kecil, spasi tunggal. */
     public static function namaBaku(?string $nama): string
     {

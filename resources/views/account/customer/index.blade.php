@@ -59,17 +59,41 @@ Data Pelanggan | MIS
 
     /* ------------------------------------------------------- penyaring */
 
+    /*
+     * Penyaring berkartu, bukan mengambang di latar halaman.
+     *
+     * Ubin ringkasan di atasnya dan tabel di bawahnya sama-sama berkartu
+     * putih; di antara keduanya, tiga kendali tanpa latar terbaca seperti
+     * tercecer di luar susunan, bukan seperti satu perangkat yang utuh.
+     */
+    .pel-saring-kartu {
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        border: 1px solid #e7ecf5;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+
     .pel-saring {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-end;
         gap: 10px;
-        margin-bottom: 14px;
     }
 
+    /*
+     * Batas 420px, bukan sekadar tumbuh sebisanya.
+     *
+     * Dengan flex-basis 240px dan tanpa batas atas, kotak cari melahap seluruh
+     * sisa baris — terukur sekitar 60% lebar layar — sementara dua menu di
+     * sebelahnya tinggal 170px. Ketiganya sama-sama penyaring dan tidak ada
+     * alasan yang satu enam kali lebih lebar.
+     */
     .pel-saring-cari {
         position: relative;
         flex: 1 1 240px;
+        max-width: 420px;
         min-width: 0;
     }
 
@@ -232,16 +256,33 @@ Data Pelanggan | MIS
         color: var(--mis-tinta-2);
     }
 
-    .pel-kontak span {
+    .pel-kontak span,
+    .pel-kontak a {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         overflow-wrap: anywhere;
     }
 
+    /* Tautannya tidak digarisbawahi dan tidak berwarna tautan: di dalam tabel,
+       dua puluh empat tautan biru bergaris membuat kolomnya berisik. Warnanya
+       baru muncul saat disentuh, jadi tetap ketahuan bisa ditekan. */
+    .pel-kontak a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .pel-kontak a:hover,
+    .pel-kontak a:focus-visible {
+        color: #4f46e5;
+        text-decoration: underline;
+    }
+
     /* Ikon sebaris ikut ukuran teksnya; aturan global layout mengunci .fas
        ke 20px dengan bobot yang sama, jadi di sini perlu lebih spesifik. */
-    .pel-kontak span > .fas {
+    .pel-kontak span > .fas,
+    .pel-kontak a > .fas,
+    .pel-kontak a > .fab {
         width: 13px;
         font-size: .72rem !important;
         text-align: center;
@@ -351,6 +392,13 @@ Data Pelanggan | MIS
             <div class="mis-kepala-aksi">
                 {{-- Ekspor membawa saringan yang sedang dipakai, bukan seluruh
                      tabel: yang diunduh orang hampir selalu yang dilihatnya. --}}
+                {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibaca dan
+                     dilampirkan, lembar kerja untuk diolah. Daftar pelanggan
+                     hampir selalu berakhir di spreadsheet. --}}
+                <a class="mis-tombol mis-tombol-halus"
+                    href="{{ route('account.customer.ekspor.excel', request()->only('cari', 'status', 'verifikasi')) }}">
+                    <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                </a>
                 <a class="mis-tombol mis-tombol-halus"
                     href="{{ route('account.customer.ekspor', request()->only('cari', 'status', 'verifikasi')) }}">
                     <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
@@ -376,11 +424,15 @@ Data Pelanggan | MIS
                     <p class="pel-ubin-label">Akun aktif</p>
                 </div>
             </div>
+            {{-- Dulu "Email terverifikasi", dan itu angka mati: terukur 65 aktif
+                 dan 65 terverifikasi, NOL yang berbeda ke salah satu arah,
+                 sebab verifyEmail() menyetel keduanya sekaligus. Jumlah yang
+                 pernah memesan memang berbeda (29 dari 102). --}}
             <div class="pel-ubin">
-                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-envelope-open-text"></i></span>
+                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                 <div>
-                    <p class="pel-ubin-angka">{{ number_format($ringkasan['terverifikasi']) }}</p>
-                    <p class="pel-ubin-label">Email terverifikasi</p>
+                    <p class="pel-ubin-angka">{{ number_format($ringkasan['memesan']) }}</p>
+                    <p class="pel-ubin-label">Pernah memesan</p>
                 </div>
             </div>
             <div class="pel-ubin">
@@ -407,6 +459,7 @@ Data Pelanggan | MIS
                 @endif
             </summary>
 
+        <div class="pel-saring-kartu">
         <form method="GET" action="{{ route('account.customer.index') }}" class="pel-saring" id="pel-borang">
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan Terapkan
                  diam-diam mengembalikan urutannya ke bawaan. --}}
@@ -461,6 +514,7 @@ Data Pelanggan | MIS
                 </a>
             @endif
         </form>
+        </div>
         </details>
 
         {{-- --------------------------------------------------- daftar --}}
@@ -496,7 +550,7 @@ Data Pelanggan | MIS
                             <th>@include('account.customer.partials.urut', ['kolom' => 'nama', 'label' => 'Pelanggan'])</th>
                             <th>Kontak</th>
                             <th>@include('account.customer.partials.urut', ['kolom' => 'status', 'label' => 'Status'])</th>
-                            <th>Pesanan</th>
+                            <th>@include('account.customer.partials.urut', ['kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
                             <th>@include('account.customer.partials.urut', ['kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
                             <th class="text-right">Aksi</th>
                         </tr>
@@ -524,9 +578,24 @@ Data Pelanggan | MIS
                                 </td>
 
                                 <td data-judul="Kontak">
+                                    {{-- Tautan, bukan teks. Kolom ini judulnya "Kontak" dan
+                                         gunanya menghubungi orangnya; sebagai teks, nomornya
+                                         harus disalin dulu ke aplikasi lain. wa.me menuntut
+                                         nomor berformat internasional tanpa tanda baca, dan
+                                         itulah yang dikerjakan nomorWa(). --}}
                                     <div class="pel-kontak">
-                                        <span><i class="fas fa-envelope mis-ikon-biru"></i> {{ $orang->email }}</span>
-                                        <span><i class="fas fa-phone mis-ikon-hijau"></i> {{ $orang->telp ?: 'Nomor belum diisi' }}</span>
+                                        <a href="mailto:{{ $orang->email }}" title="Kirim email ke {{ $orang->email }}">
+                                            <i class="fas fa-envelope mis-ikon-biru"></i> {{ $orang->email }}
+                                        </a>
+                                        @php ($wa = \App\Support\PesananPelanggan::nomorWa($orang->telp))
+                                        @if ($wa)
+                                            <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
+                                                title="Hubungi lewat WhatsApp">
+                                                <i class="fab fa-whatsapp mis-ikon-hijau"></i> {{ $orang->telp }}
+                                            </a>
+                                        @else
+                                            <span><i class="fas fa-phone mis-ikon-hijau"></i> Nomor belum diisi</span>
+                                        @endif
                                     </div>
                                 </td>
 

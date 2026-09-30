@@ -97,6 +97,24 @@ class User extends Authenticatable
         return $this->peran !== self::PERAN_PELANGGAN;
     }
 
+    /**
+     * Nama peran dalam bahasa Indonesia, untuk ditampilkan.
+     *
+     * Nilai yang tersimpan sengaja tetap bahasa Inggris — ia dipakai sebagai
+     * kunci di puluhan tempat, dan menerjemahkan yang tersimpan berarti
+     * migrasi beserta seluruh pembandingnya. Yang diterjemahkan hanya yang
+     * terbaca orang: sebelum ini layar data pelanggan menuliskan "User", satu-
+     * satunya kata Inggris di halaman berbahasa Indonesia.
+     */
+    public function peranTerbaca(): string
+    {
+        return [
+            self::PERAN_ADMINISTRATOR => 'Administrator',
+            self::PERAN_KARYAWAN => 'Karyawan',
+            self::PERAN_PELANGGAN => 'Pelanggan',
+        ][$this->peran] ?? \Illuminate\Support\Str::title((string) $this->peran);
+    }
+
     /** Cocok dengan salah satu peran yang disebut. */
     public function punyaPeran(string ...$peran): bool
     {

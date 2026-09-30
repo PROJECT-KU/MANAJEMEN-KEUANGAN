@@ -1327,6 +1327,36 @@ body.sidebar-show .main-footer {
 }
 
 /*
+ * Di ponsel tabnya disusun dua kolom, bukan satu baris memanjang.
+ *
+ * Terukur pada layar 390px: strip tab hanya selebar 302px sementara isinya
+ * menuntut 444px — 142px tersembunyi, dan dua dari empat tab ("Pesanan" dan
+ * "Jejak") berada di luar layar. Stripnya memang bisa digulung ke samping,
+ * tetapi tidak ada tanda apa pun bahwa masih ada isi di kanan: "Jejak" tidak
+ * terlihat sama sekali, jadi tab itu praktis tidak ada bagi pengguna ponsel.
+ *
+ * Membuang ikonnya saja sudah dicoba dan TIDAK cukup: isinya turun dari 444px
+ * ke 337px, masih 35px lebih lebar daripada ruangnya, dan di 320px ruangnya
+ * cuma 232px. Selama tabnya sebaris, menambah tab berikutnya akan mengulang
+ * persoalan yang sama.
+ *
+ * Dua kolom memberi tiap tab sekitar 145px di layar 390px dan 110px di 320px —
+ * cukup untuk tulisan beserta ikonnya, dan tidak ada yang tersembunyi pada
+ * lebar berapa pun.
+ */
+@media (max-width: 575.98px) {
+    .mis-tab {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mis-tab .nav-link {
+        padding: 9px 6px;
+        font-size: .76rem;
+    }
+}
+
+/*
  * Lencana angka di dalam tab (mis. jumlah pesanan) dibuat seringkas mungkin.
  *
  * Dengan ukuran .mis-pil biasa, kotaknya lebih tinggi daripada baris teks tab
