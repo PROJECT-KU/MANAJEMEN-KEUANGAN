@@ -547,3 +547,36 @@ CDP, bukan `window.scrollBy` — guliran terprogram tetap jalan walau
 patokan lebih dulu (gulir sebelum dialog pernah dibuka): "halaman tidak
 bergerak" bisa berarti terkunci, bisa juga berarti titik ujinya kebetulan di
 atas bilah sisi.
+
+## Keadaan kosong hasil pencarian punya bentuknya sendiri
+
+`.mis-kosong-cari` di `mis-ui.css`, dipakai Data Pelanggan dan Tarif Layanan.
+Bedakan dari keadaan "datanya memang belum ada": keduanya terasa sama di layar
+padahal jalan keluarnya berbeda — yang satu ganti kata kunci, yang lain isi
+datanya dulu. Hanya yang pertama memakai ikon kaca pembesar bergerak.
+
+Isinya: ubin ikon yang menyapu pelan + dua cincin memuai bergantian, judul
+"Tidak ada yang cocok", kalimat yang **menyebut kata kuncinya**, dan tombol
+"Hapus saringan" — jalan keluarnya ada di tempat orang menyadari ada masalah,
+bukan di ujung lain halaman.
+
+Warnanya tetap keluarga abu-abu sesuai aturan "abu-abu hanya untuk data
+kosong"; yang berwarna cuma cincin dendangnya, ungu tipis, supaya terbaca
+sebagai gerak dan bukan sebagai data.
+
+`@media (prefers-reduced-motion: reduce)` **wajib**: keadaan kosong yang
+berdenyut terus-menerus termasuk yang paling mengganggu bagi orang dengan
+sensitivitas gerak, dan ia muncul justru saat orangnya sedang bingung. Uji
+dengan `Emulation.setEmulatedMedia { features: [{ name:
+'prefers-reduced-motion', value: 'reduce' }] }`.
+
+## Jangan potong-tempel blok besar dengan indeks teks
+
+Memindahkan satu blok Blade dengan `s.index(...)` lalu menyambungnya kembali
+menggandakan seluruh saringan dan kisi tarif — 14 kartu muncul di tempat yang
+seharusnya 7, dan ujinya tetap hijau karena tidak ada yang menghitungnya.
+Ketahuan hanya karena pengukuran di peramban menghitung kartunya.
+
+Pakai suntingan yang menyebut teks lama dan teks barunya secara utuh. Kalau
+sudah terlanjur, `git checkout --` berkas itu dan ulangi — jauh lebih murah
+daripada menambal hasil gandanya.
