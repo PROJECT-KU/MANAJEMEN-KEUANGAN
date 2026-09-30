@@ -85,27 +85,27 @@ class BiayaPersesiTest extends TestCase
          * kosong tanpa ada yang tahu sebabnya.
          */
         $clinik = $this->tarif(125000, 11, ClinikScopusBiayaPersesi::AKTIF);
-        $camp = $this->tarif(4500000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'scopus_camp', 'jawa');
+        $camp = $this->tarif(5500000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'scopus_camp');
 
         $camp->jadikanBerlaku();
 
         $this->assertSame(ClinikScopusBiayaPersesi::AKTIF, $clinik->refresh()->status);
-        $this->assertTrue(ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->is($camp));
+        $this->assertTrue(ClinikScopusBiayaPersesi::berlaku('scopus_camp')->is($camp));
     }
 
     #[Test]
     public function varian_lain_dari_layanan_yang_sama_tidak_ikut_dimatikan(): void
     {
-        // Pulau Jawa dan luar Jawa dua harga yang berjalan berdampingan, bukan
-        // dua versi dari satu harga.
-        $jawa = $this->tarif(4500000, null, ClinikScopusBiayaPersesi::AKTIF, 'scopus_camp', 'jawa');
-        $luar = $this->tarif(5500000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'scopus_camp', 'luar_jawa');
+        // Online dan offline dua harga yang berjalan berdampingan, bukan dua
+        // versi dari satu harga.
+        $daring = $this->tarif(549000, null, ClinikScopusBiayaPersesi::AKTIF, 'bibliometrik', 'online');
+        $luring = $this->tarif(999000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'bibliometrik', 'offline');
 
-        $luar->jadikanBerlaku();
+        $luring->jadikanBerlaku();
 
-        $this->assertSame(ClinikScopusBiayaPersesi::AKTIF, $jawa->refresh()->status);
-        $this->assertSame(4500000, (int) ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->biaya_persesi);
-        $this->assertSame(5500000, (int) ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'luar_jawa')->biaya_persesi);
+        $this->assertSame(ClinikScopusBiayaPersesi::AKTIF, $daring->refresh()->status);
+        $this->assertSame(549000, (int) ClinikScopusBiayaPersesi::berlaku('bibliometrik', 'online')->biaya_persesi);
+        $this->assertSame(999000, (int) ClinikScopusBiayaPersesi::berlaku('bibliometrik', 'offline')->biaya_persesi);
     }
 
     #[Test]
@@ -298,7 +298,7 @@ class BiayaPersesiTest extends TestCase
         $this->actingAs($admin)
             ->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
                 'layanan' => 'clinik_scopus',
-                'varian' => 'jawa',
+                'varian' => 'online',
                 'biaya_persesi' => '100.000',
             ])
             ->assertSessionHasErrors('varian');
@@ -307,14 +307,37 @@ class BiayaPersesiTest extends TestCase
     #[Test]
     public function layanan_bervarian_tanpa_varian_ditolak(): void
     {
-        // Sebaliknya: Scopus Camp tanpa varian jadi tarif menggantung yang
-        // tidak dipakai baik Jawa maupun luar Jawa.
+        // Sebaliknya: Bibliometrik tanpa varian jadi tarif menggantung yang
+        // tidak dipakai baik oleh kelas online maupun offline.
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
 
         $this->actingAs($admin)
             ->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+                'layanan' => 'bibliometrik',
+                'biaya_persesi' => '999.000',
+            ])
+            ->assertSessionHasErrors('varian');
+    }
+
+    #[Test]
+    public function scopus_camp_tidak_lagi_menerima_varian_pulau(): void
+    {
+        /*
+         * Penjaga keputusan 30 Sep 2026. Varian Jawa/luar Jawa dibuang karena
+         * datanya membantah anggapannya: Yogyakarta 4,5jt sampai September
+         * lalu 5,5jt sejak Oktober — kota sama, dua harga, yang berubah waktu.
+         * Kalau varian itu diam-diam kembali, tarif induk kembali menduplikasi
+         * `lokasi` yang sudah disimpan tiap angkatan.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->assertSame([], ClinikScopusBiayaPersesi::LAYANAN['scopus_camp']['varian']);
+
+        $this->actingAs($admin)
+            ->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
                 'layanan' => 'scopus_camp',
-                'biaya_persesi' => '4.500.000',
+                'varian' => 'jawa',
+                'biaya_persesi' => '5.500.000',
             ])
             ->assertSessionHasErrors('varian');
     }
@@ -419,7 +442,6 @@ class BiayaPersesiTest extends TestCase
 
         $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
             'layanan' => 'scopus_camp',
-            'varian' => 'jawa',
             'biaya_persesi' => '5.500.000',
             'fasilitas' => $this->pengumumanAngkatan(),
         ]);
@@ -432,7 +454,7 @@ class BiayaPersesiTest extends TestCase
             'Cek plagiasi',
             'E-Materi',
             'Mushola, kolam renang & treadmill',
-        ], ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->daftar_fasilitas);
+        ], ClinikScopusBiayaPersesi::berlaku('scopus_camp')->daftar_fasilitas);
     }
 
     #[Test]
@@ -704,11 +726,16 @@ class BiayaPersesiTest extends TestCase
     #[Test]
     public function nama_layanan_dan_varian_terbaca_manusia(): void
     {
-        $camp = $this->tarif(5500000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'scopus_camp', 'luar_jawa');
+        $luring = $this->tarif(999000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'bibliometrik', 'offline');
 
+        $this->assertSame('Analisis Bibliometrik', $luring->nama_layanan);
+        $this->assertSame('Offline', $luring->nama_varian);
+        $this->assertSame('per peserta', $luring->satuan);
+
+        // Layanan tanpa varian tidak mengarang nama varian.
+        $camp = $this->tarif(5500000, null, ClinikScopusBiayaPersesi::NONAKTIF, 'scopus_camp');
         $this->assertSame('Scopus Camp', $camp->nama_layanan);
-        $this->assertSame('Luar Pulau Jawa', $camp->nama_varian);
-        $this->assertSame('per peserta', $camp->satuan);
+        $this->assertNull($camp->nama_varian);
     }
 
     #[Test]
