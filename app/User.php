@@ -115,6 +115,26 @@ class User extends Authenticatable
         ][$this->peran] ?? \Illuminate\Support\Str::title((string) $this->peran);
     }
 
+    /**
+     * Apakah alamat emailnya masih masuk akal untuk dikirimi surat.
+     *
+     * filter_var(FILTER_VALIDATE_EMAIL) TIDAK cukup: ia meloloskan
+     * "terpotong@mail.unnes.a", sebab domain berakhiran satu huruf sah
+     * secara tata bahasa. Padahal itulah bentuk yang ada di data — lima
+     * alamat terpotong tepat di 30 huruf, pola khas batas kolom lama saat
+     * impor, dan surat ke sana tidak akan pernah sampai.
+     *
+     * Karena itu akhiran domainnya dituntut minimal dua huruf.
+     */
+    public function emailTampakSah(): bool
+    {
+        $email = trim((string) $this->email);
+
+        return $email !== ''
+            && filter_var($email, FILTER_VALIDATE_EMAIL) !== false
+            && preg_match('/\.[a-z]{2,}$/i', $email) === 1;
+    }
+
     /** Cocok dengan salah satu peran yang disebut. */
     public function punyaPeran(string ...$peran): bool
     {
