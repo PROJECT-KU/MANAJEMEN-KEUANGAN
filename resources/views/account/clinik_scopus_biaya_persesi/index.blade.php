@@ -323,23 +323,42 @@ Tarif Layanan | MIS
 
     /* Saringan kartu */
     .tar-saring {
-        position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 10px; align-items: center;
         margin-bottom: 12px;
     }
 
-    .tar-saring .form-control-modern { padding-left: 38px; }
+    /* Pembungkus isian: inilah acuan posisi ikon dan tombol kosongkan. */
+    .tar-saring-kotak { position: relative; display: block; }
+
+    .tar-saring .form-control-modern { width: 100%; padding-left: 38px; padding-right: 40px; }
+
+    /* Silang bawaan peramban dimatikan; kalau tidak ada DUA tombol kosongkan
+       berdampingan di Chrome, dan yang bawaan tidak ikut memicu penyaringan. */
+    .tar-saring input[type="search"]::-webkit-search-cancel-button { display: none; }
 
     .tar-saring-ikon {
-        position: absolute; left: 0; top: 0;
+        position: absolute; left: 0; top: 0; bottom: 0;
         display: grid; place-items: center;
-        width: 38px; height: 100%;
+        width: 38px;
         color: var(--mis-tinta-4); pointer-events: none;
     }
 
     .tar-saring-ikon .fas { font-size: 13px !important; }
+
+    .tar-saring-bersih {
+        position: absolute; right: 5px; top: 50%;
+        transform: translateY(-50%);
+        display: grid; place-items: center;
+        width: 30px; height: 30px;
+        border: none; border-radius: 8px;
+        background: transparent; color: var(--mis-tinta-4);
+        cursor: pointer;
+    }
+
+    .tar-saring-bersih:hover { background: #fef2f2; color: #e11d48; }
+    .tar-saring-bersih .fas { font-size: 12px !important; }
     .tar-saring-hasil { font-size: .75rem; color: var(--mis-tinta-3); white-space: nowrap; }
 
     /* Ringkasan yang bisa ditekan tetap serupa lencana, hanya dapat penunjuk. */
@@ -513,6 +532,16 @@ Tarif Layanan | MIS
     @media (max-width: 767.98px) {
         .tar-kisi { grid-template-columns: minmax(0, 1fr); }
         .tar-saring { grid-template-columns: minmax(0, 1fr); }
+
+        /* Lencana ringkasan selebar kartunya dan rata tengah. Rata kiri, ia
+           menggantung sendirian di bawah tombol cetak yang selebar penuh. */
+        .mis-kepala-aksi > .mis-pil,
+        .mis-kepala-aksi > .tar-pil-tombol {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .tar-saring-hasil { text-align: center; }
         .tar-saring-riwayat { grid-template-columns: minmax(0, 1fr); }
         .tar-dua { grid-template-columns: minmax(0, 1fr); }
         .tar-angka { font-size: 1.35rem; }
@@ -593,9 +622,19 @@ Tarif Layanan | MIS
              tidak lagi dijamin muat sekali lihat. Menyaring di peramban, bukan
              memuat ulang: daftarnya kecil dan jawabannya harus seketika. --}}
         <div class="tar-saring">
-            <span class="tar-saring-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
-            <input type="search" id="tar-cari" class="form-control-modern"
-                placeholder="Cari layanan — nama atau varian" aria-label="Cari layanan">
+            {{-- Ikon dan tombol kosongkan diposisikan terhadap KOTAK ISIANNYA,
+                 bukan terhadap seluruh baris saringan. Terhadap barisnya, di
+                 ponsel barisnya menumpuk jadi dua (isian + keterangan hasil)
+                 sehingga ikonnya ikut turun ke tengah keduanya. --}}
+            <div class="tar-saring-kotak">
+                <span class="tar-saring-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                <input type="search" id="tar-cari" class="form-control-modern"
+                    placeholder="Cari layanan — nama atau varian" aria-label="Cari layanan">
+                <button type="button" class="tar-saring-bersih" id="tar-cari-bersih"
+                    hidden aria-label="Kosongkan pencarian" title="Kosongkan pencarian">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <span class="tar-saring-hasil" id="tar-cari-hasil" aria-live="polite"></span>
         </div>
 
@@ -1313,10 +1352,11 @@ Tarif Layanan | MIS
         if (!cari) return;
 
         const hasil = document.getElementById('tar-cari-hasil');
+        const bersih = document.getElementById('tar-cari-bersih');
         const kartu = [...document.querySelectorAll('.tar-kartu')];
         const tambah = document.querySelector('.tar-tambah');
 
-        cari.addEventListener('input', function () {
+        function saring() {
             const kata = cari.value.trim().toLowerCase();
             let tampil = 0;
 
@@ -1334,7 +1374,30 @@ Tarif Layanan | MIS
             hasil.textContent = kata === ''
                 ? ''
                 : (tampil === 0 ? 'Tidak ada yang cocok' : tampil + ' dari ' + kartu.length + ' layanan');
+
+            // Tombol kosongkan hanya ada saat memang ada yang bisa dikosongkan.
+            bersih.hidden = cari.value === '';
+        }
+
+        cari.addEventListener('input', saring);
+
+        bersih.addEventListener('click', function () {
+            cari.value = '';
+            saring();
+            cari.focus();
         });
+
+        // Esc mengosongkan juga, kebiasaan yang sudah dipunyai orang dari
+        // kotak pencarian mana pun.
+        cari.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && cari.value !== '') {
+                e.preventDefault();
+                cari.value = '';
+                saring();
+            }
+        });
+
+        saring();
     })();
 
     /*
