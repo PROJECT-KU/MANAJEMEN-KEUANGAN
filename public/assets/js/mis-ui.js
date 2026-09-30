@@ -548,3 +548,73 @@
 
     window.misKonfirmasi = tanya;
 })();
+
+/*
+ * Mengunci guliran halaman selama ada dialog terbuka.
+ *
+ * <dialog> tidak punya peristiwa "open", jadi perubahan atribut `open` yang
+ * disimak — bukan showModal() yang ditambal. Menambal prototipe berarti dialog
+ * yang dibuka dengan cara lain terlewat, dan sulit dilacak orang berikutnya.
+ *
+ * Berlaku untuk dialog MANA PUN di back office, jadi layar baru tidak perlu
+ * mengulang kodenya.
+ */
+(function () {
+    var badan = document.body;
+    if (!badan) return;
+
+    function adaYangTerbuka() {
+        return document.querySelector('dialog[open]') !== null;
+    }
+
+    function segarkan() {
+        var terbuka = adaYangTerbuka();
+        var sudah = badan.classList.contains('mis-dialog-terbuka');
+
+        if (terbuka === sudah) return;
+
+        if (terbuka) {
+            /*
+             * Lebar batang gulir diganti padding. Tanpa ini halaman melompat
+             * ke kanan sesaat saat dialognya dibuka, karena batang gulirnya
+             * hilang bersama overflow: hidden.
+             */
+            var lebarBatang = window.innerWidth - document.documentElement.clientWidth;
+
+            if (lebarBatang > 0) {
+                badan.style.paddingRight = lebarBatang + 'px';
+            }
+
+            badan.classList.add('mis-dialog-terbuka');
+
+            return;
+        }
+
+        badan.classList.remove('mis-dialog-terbuka');
+        badan.style.paddingRight = '';
+    }
+
+    var pengamat = new MutationObserver(segarkan);
+
+    function amati(d) {
+        pengamat.observe(d, { attributes: true, attributeFilter: ['open'] });
+    }
+
+    document.querySelectorAll('dialog').forEach(amati);
+
+    // Dialog yang baru ditambahkan ke halaman ikut diamati; ada layar yang
+    // merakit dialognya setelah data dimuat.
+    new MutationObserver(function (perubahan) {
+        perubahan.forEach(function (p) {
+            p.addedNodes.forEach(function (n) {
+                if (n.nodeType !== 1) return;
+                if (n.tagName === 'DIALOG') amati(n);
+                if (n.querySelectorAll) n.querySelectorAll('dialog').forEach(amati);
+            });
+        });
+
+        segarkan();
+    }).observe(document.body, { childList: true, subtree: true });
+
+    segarkan();
+})();
