@@ -306,3 +306,35 @@ Tombol bertulisan memakai `.mis-tombol-halus` (putih, bertepi) atau
 `.mis-tombol-ungu` / `.mis-tombol-biru` / `.mis-tombol-hijau` untuk yang
 utama. `.mis-tombol-bahaya` juga 34x34 dan ikon saja; yang bertulisan merah
 memakai `.mis-tombol-hapus`.
+
+## Borang panjang: dialog, bukan lipatan di dalam kartu
+
+Tarif layanan sempat memuat tujuh borang di tujuh kartu, masing-masing
+terlipat di dalam kartunya. Dua akibatnya:
+
+- Membuka satu borang menarik **seisi barisnya** jadi setinggi itu — terukur
+  294px jadi 590px — dan kartu sebelahnya menyisakan petak putih hampir 300px.
+- Untuk menghindarinya, kisinya dipaksa `align-items: start`, yang membuat
+  dasar kartunya bergerigi dan tombolnya tidak sejajar.
+
+Dipindah ke `<dialog>`, keduanya hilang sekaligus: kisinya boleh kembali
+`stretch` (tinggi seragam, tombol sejajar lewat `margin-top: auto` pada kaki
+kartu), dan membuka borang tidak menggeser tata letak sama sekali. Bonusnya
+`<dialog>` memberi jebakan fokus dan tombol Esc tanpa kode tambahan.
+
+Ukurannya `width: min(620px, calc(100vw - 32px))`, dan di bawah 768px jadi
+selayar penuh tanpa radius. Isinya yang menggulung (`overflow-y: auto` pada
+badan dialog), bukan halamannya, supaya kepala dan tombol simpannya selalu
+terlihat.
+
+**Jebakan saat mengukurnya lewat CDP:** dengan modal terbuka, timer halaman
+dicekik. `setTimeout` di dalam `Runtime.evaluate` yang menunggu janji tidak
+pernah selesai dan skripnya menggantung diam tanpa galat. Tunggu di Node,
+jangan di halaman.
+
+## Daftar panjang di kartu ringkasan dipotong
+
+Kartu yang memajang daftar (fasilitas, kegiatan) memotongnya di **4 butir**
+lalu menulis "+N lainnya". Selengkapnya ada di borangnya. Tanpa dipotong,
+kartu berisi 7 butir memaksa seluruh barisnya setinggi itu, dan kartu yang
+cuma punya 3 butir jadi separuh kosong.
