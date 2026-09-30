@@ -154,6 +154,17 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         $adaTarif = collect($kartu)->filter(fn ($k) => $k['tarif'] !== null)->count();
 
+        /*
+         * Kapan harga terakhir disentuh — pertanyaan pertama saat seseorang
+         * curiga harganya berubah. Tiap kartu menyebut penyetelnya dan riwayat
+         * menyebut tanggalnya, tetapi tidak ada satu pun yang menjawab itu
+         * untuk seluruh layar.
+         */
+        $terakhir = ClinikScopusBiayaPersesi::query()
+            ->with('penginput:id,full_name,username')
+            ->latest('updated_at')
+            ->first();
+
         return view('account.clinik_scopus_biaya_persesi.index', [
             'kartu' => $kartu,
             'riwayat' => $riwayat,
@@ -167,6 +178,7 @@ class ClinikScopusBiayaPersesiController extends Controller
             'totalRiwayat' => $totalRiwayat,
             'ppnLazim' => $ppnLazim ? (int) $ppnLazim : null,
             'saringRiwayat' => $saringRiwayat,
+            'terakhir' => $terakhir,
         ]);
     }
 
