@@ -68,4 +68,43 @@ class RentangTanggalTest extends TestCase
             Carbon::parse('2026-11-01'), Carbon::parse('2026-11-03')
         ));
     }
+
+    // ----------------------------------------------------- bentuk pendek
+
+    #[Test]
+    public function bentuk_pendek_menyingkat_nama_bulan(): void
+    {
+        // Dipakai kolom tanggal di daftar bertabel, yang sempit.
+        $this->assertSame('30 Okt – 1 Nov 2026', RentangTanggal::tulis(
+            Carbon::parse('2026-10-30'), Carbon::parse('2026-11-01'), true
+        ));
+    }
+
+    #[Test]
+    public function bentuk_pendek_tetap_mengikuti_aturan_pengulangan(): void
+    {
+        // Aturan hematnya sama persis, cuma nama bulannya yang disingkat.
+        $this->assertSame('1 – 3 Nov 2026', RentangTanggal::tulis(
+            Carbon::parse('2026-11-01'), Carbon::parse('2026-11-03'), true
+        ));
+
+        $this->assertSame('15 Apr 2026', RentangTanggal::tulis(
+            Carbon::parse('2026-04-15'), null, true
+        ));
+
+        $this->assertSame('30 Des 2026 – 1 Jan 2027', RentangTanggal::tulis(
+            Carbon::parse('2026-12-30'), Carbon::parse('2027-01-01'), true
+        ));
+    }
+
+    #[Test]
+    public function bentuk_panjang_tetap_bawaan(): void
+    {
+        // Pengumuman yang dirakit memakai nama bulan lengkap; kalau bawaannya
+        // ikut berubah jadi singkatan, seluruh deskripsi angkatan ikut berubah
+        // tanpa ada yang meminta.
+        $this->assertSame('30 Oktober – 1 November 2026', RentangTanggal::tulis(
+            Carbon::parse('2026-10-30'), Carbon::parse('2026-11-01')
+        ));
+    }
 }
