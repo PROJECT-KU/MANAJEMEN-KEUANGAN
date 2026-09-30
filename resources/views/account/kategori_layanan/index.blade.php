@@ -77,7 +77,9 @@ Angkatan Layanan | MIS
 
     .ang-saring {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 170px auto;
+        /* Empat kendali sejak pengurut ditambahkan; kisinya masih untuk tiga,
+           jadi tombol Saring jatuh ke baris sendiri selebar penuh. */
+        grid-template-columns: minmax(0, 1fr) 170px 190px auto;
         gap: 10px; align-items: end;
         margin-bottom: var(--mis-jarak);
     }
@@ -104,6 +106,20 @@ Angkatan Layanan | MIS
     .ang-ket { margin: 1px 0 0; line-height: 1.4; font-size: .73rem; color: var(--mis-tinta-3); }
     .ang-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 
+    /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
+    .ang-gandakan { display: inline-flex; margin: 0; }
+
+    .ang-tautan {
+        display: inline-block;
+        margin-top: 3px;
+        line-height: 1.4;
+        font-size: .72rem;
+        font-weight: 700;
+        color: #4f46e5;
+    }
+
+    .ang-tautan:hover { color: #4338ca; }
+
     .ang-kuota { display: inline-flex; align-items: baseline; gap: 4px; font-size: .8rem; color: var(--mis-tinta-2); }
 
     /* Satu nilai bertingkat: angkanya di atas, keterangannya di bawah. */
@@ -112,8 +128,8 @@ Angkatan Layanan | MIS
     .ang-nilai .ang-ket { display: block; }
     .ang-kuota strong { font-size: .92rem; font-weight: 800; color: var(--mis-tinta); }
 
-    @media (max-width: 991.98px) {
-        .ang-saring { grid-template-columns: minmax(0, 1fr) 170px; }
+    @media (max-width: 1199.98px) {
+        .ang-saring { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
         .ang-saring > .mis-tombol { grid-column: 1 / -1; }
     }
 
@@ -124,11 +140,38 @@ Angkatan Layanan | MIS
            sepi untuk memisahkan enam keterangan berlabel. */
         .mis-tabel-kartu.ang-tabel tbody { display: flex; flex-direction: column; gap: 8px; }
         .mis-tabel-kartu.ang-tabel tbody tr { border: 1px solid var(--mis-garis); border-radius: 13px; background: #f8fafc; }
+
+        /* Tujuh keterangan berlabel per kartu terukur 253px di 390px dan 304px
+           di 320px — terlalu tinggi untuk daftar yang dibaca sambil menggulung.
+           Dua yang paling jarang ditindaklanjuti disembunyikan; keduanya tetap
+           ada di layar lebar dan di berkas unduhan. */
+        .mis-tabel-kartu.ang-tabel td[data-judul="Layanan"],
+        .mis-tabel-kartu.ang-tabel td[data-judul="Biaya"] { display: none; }
     }
 </style>
 @endpush
 
 @section('content')
+@php
+    /*
+     * Tautan ke daftar pendaftar tiap angkatan. Hanya dua layanan yang
+     * pendaftarannya tercatat di sistem ini; sisanya belum punya layar
+     * pendaftar, jadi tautannya tidak dibuat daripada menunjuk halaman yang
+     * tidak menjawab apa-apa.
+     */
+    $tautanPendaftar = function ($a) {
+        $rute = [
+            'scopus_camp' => 'account.pendaftaranscopuscamp.index',
+            'bibliometrik' => 'account.analisisbibliometrik.index',
+        ];
+
+        if (! isset($rute[$a->layanan]) || ! \Illuminate\Support\Facades\Route::has($rute[$a->layanan])) {
+            return null;
+        }
+
+        return route($rute[$a->layanan], ['kategori' => $a->id]);
+    };
+@endphp
 <div class="main-content mis-badan">
     <section class="section">
 
@@ -138,14 +181,26 @@ Angkatan Layanan | MIS
                 <h1 class="mis-judul">Angkatan layanan</h1>
                 <p class="mis-sub">Semua angkatan jasa dalam satu daftar — harga dan deskripsinya ikut tarif induk.</p>
             </div>
-            @if ($bolehUbah)
-                <div class="mis-kepala-aksi">
+            <div class="mis-kepala-aksi">
+                {{-- Layar kategori yang digantikan layar ini SUDAH punya unduhan
+                     PDF dan Excel; menyatukannya tanpa keduanya berarti
+                     diam-diam mencabut kemampuan yang sudah dipakai orang.
+                     Saringan yang sedang aktif ikut terbawa. --}}
+                <a href="{{ route('account.kategori-layanan.excel', request()->query()) }}"
+                    class="mis-tombol mis-tombol-halus">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{{ route('account.kategori-layanan.cetak', request()->query()) }}"
+                    class="mis-tombol mis-tombol-halus">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                @if ($bolehUbah)
                     <a href="{{ route('account.kategori-layanan.create', ['layanan' => $layanan ?: 'scopus_camp']) }}"
                         class="mis-tombol mis-tombol-ungu">
                         <i class="fas fa-plus"></i> Angkatan baru
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         {{-- Strip layanan. Tautan biasa, bukan JavaScript: bisa dibuka di tab
@@ -169,6 +224,10 @@ Angkatan Layanan | MIS
         <div class="mis-bagian">
             <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="ang-saring">
                 <input type="hidden" name="layanan" value="{{ $layanan }}">
+                {{-- Menu pengurut menulis ke dua isian ini, bukan mengirim
+                     namanya sendiri: peladen hanya mengenal 'urut' dan 'arah'. --}}
+                <input type="hidden" name="urut" id="ang-urut-kolom" value="{{ $urut }}">
+                <input type="hidden" name="arah" id="ang-urut-arah" value="{{ $arah }}">
 
                 <div class="mis-isian">
                     <label class="mis-label" for="ang-cari">Cari angkatan</label>
@@ -200,19 +259,62 @@ Angkatan Layanan | MIS
                     </select>
                 </div>
 
+                <div class="mis-isian">
+                    <label class="mis-label" for="ang-urut">Urutkan</label>
+                    <select class="form-control-modern" id="ang-urut" name="urutgabung">
+                        @php
+                            // Larik bersarang, bukan kunci "kolom|arah" yang dibelah
+                            // di dalam @foreach: @php(...) sebaris tidak menangani
+                            // pembongkaran larik, dan halamannya galat 500 tanpa
+                            // menyebut sebabnya.
+                            $pilihanUrut = [
+                                ['mulai', 'turun', 'Terbaru dulu'],
+                                ['mulai', 'naik', 'Terlama dulu'],
+                                ['nama', 'naik', 'Nama A–Z'],
+                                ['nama', 'turun', 'Nama Z–A'],
+                                ['sisa_kuota', 'naik', 'Sisa kuota paling sedikit'],
+                                ['sisa_kuota', 'turun', 'Sisa kuota paling banyak'],
+                                ['status', 'naik', 'Status'],
+                            ];
+                        @endphp
+                        @foreach ($pilihanUrut as $pilihan)
+                            <option value="{{ $pilihan[0] }}|{{ $pilihan[1] }}"
+                                @selected($urut === $pilihan[0] && $arah === $pilihan[1])>{{ $pilihan[2] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <button type="submit" class="mis-tombol mis-tombol-halus">
                     <i class="fas fa-search"></i> Saring
                 </button>
             </form>
 
             @if ($angkatan->isEmpty())
-                <div class="mis-kosong">
-                    <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
-                    <p class="mis-kosong-judul">Belum ada angkatan</p>
-                    <p class="mis-kosong-teks">
-                        {{ $cari !== '' || $status ? 'Tidak ada yang cocok dengan saringan ini.' : 'Buat angkatan pertama lewat tombol di atas.' }}
-                    </p>
-                </div>
+                {{-- Judulnya ikut berubah, bukan cuma subjudulnya: "Belum ada
+                     angkatan" pada daftar yang sedang disaring adalah kalimat
+                     yang tidak benar — angkatannya ada, cuma tidak cocok. --}}
+                @if ($adaSaringan)
+                    <div class="mis-kosong mis-kosong-cari">
+                        <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                        <p class="mis-kosong-judul">Tidak ada yang cocok</p>
+                        <p class="mis-kosong-teks">
+                            @if ($cari !== '')
+                                Tidak ada angkatan bernama &ldquo;<strong>{{ $cari }}</strong>&rdquo;.
+                            @endif
+                            Coba kata kunci lain, atau hapus saringannya.
+                        </p>
+                        <a href="{{ route('account.kategori-layanan.index') }}"
+                            class="mis-tombol mis-tombol-halus mis-kosong-aksi">
+                            <i class="fas fa-times"></i> Hapus saringan
+                        </a>
+                    </div>
+                @else
+                    <div class="mis-kosong">
+                        <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                        <p class="mis-kosong-judul">Belum ada angkatan</p>
+                        <p class="mis-kosong-teks">Buat angkatan pertama lewat tombol di atas.</p>
+                    </div>
+                @endif
             @else
                 <div class="mis-tabel-bungkus">
                     <table class="mis-tabel mis-tabel-kartu ang-tabel">
@@ -267,6 +369,25 @@ Angkatan Layanan | MIS
                                             <strong>{{ $a->sisa_kuota ?? '—' }}</strong>
                                             <span>dari {{ $a->total_kuota ?? '—' }}</span>
                                         </span>
+
+                                        @if ($a->kuota_habis)
+                                            {{-- Kuota habis harus kelihatan tanpa membandingkan
+                                                 dua angka sendiri. --}}
+                                            <span class="mis-pil mis-pil-merah">
+                                                <i class="fas fa-user-friends"></i> Penuh
+                                            </span>
+                                        @endif
+
+                                        @php($pendaftar = $a->jumlah_pendaftar)
+                                        @if ($pendaftar > 0 && $tautanPendaftar($a))
+                                            {{-- "14 dari 25" lalu berhenti di situ menyisakan
+                                                 pertanyaan "siapa"; jawabannya satu klik. --}}
+                                            <a href="{{ $tautanPendaftar($a) }}" class="ang-tautan">
+                                                lihat {{ $pendaftar }} pendaftar
+                                            </a>
+                                        @elseif ($pendaftar > 0)
+                                            <span class="ang-ket">{{ $pendaftar }} pendaftar</span>
+                                        @endif
                                     </td>
 
                                     {{-- Harga dan promonya dibungkus jadi SATU nilai. Di modus
@@ -290,6 +411,16 @@ Angkatan Layanan | MIS
                                         @php($rupa = ['active' => ['mis-pil-hijau', 'Aktif'], 'non active' => ['mis-pil-abu', 'Nonaktif'], 'draft' => ['mis-pil-kuning', 'Draf']])
                                         @php($s = $rupa[$a->status] ?? ['mis-pil-abu', $a->status])
                                         <span class="mis-pil {{ $s[0] }}">{{ $s[1] }}</span>
+
+                                        @if ($a->sudah_lewat)
+                                            {{-- Tidak ada apa pun yang menutup angkatan otomatis,
+                                                 jadi ia bisa terpajang "Aktif" berbulan-bulan
+                                                 sesudah acaranya selesai. --}}
+                                            <span class="mis-pil mis-pil-kuning"
+                                                title="Masih aktif padahal tanggalnya sudah lewat">
+                                                <i class="fas fa-exclamation-triangle"></i> Lewat
+                                            </span>
+                                        @endif
                                     </td>
 
                                     <td data-judul="Aksi">
@@ -299,6 +430,17 @@ Angkatan Layanan | MIS
                                                     class="mis-tombol mis-tombol-garis" title="Lihat &amp; ubah">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                {{-- Menggandakan: 41 angkatan Yogyakarta isinya
+                                                     nyaris sama persis, dan semuanya diketik ulang. --}}
+                                                <form method="POST" class="ang-gandakan"
+                                                    action="{{ route('account.kategori-layanan.gandakan', $a) }}">
+                                                    @csrf
+                                                    <button type="submit" class="mis-tombol mis-tombol-garis"
+                                                        title="Gandakan jadi rancangan baru">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </form>
+
                                                 <button type="button" class="mis-tombol mis-tombol-bahaya"
                                                     title="Hapus angkatan"
                                                     data-hapus="{{ route('account.kategori-layanan.destroy', $a) }}"
@@ -326,6 +468,23 @@ Angkatan Layanan | MIS
 
 @push('scripts')
 <script>
+    /*
+     * Menu pengurut menulis ke isian tersembunyi urut/arah lalu mengirim
+     * borangnya. Namanya sengaja 'urutgabung' supaya nilainya sendiri tidak
+     * ikut terkirim ke peladen, yang cuma mengenal dua nama itu.
+     */
+    (function () {
+        const pilih = document.getElementById('ang-urut');
+        if (!pilih) return;
+
+        pilih.addEventListener('change', function () {
+            const bagian = pilih.value.split('|');
+            document.getElementById('ang-urut-kolom').value = bagian[0];
+            document.getElementById('ang-urut-arah').value = bagian[1];
+            pilih.form.submit();
+        });
+    })();
+
     document.addEventListener('click', function (e) {
         const tombol = e.target.closest('[data-hapus]');
         if (!tombol) return;

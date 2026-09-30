@@ -617,3 +617,37 @@ salahnya.
 
 Periksa keadaan yang PERSIS dimaksud — kelas penanda yang spesifik, atau
 seluruh pernyataan sampai titik komanya — bukan kemiripan tekstual.
+
+## Menyatukan dua layar tidak boleh mencabut kemampuannya
+
+Layar kategori Bibliometrik punya unduhan PDF dan Excel; layar Angkatan
+Layanan yang menggantikan dua layar kategori dibuat tanpa keduanya — jadi
+penyatuannya diam-diam membuat penggunanya kehilangan sesuatu.
+
+Sebelum mengganti sebuah layar, **daftar dulu rute yang dipunyai layar lama**
+(`route:list | grep`), bukan hanya melihat tampilannya. Kemampuan yang tidak
+kelihatan di layar — unduhan, saringan, cetakan — paling gampang terlewat.
+
+## Mengukur kisi: baca dasarnya kalau `align-items: end`
+
+`getBoundingClientRect().top` berbeda-beda untuk item setinggi berbeda di
+BARIS YANG SAMA, jadi menghitung baris kisi dari puncaknya memberi angka yang
+salah — terukur "2 baris" untuk kisi yang sebenarnya satu baris. Baca
+`bottom`-nya, atau `gridTemplateColumns` yang sudah dihitung peramban.
+
+Dan saring dulu anak yang `display: none` (isian tersembunyi tidak membentuk
+jalur kisi); menghitung semua anak juga memberi angka yang salah.
+
+## Kuota tidak boleh bisa lebih kecil dari yang sudah terpakai
+
+Angkatan menyimpan `total_kuota` dan `sisa_kuota` terpisah dari pendaftarnya,
+dan tidak ada apa pun yang mengikat ketiganya. Validator wajib menolak total
+di bawah jumlah pendaftar, dan sisa di atas totalnya. Tanpa itu angka sisanya
+jadi tidak berarti — angkatan yang penuh terlihat longgar, atau sebaliknya.
+
+## Menggandakan baris berulang
+
+Kalau data yang sama diketik ulang berkali-kali — 41 angkatan Yogyakarta yang
+isinya nyaris sama persis — sediakan penggandaan. Yang TIDAK ikut disalin:
+tanggal, sisa kuota, token, dan statusnya. Salinannya selalu **draf**, supaya
+tidak ada yang terbit hanya karena tombol tertekan.

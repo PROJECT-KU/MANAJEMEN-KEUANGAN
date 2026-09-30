@@ -328,6 +328,18 @@
                 <a href="{{ route('account.kategori-layanan.index') }}" class="mis-tombol mis-tombol-halus">
                     Batal
                 </a>
+
+                @if ($sunting)
+                    {{-- Menghapus tersedia di tempat angkatan itu sedang dibuka,
+                         bukan hanya di daftar — begitu orang masuk ke borangnya,
+                         di situlah ia memutuskan. Angkatan yang sudah punya
+                         pendaftar tetap ditolak peladen. --}}
+                    <button type="button" class="mis-tombol mis-tombol-hapus" id="brg-hapus"
+                        data-hapus="{{ route('account.kategori-layanan.destroy', $angkatan) }}"
+                        data-nama="{{ $angkatan->nama }}">
+                        <i class="fas fa-trash-alt"></i> Hapus angkatan
+                    </button>
+                @endif
             </div>
         </form>
 
@@ -337,6 +349,42 @@
 
 @push('scripts')
 <script>
+    /* Menghapus dari borang sunting; aturannya sama dengan di daftar. */
+    (function () {
+        const tombol = document.getElementById('brg-hapus');
+        if (!tombol) return;
+
+        tombol.addEventListener('click', function () {
+            window.misKonfirmasi({
+                judul: 'Hapus angkatan ini?',
+                pesan: '%s dihapus permanen. Angkatan yang sudah punya pendaftar tidak bisa dihapus.',
+                sorot: tombol.dataset.nama,
+                tombol: 'Ya, hapus',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                fetch(tombol.dataset.hapus, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (j) {
+                        window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal', j.d.message);
+                        if (j.ok && j.d.success) {
+                            setTimeout(function () {
+                                window.location.href = '{{ route('account.kategori-layanan.index') }}';
+                            }, 900);
+                        }
+                    })
+                    .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+            });
+        });
+    })();
+
     (function () {
         const KATALOG = @json(collect($katalog)->map(fn ($t) => ['nama' => $t['nama'], 'varian' => $t['varian']]));
         const TARIF = @json($tarifPer);

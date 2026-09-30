@@ -2,8 +2,10 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -23,6 +25,15 @@ use Illuminate\Support\Str;
  */
 class KategoriLayanan extends Model
 {
+    /** @var array<string, int>|null */
+    private static ?array $pendaftar = null;
+
+    /** Dibuang uji yang mengubah pendaftarnya di tengah jalan. */
+    public static function lupakanPendaftar(): void
+    {
+        self::$pendaftar = null;
+    }
+
     protected $table = 'kategori_layanan';
 
     protected $keyType = 'string';
@@ -80,6 +91,70 @@ class KategoriLayanan extends Model
     public function tarif(): ?ClinikScopusBiayaPersesi
     {
         return ClinikScopusBiayaPersesi::berlaku($this->layanan, $this->varian);
+    }
+
+    /**
+     * Jumlah pendaftar SEMUA angkatan sekaligus, dalam dua kueri berkelompok.
+     *
+     * Bukan satu kueri per baris: daftarnya berhalaman sepuluh dan jumlahnya
+     * dipakai di tiga tempat (lencana kuota, penjaga kuota, tautan pendaftar),
+     * jadi dibaca satu per satu ia jadi tiga puluh kueri.
+     *
+     * Dua tabel karena pendaftarannya memang dua: Scopus Camp dan Bibliometrik
+     * menyimpan pendaftarnya sendiri-sendiri, keduanya menunjuk `kategori_id`.
+     *
+     * @return array<string, int>
+     */
+    public static function hitungPendaftar(): array
+    {
+        if (self::$pendaftar !== null) {
+            return self::$pendaftar;
+        }
+
+        $hasil = [];
+
+        foreach (['scopus_camp_pendaftaran', 'analisis_bibliometrik'] as $tabel) {
+            $baris = DB::table($tabel)
+                ->whereNotNull('kategori_id')
+                ->selectRaw('kategori_id, count(*) as n')
+                ->groupBy('kategori_id')
+                ->pluck('n', 'kategori_id');
+
+            foreach ($baris as $id => $n) {
+                $hasil[$id] = ($hasil[$id] ?? 0) + (int) $n;
+            }
+        }
+
+        return self::$pendaftar = $hasil;
+    }
+
+    /** Berapa orang yang sudah mendaftar di angkatan ini. */
+    public function getJumlahPendaftarAttribute(): int
+    {
+        return self::hitungPendaftar()[$this->getKey()] ?? 0;
+    }
+
+    /** Kuotanya sudah habis. */
+    public function getKuotaHabisAttribute(): bool
+    {
+        return $this->total_kuota !== null && (int) $this->sisa_kuota < 1;
+    }
+
+    /**
+     * Aktif padahal tanggalnya sudah lewat.
+     *
+     * Tidak ada apa pun yang menutup angkatan otomatis, jadi ia bisa terpajang
+     * sebagai "Aktif" berbulan-bulan sesudah acaranya selesai.
+     */
+    public function getSudahLewatAttribute(): bool
+    {
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        $akhir = $this->selesai ?: $this->mulai;
+
+        return $akhir && \Carbon\Carbon::parse($akhir)->endOfDay()->isPast();
     }
 
     // ------------------------------------------------------------- tampilan
