@@ -100,6 +100,23 @@
 
     .brg-tarif strong { font-size: .84rem; font-weight: 800; color: var(--mis-tinta); }
 
+    .brg-sampul {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px; align-items: start;
+    }
+
+    .brg-sampul-pratinjau {
+        display: grid; place-items: center;
+        width: 96px; height: 96px;
+        overflow: hidden;
+        border: 1px solid var(--mis-garis); border-radius: 13px;
+        background: #f8fafc; color: var(--mis-tinta-4);
+    }
+
+    .brg-sampul-pratinjau img { width: 100%; height: 100%; object-fit: cover; }
+    .brg-sampul-pratinjau .fas { font-size: 22px !important; }
+
     .brg-kaki {
         display: flex; flex-wrap: wrap; gap: 10px;
         margin-top: var(--mis-jarak);
@@ -145,7 +162,10 @@
             </div>
         @endif
 
-        <form method="POST"
+        {{-- enctype WAJIB: tanpa itu berkas sampulnya tidak pernah sampai ke
+             peladen, dan borangnya tersimpan seolah tidak ada gambar yang
+             dipilih — tanpa galat apa pun. --}}
+        <form method="POST" enctype="multipart/form-data"
             action="{{ $sunting ? route('account.kategori-layanan.update', $angkatan) : route('account.kategori-layanan.store') }}"
             id="brg-angkatan">
             @csrf
@@ -285,6 +305,35 @@
                                 </span>
                             </label>
                         @endif
+
+                        <div class="mis-isian brg-isian brg-penuh">
+                            <label class="mis-label" for="brg-sampul">Sampul angkatan</label>
+
+                            {{-- Halaman publik memakai gambar ini; tanpa sampul ia
+                                 menampilkan "no-image". Semua 58 angkatan yang ada
+                                 punya sampul, jadi angkatan tanpa gambar akan
+                                 langsung terlihat ganjil di antara mereka. --}}
+                            <div class="brg-sampul">
+                                <span class="brg-sampul-pratinjau" id="brg-sampul-pratinjau">
+                                    @if ($sunting && $angkatan->alamat_sampul)
+                                        <img src="{{ $angkatan->alamat_sampul }}" alt="Sampul {{ $angkatan->nama }}">
+                                    @else
+                                        <i class="fas fa-image" aria-hidden="true"></i>
+                                    @endif
+                                </span>
+
+                                <div class="brg-sampul-isi">
+                                    <input type="file" class="form-control-modern" id="brg-sampul"
+                                        name="gambar" accept="image/jpeg,image/png,image/webp">
+                                    <p class="mis-bantuan">
+                                        JPG, PNG, atau WebP, maksimal 4 MB.
+                                        {{ $sunting && $angkatan->gambar
+                                            ? 'Dibiarkan kosong, sampul yang sekarang tetap dipakai.'
+                                            : 'Ukuran yang pas mengikuti flyer pengumuman.' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="mis-isian brg-isian brg-penuh">
                             <label class="mis-label" for="brg-wa">Grup WhatsApp</label>
@@ -470,6 +519,29 @@
          * JavaScript, format tanggal dan aturan baris kosongnya pasti
          * berselisih dengan yang dipakai saat menyimpan.
          */
+        /* Pratinjau sampul sebelum disimpan: mengunggah gambar yang salah lalu
+           baru tahu sesudah halaman publiknya terbit itu mahal. */
+        const sampul = document.getElementById('brg-sampul');
+
+        if (sampul) {
+            sampul.addEventListener('change', function () {
+                const berkas = sampul.files && sampul.files[0];
+                if (!berkas) return;
+
+                const kotak = document.getElementById('brg-sampul-pratinjau');
+                const alamat = URL.createObjectURL(berkas);
+
+                kotak.innerHTML = '';
+                const gbr = document.createElement('img');
+                gbr.src = alamat;
+                gbr.alt = 'Pratinjau sampul';
+                // Alamat sementaranya dilepas sesudah dipakai; kalau tidak,
+                // berkasnya tetap dipegang peramban sampai tabnya ditutup.
+                gbr.addEventListener('load', function () { URL.revokeObjectURL(alamat); });
+                kotak.appendChild(gbr);
+            });
+        }
+
         document.getElementById('brg-rakit').addEventListener('click', function () {
             const borang = document.getElementById('brg-angkatan');
             const isi = new FormData(borang);

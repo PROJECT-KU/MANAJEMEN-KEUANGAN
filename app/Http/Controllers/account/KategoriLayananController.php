@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Layanan;
 use App\Support\PerakitDeskripsi;
+use App\Support\TeksDariHtml;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -124,9 +125,19 @@ class KategoriLayananController extends Controller
         $jumlah = KategoriLayanan::select('layanan', DB::raw('count(*) as n'))
             ->groupBy('layanan')->pluck('n', 'layanan');
 
+        /*
+         * Ringkasan per status untuk saringan yang sedang dipakai. Lencana
+         * layanan menyebut totalnya — "Scopus Camp 48" tidak memberi tahu
+         * berapa yang sedang berjalan, dan itu yang paling sering ditanya.
+         */
+        $perStatus = (clone $kueri)->reorder()
+            ->select('status', DB::raw('count(*) as n'))
+            ->groupBy('status')->pluck('n', 'status');
+
         return view('account.kategori_layanan.index', [
             'angkatan' => $angkatan,
             'jumlah' => $jumlah,
+            'perStatus' => $perStatus,
             'layanan' => $layanan,
             'status' => $status,
             'cari' => $cari,
@@ -269,8 +280,16 @@ class KategoriLayananController extends Controller
             return $this->tolak();
         }
 
+        $layanan = $request->query('layanan', 'scopus_camp');
+
         return view('account.kategori_layanan.form', [
-            'angkatan' => new KategoriLayanan(['layanan' => $request->query('layanan', 'scopus_camp')]),
+            'angkatan' => new KategoriLayanan([
+                'layanan' => $layanan,
+                // Nomor berikutnya disarankan, bukan dipaksakan: admin
+                // mengingat-ingat nomor terakhir kalau tidak, dan angka yang
+                // dilompati baru ketahuan berbulan-bulan kemudian.
+                'nama_ke' => $this->nomorBerikutnya($layanan),
+            ]),
             'sunting' => false,
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
@@ -297,6 +316,22 @@ class KategoriLayananController extends Controller
      *
      * @return array<string, array<string, mixed>>
      */
+    /**
+     * Nomor angkatan berikutnya untuk satu layanan.
+     *
+     * Diambil dari nomor TERBESAR yang pernah dipakai, bukan dari jumlah
+     * barisnya: angkatan yang dihapus akan membuat hitungan baris memberi
+     * nomor yang sudah terpakai.
+     */
+    private function nomorBerikutnya(string $layanan): ?string
+    {
+        $tertinggi = KategoriLayanan::where('layanan', $layanan)
+            ->whereRaw("nama_ke REGEXP '^[0-9]+$'")
+            ->max(DB::raw('CAST(nama_ke AS UNSIGNED)'));
+
+        return $tertinggi ? (string) ((int) $tertinggi + 1) : null;
+    }
+
     private function tarifPerLayanan(): array
     {
         $hasil = [];
@@ -333,6 +368,11 @@ class KategoriLayananController extends Controller
 
         $angkatan = KategoriLayanan::create($data);
 
+        // Sesudah barisnya ada: foldernya ditentukan layanannya.
+        if ($sampul = $this->simpanSampul($request, $angkatan)) {
+            $angkatan->forceFill(['gambar' => $sampul])->save();
+        }
+
         return redirect()->route('account.kategori-layanan.index', ['layanan' => $angkatan->layanan])
             ->with('success', 'Angkatan ' . $angkatan->nama . ' tersimpan.');
     }
@@ -343,7 +383,13 @@ class KategoriLayananController extends Controller
             return $this->tolak();
         }
 
-        $angkatan->update($this->periksa($request, $angkatan));
+        $data = $this->periksa($request, $angkatan);
+
+        if ($sampul = $this->simpanSampul($request, $angkatan)) {
+            $data['gambar'] = $sampul;
+        }
+
+        $angkatan->update($data);
 
         return redirect()->route('account.kategori-layanan.index', ['layanan' => $angkatan->layanan])
             ->with('success', 'Angkatan ' . $angkatan->nama . ' diperbarui.');
@@ -368,6 +414,9 @@ class KategoriLayananController extends Controller
             'group_wa' => ['nullable', 'string', 'max:255'],
             'desc' => ['nullable', 'string', 'max:20000'],
             'status' => ['required', Rule::in(['active', 'non active', 'draft'])],
+            // Sampul: jenisnya dibatasi daftar tertutup. 4 MB cukup untuk
+            // flyer; di atas itu halaman publiknya lambat dimuat pengunjung.
+            'gambar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
         ], [
             'nama.required' => 'Isi dulu nama angkatannya.',
             'mulai.required' => 'Isi dulu tanggal mulainya.',
@@ -388,6 +437,17 @@ class KategoriLayananController extends Controller
             'varian', 'nama_ke', 'selesai', 'lokasi', 'total_kuota', 'sisa_kuota',
             'group_wa', 'desc',
         ], null), $data);
+
+        /*
+         * Deskripsi yang ditempel dari ChatGPT atau Word ikut membawa HTML-nya.
+         * Halaman publik menampilkannya dengan {{ }}, jadi yang terbaca
+         * pengunjung adalah tag-nya — empat angkatan Bibliometrik sudah
+         * terlanjur begitu sebelum ini dipasang.
+         *
+         * Teks yang memang sudah datar dikembalikan utuh, jadi baris kosong
+         * yang sengaja diketik admin tidak ikut dirapatkan.
+         */
+        $data['desc'] = TeksDariHtml::ubah($data['desc']) ?: null;
 
         $tentang = Layanan::katalog()[$data['layanan']];
         $varian = $data['varian'] ?: null;
@@ -465,6 +525,54 @@ class KategoriLayananController extends Controller
      *
      * @param  array<string, mixed>  $data
      */
+    /**
+     * Menyimpan sampul angkatan dan mengembalikan nama berkasnya.
+     *
+     * Halaman publik membaca sampul lewat basename(), jadi yang menentukan
+     * FOLDER tempat berkasnya diletakkan — bukan awalan yang tersimpan. Nama
+     * berkasnya UUID, bukan nama asli: nama unggahan bisa memuat spasi atau
+     * apostrof, dan apostrof di nama berkas ditolak firewall hosting sebelum
+     * PHP sempat jalan.
+     */
+    private function simpanSampul(Request $request, KategoriLayanan $angkatan): ?string
+    {
+        if (! $request->hasFile('gambar')) {
+            return null;
+        }
+
+        $berkas = $request->file('gambar');
+        $folder = $angkatan->folderSampul();
+        $tujuan = public_path($folder);
+
+        if (! is_dir($tujuan)) {
+            mkdir($tujuan, 0755, true);
+        }
+
+        $nama = (string) Str::uuid() . '.' . strtolower($berkas->getClientOriginalExtension());
+        $berkas->move($tujuan, $nama);
+
+        /*
+         * Sampul lama dihapus SESUDAH yang baru tersimpan, dan hanya kalau
+         * tidak ada angkatan lain yang memakainya — beberapa angkatan berbagi
+         * satu flyer, dan menghapusnya akan mengosongkan gambar mereka juga.
+         */
+        if ($angkatan->gambar) {
+            $lama = basename($angkatan->gambar);
+
+            $dipakaiLain = KategoriLayanan::where('id', '!=', $angkatan->getKey())
+                ->where('gambar', 'like', '%' . $lama)
+                ->exists();
+
+            $berkasLama = public_path($folder . '/' . $lama);
+
+            if (! $dipakaiLain && is_file($berkasLama)) {
+                @unlink($berkasLama);
+            }
+        }
+
+        return $folder . '/' . $nama;
+    }
+
     private function hargakan(array &$data, Request $request, ?KategoriLayanan $angkatan, string $layanan, ?string $varian): void
     {
         $tarif = ClinikScopusBiayaPersesi::berlaku($layanan, $varian);
@@ -576,6 +684,68 @@ class KategoriLayananController extends Controller
             'message' => $teks !== ''
                 ? 'Deskripsi dirakit dari cetakan layanan.'
                 : 'Layanan ini belum punya cetakan deskripsi. Isi dulu di Tarif layanan.',
+        ]);
+    }
+
+    // ------------------------------------------------------ tindakan massal
+
+    /**
+     * Mengubah status beberapa angkatan sekaligus.
+     *
+     * Dipakai juga oleh lencana "Lewat" di daftar, yang mengirim satu id:
+     * lencana itu memberi tahu ada angkatan yang masih aktif padahal
+     * tanggalnya lewat, dan jalan keluarnya pantas ada di tempat yang sama —
+     * bukan lewat buka-sunting-simpan.
+     */
+    public function massal(Request $request)
+    {
+        if (! $this->bolehMengubah()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak boleh mengubah angkatan.',
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'id' => ['required', 'array', 'min:1', 'max:200'],
+            'id.*' => ['uuid'],
+            'status' => ['required', Rule::in(['active', 'non active', 'draft'])],
+        ], [
+            'id.required' => 'Pilih dulu angkatan yang mau diubah.',
+            'id.max' => 'Maksimal 200 angkatan sekali ubah.',
+        ]);
+
+        $jumlah = KategoriLayanan::whereIn('id', $data['id'])->update(['status' => $data['status']]);
+
+        $sebutan = ['active' => 'Aktif', 'non active' => 'Nonaktif', 'draft' => 'Draf'][$data['status']];
+
+        return response()->json([
+            'success' => true,
+            'message' => $jumlah . ' angkatan diubah jadi ' . $sebutan . '.',
+        ]);
+    }
+
+    // ------------------------------------------------------------- detail
+
+    /**
+     * Tampilan baca-saja satu angkatan.
+     *
+     * Sebelum ini, membaca deskripsi utuh satu angkatan harus lewat borang
+     * SUNTING — membaca melalui layar yang bisa mengubah, dan satu salah tekan
+     * sudah cukup untuk menyimpan sesuatu yang tidak dimaksud.
+     */
+    public function detail(KategoriLayanan $angkatan)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        KategoriLayanan::hitungPendaftar();
+
+        return view('account.kategori_layanan.detail', [
+            'angkatan' => $angkatan,
+            'tarif' => $angkatan->tarif(),
+            'bolehUbah' => $this->bolehMengubah(),
         ]);
     }
 
