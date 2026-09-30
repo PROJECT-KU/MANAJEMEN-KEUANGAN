@@ -200,9 +200,9 @@ class KategoriLayananController extends Controller
             'lokasi' => ['nullable', 'string', 'max:255'],
             'total_kuota' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'sisa_kuota' => ['nullable', 'integer', 'min:0', 'max:10000'],
-            'biaya' => ['nullable', 'string', 'max:20'],
-            'total_biaya' => ['nullable', 'string', 'max:20'],
-            'kode_diskon' => ['nullable', 'string', 'max:60'],
+            // Harga, harga promo, dan kode promo TIDAK lagi diketik di sini.
+            // Harga memotret tarif induk; promo jadi fiturnya sendiri nanti.
+            'ikuti_tarif' => ['nullable', 'boolean'],
             'group_wa' => ['nullable', 'string', 'max:255'],
             'desc' => ['nullable', 'string', 'max:20000'],
             'status' => ['required', Rule::in(['active', 'non active', 'draft'])],
@@ -224,7 +224,7 @@ class KategoriLayananController extends Controller
          */
         $data = array_merge(array_fill_keys([
             'varian', 'nama_ke', 'selesai', 'lokasi', 'total_kuota', 'sisa_kuota',
-            'biaya', 'total_biaya', 'kode_diskon', 'group_wa', 'desc',
+            'group_wa', 'desc',
         ], null), $data);
 
         $tentang = ClinikScopusBiayaPersesi::LAYANAN[$data['layanan']];
@@ -244,18 +244,7 @@ class KategoriLayananController extends Controller
 
         $data['varian'] = $varian;
 
-        // Angka rupiah diketik berformat "5.500.000" oleh pemolesnya di layar.
-        foreach (['biaya', 'total_biaya'] as $k) {
-            $data[$k] = $request->filled($k)
-                ? (string) (int) preg_replace('/\D+/', '', (string) $data[$k])
-                : null;
-        }
-
-        // Tanpa diskon, total sama dengan biayanya — bukan kosong, karena
-        // itulah angka yang dipakai halaman publik dan laporan.
-        if (! $data['total_biaya'] && $data['biaya']) {
-            $data['total_biaya'] = $data['biaya'];
-        }
+        $this->hargakan($data, $request, $angkatan, $data['layanan'], $varian);
 
         /*
          * Sisa kuota mengikuti total HANYA saat angkatannya baru. Pada
@@ -267,6 +256,59 @@ class KategoriLayananController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Menentukan harga angkatan tanpa satu pun isian harga.
+     *
+     * Angkatan BARU memotret tarif yang berlaku saat itu. Angkatan yang SUDAH
+     * ADA mempertahankan harganya sendiri — peserta yang sudah mendaftar
+     * membayar harga yang dijanjikan saat itu, dan menyunting tanggal atau
+     * kuota tidak boleh diam-diam menaikkannya. Dari 48 angkatan Scopus Camp
+     * yang ada, 25 di antaranya berharga 4,5jt sementara tarif sekarang 5,5jt.
+     *
+     * Satu-satunya jalan mengubah harga angkatan lama adalah mencentang
+     * "ikuti tarif sekarang", dan centang itu hanya muncul kalau harganya
+     * memang sudah berbeda.
+     *
+     * Harga promo dan kode promo TIDAK disentuh sama sekali di sini. Keduanya
+     * akan jadi fiturnya sendiri; sampai itu ada, nilai yang sudah tersimpan
+     * dibiarkan utuh — 12 angkatan sudah punya promo, dan menghapusnya lewat
+     * penyuntingan biasa berarti kehilangan data tanpa ada yang meminta.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function hargakan(array &$data, Request $request, ?KategoriLayanan $angkatan, string $layanan, ?string $varian): void
+    {
+        $tarif = ClinikScopusBiayaPersesi::berlaku($layanan, $varian);
+
+        if ($angkatan === null) {
+            $harga = $tarif ? (string) (int) $tarif->biaya_persesi : null;
+
+            $data['biaya'] = $harga;
+            // Tanpa promo, total sama dengan biayanya — bukan kosong, karena
+            // itulah angka yang dipakai halaman publik dan laporan.
+            $data['total_biaya'] = $harga;
+
+            return;
+        }
+
+        if ($request->boolean('ikuti_tarif') && $tarif) {
+            $harga = (string) (int) $tarif->biaya_persesi;
+
+            $data['biaya'] = $harga;
+
+            // Promo yang lama dihitung dari harga lama, jadi ikut disetarakan;
+            // kalau tidak, "promo" bisa jadi lebih mahal daripada harganya.
+            $data['total_biaya'] = $harga;
+            $data['kode_diskon'] = null;
+
+            return;
+        }
+
+        // Tidak disebut sama sekali = tidak diubah. Dibiarkan ada di $data
+        // sebagai null, update() akan mengosongkannya.
+        unset($data['biaya'], $data['total_biaya'], $data['kode_diskon']);
     }
 
     // -------------------------------------------------------------- perakit
