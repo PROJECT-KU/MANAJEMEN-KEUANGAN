@@ -46,11 +46,15 @@ class ClinikScopusBiayaPersesi extends Model
         'biaya_persesi',
         'ppn',
         'fasilitas',
+        'template_deskripsi',
+        'kegiatan',
+        'kontak',
         'status',
     ];
 
     protected $casts = [
         'fasilitas' => 'array',
+        'kegiatan' => 'array',
     ];
 
     public const AKTIF = 'active';
@@ -234,8 +238,26 @@ class ClinikScopusBiayaPersesi extends Model
     /** Daftar fasilitas, selalu berupa larik walau kolomnya kosong. */
     public function getDaftarFasilitasAttribute(): array
     {
+        return self::bersihkanDaftar($this->fasilitas);
+    }
+
+    /** Daftar kegiatan utama; diperlakukan sama persis seperti fasilitas. */
+    public function getDaftarKegiatanAttribute(): array
+    {
+        return self::bersihkanDaftar($this->kegiatan);
+    }
+
+    /** Apakah layanan ini sudah punya cetakan deskripsi yang bisa dipakai. */
+    public function getAdaCetakanAttribute(): bool
+    {
+        return trim((string) $this->template_deskripsi) !== '';
+    }
+
+    /** @param mixed $nilai */
+    private static function bersihkanDaftar($nilai): array
+    {
         return array_values(array_filter(
-            (array) ($this->fasilitas ?? []),
+            (array) ($nilai ?? []),
             fn ($f) => trim((string) $f) !== ''
         ));
     }

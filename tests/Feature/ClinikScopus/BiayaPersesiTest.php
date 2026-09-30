@@ -536,6 +536,55 @@ class BiayaPersesiTest extends TestCase
         $this->assertSame([], $tarif->daftar_fasilitas);
     }
 
+    #[Test]
+    public function kotak_kegiatan_mengambil_bagian_kegiatan_dari_pengumuman_yang_sama(): void
+    {
+        /*
+         * Teks pengumuman yang SAMA ditempel ke dua kotak, dan tiap kotak
+         * mengambil bagiannya sendiri. Admin tidak perlu memilah manual —
+         * itulah yang selama ini bikin daftarnya sering tertukar.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $teks = $this->pengumumanAngkatan();
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'biaya_persesi' => '1.000.000',
+            'fasilitas' => $teks,
+            'kegiatan' => $teks,
+        ]);
+
+        $tarif = ClinikScopusBiayaPersesi::berlaku('scopus_kafe');
+
+        $this->assertSame([
+            'Penulisan dan penajaman hasil riset ke dalam artikel ilmiah',
+            'Pencarian dan pemilihan jurnal terindeks Scopus yang relevan',
+        ], $tarif->daftar_kegiatan);
+
+        $this->assertContains('Mushola, kolam renang & treadmill', $tarif->daftar_fasilitas);
+        $this->assertNotContains('Penulisan dan penajaman hasil riset ke dalam artikel ilmiah',
+            $tarif->daftar_fasilitas);
+    }
+
+    #[Test]
+    public function cetakan_deskripsi_dan_kontak_ikut_tersimpan(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'biaya_persesi' => '1.000.000',
+            'template_deskripsi' => "📘 {nama}\n🗓 {tanggal}",
+            'kontak' => '📞 Kumala: 0889-8356-7819',
+        ]);
+
+        $tarif = ClinikScopusBiayaPersesi::berlaku('scopus_kafe');
+
+        $this->assertTrue($tarif->ada_cetakan);
+        $this->assertStringContainsString('{tanggal}', $tarif->template_deskripsi);
+        $this->assertStringContainsString('Kumala', $tarif->kontak);
+    }
+
     // ------------------------------------------------------------------ hak
 
     #[Test]
