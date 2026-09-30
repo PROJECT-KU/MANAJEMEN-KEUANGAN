@@ -157,6 +157,37 @@ class KategoriLayanan extends Model
         return $akhir && \Carbon\Carbon::parse($akhir)->endOfDay()->isPast();
     }
 
+    /**
+     * Folder tempat sampul angkatan disimpan, menurut layanannya.
+     *
+     * Kebiasaannya sudah terlanjur berbeda per layanan — halaman publik Scopus
+     * Camp membaca dari `ScopusCamp/`, Bibliometrik dari `bibliometrik/` —
+     * dan keduanya memakai basename(), jadi yang penting nama berkasnya ada di
+     * folder yang benar. Layanan yang belum punya halaman publik ditaruh di
+     * folder sendiri daripada menumpang salah satu di atas.
+     */
+    public const FOLDER_SAMPUL = [
+        'scopus_camp' => 'ScopusCamp',
+        'bibliometrik' => 'bibliometrik',
+    ];
+
+    public function folderSampul(): string
+    {
+        return self::FOLDER_SAMPUL[$this->layanan] ?? 'angkatan';
+    }
+
+    /** Alamat sampul untuk ditampilkan; null kalau belum ada. */
+    public function getAlamatSampulAttribute(): ?string
+    {
+        if (! $this->gambar) {
+            return null;
+        }
+
+        $berkas = public_path($this->folderSampul() . '/' . basename($this->gambar));
+
+        return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->gambar)) : null;
+    }
+
     // ------------------------------------------------------------- tampilan
 
     public function getNamaLayananAttribute(): string
