@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\account;
 
 use App\ClinikScopusBiayaPersesi;
+use App\Exports\AngkatanLayananExport;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Layanan;
@@ -11,7 +12,9 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Dompdf\Dompdf;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\Rule;
 
 /**
@@ -80,7 +83,38 @@ class KategoriLayananController extends Controller
             });
         }
 
-        $angkatan = $kueri->orderByDesc('mulai')->paginate(self::PER_HALAMAN)->withQueryString();
+        /*
+         * Pengurutan. Daftarnya semula selalu tanggal mulai terbaru, jadi
+         * mencari angkatan terlama atau yang paling penuh berarti menggulung
+         * seluruh enam halaman.
+         *
+         * Kolomnya dibatasi daftar tertutup: nilainya datang dari alamat, dan
+         * nama kolom sembarang akan sampai ke orderBy apa adanya.
+         */
+        $bolehUrut = [
+            'mulai' => 'Tanggal mulai',
+            'nama' => 'Nama angkatan',
+            'sisa_kuota' => 'Sisa kuota',
+            'status' => 'Status',
+        ];
+
+        $urut = array_key_exists((string) $request->query('urut'), $bolehUrut)
+            ? $request->query('urut')
+            : 'mulai';
+
+        $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
+
+        $angkatan = $kueri
+            // sisa_kuota kolom teks; tanpa dicetak jadi bilangan, "9" berdiri
+            // di atas "10" karena diurutkan sebagai huruf.
+            ->when($urut === 'sisa_kuota',
+                fn ($q) => $q->orderByRaw('CAST(sisa_kuota AS UNSIGNED) ' . $arah),
+                fn ($q) => $q->orderBy($urut, $arah))
+            ->paginate(self::PER_HALAMAN)
+            ->withQueryString();
+
+        // Dipakai lencana kuota, tautan pendaftar, dan penjaga kuota.
+        KategoriLayanan::hitungPendaftar();
 
         /*
          * Jumlah per layanan dihitung sekali dengan satu kueri, bukan satu
@@ -96,9 +130,135 @@ class KategoriLayananController extends Controller
             'layanan' => $layanan,
             'status' => $status,
             'cari' => $cari,
+            'urut' => $urut,
+            'arah' => $arah === 'asc' ? 'naik' : 'turun',
+            'bolehUrut' => $bolehUrut,
+            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan,
             'bolehUbah' => $this->bolehMengubah(),
             'katalog' => Layanan::katalog(),
         ]);
+    }
+
+    // ------------------------------------------------------------- ekspor
+
+    /**
+     * Daftar angkatan yang SEDANG disaring dan diurutkan di layar.
+     *
+     * Batasnya tidak dipotong per halaman — mengunduh sepuluh dari lima puluh
+     * delapan tidak ada gunanya.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function untukEkspor(Request $request)
+    {
+        $layanan = $request->query('layanan');
+        $status = $request->query('status');
+        $cari = trim((string) $request->query('cari'));
+
+        $kueri = KategoriLayanan::query()
+            ->when($layanan && array_key_exists($layanan, Layanan::katalog()),
+                fn ($q) => $q->where('layanan', $layanan))
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($cari !== '', fn ($q) => $q->where(function ($w) use ($cari) {
+                $w->where('nama', 'like', "%{$cari}%")
+                    ->orWhere('nama_ke', 'like', "%{$cari}%")
+                    ->orWhere('lokasi', 'like', "%{$cari}%");
+            }));
+
+        $urut = in_array($request->query('urut'), ['mulai', 'nama', 'sisa_kuota', 'status'], true)
+            ? $request->query('urut')
+            : 'mulai';
+
+        $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
+
+        return $kueri
+            ->when($urut === 'sisa_kuota',
+                fn ($q) => $q->orderByRaw('CAST(sisa_kuota AS UNSIGNED) ' . $arah),
+                fn ($q) => $q->orderBy($urut, $arah))
+            ->get();
+    }
+
+    /**
+     * Mengunduh daftar angkatan sebagai PDF.
+     *
+     * Layar kategori yang digantikan layar ini SUDAH punya unduhan PDF dan
+     * Excel; menyatukannya tanpa keduanya berarti diam-diam mencabut
+     * kemampuan yang sudah dipakai orang.
+     */
+    public function cetakPdf(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $angkatan = $this->untukEkspor($request);
+        KategoriLayanan::hitungPendaftar();
+
+        $html = view('account.kategori_layanan.cetak-pdf', [
+            'angkatan' => $angkatan,
+            'saringan' => $this->ringkasanSaringan($request),
+        ])->render();
+
+        $dompdf = new Dompdf();
+        $pengaturan = $dompdf->getOptions();
+        $pengaturan->setIsPhpEnabled(true);
+        $pengaturan->setIsRemoteEnabled(false);
+        $dompdf->setOptions($pengaturan);
+        $dompdf->loadHtml($html);
+        // Mendatar: sembilan kolom tidak muat tegak tanpa dimampatkan.
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $nama = 'angkatan-layanan-' . now()->format('Ymd-His') . '.pdf';
+
+        // response(), bukan $dompdf->stream(): stream() memanggil header() dan
+        // echo sendiri sehingga kepalanya lewat dari lapisan respons Laravel.
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $nama . '"',
+        ]);
+    }
+
+    /** Mengunduh daftar angkatan sebagai Excel. */
+    public function cetakExcel(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $angkatan = $this->untukEkspor($request);
+        KategoriLayanan::hitungPendaftar();
+
+        return Excel::download(
+            new AngkatanLayananExport($angkatan),
+            'angkatan-layanan-' . now()->format('Ymd-His') . '.xlsx'
+        );
+    }
+
+    /**
+     * Kalimat yang menerangkan saringan yang sedang dipakai.
+     *
+     * Ditulis di berkasnya supaya yang menerimanya tahu ia sedang melihat
+     * sebagian, bukan seluruhnya — daftar tersaring yang tampak lengkap itu
+     * jenis kesalahan yang mahal.
+     */
+    private function ringkasanSaringan(Request $request): string
+    {
+        $bagian = [];
+
+        if ($l = $request->query('layanan')) {
+            $bagian[] = 'layanan ' . (Layanan::katalog()[$l]['nama'] ?? $l);
+        }
+
+        if ($s = $request->query('status')) {
+            $bagian[] = 'status ' . (['active' => 'Aktif', 'non active' => 'Nonaktif', 'draft' => 'Draf'][$s] ?? $s);
+        }
+
+        if ($c = trim((string) $request->query('cari'))) {
+            $bagian[] = 'kata kunci "' . $c . '"';
+        }
+
+        return $bagian === [] ? 'Seluruh angkatan, tanpa saringan.' : 'Disaring: ' . implode(', ', $bagian) . '.';
     }
 
     // -------------------------------------------------------------- borang
@@ -249,6 +409,31 @@ class KategoriLayananController extends Controller
         $this->hargakan($data, $request, $angkatan, $data['layanan'], $varian);
 
         /*
+         * Kuota tidak boleh disetel di bawah jumlah yang SUDAH mendaftar.
+         * Dibiarkan, angka sisanya jadi tidak berarti dan angkatan yang
+         * sebenarnya penuh terlihat masih longgar — atau sebaliknya.
+         */
+        if ($angkatan !== null && $data['total_kuota'] !== null) {
+            $pendaftar = $angkatan->jumlah_pendaftar;
+
+            if ((int) $data['total_kuota'] < $pendaftar) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'total_kuota' => 'Sudah ada ' . $pendaftar . ' orang yang mendaftar, '
+                        . 'jadi kuotanya tidak bisa kurang dari itu.',
+                ]);
+            }
+        }
+
+        // Sisa tidak boleh melebihi totalnya; kalau tidak, angkatan bisa
+        // menerima lebih banyak orang daripada yang disediakan.
+        if ($data['total_kuota'] !== null && $data['sisa_kuota'] !== null
+            && (int) $data['sisa_kuota'] > (int) $data['total_kuota']) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'sisa_kuota' => 'Sisa kuota tidak boleh lebih besar daripada total kuotanya.',
+            ]);
+        }
+
+        /*
          * Sisa kuota mengikuti total HANYA saat angkatannya baru. Pada
          * angkatan yang sudah berjalan, sisanya sudah berkurang karena ada
          * yang mendaftar; menimpanya akan membuka kuota yang sebenarnya habis.
@@ -311,6 +496,50 @@ class KategoriLayananController extends Controller
         // Tidak disebut sama sekali = tidak diubah. Dibiarkan ada di $data
         // sebagai null, update() akan mengosongkannya.
         unset($data['biaya'], $data['total_biaya'], $data['kode_diskon']);
+    }
+
+    /**
+     * Menggandakan satu angkatan jadi rancangan baru.
+     *
+     * Ada 41 angkatan Yogyakarta yang isinya nyaris sama persis — nama,
+     * lokasi, kuota, deskripsi — hanya tanggal dan nomornya berbeda, dan
+     * semuanya diketik ulang satu per satu.
+     *
+     * Yang TIDAK ikut disalin: tanggal (acaranya belum ditentukan), sisa kuota
+     * (belum ada yang mendaftar), dan statusnya — salinannya selalu draf,
+     * supaya tidak ada angkatan yang terbit hanya karena tombol tertekan.
+     */
+    public function gandakan(KategoriLayanan $angkatan)
+    {
+        if (! $this->bolehMengubah()) {
+            return $this->tolak();
+        }
+
+        $salinan = $angkatan->replicate([
+            'mulai', 'selesai', 'sisa_kuota', 'status', 'token',
+            'created_at', 'updated_at',
+        ]);
+
+        $salinan->token = Str::random(30);
+        $salinan->status = 'draft';
+        $salinan->sisa_kuota = $angkatan->total_kuota;
+
+        // Nomor angkatan dinaikkan satu kalau memang angka; kalau bukan,
+        // dibiarkan apa adanya daripada mengarang.
+        $salinan->nama_ke = is_numeric($angkatan->nama_ke)
+            ? (string) ((int) $angkatan->nama_ke + 1)
+            : $angkatan->nama_ke;
+
+        // Tanggalnya sengaja dikosongkan, tetapi kolomnya wajib isi — diisi
+        // hari ini supaya borangnya terbuka, dan admin tinggal menggantinya.
+        $salinan->mulai = now();
+        $salinan->selesai = null;
+
+        $salinan->save();
+
+        return redirect()->route('account.kategori-layanan.edit', $salinan)
+            ->with('success', 'Angkatan digandakan jadi rancangan. '
+                . 'Ganti tanggalnya, lalu ubah statusnya kalau sudah siap.');
     }
 
     // -------------------------------------------------------------- perakit

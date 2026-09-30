@@ -62,6 +62,19 @@ class PendaftaranScopusCampController extends Controller
             )
             ->latest('scopus_camp_pendaftaran.created_at');
 
+
+        /*
+         * Saringan per angkatan. Ditambahkan supaya tautan "lihat pendaftar"
+         * dari daftar Angkatan Layanan punya tujuan yang berarti — sebelumnya
+         * kolom kuota menulis "14 dari 25" lalu berhenti di situ, dan untuk
+         * tahu siapa, admin harus pindah layar lalu mencari sendiri.
+         */
+        $kategori = $request->input('kategori');
+
+        if ($kategori) {
+            $query->where('scopus_camp_pendaftaran.kategori_id', $kategori);
+        }
+
         // Filter tanggal
         if ($startDate && $endDate) {
             $query->whereDate('scopus_camp_pendaftaran.created_at', '>=', $startDate)
@@ -70,7 +83,7 @@ class PendaftaranScopusCampController extends Controller
 
         $datas = $query->paginate(15);
 
-        return view('account.pendaftaran_scopus_camp.index', compact('datas', 'startDate', 'endDate'));
+        return view('account.pendaftaran_scopus_camp.index', compact('datas', 'startDate', 'endDate', 'kategori'));
     }
     // <!--================== END ==================-->
 
