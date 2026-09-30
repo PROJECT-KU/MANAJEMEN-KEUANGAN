@@ -274,18 +274,59 @@
      * tepi kartunya sudah memisahkan, dan garis kedua di dalamnya hanya
      * menambah coretan. Terukur di profil: padding-top 0, border none.
      */
+    /*
+     * Keterangan di kiri, tombol-tombol mengelompok di kanan.
+     *
+     * Dulu justify-content: space-between, dan itu benar sewaktu anaknya cuma
+     * dua. Begitu tombol kedua masuk, aturan itu menyebar ketiganya rata di
+     * seluruh lebar baris: terukur 229px menganga ANTARA dua tombol pada
+     * 1920px, dan pada 1470px barisnya malah pecah dua — "Simpan kontak"
+     * terlempar ke baris sendiri.
+     *
+     * Ruang kosongnya kini seluruhnya jatuh ke kanan keterangan lewat
+     * margin-right: auto, jadi tombolnya berdampingan sejauh gap 12px berapa
+     * pun lebar layarnya, dan bertambahnya tombol berikutnya tidak mengubah
+     * apa pun.
+     */
     .pel-baris-aksi {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 12px;
         margin-top: 18px;
+    }
+
+    /* Tombol tidak ikut menyusut: label yang terpotong jauh lebih buruk
+       daripada kalimat keterangan yang membungkus. */
+    .pel-baris-aksi > .mis-tombol,
+    .pel-aksi-tombol {
+        flex: 0 0 auto;
+    }
+
+    /* Satuan tombol: selalu berdampingan, dan turun bersama-sama. */
+    .pel-aksi-tombol {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
     .pel-aksi-catatan {
         display: flex;
         align-items: center;
+        /*
+         * Seluruh ruang sisa jatuh di sini, bukan dibagi rata antar tombol —
+         * dan keterangannya pula yang mengalah saat ruangnya kurang.
+         *
+         * Terukur di 1470px: baris ini menyediakan 758px sementara ketiga
+         * anaknya menuntut 765px, kurang tujuh piksel, dan "Simpan kontak"
+         * terlempar ke baris sendiri. Yang pantas membungkus memang
+         * kalimatnya, bukan tombolnya; flex-basis 200px membuatnya menyusut
+         * lebih dulu, dan min-width 0 mengizinkan teksnya benar-benar pecah.
+         */
+        flex: 1 1 200px;
+        min-width: 0;
+        margin-right: auto;
         gap: 6px;
         margin: 0;
         /* Angka relatif: layout mewariskan line-height 28px MUTLAK, yang pada
@@ -360,9 +401,19 @@
         .pel-aksi-catatan {
             justify-content: center;
             text-align: center;
+            /* Susunannya menurun di sini; margin kanan otomatis tidak ada
+               gunanya dan hanya menyisakan sifat yang membingungkan. */
+            margin-right: 0;
         }
 
         .pel-baris-aksi .mis-tombol {
+            width: 100%;
+        }
+
+        /* Di ponsel satuannya ikut menurun dan memenuhi lebar. */
+        .pel-aksi-tombol {
+            flex-direction: column-reverse;
+            align-items: stretch;
             width: 100%;
         }
 
@@ -857,22 +908,31 @@
                                 @endif
                             </p>
                             @if ($bolehUbah)
-                                {{-- Kata sandinya TIDAK diganti dari sini dan tidak
-                                     pernah terlihat siapa pun di kantor: yang dikirim
-                                     tautan, dan pelanggannya sendiri yang menentukan
-                                     kata sandi barunya. --}}
-                                <button type="button" class="mis-tombol mis-tombol-halus"
-                                    data-kirim="{{ route('account.customer.kirim.sandi', $user) }}"
-                                    data-judul="Kirim tautan atur ulang kata sandi?"
-                                    data-pesan="Tautan dikirim ke %s. Kata sandinya ditentukan sendiri oleh pelanggannya; Anda tidak akan melihatnya."
-                                    data-sorot="{{ $user->email }}"
-                                    data-tombol="Ya, kirim"
-                                    data-glif="fa-key">
-                                    <i class="fas fa-key mis-ikon-kuning"></i> Kirim tautan atur ulang sandi
-                                </button>
-                                <button type="submit" class="mis-tombol mis-tombol-ungu">
-                                    <i class="fas fa-save"></i> Simpan kontak
-                                </button>
+                                {{-- Kedua tombol dibungkus jadi SATU satuan.
+                                     Sebagai anak langsung baris aksi, keduanya
+                                     dibungkus terpisah begitu ruangnya kurang —
+                                     terukur di 1280px dan 1024px, "Simpan kontak"
+                                     terlempar sendirian ke baris di bawahnya.
+                                     Dibungkus, keduanya selalu berdampingan dan
+                                     turun bersama-sama. --}}
+                                <div class="pel-aksi-tombol">
+                                    {{-- Kata sandinya TIDAK diganti dari sini dan
+                                         tidak pernah terlihat siapa pun di kantor:
+                                         yang dikirim tautan, dan pelanggannya
+                                         sendiri yang menentukan kata sandi barunya. --}}
+                                    <button type="button" class="mis-tombol mis-tombol-halus"
+                                        data-kirim="{{ route('account.customer.kirim.sandi', $user) }}"
+                                        data-judul="Kirim tautan atur ulang kata sandi?"
+                                        data-pesan="Tautan dikirim ke %s. Kata sandinya ditentukan sendiri oleh pelanggannya; Anda tidak akan melihatnya."
+                                        data-sorot="{{ $user->email }}"
+                                        data-tombol="Ya, kirim"
+                                        data-glif="fa-key">
+                                        <i class="fas fa-key mis-ikon-kuning"></i> Kirim tautan atur ulang sandi
+                                    </button>
+                                    <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                        <i class="fas fa-save"></i> Simpan kontak
+                                    </button>
+                                </div>
                             @endif
                         </div>
                     </form>
