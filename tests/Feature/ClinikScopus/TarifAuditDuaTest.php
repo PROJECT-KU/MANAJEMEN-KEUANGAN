@@ -217,64 +217,99 @@ class TarifAuditDuaTest extends TestCase
     // ------------------------------------------------------------- cetak
 
     #[Test]
-    public function daftar_harga_cetak_memuat_seluruh_fasilitas(): void
+    public function daftar_harga_pdf_serupa_dengan_ekspor_data_pelanggan(): void
     {
         /*
-         * Kartu memotong fasilitas di empat butir untuk layar. Kalau
-         * pemotongan itu terjadi di MARKAH, daftar harga yang dicetak diam-diam
-         * tidak lengkap — Scopus Camp Pulau Jawa tercetak 4 dari 7 tanpa satu
-         * pun tanda ada yang dipotong. Jadi semuanya dirender, dan yang
-         * kelebihan disembunyikan lewat kelas.
+         * Cetaknya dulu window.print() dengan gaya @media print, dan hasilnya
+         * tidak serupa dengan berkas lain yang keluar dari MIS: tanpa logo,
+         * tanpa kepala berulang, tanpa kaki. Sekarang memakai cetakan yang
+         * sama dengan ekspor Data Pelanggan.
          */
         $admin = $this->akun();
 
+        $jawab = $this->actingAs($admin)->get(route('account.Clinik-Scopus-Biaya-Persesi.cetak'));
+
+        $jawab->assertOk();
+        $jawab->assertHeader('Content-Type', 'application/pdf');
+        // Respons biasa, bukan streamed: dompdf->output() dikirim lewat response().
+        $this->assertStringStartsWith('%PDF', $jawab->getContent());
+
+        $nama = $jawab->headers->get('Content-Disposition');
+        $this->assertStringContainsString('daftar-harga-layanan-', $nama);
+        $this->assertStringContainsString('.pdf', $nama);
+    }
+
+    #[Test]
+    public function cetakan_pdf_memuat_seluruh_fasilitas_tanpa_dipotong(): void
+    {
+        /*
+         * Kartu di layar memotong daftar di empat butir. Cetakannya mengambil
+         * datanya sendiri, jadi tidak boleh ikut terpotong — daftar harga yang
+         * menyembunyikan sebagian isinya lebih berbahaya daripada tidak ada.
+         */
         $tarif = T::berlaku('scopus_camp', 'jawa');
         $this->assertGreaterThan(4, count($tarif->daftar_fasilitas),
             'Uji ini perlu layanan dengan lebih dari empat fasilitas.');
 
-        $isi = $this->actingAs($admin)
-            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))->getContent();
+        $html = view('account.clinik_scopus_biaya_persesi.cetak-pdf', [
+            'baris' => [[
+                'nama' => 'Scopus Camp',
+                'namaVarian' => 'Pulau Jawa',
+                'satuan' => 'per peserta',
+                'tarif' => $tarif,
+            ]],
+        ])->render();
 
         foreach ($tarif->daftar_fasilitas as $f) {
-            $this->assertStringContainsString(e($f), $isi,
-                'Fasilitas "' . $f . '" harus ada di markah, walau tersembunyi di layar.');
+            $this->assertStringContainsString(e($f), $html);
         }
 
-        $this->assertStringContainsString('tar-lebih', $isi,
-            'Yang kelebihan disembunyikan lewat kelas, bukan dibuang dari markah.');
+        $this->assertStringContainsString('Daftar Harga Layanan', $html);
+        $this->assertStringContainsString('MIS Rumah Scopus Foundation', $html);
+        $this->assertStringContainsString('data:image/png;base64,', $html, 'Logonya harus disisipkan.');
     }
 
     #[Test]
-    public function cetakan_menyembunyikan_yang_tidak_pantas_dibagikan(): void
+    public function cetakan_pdf_hanya_memuat_layanan_yang_tarifnya_sudah_disetel(): void
     {
-        // Rencana kenaikan, layanan tanpa tarif, tombol, dan saringan tidak
-        // punya tempat di kertas yang diberikan ke calon peserta.
-        $berkas = resource_path('views/account/clinik_scopus_biaya_persesi/index.blade.php');
-        $isi = file_get_contents($berkas);
-
-        $awal = strpos($isi, '@media print');
-        $this->assertNotFalse($awal, 'Gaya cetaknya harus ada.');
-
-        $blok = substr($isi, $awal, 1400);
-
-        foreach (['.tar-atur', '.tar-jadwal', '.tar-kartu.kosong', '.tar-saring', '.tar-kaki'] as $sel) {
-            $this->assertStringContainsString($sel, $blok, $sel . ' harus disembunyikan saat dicetak.');
-        }
-
-        $this->assertStringContainsString('.tar-kepala-cetak', $blok,
-            'Kepala cetak berisi judul dan tanggal harus ditampilkan.');
-    }
-
-    #[Test]
-    public function daftar_harga_cetak_menyebut_tanggalnya(): void
-    {
-        // Daftar harga tanpa tanggal tidak bisa dipercaya siapa pun yang
-        // menerimanya seminggu kemudian.
+        // "Belum disetel" itu peringatan untuk admin, bukan keterangan untuk
+        // calon peserta yang menerima lembarnya.
         $admin = $this->akun();
 
-        $this->actingAs($admin)
-            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))
-            ->assertSee('Berlaku per ' . now()->locale('id')->translatedFormat('d F Y'), false);
+        $halaman = $this->actingAs($admin)->get(route('account.Clinik-Scopus-Biaya-Persesi.index'));
+        $adaYangKosong = $halaman->viewData('totalKartu') > $halaman->viewData('adaTarif');
+
+        $this->assertTrue($adaYangKosong, 'Uji ini perlu setidaknya satu layanan tanpa tarif.');
+
+        $berlaku = T::semuaYangBerlaku();
+        $baris = [];
+
+        foreach (\App\Layanan::katalog() as $kunci => $tentang) {
+            foreach (($tentang['varian'] ?: [null => null]) as $kv => $nv) {
+                if ($t = ($berlaku[$kunci . '|' . ($kv ?: '')] ?? null)) {
+                    $baris[] = ['nama' => $tentang['nama'], 'namaVarian' => $nv,
+                        'satuan' => $tentang['satuan'], 'tarif' => $t];
+                }
+            }
+        }
+
+        $html = view('account.clinik_scopus_biaya_persesi.cetak-pdf', ['baris' => $baris])->render();
+
+        $this->assertStringNotContainsString('Belum disetel', $html);
+        $this->assertSame($halaman->viewData('adaTarif'), count($baris));
+    }
+
+    #[Test]
+    public function karyawan_boleh_mengunduh_daftar_harga(): void
+    {
+        // Daftar harga dibagikan ke luar; yang boleh melihat tarif boleh
+        // mengunduhnya. Yang dibatasi mengubahnya, bukan membacanya.
+        $karyawan = $this->akun(User::PERAN_KARYAWAN);
+
+        $this->actingAs($karyawan)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.cetak'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
     }
 
     // ----------------------------------------------------- tanggal & perbaiki
