@@ -117,8 +117,23 @@ class ClinikScopusBiayaPersesiController extends Controller
         // Tarif yang sudah disetel tapi menunggu tanggalnya.
         $terjadwal = ClinikScopusBiayaPersesi::query()
             ->where('status', ClinikScopusBiayaPersesi::TERJADWAL)
+            ->with('penginput:id,full_name,username')
             ->orderBy('berlaku_mulai')
             ->get();
+
+        // Jumlah seluruh riwayat, bukan hanya halaman ini: pemiliknya perlu
+        // tahu sedang melihat 2 dari 2 atau 2 dari 40.
+        $totalRiwayat = ClinikScopusBiayaPersesi::where('status', ClinikScopusBiayaPersesi::NONAKTIF)->count();
+
+        /*
+         * PPN yang paling sering dipakai layanan lain, untuk ditawarkan saat
+         * menyetel tarif baru. Bukan disetel diam-diam — ditawarkan, karena
+         * yang lupa mengisi PPN baru ketahuan saat ada yang menghitung tagihan.
+         */
+        $ppnLazim = ClinikScopusBiayaPersesi::query()
+            ->aktif()->whereNotNull('ppn')->where('ppn', '>', 0)
+            ->selectRaw('ppn, count(*) as n')->groupBy('ppn')
+            ->orderByDesc('n')->value('ppn');
 
         $adaTarif = collect($kartu)->filter(fn ($k) => $k['tarif'] !== null)->count();
 
@@ -132,6 +147,8 @@ class ClinikScopusBiayaPersesiController extends Controller
             'daftarWarna' => Layanan::WARNA,
             'nonaktif' => $nonaktif,
             'terjadwal' => $terjadwal,
+            'totalRiwayat' => $totalRiwayat,
+            'ppnLazim' => $ppnLazim ? (int) $ppnLazim : null,
             'saringRiwayat' => $saringRiwayat,
         ]);
     }
@@ -213,6 +230,11 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'kegiatan' => $kegiatan,
                     'kontak' => $kontak,
                     'template_deskripsi' => $cetakan,
+                    // Jejaknya menunjuk yang TERAKHIR mengubah, bukan yang
+                    // pertama membuat: memperbaiki justru cara tarif paling
+                    // sering berubah, dan "disetel oleh A" pada angka yang
+                    // ditulis B adalah jejak yang menunjuk orang keliru.
+                    'penginput_id' => auth()->id(),
                 ]);
                 $lama->jadikanBerlaku();
 
@@ -424,6 +446,9 @@ class ClinikScopusBiayaPersesiController extends Controller
             ], 409);
         }
 
+        // Diingat sebelum barisnya hilang, untuk menyusun pesannya.
+        $terjadwal = $tarif->terjadwal;
+
         $dipakai = $tarif->dipakai_sesi;
 
         if ($dipakai > 0) {
@@ -447,7 +472,9 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Tarif lama dihapus dari riwayat.',
+            'message' => $terjadwal
+                ? 'Jadwal kenaikan dibatalkan. Harga yang berlaku tidak berubah.'
+                : 'Tarif lama dihapus dari riwayat.',
         ]);
     }
 }
