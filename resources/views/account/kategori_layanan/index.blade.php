@@ -109,12 +109,23 @@ Angkatan Layanan | MIS
     /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
     .ang-gandakan { display: inline-flex; margin: 0; }
 
-    .ang-ringkas {
-        margin: 0 0 12px;
-        line-height: 1.45; font-size: .78rem; color: var(--mis-tinta-3);
-    }
-
-    .ang-ringkas strong { color: var(--mis-tinta); }
+    /*
+     * Lebar kolom dipatok persen.
+     *
+     * Dibiarkan otomatis, peramban membagi rata menurut isi terpanjang:
+     * terukur kolom Angkatan cuma 219px dari 1124px sementara Kuota dapat
+     * 158px dan Aksi 154px untuk isi yang jauh lebih pendek. Akibatnya nama
+     * "Scopus Camp Yogyakarta" patah dua baris DAN keterangannya patah dua
+     * baris lagi — barisnya jadi 99px, dan tingginya berbeda-beda antar baris
+     * tergantung panjang namanya.
+     */
+    .ang-k-nama { width: 28%; }
+    .ang-k-layanan { width: 13%; }
+    .ang-k-tanggal { width: 14%; }
+    .ang-k-kuota { width: 11%; }
+    .ang-k-biaya { width: 14%; }
+    .ang-k-status { width: 8%; }
+    .ang-k-aksi { width: 12%; }
 
     .ang-sampul {
         width: 38px; height: 38px;
@@ -155,6 +166,10 @@ Angkatan Layanan | MIS
 
     .ang-tautan {
         display: inline-block;
+        /* "lihat 1 pendaftar" tidak boleh patah: dua barisnya membuat baris
+           tabelnya 18px lebih tinggi daripada baris tetangganya, dan kolom
+           kuotanya jadi terlihat berantakan. */
+        white-space: nowrap;
         margin-top: 3px;
         line-height: 1.4;
         font-size: .72rem;
@@ -183,6 +198,46 @@ Angkatan Layanan | MIS
         .ang-saring > .mis-tombol { grid-column: 2; }
     }
 
+    /*
+     * Dua kolom disembunyikan mulai 992px ke bawah — bukan cuma di mode kartu.
+     *
+     * Tabel ini delapan kolom, terbanyak di antara layar daftar mana pun di
+     * MIS, dan mode kartu bersama baru menyala di 768px.
+     *
+     * Terukur: tabelnya menuntut 921px sementara wadahnya cuma 854px di layar
+     * 1200px dan 896px di 992px — keduanya harus digeser ke samping. Di 820px
+     * kolom Angkatan tinggal 85px dan "Scopus Camp Yogyakarta" patah di tengah
+     * kata jadi "Yogyakar-ta". Data Pelanggan tidak pernah begitu di lebar
+     * mana pun, jadi ini memang khas tabel ini, bukan batas bersama.
+     *
+     * Ambangnya 1366px. Dicari dengan mengukur, bukan ditebak: delapan kolom
+     * baru berhenti tergeser ke samping mulai 1280px, tetapi di sana barisnya
+     * masih 151px karena semua yang tersisa patah-patah. Di 1240px dengan enam
+     * kolom barisnya 99px. Jadi yang dipakai bukan lebar terkecil yang "muat",
+     * melainkan yang pertama terbaca: 1366px, lebar laptop yang paling umum.
+     *
+     * Yang dibuang dua yang paling jarang ditindaklanjuti, dan keduanya sama
+     * dengan yang sudah disembunyikan di ponsel — layanan sudah tertulis di
+     * nama dan tersaring pil di atas, harga ada di halaman rincian. Keduanya
+     * tetap utuh di layar lebar dan di berkas unduhan.
+     */
+    @media (max-width: 1365.98px) {
+        .ang-tabel .ang-k-layanan,
+        .ang-tabel .ang-k-biaya,
+        .ang-tabel td[data-judul="Layanan"],
+        .ang-tabel td[data-judul="Biaya"],
+        /*
+         * Dua pemilih terakhir bukan pengulangan. Di mode kartu, aturan
+         * bersama `.mis-tabel.mis-tabel-kartu tbody td` berbobot (0,3,2) —
+         * lebih berat daripada `.ang-tabel td[data-judul=...]` yang (0,2,1) —
+         * jadi display:grid-nya menang dan kedua baris itu muncul kembali di
+         * kartu. Terlihat di potret 390px, tidak terlihat oleh hitungan kolom
+         * karena yang dihitung <th>, bukan <td>.
+         */
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td[data-judul="Layanan"],
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td[data-judul="Biaya"] { display: none; }
+    }
+
     @media (max-width: 767.98px) {
         .ang-saring { grid-template-columns: minmax(0, 1fr); }
 
@@ -190,13 +245,6 @@ Angkatan Layanan | MIS
            sepi untuk memisahkan enam keterangan berlabel. */
         .mis-tabel-kartu.ang-tabel tbody { display: flex; flex-direction: column; gap: 8px; }
         .mis-tabel-kartu.ang-tabel tbody tr { border: 1px solid var(--mis-garis); border-radius: 13px; background: #f8fafc; }
-
-        /* Tujuh keterangan berlabel per kartu terukur 253px di 390px dan 304px
-           di 320px — terlalu tinggi untuk daftar yang dibaca sambil menggulung.
-           Dua yang paling jarang ditindaklanjuti disembunyikan; keduanya tetap
-           ada di layar lebar dan di berkas unduhan. */
-        .mis-tabel-kartu.ang-tabel td[data-judul="Layanan"],
-        .mis-tabel-kartu.ang-tabel td[data-judul="Biaya"] { display: none; }
 
         /* Kotak centang dipindah ke sudut kanan-atas kartu, sama seperti Data
            Customer. Dibiarkan jadi baris berlabel "Pilih", ia menambah satu
@@ -299,19 +347,40 @@ Angkatan Layanan | MIS
             @endforeach
         </div>
 
-        {{-- Lencana layanan menyebut totalnya; ini menyebut berapa yang sedang
-             berjalan, dan itu yang paling sering ditanya. Mengikuti saringan
-             yang sedang dipakai, bukan seluruh tabel. --}}
-        @if ($perStatus->sum() > 0)
-            <p class="ang-ringkas">
-                {{ $perStatus->sum() }} angkatan
-                @foreach (['active' => 'aktif', 'draft' => 'draf', 'non active' => 'nonaktif'] as $k => $l)
-                    @if (($perStatus[$k] ?? 0) > 0)
-                        &middot; <strong>{{ $perStatus[$k] }}</strong> {{ $l }}
-                    @endif
-                @endforeach
-            </p>
-        @endif
+        {{-- ---------------------------------------------- ringkasan --}}
+        {{-- Ubin yang sama dengan Data Pelanggan, dan kelasnya memang kelas
+             yang sama (.mis-ubin di mis-ui.css) — bukan salinan.
+
+             Sebelumnya ini sebaris tulisan abu-abu "60 angkatan · 6 aktif ·
+             24 draf · 30 nonaktif". Angkanya ada, tetapi tidak menarik mata
+             dan tidak bisa ditekan, padahal angka yang menarik perhatian
+             hampir selalu memancing pertanyaan "yang mana saja?".
+
+             Tiap ubin membawa layanan dan kata kunci yang sedang dipakai,
+             jadi menekannya mempersempit — bukan mengulang dari nol. --}}
+        @php
+            $bawaUbin = array_filter(['layanan' => $layanan, 'cari' => $cari !== '' ? $cari : null]);
+            $ubin = [
+                [null, 'Seluruh angkatan', $perStatus->sum(), 'mis-ungu', 'fa-layer-group'],
+                ['active', 'Sedang aktif', $perStatus['active'] ?? 0, 'mis-hijau', 'fa-check-circle'],
+                ['draft', 'Masih draf', $perStatus['draft'] ?? 0, 'mis-kuning', 'fa-pen'],
+                ['non active', 'Nonaktif', $perStatus['non active'] ?? 0, 'mis-abu', 'fa-pause-circle'],
+            ];
+        @endphp
+        <div class="mis-ringkas">
+            @foreach ($ubin as [$nilaiStatus, $label, $angka, $warna, $glif])
+                <a class="mis-ubin {{ $status === $nilaiStatus ? 'terpilih' : '' }}"
+                    href="{{ route('account.kategori-layanan.index',
+                        $nilaiStatus === null ? $bawaUbin : array_merge($bawaUbin, ['status' => $nilaiStatus])) }}"
+                    title="{{ $nilaiStatus === null ? 'Tampilkan semua status' : 'Saring: hanya yang ' . strtolower($label) }}">
+                    <span class="mis-medali kecil {{ $warna }}" aria-hidden="true"><i class="fas {{ $glif }}"></i></span>
+                    <div>
+                        <p class="mis-ubin-angka">{{ number_format($angka) }}</p>
+                        <p class="mis-ubin-label">{{ $label }}</p>
+                    </div>
+                </a>
+            @endforeach
+        </div>
 
         <div class="mis-bagian">
             <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="ang-saring">
@@ -351,7 +420,9 @@ Angkatan Layanan | MIS
                     </select>
                 </div>
 
-                <div class="mis-isian">
+                {{-- Di layar lebar kepala kolomnya yang mengurutkan; menu ini
+                     penggantinya di ponsel, tempat <thead> disembunyikan. --}}
+                <div class="mis-isian mis-urut-ponsel">
                     <label class="mis-label" for="ang-urut">Urutkan</label>
                     <select class="form-control-modern" id="ang-urut" name="urutgabung">
                         @php
@@ -435,6 +506,24 @@ Angkatan Layanan | MIS
                 <div class="mis-tabel-bungkus">
                     <table class="mis-tabel mis-tabel-kartu ang-tabel">
                         <thead>
+                            {{-- aria-sort menyebut kolom mana yang sedang mengurutkan;
+                                 judul tautannya berbunyi "Urutkan menurut ..." dan itu
+                                 menjelaskan apa yang terjadi KALAU ditekan, bukan
+                                 keadaan sekarang. --}}
+                            @php
+                                $ariaUrut = fn ($k) => $urut === $k
+                                    ? ($arahKode === 'asc' ? 'ascending' : 'descending')
+                                    : 'none';
+
+                                // Saringan yang ikut dibawa tiap tautan pengurut; tanpa
+                                // ini, mengurutkan membuang layanan dan kata kunci yang
+                                // sedang dipakai dan daftarnya melompat kembali ke awal.
+                                $bawaUrut = array_filter([
+                                    'layanan' => $layanan,
+                                    'status' => $status,
+                                    'cari' => $cari !== '' ? $cari : null,
+                                ]);
+                            @endphp
                             <tr>
                                 @if ($bolehUbah)
                                     <th class="ang-centang-sel">
@@ -442,13 +531,28 @@ Angkatan Layanan | MIS
                                             aria-label="Pilih semua angkatan di halaman ini">
                                     </th>
                                 @endif
-                                <th>Angkatan</th>
-                                <th>Layanan</th>
-                                <th>Tanggal</th>
-                                <th>Kuota</th>
-                                <th>Biaya</th>
-                                <th>Status</th>
-                                <th class="text-right">Aksi</th>
+                                {{-- aria-sort memberi tahu pembaca layar kolom mana yang
+                                     sedang mengurutkan dan ke arah mana; tanpa itu
+                                     panah di layar tidak berarti apa-apa bagi mereka. --}}
+                                <th class="ang-k-nama" aria-sort="{{ $ariaUrut('nama') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'nama', 'label' => 'Angkatan'])
+                                </th>
+                                <th class="ang-k-layanan">Layanan</th>
+                                <th class="ang-k-tanggal" aria-sort="{{ $ariaUrut('mulai') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'mulai', 'label' => 'Tanggal'])
+                                </th>
+                                <th class="ang-k-kuota" aria-sort="{{ $ariaUrut('sisa_kuota') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'sisa_kuota', 'label' => 'Kuota'])
+                                </th>
+                                <th class="ang-k-biaya">Biaya</th>
+                                <th class="ang-k-status" aria-sort="{{ $ariaUrut('status') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'status', 'label' => 'Status'])
+                                </th>
+                                <th class="ang-k-aksi text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -499,9 +603,13 @@ Angkatan Layanan | MIS
 
                                     <td data-judul="Tanggal">
                                         <span class="ang-ket">
+                                            {{-- Bentuk pendek: kolomnya sempit, dan nama bulan
+                                                 lengkap membuat tanggal terpanjang patah dua
+                                                 baris. Halaman rincian tetap yang lengkap. --}}
                                             {{ \App\Support\RentangTanggal::tulis(
                                                 $a->mulai ? \Carbon\Carbon::parse($a->mulai) : null,
-                                                $a->selesai ? \Carbon\Carbon::parse($a->selesai) : null
+                                                $a->selesai ? \Carbon\Carbon::parse($a->selesai) : null,
+                                                true
                                             ) ?: '—' }}
                                         </span>
                                     </td>
@@ -550,9 +658,17 @@ Angkatan Layanan | MIS
                                     </td>
 
                                     <td data-judul="Status">
-                                        @php($rupa = ['active' => ['mis-pil-hijau', 'Aktif'], 'non active' => ['mis-pil-abu', 'Nonaktif'], 'draft' => ['mis-pil-kuning', 'Draf']])
-                                        @php($s = $rupa[$a->status] ?? ['mis-pil-abu', $a->status])
-                                        <span class="mis-pil {{ $s[0] }}">{{ $s[1] }}</span>
+                                        {{-- Berikon seperti lencana status di Data Pelanggan:
+                                             warna saja tidak terbaca orang yang buta warna,
+                                             dan hijau/kuning adalah pasangan yang paling
+                                             sering tertukar. --}}
+                                        @php($rupa = [
+                                            'active' => ['mis-pil-hijau', 'Aktif', 'fa-check'],
+                                            'non active' => ['mis-pil-abu', 'Nonaktif', 'fa-pause'],
+                                            'draft' => ['mis-pil-kuning', 'Draf', 'fa-pen'],
+                                        ])
+                                        @php($s = $rupa[$a->status] ?? ['mis-pil-abu', $a->status, 'fa-question'])
+                                        <span class="mis-pil {{ $s[0] }}"><i class="fas {{ $s[2] }}"></i> {{ $s[1] }}</span>
 
                                         @if ($a->sudah_lewat)
                                             {{-- Tidak ada apa pun yang menutup angkatan otomatis,

@@ -2977,3 +2977,135 @@ dialog {
         transform: scale(1.18);
     }
 }
+
+/* ==========================================================================
+   Ringkasan berubin & kepala kolom yang bisa diurutkan
+
+   Keduanya lahir di layar Data Pelanggan dengan nama .pel-*, lalu dibutuhkan
+   lagi begitu Angkatan Layanan dirapikan. Disalin, ia jadi dua salinan yang
+   harus diperbaiki dua kali — persis keluhan yang sudah tertulis di kepala
+   berkas layar itu sendiri. Jadi dipindah ke sini, dan kedua layar memakainya.
+   ========================================================================== */
+
+.mis-ringkas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+/* Tiga ubin dan lima ubin sama-sama mungkin; yang dipatok cuma lebar
+   minimumnya, supaya layar yang punya jumlah berbeda tidak perlu CSS sendiri. */
+.mis-ringkas-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mis-ringkas-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+.mis-ubin {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #e7ecf5;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+/* Ubin sekaligus tautan: warna dan garis bawah tautan dibuang, dan keadaan
+   terpilihnya ditandai tepi beraksen. */
+a.mis-ubin {
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+a.mis-ubin:hover,
+a.mis-ubin:focus-visible {
+    border-color: #c7d2fe;
+    box-shadow: 0 6px 16px -10px rgba(79, 70, 229, .7);
+    transform: translateY(-1px);
+}
+
+a.mis-ubin.terpilih {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 1px #6366f1 inset;
+}
+
+.mis-ubin-angka {
+    margin: 0;
+    line-height: 1.1;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--mis-tinta);
+}
+
+.mis-ubin-label {
+    margin: 2px 0 0;
+    line-height: 1.4;
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--mis-tinta-3);
+}
+
+/* Kepala kolom yang bisa diurutkan. Berupa tautan, bukan tombol berskrip:
+   tetap bekerja tanpa JavaScript, bisa dibuka di tab baru, dan urutannya ikut
+   tersimpan di alamat halaman. */
+.mis-urut {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.mis-urut:hover { color: var(--mis-ungu); text-decoration: none; }
+
+.mis-urut > .fas {
+    font-size: 10px !important;
+    color: var(--mis-tinta-4);
+}
+
+.mis-urut.aktif { color: var(--mis-ungu); }
+.mis-urut.aktif > .fas { color: var(--mis-ungu); }
+
+/* Pengurut khusus ponsel: di layar lebar kepala kolomnya yang bekerja. */
+.mis-urut-ponsel { display: none; }
+
+@media (max-width: 1100px) {
+    .mis-ringkas,
+    .mis-ringkas-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mis-ringkas-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+    .mis-ringkas { gap: 10px; }
+
+    .mis-ubin {
+        padding: 12px 13px;
+        border-radius: 14px;
+    }
+
+    .mis-ubin-angka { font-size: 1.15rem; }
+
+    .mis-ringkas-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    /* Di mode kartu <thead> disembunyikan untuk pembaca layar saja — terukur
+       1x1 piksel dan terklip — jadi kepala kolom pengurutnya tidak bisa
+       dijangkau sama sekali. Menu inilah penggantinya di sana. */
+    .mis-urut-ponsel { display: block; }
+}
+
+/*
+ * Sela sel tabel dirapatkan mulai 992px ke bawah.
+ *
+ * Aturan ini lahir di layar Data Pelanggan; dipindah ke sini karena setiap
+ * tabel berkolom banyak membutuhkannya di lebar yang sama, dan Angkatan
+ * Layanan jadi yang kedua. 16px kiri-kanan pada delapan kolom berarti 256px
+ * habis untuk ruang kosong — lebih lebar daripada kolom nama itu sendiri.
+ */
+@media (max-width: 991.98px) {
+    .mis-tabel th,
+    .mis-tabel td {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+}
