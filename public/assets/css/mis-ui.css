@@ -389,6 +389,26 @@ body {
 }
 
 /*
+ * Batas lebar isi pada monitor besar.
+ *
+ * Tanpa batas, isinya melar sejauh layarnya. Terukur di 2560px: tabel daftar
+ * pelanggan melebar jadi 2248px dengan kolom Kontak selebar 585px — sekitar
+ * tiga kali yang dibutuhkan satu alamat email — dan mata harus menyeberangi
+ * layar penuh dari nama di kiri ke tombol aksi di kanan. Di halaman rincian,
+ * kartu kanannya jadi 1916px sementara isian di dalamnya tetap sekitar 296px,
+ * jadi sebagian besarnya ruang kosong.
+ *
+ * 1600px kira-kira lebar sembilan belas kolom teks; di atas itu tidak ada
+ * yang bertambah terbaca. Dipusatkan, bukan dibiarkan menempel kiri, supaya
+ * tidak ada ruang menganga di satu sisi saja.
+ */
+.mis-badan > .section {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*
  * Ubin ikon di KEPALA HALAMAN lebih besar daripada ubin di kepala bagian: ia
  * menaungi seluruh layar, bukan satu bagian saja. Angkanya disamakan dengan
  * halaman profil, yang jadi acuan rupa.

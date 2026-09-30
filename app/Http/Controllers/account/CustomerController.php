@@ -10,9 +10,15 @@ use App\User;
 use Dompdf\Dompdf;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use App\Mail\VerifikasiEmailMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -211,6 +217,32 @@ class CustomerController extends Controller
         return $bersih;
     }
 
+    /**
+     * Ringkasan saringan yang sedang dipakai, untuk dicetak di berkas unduhan.
+     *
+     * Dipakai bersama PDF dan lembar kerja, dan dirakit di SATU tempat justru
+     * karena dulu tidak: ringkasan di templat PDF hanya menyebut tiga saringan
+     * lama, sehingga sesudah dua saringan dari ubin ringkasan ditambahkan,
+     * berkas berisi 29 dari 101 pelanggan tetap mencetak "Tanpa saringan" —
+     * dan lembar kerjanya tidak menyebut apa pun sama sekali. Berkas yang
+     * diteruskan ke orang lain lalu terbaca sebagai daftar yang lengkap.
+     *
+     * @return array<string, string>
+     */
+    private function ringkasanSaringan(Request $request, string $cari, $status, $verifikasi): array
+    {
+        return array_filter([
+            'Kata kunci' => $cari !== '' ? $cari : null,
+            'Status akun' => $status ? ($status === 'aktif' ? 'Aktif' : 'Nonaktif') : null,
+            'Email' => $verifikasi ? ($verifikasi === 'sudah' ? 'Sudah diverifikasi' : 'Belum diverifikasi') : null,
+            'Pesanan' => $request->input('pesanan') === 'ada' ? 'Pernah memesan' : null,
+            'Bergabung' => $request->input('baru') === '30' ? '30 hari terakhir' : null,
+            'Urutan' => array_key_exists((string) $request->input('urut'), self::URUTAN)
+                ? ucfirst((string) $request->input('urut')) . ' (' . ($request->input('arah') === 'naik' ? 'menaik' : 'menurun') . ')'
+                : null,
+        ]);
+    }
+
     /** Saringan yang sama dipakai daftar dan ekspor; ditulis sekali di sini. */
     private function saring($kueri, string $cari, $status, $verifikasi, bool $punyaPesanan = false, bool $baru = false, array $pesanan = [])
     {
@@ -332,11 +364,7 @@ class CustomerController extends Controller
         $html = view('account.customer.ekspor-pdf', [
             'pelanggan' => $pelanggan,
             'pesanan' => PesananPelanggan::ringkas($pelanggan),
-            'saringan' => array_filter([
-                'Kata kunci' => $cari !== '' ? $cari : null,
-                'Status akun' => $status ? ($status === 'aktif' ? 'Aktif' : 'Nonaktif') : null,
-                'Email' => $verifikasi ? ($verifikasi === 'sudah' ? 'Sudah diverifikasi' : 'Belum diverifikasi') : null,
-            ]),
+            'saringan' => $this->ringkasanSaringan($request, $cari, $status, $verifikasi),
         ])->render();
 
         $dompdf = new Dompdf();
@@ -438,6 +466,156 @@ class CustomerController extends Controller
             'jumlah' => $jumlah,
             'message' => $jumlah . ' pelanggan ' . ($aktif ? 'diaktifkan.' : 'dinonaktifkan.'),
         ]);
+    }
+
+    /** Tautan verifikasi berlaku dua hari, sama dengan halaman kirim ulang. */
+    private const JAM_VERIFIKASI = 48;
+
+    /**
+     * Penjagaan bersama untuk kedua pengiriman surat.
+     *
+     * Dibatasi laju karena keduanya mengirim email ke alamat orang lain: tanpa
+     * batas, satu layar yang terbuka cukup untuk membanjiri kotak masuk
+     * seseorang, dan alamat pengirim kantor yang akan dianggap pengirim sampah.
+     *
+     * @return array{0: bool, 1: string, 2: int}
+     */
+    private function bolehKirimSurat(User $pelanggan, string $jenis): array
+    {
+        if (! Auth::user()?->adalahAdministrator()) {
+            return [false, 'Hanya administrator yang boleh mengirim surat ke pelanggan.', 403];
+        }
+
+        if (! $pelanggan->adalahPelanggan()) {
+            return [false, 'Akun ini bukan pelanggan.', 404];
+        }
+
+        /*
+         * Alamat yang bentuknya tidak sah ditolak lebih dulu.
+         *
+         * Lima alamat di data yang ada terpotong tepat di 30 huruf; mengirim ke
+         * sana hanya menghasilkan surat pantulan, sementara layarnya terlanjur
+         * bilang "terkirim".
+         */
+        if (! $pelanggan->emailTampakSah()) {
+            return [false, 'Alamat emailnya tidak lengkap, jadi suratnya tidak mungkin sampai. Perbaiki dulu alamatnya.', 422];
+        }
+
+        $kunci = $jenis . '|pelanggan|' . $pelanggan->getKey();
+
+        if (RateLimiter::tooManyAttempts($kunci, 3)) {
+            return [false, 'Sudah tiga kali dikirim. Coba lagi dalam '
+                . ceil(RateLimiter::availableIn($kunci) / 60) . ' menit.', 429];
+        }
+
+        RateLimiter::hit($kunci, 600);
+
+        return [true, '', 200];
+    }
+
+    /**
+     * Mengirim ulang tautan verifikasi ke pelanggan.
+     *
+     * Berbeda dari "Tandai terverifikasi" yang sudah ada: tombol itu menyatakan
+     * alamatnya benar TANPA bukti apa pun dari pemiliknya. Yang ini meminta
+     * pemiliknya sendiri yang membuktikan, dan itulah yang seharusnya dicoba
+     * lebih dulu.
+     *
+     * Tautannya dirakit sama persis dengan halaman kirim ulang milik pelanggan
+     * sendiri, supaya tidak ada dua bentuk tautan verifikasi yang beredar.
+     */
+    public function kirimVerifikasi(User $pelanggan)
+    {
+        [$boleh, $pesan, $kode] = $this->bolehKirimSurat($pelanggan, 'verifikasi');
+
+        if (! $boleh) {
+            return response()->json(['success' => false, 'message' => $pesan], $kode);
+        }
+
+        if ($pelanggan->email_verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email pelanggan ini sudah terverifikasi.',
+            ], 422);
+        }
+
+        $tautan = URL::temporarySignedRoute('verification.verify', now()->addHours(self::JAM_VERIFIKASI), [
+            'id' => $pelanggan->getKey(),
+            'hash' => sha1($pelanggan->getEmailForVerification()),
+        ]);
+
+        try {
+            Mail::to($pelanggan->email)->send(
+                new VerifikasiEmailMail($pelanggan, $tautan, self::JAM_VERIFIKASI)
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim tautan verifikasi pelanggan: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Layanan email sedang bermasalah, suratnya belum terkirim. Coba beberapa saat lagi.',
+            ], 502);
+        }
+
+        $this->catatJejak($pelanggan, 'tautan verifikasi dikirim ulang');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tautan verifikasi dikirim ke ' . $pelanggan->email . '.',
+        ]);
+    }
+
+    /**
+     * Mengirim tautan atur ulang kata sandi ke pelanggan.
+     *
+     * Kata sandinya TIDAK diganti dari sini dan tidak pernah terlihat oleh
+     * siapa pun di kantor: yang dikirim tautan, dan pelanggannya sendiri yang
+     * menentukan kata sandi barunya. Memakai broker yang sama dengan halaman
+     * "lupa kata sandi" supaya tokennya satu jenis.
+     */
+    public function kirimAturUlangSandi(User $pelanggan)
+    {
+        [$boleh, $pesan, $kode] = $this->bolehKirimSurat($pelanggan, 'atur-ulang');
+
+        if (! $boleh) {
+            return response()->json(['success' => false, 'message' => $pesan], $kode);
+        }
+
+        $hasil = Password::sendResetLink(['email' => $pelanggan->email]);
+
+        if ($hasil !== Password::RESET_LINK_SENT) {
+            Log::warning('Tautan atur ulang sandi pelanggan tidak terkirim: ' . $hasil);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Tautannya belum terkirim. Coba beberapa saat lagi.',
+            ], 502);
+        }
+
+        $this->catatJejak($pelanggan, 'tautan atur ulang kata sandi dikirim');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tautan atur ulang kata sandi dikirim ke ' . $pelanggan->email . '.',
+        ]);
+    }
+
+    /** Mencatat tindakan orang dalam di jejak akun pelanggannya. */
+    private function catatJejak(User $pelanggan, string $alasan): void
+    {
+        try {
+            AktivitasMasuk::create([
+                'user_id' => $pelanggan->getKey(),
+                'identitas' => (string) ($pelanggan->username ?? $pelanggan->email),
+                'berhasil' => true,
+                'alasan' => $alasan . ' oleh ' . (Auth::user()?->full_name ?? 'orang dalam'),
+                'ip' => request()->ip(),
+                'peramban' => mb_substr((string) request()->userAgent(), 0, 255),
+            ]);
+        } catch (\Throwable $e) {
+            // Gagal mencatat tidak boleh menggagalkan tindakannya.
+            report($e);
+        }
     }
 
     /**
@@ -566,7 +744,16 @@ class CustomerController extends Controller
         );
 
         return Excel::download(
-            new PelangganExport($pelanggan, PesananPelanggan::ringkas($pelanggan)),
+            new PelangganExport(
+                $pelanggan,
+                PesananPelanggan::ringkas($pelanggan),
+                $this->ringkasanSaringan(
+                    $request,
+                    trim((string) $request->input('cari')),
+                    $request->input('status'),
+                    $request->input('verifikasi')
+                )
+            ),
             'data-pelanggan-' . now()->format('Ymd-His') . '.xlsx'
         );
     }

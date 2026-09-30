@@ -1213,45 +1213,74 @@ Data Pelanggan | MIS
 
         const jumlahTeks = document.getElementById('pel-massal-jumlah');
 
-        const terpilih = function () {
-            return [...hasil.querySelectorAll('.pel-centang:checked')].map(function (c) { return c.value; });
-        };
+        /*
+         * Pilihannya disimpan di sini, BUKAN dibaca dari kotak yang sedang
+         * tampil.
+         *
+         * Isi #pel-hasil ditukar tiap kali mengetik atau berpindah halaman.
+         * Dengan pilihan yang hanya hidup di kotaknya, mencentang dua belas
+         * orang lalu tanpa sengaja mengetik satu huruf di kotak cari
+         * menghapusnya tanpa sepatah kata — terukur: "2 dipilih" jadi
+         * "0 dipilih" dan baris aksinya hilang begitu saja.
+         *
+         * Disimpan terpisah, pilihan bertahan menyeberangi pencarian dan
+         * halaman, jadi orang bisa menyaring, memilih, menyaring lagi, memilih
+         * lagi, baru bertindak.
+         */
+        const dipilih = new Set();
 
         const segarkan = function () {
-            const n = terpilih().length;
+            const n = dipilih.size;
             bar.classList.toggle('tampil', n > 0);
             if (jumlahTeks) jumlahTeks.textContent = n + ' dipilih';
 
             const semua = hasil.querySelector('#pel-centang-semua');
-            const kotak = hasil.querySelectorAll('.pel-centang');
+            const kotak = [...hasil.querySelectorAll('.pel-centang')];
 
             if (semua) {
-                semua.checked = kotak.length > 0 && n === kotak.length;
+                const tampilTerpilih = kotak.filter(function (c) { return dipilih.has(c.value); }).length;
+                semua.checked = kotak.length > 0 && tampilTerpilih === kotak.length;
                 // Sebagian terpilih ditandai setengah, bukan kosong: kosong
                 // membuatnya tampak seolah tidak ada yang dipilih sama sekali.
-                semua.indeterminate = n > 0 && n < kotak.length;
+                semua.indeterminate = tampilTerpilih > 0 && tampilTerpilih < kotak.length;
             }
+        };
+
+        // Kotak yang baru digambar disamakan lagi dengan pilihan yang tersimpan.
+        const selaraskan = function () {
+            hasil.querySelectorAll('.pel-centang').forEach(function (c) {
+                c.checked = dipilih.has(c.value);
+            });
+            segarkan();
         };
 
         hasil.addEventListener('change', function (e) {
             if (e.target.id === 'pel-centang-semua') {
-                hasil.querySelectorAll('.pel-centang').forEach(function (c) { c.checked = e.target.checked; });
+                hasil.querySelectorAll('.pel-centang').forEach(function (c) {
+                    c.checked = e.target.checked;
+                    if (e.target.checked) dipilih.add(c.value); else dipilih.delete(c.value);
+                });
+            } else if (e.target.classList.contains('pel-centang')) {
+                if (e.target.checked) dipilih.add(e.target.value); else dipilih.delete(e.target.value);
+            } else {
+                return;
             }
 
-            if (e.target.classList.contains('pel-centang') || e.target.id === 'pel-centang-semua') {
-                segarkan();
-            }
+            segarkan();
         });
 
-        // Isi wadah ditukar lewat fetch; pilihan lama tidak ikut terbawa.
-        new MutationObserver(segarkan).observe(hasil, { childList: true, subtree: true });
+        new MutationObserver(selaraskan).observe(hasil, { childList: true, subtree: true });
 
         document.getElementById('pel-massal-semua').addEventListener('click', function () {
-            hasil.querySelectorAll('.pel-centang').forEach(function (c) { c.checked = true; });
+            hasil.querySelectorAll('.pel-centang').forEach(function (c) {
+                c.checked = true;
+                dipilih.add(c.value);
+            });
             segarkan();
         });
 
         document.getElementById('pel-massal-batal').addEventListener('click', function () {
+            dipilih.clear();
             hasil.querySelectorAll('.pel-centang, #pel-centang-semua').forEach(function (c) {
                 c.checked = false;
                 c.indeterminate = false;
@@ -1261,7 +1290,7 @@ Data Pelanggan | MIS
 
         bar.querySelectorAll('[data-massal]').forEach(function (tombol) {
             tombol.addEventListener('click', function () {
-                const uuid = terpilih();
+                const uuid = [...dipilih];
                 if (uuid.length === 0) return;
 
                 const aksi = tombol.dataset.massal;
