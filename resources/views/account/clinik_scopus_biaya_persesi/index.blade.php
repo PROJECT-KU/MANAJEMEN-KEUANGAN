@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Biaya per Sesi | MIS
+Tarif Layanan | MIS
 @stop
 
 {{-- Pemberitahuan lewat toast bersama, bukan kotak alert Bootstrap. --}}
@@ -11,22 +11,14 @@ Biaya per Sesi | MIS
 @push('gaya')
 <style>
     /*
-     * Layar ini memakai bahasa rupa yang sama dengan Profil dan Data
-     * Pelanggan: kartu .mis-bagian, ubin ikon .mis-medali, lencana .mis-pil,
-     * tombol .mis-tombol. Yang ditulis di sini hanya yang khas layar ini.
-     *
-     * Acuannya docs/panduan-ui-mis.md.
+     * Bahasa rupanya sama dengan Profil dan Data Pelanggan — kartu
+     * .mis-bagian, ubin ikon .mis-medali, lencana .mis-pil, tombol
+     * .mis-tombol. Acuannya docs/panduan-ui-mis.md.
      */
 
-    /*
-     * Kepala kartu bagian, disalin apa adanya dari .pel-kepala di Data
-     * Pelanggan supaya kedua layar tampil serupa.
-     *
-     * .mis-kartu-kepala TIDAK dipakai di sini: ia ber-justify-content
-     * space-between, yang benar untuk "judul di kiri, tombol di kanan" tetapi
-     * melempar judulnya ke tepi kanan begitu anaknya cuma ubin ikon dan blok
-     * teks.
-     */
+    /* Kepala bagian: disalin dari .pel-kepala di Data Pelanggan.
+       .mis-kartu-kepala TIDAK dipakai — ia ber-justify-content space-between,
+       yang melempar judulnya ke tepi kanan begitu anaknya cuma ubin dan teks. */
     .tar-kepala {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
@@ -36,245 +28,206 @@ Biaya per Sesi | MIS
         margin-bottom: 12px;
     }
 
-    .tar-kepala > .mis-medali {
-        grid-row: 1 / span 2;
-        align-self: center;
-    }
+    .tar-kepala > .mis-medali { grid-row: 1 / span 2; align-self: center; }
 
     .tar-kepala-judul {
-        grid-column: 2;
-        grid-row: 1;
-        margin: 0;
-        line-height: 1.25;
-        font-size: .92rem;
-        font-weight: 800;
-        color: var(--mis-tinta);
+        grid-column: 2; grid-row: 1;
+        margin: 0; line-height: 1.25;
+        font-size: .92rem; font-weight: 800; color: var(--mis-tinta);
     }
 
     .tar-kepala-sub {
-        grid-column: 2;
-        grid-row: 2;
+        grid-column: 2; grid-row: 2;
         margin: 0;
         /* Angka relatif, bukan warisan line-height 28px mutlak dari layout. */
-        line-height: 1.45;
-        font-size: .75rem;
-        color: var(--mis-tinta-3);
+        line-height: 1.45; font-size: .75rem; color: var(--mis-tinta-3);
     }
 
-    /* --------------------------------------------- kartu tarif berlaku */
+    /* ------------------------------------------------- kisi kartu layanan */
 
     /*
-     * Satu kartu besar untuk SATU angka.
-     *
-     * Yang dicari orang di layar ini cuma satu: berapa harga sesi sekarang.
-     * Bentuk lamanya menyembunyikannya sebagai satu baris di dalam tabel
-     * lima kolom, sejajar dengan baris-baris lama yang sudah tidak berlaku —
-     * jadi pertanyaan paling dasar itu justru paling lama dijawab.
+     * auto-fit + minmax, bukan jumlah kolom yang dipatok: layanan bisa
+     * bertambah kapan saja, dan kisinya menyesuaikan sendiri tanpa ada titik
+     * putus baru yang harus dijaga.
      */
-    .tar-utama {
+    .tar-kisi {
         display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: var(--mis-jarak);
-        align-items: start;
         margin-bottom: var(--mis-jarak);
+        /*
+         * start, BUKAN stretch bawaan kisi. Dengan stretch, membuka borang di
+         * satu kartu menarik SEISI barisnya jadi setinggi itu — terukur 294px
+         * jadi 590px — dan kartu di sebelahnya menyisakan petak putih hampir
+         * 300px di dalam dirinya sendiri. Kartu yang berhenti di ujung isinya
+         * jauh lebih enak dilihat daripada kartu yang dipaksa rata bawah.
+         */
+        align-items: start;
     }
 
-    .tar-angka {
+    .tar-kartu {
         display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 20px 22px;
-        border: 1px solid var(--mis-garis);
-        border-radius: var(--mis-radius);
-        background:
-            radial-gradient(120% 140% at 0% 0%, #ecfdf5 0%, rgba(236, 253, 245, 0) 60%),
-            #fff;
-        box-shadow: var(--mis-bayang);
-    }
-
-    .tar-angka-teks {
-        min-width: 0;
-    }
-
-    .tar-label {
-        margin: 0;
-        line-height: 1.3;
-        font-size: .68rem;
-        font-weight: 800;
-        letter-spacing: .05em;
-        text-transform: uppercase;
-        color: var(--mis-tinta-4);
-    }
-
-    .tar-nilai {
-        margin: 3px 0 0;
-        line-height: 1.1;
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: var(--mis-tinta);
-        overflow-wrap: anywhere;
-    }
-
-    .tar-ket {
-        margin: 6px 0 0;
-        line-height: 1.5;
-        font-size: .78rem;
-        color: var(--mis-tinta-3);
-    }
-
-    /* Rincian angka: dasar, PPN, dan yang benar-benar dibayar pelanggan. */
-    .tar-rincian {
-        display: grid;
-        gap: 8px;
-        padding: 16px 18px;
+        flex-direction: column;
+        padding: 18px;
         border: 1px solid var(--mis-garis);
         border-radius: var(--mis-radius);
         background: #fff;
         box-shadow: var(--mis-bayang);
     }
 
-    .tar-baris {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 12px;
-        font-size: .82rem;
-        color: var(--mis-tinta-2);
+    /* Yang belum punya tarif ditandai tepi kuning, bukan disembunyikan:
+       layanan yang terlewat harus kelihatan justru karena terlewat. */
+    .tar-kartu.kosong {
+        border-color: #fde68a;
+        background: linear-gradient(180deg, #fffbeb 0%, #fff 55%);
     }
 
-    .tar-baris > span:last-child {
-        font-weight: 700;
-        color: var(--mis-tinta);
-        white-space: nowrap;
-    }
-
-    /* Baris jumlah dipisah garis dan ditebalkan: itu angka yang dilihat
-       pelanggan, bukan angka kerja orang dalam. */
-    .tar-baris.jumlah {
-        margin-top: 4px;
-        padding-top: 10px;
-        border-top: 1px dashed var(--mis-garis);
-        font-size: .88rem;
-    }
-
-    .tar-baris.jumlah > span:last-child {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #047857;
-    }
-
-    /* ------------------------------------------------------ borang tarif */
-
-    .tar-borang {
+    .tar-kartu-kepala {
         display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
-        gap: 12px;
-        align-items: end;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 3px;
+        align-items: center;
     }
 
-    /* Awalan "Rp" dan akhiran "%" menempel di dalam kotaknya, bukan jadi
-       label terpisah: keduanya satuan, bukan keterangan. */
-    .tar-isian {
-        position: relative;
+    .tar-kartu-kepala > .mis-medali { grid-row: 1 / span 2; align-self: center; }
+
+    .tar-nama {
+        grid-column: 2; grid-row: 1;
+        margin: 0; line-height: 1.25;
+        font-size: .92rem; font-weight: 800; color: var(--mis-tinta);
+        overflow-wrap: anywhere;
     }
 
-    .tar-isian .form-control-modern {
-        padding-left: 40px;
-    }
+    .tar-varian { grid-column: 2; grid-row: 2; display: flex; flex-wrap: wrap; gap: 6px; }
 
-    .tar-isian.persen .form-control-modern {
-        padding-left: 14px;
-        padding-right: 36px;
+    .tar-harga {
+        margin: 14px 0 0;
+        line-height: 1.1;
+        font-size: 1.55rem; font-weight: 800; color: var(--mis-tinta);
+        overflow-wrap: anywhere;
     }
 
     .tar-satuan {
-        position: absolute;
-        bottom: 0;
+        margin: 3px 0 0;
+        line-height: 1.45; font-size: .75rem; color: var(--mis-tinta-3);
+    }
+
+    /* Rincian PPN hanya muncul kalau memang dikenakan — baris "PPN 0%" tidak
+       memberi tahu apa pun dan cuma menambah satu hal untuk dibaca. */
+    .tar-rinci {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 10px; margin-top: 10px; padding-top: 10px;
+        border-top: 1px dashed var(--mis-garis);
+        font-size: .8rem; color: var(--mis-tinta-2);
+    }
+
+    .tar-rinci strong { font-size: .92rem; font-weight: 800; color: #047857; }
+
+    /* --------------------------------------------------------- fasilitas */
+
+    .tar-fasilitas {
+        margin: 12px 0 0; padding: 0; list-style: none;
+        display: grid; gap: 5px;
+    }
+
+    .tar-fasilitas li {
         display: grid;
-        place-items: center;
-        width: 30px;
-        height: 42px;
-        font-size: .82rem;
-        font-weight: 700;
-        color: var(--mis-tinta-4);
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px;
+        line-height: 1.45; font-size: .78rem; color: var(--mis-tinta-2);
+    }
+
+    .tar-fasilitas .fas { font-size: 11px !important; color: #10b981; margin-top: 3px; }
+
+    .tar-kosong-teks {
+        margin: 12px 0 0; line-height: 1.45;
+        font-size: .78rem; color: var(--mis-tinta-4);
+    }
+
+    /* ------------------------------------------------------ borang setel */
+
+    /* Borangnya terlipat di dalam kartunya sendiri: tujuh kartu dengan tujuh
+       borang terbuka sekaligus menuntut menggulung jauh hanya untuk melihat
+       harga yang berlaku — padahal itu yang paling sering dicari.
+
+       Tanpa margin-top: auto — kartunya setinggi isinya sendiri sejak kisinya
+       memakai align-items: start, jadi tidak ada ruang sisa untuk didorong. */
+    .tar-setel { padding-top: 14px; }
+
+    .tar-setel > summary {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        height: 38px; padding: 0 14px;
+        border: 1px solid var(--mis-garis); border-radius: 12px;
+        background: #fff;
+        font-size: .8rem; font-weight: 700; color: var(--mis-tinta-2);
+        cursor: pointer; list-style: none;
+        transition: all .2s ease;
+    }
+
+    .tar-setel > summary::-webkit-details-marker { display: none; }
+
+    .tar-setel > summary:hover { border-color: #c7d2fe; color: #4f46e5; }
+
+    .tar-setel[open] > summary { margin-bottom: 12px; }
+
+    .tar-borang { display: grid; gap: 10px; }
+
+    .tar-dua { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 10px; }
+
+    /* Awalan "Rp" dan akhiran "%" menempel di dalam kotaknya: keduanya
+       satuan, bukan keterangan yang perlu labelnya sendiri. */
+    .tar-isian { position: relative; }
+    .tar-isian .form-control-modern { padding-left: 40px; }
+    .tar-isian.persen .form-control-modern { padding-left: 14px; padding-right: 36px; }
+
+    .tar-tanda {
+        position: absolute; bottom: 0;
+        display: grid; place-items: center;
+        width: 30px; height: 42px;
+        font-size: .82rem; font-weight: 700; color: var(--mis-tinta-4);
         pointer-events: none;
     }
 
-    .tar-satuan.kiri { left: 8px; }
-    .tar-satuan.kanan { right: 6px; }
+    .tar-tanda.kiri { left: 8px; }
+    .tar-tanda.kanan { right: 6px; }
 
-    /* Pratinjau hitungan, berubah saat diketik. */
+    .tar-area {
+        min-height: 92px; padding: 10px 13px;
+        border: 1px solid var(--mis-garis); border-radius: 11px;
+        background: #fff;
+        line-height: 1.5; font-size: .82rem; color: var(--mis-tinta);
+        resize: vertical;
+    }
+
+    .tar-area:focus { outline: none; border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(99, 102, 241, .5); }
+
     .tar-pratinjau {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-        margin-top: 12px;
-        font-size: .78rem;
-        color: var(--mis-tinta-3);
+        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        font-size: .76rem; color: var(--mis-tinta-3);
     }
 
     /* ----------------------------------------------------------- riwayat */
 
-    .tar-riwayat-nilai {
-        margin: 0;
-        line-height: 1.25;
-        font-size: .86rem;
-        font-weight: 700;
-        color: var(--mis-tinta);
-    }
+    .tar-riwayat-nilai { margin: 0; line-height: 1.25; font-size: .86rem; font-weight: 700; color: var(--mis-tinta); }
+    .tar-riwayat-ket { margin: 1px 0 0; line-height: 1.4; font-size: .73rem; color: var(--mis-tinta-3); }
+    .tar-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 
-    .tar-riwayat-ket {
-        margin: 1px 0 0;
-        line-height: 1.4;
-        font-size: .73rem;
-        color: var(--mis-tinta-3);
-    }
-
-    .tar-aksi {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 6px;
-    }
-
-    /* ---------------------------------------------------------- responsif */
-
-    @media (max-width: 991.98px) {
-        .tar-utama {
-            grid-template-columns: minmax(0, 1fr);
-        }
-    }
+    /* --------------------------------------------------------- responsif */
 
     @media (max-width: 767.98px) {
-        .tar-borang {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .tar-borang .mis-tombol {
-            width: 100%;
-        }
-
-        .tar-nilai {
-            font-size: 1.6rem;
-        }
+        .tar-kisi { grid-template-columns: minmax(0, 1fr); }
+        .tar-dua { grid-template-columns: minmax(0, 1fr); }
+        .tar-harga { font-size: 1.4rem; }
 
         /* Tiap baris riwayat jadi kartu tersendiri, seperti daftar pelanggan:
-           garis 1px terlalu sepi untuk memisahkan empat keterangan berlabel. */
+           garis 1px terlalu sepi untuk memisahkan lima keterangan berlabel. */
         .mis-tabel-kartu.tar-tabel tbody {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: flex; flex-direction: column; gap: 8px;
         }
 
         .mis-tabel-kartu.tar-tabel tbody tr {
-            border: 1px solid var(--mis-garis);
-            border-radius: 13px;
-            background: #f8fafc;
-        }
-
-        .tar-aksi {
-            justify-content: flex-end;
+            border: 1px solid var(--mis-garis); border-radius: 13px; background: #f8fafc;
         }
     }
 </style>
@@ -288,138 +241,155 @@ Biaya per Sesi | MIS
         <div class="mis-kepala">
             <span class="mis-medali mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
             <div class="mis-kepala-teks">
-                <h1 class="mis-judul">Biaya per sesi</h1>
-                <p class="mis-sub">Harga satu sesi Clinik Scopus yang dipakai saat pelanggan memesan.</p>
+                <h1 class="mis-judul">Tarif layanan</h1>
+                <p class="mis-sub">Harga dan fasilitas seluruh layanan jasa, disetel sekali di sini.</p>
             </div>
             <div class="mis-kepala-aksi">
-                <span class="mis-pil {{ $berlaku ? 'mis-pil-hijau' : 'mis-pil-merah' }}">
-                    <i class="fas {{ $berlaku ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"></i>
-                    {{ $berlaku ? 'Tarif sudah disetel' : 'Belum ada tarif berlaku' }}
+                <span class="mis-pil {{ $adaTarif === $totalKartu ? 'mis-pil-hijau' : 'mis-pil-kuning' }}">
+                    <i class="fas {{ $adaTarif === $totalKartu ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"></i>
+                    {{ $adaTarif }} dari {{ $totalKartu }} tarif sudah disetel
                 </span>
             </div>
         </div>
 
-        {{-- --------------------------------- tarif yang sedang berlaku --}}
-        @php
-            $tarifAngka = $berlaku ? (int) $berlaku->biaya_persesi : 0;
-            $ppnPersen = $berlaku ? $berlaku->ppn_persen : 0;
-            $ppnRupiah = (int) round($tarifAngka * $ppnPersen / 100);
-        @endphp
-
-        <div class="tar-utama">
-            <div class="tar-angka">
-                <span class="mis-medali mis-hijau" aria-hidden="true"><i class="fas fa-tags"></i></span>
-                <div class="tar-angka-teks">
-                    <p class="tar-label">Berlaku sekarang</p>
-                    <p class="tar-nilai">{{ $berlaku ? $berlaku->tarif_terbaca : 'Belum disetel' }}</p>
-                    <p class="tar-ket">
-                        @if ($berlaku)
-                            per satu sesi &middot; disetel
-                            {{ optional($berlaku->updated_at)->locale('id')->translatedFormat('d M Y') }}
-                            @if ($sesiMemakai > 0)
-                                &middot; jadi acuan {{ number_format($sesiMemakai) }} sesi
+        {{-- --------------------------------------- kartu tiap layanan --}}
+        <div class="tar-kisi">
+            @foreach ($kartu as $k)
+                @php($t = $k['tarif'])
+                <div class="tar-kartu {{ $t ? '' : 'kosong' }}">
+                    <div class="tar-kartu-kepala">
+                        <span class="mis-medali {{ $k['warna'] }}" aria-hidden="true">
+                            <i class="fas {{ $k['ikon'] }}"></i>
+                        </span>
+                        <h2 class="tar-nama">{{ $k['nama'] }}</h2>
+                        <div class="tar-varian">
+                            @if ($k['namaVarian'])
+                                <span class="mis-pil mis-pil-ungu">
+                                    <i class="fas fa-map-marker-alt"></i> {{ $k['namaVarian'] }}
+                                </span>
                             @endif
-                        @else
-                            Borang pemesanan menampilkan harga kosong sampai tarifnya disetel.
+                            @if ($t && $t->ppn_persen > 0)
+                                <span class="mis-pil mis-pil-kuning">
+                                    <i class="fas fa-percent"></i> PPN {{ $t->ppn_persen }}%
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <p class="tar-harga">{{ $t ? $t->tarif_terbaca : 'Belum disetel' }}</p>
+                    <p class="tar-satuan">
+                        {{ $k['satuan'] }}
+                        @if ($t)
+                            &middot; disetel {{ optional($t->updated_at)->locale('id')->translatedFormat('d M Y') }}
                         @endif
                     </p>
-                </div>
-            </div>
 
-            {{-- Rincian yang dilihat pelanggan, dihitung di sini supaya tidak
-                 ada yang perlu mengalikan persen di kepalanya sendiri. --}}
-            <div class="tar-rincian">
-                <div class="tar-baris">
-                    <span><i class="fas fa-receipt mis-ikon-biru"></i> Tarif dasar</span>
-                    <span>{{ $berlaku ? $berlaku->tarif_terbaca : '—' }}</span>
+                    @if ($t && $t->ppn_persen > 0)
+                        <div class="tar-rinci">
+                            <span>Dibayar pelanggan</span>
+                            <strong>Rp {{ number_format($t->total_dibayar, 0, ',', '.') }}</strong>
+                        </div>
+                    @endif
+
+                    @if ($t && $t->daftar_fasilitas)
+                        <ul class="tar-fasilitas">
+                            @foreach ($t->daftar_fasilitas as $f)
+                                <li>
+                                    <i class="fas fa-check" aria-hidden="true"></i>
+                                    <span>{{ $f }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="tar-kosong-teks">
+                            {{ $t ? 'Fasilitasnya belum diisi.' : 'Tarifnya belum pernah disetel, jadi borang pemesanan menampilkan harga kosong.' }}
+                        </p>
+                    @endif
+
+                    @if ($bolehUbah)
+                        <details class="tar-setel">
+                            <summary>
+                                <i class="fas fa-edit mis-ikon-ungu" aria-hidden="true"></i>
+                                {{ $t ? 'Ubah tarif & fasilitas' : 'Setel tarif' }}
+                            </summary>
+
+                            <form method="POST" action="{{ route('account.Clinik-Scopus-Biaya-Persesi.simpan') }}"
+                                class="tar-borang" data-tarif-borang>
+                                @csrf
+                                <input type="hidden" name="layanan" value="{{ $k['layanan'] }}">
+                                <input type="hidden" name="varian" value="{{ $k['varian'] }}">
+                                {{-- Diisi skrip saat angkanya TIDAK berubah: membetulkan
+                                     salah ketik tidak boleh meninggalkan jejak seolah
+                                     harganya pernah naik. --}}
+                                <input type="hidden" name="perbaiki" value="" data-perbaiki
+                                    data-acuan="{{ $t?->getKey() }}">
+
+                                <div class="tar-dua">
+                                    <div class="mis-isian tar-isian">
+                                        <label class="mis-label" for="tar-biaya-{{ $loop->index }}">Tarif</label>
+                                        <span class="tar-tanda kiri" aria-hidden="true">Rp</span>
+                                        <input type="text" class="form-control-modern" id="tar-biaya-{{ $loop->index }}"
+                                            name="biaya_persesi" inputmode="numeric" autocomplete="off" required
+                                            data-biaya data-awal="{{ $t ? (int) $t->biaya_persesi : '' }}"
+                                            value="{{ $t ? number_format((int) $t->biaya_persesi, 0, ',', '.') : '' }}"
+                                            placeholder="0">
+                                    </div>
+
+                                    <div class="mis-isian tar-isian persen">
+                                        <label class="mis-label" for="tar-ppn-{{ $loop->index }}">PPN</label>
+                                        <span class="tar-tanda kanan" aria-hidden="true">%</span>
+                                        <input type="number" class="form-control-modern" id="tar-ppn-{{ $loop->index }}"
+                                            name="ppn" min="0" max="100" inputmode="numeric" data-ppn
+                                            value="{{ $t && $t->ppn !== null ? $t->ppn_persen : '' }}" placeholder="0">
+                                    </div>
+                                </div>
+
+                                <div class="mis-isian">
+                                    <label class="mis-label" for="tar-fas-{{ $loop->index }}">
+                                        Fasilitas yang didapat
+                                    </label>
+                                    <textarea class="tar-area" id="tar-fas-{{ $loop->index }}" name="fasilitas"
+                                        rows="4" placeholder="Satu fasilitas per baris&#10;Sertifikat&#10;Konsumsi selama acara">{{ $t ? implode("\n", $t->daftar_fasilitas) : '' }}</textarea>
+                                    <p class="mis-bantuan">
+                                        Satu baris satu fasilitas. Dipakai ulang saat membuat angkatan baru,
+                                        jadi tidak perlu diketik lagi.
+                                    </p>
+                                </div>
+
+                                <div class="tar-pratinjau" aria-live="polite">
+                                    <i class="fas fa-calculator mis-ikon-ungu" aria-hidden="true"></i>
+                                    <span data-pratinjau>Pelanggan membayar <strong>—</strong></span>
+                                </div>
+
+                                <button type="submit" class="mis-tombol mis-tombol-ungu" data-simpan>
+                                    <i class="fas fa-save"></i> Berlakukan
+                                </button>
+                            </form>
+                        </details>
+                    @endif
                 </div>
-                <div class="tar-baris">
-                    <span><i class="fas fa-percent mis-ikon-jingga"></i> PPN {{ $ppnPersen }}%</span>
-                    <span>{{ $ppnPersen > 0 ? 'Rp ' . number_format($ppnRupiah, 0, ',', '.') : 'Tidak dikenakan' }}</span>
-                </div>
-                <div class="tar-baris jumlah">
-                    <span>Dibayar pelanggan</span>
-                    <span>{{ $berlaku ? 'Rp ' . number_format($tarifAngka + $ppnRupiah, 0, ',', '.') : '—' }}</span>
-                </div>
-                <p class="mis-bantuan" style="margin-top: 6px;">
-                    <i class="fas fa-info-circle mis-ikon-biru"></i>
-                    Belum termasuk kode unik dan potongan promo, yang dihitung saat memesan.
-                </p>
-            </div>
+            @endforeach
         </div>
 
-        {{-- ------------------------------------------- setel tarif --}}
-        <div class="mis-bagian" style="margin-bottom: var(--mis-jarak);">
-            <div class="tar-kepala">
-                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-edit"></i></span>
-                <h2 class="tar-kepala-judul">Setel tarif</h2>
-                <p class="tar-kepala-sub">Dua isian saja. Tarif baru langsung berlaku untuk pemesanan berikutnya.</p>
-            </div>
-
-            @if ($bolehUbah)
-                <form method="POST" action="{{ route('account.Clinik-Scopus-Biaya-Persesi.simpan') }}" id="tar-borang">
-                    @csrf
-
-                    {{-- Kalau dicentang, baris yang berlaku DIPERBAIKI, bukan
-                         ditambah baris baru. Dibedakan supaya salah ketik tidak
-                         meninggalkan jejak seolah harganya pernah berubah. --}}
-                    <input type="hidden" name="perbaiki" id="tar-perbaiki" value="">
-
-                    <div class="tar-borang">
-                        <div class="mis-isian tar-isian">
-                            <label class="mis-label" for="tar-tarif">Tarif per sesi</label>
-                            <span class="tar-satuan kiri" aria-hidden="true">Rp</span>
-                            <input type="text" class="form-control-modern @error('biaya_persesi') is-invalid @enderror"
-                                id="tar-tarif" name="biaya_persesi" inputmode="numeric" autocomplete="off"
-                                value="{{ old('biaya_persesi', $berlaku ? number_format((int) $berlaku->biaya_persesi, 0, ',', '.') : '') }}"
-                                placeholder="125.000" required>
-                            @error('biaya_persesi')
-                                <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="mis-isian tar-isian persen">
-                            <label class="mis-label" for="tar-ppn">PPN</label>
-                            <span class="tar-satuan kanan" aria-hidden="true">%</span>
-                            <input type="number" class="form-control-modern @error('ppn') is-invalid @enderror"
-                                id="tar-ppn" name="ppn" min="0" max="100" inputmode="numeric"
-                                value="{{ old('ppn', $berlaku && $berlaku->ppn !== null ? $berlaku->ppn_persen : '') }}"
-                                placeholder="0">
-                            @error('ppn')
-                                <p class="mis-salah"><i class="fas fa-exclamation-circle"></i> {{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <button type="submit" class="mis-tombol mis-tombol-ungu" id="tar-simpan">
-                            <i class="fas fa-save"></i> Berlakukan
-                        </button>
-                    </div>
-
-                    <div class="tar-pratinjau" id="tar-pratinjau" aria-live="polite">
-                        <i class="fas fa-calculator mis-ikon-ungu" aria-hidden="true"></i>
-                        <span id="tar-pratinjau-teks">Pelanggan membayar <strong>—</strong></span>
-                    </div>
-                </form>
-            @else
-                <p class="mis-bantuan">
-                    <i class="fas fa-lock mis-ikon-kuning"></i>
-                    Hanya administrator yang boleh mengubah tarif.
-                </p>
-            @endif
-        </div>
+        @unless ($bolehUbah)
+            <p class="mis-bantuan" style="margin-bottom: var(--mis-jarak);">
+                <i class="fas fa-lock mis-ikon-kuning"></i>
+                Hanya administrator yang boleh mengubah tarif.
+            </p>
+        @endunless
 
         {{-- ----------------------------------------------- riwayat --}}
         <div class="mis-bagian">
             <div class="tar-kepala">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-history"></i></span>
                 <h2 class="tar-kepala-judul">Tarif sebelumnya</h2>
-                <p class="tar-kepala-sub">Disimpan karena sesi yang sudah dipesan memakai harga yang berlaku saat itu.</p>
+                <p class="tar-kepala-sub">Disimpan karena pesanan yang sudah terjadi memakai harga yang berlaku saat itu.</p>
             </div>
 
             @if ($riwayat->isEmpty())
                 <div class="mis-kosong">
                     <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
-                    <p class="mis-kosong-judul">Belum ada tarif lain</p>
+                    <p class="mis-kosong-judul">Belum ada tarif lama</p>
                     <p class="mis-kosong-teks">Tarif yang diganti akan tersimpan di sini, lengkap dengan tanggalnya.</p>
                 </div>
             @else
@@ -427,6 +397,7 @@ Biaya per Sesi | MIS
                     <table class="mis-tabel mis-tabel-kartu tar-tabel">
                         <thead>
                             <tr>
+                                <th>Layanan</th>
                                 <th>Tarif</th>
                                 <th>PPN</th>
                                 <th>Dipakai</th>
@@ -436,17 +407,24 @@ Biaya per Sesi | MIS
                         </thead>
                         <tbody>
                             @foreach ($riwayat as $item)
+                                @php($tentang = \App\ClinikScopusBiayaPersesi::LAYANAN[$item->layanan] ?? null)
                                 <tr>
                                     <td class="mis-td-utama">
                                         <span class="mis-sel-utama">
                                             <span class="mis-medali kecil mis-abu" aria-hidden="true">
-                                                <i class="fas fa-tag"></i>
+                                                <i class="fas {{ $tentang['ikon'] ?? 'fa-tag' }}"></i>
                                             </span>
                                             <span class="mis-sel-teks">
-                                                <p class="tar-riwayat-nilai">{{ $item->tarif_terbaca }}</p>
-                                                <p class="tar-riwayat-ket">per satu sesi</p>
+                                                <p class="tar-riwayat-nilai">{{ $item->nama_layanan }}</p>
+                                                <p class="tar-riwayat-ket">
+                                                    {{ $item->nama_varian ?: $item->satuan }}
+                                                </p>
                                             </span>
                                         </span>
+                                    </td>
+
+                                    <td data-judul="Tarif">
+                                        <span class="tar-riwayat-nilai">{{ $item->tarif_terbaca }}</span>
                                     </td>
 
                                     <td data-judul="PPN">
@@ -481,13 +459,13 @@ Biaya per Sesi | MIS
                                                 <button type="button" class="mis-tombol mis-tombol-garis"
                                                     title="Berlakukan lagi tarif ini"
                                                     data-berlaku="{{ route('account.Clinik-Scopus-Biaya-Persesi.berlakukan', $item) }}"
-                                                    data-nilai="{{ $item->tarif_terbaca }}">
+                                                    data-nilai="{{ $item->nama_layanan }} {{ $item->tarif_terbaca }}">
                                                     <i class="fas fa-undo"></i>
                                                 </button>
                                                 <button type="button" class="mis-tombol mis-tombol-bahaya"
                                                     title="Hapus dari riwayat"
                                                     data-hapus="{{ route('account.Clinik-Scopus-Biaya-Persesi.destroy', $item) }}"
-                                                    data-nilai="{{ $item->tarif_terbaca }}">
+                                                    data-nilai="{{ $item->nama_layanan }} {{ $item->tarif_terbaca }}">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             @else
@@ -512,73 +490,68 @@ Biaya per Sesi | MIS
 @push('scripts')
 <script>
     /*
-     * Isian tarif dipoles jadi berformat ribuan saat diketik, dan pratinjau
-     * di bawahnya ikut berubah.
+     * Tiap borang kartu memoles isian tarifnya dan menghitung pratinjaunya
+     * sendiri.
      *
-     * Angkanya tetap dikirim apa adanya; peladen membuang tanda bacanya
-     * sendiri. Tanpa pratinjau, orang harus mengalikan persen di kepalanya
-     * untuk tahu berapa yang sebenarnya dibayar pelanggan — dan itu justru
-     * angka yang paling ingin dipastikan sebelum menekan Berlakukan.
+     * Dipasang per borang, bukan satu penangan untuk semuanya: tujuh kartu
+     * punya tujuh borang dengan angka acuannya masing-masing, dan menyimpan
+     * acuan itu di satu tempat berarti kartu yang satu ikut mengubah tulisan
+     * tombol kartu yang lain.
      */
     (function () {
-        const tarif = document.getElementById('tar-tarif');
-        const ppn = document.getElementById('tar-ppn');
-        const teks = document.getElementById('tar-pratinjau-teks');
-        const perbaiki = document.getElementById('tar-perbaiki');
-        const simpan = document.getElementById('tar-simpan');
-        if (!tarif || !teks) return;
+        const rupiah = function (n) { return 'Rp ' + n.toLocaleString('id-ID'); };
+        const angka = function (v) { return parseInt(String(v).replace(/\D+/g, ''), 10) || 0; };
 
-        const awalTarif = tarif.value;
-        const awalPpn = ppn ? ppn.value : '';
+        document.querySelectorAll('[data-tarif-borang]').forEach(function (borang) {
+            const biaya = borang.querySelector('[data-biaya]');
+            const ppn = borang.querySelector('[data-ppn]');
+            const teks = borang.querySelector('[data-pratinjau]');
+            const perbaiki = borang.querySelector('[data-perbaiki]');
+            const simpan = borang.querySelector('[data-simpan]');
+            if (!biaya || !teks) return;
 
-        const rupiah = function (n) {
-            return 'Rp ' + n.toLocaleString('id-ID');
-        };
+            const acuan = angka(biaya.dataset.awal);
+            const punyaAcuan = (biaya.dataset.awal || '') !== '';
 
-        const angka = function (nilai) {
-            return parseInt(String(nilai).replace(/\D+/g, ''), 10) || 0;
-        };
+            const segarkan = function () {
+                const dasar = angka(biaya.value);
+                const persen = Math.min(100, Math.max(0, parseInt(ppn && ppn.value, 10) || 0));
+                const pajak = Math.round(dasar * persen / 100);
 
-        const segarkan = function () {
-            const dasar = angka(tarif.value);
-            const persen = Math.min(100, Math.max(0, parseInt(ppn && ppn.value, 10) || 0));
-            const pajak = Math.round(dasar * persen / 100);
+                if (dasar < 1) {
+                    teks.innerHTML = 'Pelanggan membayar <strong>—</strong>';
+                } else if (persen > 0) {
+                    teks.innerHTML = 'Pelanggan membayar <strong>' + rupiah(dasar + pajak) + '</strong> — '
+                        + rupiah(dasar) + ' + PPN ' + persen + '% (' + rupiah(pajak) + ')';
+                } else {
+                    teks.innerHTML = 'Pelanggan membayar <strong>' + rupiah(dasar) + '</strong> — tanpa PPN';
+                }
 
-            if (dasar < 1) {
-                teks.innerHTML = 'Pelanggan membayar <strong>—</strong>';
-            } else if (persen > 0) {
-                teks.innerHTML = 'Pelanggan membayar <strong>' + rupiah(dasar + pajak)
-                    + '</strong> — ' + rupiah(dasar) + ' + PPN ' + persen + '% (' + rupiah(pajak) + ')';
-            } else {
-                teks.innerHTML = 'Pelanggan membayar <strong>' + rupiah(dasar) + '</strong> — tanpa PPN';
-            }
+                /*
+                 * Menekan tombol berarti hal yang berbeda tergantung apa yang
+                 * berubah, jadi tulisannya ikut berubah. Tarif yang sama persis
+                 * tetapi PPN atau fasilitasnya berbeda tetap dihitung
+                 * perbaikan, bukan kenaikan harga.
+                 */
+                if (perbaiki && simpan) {
+                    const sama = punyaAcuan && dasar === acuan;
+                    perbaiki.value = sama ? (perbaiki.dataset.acuan || '') : '';
+                    simpan.innerHTML = sama
+                        ? '<i class="fas fa-save"></i> Perbaiki'
+                        : '<i class="fas fa-save"></i> Berlakukan';
+                }
+            };
 
-            /*
-             * Menekan tombol berarti hal yang berbeda tergantung apa yang
-             * berubah, jadi tulisannya ikut berubah. Tarif yang sama persis
-             * dengan yang berlaku tetapi PPN-nya berbeda tetap dihitung
-             * perbaikan, bukan kenaikan harga.
-             */
-            if (perbaiki && simpan) {
-                const samaTarif = angka(tarif.value) === angka(awalTarif);
-                const adaAcuan = awalTarif !== '';
+            biaya.addEventListener('input', function () {
+                const n = angka(biaya.value);
+                biaya.value = n > 0 ? n.toLocaleString('id-ID') : '';
+                segarkan();
+            });
 
-                perbaiki.value = (adaAcuan && samaTarif) ? @json($berlaku?->getKey()) ?? '' : '';
-                simpan.innerHTML = (adaAcuan && samaTarif)
-                    ? '<i class="fas fa-save"></i> Perbaiki'
-                    : '<i class="fas fa-save"></i> Berlakukan';
-            }
-        };
+            if (ppn) ppn.addEventListener('input', segarkan);
 
-        tarif.addEventListener('input', function () {
-            const n = angka(tarif.value);
-            tarif.value = n > 0 ? n.toLocaleString('id-ID') : '';
             segarkan();
         });
-
-        if (ppn) ppn.addEventListener('input', segarkan);
-
-        segarkan();
     })();
 
     /*
@@ -599,12 +572,9 @@ Biaya per Sesi | MIS
             })
                 .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
                 .then(function (j) {
-                    if (!j.ok || !j.d.success) {
-                        window.misToast('gagal', j.d.message || 'Tindakannya gagal.');
-                        return false;
-                    }
-                    window.misToast('berhasil', j.d.message);
-                    return true;
+                    window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal',
+                        j.d.message || 'Tindakannya gagal.');
+                    return j.ok && j.d.success;
                 })
                 .catch(function () {
                     window.misToast('gagal', 'Tidak bisa menghubungi peladen.');
@@ -618,7 +588,7 @@ Biaya per Sesi | MIS
             if (pulih) {
                 window.misKonfirmasi({
                     judul: 'Berlakukan lagi tarif ini?',
-                    pesan: '%s per sesi akan dipakai untuk pemesanan berikutnya. Tarif yang sekarang berhenti berlaku.',
+                    pesan: '%s akan dipakai untuk pemesanan berikutnya. Tarif yang sekarang berhenti berlaku.',
                     sorot: pulih.dataset.nilai,
                     tombol: 'Ya, berlakukan',
                     jenis: 'tanya',
@@ -637,7 +607,7 @@ Biaya per Sesi | MIS
 
             window.misKonfirmasi({
                 judul: 'Hapus tarif ini dari riwayat?',
-                pesan: 'Baris %s dihapus permanen. Tarif yang masih jadi acuan harga sesi tidak bisa dihapus.',
+                pesan: 'Baris %s dihapus permanen. Tarif yang masih jadi acuan harga pesanan tidak bisa dihapus.',
                 sorot: hapus.dataset.nilai,
                 tombol: 'Ya, hapus',
                 jenis: 'bahaya',
