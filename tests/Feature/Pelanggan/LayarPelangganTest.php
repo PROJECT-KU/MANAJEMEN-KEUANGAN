@@ -64,13 +64,22 @@ class LayarPelangganTest extends TestCase
 
         $halaman->assertOk();
         $halaman->assertSee('Hanya administrator yang boleh mengubah data pelanggan.');
-        $halaman->assertDontSee('Simpan perubahan');
-        $halaman->assertDontSee('Simpan kontak');
-        $halaman->assertDontSee('Simpan foto');
+
+        /*
+         * Diperiksa dari TOMBOLNYA, bukan dari tulisannya.
+         *
+         * assertDontSee('Simpan kontak') pernah dipakai di sini dan menangkap
+         * hal yang salah: label itu juga tertulis di dalam komentar CSS pada
+         * blok <style> halaman ini, dan komentar CSS ikut terkirim ke peramban.
+         * Yang sebenarnya dijaga adalah tidak ada satu pun tombol kirim.
+         */
+        $isi = $halaman->getContent();
+
+        $this->assertStringNotContainsString('type="submit"', $isi, 'Karyawan tidak boleh punya tombol kirim apa pun.');
 
         // Isiannya dimatikan, bukan sekadar tombolnya disembunyikan: tanpa itu
         // isian masih bisa diisi dan dikirim lewat Enter.
-        $this->assertStringContainsString('disabled', $halaman->getContent());
+        $this->assertStringContainsString('disabled', $isi);
     }
 
     #[Test]
@@ -79,12 +88,14 @@ class LayarPelangganTest extends TestCase
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
         $pelanggan = $this->akun(User::PERAN_PELANGGAN);
 
-        $this->actingAs($admin)
+        $isi = $this->actingAs($admin)
             ->get(route('account.customer.edit', $pelanggan->uuid))
             ->assertOk()
-            ->assertSee('Simpan perubahan')
-            ->assertSee('Simpan kontak')
-            ->assertDontSee('Hanya administrator yang boleh mengubah data pelanggan.');
+            ->assertDontSee('Hanya administrator yang boleh mengubah data pelanggan.')
+            ->getContent();
+
+        // Tiga tombol kirim: data akun, kontak, dan unggah foto.
+        $this->assertSame(3, substr_count($isi, 'type="submit"'));
     }
 
     // ----------------------------------------------------------- penghapusan
