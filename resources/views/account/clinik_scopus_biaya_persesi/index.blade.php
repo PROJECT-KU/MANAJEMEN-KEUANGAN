@@ -220,6 +220,10 @@ Tarif Layanan | MIS
         display: grid; gap: 13px;
         padding: 18px;
         overflow-y: auto;
+        /* Wadah gulirnya menyatakan sendiri bahwa guliran berhenti di sini.
+           Di mis-ui.css aturan ini sengaja TIDAK dipasang ke seluruh keturunan
+           dialog — textarea yang isinya muat akan ikut menahan guliran. */
+        overscroll-behavior: contain;
     }
 
     .tar-dialog-kaki {

@@ -2859,3 +2859,34 @@ body.mis-latar-terkunci {
         margin: 0;
     }
 }
+
+/* =====================================================================
+   Dialog: latar tidak ikut tergulir
+   ===================================================================== */
+
+/*
+ * showModal() membuat sisa halaman tidak bisa disentuh, tetapi TIDAK mengunci
+ * gulirannya — terukur, roda tetikus di atas latarnya menggulung halaman 400px
+ * di belakang dialog yang terbuka. Yang dibaca orang bergeser diam-diam, dan
+ * begitu dialognya ditutup ia mendapati dirinya entah di mana.
+ *
+ * Kelasnya dipasang mis-ui.js untuk dialog mana pun, bukan per layar.
+ */
+body.mis-dialog-terbuka {
+    overflow: hidden;
+}
+
+/*
+ * Guliran berhenti di ujung dialog, tidak merambat ke halaman.
+ *
+ * HANYA pada dialognya sendiri, JANGAN pada seluruh keturunannya. Dipasang ke
+ * `dialog *`, tiap textarea yang isinya muat ikut menahan guliran — terukur,
+ * roda tetikus di atas kotak Fasilitas membuat dialog yang perlu digulung
+ * (781px isi dalam 710px ruang) sama sekali tidak bergerak, karena penerusan
+ * ke induknya diblokir.
+ *
+ * Wadah gulir di dalam dialog menyatakannya sendiri; lihat .tar-dialog-isi.
+ */
+dialog {
+    overscroll-behavior: contain;
+}
