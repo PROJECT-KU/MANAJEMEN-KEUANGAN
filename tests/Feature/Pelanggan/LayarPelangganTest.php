@@ -468,6 +468,130 @@ class LayarPelangganTest extends TestCase
         $this->assertStringContainsString('data-pelanggan-', $jawab->headers->get('content-disposition'));
     }
 
+    // ------------------------------------- saringan ubin dianggap "sedang aktif"
+
+    #[Test]
+    public function saringan_dari_ubin_ikut_dihitung_sebagai_saringan(): void
+    {
+        /*
+         * Empat tempat di tampilan dulu memeriksa cari/status/verifikasi saja,
+         * dan dua saringan dari ubin ringkasan tidak disebut di satu pun.
+         * Akibatnya tombol Reset tidak muncul dan lencana "aktif" di penyaring
+         * yang terlipat tidak menyala — di ponsel, tidak ada tanda apa pun
+         * bahwa daftarnya sedang disaring.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.index', ['pesanan' => 'ada']))
+            ->assertOk()
+            ->assertSee('Hapus semua saringan');
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.index', ['baru' => '30']))
+            ->assertOk()
+            ->assertSee('Hapus semua saringan');
+    }
+
+    #[Test]
+    public function saringan_yang_tidak_menyisakan_siapa_pun_tidak_bilang_belum_ada_pelanggan(): void
+    {
+        // "Belum ada pelanggan" berarti tabelnya kosong. Saat 101 pelanggan ada
+        // dan hanya saringannya yang mengecualikan semua, kalimat itu keliru.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        User::where('peran', User::PERAN_PELANGGAN)->update(['created_at' => now()->subYears(2)]);
+
+        $halaman = $this->actingAs($admin)->get(route('account.customer.index', ['baru' => '30']));
+
+        $halaman->assertOk()
+            ->assertSee('Tidak ada yang cocok')
+            ->assertDontSee('Belum ada pelanggan');
+    }
+
+    // ----------------------------------------------------- aksi massal di ponsel
+
+    #[Test]
+    public function kotak_centang_tidak_disembunyikan_di_mode_kartu(): void
+    {
+        /*
+         * Terukur sebelum ini: 12 kotak centang ada di markah dan NOL terlihat
+         * di 390px, sebab selnya diberi kelas mis-td-samar — kelas yang di mode
+         * kartu berarti display:none, dan yang memang dibuat untuk kolom nomor
+         * urut. Seluruh aksi massal jadi mustahil dipakai dari ponsel.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $this->akun(User::PERAN_PELANGGAN);
+
+        $isi = $this->actingAs($admin)->get(route('account.customer.index'))->getContent();
+
+        $this->assertStringContainsString('class="pel-centang-sel"', $isi);
+        $this->assertStringNotContainsString('pel-centang-sel mis-td-samar', $isi);
+    }
+
+    #[Test]
+    public function baris_aksi_massal_punya_tombol_pilih_semua(): void
+    {
+        // Kotak "pilih semua" ada di kepala tabel, dan kepala tabel
+        // disembunyikan di mode kartu — tombol ini penggantinya di ponsel.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->get(route('account.customer.index'))
+            ->assertOk()
+            ->assertSee('pel-massal-semua', false)
+            ->assertSee('Pilih semua');
+    }
+
+    // -------------------------------------------------- galat menunjuk tabnya
+
+    #[Test]
+    public function galat_pada_kontak_membuka_tab_kontak(): void
+    {
+        /*
+         * Kirim email yang sudah dipakai: toast memang muncul, tetapi halamannya
+         * dulu digambar ulang pada tab Data akun — sementara tanda merah beserta
+         * nilai yang tadi diketik ada di tab Kontak, tidak terlihat sama sekali.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+
+        $this->actingAs($admin)
+            ->from(route('account.customer.edit', $pelanggan->uuid))
+            ->post(route('account.pengguna.update.datadiri', $pelanggan->uuid), [
+                'email' => $admin->email,
+                'telp' => '0812-0000-0000',
+            ])
+            ->assertRedirect();
+
+        // Galatnya dikirim lewat sesi, jadi baru terbaca saat halamannya dibuka.
+        $isi = $this->actingAs($admin)
+            ->get(route('account.customer.edit', $pelanggan->uuid))
+            ->getContent();
+
+        $this->assertStringContainsString('id="pel-panel-kontak"', $isi);
+        // Panel Kontak yang terbuka, bukan Data akun.
+        $this->assertMatchesRegularExpression(
+            '/class="tab-pane fade show active"\s+id="pel-panel-kontak"/',
+            $isi,
+            'Tab Kontak seharusnya yang terbuka saat galatnya ada di sana.'
+        );
+    }
+
+    #[Test]
+    public function tanpa_galat_tab_pertama_yang_terbuka(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.customer.edit', $pelanggan->uuid))
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/class="tab-pane fade show active"\s+id="pel-panel-akun"/',
+            $isi
+        );
+    }
+
     #[Test]
     public function unduhan_excel_tidak_membawa_kolom_rahasia(): void
     {

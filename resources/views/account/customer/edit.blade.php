@@ -570,16 +570,29 @@
                   bukan tab mana yang terbuka, dan bukan panel mana yang
                   dikendalikannya. Kelas .active cuma rupa; ia tidak terbaca.
                 --}}
+                {{-- $tabAktif dihitung di pengendali, bukan di sini.
+
+                     Berkas ini memuat beberapa direktif PHP SEBARIS. Menambahkan
+                     satu blok PHP mentah berpasangan ke berkas yang sama membuat
+                     Blade memasangkan penutupnya dengan direktif sebaris yang
+                     pertama: seluruh markah di antaranya ikut tertelan, dan
+                     halamannya galat 500 dengan pesan "unexpected token" yang
+                     menunjuk baris yang sama sekali tidak disentuh.
+
+                     Nama direktifnya sengaja TIDAK ditulis harfiah di komentar
+                     ini — Blade memproses direktif lebih dulu daripada komentar,
+                     jadi menyebutnya di sini pun sudah cukup untuk mengulang
+                     persoalan yang sama. --}}
                 <ul class="mis-tab nav nav-pills" id="pel-tab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="pel-tab-akun" data-toggle="pill" href="#pel-panel-akun"
-                            role="tab" aria-controls="pel-panel-akun" aria-selected="true">
+                        <a class="nav-link {{ $tabAktif === 'akun' ? 'active' : '' }}" id="pel-tab-akun" data-toggle="pill" href="#pel-panel-akun"
+                            role="tab" aria-controls="pel-panel-akun" aria-selected="{{ $tabAktif === 'akun' ? 'true' : 'false' }}">
                             <i class="fas fa-id-card mis-ikon-biru" aria-hidden="true"></i> Data akun
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="pel-tab-kontak" data-toggle="pill" href="#pel-panel-kontak"
-                            role="tab" aria-controls="pel-panel-kontak" aria-selected="false">
+                        <a class="nav-link {{ $tabAktif === 'kontak' ? 'active' : '' }}" id="pel-tab-kontak" data-toggle="pill" href="#pel-panel-kontak"
+                            role="tab" aria-controls="pel-panel-kontak" aria-selected="{{ $tabAktif === 'kontak' ? 'true' : 'false' }}">
                             <i class="fas fa-address-book mis-ikon-hijau" aria-hidden="true"></i> Kontak
                         </a>
                     </li>
@@ -608,7 +621,7 @@
                 <div class="tab-content">
 
                 {{-- ------------------------------------- data akun --}}
-                <div class="tab-pane fade show active" id="pel-panel-akun" role="tabpanel"
+                <div class="tab-pane fade {{ $tabAktif === 'akun' ? 'show active' : '' }}" id="pel-panel-akun" role="tabpanel"
                     aria-labelledby="pel-tab-akun" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     {{-- Kepala bagian tetap ada walau kartunya sudah berkepala,
@@ -746,7 +759,7 @@
                 </div>
 
                 {{-- --------------------------------------- kontak --}}
-                <div class="tab-pane fade" id="pel-panel-kontak" role="tabpanel"
+                <div class="tab-pane fade {{ $tabAktif === 'kontak' ? 'show active' : '' }}" id="pel-panel-kontak" role="tabpanel"
                     aria-labelledby="pel-tab-kontak" tabindex="0">
                 <section class="mis-bagian pel-bagian">
                     <div class="pel-kepala">
