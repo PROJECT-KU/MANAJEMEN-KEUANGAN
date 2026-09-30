@@ -66,22 +66,32 @@ class KategoriLayananController extends Controller
         $status = $request->query('status');
         $cari = trim((string) $request->query('cari'));
 
-        $kueri = KategoriLayanan::query();
+        /*
+         * Dua kueri, bukan satu: yang dasar memakai layanan dan kata kunci
+         * saja, dan ubin ringkasan dihitung dari situ.
+         *
+         * Kalau ubinnya ikut menyaring status, angkanya berubah tiap kali
+         * ubinnya ditekan — menekan "Aktif" membuat ubin "Draf" jadi 0, dan
+         * jalan kembalinya hilang dari layar.
+         */
+        $kueriDasar = KategoriLayanan::query();
 
         if ($layanan && array_key_exists($layanan, Layanan::katalog())) {
-            $kueri->where('layanan', $layanan);
-        }
-
-        if ($status) {
-            $kueri->where('status', $status);
+            $kueriDasar->where('layanan', $layanan);
         }
 
         if ($cari !== '') {
-            $kueri->where(function ($q) use ($cari) {
+            $kueriDasar->where(function ($q) use ($cari) {
                 $q->where('nama', 'like', "%{$cari}%")
                     ->orWhere('nama_ke', 'like', "%{$cari}%")
                     ->orWhere('lokasi', 'like', "%{$cari}%");
             });
+        }
+
+        $kueri = clone $kueriDasar;
+
+        if ($status) {
+            $kueri->where('status', $status);
         }
 
         /*
@@ -126,11 +136,11 @@ class KategoriLayananController extends Controller
             ->groupBy('layanan')->pluck('n', 'layanan');
 
         /*
-         * Ringkasan per status untuk saringan yang sedang dipakai. Lencana
-         * layanan menyebut totalnya — "Scopus Camp 48" tidak memberi tahu
-         * berapa yang sedang berjalan, dan itu yang paling sering ditanya.
+         * Ringkasan per status, satu kueri berkelompok. Lencana layanan
+         * menyebut totalnya — "Scopus Camp 48" tidak memberi tahu berapa yang
+         * sedang berjalan, dan itu yang paling sering ditanya.
          */
-        $perStatus = (clone $kueri)->reorder()
+        $perStatus = (clone $kueriDasar)->reorder()
             ->select('status', DB::raw('count(*) as n'))
             ->groupBy('status')->pluck('n', 'status');
 
@@ -143,6 +153,9 @@ class KategoriLayananController extends Controller
             'cari' => $cari,
             'urut' => $urut,
             'arah' => $arah === 'asc' ? 'naik' : 'turun',
+            // Kepala kolom pengurut memakai asc/desc; menu ponsel memakai
+            // naik/turun. Keduanya dikirim daripada disulih di dalam Blade.
+            'arahKode' => $arah,
             'bolehUrut' => $bolehUrut,
             'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan,
             'bolehUbah' => $this->bolehMengubah(),

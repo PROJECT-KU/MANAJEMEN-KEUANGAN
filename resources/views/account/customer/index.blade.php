@@ -23,49 +23,6 @@ Data Pelanggan | MIS
 
     /* ------------------------------------------------------- ringkasan */
 
-    .pel-ringkas {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        margin-bottom: 14px;
-    }
-
-    .pel-ubin {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
-        border: 1px solid #e7ecf5;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
-    }
-
-    /* Ubin sekaligus tautan: warna dan garis bawah tautan dibuang, dan
-       keadaan terpilihnya ditandai tepi beraksen. */
-    a.pel-ubin {
-        color: inherit;
-        text-decoration: none;
-        transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-    }
-
-    a.pel-ubin:hover,
-    a.pel-ubin:focus-visible {
-        border-color: #c7d2fe;
-        box-shadow: 0 6px 16px -10px rgba(79, 70, 229, .7);
-        transform: translateY(-1px);
-    }
-
-    a.pel-ubin.terpilih {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 1px #6366f1 inset;
-    }
-
-    /* Pengurut khusus ponsel; di layar lebar kepala kolomnya yang bekerja. */
-    .pel-urut-ponsel {
-        display: none;
-    }
-
     /* Kolom centang: selebar kotaknya saja. */
     .pel-centang-sel {
         width: 34px;
@@ -142,22 +99,6 @@ Data Pelanggan | MIS
         color: #92400e;
         text-decoration: underline dotted #f59e0b;
         text-underline-offset: 3px;
-    }
-
-    .pel-ubin-angka {
-        margin: 0;
-        line-height: 1.1;
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: var(--mis-tinta);
-    }
-
-    .pel-ubin-label {
-        margin: 2px 0 0;
-        line-height: 1.4;
-        font-size: .74rem;
-        font-weight: 600;
-        color: var(--mis-tinta-3);
     }
 
     /* ------------------------------------------------------- penyaring */
@@ -314,31 +255,6 @@ Data Pelanggan | MIS
 
     /* Kepala kolom yang bisa diurutkan. Ikon panahnya samar sampai kolomnya
        dipakai, supaya tiga panah sekaligus tidak ramai di kepala tabel. */
-    .pel-urut {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .pel-urut:hover {
-        color: #4f46e5;
-    }
-
-    .pel-urut > .fas {
-        font-size: .7rem !important;
-        opacity: .35;
-    }
-
-    .pel-urut.aktif {
-        color: #4f46e5;
-    }
-
-    .pel-urut.aktif > .fas {
-        opacity: 1;
-    }
-
     .pel-nama {
         margin: 0;
         line-height: 1.25;
@@ -405,12 +321,6 @@ Data Pelanggan | MIS
 
     /* ------------------------------------------------------- responsif */
 
-    @media (max-width: 1100px) {
-        .pel-ringkas {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
     /*
      * Pita 768px: tabelnya masih tabel, tetapi tinggal sepuluh piksel lagi.
      *
@@ -422,12 +332,6 @@ Data Pelanggan | MIS
      * tujuh kolom jauh lebih dari cukup.
      */
     @media (max-width: 991.98px) {
-        .mis-tabel th,
-        .mis-tabel td {
-            padding-left: 12px !important;
-            padding-right: 12px !important;
-        }
-
         .pel-centang-sel {
             width: 28px;
             padding-left: 10px !important;
@@ -435,12 +339,6 @@ Data Pelanggan | MIS
     }
 
     @media (max-width: 767.98px) {
-        /* Baru di sini pengurutnya berguna: di atas 768px kepala kolomnya
-           masih kelihatan dan sudah melakukan tugas yang sama. */
-        .pel-urut-ponsel {
-            display: block;
-        }
-
         /*
          * Tiap pelanggan jadi kartu tersendiri, bukan baris bergaris pemisah.
          *
@@ -557,19 +455,6 @@ Data Pelanggan | MIS
     }
 
     @media (max-width: 767.98px) {
-        .pel-ringkas {
-            gap: 10px;
-        }
-
-        .pel-ubin {
-            padding: 12px 13px;
-            border-radius: 14px;
-        }
-
-        .pel-ubin-angka {
-            font-size: 1.15rem;
-        }
-
         /*
          * Penyaring dilipat di ponsel.
          *
@@ -686,45 +571,45 @@ Data Pelanggan | MIS
              angkanya terlihat tetapi daftarnya tidak bisa dipersempit jadi
              orang-orang itu. Berupa TAUTAN, bukan tombol berskrip, jadi
              alamatnya bisa disalin dan tetap bekerja tanpa JavaScript. --}}
-        <div class="pel-ringkas">
-            <a class="pel-ubin {{ ! $status && ! $verifikasi && ! $punyaPesanan && ! $baru ? 'terpilih' : '' }}"
+        <div class="mis-ringkas">
+            <a class="mis-ubin {{ ! $status && ! $verifikasi && ! $punyaPesanan && ! $baru ? 'terpilih' : '' }}"
                 href="{{ route('account.customer.index', request()->only('cari')) }}"
                 title="Tampilkan semua pelanggan">
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-users"></i></span>
                 <div>
-                    <p class="pel-ubin-angka">{{ number_format($ringkasan['total']) }}</p>
-                    <p class="pel-ubin-label">Seluruh pelanggan</p>
+                    <p class="mis-ubin-angka">{{ number_format($ringkasan['total']) }}</p>
+                    <p class="mis-ubin-label">Seluruh pelanggan</p>
                 </div>
             </a>
-            <a class="pel-ubin {{ $status === 'aktif' ? 'terpilih' : '' }}"
+            <a class="mis-ubin {{ $status === 'aktif' ? 'terpilih' : '' }}"
                 href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['status' => 'aktif'])) }}"
                 title="Saring: hanya akun aktif">
                 <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-user-check"></i></span>
                 <div>
-                    <p class="pel-ubin-angka">{{ number_format($ringkasan['aktif']) }}</p>
-                    <p class="pel-ubin-label">Akun aktif</p>
+                    <p class="mis-ubin-angka">{{ number_format($ringkasan['aktif']) }}</p>
+                    <p class="mis-ubin-label">Akun aktif</p>
                 </div>
             </a>
             {{-- Dulu "Email terverifikasi", dan itu angka mati: terukur 65 aktif
                  dan 65 terverifikasi, NOL yang berbeda ke salah satu arah,
                  sebab verifyEmail() menyetel keduanya sekaligus. Jumlah yang
                  pernah memesan memang berbeda (29 dari 102). --}}
-            <a class="pel-ubin {{ $punyaPesanan ? 'terpilih' : '' }}"
+            <a class="mis-ubin {{ $punyaPesanan ? 'terpilih' : '' }}"
                 href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['pesanan' => 'ada'])) }}"
                 title="Saring: hanya yang pernah memesan">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                 <div>
-                    <p class="pel-ubin-angka">{{ number_format($ringkasan['memesan']) }}</p>
-                    <p class="pel-ubin-label">Pernah memesan</p>
+                    <p class="mis-ubin-angka">{{ number_format($ringkasan['memesan']) }}</p>
+                    <p class="mis-ubin-label">Pernah memesan</p>
                 </div>
             </a>
-            <a class="pel-ubin {{ $baru ? 'terpilih' : '' }}"
+            <a class="mis-ubin {{ $baru ? 'terpilih' : '' }}"
                 href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['baru' => '30'])) }}"
                 title="Saring: bergabung 30 hari terakhir">
                 <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-user-plus"></i></span>
                 <div>
-                    <p class="pel-ubin-angka">{{ number_format($ringkasan['baru']) }}</p>
-                    <p class="pel-ubin-label">Bergabung 30 hari terakhir</p>
+                    <p class="mis-ubin-angka">{{ number_format($ringkasan['baru']) }}</p>
+                    <p class="mis-ubin-label">Bergabung 30 hari terakhir</p>
                 </div>
             </a>
         </div>
@@ -795,7 +680,7 @@ Data Pelanggan | MIS
               Menu ini menggantikannya di sana, dan disembunyikan di layar lebar
               karena kepala kolomnya sudah melakukan tugas yang sama.
             --}}
-            <div class="mis-isian pel-saring-pilih pel-urut-ponsel">
+            <div class="mis-isian pel-saring-pilih mis-urut-ponsel">
                 <label class="mis-label" for="pel-urut-pilih">Urutkan</label>
                 <select class="form-control-modern" id="pel-urut-pilih" name="urutgabung">
                     @php
@@ -904,11 +789,11 @@ Data Pelanggan | MIS
                                         aria-label="Pilih semua pelanggan di halaman ini">
                                 </th>
                             @endif
-                            <th aria-sort="{{ $ariaUrut('nama') }}">@include('account.customer.partials.urut', ['kolom' => 'nama', 'label' => 'Pelanggan'])</th>
+                            <th aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'nama', 'label' => 'Pelanggan'])</th>
                             <th>Kontak</th>
-                            <th aria-sort="{{ $ariaUrut('status') }}">@include('account.customer.partials.urut', ['kolom' => 'status', 'label' => 'Status'])</th>
-                            <th aria-sort="{{ $ariaUrut('pesanan') }}">@include('account.customer.partials.urut', ['kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
-                            <th aria-sort="{{ $ariaUrut('bergabung') }}">@include('account.customer.partials.urut', ['kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
+                            <th aria-sort="{{ $ariaUrut('status') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'status', 'label' => 'Status'])</th>
+                            <th aria-sort="{{ $ariaUrut('pesanan') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
+                            <th aria-sort="{{ $ariaUrut('bergabung') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -1254,7 +1139,7 @@ Data Pelanggan | MIS
          * diganti pertama kali.
          */
         hasil.addEventListener('click', function (e) {
-            const tautan = e.target.closest('.pagination a, .pel-urut');
+            const tautan = e.target.closest('.pagination a, .mis-urut');
             if (!tautan || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
 
             e.preventDefault();
