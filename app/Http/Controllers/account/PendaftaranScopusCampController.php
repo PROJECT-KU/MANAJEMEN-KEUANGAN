@@ -51,14 +51,14 @@ class PendaftaranScopusCampController extends Controller
         $endDate = $request->input('tanggal_akhir');
 
         $query = DB::table('scopus_camp_pendaftaran')
-            ->join('scopus_camp_kategori', 'scopus_camp_pendaftaran.scopus_camp_kategori_id', '=', 'scopus_camp_kategori.id')
+            ->join('kategori_layanan', 'scopus_camp_pendaftaran.kategori_id', '=', 'kategori_layanan.id')
             ->select(
                 'scopus_camp_pendaftaran.*',
-                'scopus_camp_kategori.nama as kategori_nama',
-                'scopus_camp_kategori.nama_ke as kategori_nama_ke',
-                'scopus_camp_kategori.mulai as kategori_tanggal_mulai',
-                'scopus_camp_kategori.selesai as kategori_tanggal_selesai',
-                'scopus_camp_kategori.id as kategori_id'
+                'kategori_layanan.nama as kategori_nama',
+                'kategori_layanan.nama_ke as kategori_nama_ke',
+                'kategori_layanan.mulai as kategori_tanggal_mulai',
+                'kategori_layanan.selesai as kategori_tanggal_selesai',
+                'kategori_layanan.id as kategori_id'
             )
             ->latest('scopus_camp_pendaftaran.created_at');
 
@@ -78,7 +78,7 @@ class PendaftaranScopusCampController extends Controller
     public function edit($id)
     {
         $data = PendaftaranScopusCamp::findOrFail($id);
-        $category = CategoriesScopusCamp::find($data->scopus_camp_kategori_id);
+        $category = CategoriesScopusCamp::find($data->kategori_id);
         $categories = CategoriesScopusCamp::all();
 
         // Inject mulai dan selesai manual jika category ditemukan
@@ -116,8 +116,8 @@ class PendaftaranScopusCampController extends Controller
         // ===========================
         // AMBIL KATEGORI LAMA DAN BARU
         // ===========================
-        $kategoriLama = CategoriesScopusCamp::find($dataUpdate->scopus_camp_kategori_id);
-        $kategoriBaruId = $request->input('scopus_camp_kategori_id');
+        $kategoriLama = CategoriesScopusCamp::find($dataUpdate->kategori_id);
+        $kategoriBaruId = $request->input('kategori_id');
         $kategoriBaru = CategoriesScopusCamp::find($kategoriBaruId);
 
         if (!$kategoriBaru) {
@@ -153,7 +153,7 @@ class PendaftaranScopusCampController extends Controller
         // UPDATE DATA PENDAFTAR
         // ===========================
         $dataUpdate->update([
-            'scopus_camp_kategori_id' => $kategoriBaruId,
+            'kategori_id' => $kategoriBaruId,
             'nama' => $request->input('nama'),
             'email' => $request->input('email'),
             'affiliasi' => $request->input('affiliasi'),
@@ -208,7 +208,7 @@ class PendaftaranScopusCampController extends Controller
             }
 
             // Ambil kategori terkait
-            $kategori = CategoriesScopusCamp::find($data->scopus_camp_kategori_id);
+            $kategori = CategoriesScopusCamp::find($data->kategori_id);
             if ($kategori) {
                 // Kembalikan sisa kuota sesuai jumlah pendaftar yang dihapus
                 $kategori->sisa_kuota += $data->jumlah_pendaftar;
@@ -260,7 +260,7 @@ class PendaftaranScopusCampController extends Controller
         }
 
         $query = DB::table('scopus_camp_pendaftaran as p')
-            ->join('scopus_camp_kategori as k', 'p.scopus_camp_kategori_id', '=', 'k.id')
+            ->join('kategori_layanan as k', 'p.kategori_id', '=', 'k.id')
             ->where(function ($query) use ($search) {
                 $query->where('p.id_transaksi', 'LIKE', '%' . $search . '%')
                     ->orWhere('p.nama', 'LIKE', '%' . $search . '%')

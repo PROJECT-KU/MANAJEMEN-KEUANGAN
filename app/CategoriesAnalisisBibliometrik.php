@@ -2,63 +2,23 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
-class CategoriesAnalisisBibliometrik extends Model
+/**
+ * Angkatan Analisis Bibliometrik.
+ *
+ * Penyaring di atas KategoriLayanan; lihat keterangan di CategoriesScopusCamp.
+ */
+class CategoriesAnalisisBibliometrik extends KategoriLayanan
 {
-    /**
-     * @var string
-     */
-    protected $table = 'categories_analisis_bibliometrik';
+    public const LAYANAN = 'bibliometrik';
 
-    /**
-     * @var array
-     */
-    protected $fillable = [
-        'token',
-        'nama',
-        'nama_ke',
-        'mulai',
-        'selesai',
-        'total_kuota',
-        'sisa_kuota',
-        'desc',
-        'biaya',
-        'ppn',
-        'tipe_diskon',
-        'diskon_persentase',
-        'nominal_diskon',
-        'kode_diskon',
-        'total_biaya',
-        'status',
-        'group_wa',
-        'gambar',
-        'created_at',
-        'updated_at',
-    ];
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
+        static::addGlobalScope('layanan', fn (Builder $q) => $q->where('layanan', self::LAYANAN));
 
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
+            $model->layanan = self::LAYANAN;
         });
     }
-
-    /**
-     * The data type of the primary key.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
 }

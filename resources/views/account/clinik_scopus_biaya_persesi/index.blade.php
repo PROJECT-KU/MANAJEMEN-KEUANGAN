@@ -193,6 +193,12 @@ Tarif Layanan | MIS
     .tar-tanda.kanan { right: 6px; }
 
     .tar-area {
+        /* width 100% WAJIB, tidak boleh mengandalkan induknya: lebar bawaan
+           textarea datang dari atribut cols (20 aksara). Kotak fasilitas
+           selamat karena kebetulan ada di dalam .mis-isian yang meregangkan
+           anaknya; kotak cetakan di bawah TIDAK, dan tanpa aturan ini ia
+           menyempit jadi satu kolom sempit. */
+        width: 100%;
         min-height: 92px; padding: 10px 13px;
         border: 1px solid var(--mis-garis); border-radius: 11px;
         background: #fff;
@@ -201,6 +207,45 @@ Tarif Layanan | MIS
     }
 
     .tar-area:focus { outline: none; border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(99, 102, 241, .5); }
+
+    .tar-pendek { min-height: 62px; }
+    .tar-panjang { min-height: 220px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .76rem; }
+
+    /* Cetakan deskripsinya terlipat di dalam borang yang sudah terlipat:
+       yang paling sering diubah tarif dan fasilitasnya, bukan teks yang
+       ditulis sekali lalu dibiarkan bertahun-tahun. */
+    .tar-cetakan > summary {
+        display: flex; align-items: center; gap: 8px;
+        padding: 9px 12px;
+        border: 1px dashed var(--mis-garis); border-radius: 11px;
+        background: #f8fafc;
+        font-size: .78rem; font-weight: 700; color: var(--mis-tinta-2);
+        cursor: pointer; list-style: none;
+    }
+
+    .tar-cetakan > summary::-webkit-details-marker { display: none; }
+    .tar-cetakan[open] > summary { margin-bottom: 10px; }
+
+    .tar-penanda {
+        margin: 8px 0 0; padding: 10px 12px; list-style: none;
+        display: grid; gap: 5px;
+        border-radius: 11px; background: #f8fafc;
+    }
+
+    .tar-penanda li {
+        display: grid;
+        /* minmax(0, ...) supaya nama penanda yang panjang tetap bisa menyusut
+           dan tidak mendorong keterangannya keluar kartu di layar sempit. */
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 8px; align-items: baseline;
+        line-height: 1.45; font-size: .72rem; color: var(--mis-tinta-3);
+    }
+
+    .tar-penanda code {
+        padding: 1px 6px; border-radius: 6px;
+        background: #ede9fe; color: #6d28d9;
+        font-size: .72rem; white-space: nowrap;
+    }
 
     .tar-pratinjau {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
@@ -357,6 +402,64 @@ Tarif Layanan | MIS
                                         Dipakai ulang saat membuat angkatan baru, jadi tidak perlu diketik lagi.
                                     </p>
                                 </div>
+
+                                <div class="mis-isian">
+                                    <label class="mis-label" for="tar-keg-{{ $loop->index }}">
+                                        Kegiatan utama
+                                    </label>
+                                    <textarea class="tar-area" id="tar-keg-{{ $loop->index }}" name="kegiatan"
+                                        rows="4" placeholder="Boleh ditempel utuh, atau satu kegiatan per baris">{{ $t ? implode("\n", $t->daftar_kegiatan) : '' }}</textarea>
+                                    <p class="mis-bantuan">
+                                        Sama seperti fasilitas — tempel teks pengumuman, yang diambil
+                                        baris di bawah judul &ldquo;Kegiatan&rdquo;.
+                                    </p>
+                                </div>
+
+                                <div class="mis-isian">
+                                    <label class="mis-label" for="tar-kontak-{{ $loop->index }}">
+                                        Kontak panitia
+                                    </label>
+                                    <textarea class="tar-area tar-pendek" id="tar-kontak-{{ $loop->index }}"
+                                        name="kontak" rows="2"
+                                        placeholder="📞 Kumala: 0889-8356-7819">{{ $t?->kontak }}</textarea>
+                                    <p class="mis-bantuan">
+                                        Berganti tiap beberapa bulan. Diubah di sini sekali, seluruh
+                                        angkatan berikutnya ikut.
+                                    </p>
+                                </div>
+
+                                <details class="tar-cetakan">
+                                    <summary>
+                                        <i class="fas fa-file-alt mis-ikon-biru" aria-hidden="true"></i>
+                                        Cetakan deskripsi angkatan
+                                        @if ($t?->ada_cetakan)
+                                            <span class="mis-pil mis-pil-hijau">
+                                                <i class="fas fa-check"></i> sudah ada
+                                            </span>
+                                        @else
+                                            <span class="mis-pil mis-pil-abu">belum diisi</span>
+                                        @endif
+                                    </summary>
+
+                                    <textarea class="tar-area tar-panjang" name="template_deskripsi"
+                                        rows="10" spellcheck="false"
+                                        placeholder="Teks pengumuman yang dipakai ulang tiap angkatan">{{ $t?->template_deskripsi }}</textarea>
+
+                                    <p class="mis-bantuan">
+                                        Ditulis sekali, dipakai semua angkatan. Bagian yang berganti
+                                        tiap angkatan cukup ditulis sebagai penanda di bawah ini —
+                                        sistem yang mengisinya.
+                                    </p>
+
+                                    <ul class="tar-penanda">
+                                        @foreach (\App\Support\PerakitDeskripsi::PENANDA as $kode => $arti)
+                                            <li>
+                                                <code>{{ $kode }}</code>
+                                                <span>{{ $arti }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </details>
 
                                 <div class="tar-pratinjau" aria-live="polite">
                                     <i class="fas fa-calculator mis-ikon-ungu" aria-hidden="true"></i>

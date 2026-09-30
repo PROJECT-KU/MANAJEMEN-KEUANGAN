@@ -20,8 +20,11 @@ use Illuminate\Support\Str;
  *
  * Varian membedakan harga di dalam satu layanan:
  *
- *   Scopus Camp    jawa / luar_jawa   — ongkos penyelenggaraan berbeda
  *   Bibliometrik   online / offline   — offline menanggung tempat & konsumsi
+ *
+ * Varian dipakai hanya untuk beda PRODUK, bukan beda angkatan. Scopus Camp
+ * sempat dibagi Jawa/luar Jawa, lalu dibuang: harganya berubah menurut waktu,
+ * bukan pulau, dan tiap angkatan sudah menyimpan lokasi serta biayanya sendiri.
  *
  * Layanan tanpa varian menyimpan NULL, bukan untaian kosong: keduanya berbeda
  * di whereNull, dan kolom kosong yang tercampur membuat pencarian tarifnya
@@ -43,11 +46,15 @@ class ClinikScopusBiayaPersesi extends Model
         'biaya_persesi',
         'ppn',
         'fasilitas',
+        'template_deskripsi',
+        'kegiatan',
+        'kontak',
         'status',
     ];
 
     protected $casts = [
         'fasilitas' => 'array',
+        'kegiatan' => 'array',
     ];
 
     public const AKTIF = 'active';
@@ -81,7 +88,10 @@ class ClinikScopusBiayaPersesi extends Model
             'satuan' => 'per peserta',
             'ikon' => 'fa-campground',
             'warna' => 'mis-hijau',
-            'varian' => ['jawa' => 'Pulau Jawa', 'luar_jawa' => 'Luar Pulau Jawa'],
+            // Tanpa varian: harganya ternyata berubah menurut WAKTU, bukan
+            // pulau — Yogyakarta 4,5jt sampai September 2026 lalu 5,5jt sejak
+            // Oktober. Lokasinya sendiri sudah disimpan tiap angkatan.
+            'varian' => [],
         ],
         'scopus_kafe' => [
             'nama' => 'Scopus Kafe',
@@ -228,8 +238,26 @@ class ClinikScopusBiayaPersesi extends Model
     /** Daftar fasilitas, selalu berupa larik walau kolomnya kosong. */
     public function getDaftarFasilitasAttribute(): array
     {
+        return self::bersihkanDaftar($this->fasilitas);
+    }
+
+    /** Daftar kegiatan utama; diperlakukan sama persis seperti fasilitas. */
+    public function getDaftarKegiatanAttribute(): array
+    {
+        return self::bersihkanDaftar($this->kegiatan);
+    }
+
+    /** Apakah layanan ini sudah punya cetakan deskripsi yang bisa dipakai. */
+    public function getAdaCetakanAttribute(): bool
+    {
+        return trim((string) $this->template_deskripsi) !== '';
+    }
+
+    /** @param mixed $nilai */
+    private static function bersihkanDaftar($nilai): array
+    {
         return array_values(array_filter(
-            (array) ($this->fasilitas ?? []),
+            (array) ($nilai ?? []),
             fn ($f) => trim((string) $f) !== ''
         ));
     }

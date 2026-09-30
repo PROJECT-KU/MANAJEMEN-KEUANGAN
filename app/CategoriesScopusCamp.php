@@ -2,66 +2,26 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
-class CategoriesScopusCamp extends Model
+/**
+ * Angkatan Scopus Camp.
+ *
+ * Tinggal penyaring di atas KategoriLayanan sejak kategorinya disatukan.
+ * Dipertahankan supaya kode lama yang memakai kelas ini tidak perlu diubah
+ * sekaligus — dan supaya tidak ada kueri yang lupa menyaring layanannya, yang
+ * akibatnya layar Scopus Camp menampilkan angkatan Bibliometrik.
+ */
+class CategoriesScopusCamp extends KategoriLayanan
 {
-    /**
-     * @var string
-     */
-    protected $table = 'scopus_camp_kategori';
+    public const LAYANAN = 'scopus_camp';
 
-    /**
-     * @var array
-     */
-    protected $fillable = [
-        'token',
-        'nama',
-        'nama_ke',
-        'mulai',
-        'selesai',
-        'total_kuota',
-        'sisa_kuota',
-        'desc',
-        'best_price',
-        'lokasi',
-        'biaya',
-        'ppn',
-        'tipe_diskon',
-        'diskon_persentase',
-        'nominal_diskon',
-        'kode_diskon',
-        'total_biaya',
-        'status',
-        'group_wa',
-        'gambar',
-        'created_at',
-        'updated_at',
-    ];
-
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
+        static::addGlobalScope('layanan', fn (Builder $q) => $q->where('layanan', self::LAYANAN));
 
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
+            $model->layanan = self::LAYANAN;
         });
     }
-
-    /**
-     * The data type of the primary key.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
 }

@@ -294,3 +294,15 @@ layar yang isinya beberapa hal sejenis dan tiap hal punya sedikit isian.
 
 Terukur di 1470/820/390/320px: tiga, dua, satu, satu kolom; tidak ada gulung
 mendatar; tidak ada yang meluber.
+
+## `.mis-tombol-garis` itu tombol IKON SAJA
+
+Di `mis-ui.css` kelas itu didefinisikan **34x34, `display: inline-grid`,
+padding nol** — bentuk untuk tombol aksi baris yang isinya cuma satu glif.
+Dipakai untuk tombol bertulisan, teksnya terjepit: terukur "Kembali" butuh
+41px di dalam kotak 32px, dan tidak ada galat apa pun yang memberi tahu.
+
+Tombol bertulisan memakai `.mis-tombol-halus` (putih, bertepi) atau
+`.mis-tombol-ungu` / `.mis-tombol-biru` / `.mis-tombol-hijau` untuk yang
+utama. `.mis-tombol-bahaya` juga 34x34 dan ikon saja; yang bertulisan merah
+memakai `.mis-tombol-hapus`.

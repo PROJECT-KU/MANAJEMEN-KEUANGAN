@@ -329,7 +329,7 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
 
         <form id="formKonfirmasi" method="POST" action="{{ route('public.scopuscamp.store') }}" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="scopus_camp_kategori_id" id="scopusCampIdvalue" value="{{ $item->id }}">
+            <input type="hidden" name="kategori_id" id="scopusCampIdvalue" value="{{ $item->id }}">
 
             <div class="registration-grid mt-4">
 

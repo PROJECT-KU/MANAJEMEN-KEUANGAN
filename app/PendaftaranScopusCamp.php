@@ -18,7 +18,7 @@ class PendaftaranScopusCamp extends Model
     protected $fillable = [
         'token',
         'id_transaksi',
-        'scopus_camp_kategori_id',
+        'kategori_id',
         'email',
         'nama',
         'telp',

@@ -19,7 +19,7 @@ class PublicAnalisisBibliometrikController extends Controller
     public function public(Request $request)
     {
 
-        $categories = DB::table('categories_analisis_bibliometrik')
+        $categories = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->where('status', 'active')
             ->latest()
             ->paginate(6);
@@ -56,7 +56,7 @@ class PublicAnalisisBibliometrikController extends Controller
             'kode_diterima' => $kode,
         ]);
 
-        $diskon = DB::table('categories_analisis_bibliometrik')
+        $diskon = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->where('id', $id)
             ->first();
 
@@ -122,12 +122,12 @@ class PublicAnalisisBibliometrikController extends Controller
         $id_transaksi = $this->generateRandomId(5);
 
         // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
-        $kategoriId = $request->input('categories_analisis_bibliometrik_id');
+        $kategoriId = $request->input('kategori_id');
         $kategori = CategoriesAnalisisBibliometrik::findOrFail($kategoriId);
 
         // Hitung jumlah pendaftar saat ini
         $jumlahPendaftarBaru = (int) $request->input('jumlah_pendaftar');
-        $totalTerdaftarSaatIni = AnalisisBibliometrik::where('categories_analisis_bibliometrik_id', $kategoriId)
+        $totalTerdaftarSaatIni = AnalisisBibliometrik::where('kategori_id', $kategoriId)
             ->sum('jumlah_pendaftar');
 
         $totalSetelahPendaftaran = $totalTerdaftarSaatIni + $jumlahPendaftarBaru;
@@ -165,7 +165,7 @@ class PublicAnalisisBibliometrikController extends Controller
         $save = AnalisisBibliometrik::create([
             'token'                                                     => $token,
             'id_transaksi'                                              => $id_transaksi,
-            'categories_analisis_bibliometrik_id'                       => $request->input('categories_analisis_bibliometrik_id'),
+            'kategori_id'                       => $request->input('kategori_id'),
             'email'                                                     => $request->input('email'),
             'nama'                                                      => $request->input('nama'),
             'telp'                                                      => $request->input('telp'),
@@ -183,7 +183,7 @@ class PublicAnalisisBibliometrikController extends Controller
 
         if ($save) {
             // UPDATE SISA KUOTA
-            $totalTerdaftar = AnalisisBibliometrik::where('categories_analisis_bibliometrik_id', $kategoriId)
+            $totalTerdaftar = AnalisisBibliometrik::where('kategori_id', $kategoriId)
                 ->sum('jumlah_pendaftar');
 
             $kategori->sisa_kuota = max(0, $kategori->total_kuota - $totalTerdaftar);
