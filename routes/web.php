@@ -443,6 +443,11 @@ Route::prefix('account')
             Route::post('/Clinik-Scopus-Biaya-Persesi/data/{tarif}/berlakukan', 'account\ClinikScopusBiayaPersesiController@berlakukan')->name('account.Clinik-Scopus-Biaya-Persesi.berlakukan');
             Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{tarif}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
 
+            // Katalog layanannya sendiri: menambah jenis jasa baru tanpa rilis.
+            Route::post('/layanan', 'account\LayananController@store')->name('account.layanan.store');
+            Route::post('/layanan/{layanan}', 'account\LayananController@update')->name('account.layanan.update');
+            Route::delete('/layanan/{layanan}', 'account\LayananController@destroy')->name('account.layanan.destroy');
+
             /*
              * Angkatan seluruh layanan, satu layar. Penggantinya dua layar
              * kategori yang lama; keduanya masih hidup sampai layar ini

@@ -338,3 +338,24 @@ Kartu yang memajang daftar (fasilitas, kegiatan) memotongnya di **4 butir**
 lalu menulis "+N lainnya". Selengkapnya ada di borangnya. Tanpa dipotong,
 kartu berisi 7 butir memaksa seluruh barisnya setinggi itu, dan kartu yang
 cuma punya 3 butir jadi separuh kosong.
+
+## Daftar pilihan yang tersimpan di basis data
+
+Ikon dan warna yang disimpan admin lewat borang **wajib** dari daftar tertutup
+(`Rule::in`), bukan isian bebas. Alasannya bukan kerapian: proyek ini memakai
+Font Awesome 5, dan nama FA6 tidak merender apa pun **tanpa galat sama sekali**.
+`IkonAdaGlifnyaTest` memindai berkas Blade dan `mis-ui.js`, tetapi nama yang
+datang dari basis data lolos dari pemindaian itu — jadi penjaganya harus di
+validator, ditambah satu uji yang memeriksa seluruh daftar pilihan itu benar
+ada glifnya.
+
+## MySQL mengurutkan ulang kunci objek JSON
+
+Terukur: `{zulu, alfa, bravo_panjang}` yang disimpan ke kolom `json` terbaca
+kembali sebagai `{alfa, zulu, bravo_panjang}` — menurut panjang lalu abjad.
+Larik JSON **tidak** diurutkan ulang.
+
+Jadi apa pun yang urutannya berarti bagi orang (varian layanan, langkah,
+pilihan) disimpan sebagai **larik berurut** `[{kode, nama}, ...]`, bukan objek
+`{kode: nama}`. Urutan yang diketik admin hilang tanpa jejak kalau memakai
+objek.

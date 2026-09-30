@@ -29,7 +29,7 @@ class KategoriLayananTest extends TestCase
          * bervarian yang dibuat tanpa varian tidak akan pernah menemukan tarif
          * induknya, dan ujinya gagal dengan sebab yang jauh dari penyebabnya.
          */
-        $varian = ClinikScopusBiayaPersesi::LAYANAN[$layanan]['varian'] ?? [];
+        $varian = ClinikScopusBiayaPersesi::layanan()[$layanan]['varian'] ?? [];
 
         return KategoriLayanan::create(array_merge([
             'layanan' => $layanan,
@@ -100,16 +100,27 @@ class KategoriLayananTest extends TestCase
         $lengah = [];
 
         foreach ($this->berkasPhp(base_path('app')) as $berkas) {
-            foreach (file($berkas) as $no => $baris) {
-                if (! str_contains($baris, "DB::table('kategori_layanan')")) {
+            $isi = file_get_contents($berkas);
+            $posisi = 0;
+
+            while (($temu = strpos($isi, "DB::table('kategori_layanan')", $posisi)) !== false) {
+                $posisi = $temu + 1;
+
+                /*
+                 * Diperiksa per PERNYATAAN, bukan per baris: kueri yang
+                 * dirangkai berbilang baris menaruh where-nya di baris
+                 * berikutnya, dan pemeriksaan per baris menandainya lengah
+                 * padahal tidak. Batasnya titik koma penutup rangkaian itu.
+                 */
+                $akhir = strpos($isi, ';', $temu);
+                $pernyataan = substr($isi, $temu, $akhir === false ? 200 : $akhir - $temu);
+
+                if (str_contains($pernyataan, "where('layanan'")) {
                     continue;
                 }
 
-                if (str_contains($baris, "where('layanan'")) {
-                    continue;
-                }
-
-                $lengah[] = str_replace(base_path() . '/', '', $berkas) . ':' . ($no + 1);
+                $baris = substr_count($isi, "\n", 0, $temu) + 1;
+                $lengah[] = str_replace(base_path() . '/', '', $berkas) . ':' . $baris;
             }
         }
 
