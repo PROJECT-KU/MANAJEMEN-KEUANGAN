@@ -373,6 +373,136 @@ class TarifAuditDuaTest extends TestCase
             ->assertSee('href="' . route('account.Clinik-Scopus-Biaya-Persesi.index') . '"', false);
     }
 
+    // ------------------------------------------------- audit ronde keempat
+
+    #[Test]
+    public function pencarian_menjangkau_fasilitas_bukan_cuma_nama(): void
+    {
+        /*
+         * Orang mencari layanan lewat apa yang didapat peserta. Mengetik
+         * "penginapan" dulu tidak menemukan apa pun padahal itu fasilitas
+         * Scopus Camp Pulau Jawa.
+         */
+        $admin = $this->akun();
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))->getContent();
+
+        preg_match_all('/data-cari="([^"]*)"/', $isi, $m);
+        $gabungan = strtolower(implode(' | ', $m[1]));
+
+        $this->assertStringContainsString('penginapan', $gabungan,
+            'Fasilitas harus ikut dicari.');
+        $this->assertStringContainsString('per peserta', $gabungan,
+            'Satuan harus ikut dicari.');
+    }
+
+    #[Test]
+    public function keadaan_kosong_setingkat_kisi_selalu_dibungkus_kartu(): void
+    {
+        /*
+         * Dibuat sesudah menemukan dua keadaan kosong beda bentuk di layar yang
+         * sama: yang satu di dalam kartu, yang lain mengambang di latar.
+         *
+         * Yang diperiksa PERSIS keadaan yang menggantikan kisi — bukan semua
+         * `.mis-kosong` di berkas. Percobaan pertama memindai seluruhnya dengan
+         * jendela 220 aksara ke belakang, dan ia menandai dua keadaan kosong
+         * riwayat yang sebenarnya SUDAH berada di dalam kartu bagiannya; jendela
+         * sepanjang apa pun cuma memindah batas salahnya.
+         */
+        $isi = file_get_contents(
+            resource_path('views/account/clinik_scopus_biaya_persesi/index.blade.php')
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/<div class="mis-bagian tar-kosong-semua"/',
+            $isi,
+            'Keadaan kosong "belum ada layanan" harus dibungkus kartu.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/<div class="mis-bagian[^"]*" id="tar-kosong-cari"/',
+            $isi,
+            'Keadaan kosong pencarian harus dibungkus kartu.'
+        );
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/<div class="mis-kosong[^"]*tar-kosong-semua"/',
+            $isi,
+            'Tidak boleh ada keadaan kosong setingkat kisi yang tanpa kartu.'
+        );
+    }
+
+    #[Test]
+    public function riwayat_kosong_karena_saringan_tidak_bilang_belum_ada(): void
+    {
+        // Riwayatnya ADA, cuma bukan untuk layanan yang sedang disaring.
+        $admin = $this->akun();
+
+        T::query()->where('status', T::NONAKTIF)->update(['layanan' => 'scopus_camp']);
+
+        $halaman = $this->actingAs($admin)->get(route('account.Clinik-Scopus-Biaya-Persesi.index', [
+            'riwayat' => 'clinik_scopus',
+        ]));
+
+        $halaman->assertOk();
+        $halaman->assertSee('Tidak ada yang cocok', false);
+        $halaman->assertDontSee('Belum ada tarif lama', false);
+    }
+
+    #[Test]
+    public function dialog_punya_nama_untuk_pembaca_layar(): void
+    {
+        // Tanpa aria-labelledby, pembaca layar mengumumkan "dialog" saja —
+        // bukan "Scopus Camp — Pulau Jawa".
+        $admin = $this->akun();
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))->getContent();
+
+        foreach ([['tar-dialog', 'tar-f-judul'], ['lyn-dialog', 'lyn-judul']] as [$dialog, $judul]) {
+            $this->assertMatchesRegularExpression(
+                '/id="' . $dialog . '"[^>]*aria-labelledby="' . $judul . '"/s',
+                $isi,
+                $dialog . ' harus dinamai oleh ' . $judul
+            );
+        }
+    }
+
+    #[Test]
+    public function daftar_harga_pdf_menomori_halamannya(): void
+    {
+        /*
+         * Ekspor Data Pelanggan menomori halamannya; daftar harga sempat tidak,
+         * jadi "seragam" yang diklaim sebelumnya belum penuh — dan daftar yang
+         * menyeberang beberapa halaman tidak bisa dicocokkan urutannya.
+         */
+        $blade = file_get_contents(
+            resource_path('views/account/clinik_scopus_biaya_persesi/cetak-pdf.blade.php')
+        );
+
+        $this->assertStringContainsString('{PAGE_NUM}', $blade);
+        $this->assertStringContainsString('{PAGE_COUNT}', $blade);
+        $this->assertStringContainsString('page_text', $blade);
+
+        // Jebakannya: penanda diukur pakai angka contoh, bukan apa adanya.
+        $this->assertStringContainsString('str_repeat("0"', $blade,
+            'Lebarnya harus diukur dengan angka contoh, bukan dengan penandanya.');
+    }
+
+    #[Test]
+    public function kepala_menyebut_kapan_harga_terakhir_disentuh(): void
+    {
+        // Pertanyaan pertama saat seseorang curiga harganya berubah.
+        $admin = $this->akun();
+
+        $halaman = $this->actingAs($admin)->get(route('account.Clinik-Scopus-Biaya-Persesi.index'));
+
+        $halaman->assertOk();
+        $halaman->assertSee('Terakhir diubah', false);
+        $this->assertNotNull($halaman->viewData('terakhir'));
+    }
+
     // ----------------------------------------------------- tanggal & perbaiki
 
     #[Test]

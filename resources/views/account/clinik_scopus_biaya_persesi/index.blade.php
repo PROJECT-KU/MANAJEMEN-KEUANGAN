@@ -15,6 +15,19 @@ Tarif Layanan | MIS
      * lencana .mis-pil, tombol .mis-tombol, kartu .mis-bagian.
      */
 
+    /* Keterangan "terakhir diubah" menempel di anak judul, tidak jadi baris
+       sendiri: ia keterangan, bukan pengumuman. */
+    .tar-terakhir {
+        display: inline-block;
+        margin-left: 4px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        font-size: .72rem;
+        color: var(--mis-tinta-3);
+        white-space: nowrap;
+    }
+
     .tar-kepala {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
@@ -587,7 +600,20 @@ Tarif Layanan | MIS
             <span class="mis-medali mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
             <div class="mis-kepala-teks">
                 <h1 class="mis-judul">Tarif layanan</h1>
-                <p class="mis-sub">Harga, fasilitas, dan cetakan deskripsi seluruh layanan jasa — disetel sekali di sini.</p>
+                <p class="mis-sub">
+                    Harga, fasilitas, dan cetakan deskripsi seluruh layanan jasa — disetel sekali di sini.
+                    @if ($terakhir)
+                        {{-- Pertanyaan pertama saat seseorang curiga harganya berubah,
+                             dijawab tanpa perlu membuka riwayat. --}}
+                        <span class="tar-terakhir">
+                            Terakhir diubah
+                            {{ optional($terakhir->updated_at)->locale('id')->diffForHumans() }}
+                            @if ($terakhir->penginput_id)
+                                oleh {{ optional($terakhir->penginput)->full_name ?: 'akun terhapus' }}
+                            @endif
+                        </span>
+                    @endif
+                </p>
             </div>
             <div class="mis-kepala-aksi">
                 @if ($totalKartu > 0)
@@ -667,8 +693,16 @@ Tarif Layanan | MIS
                 @php($t = $k['tarif'])
                 @php($fasilitas = $t ? $t->daftar_fasilitas : [])
                 @php($jadwal = $terjadwal->first(fn ($j) => $j->layanan === $k['layanan'] && $j->varian === $k['varian']))
+                {{-- Yang dicari termasuk fasilitas dan satuannya, bukan cuma
+                     namanya: orang mencari layanan lewat apa yang didapat
+                     peserta — mengetik "penginapan" dulu tidak menemukan apa pun
+                     padahal itu fasilitas Scopus Camp Pulau Jawa. --}}
                 <div class="tar-kartu {{ $t ? '' : 'kosong' }}"
-                    data-cari="{{ Str::lower($k['nama'] . ' ' . $k['namaVarian']) }}">
+                    data-cari="{{ Str::lower(implode(' ', array_filter([
+                        $k['nama'], $k['namaVarian'], $k['satuan'],
+                        implode(' ', $fasilitas),
+                        $t ? implode(' ', $t->daftar_kegiatan) : '',
+                    ]))) }}">
                     <div class="tar-kartu-kepala">
                         <span class="mis-medali {{ $k['warna'] }}" aria-hidden="true">
                             <i class="fas {{ $k['ikon'] }}"></i>
@@ -841,14 +875,19 @@ Tarif Layanan | MIS
             </div>
 
             @if ($totalKartu === 0)
-                <div class="mis-kosong tar-kosong-semua">
-                    <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
-                    <p class="mis-kosong-judul">Belum ada layanan yang dijual</p>
-                    <p class="mis-kosong-teks">
-                        {{ $nonaktif->isNotEmpty()
-                            ? 'Semua layanan sedang dinonaktifkan. Aktifkan lagi di bawah, atau tambah yang baru.'
-                            : 'Tambah layanan pertama, lalu setel tarifnya.' }}
-                    </p>
+                {{-- Dibungkus kartu, sama dengan keadaan kosong pencarian di
+                     atas. Dua keadaan kosong di layar yang sama tidak boleh
+                     beda bentuk. --}}
+                <div class="mis-bagian tar-kosong-semua">
+                    <div class="mis-kosong">
+                        <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
+                        <p class="mis-kosong-judul">Belum ada layanan yang dijual</p>
+                        <p class="mis-kosong-teks">
+                            {{ $nonaktif->isNotEmpty()
+                                ? 'Semua layanan sedang dinonaktifkan. Aktifkan lagi di bawah, atau tambah yang baru.'
+                                : 'Tambah layanan pertama, lalu setel tarifnya.' }}
+                        </p>
+                    </div>
                 </div>
             @endif
 
@@ -996,11 +1035,30 @@ Tarif Layanan | MIS
             </form>
 
             @if ($riwayat->isEmpty())
-                <div class="mis-kosong">
-                    <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
-                    <p class="mis-kosong-judul">Belum ada tarif lama</p>
-                    <p class="mis-kosong-teks">Tarif yang diganti akan tersimpan di sini, lengkap dengan tanggalnya.</p>
-                </div>
+                {{-- Dibedakan: "belum ada" dan "tidak cocok saringannya" adalah
+                     dua keadaan berbeda, dan yang kedua ditulis "belum ada"
+                     adalah kalimat yang tidak benar — riwayatnya ADA, cuma bukan
+                     untuk layanan yang sedang disaring. --}}
+                @if ($saringRiwayat)
+                    <div class="mis-kosong mis-kosong-cari">
+                        <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                        <p class="mis-kosong-judul">Tidak ada yang cocok</p>
+                        <p class="mis-kosong-teks">
+                            {{ $totalRiwayat }} tarif lama tersimpan, tetapi tidak ada yang
+                            milik layanan ini. Coba layanan lain, atau lihat semuanya.
+                        </p>
+                        <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}"
+                            class="mis-tombol mis-tombol-halus mis-kosong-aksi">
+                            <i class="fas fa-times"></i> Lihat semua layanan
+                        </a>
+                    </div>
+                @else
+                    <div class="mis-kosong">
+                        <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                        <p class="mis-kosong-judul">Belum ada tarif lama</p>
+                        <p class="mis-kosong-teks">Tarif yang diganti akan tersimpan di sini, lengkap dengan tanggalnya.</p>
+                    </div>
+                @endif
             @else
                 <div class="mis-tabel-bungkus">
                     <table class="mis-tabel mis-tabel-kartu tar-tabel">
@@ -1117,7 +1175,12 @@ Tarif Layanan | MIS
     {{-- SATU borang untuk semua layanan, diisi saat dibuka. Tujuh borang di
          tujuh kartu berarti tujuh salinan markah yang sama di setiap muat
          halaman, dan tiap kartu jadi dua kali lebih tinggi saat dibuka. --}}
-    <dialog class="tar-dialog" id="tar-dialog">
+    {{-- aria-labelledby menamai dialognya; tanpa itu pembaca layar
+         mengumumkan "dialog" saja, bukan "Scopus Camp — Pulau Jawa".
+         aria-modal ditulis eksplisit: showModal() sudah memberi semantiknya,
+         tetapi tidak semua pembaca layar lama menyimpulkannya. --}}
+    <dialog class="tar-dialog" id="tar-dialog"
+        aria-labelledby="tar-f-judul" aria-describedby="tar-f-sub" aria-modal="true">
         <form method="POST" action="{{ route('account.Clinik-Scopus-Biaya-Persesi.simpan') }}"
             class="tar-dialog-borang" id="tar-borang">
             @csrf
@@ -1252,7 +1315,8 @@ Tarif Layanan | MIS
     </dialog>
 
     {{-- ---------------------------------------- dialog layanan --}}
-    <dialog class="tar-dialog" id="lyn-dialog">
+    <dialog class="tar-dialog" id="lyn-dialog"
+        aria-labelledby="lyn-judul" aria-describedby="lyn-sub" aria-modal="true">
         <form method="POST" action="{{ route('account.layanan.store') }}"
             class="tar-dialog-borang" id="lyn-borang">
             @csrf
@@ -1590,7 +1654,15 @@ Tarif Layanan | MIS
             salin.hidden = saudara.length === 0;
 
             if (saudara.length > 0) {
-                el('tar-f-salin-teks').textContent = 'Salin isi dari ' + saudara[0].nama;
+                /*
+                 * Semua saudara ditawarkan, bukan cuma yang pertama. Dengan dua
+                 * varian bedanya tidak terasa, tetapi katalognya memang dibuat
+                 * bisa tumbuh — layanan bertiga varian hanya bisa menyalin dari
+                 * satu, diam-diam.
+                 */
+                el('tar-f-salin-teks').textContent = saudara.length === 1
+                    ? 'Salin isi dari ' + saudara[0].nama
+                    : 'Salin isi dari varian lain (' + saudara.length + ' pilihan)';
             }
 
             segarkan();
@@ -1606,18 +1678,37 @@ Tarif Layanan | MIS
         el('tar-f-salin').addEventListener('click', function () {
             if (saudara.length === 0) return;
 
-            const d = saudara[0];
+            const pilih = saudara.length === 1
+                ? Promise.resolve(saudara[0])
+                : window.Swal.fire({
+                    title: 'Salin dari varian mana?',
+                    input: 'select',
+                    inputOptions: saudara.reduce(function (o, x, i) { o[i] = x.nama; return o; }, {}),
+                    inputValue: '0',
+                    showCancelButton: true,
+                    confirmButtonText: 'Lanjut',
+                    cancelButtonText: 'Batal',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'mis-tombol mis-tombol-ungu',
+                        cancelButton: 'mis-tombol mis-tombol-halus',
+                    },
+                }).then(function (h) { return h.isConfirmed ? saudara[h.value] : null; });
 
-            window.misKonfirmasi({
-                judul: 'Salin isi dari varian lain?',
-                pesan: 'Fasilitas, kegiatan, kontak, dan cetakan deskripsi diambil dari %s. '
-                    + 'Tarif dan PPN tidak ikut — itu justru yang membedakan variannya.',
-                sorot: d.nama,
-                tombol: 'Ya, salin',
-                jenis: 'tanya',
-                glif: 'fa-copy',
-            }).then(function (ya) {
-                if (!ya) return;
+            pilih.then(function (d) {
+                if (!d) return;
+
+                return window.misKonfirmasi({
+                    judul: 'Salin isi dari varian lain?',
+                    pesan: 'Fasilitas, kegiatan, kontak, dan cetakan deskripsi diambil dari %s. '
+                        + 'Tarif dan PPN tidak ikut — itu justru yang membedakan variannya.',
+                    sorot: d.nama,
+                    tombol: 'Ya, salin',
+                    jenis: 'tanya',
+                    glif: 'fa-copy',
+                }).then(function (ya) { return ya ? d : null; });
+            }).then(function (d) {
+                if (!d) return;
 
                 el('tar-f-fasilitas').value = d.fasilitas;
                 el('tar-f-kegiatan').value = d.kegiatan;

@@ -278,6 +278,37 @@
             </tbody>
         </table>
     @endif
+
+    {{-- Nomor halaman digambar Dompdf sendiri; Blade tidak bisa menghitungnya
+         karena pemenggalan halamannya baru diketahui saat render.
+
+         Disalin apa adanya dari ekspor Data Pelanggan — termasuk jebakan
+         pengukurannya di bawah. --}}
+    <script type="text/php">
+        if (isset($pdf)) {
+            $teks = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+            $huruf = $fontMetrics->getFont("DejaVu Sans");
+
+            /*
+             * Penandanya diganti angka contoh sebelum diukur: {PAGE_NUM} baru
+             * disulih SESUDAH ini, jadi mengukur $teks apa adanya berarti
+             * mengukur panjang penandanya (36 huruf) dan tulisannya terlempar
+             * jauh ke kiri.
+             */
+            $jumlah = (string) (method_exists($pdf, "get_page_count") ? $pdf->get_page_count() : 1);
+            $contoh = str_replace(
+                ["{PAGE_NUM}", "{PAGE_COUNT}"],
+                [str_repeat("0", strlen($jumlah)), $jumlah],
+                $teks
+            );
+            $lebar = $fontMetrics->getTextWidth($contoh, $huruf, 6);
+
+            $pdf->page_text(
+                $pdf->get_width() - 26 - $lebar, $pdf->get_height() - 26,
+                $teks, $huruf, 6, [0.58, 0.64, 0.72]
+            );
+        }
+    </script>
 </body>
 
 </html>
