@@ -141,7 +141,21 @@ class CustomerController extends Controller
 
         return view('account.customer.index', compact(
             'pelanggan', 'ringkasan', 'cari', 'status', 'verifikasi', 'urut', 'arah', 'pesanan'
-        ) + ['punyaPesanan' => $punyaPesanan, 'baru' => $baru]);
+        ) + [
+            'punyaPesanan' => $punyaPesanan,
+            'baru' => $baru,
+            /*
+             * SATU penanda "sedang menyaring", bukan syarat yang diulang di
+             * tiap tempat yang membutuhkannya.
+             *
+             * Sebelum ini tampilannya memeriksa $cari || $status || $verifikasi
+             * di empat tempat, dan dua saringan dari ubin ringkasan tidak ikut
+             * disebut di satu pun. Akibat terburuknya: saat saringan ubin tidak
+             * menyisakan siapa pun, layarnya berbunyi "Belum ada pelanggan" —
+             * padahal ada 101, hanya saringannya yang mengecualikan semua.
+             */
+            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $verifikasi || $punyaPesanan || $baru,
+        ]);
     }
 
     /**
@@ -275,6 +289,17 @@ class CustomerController extends Controller
              * baru datang sesudah orang mengetik.
              */
             'bolehUbah' => (bool) Auth::user()?->adalahAdministrator(),
+            /*
+             * Tab mana yang terbuka mengikuti DI MANA galatnya.
+             *
+             * Kirim email yang sudah dipakai, dan halaman ini digambar ulang
+             * pada tab Data akun — sementara tanda merah beserta nilai yang tadi
+             * diketik ada di tab Kontak, tidak terlihat. Toast-nya memang muncul,
+             * tetapi ia tidak menunjuk medan mana yang bermasalah.
+             */
+            'tabAktif' => session()->get('errors')?->getBag('default')?->hasAny(['email', 'telp'])
+                ? 'kontak'
+                : 'akun',
             'pesanan' => PesananPelanggan::untuk($pelanggan),
             // Jejak perubahan memakai tabel yang sama dengan riwayat keamanan
             // profil; polanya sudah ada, jadi tidak perlu tabel baru.

@@ -397,11 +397,102 @@ Data Pelanggan | MIS
         }
     }
 
-    @media (max-width: 575.98px) {
-        /* Baru di sini pengurutnya berguna: di atas 576px tabelnya masih tabel
-           dan kepala kolomnya kelihatan. */
+    /*
+     * Pita 768px: tabelnya masih tabel, tetapi tinggal sepuluh piksel lagi.
+     *
+     * Mode kartu menyala di bawah 768px (meski komentarnya di mis-ui.css
+     * menyebut "ponsel"), jadi tepat di 768px — lebar iPad tegak — tabelnya
+     * utuh dengan tujuh kolom. Terukur ia meluber 10px sesudah kolom centang
+     * ditambahkan, dan 10px itu cukup membuat daftarnya harus digeser ke
+     * samping. Bantalan selnya dirapatkan di pita ini; 6px per sisi dikali
+     * tujuh kolom jauh lebih dari cukup.
+     */
+    @media (max-width: 991.98px) {
+        .mis-tabel th,
+        .mis-tabel td {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        .pel-centang-sel {
+            width: 28px;
+            padding-left: 10px !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        /* Baru di sini pengurutnya berguna: di atas 768px kepala kolomnya
+           masih kelihatan dan sudah melakukan tugas yang sama. */
         .pel-urut-ponsel {
             display: block;
+        }
+
+        /*
+         * Di mode kartu, kotak centangnya duduk di sudut kanan atas kartu.
+         * Sebagai baris berlabel sendiri ia menambah satu baris di tiap kartu
+         * untuk sesuatu yang tidak perlu dibaca; di sudut, ia tetap terjangkau
+         * jempol dan tidak mengganggu susunan kartunya.
+         */
+        .mis-tabel.mis-tabel-kartu tbody tr {
+            position: relative;
+        }
+
+        .mis-tabel.mis-tabel-kartu tbody td.pel-centang-sel {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: auto;
+            padding: 0 !important;
+            justify-content: flex-end;
+        }
+
+        .mis-tabel.mis-tabel-kartu tbody td.pel-centang-sel::before {
+            display: none;
+        }
+
+        /* Sel nama diberi ruang di kanan supaya nama panjang tidak menyelinap
+           ke bawah kotak centangnya. */
+        .mis-tabel.mis-tabel-kartu tbody td.mis-td-utama {
+            padding-right: 28px;
+        }
+
+        /*
+         * Baris aksi massal diangkat di atas bilah navigasi mengambang milik
+         * cabang ponsel; pada posisi bawaannya ia tertutup penuh.
+         */
+        .pel-massal {
+            bottom: 96px;
+        }
+
+        /*
+         * Keempat tombolnya disusun dua-dua, bukan dibiarkan membungkus
+         * sendiri.
+         *
+         * Lebar keempatnya berbeda-beda ("Batal" 110px, "Nonaktifkan" 160px),
+         * jadi pembungkusan alaminya menghasilkan tiga tombol di baris pertama
+         * dan dua di baris kedua — tepinya bergerigi dan tidak ada yang lurus.
+         * Dalam kisi dua kolom, keempatnya sama lebar dan barisnya rata.
+         */
+        .pel-massal {
+            display: grid;
+            /* minmax(0, 1fr), bukan 1fr: 1fr tidak pernah menyusut di bawah
+               isi terlebarnya, jadi kolom berisi "Nonaktifkan" merebut 144px
+               sementara kolom "Batal" tinggal 119px — terukur di 320px. */
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .pel-massal.tampil {
+            display: grid;
+        }
+
+        .pel-massal-jumlah {
+            grid-column: 1 / -1;
+            margin-right: 0;
+        }
+
+        .pel-massal .mis-tombol {
+            justify-content: center;
         }
     }
 
@@ -570,7 +661,7 @@ Data Pelanggan | MIS
             <summary>
                 <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
                 Cari &amp; saring
-                @if ($cari !== '' || $status || $verifikasi)
+                @if ($adaSaringan)
                     <span class="mis-pil mis-pil-ungu">aktif</span>
                 @endif
             </summary>
@@ -659,7 +750,7 @@ Data Pelanggan | MIS
                 <i class="fas fa-search"></i> Terapkan
             </button>
 
-            @if ($cari !== '' || $status || $verifikasi)
+            @if ($adaSaringan)
                 <a href="{{ route('account.customer.index') }}" class="mis-tombol mis-tombol-halus" title="Hapus semua saringan">
                     <i class="fas fa-times"></i> Reset
                 </a>
@@ -683,10 +774,10 @@ Data Pelanggan | MIS
                 <div class="mis-kosong">
                     <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-users"></i></span>
                     <p class="mis-kosong-judul">
-                        {{ $cari !== '' || $status || $verifikasi ? 'Tidak ada yang cocok' : 'Belum ada pelanggan' }}
+                        {{ $adaSaringan ? 'Tidak ada yang cocok' : 'Belum ada pelanggan' }}
                     </p>
                     <p class="mis-kosong-teks">
-                        {{ $cari !== '' || $status || $verifikasi
+                        {{ $adaSaringan
                             ? 'Coba ganti kata kuncinya, atau hapus saringannya.'
                             : 'Pelanggan muncul di sini setelah mendaftar di layanan.' }}
                     </p>
@@ -731,7 +822,13 @@ Data Pelanggan | MIS
                         @foreach ($pelanggan as $orang)
                             <tr>
                                 @if (auth()->user()->adalahAdministrator())
-                                    <td class="pel-centang-sel mis-td-samar">
+                                    {{-- BUKAN mis-td-samar: kelas itu berarti
+                                         display:none di mode kartu — ia memang
+                                         dibuat untuk kolom nomor urut. Dipakai di
+                                         sini, seluruh aksi massal jadi mustahil di
+                                         ponsel: terukur 12 kotak centang ada di
+                                         markah dan nol terlihat. --}}
+                                    <td class="pel-centang-sel">
                                         <input type="checkbox" class="pel-centang" value="{{ $orang->uuid }}"
                                             aria-label="Pilih {{ $orang->full_name ?: $orang->username }}">
                                     </td>
@@ -869,6 +966,13 @@ Data Pelanggan | MIS
                  sampah yang bisa mengembalikannya. --}}
             <div class="pel-massal" id="pel-massal" role="region" aria-label="Aksi untuk pelanggan terpilih">
                 <p class="pel-massal-jumlah" id="pel-massal-jumlah">0 dipilih</p>
+                {{-- Kotak "pilih semua" ada di kepala tabel, dan kepala tabel
+                     disembunyikan di mode kartu. Tombol ini penggantinya di
+                     ponsel, dan di layar lebar ia tetap berguna sebagai jalan
+                     kedua. --}}
+                <button type="button" class="mis-tombol mis-tombol-halus" id="pel-massal-semua">
+                    <i class="fas fa-check-double mis-ikon-ungu"></i> Pilih semua
+                </button>
                 <button type="button" class="mis-tombol mis-tombol-halus" data-massal="aktifkan">
                     <i class="fas fa-user-check mis-ikon-hijau"></i> Aktifkan
                 </button>
@@ -1076,7 +1180,21 @@ Data Pelanggan | MIS
         const lipat = document.getElementById('pel-penyaring');
         if (!lipat) return;
         const lebar = window.matchMedia('(min-width: 768px)');
-        const setel = function () { if (lebar.matches) lipat.setAttribute('open', ''); };
+
+        /*
+         * Di ponsel penyaringnya terlipat — dan di dalamnya ada menu Urutkan,
+         * satu-satunya cara mengurutkan di sana. Terukur: sebelum dibuka,
+         * elementFromPoint di titik tengah menu itu tidak menunjuk apa pun.
+         * Jadi begitu ada saringan atau urutan yang bukan bawaan, penyaringnya
+         * dibuka sendiri: yang sedang berlaku harus terlihat, bukan tersembunyi
+         * di balik satu ketukan lagi.
+         */
+        const sedangDipakai = @json($adaSaringan) || @json($urut !== 'bergabung' || $arah !== 'desc');
+
+        const setel = function () {
+            if (lebar.matches || sedangDipakai) lipat.setAttribute('open', '');
+        };
+
         setel();
         lebar.addEventListener('change', setel);
     })();
@@ -1127,6 +1245,11 @@ Data Pelanggan | MIS
 
         // Isi wadah ditukar lewat fetch; pilihan lama tidak ikut terbawa.
         new MutationObserver(segarkan).observe(hasil, { childList: true, subtree: true });
+
+        document.getElementById('pel-massal-semua').addEventListener('click', function () {
+            hasil.querySelectorAll('.pel-centang').forEach(function (c) { c.checked = true; });
+            segarkan();
+        });
 
         document.getElementById('pel-massal-batal').addEventListener('click', function () {
             hasil.querySelectorAll('.pel-centang, #pel-centang-semua').forEach(function (c) {
