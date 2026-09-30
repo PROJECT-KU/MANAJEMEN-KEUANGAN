@@ -520,3 +520,30 @@ Esc juga mengosongkan, kebiasaan yang sudah dipunyai orang.
 keadaan sesudah tombolnya bekerja — jadi tombol yang benar-benar muncul selalu
 terbaca "tersembunyi", dan perbaikan yang benar terlihat gagal. Baca dulu ke
 peubah, baru tekan.
+
+## `showModal()` tidak mengunci guliran latar
+
+Ia membuat sisa halaman tidak bisa disentuh, tetapi rodanya tetap menggulung —
+terukur 400px bergeser di belakang dialog yang terbuka. Yang dibaca orang
+bergeser diam-diam, dan begitu dialognya ditutup ia mendapati dirinya entah di
+mana.
+
+`mis-ui.js` sudah menanganinya untuk **dialog mana pun**: ia menyimak
+perubahan atribut `open` lewat MutationObserver dan memasang
+`body.mis-dialog-terbuka` (`overflow: hidden`), plus mengganti lebar batang
+gulir dengan padding supaya halaman tidak melompat. Layar baru tidak perlu
+mengulang kodenya.
+
+**Jebakan:** `overscroll-behavior: contain` dipasang ke `dialog`, **jangan ke
+`dialog *`**. Ke semua keturunan, tiap `<textarea>` yang isinya muat ikut
+menahan guliran karena penerusan ke induknya diblokir — terukur, dialog yang
+perlu digulung (781px isi dalam 710px ruang) sama sekali tidak bergerak saat
+roda berada di atas kotak isian. Wadah gulir di dalam dialog menyatakan
+`contain` sendiri.
+
+**Mengukurnya:** pakai `Input.dispatchMouseEvent { type: 'mouseWheel' }` lewat
+CDP, bukan `window.scrollBy` — guliran terprogram tetap jalan walau
+`overflow: hidden`, jadi ia mengukur hal yang bukan keluhannya. Dan ambil
+patokan lebih dulu (gulir sebelum dialog pernah dibuka): "halaman tidak
+bergerak" bisa berarti terkunci, bisa juga berarti titik ujinya kebetulan di
+atas bilah sisi.
