@@ -651,7 +651,19 @@ class BiayaPersesiTest extends TestCase
 
         $halaman->assertOk();
         $halaman->assertSee('Hanya administrator yang boleh mengubah tarif.');
-        $this->assertStringNotContainsString('type="submit"', $halaman->getContent());
+
+        /*
+         * Yang diperiksa borang PENYUNTINGNYA, bukan sembarang tombol kirim.
+         * Layarnya juga punya saringan riwayat, dan saringan memang boleh
+         * dipakai karyawan — memeriksa type="submit" begitu saja menandai
+         * saringan itu sebagai kebocoran hak, padahal bukan.
+         */
+        $isi = $halaman->getContent();
+
+        $this->assertStringNotContainsString('id="tar-dialog"', $isi, 'Dialog tarif tidak boleh disuguhkan.');
+        $this->assertStringNotContainsString('id="lyn-dialog"', $isi, 'Dialog layanan tidak boleh disuguhkan.');
+        $this->assertStringNotContainsString('data-setel', $isi, 'Tombol setel tarif tidak boleh ada.');
+        $this->assertStringNotContainsString('name="biaya_persesi"', $isi);
     }
 
     #[Test]

@@ -46,16 +46,22 @@ class ClinikScopusBiayaPersesi extends Model
         'kegiatan',
         'kontak',
         'status',
+        'penginput_id',
+        'berlaku_mulai',
     ];
 
     protected $casts = [
         'fasilitas' => 'array',
         'kegiatan' => 'array',
+        'berlaku_mulai' => 'date',
     ];
 
     public const AKTIF = 'active';
 
     public const NONAKTIF = 'non active';
+
+    /** Sudah disetel, menunggu tanggalnya. Naik sendiri saat harinya tiba. */
+    public const TERJADWAL = 'terjadwal';
 
     /**
      * Katalog layanan — sekarang datanya, bukan konstanta.
@@ -83,6 +89,12 @@ class ClinikScopusBiayaPersesi extends Model
 
             if (! $model->layanan) {
                 $model->layanan = 'clinik_scopus';
+            }
+
+            // Siapa yang menyetel dicatat otomatis, bukan diminta dari borang:
+            // isian yang bisa dilewati bukan jejak.
+            if (! $model->penginput_id && auth()->check()) {
+                $model->penginput_id = auth()->id();
             }
         });
     }
@@ -117,11 +129,54 @@ class ClinikScopusBiayaPersesi extends Model
      */
     public static function berlaku(string $layanan = 'clinik_scopus', ?string $varian = null): ?self
     {
+        self::naikkanYangSudahWaktunya($layanan, $varian);
+
         return static::query()
             ->untuk($layanan, $varian)
             ->aktif()
             ->latest('updated_at')
             ->first();
+    }
+
+    /**
+     * Menaikkan tarif terjadwal yang tanggalnya sudah tiba.
+     *
+     * Dikerjakan saat tarifnya DIBACA, bukan oleh penjadwal. Alasannya bukan
+     * kemalasan: penjadwal yang tidak jalan membuat harga tertinggal tanpa ada
+     * yang tahu, dan itu justru jenis kegagalan yang paling mahal di sini.
+     * Dibaca, ia tidak mungkin terlewat — yang membaca tarifnya pasti
+     * mendapat harga yang benar.
+     *
+     * Dibungkus transaksi dan diperiksa ulang di dalamnya supaya dua
+     * permintaan yang datang bersamaan tidak menaikkan dua kali.
+     */
+    private static function naikkanYangSudahWaktunya(string $layanan, ?string $varian): void
+    {
+        $adaJatuhTempo = static::query()
+            ->untuk($layanan, $varian)
+            ->where('status', self::TERJADWAL)
+            ->whereDate('berlaku_mulai', '<=', now())
+            ->exists();
+
+        if (! $adaJatuhTempo) {
+            return;
+        }
+
+        DB::transaction(function () use ($layanan, $varian) {
+            $jatuhTempo = static::query()
+                ->untuk($layanan, $varian)
+                ->where('status', self::TERJADWAL)
+                ->whereDate('berlaku_mulai', '<=', now())
+                ->orderBy('berlaku_mulai')
+                ->lockForUpdate()
+                ->get();
+
+            // Kalau ada beberapa yang terlewat sekaligus, yang paling akhir
+            // tanggalnya yang menang; sisanya turun jadi riwayat.
+            foreach ($jatuhTempo as $t) {
+                $t->jadikanBerlaku();
+            }
+        });
     }
 
     // ------------------------------------------------------------- perubahan
@@ -147,6 +202,12 @@ class ClinikScopusBiayaPersesi extends Model
 
             $this->forceFill(['status' => self::AKTIF])->save();
         });
+    }
+
+    /** Penyetel tarif ini, kalau akunnya masih ada. */
+    public function penginput()
+    {
+        return $this->belongsTo(User::class, 'penginput_id');
     }
 
     // -------------------------------------------------------------- tampilan
@@ -176,6 +237,24 @@ class ClinikScopusBiayaPersesi extends Model
     public function getDipakaiSesiAttribute(): int
     {
         return $this->clinikScopus()->count();
+    }
+
+    /**
+     * Apakah pemakaian tarif ini bisa dihitung sama sekali.
+     *
+     * Hanya sesi Clinik Scopus yang menyimpan `biaya_persesi_id`. Angkatan
+     * layanan lain menyalin angkanya, tidak menunjuk barisnya — jadi untuk
+     * mereka jumlahnya BUKAN nol, melainkan tidak diketahui. Menuliskannya
+     * "Belum dipakai" adalah angka yang berbohong.
+     */
+    public function getPemakaianTerhitungAttribute(): bool
+    {
+        return $this->layanan === 'clinik_scopus';
+    }
+
+    public function getTerjadwalAttribute(): bool
+    {
+        return $this->status === self::TERJADWAL;
     }
 
     public function getNamaLayananAttribute(): string

@@ -36,7 +36,7 @@ class LayananController extends Controller
             return back()->with('error', 'Hanya administrator yang boleh menambah layanan.');
         }
 
-        $data = $this->periksa($request);
+        $data = $this->tanpaYangKosong($this->periksa($request));
 
         $layanan = new Layanan();
         // Kode dibuat sekali dari namanya, lalu tidak pernah berubah: nilai
@@ -57,7 +57,7 @@ class LayananController extends Controller
             return back()->with('error', 'Hanya administrator yang boleh mengubah layanan.');
         }
 
-        $data = $this->periksa($request, $layanan);
+        $data = $this->tanpaYangKosong($this->periksa($request, $layanan));
 
         $baru = $this->uraikanVarian($request->input('varian'), $layanan->varian_peta);
 
@@ -143,12 +143,32 @@ class LayananController extends Controller
             'ikon' => ['required', Rule::in(array_keys(Layanan::IKON))],
             'warna' => ['required', Rule::in(array_keys(Layanan::WARNA))],
             'aktif' => ['nullable', 'boolean'],
+            'urutan' => ['nullable', 'integer', 'min:0', 'max:9999'],
         ], [
             'nama.required' => 'Isi dulu nama layanannya.',
             'nama.unique' => 'Sudah ada layanan dengan nama itu.',
             'satuan.required' => 'Isi dulu satuannya, misalnya "per peserta".',
             'ikon.in' => 'Pilih ikon dari daftar yang tersedia.',
         ]) + ['aktif' => $request->boolean('aktif')];
+    }
+
+    /**
+     * Membuang kunci yang memang tidak dikirim.
+     *
+     * validate() tidak memuat kunci yang absen, tetapi `urutan` boleh kosong
+     * dan dibiarkan apa adanya — bukan dinolkan, yang akan melempar layanan itu
+     * ke urutan paling depan tanpa diminta.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function tanpaYangKosong(array $data): array
+    {
+        if (($data['urutan'] ?? null) === null) {
+            unset($data['urutan']);
+        }
+
+        return $data;
     }
 
     /**

@@ -68,8 +68,8 @@ Tarif Layanan | MIS
     }
 
     .tar-tambah:hover { border-color: #a5b4fc; background: #f5f3ff; color: #4f46e5; }
-    .tar-tambah-judul { margin: 0; line-height: 1.3; font-size: .86rem; font-weight: 800; }
-    .tar-tambah-ket { margin: 0; line-height: 1.45; font-size: .74rem; max-width: 24ch; }
+    .tar-tambah-judul { display: block; line-height: 1.3; font-size: .86rem; font-weight: 800; }
+    .tar-tambah-ket { display: block; line-height: 1.45; font-size: .74rem; max-width: 24ch; }
     .tar-tambah .mis-medali { margin-bottom: 2px; }
 
     /* Yang belum punya tarif ditandai, bukan disembunyikan: layanan yang
@@ -309,6 +309,93 @@ Tarif Layanan | MIS
     .lyn-aktif input { margin-top: 3px; }
     .lyn-aktif-ket { display: block; margin-top: 3px; font-size: .73rem; font-weight: 400; color: var(--mis-tinta-3); }
 
+    /* Saringan kartu */
+    .tar-saring {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px; align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .tar-saring .form-control-modern { padding-left: 38px; }
+
+    .tar-saring-ikon {
+        position: absolute; left: 0; top: 0;
+        display: grid; place-items: center;
+        width: 38px; height: 100%;
+        color: var(--mis-tinta-4); pointer-events: none;
+    }
+
+    .tar-saring-ikon .fas { font-size: 13px !important; }
+    .tar-saring-hasil { font-size: .75rem; color: var(--mis-tinta-3); white-space: nowrap; }
+
+    /* Ringkasan yang bisa ditekan tetap serupa lencana, hanya dapat penunjuk. */
+    .tar-pil-tombol { border: none; cursor: pointer; font: inherit; }
+    .tar-pil-tombol:hover { filter: brightness(.96); }
+
+    /* Kartu yang disorot sesudah lompat dari ringkasan. */
+    .tar-kartu.disorot {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, .35);
+    }
+
+    .tar-kosong-kotak {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 9px; align-items: start;
+        margin-top: 13px; padding: 11px 12px;
+        border: 1px dashed var(--mis-garis); border-radius: 11px;
+        line-height: 1.45; font-size: .75rem; color: var(--mis-tinta-4);
+    }
+
+    .tar-kosong-kotak .fas { font-size: 12px !important; margin-top: 2px; }
+
+    .tar-jadwal {
+        display: flex; align-items: center; gap: 7px;
+        margin: 10px 0 0; padding: 7px 10px;
+        border-radius: 9px; background: #fffbeb;
+        line-height: 1.4; font-size: .74rem; color: #b45309;
+    }
+
+    .tar-jadwal .fas { font-size: 11px !important; }
+    .tar-jadwal strong { font-weight: 800; }
+
+    /* Layanan nonaktif */
+    .tar-nonaktif-kisi {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 10px;
+    }
+
+    .tar-nonaktif-butir {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 10px; align-items: center;
+        padding: 10px 12px;
+        border: 1px solid var(--mis-garis); border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .tar-nonaktif-nama { display: block; line-height: 1.3; font-size: .82rem; font-weight: 700; color: var(--mis-tinta-2); }
+    .tar-nonaktif-ket { display: block; line-height: 1.4; font-size: .72rem; color: var(--mis-tinta-4); }
+
+    .tar-saring-riwayat {
+        display: grid; grid-template-columns: minmax(0, 220px); gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .tar-salin {
+        display: flex; align-items: center; gap: 8px;
+        width: 100%; padding: 9px 12px;
+        border: 1px dashed #c7d2fe; border-radius: 11px;
+        background: #f5f3ff;
+        font-size: .78rem; font-weight: 700; color: #4f46e5;
+        cursor: pointer; text-align: left;
+    }
+
+    .tar-salin:hover { background: #ede9fe; }
+
     .tar-pratinjau {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
         padding: 9px 11px; border-radius: 10px; background: #f5f3ff;
@@ -323,8 +410,23 @@ Tarif Layanan | MIS
 
     /* --------------------------------------------------------- responsif */
 
+    /*
+     * Penunjuk kasar (jari) butuh sasaran lebih besar; 34px terlalu kecil dan
+     * letaknya di pojok kartu, tempat ibu jari paling sering meleset.
+     *
+     * Lebar ponsel ikut disebut, bukan mengandalkan pointer: coarse saja —
+     * ciri itu tidak selalu dilaporkan peramban (emulasi DevTools pun tidak
+     * menyetelnya), jadi aturan yang cuma bergantung padanya bisa tidak
+     * pernah aktif tanpa ada yang tahu.
+     */
+    @media (pointer: coarse), (max-width: 767.98px) {
+        .tar-atur { width: 44px; height: 44px; }
+    }
+
     @media (max-width: 767.98px) {
         .tar-kisi { grid-template-columns: minmax(0, 1fr); }
+        .tar-saring { grid-template-columns: minmax(0, 1fr); }
+        .tar-saring-riwayat { grid-template-columns: minmax(0, 1fr); }
         .tar-dua { grid-template-columns: minmax(0, 1fr); }
         .tar-angka { font-size: 1.35rem; }
 
@@ -355,11 +457,30 @@ Tarif Layanan | MIS
                 <p class="mis-sub">Harga, fasilitas, dan cetakan deskripsi seluruh layanan jasa — disetel sekali di sini.</p>
             </div>
             <div class="mis-kepala-aksi">
-                <span class="mis-pil {{ $adaTarif === $totalKartu ? 'mis-pil-hijau' : 'mis-pil-kuning' }}">
-                    <i class="fas {{ $adaTarif === $totalKartu ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"></i>
-                    {{ $adaTarif }} dari {{ $totalKartu }} tarif sudah disetel
-                </span>
+                {{-- Bisa ditekan kalau memang ada yang terlewat: memberi tahu ada
+                     yang kurang tanpa mengantar ke sana cuma setengah pekerjaan. --}}
+                @if ($adaTarif === $totalKartu)
+                    <span class="mis-pil mis-pil-hijau">
+                        <i class="fas fa-check-circle"></i>
+                        Semua {{ $totalKartu }} tarif sudah disetel
+                    </span>
+                @else
+                    <button type="button" class="mis-pil mis-pil-kuning tar-pil-tombol" data-lompat-kosong>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ $totalKartu - $adaTarif }} tarif belum disetel — lihat
+                    </button>
+                @endif
             </div>
+        </div>
+
+        {{-- Saringan cepat. Katalognya kini boleh tumbuh sendiri, jadi kisinya
+             tidak lagi dijamin muat sekali lihat. Menyaring di peramban, bukan
+             memuat ulang: daftarnya kecil dan jawabannya harus seketika. --}}
+        <div class="tar-saring">
+            <span class="tar-saring-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+            <input type="search" id="tar-cari" class="form-control-modern"
+                placeholder="Cari layanan — nama atau varian" aria-label="Cari layanan">
+            <span class="tar-saring-hasil" id="tar-cari-hasil" aria-live="polite"></span>
         </div>
 
         {{-- --------------------------------------- kartu tiap layanan --}}
@@ -367,7 +488,9 @@ Tarif Layanan | MIS
             @foreach ($kartu as $k)
                 @php($t = $k['tarif'])
                 @php($fasilitas = $t ? $t->daftar_fasilitas : [])
-                <div class="tar-kartu {{ $t ? '' : 'kosong' }}">
+                @php($jadwal = $terjadwal->first(fn ($j) => $j->layanan === $k['layanan'] && $j->varian === $k['varian']))
+                <div class="tar-kartu {{ $t ? '' : 'kosong' }}"
+                    data-cari="{{ Str::lower($k['nama'] . ' ' . $k['namaVarian']) }}">
                     <div class="tar-kartu-kepala">
                         <span class="mis-medali {{ $k['warna'] }}" aria-hidden="true">
                             <i class="fas {{ $k['ikon'] }}"></i>
@@ -384,6 +507,7 @@ Tarif Layanan | MIS
                                     'ikon' => $k['pengatur']->ikon,
                                     'warna' => $k['pengatur']->warna,
                                     'aktif' => $k['pengatur']->aktif,
+                                    'urutan' => $k['pengatur']->urutan,
                                     'varian' => implode("\n", array_values($k['pengatur']->varian_peta)),
                                     'terpakai' => $k['pengatur']->jumlah_tarif + $k['pengatur']->jumlah_angkatan,
                                 ]) }}">
@@ -430,14 +554,36 @@ Tarif Layanan | MIS
                             <p class="tar-sisa">+{{ count($fasilitas) - 4 }} fasilitas lainnya</p>
                         @endif
                     @else
-                        <p class="tar-kosong-teks">
-                            {{ $t
-                                ? 'Fasilitasnya belum diisi, jadi pengumuman angkatan tidak menyebut apa pun.'
-                                : 'Tarifnya belum pernah disetel, jadi borang angkatan menampilkan harga kosong.' }}
+                        {{-- Kotak bertepi putus-putus, bukan satu baris teks yang
+                             menggantung: kartu yang fasilitasnya kosong terukur
+                             menyisakan 56px petak putih, dan ruang itu lebih
+                             berguna sebagai ajakan daripada sebagai lubang. --}}
+                        <div class="tar-kosong-kotak">
+                            <i class="fas fa-list-ul" aria-hidden="true"></i>
+                            <span>
+                                {{ $t
+                                    ? 'Fasilitasnya belum diisi — pengumuman angkatan tidak akan menyebut apa pun.'
+                                    : 'Tarifnya belum pernah disetel — borang angkatan menampilkan harga kosong.' }}
+                            </span>
+                        </div>
+                    @endif
+
+                    @if ($jadwal)
+                        <p class="tar-jadwal">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            Naik jadi <strong>{{ $jadwal->tarif_terbaca }}</strong> pada
+                            {{ $jadwal->berlaku_mulai->locale('id')->translatedFormat('d F Y') }}
                         </p>
                     @endif
 
                     <div class="tar-kaki">
+                        @if ($t && $t->penginput_id)
+                            <p class="tar-tanda-cetakan">
+                                <i class="fas fa-user-edit mis-ikon-biru" aria-hidden="true"></i>
+                                Disetel {{ optional($t->penginput)->full_name ?: 'pengguna yang sudah dihapus' }}
+                            </p>
+                        @endif
+
                         @if ($t)
                             <p class="tar-tanda-cetakan">
                                 @if ($t->ada_cetakan)
@@ -464,6 +610,18 @@ Tarif Layanan | MIS
                                     'kegiatan' => $t ? implode("\n", $t->daftar_kegiatan) : '',
                                     'kontak' => $t?->kontak ?? '',
                                     'cetakan' => $t?->template_deskripsi ?? '',
+                                    // Varian lain dari layanan yang sama, untuk disalin.
+                                    'saudara' => collect($kartu)
+                                        ->filter(fn ($x) => $x['layanan'] === $k['layanan'] && $x['varian'] !== $k['varian'] && $x['tarif'])
+                                        ->map(fn ($x) => [
+                                            'nama' => $x['namaVarian'],
+                                            'biaya' => (int) $x['tarif']->biaya_persesi,
+                                            'ppn' => $x['tarif']->ppn !== null ? $x['tarif']->ppn_persen : null,
+                                            'fasilitas' => implode("\n", $x['tarif']->daftar_fasilitas),
+                                            'kegiatan' => implode("\n", $x['tarif']->daftar_kegiatan),
+                                            'kontak' => $x['tarif']->kontak ?? '',
+                                            'cetakan' => $x['tarif']->template_deskripsi ?? '',
+                                        ])->values()->all(),
                                 ]) }}">
                                 <i class="fas {{ $t ? 'fa-edit' : 'fa-plus' }}"></i>
                                 {{ $t ? 'Ubah tarif & fasilitas' : 'Setel tarif' }}
@@ -476,13 +634,65 @@ Tarif Layanan | MIS
             @if ($bolehUbah)
                 <button type="button" class="tar-tambah" data-layanan-baru>
                     <span class="mis-medali mis-ungu" aria-hidden="true"><i class="fas fa-plus"></i></span>
-                    <p class="tar-tambah-judul">Tambah layanan</p>
-                    <p class="tar-tambah-ket">
+                    <span class="tar-tambah-judul">Tambah layanan</span>
+                    <span class="tar-tambah-ket">
                         Jenis jasa baru — misalnya sharing session eksklusif — beserta tarifnya.
-                    </p>
+                    </span>
                 </button>
             @endif
         </div>
+
+        {{-- ------------------------------------ layanan nonaktif --}}
+        @if ($nonaktif->isNotEmpty())
+            {{-- WAJIB ditampilkan. Katalog hanya membaca yang aktif, jadi tanpa
+                 bagian ini layanan yang dinonaktifkan lenyap dari layar dan tidak
+                 ada cara mengaktifkannya lagi — padahal pesan penolakan hapus
+                 justru menyarankan menonaktifkan. --}}
+            <div class="mis-bagian tar-nonaktif">
+                <div class="tar-kepala">
+                    <span class="mis-medali kecil mis-abu" aria-hidden="true"><i class="fas fa-eye-slash"></i></span>
+                    <h2 class="tar-kepala-judul">Layanan yang tidak dijual lagi</h2>
+                    <p class="tar-kepala-sub">
+                        Tersembunyi dari daftar tarif dan borang angkatan. Tarif serta
+                        angkatannya tetap utuh, dan bisa diaktifkan lagi kapan saja.
+                    </p>
+                </div>
+
+                <div class="tar-nonaktif-kisi">
+                    @foreach ($nonaktif as $l)
+                        <div class="tar-nonaktif-butir">
+                            <span class="mis-medali kecil mis-abu" aria-hidden="true">
+                                <i class="fas {{ $l->ikon }}"></i>
+                            </span>
+                            <span class="tar-nonaktif-teks">
+                                <span class="tar-nonaktif-nama">{{ $l->nama }}</span>
+                                <span class="tar-nonaktif-ket">
+                                    {{ $l->jumlah_tarif }} tarif &middot; {{ $l->jumlah_angkatan }} angkatan
+                                </span>
+                            </span>
+
+                            @if ($bolehUbah)
+                                <button type="button" class="mis-tombol mis-tombol-halus"
+                                    data-layanan="{{ json_encode([
+                                        'alamat' => route('account.layanan.update', $l),
+                                        'hapus' => route('account.layanan.destroy', $l),
+                                        'nama' => $l->nama,
+                                        'satuan' => $l->satuan,
+                                        'ikon' => $l->ikon,
+                                        'warna' => $l->warna,
+                                        'aktif' => $l->aktif,
+                                        'urutan' => $l->urutan,
+                                        'varian' => implode("\n", array_values($l->varian_peta)),
+                                        'terpakai' => $l->jumlah_tarif + $l->jumlah_angkatan,
+                                    ]) }}">
+                                    <i class="fas fa-redo"></i> Aktifkan lagi
+                                </button>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         @unless ($bolehUbah)
             <p class="mis-bantuan" style="margin-bottom: var(--mis-jarak);">
@@ -498,6 +708,18 @@ Tarif Layanan | MIS
                 <h2 class="tar-kepala-judul">Tarif sebelumnya</h2>
                 <p class="tar-kepala-sub">Disimpan karena angkatan yang sudah berjalan memakai harga yang berlaku saat itu.</p>
             </div>
+
+            <form method="GET" class="tar-saring-riwayat">
+                <label class="mis-label" for="tar-riwayat-layanan">Saring layanan</label>
+                <select class="form-control-modern" id="tar-riwayat-layanan" name="riwayat"
+                    onchange="this.form.submit()">
+                    <option value="">Semua layanan</option>
+                    @foreach (\App\Layanan::katalog() as $kode => $tentang)
+                        <option value="{{ $kode }}" @selected($saringRiwayat === $kode)>{{ $tentang['nama'] }}</option>
+                    @endforeach
+                </select>
+                <noscript><button type="submit" class="mis-tombol mis-tombol-halus">Saring</button></noscript>
+            </form>
 
             @if ($riwayat->isEmpty())
                 <div class="mis-kosong">
@@ -515,6 +737,7 @@ Tarif Layanan | MIS
                                 <th>PPN</th>
                                 <th>Dipakai</th>
                                 <th>Disetel</th>
+                                <th>Oleh</th>
                                 <th class="text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -548,8 +771,19 @@ Tarif Layanan | MIS
                                         @endif
                                     </td>
 
+                                    {{-- Hanya sesi Clinik Scopus yang menyimpan
+                                         biaya_persesi_id. Angkatan layanan lain menyalin
+                                         angkanya, tidak menunjuk barisnya — jadi untuk
+                                         mereka jumlahnya BUKAN nol, melainkan tidak
+                                         diketahui. Menulis "Belum dipakai" di sana adalah
+                                         angka yang berbohong. --}}
                                     <td data-judul="Dipakai">
-                                        @if ($item->clinik_scopus_count > 0)
+                                        @if (! $item->pemakaian_terhitung)
+                                            <span class="tar-riwayat-ket"
+                                                title="Angkatan menyalin harganya, tidak menunjuk baris tarif ini">
+                                                tidak tertaut
+                                            </span>
+                                        @elseif ($item->clinik_scopus_count > 0)
                                             <span class="mis-pil mis-pil-biru" title="Jadi acuan harga sesi sebanyak ini">
                                                 <i class="fas fa-link"></i> {{ $item->clinik_scopus_count }} sesi
                                             </span>
@@ -561,6 +795,14 @@ Tarif Layanan | MIS
                                     <td data-judul="Disetel">
                                         <span class="tar-riwayat-ket">
                                             {{ optional($item->updated_at)->locale('id')->translatedFormat('d M Y') ?: '—' }}
+                                        </span>
+                                    </td>
+
+                                    <td data-judul="Oleh">
+                                        <span class="tar-riwayat-ket">
+                                            {{ $item->penginput_id
+                                                ? (optional($item->penginput)->full_name ?: 'akun terhapus')
+                                                : 'tidak tercatat' }}
                                         </span>
                                     </td>
 
@@ -623,9 +865,20 @@ Tarif Layanan | MIS
             </div>
 
             <div class="tar-dialog-isi">
+                {{-- Muncul hanya kalau layanannya punya varian lain yang sudah
+                     terisi. Jawa dan luar Jawa isinya ~90% sama — kegiatan,
+                     kontak, dan cetakannya identik — dan mengetiknya dua kali
+                     adalah pekerjaan yang diciptakan sendiri. --}}
+                <button type="button" class="tar-salin" id="tar-f-salin" hidden>
+                    <i class="fas fa-copy mis-ikon-ungu" aria-hidden="true"></i>
+                    <span id="tar-f-salin-teks">Salin dari varian lain</span>
+                </button>
+
                 <div class="tar-dua">
                     <div class="mis-isian tar-isian">
-                        <label class="mis-label" for="tar-f-biaya">Tarif</label>
+                        <label class="mis-label" for="tar-f-biaya">
+                            Tarif <span class="tar-wajib" aria-hidden="true">*</span>
+                        </label>
                         <span class="tar-tanda kiri" aria-hidden="true">Rp</span>
                         <input type="text" class="form-control-modern" id="tar-f-biaya" name="biaya_persesi"
                             inputmode="numeric" autocomplete="off" required placeholder="0">
@@ -642,6 +895,18 @@ Tarif Layanan | MIS
                 <div class="tar-pratinjau" aria-live="polite">
                     <i class="fas fa-calculator mis-ikon-ungu" aria-hidden="true"></i>
                     <span id="tar-f-pratinjau">Pelanggan membayar <strong>—</strong></span>
+                </div>
+
+                <div class="mis-isian">
+                    <label class="mis-label" for="tar-f-mulai">
+                        Mulai berlaku <span class="tar-opsional">opsional</span>
+                    </label>
+                    <input type="date" class="form-control-modern" id="tar-f-mulai" name="berlaku_mulai">
+                    <p class="mis-bantuan" id="tar-f-mulai-ket">
+                        Kosongkan untuk berlaku sekarang juga. Diisi tanggal yang akan datang,
+                        tarifnya <strong>menunggu</strong> — harga yang sekarang tidak berubah
+                        sampai tanggal itu tiba.
+                    </p>
                 </div>
 
                 <div class="mis-isian">
@@ -754,6 +1019,16 @@ Tarif Layanan | MIS
                 </div>
 
                 <div class="mis-isian">
+                    <label class="mis-label" for="lyn-urutan">Urutan tampil</label>
+                    <input type="number" class="form-control-modern" id="lyn-urutan" name="urutan"
+                        min="0" max="9999" step="10" placeholder="10">
+                    <p class="mis-bantuan">
+                        Makin kecil makin depan. Kolomnya sudah ada sejak awal tetapi tidak
+                        pernah punya tuasnya, jadi layanan baru selalu menempel di ujung.
+                    </p>
+                </div>
+
+                <div class="mis-isian">
                     <label class="mis-label" for="lyn-ikon">Ikon</label>
                     <select class="form-control-modern" id="lyn-ikon" name="ikon">
                         @foreach ($daftarIkon as $kode => $arti)
@@ -809,6 +1084,60 @@ Tarif Layanan | MIS
 
 @push('scripts')
 <script>
+    /*
+     * Saringan kartu. Dikerjakan di peramban: daftarnya kecil dan jawabannya
+     * harus seketika, sementara memuat ulang halaman untuk menyaring tujuh
+     * kartu terasa jauh lebih lambat daripada mengetiknya.
+     */
+    (function () {
+        const cari = document.getElementById('tar-cari');
+        if (!cari) return;
+
+        const hasil = document.getElementById('tar-cari-hasil');
+        const kartu = [...document.querySelectorAll('.tar-kartu')];
+        const tambah = document.querySelector('.tar-tambah');
+
+        cari.addEventListener('input', function () {
+            const kata = cari.value.trim().toLowerCase();
+            let tampil = 0;
+
+            kartu.forEach(function (k) {
+                const cocok = kata === '' || (k.dataset.cari || '').includes(kata);
+                k.hidden = ! cocok;
+                if (cocok) tampil++;
+            });
+
+            // Kartu "Tambah layanan" ikut sembunyi saat menyaring: ia bukan
+            // hasil pencarian, dan berdiri sendiri di tengah daftar kosong
+            // terbaca seolah itulah yang ditemukan.
+            if (tambah) tambah.hidden = kata !== '';
+
+            hasil.textContent = kata === ''
+                ? ''
+                : (tampil === 0 ? 'Tidak ada yang cocok' : tampil + ' dari ' + kartu.length + ' layanan');
+        });
+    })();
+
+    /*
+     * Ringkasan "N tarif belum disetel" mengantar ke kartunya, bukan cuma
+     * memberi tahu. Disorot sebentar supaya jelas yang mana.
+     */
+    (function () {
+        const pil = document.querySelector('[data-lompat-kosong]');
+        if (!pil) return;
+
+        pil.addEventListener('click', function () {
+            const kosong = [...document.querySelectorAll('.tar-kartu.kosong')].filter((k) => !k.hidden);
+            if (kosong.length === 0) return;
+
+            kosong[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            kosong.forEach(function (k) {
+                k.classList.add('disorot');
+                setTimeout(function () { k.classList.remove('disorot'); }, 2600);
+            });
+        });
+    })();
+
     @if ($bolehUbah)
     /*
      * Dialog tarif: satu borang yang diisi ulang tiap kali dibuka.
@@ -829,6 +1158,7 @@ Tarif Layanan | MIS
 
         let acuan = null;   // tarif yang berlaku saat dialog dibuka
         let idLama = null;
+        let saudara = [];   // varian lain dari layanan yang sama
 
         function segarkan() {
             const dasar = angka(biaya.value);
@@ -849,11 +1179,13 @@ Tarif Layanan | MIS
              * Tarif yang sama persis tetapi PPN atau fasilitasnya berbeda tetap
              * dihitung perbaikan, bukan kenaikan harga.
              */
-            const sama = acuan !== null && dasar === acuan;
+            const bertanggal = el('tar-f-mulai').value !== '';
+            const sama = acuan !== null && dasar === acuan && ! bertanggal;
+
             perbaiki.value = sama ? (idLama || '') : '';
-            simpan.innerHTML = sama
-                ? '<i class="fas fa-save"></i> Perbaiki'
-                : '<i class="fas fa-save"></i> Berlakukan';
+            simpan.innerHTML = bertanggal
+                ? '<i class="fas fa-clock"></i> Jadwalkan'
+                : (sama ? '<i class="fas fa-save"></i> Perbaiki' : '<i class="fas fa-save"></i> Berlakukan');
         }
 
         biaya.addEventListener('input', function () {
@@ -890,11 +1222,63 @@ Tarif Layanan | MIS
 
             acuan = d.biaya;
             idLama = d.id;
+            saudara = d.saudara || [];
+
+            // Tanggal mulai selalu dikosongkan saat dialog dibuka: menyetel
+            // tarif baru jauh lebih sering daripada menjadwalkannya, dan
+            // tanggal yang tertinggal dari pembukaan sebelumnya akan membuat
+            // tarif menunggu tanpa diminta.
+            el('tar-f-mulai').value = '';
+
+            const salin = el('tar-f-salin');
+            salin.hidden = saudara.length === 0;
+
+            if (saudara.length > 0) {
+                el('tar-f-salin-teks').textContent = 'Salin isi dari ' + saudara[0].nama;
+            }
 
             segarkan();
             dialog.showModal();
             biaya.focus();
         });
+
+        /*
+         * Menyalin dari varian lain. Harganya SENGAJA tidak ikut: yang sama
+         * antar varian itu fasilitas, kegiatan, kontak, dan cetakannya —
+         * harganya justru alasan variannya ada.
+         */
+        el('tar-f-salin').addEventListener('click', function () {
+            if (saudara.length === 0) return;
+
+            const d = saudara[0];
+
+            window.misKonfirmasi({
+                judul: 'Salin isi dari varian lain?',
+                pesan: 'Fasilitas, kegiatan, kontak, dan cetakan deskripsi diambil dari %s. '
+                    + 'Tarif dan PPN tidak ikut — itu justru yang membedakan variannya.',
+                sorot: d.nama,
+                tombol: 'Ya, salin',
+                jenis: 'tanya',
+                glif: 'fa-copy',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                el('tar-f-fasilitas').value = d.fasilitas;
+                el('tar-f-kegiatan').value = d.kegiatan;
+                el('tar-f-kontak').value = d.kontak;
+                el('tar-f-cetakan').value = d.cetakan;
+
+                const tanda = el('tar-f-tanda');
+                tanda.textContent = d.cetakan.trim() !== '' ? 'sudah ada' : 'belum diisi';
+                tanda.className = 'mis-pil ' + (d.cetakan.trim() !== '' ? 'mis-pil-hijau' : 'mis-pil-abu');
+
+                window.misToast('berhasil', 'Isi disalin dari ' + d.nama + '. Periksa dulu sebelum disimpan.');
+            });
+        });
+
+        // Tombolnya berubah tulisan saat tanggal diisi: menekan "Berlakukan"
+        // padahal yang terjadi menjadwalkan adalah kejutan yang bisa dihindari.
+        el('tar-f-mulai').addEventListener('input', segarkan);
 
         document.addEventListener('click', function (e) {
             if (e.target.closest('[data-tutup]') || e.target.closest('#tar-batal')) dialog.close();
@@ -951,6 +1335,7 @@ Tarif Layanan | MIS
             el('lyn-aktif').checked = baru ? true : d.aktif;
             ikon.value = baru ? 'fa-star' : d.ikon;
             warna.value = baru ? 'mis-ungu' : d.warna;
+            el('lyn-urutan').value = baru ? '' : (d.urutan ?? '');
 
             // Nama yang sudah dipakai tetap boleh diubah — yang dikunci
             // kodenya, dan kode tidak ikut nama setelah dibuat.
