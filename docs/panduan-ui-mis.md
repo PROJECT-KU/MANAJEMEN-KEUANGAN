@@ -392,3 +392,42 @@ menyetelnya — jadi aturan yang hanya bergantung padanya bisa **tidak pernah
 aktif tanpa ada yang tahu**, dan tidak bisa dibuktikan lewat pengukuran.
 Sebutkan lebar ponsel juga: `@media (pointer: coarse), (max-width: 767.98px)`.
 Sasaran sentuh minimal 44x44.
+
+## Status baru wajib punya barisnya sendiri
+
+Menambah status ke sebuah data (`terjadwal` di samping `active`/`non active`)
+tidak selesai di modelnya. Kalau daftar di layar menyaring satu status saja —
+tabel riwayat memuat `non active` — maka baris berstatus baru itu **tidak
+punya baris di mana pun**, dan tidak ada satu tombol pun yang bisa
+menyentuhnya. Di layar tarif, kartunya sempat mengumumkan kenaikan harga yang
+tidak bisa dibatalkan siapa pun.
+
+Ini kembaran dari aturan "menyembunyikan sesuatu harus ada jalan kembalinya",
+dan sama mudahnya terlewat: keduanya muncul dari fitur yang *menambah*
+keadaan, bukan dari kode yang salah.
+
+**Periksa tiap kali menambah status atau saringan:** untuk setiap keadaan yang
+mungkin, di layar mana ia muncul, dan tombol apa yang bisa mengubahnya?
+
+## `minmax(300px, 1fr)` tidak pernah menyusut
+
+`repeat(auto-fit, minmax(280px, 1fr))` meluber di layar 320px — lebar tetap
+pada argumen pertama adalah lantai yang tidak bisa ditembus, dan ruang yang
+tersedia di sana cuma ~258px. Pakai `minmax(min(100%, 280px), 1fr)`.
+
+Terukur di kisi jadwal tarif; halamannya sendiri tidak menggulung mendatar,
+jadi pemeriksaan "ada gulung mendatar?" saja TIDAK menangkapnya — yang
+menangkap perbandingan `scrollWidth` tiap unsur dengan `clientWidth`-nya.
+
+## Jejak "siapa" harus mencatat yang terakhir, bukan yang pertama
+
+Kolom penginput yang diisi hanya saat baris DIBUAT menunjuk orang keliru
+begitu ada yang memperbaikinya — dan memperbaiki justru cara nilai paling
+sering berubah. Isi juga pada cabang pembaruan.
+
+## Jebakan uji: dua pengguna dalam satu uji
+
+`actingAs($a)->post(...)` lalu `actingAs($b)->post(...)` membuat permintaan
+kedua tertolak ke `/login` **tanpa galat maupun pesan**, jadi ujinya gagal
+seolah kodenya yang salah. Sesi permintaan pertama masih memegang pengguna A.
+Panggil `$this->flushSession()` di antaranya.

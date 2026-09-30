@@ -5,6 +5,7 @@ namespace App\Http\Controllers\account;
 use App\Http\Controllers\Controller;
 use App\Layanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -79,12 +80,40 @@ class LayananController extends Controller
             ]);
         }
 
+        $sebelumnyaTanpaVarian = $layanan->varian_peta === [];
+
         $layanan->fill($data);
         $layanan->setVarianDari($baru);
         $layanan->save();
 
+        $pesan = 'Layanan ' . $layanan->nama . ' diperbarui.';
+
+        /*
+         * Layanan yang SEMULA tanpa varian lalu diberi varian: tarif dan
+         * angkatannya menyimpan varian NULL, dan pencari tarif tidak akan
+         * pernah menemukannya lagi.
+         *
+         * Akibatnya paling jahat karena diam: harganya lenyap dari borang
+         * angkatan, kartunya berubah jadi "Belum disetel", sementara barisnya
+         * tetap berstatus aktif selamanya — hantu yang hidup lagi kalau
+         * variannya dibuang. Tidak ada galat apa pun.
+         *
+         * Jadi baris lamanya dipindahkan ke varian PERTAMA, bukan dibiarkan.
+         * Dipindahkan, harganya bertahan dan admin tinggal membetulkan kalau
+         * tebakan itu keliru; dibiarkan, tidak ada yang tahu ada yang hilang.
+         */
+        if ($sebelumnyaTanpaVarian && $baru) {
+            $pertama = array_key_first($baru);
+            $pindah = $this->pindahkanKeVarian($layanan->kode, $pertama);
+
+            if ($pindah > 0) {
+                $pesan .= ' ' . $pindah . ' tarif & angkatan lamanya dipindahkan ke varian '
+                    . $baru[$pertama] . ' — periksa kalau seharusnya bukan di situ.';
+            }
+        }
+
         return redirect()->route('account.Clinik-Scopus-Biaya-Persesi.index')
-            ->with('success', 'Layanan ' . $layanan->nama . ' diperbarui.');
+            ->with('success', $pesan);
     }
 
     public function destroy(Layanan $layanan)
@@ -126,6 +155,28 @@ class LayananController extends Controller
         $layanan->delete();
 
         return response()->json(['success' => true, 'message' => 'Layanan dihapus.']);
+    }
+
+    /**
+     * Memindahkan tarif dan angkatan tanpa varian ke varian yang ditunjuk.
+     *
+     * Dua tabel sekaligus karena keduanya menyimpan kode varian yang sama, dan
+     * meninggalkan salah satunya berarti angkatan menunjuk varian yang tarifnya
+     * tidak ada — atau sebaliknya.
+     */
+    private function pindahkanKeVarian(string $kode, string $varian): int
+    {
+        return DB::transaction(function () use ($kode, $varian) {
+            $tarif = DB::table('clinikscopus_biaya_persesi')
+                ->where('layanan', $kode)->whereNull('varian')
+                ->update(['varian' => $varian]);
+
+            $angkatan = DB::table('kategori_layanan')
+                ->where('layanan', $kode)->whereNull('varian')
+                ->update(['varian' => $varian]);
+
+            return $tarif + $angkatan;
+        });
     }
 
     /** @return array<string, mixed> */
