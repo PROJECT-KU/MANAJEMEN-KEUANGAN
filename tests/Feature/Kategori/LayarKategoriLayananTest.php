@@ -144,19 +144,106 @@ class LayarKategoriLayananTest extends TestCase
     }
 
     #[Test]
-    public function harga_diketik_berformat_rupiah_tersimpan_sebagai_angka(): void
+    public function angkatan_baru_memotret_harga_dari_tarif_induk(): void
     {
+        /*
+         * Tidak ada isian harga sama sekali di borangnya. Angka yang dikirim
+         * peramban pun diabaikan — yang dipakai selalu tarif yang berlaku,
+         * supaya tidak ada dua sumber harga yang bisa berselisih.
+         */
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tarif = (int) \App\ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->biaya_persesi;
 
         $this->actingAs($admin)->post(route('account.kategori-layanan.store'),
-            $this->isian(['nama_ke' => '204', 'biaya' => '5.500.000']));
+            $this->isian(['nama_ke' => '204', 'biaya' => '99.999']));
 
         $baru = KategoriLayanan::where('nama_ke', '204')->first();
 
-        $this->assertSame('5500000', (string) $baru->biaya);
+        $this->assertSame((string) $tarif, (string) $baru->biaya);
         // Tanpa promo, total sama dengan biayanya — itulah angka yang dipakai
         // halaman publik dan laporan.
-        $this->assertSame('5500000', (string) $baru->total_biaya);
+        $this->assertSame((string) $tarif, (string) $baru->total_biaya);
+    }
+
+    #[Test]
+    public function menyunting_angkatan_lama_tidak_menyentuh_harga_dan_promonya(): void
+    {
+        /*
+         * Yang paling berbahaya dari "harga ikut tarif induk". Dari 48 angkatan
+         * Scopus Camp, 25 di antaranya berharga 4,5jt sementara tarif sekarang
+         * 5,5jt. Peserta yang sudah mendaftar membayar harga saat itu, jadi
+         * menyunting tanggal atau kuota tidak boleh diam-diam menaikkannya.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $lama = $this->kategoriUji([
+            'biaya' => '4500000',
+            'total_biaya' => '4050000',
+            'kode_diskon' => 'RSCHBD',
+            'total_kuota' => '20',
+            'sisa_kuota' => '17',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('account.kategori-layanan.update', $lama),
+            $this->isian(['nama' => 'Nama diubah', 'total_kuota' => 25, 'sisa_kuota' => 17])
+        );
+
+        $lama->refresh();
+
+        $this->assertSame('Nama diubah', $lama->nama, 'Penyuntingannya memang harus berlaku.');
+        $this->assertSame('4500000', (string) $lama->biaya);
+        $this->assertSame('4050000', (string) $lama->total_biaya);
+        $this->assertSame('RSCHBD', $lama->kode_diskon);
+    }
+
+    #[Test]
+    public function mencentang_ikuti_tarif_menyetarakan_harga_dan_membersihkan_promonya(): void
+    {
+        /*
+         * Satu-satunya jalan mengubah harga angkatan lama. Promonya ikut
+         * disetarakan karena dihitung dari harga lama — dibiarkan, "promo"
+         * 4.050.000 jadi lebih murah dari yang seharusnya, atau malah lebih
+         * mahal dari harganya sendiri.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tarif = (int) \App\ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->biaya_persesi;
+
+        $lama = $this->kategoriUji([
+            'biaya' => '4500000', 'total_biaya' => '4050000', 'kode_diskon' => 'RSCHBD',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('account.kategori-layanan.update', $lama),
+            $this->isian(['ikuti_tarif' => 1])
+        );
+
+        $lama->refresh();
+
+        $this->assertSame((string) $tarif, (string) $lama->biaya);
+        $this->assertSame((string) $tarif, (string) $lama->total_biaya);
+        $this->assertNull($lama->kode_diskon);
+    }
+
+    #[Test]
+    public function borang_tidak_lagi_punya_isian_harga_atau_promo(): void
+    {
+        // Penjaga permintaan 30 Sep 2026: harga ikut tarif, promo jadi fitur
+        // sendiri. Kalau isiannya kembali, dua sumber harga hidup berdampingan.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($admin)->get(route('account.kategori-layanan.create'))->getContent();
+
+        foreach (['name="biaya"', 'name="total_biaya"', 'name="kode_diskon"'] as $medan) {
+            if ($medan === 'name="biaya"') {
+                // Yang tersisa hanya isian tersembunyi untuk pratinjau deskripsi.
+                $this->assertStringNotContainsString('type="text" class="form-control-modern" id="brg-biaya"', $isi);
+
+                continue;
+            }
+
+            $this->assertStringNotContainsString($medan, $isi, "Isian $medan seharusnya sudah tidak ada.");
+        }
     }
 
     #[Test]
