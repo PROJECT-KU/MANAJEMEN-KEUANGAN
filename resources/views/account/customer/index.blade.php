@@ -177,17 +177,22 @@ Data Pelanggan | MIS
     }
 
     /*
-     * Batas 420px, bukan sekadar tumbuh sebisanya.
+     * Ketiga kendali berbagi baris dengan perbandingan tetap 2:1:1.
      *
-     * Dengan flex-basis 240px dan tanpa batas atas, kotak cari melahap seluruh
-     * sisa baris — terukur sekitar 60% lebar layar — sementara dua menu di
-     * sebelahnya tinggal 170px. Ketiganya sama-sama penyaring dan tidak ada
-     * alasan yang satu enam kali lebih lebar.
+     * Dua keadaan yang sama-sama salah pernah terjadi di sini. Tanpa batas
+     * apa pun, kotak cari melahap seluruh sisa baris — sekitar 60% lebar
+     * layar — sementara dua menu di sebelahnya tinggal 170px. Dengan batas
+     * 420px, kebalikannya: terukur 347px kosong di 1470px dan 787px di
+     * 1920px, jadi separuh kartunya melompong.
+     *
+     * Yang keliru bukan lebar mutlaknya melainkan perbandingannya. Dipatok
+     * 2:1:1, ketiganya selalu memenuhi barisnya pada lebar berapa pun, dan
+     * kotak cari — satu-satunya yang menerima tulisan bebas — tetap yang
+     * terlebar tanpa jadi enam kali lipat menu di sebelahnya.
      */
     .pel-saring-cari {
         position: relative;
-        flex: 1 1 240px;
-        max-width: 420px;
+        flex: 2 1 260px;
         min-width: 0;
     }
 
@@ -277,7 +282,7 @@ Data Pelanggan | MIS
     }
 
     .pel-saring-pilih {
-        flex: 0 1 170px;
+        flex: 1 1 170px;
         min-width: 0;
     }
 
@@ -550,11 +555,29 @@ Data Pelanggan | MIS
         .pel-saring-cari,
         .pel-saring-pilih {
             flex: 1 1 auto;
+            /*
+             * align-self: stretch menimpa .mis-isian, yang memasang
+             * align-self: start.
+             *
+             * Dalam susunan menurun, sifat itu membuat tiap kendali selebar
+             * isinya sendiri: terukur 220/144/172/183px pada layar 390px,
+             * jadi keempatnya bertepi ragged dan 109px di kanan menganga.
+             * Bukan akibat perubahan lebar di layar lebar — diperiksa pada
+             * keadaan sebelumnya, angkanya sama persis.
+             */
+            align-self: stretch;
         }
 
         .pel-saring .mis-tombol {
             width: 100%;
         }
+    }
+
+    /* Tombol tidak ikut berbagi perbandingan: ia bukan penyaring, dan melar
+       selebar sepertiga baris hanya membuatnya tampak seperti kendali ketiga. */
+    .pel-saring > .mis-tombol {
+        flex: 0 0 auto;
+        align-self: flex-end;
     }
 
     @media (max-width: 575.98px) {
