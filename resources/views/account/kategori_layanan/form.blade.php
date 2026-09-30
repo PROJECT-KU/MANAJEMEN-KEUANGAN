@@ -48,6 +48,38 @@
         align-items: start;
     }
 
+    /* Kartu bergembok: nilai yang tidak bisa disunting. */
+    .brg-harga {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px; align-items: center;
+        padding: 12px 14px;
+        border: 1px solid var(--mis-garis); border-radius: 13px;
+        background: linear-gradient(180deg, #f0fdf4 0%, #fff 70%);
+    }
+
+    .brg-harga-nilai {
+        margin: 0; line-height: 1.2;
+        font-size: 1.15rem; font-weight: 800; color: var(--mis-tinta);
+        overflow-wrap: anywhere;
+    }
+
+    .brg-harga-ket { margin: 2px 0 0; line-height: 1.45; font-size: .74rem; color: var(--mis-tinta-3); }
+
+    .brg-ikut {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px; align-items: start;
+        margin: 0; padding: 11px 13px;
+        border: 1px dashed #fde68a; border-radius: 12px;
+        background: #fffbeb;
+        line-height: 1.5; font-size: .78rem; font-weight: 600; color: var(--mis-tinta-2);
+        cursor: pointer;
+    }
+
+    .brg-ikut input { margin-top: 3px; }
+    .brg-ikut-ket { display: block; margin-top: 3px; font-size: .73rem; font-weight: 400; color: var(--mis-tinta-3); }
+
     .brg-alat {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
         margin-bottom: 10px;
@@ -196,29 +228,6 @@
                         @endif
 
                         <div class="mis-isian brg-isian">
-                            <label class="mis-label" for="brg-biaya">Biaya</label>
-                            <input type="text" class="form-control-modern" id="brg-biaya" name="biaya"
-                                inputmode="numeric" data-uang
-                                value="{{ old('biaya', $angkatan->biaya ? number_format((int) $angkatan->biaya, 0, ',', '.') : '') }}"
-                                placeholder="ikut tarif induk">
-                            <p class="mis-bantuan">Kosongkan untuk memakai harga patokan layanan.</p>
-                        </div>
-
-                        <div class="mis-isian brg-isian">
-                            <label class="mis-label" for="brg-total">Harga promo</label>
-                            <input type="text" class="form-control-modern" id="brg-total" name="total_biaya"
-                                inputmode="numeric" data-uang
-                                value="{{ old('total_biaya', $angkatan->total_biaya ? number_format((int) $angkatan->total_biaya, 0, ',', '.') : '') }}"
-                                placeholder="kosong kalau tanpa promo">
-                        </div>
-
-                        <div class="mis-isian brg-isian">
-                            <label class="mis-label" for="brg-kode">Kode promo</label>
-                            <input type="text" class="form-control-modern" id="brg-kode" name="kode_diskon"
-                                value="{{ old('kode_diskon', $angkatan->kode_diskon) }}" placeholder="SalamQ1">
-                        </div>
-
-                        <div class="mis-isian brg-isian">
                             <label class="mis-label" for="brg-status">Status <span class="brg-wajib" title="Wajib diisi" aria-hidden="true">*</span></label>
                             <select class="form-control-modern" id="brg-status" name="status" required>
                                 @foreach (['draft' => 'Draf', 'active' => 'Aktif', 'non active' => 'Nonaktif'] as $k => $l)
@@ -227,6 +236,55 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        @php($tarifIni = $sunting ? $angkatan->tarif() : null)
+                        @php($hargaTersimpan = (int) $angkatan->biaya)
+                        @php($hargaTarif = $tarifIni ? (int) $tarifIni->biaya_persesi : null)
+
+                        {{-- Harga tidak diketik. Nilai yang tidak bisa disunting
+                             ditampilkan sebagai kartu bergembok, bukan isian
+                             disabled — itu aturan di docs/panduan-ui-mis.md. --}}
+                        <div class="brg-harga brg-penuh">
+                            <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <div class="brg-harga-teks">
+                                <p class="brg-harga-nilai" id="brg-harga-nilai">
+                                    {{ $sunting && $hargaTersimpan > 0
+                                        ? 'Rp ' . number_format($hargaTersimpan, 0, ',', '.')
+                                        : '—' }}
+                                </p>
+                                <p class="brg-harga-ket" id="brg-harga-ket">
+                                    {{ $sunting
+                                        ? 'Harga yang dipotret saat angkatan ini dibuat.'
+                                        : 'Mengikuti tarif layanan — tidak perlu diketik.' }}
+                                </p>
+                            </div>
+
+                            {{-- Isian tersembunyi ini hanya untuk pratinjau deskripsi.
+                                 Yang disimpan tetap ditentukan peladen, jadi mengubahnya
+                                 di peramban tidak mengubah harga yang tersimpan. --}}
+                            <input type="hidden" name="biaya" id="brg-harga-nilai-mentah"
+                                value="{{ $sunting ? $hargaTersimpan : '' }}">
+                        </div>
+
+                        @if ($sunting && $hargaTarif !== null && $hargaTarif !== $hargaTersimpan)
+                            {{-- Muncul HANYA kalau tarifnya memang sudah berbeda. Tanpa
+                                 jalan ini, angkatan yang harganya terlanjur salah tidak
+                                 bisa dibetulkan sama sekali. --}}
+                            <label class="brg-ikut brg-penuh" for="brg-ikuti">
+                                <input type="checkbox" id="brg-ikuti" name="ikuti_tarif" value="1">
+                                <span>
+                                    Ikuti tarif sekarang
+                                    (<strong>Rp {{ number_format($hargaTarif, 0, ',', '.') }}</strong>)
+                                    <span class="brg-ikut-ket">
+                                        Peserta yang sudah mendaftar membayar harga lama, jadi
+                                        centang ini hanya kalau angkatannya belum berjalan.
+                                        Promo yang ada ikut disetarakan.
+                                    </span>
+                                </span>
+                            </label>
+                        @endif
 
                         <div class="mis-isian brg-isian brg-penuh">
                             <label class="mis-label" for="brg-wa">Grup WhatsApp</label>
@@ -283,6 +341,7 @@
         const KATALOG = @json(collect($katalog)->map(fn ($t) => ['nama' => $t['nama'], 'varian' => $t['varian']]));
         const TARIF = @json($tarifPer);
         const VARIAN_AWAL = @json(old('varian', $angkatan->varian));
+        const SUNTING = @json($sunting);
 
         const layanan = document.getElementById('brg-layanan');
         const bungkusVarian = document.getElementById('brg-bungkus-varian');
@@ -290,15 +349,6 @@
         const tarifTeks = document.getElementById('brg-tarif-teks');
 
         const rupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
-
-        /* Isian uang dipoles saat diketik; yang dikirim tetap dibersihkan lagi
-           di peladen, karena pemoles di peramban bukan pengaman. */
-        document.querySelectorAll('[data-uang]').forEach(function (el) {
-            el.addEventListener('input', function () {
-                const n = parseInt(String(el.value).replace(/\D+/g, ''), 10) || 0;
-                el.value = n > 0 ? n.toLocaleString('id-ID') : '';
-            });
-        });
 
         function segarkanVarian() {
             const daftar = KATALOG[layanan.value]?.varian || {};
@@ -324,19 +374,41 @@
             });
         }
 
+        const hargaNilai = document.getElementById('brg-harga-nilai');
+        const hargaKet = document.getElementById('brg-harga-ket');
+        const hargaMentah = document.getElementById('brg-harga-nilai-mentah');
+
         function segarkanTarif() {
             const kunci = layanan.value + '|' + (varian.disabled ? '' : varian.value || '');
             const t = TARIF[kunci];
 
             if (!t || t.biaya === null) {
                 tarifTeks.innerHTML = 'Layanan ini <strong>belum punya tarif induk</strong> — '
-                    + 'isi harga angkatannya sendiri, atau setel dulu di Tarif layanan.';
+                    + 'setel dulu di Tarif layanan sebelum membuat angkatannya.';
+            } else {
+                tarifTeks.innerHTML = 'Harga patokan <strong>' + rupiah(t.biaya) + '</strong>'
+                    + ' &middot; ' + t.fasilitas.length + ' fasilitas'
+                    + (t.adaCetakan ? ' &middot; cetakan deskripsi siap' : ' &middot; <strong>cetakan belum diisi</strong>');
+            }
+
+            /*
+             * Pada angkatan yang SUDAH ADA, kartu harganya tidak ikut berubah:
+             * yang tertulis di sana harga yang dipotret saat angkatan itu
+             * dibuat, dan mengganti layanannya di layar tidak mengubah apa yang
+             * sudah dibayar peserta.
+             */
+            if (SUNTING) return;
+
+            if (!t || t.biaya === null) {
+                hargaNilai.textContent = '—';
+                hargaKet.textContent = 'Layanan ini belum punya tarif; setel dulu di Tarif layanan.';
+                hargaMentah.value = '';
                 return;
             }
 
-            tarifTeks.innerHTML = 'Harga patokan <strong>' + rupiah(t.biaya) + '</strong>'
-                + ' &middot; ' + t.fasilitas.length + ' fasilitas'
-                + (t.adaCetakan ? ' &middot; cetakan deskripsi siap' : ' &middot; <strong>cetakan belum diisi</strong>');
+            hargaNilai.textContent = rupiah(t.biaya);
+            hargaKet.textContent = 'Mengikuti tarif layanan — tidak perlu diketik.';
+            hargaMentah.value = t.biaya;
         }
 
         layanan.addEventListener('change', function () { segarkanVarian(); segarkanTarif(); });
