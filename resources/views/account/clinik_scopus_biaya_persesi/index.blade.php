@@ -321,45 +321,83 @@ Tarif Layanan | MIS
     .lyn-aktif input { margin-top: 3px; }
     .lyn-aktif-ket { display: block; margin-top: 3px; font-size: .73rem; font-weight: 400; color: var(--mis-tinta-3); }
 
-    /* Saringan kartu */
-    .tar-saring {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 10px; align-items: center;
-        margin-bottom: 12px;
+    /* Kartu saringan — ukuran dan rupanya disalin dari .pel-saring-kartu
+       di Data Pelanggan supaya kedua layar terasa sama. */
+    .tar-saring-kartu {
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        border: 1px solid #e7ecf5;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
     }
 
-    /* Pembungkus isian: inilah acuan posisi ikon dan tombol kosongkan. */
-    .tar-saring-kotak { position: relative; display: block; }
+    .tar-saring {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 10px;
+    }
 
-    .tar-saring .form-control-modern { width: 100%; padding-left: 38px; padding-right: 40px; }
+    /* Kotak cari mengisi sisa baris; tombol Reset memakai lebarnya sendiri. */
+    .tar-saring-cari {
+        position: relative;
+        flex: 1 1 260px;
+        min-width: 0;
+    }
 
-    /* Silang bawaan peramban dimatikan; kalau tidak ada DUA tombol kosongkan
+    .tar-saring-cari .form-control-modern {
+        width: 100%;
+        padding-left: 38px;
+        /* Ruang di kanan supaya ketikan panjang tidak menyelinap ke bawah
+           tombol hapus. */
+        padding-right: 40px;
+    }
+
+    /* Silang bawaan peramban dimatikan; kalau tidak ada DUA tombol hapus
        berdampingan di Chrome, dan yang bawaan tidak ikut memicu penyaringan. */
-    .tar-saring input[type="search"]::-webkit-search-cancel-button { display: none; }
+    .tar-saring-cari input[type="search"]::-webkit-search-cancel-button { display: none; }
 
     .tar-saring-ikon {
-        position: absolute; left: 0; top: 0; bottom: 0;
+        position: absolute; left: 0; bottom: 0;
         display: grid; place-items: center;
-        width: 38px;
+        width: 38px; height: 42px;
         color: var(--mis-tinta-4); pointer-events: none;
     }
 
     .tar-saring-ikon .fas { font-size: 13px !important; }
 
-    .tar-saring-bersih {
-        position: absolute; right: 5px; top: 50%;
-        transform: translateY(-50%);
-        display: grid; place-items: center;
-        width: 30px; height: 30px;
-        border: none; border-radius: 8px;
-        background: transparent; color: var(--mis-tinta-4);
+    /* Tombol hapus di dalam kotak cari; bentuknya sama dengan .pel-hapus. */
+    .tar-hapus {
+        position: absolute;
+        right: 10px;
+        bottom: 9px;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--mis-tinta-4);
         cursor: pointer;
+        transition: background .18s ease, color .18s ease;
     }
 
-    .tar-saring-bersih:hover { background: #fef2f2; color: #e11d48; }
-    .tar-saring-bersih .fas { font-size: 12px !important; }
-    .tar-saring-hasil { font-size: .75rem; color: var(--mis-tinta-3); white-space: nowrap; }
+    .tar-hapus:hover { background: #eef2ff; color: #4f46e5; }
+
+    /* Aturan global layout mengunci .fas ke 20px dengan bobot yang sama,
+       jadi di sini perlu lebih kuat. */
+    .tar-hapus > .fas { font-size: .78rem !important; }
+    .tar-saring-hasil {
+        margin: 9px 0 0;
+        line-height: 1.45;
+        font-size: .75rem;
+        color: var(--mis-tinta-3);
+    }
+
+    .tar-saring-hasil:empty { display: none; }
 
     /* Ringkasan yang bisa ditekan tetap serupa lencana, hanya dapat penunjuk. */
     .tar-pil-tombol { border: none; cursor: pointer; font: inherit; }
@@ -503,7 +541,8 @@ Tarif Layanan | MIS
 
     @media (max-width: 767.98px) {
         .tar-kisi { grid-template-columns: minmax(0, 1fr); }
-        .tar-saring { grid-template-columns: minmax(0, 1fr); }
+        .tar-saring-cari { flex: 1 1 100%; }
+        .tar-reset { width: 100%; justify-content: center; }
 
         /* Lencana ringkasan selebar kartunya dan rata tengah. Rata kiri, ia
            menggantung sendirian di bawah tombol cetak yang selebar penuh. */
@@ -582,28 +621,48 @@ Tarif Layanan | MIS
             </div>
         </div>
 
-        {{-- Saringan cepat. Katalognya kini boleh tumbuh sendiri, jadi kisinya
-             tidak lagi dijamin muat sekali lihat. Menyaring di peramban, bukan
-             memuat ulang: daftarnya kecil dan jawabannya harus seketika. --}}
-        <div class="tar-saring">
-            {{-- Ikon dan tombol kosongkan diposisikan terhadap KOTAK ISIANNYA,
-                 bukan terhadap seluruh baris saringan. Terhadap barisnya, di
-                 ponsel barisnya menumpuk jadi dua (isian + keterangan hasil)
-                 sehingga ikonnya ikut turun ke tengah keduanya. --}}
-            <div class="tar-saring-kotak">
-                <span class="tar-saring-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
-                <input type="search" id="tar-cari" class="form-control-modern"
-                    placeholder="Cari layanan — nama atau varian" aria-label="Cari layanan">
-                <button type="button" class="tar-saring-bersih" id="tar-cari-bersih"
-                    hidden aria-label="Kosongkan pencarian" title="Kosongkan pencarian">
-                    <i class="fas fa-times"></i>
-                </button>
+        {{-- Kartu saringan, bentuknya disamakan dengan Data Pelanggan: kotak
+             berlabel di dalam kartu putih, tombol hapus ketikan di dalam
+             kotaknya, dan tombol Reset yang muncul hanya saat memang ada yang
+             disaring.
+
+             Menyaring di peramban, bukan memuat ulang: daftarnya kecil dan
+             jawabannya harus seketika. Karena itu tidak ada tombol "Terapkan"
+             seperti di Data Pelanggan — di sana penyaringannya dikerjakan
+             peladen. --}}
+        <div class="tar-saring-kartu">
+            <div class="tar-saring">
+                {{-- Ikon dan tombol hapus diposisikan terhadap KOTAK ISIANNYA,
+                     bukan terhadap seluruh baris saringan. Terhadap barisnya, di
+                     ponsel barisnya menumpuk sehingga ikonnya ikut turun ke
+                     tengah tumpukan. --}}
+                <div class="mis-isian tar-saring-cari">
+                    <label class="mis-label" for="tar-cari">Cari layanan</label>
+                    <span class="tar-saring-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                    <input type="search" id="tar-cari" class="form-control-modern"
+                        placeholder="Nama layanan atau varian" autocomplete="off"
+                        aria-controls="tar-kisi">
+                    {{-- Diberi type=button supaya tidak mengirim apa pun, dan
+                         disembunyikan saat kotaknya kosong: tanda silang di kotak
+                         kosong tidak ada gunanya. --}}
+                    <button type="button" class="tar-hapus" id="tar-cari-bersih"
+                        hidden aria-label="Hapus kata kunci pencarian" title="Hapus kata kunci">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}"
+                    class="mis-tombol mis-tombol-halus tar-reset" id="tar-reset"
+                    hidden title="Hapus semua saringan">
+                    <i class="fas fa-times"></i> Reset
+                </a>
             </div>
-            <span class="tar-saring-hasil" id="tar-cari-hasil" aria-live="polite"></span>
+
+            <p class="tar-saring-hasil" id="tar-cari-hasil" aria-live="polite"></p>
         </div>
 
         {{-- --------------------------------------- kartu tiap layanan --}}
-        <div class="tar-kisi">
+        <div class="tar-kisi" id="tar-kisi">
             @foreach ($kartu as $k)
                 @php($t = $k['tarif'])
                 @php($fasilitas = $t ? $t->daftar_fasilitas : [])
@@ -760,6 +819,15 @@ Tarif Layanan | MIS
                     </div>
                 </div>
             @endforeach
+
+            {{-- Muncul saat pencarian tidak menemukan apa pun. Kalimatnya
+                 disamakan dengan Data Pelanggan; tanpa ini yang tersisa cuma
+                 kisi kosong tanpa keterangan apa-apa. --}}
+            <div class="mis-kosong tar-kosong-semua" id="tar-kosong-cari" hidden>
+                <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                <p class="mis-kosong-judul">Tidak ada yang cocok</p>
+                <p class="mis-kosong-teks">Coba ganti kata kuncinya, atau hapus saringannya.</p>
+            </div>
 
             @if ($totalKartu === 0)
                 <div class="mis-kosong tar-kosong-semua">
@@ -1299,6 +1367,8 @@ Tarif Layanan | MIS
 
         const hasil = document.getElementById('tar-cari-hasil');
         const bersih = document.getElementById('tar-cari-bersih');
+        const reset = document.getElementById('tar-reset');
+        const kosong = document.getElementById('tar-kosong-cari');
         const kartu = [...document.querySelectorAll('.tar-kartu')];
         const tambah = document.querySelector('.tar-tambah');
 
@@ -1317,12 +1387,20 @@ Tarif Layanan | MIS
             // terbaca seolah itulah yang ditemukan.
             if (tambah) tambah.hidden = kata !== '';
 
-            hasil.textContent = kata === ''
-                ? ''
-                : (tampil === 0 ? 'Tidak ada yang cocok' : tampil + ' dari ' + kartu.length + ' layanan');
+            const menyaring = kata !== '';
 
-            // Tombol kosongkan hanya ada saat memang ada yang bisa dikosongkan.
+            hasil.textContent = ! menyaring
+                ? ''
+                : (tampil === 0
+                    ? 'Tidak ada layanan yang cocok dengan "' + cari.value.trim() + '".'
+                    : 'Menampilkan ' + tampil + ' dari ' + kartu.length + ' layanan.');
+
+            // Keadaan kosong menggantikan kisi, bukan menemaninya.
+            if (kosong) kosong.hidden = ! (menyaring && tampil === 0);
+
+            // Tombol hapus dan Reset hanya ada saat memang ada yang disaring.
             bersih.hidden = cari.value === '';
+            if (reset) reset.hidden = ! menyaring;
         }
 
         cari.addEventListener('input', saring);
@@ -1332,6 +1410,20 @@ Tarif Layanan | MIS
             saring();
             cari.focus();
         });
+
+        if (reset) {
+            reset.addEventListener('click', function (e) {
+                /*
+                 * Dikosongkan di tempat, tanpa memuat ulang halaman: pencariannya
+                 * memang dikerjakan di peramban. Alamat tautannya tetap ada
+                 * sebagai cadangan kalau skripnya tidak termuat.
+                 */
+                e.preventDefault();
+                cari.value = '';
+                saring();
+                cari.focus();
+            });
+        }
 
         // Esc mengosongkan juga, kebiasaan yang sudah dipunyai orang dari
         // kotak pencarian mana pun.
