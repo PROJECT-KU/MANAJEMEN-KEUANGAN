@@ -1160,6 +1160,83 @@
     })();
 
     /*
+     * Penanda bahwa strip tab masih bisa digeser.
+     *
+     * Empat tab tidak muat berjajar di ponsel, jadi stripnya digeser ke
+     * samping — dan geseran tanpa tanda apa pun adalah sebab tab terakhir
+     * dulu praktis tidak ada: ia di luar layar dan tidak ada yang memberi
+     * tahu. Kelas pudarnya dipasang sesuai posisi, jadi ia hilang begitu
+     * sudah mentok; tepi yang selalu pudar menjanjikan isi yang sudah habis.
+     */
+    (function () {
+        const strip = document.getElementById('pel-tab');
+        if (!strip) return;
+
+        const segarkan = function () {
+            /*
+             * Ambang kirinya dihitung dari bantalan strip, bukan dipatok 1px.
+             *
+             * Stripnya berbantalan 5px dan tiap tab ber-scroll-snap-align:
+             * start, jadi posisi diam yang paling kiri BUKAN nol melainkan 5.
+             * Dibandingkan dengan 1, penanda kiri menyala sejak halaman dibuka
+             * dan menjanjikan isi yang sebenarnya tidak ada.
+             */
+            const bantalan = parseFloat(getComputedStyle(strip).paddingLeft) || 0;
+
+            // 1px toleransi: lebar hasil hitungan peramban kerap berkoma.
+            const adaKiri = strip.scrollLeft > bantalan + 1;
+            const adaKanan = strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 1;
+
+            strip.classList.toggle('mis-tab-geser-kiri', adaKiri);
+            strip.classList.toggle('mis-tab-geser-kanan', adaKanan);
+        };
+
+        strip.addEventListener('scroll', segarkan, { passive: true });
+        window.addEventListener('resize', segarkan);
+
+        /*
+         * Tab yang sedang terbuka digeser ke dalam pandangan.
+         *
+         * Penting saat halaman ini dibuka ulang pada tab Kontak karena ada
+         * galat validasi: tanpa ini, tandanya aktif tetapi tabnya sendiri
+         * berada di luar layar.
+         */
+        const terlihatPenuh = function (el) {
+            const a = strip.getBoundingClientRect();
+            const b = el.getBoundingClientRect();
+
+            return b.left >= a.left - 1 && b.right <= a.right + 1;
+        };
+
+        const aktif = strip.querySelector('.nav-link.active');
+
+        /*
+         * Digeser HANYA kalau tabnya memang belum terlihat utuh.
+         *
+         * scrollIntoView dipanggil tanpa syarat menggeser stripnya lima piksel
+         * — sebesar bantalannya sendiri — walau tab aktifnya tab pertama dan
+         * sudah kelihatan. Akibatnya penanda kiri menyala sejak halaman dibuka
+         * dan menjanjikan isi yang sebenarnya tidak ada.
+         */
+        if (aktif && ! terlihatPenuh(aktif)) {
+            aktif.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        // Berpindah tab ikut menggeser, supaya tab yang baru dipilih utuh.
+        strip.addEventListener('click', function (e) {
+            const tab = e.target.closest('.nav-link');
+            if (tab) setTimeout(function () {
+                if (! terlihatPenuh(tab)) {
+                    tab.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+                }
+                segarkan();
+            }, 60);
+        });
+
+        segarkan();
+    })();
+
+    /*
      * Tombol yang mengirim surat ke pelanggan: satu penangan untuk semuanya.
      *
      * Judul, kalimat, dan alamat tujuannya datang dari atribut data-* di
