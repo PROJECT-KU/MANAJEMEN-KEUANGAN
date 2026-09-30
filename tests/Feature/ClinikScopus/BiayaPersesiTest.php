@@ -371,6 +371,130 @@ class BiayaPersesiTest extends TestCase
         ];
     }
 
+    /** Teks pengumuman angkatan apa adanya, seperti yang dipakai di grup WA. */
+    private function pengumumanAngkatan(): string
+    {
+        return implode("\n", [
+            '\u{1F4D8} SCOPUS CAMP YOGYAKARTA',
+            '',
+            '\u{1F5D3} 30 Oktober \u{2013} 1 November 2026',
+            '\u{1F3AF} Target Training: Paper Tersubmit',
+            '',
+            'Scopus Camp Yogyakarta merupakan program intensif pendampingan penulisan artikel ilmiah.',
+            '',
+            '\u{1F525} SPECIAL PROMO:',
+            'Cashback Rp 1.000.000 + Tumbler Eksklusif Rumah Scopus!',
+            '',
+            '\u{1F539} Kegiatan Utama',
+            '1. Penulisan dan penajaman hasil riset ke dalam artikel ilmiah',
+            '2. Pencarian dan pemilihan jurnal terindeks Scopus yang relevan',
+            '',
+            '\u{1F539} Fasilitas Peserta',
+            '1. Konsumsi selama kegiatan',
+            '2. Penginapan ala Rumah Scopus',
+            '3. Pendampingan handling jurnal pasca camp',
+            '4. Sertifikat & Seminar Kit',
+            '5. Cek plagiasi',
+            '6. E-Materi',
+            '7. Mushola, kolam renang & treadmill',
+            '',
+            '\u{1F4B0} Biaya Investasi: Rp 5.500.000',
+            '\u{1F4CD} Lokasi: Yogyakarta',
+            '',
+            '\u{1F4DE} Info & Pendaftaran:',
+            '\u{1F4DE} Kumala: 0889-8356-7819',
+        ]);
+    }
+
+    #[Test]
+    public function menempel_pengumuman_utuh_hanya_mengambil_bagian_fasilitasnya(): void
+    {
+        /*
+         * Inti "minim input". Admin sudah punya teks pengumuman angkatan; yang
+         * diminta cuma menempelnya. Tanpa pemilahan ini, sekali tempel
+         * menghasilkan 26 "fasilitas" — judul, tanggal, promo, harga, lokasi,
+         * sampai nomor telepon panitia.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_camp',
+            'varian' => 'jawa',
+            'biaya_persesi' => '5.500.000',
+            'fasilitas' => $this->pengumumanAngkatan(),
+        ]);
+
+        $this->assertSame([
+            'Konsumsi selama kegiatan',
+            'Penginapan ala Rumah Scopus',
+            'Pendampingan handling jurnal pasca camp',
+            'Sertifikat & Seminar Kit',
+            'Cek plagiasi',
+            'E-Materi',
+            'Mushola, kolam renang & treadmill',
+        ], ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->daftar_fasilitas);
+    }
+
+    #[Test]
+    public function daftar_bernomor_lain_di_atas_fasilitas_tidak_ikut_terambil(): void
+    {
+        /*
+         * "Kegiatan Utama" juga daftar bernomor dan letaknya persis di atas
+         * bagian fasilitas. Yang diambil harus yang di bawah judul BERTULISKAN
+         * fasilitas, bukan daftar bernomor pertama yang ditemui.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'biaya_persesi' => '1.000.000',
+            'fasilitas' => $this->pengumumanAngkatan(),
+        ]);
+
+        $daftar = ClinikScopusBiayaPersesi::berlaku('scopus_kafe')->daftar_fasilitas;
+
+        $this->assertNotContains('Penulisan dan penajaman hasil riset ke dalam artikel ilmiah', $daftar);
+        $this->assertNotContains('Kegiatan Utama', $daftar);
+    }
+
+    #[Test]
+    public function penomoran_tidak_ikut_tersimpan(): void
+    {
+        // Kalau nomornya ikut, kartunya merender "\u{2713} 1. Konsumsi" — dua
+        // penanda daftar untuk satu butir.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'biaya_persesi' => '1.000.000',
+            'fasilitas' => "1. Sertifikat\n2) Konsumsi\n3. Cek plagiasi",
+        ]);
+
+        $this->assertSame(
+            ['Sertifikat', 'Konsumsi', 'Cek plagiasi'],
+            ClinikScopusBiayaPersesi::berlaku('scopus_kafe')->daftar_fasilitas
+        );
+    }
+
+    #[Test]
+    public function fasilitas_yang_menyebut_kata_fasilitas_tidak_disangka_judul(): void
+    {
+        // "- Fasilitas olahraga" itu fasilitas, bukan judul bagian. Judul di
+        // teks mereka ditandai emoji, bukan tanda hubung.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($admin)->post(route('account.Clinik-Scopus-Biaya-Persesi.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'biaya_persesi' => '1.000.000',
+            'fasilitas' => "- Sertifikat\n- Fasilitas olahraga\n- Konsumsi",
+        ]);
+
+        $this->assertSame(
+            ['Sertifikat', 'Fasilitas olahraga', 'Konsumsi'],
+            ClinikScopusBiayaPersesi::berlaku('scopus_kafe')->daftar_fasilitas
+        );
+    }
+
     #[Test]
     public function fasilitas_kosong_tersimpan_sebagai_null_bukan_larik_kosong(): void
     {
