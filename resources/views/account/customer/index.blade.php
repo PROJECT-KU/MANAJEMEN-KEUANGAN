@@ -88,8 +88,17 @@ Data Pelanggan | MIS
      */
     .pel-massal {
         position: sticky;
-        bottom: 12px;
-        z-index: 5;
+        /*
+         * 57px = tinggi kaki halaman (45px) + jarak 12px.
+         *
+         * Kaki halaman ber-position: fixed dengan z-index 1000, jadi pada
+         * bottom: 12px baris ini terbenam di belakangnya: terukur, barisnya
+         * menempati 822-888px sementara kakinya mulai di 855px, dan
+         * elementFromPoint di titik tengah baris justru menunjuk kaki itu.
+         * z-index-nya pun harus di atas 1000, bukan 5.
+         */
+        bottom: 57px;
+        z-index: 1001;
         display: none;
         align-items: center;
         gap: 10px;
