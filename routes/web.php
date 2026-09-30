@@ -386,6 +386,7 @@ Route::prefix('account')
             Route::get('/customer/data/ekspor', 'account\CustomerController@ekspor')->name('account.customer.ekspor');
             Route::get('/customer/data/ekspor-excel', 'account\CustomerController@eksporExcel')->name('account.customer.ekspor.excel');
             Route::get('/customer/data/{pelanggan:uuid}', 'account\CustomerController@edit')->name('account.customer.edit');
+            Route::post('/customer/data/massal', 'account\CustomerController@massal')->name('account.customer.massal');
             Route::delete('/customer/data/{pelanggan:uuid}', 'account\CustomerController@destroy')->name('account.customer.destroy');
 
             //clinik scopus trainer
