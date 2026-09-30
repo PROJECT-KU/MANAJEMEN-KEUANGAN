@@ -349,10 +349,12 @@ Tarif Layanan | MIS
                                         Fasilitas yang didapat
                                     </label>
                                     <textarea class="tar-area" id="tar-fas-{{ $loop->index }}" name="fasilitas"
-                                        rows="4" placeholder="Satu fasilitas per baris&#10;Sertifikat&#10;Konsumsi selama acara">{{ $t ? implode("\n", $t->daftar_fasilitas) : '' }}</textarea>
+                                        rows="5" placeholder="Tempel teks pengumuman di sini, atau ketik satu fasilitas per baris&#10;Sertifikat&#10;Konsumsi selama acara">{{ $t ? implode("\n", $t->daftar_fasilitas) : '' }}</textarea>
                                     <p class="mis-bantuan">
-                                        Satu baris satu fasilitas. Dipakai ulang saat membuat angkatan baru,
-                                        jadi tidak perlu diketik lagi.
+                                        Boleh <strong>ditempel utuh</strong> dari teks pengumuman —
+                                        yang diambil hanya baris di bawah judul &ldquo;Fasilitas&rdquo;,
+                                        nomornya dibuang sendiri. Atau ketik biasa, satu baris satu fasilitas.
+                                        Dipakai ulang saat membuat angkatan baru, jadi tidak perlu diketik lagi.
                                     </p>
                                 </div>
 

@@ -117,7 +117,7 @@ class ClinikScopusBiayaPersesiController extends Controller
             'varian' => ['nullable', 'string', 'max:40'],
             'biaya_persesi' => ['required', 'string'],
             'ppn' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'fasilitas' => ['nullable', 'string', 'max:2000'],
+            'fasilitas' => ['nullable', 'string', 'max:8000'],
             'perbaiki' => ['nullable', 'uuid'],
         ], [
             'layanan.required' => 'Layanannya tidak dikenali.',
@@ -185,26 +185,109 @@ class ClinikScopusBiayaPersesiController extends Controller
     }
 
     /**
-     * Fasilitas diketik satu per baris, disimpan sebagai larik.
+     * Mengambil daftar fasilitas dari teks yang diketik ATAU ditempel.
      *
-     * Satu baris satu fasilitas — bukan dipisah koma — karena fasilitasnya
-     * sendiri kerap memuat koma ("Konsumsi pagi, siang, dan sore").
+     * Admin tidak menulis daftar fasilitas dari nol — mereka sudah punya teks
+     * pengumuman angkatan (yang selama ini tersimpan di kolom `desc`), dan di
+     * dalamnya ada satu bagian berjudul "Fasilitas Peserta". Menyuruh mereka
+     * mengetik ulang tujuh baris itu justru menambah pekerjaan, padahal
+     * seluruh layar ini dibuat supaya isiannya makin sedikit.
+     *
+     * Jadi teks utuhnya boleh ditempel apa adanya: yang diambil hanya baris
+     * di bawah judul yang menyebut "fasilitas", dan berhenti di baris pertama
+     * yang bukan butir daftar. Tanpa itu, menempel pengumuman menghasilkan 19
+     * "fasilitas" — judul, tanggal, harga, sampai nomor telepon panitia.
+     *
+     * Kalau tidak ada judul semacam itu, isinya diperlakukan seperti daftar
+     * biasa: satu baris satu fasilitas. Bukan dipisah koma, karena
+     * fasilitasnya sendiri kerap memuat koma ("Konsumsi pagi, siang, dan
+     * sore").
      *
      * @return array<int, string>|null
      */
     private function uraikanFasilitas(?string $teks): ?array
     {
         $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
+        $baris = array_map(fn ($b) => trim($b), $baris);
+
+        $mulai = null;
+
+        foreach ($baris as $i => $b) {
+            if ($b !== '' && $this->judulFasilitas($b)) {
+                $mulai = $i + 1;
+                break;
+            }
+        }
+
+        if ($mulai !== null) {
+            $ambil = [];
+
+            for ($i = $mulai; $i < count($baris); $i++) {
+                if ($baris[$i] === '') {
+                    // Baris kosong SEBELUM butir pertama cuma jarak di bawah
+                    // judulnya; sesudah itu, ia penutup bagiannya.
+                    if ($ambil === []) {
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if (! $this->butirDaftar($baris[$i])) {
+                    break;
+                }
+
+                $ambil[] = $baris[$i];
+            }
+
+            $baris = $ambil;
+        }
 
         $bersih = array_values(array_filter(
-            // Penanda /u wajib: tanpa itu kelas karakternya dicocokkan per
-            // BITA, jadi "•" terpotong separuh dan sisanya UTF-8 rusak yang
-            // gagal disandikan ke JSON saat disimpan.
-            array_map(fn ($b) => trim(preg_replace('/^[-\x{2022}\x{00B7}*\x{2013}]\s*/u', '', $b)), $baris),
+            array_map(fn ($b) => $this->tanpaPenandaDaftar($b), $baris),
             fn ($b) => $b !== ''
         ));
 
         return $bersih === [] ? null : $bersih;
+    }
+
+    /**
+     * Apakah barisnya judul bagian fasilitas.
+     *
+     * Butir bernomor dan butir bertanda hubung dikecualikan supaya fasilitas
+     * yang kebetulan menyebut kata itu ("- Fasilitas olahraga") tidak disangka
+     * judul. Judul di teks mereka ditandai emoji, bukan angka atau tanda
+     * hubung — misalnya "\u{1F539} Fasilitas Peserta".
+     */
+    private function judulFasilitas(string $baris): bool
+    {
+        if (preg_match('/^(\\d+\\s*[.)]|[-*])\\s*/u', $baris)) {
+            return false;
+        }
+
+        return (bool) preg_match('/fasilitas/iu', $baris);
+    }
+
+    /** Apakah barisnya berbentuk butir daftar — bernomor, bertanda, atau bercentang. */
+    private function butirDaftar(string $baris): bool
+    {
+        return (bool) preg_match('/^(\d+\s*[.)]|[-*\x{2022}\x{00B7}\x{2013}\x{2705}\x{2714}\x{25AB}\x{25B8}])\s*/u', $baris);
+    }
+
+    /**
+     * Membuang penanda butirnya, menyisakan teks fasilitasnya saja.
+     *
+     * Penanda /u wajib: tanpa itu kelas karakternya dicocokkan per BITA, jadi
+     * "•" terpotong separuh dan sisanya UTF-8 rusak yang gagal disandikan ke
+     * JSON saat disimpan.
+     */
+    private function tanpaPenandaDaftar(string $baris): string
+    {
+        return trim(preg_replace(
+            '/^(\d+\s*[.)]|[-*\x{2022}\x{00B7}\x{2013}\x{2705}\x{2714}\x{25AB}\x{25B8}])\s*/u',
+            '',
+            $baris
+        ));
     }
 
     /** Memberlakukan lagi tarif lama, tanpa mengetik ulang angkanya. */
