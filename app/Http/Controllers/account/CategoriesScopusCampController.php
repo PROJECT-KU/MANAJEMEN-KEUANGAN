@@ -41,7 +41,7 @@ class CategoriesScopusCampController extends Controller
         // Kita gunakan Carbon untuk mendapatkan waktu sekarang
         $now = \Carbon\Carbon::now();
 
-        DB::table('scopus_camp_kategori')
+        DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
             ->where('status', 'active') // Hanya cek yang masih aktif
             ->where('mulai', '<=', $now->format('Y-m-d H:i:s'))
             ->update(['status' => 'non active']);
@@ -53,7 +53,7 @@ class CategoriesScopusCampController extends Controller
         $search = $request->input('q');
 
         // Mulai query builder
-        $query = DB::table('scopus_camp_kategori');
+        $query = DB::table('kategori_layanan')->where('layanan', 'scopus_camp');
 
         // Filter berdasarkan rentang tanggal jika ada
         if ($startDate && $endDate) {
@@ -228,7 +228,7 @@ class CategoriesScopusCampController extends Controller
         // END
 
         // MENENTUKAN SISA KUOTA YANG SAMA DENGAN JUMLAH TOTAL KUOTA
-        $totalPendaftarTerdaftar = PendaftaranScopusCamp::where('scopus_camp_kategori_id', $id)
+        $totalPendaftarTerdaftar = PendaftaranScopusCamp::where('kategori_id', $id)
             ->sum('jumlah_pendaftar');
 
         $totalKuota = (int) $request->input('total_kuota');
@@ -312,7 +312,7 @@ class CategoriesScopusCampController extends Controller
             $nextMonth = date('Y-m-d 23:59:59', strtotime($endDate));
         }
 
-        $query = DB::table('scopus_camp_kategori')
+        $query = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
             ->where(function ($query) use ($search) {
                 $query->where('nama', 'LIKE', '%' . $search . '%')
                     ->orWhere('nama_ke', 'LIKE', '%' . $search . '%')
@@ -355,7 +355,7 @@ class CategoriesScopusCampController extends Controller
 
         // Jika tidak pilih tanggal → tampilkan semua data
         if (!$startDate || !$endDate) {
-            $categories = DB::table('scopus_camp_kategori')
+            $categories = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
                 ->orderBy('mulai', 'DESC')
                 ->paginate(10);
 
@@ -370,7 +370,7 @@ class CategoriesScopusCampController extends Controller
         $endDate   = date('Y-m-d 23:59:59', strtotime($endDate));
 
         // FILTER OVERLAP (BENAR)
-        $categories = DB::table('scopus_camp_kategori')
+        $categories = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
             ->where('mulai', '<=', $endDate)
             ->where('selesai', '>=', $startDate)
             ->orderBy('mulai', 'DESC')
@@ -395,7 +395,7 @@ class CategoriesScopusCampController extends Controller
         $tanggal_akhir = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::now()->endOfMonth();
 
         // Query dasar berdasarkan tanggal dari kolom 'mulai'
-        $query = DB::table('categories_analisis_bibliometrik')
+        $query = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
             ->select(
                 'id',
                 'token',

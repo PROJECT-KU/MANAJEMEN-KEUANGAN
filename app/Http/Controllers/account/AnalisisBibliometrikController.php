@@ -58,14 +58,14 @@ class AnalisisBibliometrikController extends Controller
             $nextMonth = date('Y-m-d 00:00:00', strtotime($endDate));
         }
         $datas = DB::table('analisis_bibliometrik')
-            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
+            ->join('kategori_layanan', 'analisis_bibliometrik.kategori_id', '=', 'kategori_layanan.id')
             ->select(
                 'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama as kategori_nama',
-                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
-                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
-                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.id as kategori_id'
+                'kategori_layanan.nama as kategori_nama',
+                'kategori_layanan.nama_ke as kategori_nama_ke',
+                'kategori_layanan.mulai as kategori_tanggal_mulai',
+                'kategori_layanan.selesai as kategori_tanggal_selesai',
+                'kategori_layanan.id as kategori_id'
             )
             ->latest('analisis_bibliometrik.created_at')
             ->paginate(10);
@@ -79,7 +79,7 @@ class AnalisisBibliometrikController extends Controller
     public function edit($id, $token)
     {
         $data = AnalisisBibliometrik::findOrFail($id);
-        $category = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
+        $category = CategoriesAnalisisBibliometrik::find($data->kategori_id);
         $categories = CategoriesAnalisisBibliometrik::all();
 
         // Inject mulai dan selesai manual jika category ditemukan
@@ -108,8 +108,8 @@ class AnalisisBibliometrikController extends Controller
         $analisisbibliometrik = AnalisisBibliometrik::findOrFail($id);
 
         // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
-        $kategoriBaruId = $request->input('categories_analisis_bibliometrik_id');
-        $kategoriLamaId = $analisisbibliometrik->categories_analisis_bibliometrik_id;
+        $kategoriBaruId = $request->input('kategori_id');
+        $kategoriLamaId = $analisisbibliometrik->kategori_id;
         $kategori = CategoriesAnalisisBibliometrik::findOrFail($kategoriBaruId);
         // END
 
@@ -134,7 +134,7 @@ class AnalisisBibliometrikController extends Controller
         // END
 
         $analisisbibliometrik->update([
-            'categories_analisis_bibliometrik_id'                     => $request->input('categories_analisis_bibliometrik_id'),
+            'kategori_id'                     => $request->input('kategori_id'),
             'nama'                                                    => $request->input('nama'),
             'email'                                                   => $request->input('email'),
             'affiliasi'                                               => $request->input('affiliasi'),
@@ -153,7 +153,7 @@ class AnalisisBibliometrikController extends Controller
         if ($analisisbibliometrik) {
 
             // UPDATE SISA KUOTA
-            $totalTerdaftar = AnalisisBibliometrik::where('categories_analisis_bibliometrik_id', $kategoriBaruId)
+            $totalTerdaftar = AnalisisBibliometrik::where('kategori_id', $kategoriBaruId)
                 ->sum('jumlah_pendaftar');
 
             $kategori->sisa_kuota = max(0, $kategori->total_kuota - $totalTerdaftar);
@@ -186,7 +186,7 @@ class AnalisisBibliometrikController extends Controller
             $data = AnalisisBibliometrik::findOrFail($id);
 
             // ===== UPDATE KUOTA =====
-            $kategori = CategoriesAnalisisBibliometrik::find($data->categories_analisis_bibliometrik_id);
+            $kategori = CategoriesAnalisisBibliometrik::find($data->kategori_id);
 
             if ($kategori) {
                 $kategori->sisa_kuota += $data->jumlah_pendaftar;
@@ -241,22 +241,22 @@ class AnalisisBibliometrikController extends Controller
 
         // Query search
         $query = DB::table('analisis_bibliometrik')
-            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
+            ->join('kategori_layanan', 'analisis_bibliometrik.kategori_id', '=', 'kategori_layanan.id')
             ->select(
                 'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama as kategori_nama',
-                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
-                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
-                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.id as kategori_id'
+                'kategori_layanan.nama as kategori_nama',
+                'kategori_layanan.nama_ke as kategori_nama_ke',
+                'kategori_layanan.mulai as kategori_tanggal_mulai',
+                'kategori_layanan.selesai as kategori_tanggal_selesai',
+                'kategori_layanan.id as kategori_id'
             )
             ->where(function ($q) use ($search) {
                 $q->where('analisis_bibliometrik.id_transaksi', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama_ke', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.mulai', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.selesai', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.nama', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.nama_ke', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.mulai', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.selesai', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.total_pembayaran', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.status', 'LIKE', "%{$search}%");
             });
@@ -295,14 +295,14 @@ class AnalisisBibliometrikController extends Controller
         }
 
         $datas = DB::table('analisis_bibliometrik')
-            ->join('categories_analisis_bibliometrik', 'analisis_bibliometrik.categories_analisis_bibliometrik_id', '=', 'categories_analisis_bibliometrik.id')
+            ->join('kategori_layanan', 'analisis_bibliometrik.kategori_id', '=', 'kategori_layanan.id')
             ->select(
                 'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama as kategori_nama',
-                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
-                'categories_analisis_bibliometrik.mulai as kategori_tanggal_mulai',
-                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.id as kategori_id'
+                'kategori_layanan.nama as kategori_nama',
+                'kategori_layanan.nama_ke as kategori_nama_ke',
+                'kategori_layanan.mulai as kategori_tanggal_mulai',
+                'kategori_layanan.selesai as kategori_tanggal_selesai',
+                'kategori_layanan.id as kategori_id'
             )
             ->whereBetween('analisis_bibliometrik.created_at', [$startDate, $endDate])
             ->orderBy('analisis_bibliometrik.created_at', 'DESC')
@@ -329,19 +329,19 @@ class AnalisisBibliometrikController extends Controller
 
         $query = DB::table('analisis_bibliometrik')
             ->join(
-                'categories_analisis_bibliometrik',
-                'analisis_bibliometrik.categories_analisis_bibliometrik_id',
+                'kategori_layanan',
+                'analisis_bibliometrik.kategori_id',
                 '=',
-                'categories_analisis_bibliometrik.id'
+                'kategori_layanan.id'
             )
             ->select(
                 'analisis_bibliometrik.*',
-                'categories_analisis_bibliometrik.nama   as kategori_nama',
-                'categories_analisis_bibliometrik.nama_ke as kategori_nama_ke',
-                'categories_analisis_bibliometrik.group_wa as kategori_group_wa',
-                'categories_analisis_bibliometrik.mulai  as kategori_tanggal_mulai',
-                'categories_analisis_bibliometrik.selesai as kategori_tanggal_selesai',
-                'categories_analisis_bibliometrik.biaya  as biaya',
+                'kategori_layanan.nama   as kategori_nama',
+                'kategori_layanan.nama_ke as kategori_nama_ke',
+                'kategori_layanan.group_wa as kategori_group_wa',
+                'kategori_layanan.mulai  as kategori_tanggal_mulai',
+                'kategori_layanan.selesai as kategori_tanggal_selesai',
+                'kategori_layanan.biaya  as biaya',
                 'analisis_bibliometrik.ppn',
                 'analisis_bibliometrik.kode_unik',
                 'analisis_bibliometrik.nominal_diskon'
@@ -352,10 +352,10 @@ class AnalisisBibliometrikController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('analisis_bibliometrik.id_transaksi', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.nama_ke', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.mulai', 'LIKE', "%{$search}%")
-                    ->orWhere('categories_analisis_bibliometrik.selesai', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.nama', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.nama_ke', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.mulai', 'LIKE', "%{$search}%")
+                    ->orWhere('kategori_layanan.selesai', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.total_pembayaran', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.status', 'LIKE', "%{$search}%");
             });
