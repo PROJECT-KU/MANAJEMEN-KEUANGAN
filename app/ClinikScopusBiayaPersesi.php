@@ -22,9 +22,10 @@ use Illuminate\Support\Str;
  *
  *   Bibliometrik   online / offline   — offline menanggung tempat & konsumsi
  *
- * Varian dipakai hanya untuk beda PRODUK, bukan beda angkatan. Scopus Camp
- * sempat dibagi Jawa/luar Jawa, lalu dibuang: harganya berubah menurut waktu,
- * bukan pulau, dan tiap angkatan sudah menyimpan lokasi serta biayanya sendiri.
+ *   Scopus Camp    jawa / luar_jawa   — fasilitasnya berbeda, bukan cuma
+ *                                       harganya
+ *
+ * Varian dipakai untuk beda PRODUK, bukan beda angkatan.
  *
  * Layanan tanpa varian menyimpan NULL, bukan untaian kosong: keduanya berbeda
  * di whereNull, dan kolom kosong yang tercampur membuat pencarian tarifnya
@@ -88,10 +89,15 @@ class ClinikScopusBiayaPersesi extends Model
             'satuan' => 'per peserta',
             'ikon' => 'fa-campground',
             'warna' => 'mis-hijau',
-            // Tanpa varian: harganya ternyata berubah menurut WAKTU, bukan
-            // pulau — Yogyakarta 4,5jt sampai September 2026 lalu 5,5jt sejak
-            // Oktober. Lokasinya sendiri sudah disimpan tiap angkatan.
-            'varian' => [],
+            /*
+             * Yang membedakan bukan harganya — keduanya 5,5jt sekarang —
+             * melainkan FASILITASNYA: di Jawa acaranya di rumah sendiri, jadi
+             * dapat penginapan plus mushola, kolam renang & treadmill; di luar
+             * Jawa menyewa tempat, jadi lima butir saja. Perbedaan itu tidak
+             * kelihatan sama sekali dari kolom biaya, dan itulah sebabnya
+             * sempat salah dibaca sebagai kenaikan harga biasa.
+             */
+            'varian' => ['jawa' => 'Pulau Jawa', 'luar_jawa' => 'Luar Pulau Jawa'],
         ],
         'scopus_kafe' => [
             'nama' => 'Scopus Kafe',

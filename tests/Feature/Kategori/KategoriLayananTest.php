@@ -4,6 +4,7 @@ namespace Tests\Feature\Kategori;
 
 use App\CategoriesAnalisisBibliometrik;
 use App\CategoriesScopusCamp;
+use App\ClinikScopusBiayaPersesi;
 use App\KategoriLayanan;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -23,8 +24,16 @@ class KategoriLayananTest extends TestCase
 
     private function kategori(string $layanan, array $lain = []): KategoriLayanan
     {
+        /*
+         * Varian diambil dari katalog, bukan ditulis tetap di sini: layanan
+         * bervarian yang dibuat tanpa varian tidak akan pernah menemukan tarif
+         * induknya, dan ujinya gagal dengan sebab yang jauh dari penyebabnya.
+         */
+        $varian = ClinikScopusBiayaPersesi::LAYANAN[$layanan]['varian'] ?? [];
+
         return KategoriLayanan::create(array_merge([
             'layanan' => $layanan,
+            'varian' => $varian === [] ? null : array_key_first($varian),
             'token' => 'uji' . uniqid(),
             'nama' => 'Angkatan Uji ' . $layanan,
             'biaya' => '1000000',
