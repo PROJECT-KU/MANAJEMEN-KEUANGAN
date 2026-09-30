@@ -41,6 +41,100 @@ Data Pelanggan | MIS
         box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
     }
 
+    /* Ubin sekaligus tautan: warna dan garis bawah tautan dibuang, dan
+       keadaan terpilihnya ditandai tepi beraksen. */
+    a.pel-ubin {
+        color: inherit;
+        text-decoration: none;
+        transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    a.pel-ubin:hover,
+    a.pel-ubin:focus-visible {
+        border-color: #c7d2fe;
+        box-shadow: 0 6px 16px -10px rgba(79, 70, 229, .7);
+        transform: translateY(-1px);
+    }
+
+    a.pel-ubin.terpilih {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 1px #6366f1 inset;
+    }
+
+    /* Pengurut khusus ponsel; di layar lebar kepala kolomnya yang bekerja. */
+    .pel-urut-ponsel {
+        display: none;
+    }
+
+    /* Kolom centang: selebar kotaknya saja. */
+    .pel-centang-sel {
+        width: 34px;
+        padding-right: 0 !important;
+    }
+
+    .pel-centang-sel input {
+        width: 16px;
+        height: 16px;
+        accent-color: #4f46e5;
+        cursor: pointer;
+    }
+
+    /*
+     * Baris aksi massal muncul hanya saat ada yang dipilih.
+     *
+     * Melekat di bawah layar, bukan di atas daftar: yang mencentang baris
+     * biasanya sedang menggulung ke bawah, dan tombol yang tertinggal di atas
+     * menuntut ia menggulung balik hanya untuk menekannya.
+     */
+    .pel-massal {
+        position: sticky;
+        bottom: 12px;
+        z-index: 5;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        padding: 11px 14px;
+        border: 1px solid #c7d2fe;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 16px 36px -18px rgba(15, 23, 42, .45);
+    }
+
+    .pel-massal.tampil {
+        display: flex;
+    }
+
+    .pel-massal-jumlah {
+        margin: 0;
+        margin-right: auto;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--mis-tinta);
+    }
+
+    /* Lencana yang bisa ditekan: tetap rupa lencana, tetapi jelas bisa dituju. */
+    .pel-pil-tautan {
+        text-decoration: none;
+    }
+
+    .pel-pil-tautan:hover,
+    .pel-pil-tautan:focus-visible {
+        filter: brightness(.94);
+        text-decoration: none;
+    }
+
+    /* Alamat email yang tidak lengkap: ditandai, tidak disembunyikan. */
+    .pel-email-rusak {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #92400e;
+        text-decoration: underline dotted #f59e0b;
+        text-underline-offset: 3px;
+    }
+
     .pel-ubin-angka {
         margin: 0;
         line-height: 1.1;
@@ -303,6 +397,14 @@ Data Pelanggan | MIS
         }
     }
 
+    @media (max-width: 575.98px) {
+        /* Baru di sini pengurutnya berguna: di atas 576px tabelnya masih tabel
+           dan kepala kolomnya kelihatan. */
+        .pel-urut-ponsel {
+            display: block;
+        }
+    }
+
     @media (max-width: 767.98px) {
         .pel-ringkas {
             gap: 10px;
@@ -409,39 +511,53 @@ Data Pelanggan | MIS
         {{-- ---------------------------------------------- ringkasan --}}
         {{-- Empat angka yang paling sering ditanyakan, dihitung dari seluruh
              pelanggan — bukan dari halaman yang sedang tampil. --}}
+        {{-- Tiap ubin sekaligus pintasan saringan.
+             Angka yang menarik perhatian hampir selalu memancing pertanyaan
+             "yang mana saja?", dan sebelum ini tidak ada cara menjawabnya:
+             angkanya terlihat tetapi daftarnya tidak bisa dipersempit jadi
+             orang-orang itu. Berupa TAUTAN, bukan tombol berskrip, jadi
+             alamatnya bisa disalin dan tetap bekerja tanpa JavaScript. --}}
         <div class="pel-ringkas">
-            <div class="pel-ubin">
+            <a class="pel-ubin {{ ! $status && ! $verifikasi && ! $punyaPesanan && ! $baru ? 'terpilih' : '' }}"
+                href="{{ route('account.customer.index', request()->only('cari')) }}"
+                title="Tampilkan semua pelanggan">
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-users"></i></span>
                 <div>
                     <p class="pel-ubin-angka">{{ number_format($ringkasan['total']) }}</p>
                     <p class="pel-ubin-label">Seluruh pelanggan</p>
                 </div>
-            </div>
-            <div class="pel-ubin">
+            </a>
+            <a class="pel-ubin {{ $status === 'aktif' ? 'terpilih' : '' }}"
+                href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['status' => 'aktif'])) }}"
+                title="Saring: hanya akun aktif">
                 <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-user-check"></i></span>
                 <div>
                     <p class="pel-ubin-angka">{{ number_format($ringkasan['aktif']) }}</p>
                     <p class="pel-ubin-label">Akun aktif</p>
                 </div>
-            </div>
+            </a>
             {{-- Dulu "Email terverifikasi", dan itu angka mati: terukur 65 aktif
                  dan 65 terverifikasi, NOL yang berbeda ke salah satu arah,
                  sebab verifyEmail() menyetel keduanya sekaligus. Jumlah yang
                  pernah memesan memang berbeda (29 dari 102). --}}
-            <div class="pel-ubin">
+            <a class="pel-ubin {{ $punyaPesanan ? 'terpilih' : '' }}"
+                href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['pesanan' => 'ada'])) }}"
+                title="Saring: hanya yang pernah memesan">
                 <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                 <div>
                     <p class="pel-ubin-angka">{{ number_format($ringkasan['memesan']) }}</p>
                     <p class="pel-ubin-label">Pernah memesan</p>
                 </div>
-            </div>
-            <div class="pel-ubin">
+            </a>
+            <a class="pel-ubin {{ $baru ? 'terpilih' : '' }}"
+                href="{{ route('account.customer.index', array_merge(request()->only('cari'), ['baru' => '30'])) }}"
+                title="Saring: bergabung 30 hari terakhir">
                 <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-user-plus"></i></span>
                 <div>
                     <p class="pel-ubin-angka">{{ number_format($ringkasan['baru']) }}</p>
                     <p class="pel-ubin-label">Bergabung 30 hari terakhir</p>
                 </div>
-            </div>
+            </a>
         </div>
 
         {{-- ---------------------------------------------- penyaring --}}
@@ -500,6 +616,41 @@ Data Pelanggan | MIS
                 </select>
             </div>
 
+            {{--
+              Pengurut KHUSUS ponsel.
+
+              Kepala kolom yang bisa diurutkan ada di dalam <thead>, dan di mode
+              kartu <thead> disembunyikan untuk pembaca layar saja — terukur di
+              390px ia berukuran 1x1 dan terklip. Akibatnya keempat kolom yang
+              bisa diurutkan tidak bisa dijangkau sama sekali dari ponsel.
+              Menu ini menggantikannya di sana, dan disembunyikan di layar lebar
+              karena kepala kolomnya sudah melakukan tugas yang sama.
+            --}}
+            <div class="mis-isian pel-saring-pilih pel-urut-ponsel">
+                <label class="mis-label" for="pel-urut-pilih">Urutkan</label>
+                <select class="form-control-modern" id="pel-urut-pilih" name="urutgabung">
+                    @php
+                        // Larik bersarang, bukan kunci "kolom|arah" yang dibelah
+                        // di dalam @foreach: @php(...) sebaris tidak menangani
+                        // pembongkaran larik, dan halamannya galat 500 tanpa
+                        // menyebut sebabnya.
+                        $pilihanUrut = [
+                            ['bergabung', 'turun', 'Terbaru bergabung'],
+                            ['bergabung', 'naik', 'Terlama bergabung'],
+                            ['nama', 'naik', 'Nama A–Z'],
+                            ['nama', 'turun', 'Nama Z–A'],
+                            ['pesanan', 'turun', 'Pesanan terbanyak'],
+                            ['status', 'naik', 'Status akun'],
+                        ];
+                        $arahSekarang = $arah === 'asc' ? 'naik' : 'turun';
+                    @endphp
+                    @foreach ($pilihanUrut as $pilihan)
+                        <option value="{{ $pilihan[0] }}|{{ $pilihan[1] }}"
+                            @selected($urut === $pilihan[0] && $arahSekarang === $pilihan[1])>{{ $pilihan[2] }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             {{-- Tombolnya tetap ada di markah dan baru disembunyikan oleh
                  skrip di bawah. Tanpa JavaScript — peramban lama, skrip gagal
                  termuat, jaringan putus di tengah — penyaringnya masih bisa
@@ -521,7 +672,12 @@ Data Pelanggan | MIS
         {{-- Dibungkus dan diberi id: hanya bagian inilah yang ditukar saat
              mengetik, jadi kepala halaman, ringkasan, dan kotak pencariannya
              tidak ikut digambar ulang — dan fokus ketikan tidak hilang. --}}
-        <div id="pel-hasil">
+        {{-- role=status + aria-live: isi tabel ini ditukar diam-diam tiap
+             ketikan. Tanpa penanda ini, pembaca layar tidak mengumumkan apa
+             pun — orang yang tidak melihat layarnya mengetik lalu tidak tahu
+             daftarnya sudah berubah, apalagi jadi berapa baris. Kalimat
+             ringkasnya ada di .pel-jumlah di bawah. --}}
+        <div id="pel-hasil" role="status" aria-live="polite" aria-atomic="false">
         @if ($pelanggan->isEmpty())
             <div class="mis-bagian">
                 <div class="mis-kosong">
@@ -547,17 +703,39 @@ Data Pelanggan | MIS
                                  bukan tombol berskrip: ia tetap bekerja tanpa
                                  JavaScript, bisa dibuka di tab baru, dan
                                  urutannya ikut tersimpan di alamat halaman. --}}
-                            <th>@include('account.customer.partials.urut', ['kolom' => 'nama', 'label' => 'Pelanggan'])</th>
+                            {{-- aria-sort menyatakan KEADAAN kolomnya, bukan
+                                 aksinya. Ikon panahnya aria-hidden dan judul
+                                 tautannya berbunyi "Urutkan menurut ..." — itu
+                                 menjelaskan apa yang terjadi kalau ditekan,
+                                 bukan bahwa kolom ini sedang diurutkan. --}}
+                            @php
+                                $ariaUrut = fn ($k) => $urut === $k
+                                    ? ($arah === 'asc' ? 'ascending' : 'descending')
+                                    : 'none';
+                            @endphp
+                            @if (auth()->user()->adalahAdministrator())
+                                <th class="pel-centang-sel">
+                                    <input type="checkbox" id="pel-centang-semua"
+                                        aria-label="Pilih semua pelanggan di halaman ini">
+                                </th>
+                            @endif
+                            <th aria-sort="{{ $ariaUrut('nama') }}">@include('account.customer.partials.urut', ['kolom' => 'nama', 'label' => 'Pelanggan'])</th>
                             <th>Kontak</th>
-                            <th>@include('account.customer.partials.urut', ['kolom' => 'status', 'label' => 'Status'])</th>
-                            <th>@include('account.customer.partials.urut', ['kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
-                            <th>@include('account.customer.partials.urut', ['kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
+                            <th aria-sort="{{ $ariaUrut('status') }}">@include('account.customer.partials.urut', ['kolom' => 'status', 'label' => 'Status'])</th>
+                            <th aria-sort="{{ $ariaUrut('pesanan') }}">@include('account.customer.partials.urut', ['kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
+                            <th aria-sort="{{ $ariaUrut('bergabung') }}">@include('account.customer.partials.urut', ['kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($pelanggan as $orang)
                             <tr>
+                                @if (auth()->user()->adalahAdministrator())
+                                    <td class="pel-centang-sel mis-td-samar">
+                                        <input type="checkbox" class="pel-centang" value="{{ $orang->uuid }}"
+                                            aria-label="Pilih {{ $orang->full_name ?: $orang->username }}">
+                                    </td>
+                                @endif
                                 <td class="mis-td-utama">
                                     <div class="pel-orang">
                                         {{-- Lencana hanya untuk yang SUDAH terverifikasi.
@@ -584,9 +762,21 @@ Data Pelanggan | MIS
                                          nomor berformat internasional tanpa tanda baca, dan
                                          itulah yang dikerjakan nomorWa(). --}}
                                     <div class="pel-kontak">
-                                        <a href="mailto:{{ $orang->email }}" title="Kirim email ke {{ $orang->email }}">
-                                            <i class="fas fa-envelope mis-ikon-biru"></i> {{ $orang->email }}
-                                        </a>
+                                        @if ($orang->emailTampakSah())
+                                            <a href="mailto:{{ $orang->email }}" title="Kirim email ke {{ $orang->email }}">
+                                                <i class="fas fa-envelope mis-ikon-biru"></i> {{ $orang->email }}
+                                            </a>
+                                        @else
+                                            {{-- Ditandai, bukan diperbaiki. Lima alamat di data yang
+                                                 ada terpotong tepat di 30 huruf — pola khas batas
+                                                 kolom lama saat impor — dan surat ke sana tidak
+                                                 akan pernah sampai. Menebak bentuk benarnya justru
+                                                 berisiko mengirim ke orang lain. --}}
+                                            <span class="pel-email-rusak"
+                                                title="Alamat ini tidak lengkap, jadi email ke sini tidak akan sampai.">
+                                                <i class="fas fa-exclamation-triangle mis-ikon-kuning"></i> {{ $orang->email }}
+                                            </span>
+                                        @endif
                                         @php ($wa = \App\Support\PesananPelanggan::nomorWa($orang->telp))
                                         @if ($wa)
                                             <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
@@ -626,9 +816,15 @@ Data Pelanggan | MIS
                                 <td data-judul="Pesanan">
                                     @php ($p = $pesanan[$orang->id] ?? null)
                                     @if ($p)
-                                        <span class="mis-pil mis-pil-biru" title="Terakhir {{ $p['terakhir']?->locale('id')->translatedFormat('d M Y') }}">
+                                        {{-- Menaut langsung ke tab Pesanan orang itu. Lencana
+                                             "2x" memang memancing untuk ditekan, dan sebelum
+                                             ini tidak melakukan apa-apa: orang harus membuka
+                                             rinciannya lalu mencari sendiri tabnya. --}}
+                                        <a class="mis-pil mis-pil-biru pel-pil-tautan"
+                                            href="{{ route('account.customer.edit', $orang) }}#pel-panel-pesanan"
+                                            title="Lihat {{ $p['jumlah'] }} pesanannya &middot; terakhir {{ $p['terakhir']?->locale('id')->translatedFormat('d M Y') }}">
                                             <i class="fas fa-receipt"></i> {{ $p['jumlah'] }}&times;
-                                        </span>
+                                        </a>
                                     @else
                                         <span class="pel-akun">Belum ada</span>
                                     @endif
@@ -665,6 +861,25 @@ Data Pelanggan | MIS
             {{ $pelanggan->links('vendor.pagination.bootstrap-4') }}
         @endif
         </div>
+
+        @if (auth()->user()->adalahAdministrator())
+            {{-- Hanya mengaktifkan dan menonaktifkan, TIDAK menghapus:
+                 penghapusan massal berarti satu salah klik menghilangkan
+                 puluhan akun untuk selamanya, dan di sini tidak ada tong
+                 sampah yang bisa mengembalikannya. --}}
+            <div class="pel-massal" id="pel-massal" role="region" aria-label="Aksi untuk pelanggan terpilih">
+                <p class="pel-massal-jumlah" id="pel-massal-jumlah">0 dipilih</p>
+                <button type="button" class="mis-tombol mis-tombol-halus" data-massal="aktifkan">
+                    <i class="fas fa-user-check mis-ikon-hijau"></i> Aktifkan
+                </button>
+                <button type="button" class="mis-tombol mis-tombol-halus" data-massal="nonaktifkan">
+                    <i class="fas fa-user-slash mis-ikon-kuning"></i> Nonaktifkan
+                </button>
+                <button type="button" class="mis-tombol mis-tombol-halus" id="pel-massal-batal">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+            </div>
+        @endif
 
     </section>
 </div>
@@ -802,8 +1017,29 @@ Data Pelanggan | MIS
             jadwalkan(0);
         });
 
+        /*
+         * Menu pengurut khusus ponsel menulis ke isian tersembunyi urut/arah,
+         * bukan mengirim namanya sendiri: peladen hanya mengenal dua nama itu,
+         * dan namanya sengaja 'urutgabung' supaya tidak ikut terkirim.
+         */
+        const pilihUrut = document.getElementById('pel-urut-pilih');
+
+        if (pilihUrut) {
+            pilihUrut.addEventListener('change', function () {
+                const bagian = pilihUrut.value.split('|');
+                const setel = function (nama, nilai) {
+                    const i = borang.querySelector('input[type=hidden][name="' + nama + '"]');
+                    if (i) i.value = nilai;
+                };
+                setel('urut', bagian[0]);
+                setel('arah', bagian[1]);
+                jadwalkan(0);
+            });
+        }
+
         // Menu pilihan tidak perlu ditunda: satu klik sudah keputusan penuh.
         borang.querySelectorAll('select').forEach(function (s) {
+            if (s.id === 'pel-urut-pilih') return;
             s.addEventListener('change', function () { jadwalkan(0); });
         });
 
@@ -843,6 +1079,111 @@ Data Pelanggan | MIS
         const setel = function () { if (lebar.matches) lipat.setAttribute('open', ''); };
         setel();
         lebar.addEventListener('change', setel);
+    })();
+
+    /*
+     * Pilih banyak, lalu aktifkan/nonaktifkan sekaligus.
+     *
+     * Penangannya dipasang di wadah #pel-hasil, bukan di tiap kotak centang:
+     * isi wadah itu ditukar tiap kali mengetik atau berpindah halaman, dan
+     * pemasangan langsung akan hilang begitu isinya diganti pertama kali.
+     */
+    (function () {
+        const hasil = document.getElementById('pel-hasil');
+        const bar = document.getElementById('pel-massal');
+        if (!hasil || !bar) return;
+
+        const jumlahTeks = document.getElementById('pel-massal-jumlah');
+
+        const terpilih = function () {
+            return [...hasil.querySelectorAll('.pel-centang:checked')].map(function (c) { return c.value; });
+        };
+
+        const segarkan = function () {
+            const n = terpilih().length;
+            bar.classList.toggle('tampil', n > 0);
+            if (jumlahTeks) jumlahTeks.textContent = n + ' dipilih';
+
+            const semua = hasil.querySelector('#pel-centang-semua');
+            const kotak = hasil.querySelectorAll('.pel-centang');
+
+            if (semua) {
+                semua.checked = kotak.length > 0 && n === kotak.length;
+                // Sebagian terpilih ditandai setengah, bukan kosong: kosong
+                // membuatnya tampak seolah tidak ada yang dipilih sama sekali.
+                semua.indeterminate = n > 0 && n < kotak.length;
+            }
+        };
+
+        hasil.addEventListener('change', function (e) {
+            if (e.target.id === 'pel-centang-semua') {
+                hasil.querySelectorAll('.pel-centang').forEach(function (c) { c.checked = e.target.checked; });
+            }
+
+            if (e.target.classList.contains('pel-centang') || e.target.id === 'pel-centang-semua') {
+                segarkan();
+            }
+        });
+
+        // Isi wadah ditukar lewat fetch; pilihan lama tidak ikut terbawa.
+        new MutationObserver(segarkan).observe(hasil, { childList: true, subtree: true });
+
+        document.getElementById('pel-massal-batal').addEventListener('click', function () {
+            hasil.querySelectorAll('.pel-centang, #pel-centang-semua').forEach(function (c) {
+                c.checked = false;
+                c.indeterminate = false;
+            });
+            segarkan();
+        });
+
+        bar.querySelectorAll('[data-massal]').forEach(function (tombol) {
+            tombol.addEventListener('click', function () {
+                const uuid = terpilih();
+                if (uuid.length === 0) return;
+
+                const aksi = tombol.dataset.massal;
+                const aktif = aksi === 'aktifkan';
+
+                window.misKonfirmasi({
+                    judul: aktif ? 'Aktifkan pelanggan terpilih?' : 'Nonaktifkan pelanggan terpilih?',
+                    pesan: aktif
+                        ? '%s akan bisa masuk kembali ke akunnya.'
+                        : '%s tidak akan bisa masuk lagi sampai diaktifkan kembali. Datanya tetap utuh.',
+                    sorot: uuid.length + ' pelanggan',
+                    tombol: aktif ? 'Ya, aktifkan' : 'Ya, nonaktifkan',
+                    jenis: 'tanya',
+                    glif: aktif ? 'fa-user-check' : 'fa-user-slash',
+                }).then(function (ya) {
+                    if (!ya) return;
+
+                    const data = new FormData();
+                    data.append('aksi', aksi);
+                    uuid.forEach(function (u) { data.append('uuid[]', u); });
+
+                    fetch(@json(route('account.customer.massal')), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                        body: data,
+                    })
+                        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                        .then(function (j) {
+                            if (!j.ok || !j.d.success) {
+                                window.misToast('gagal', j.d.message || 'Gagal mengubah pelanggan terpilih.');
+                                return;
+                            }
+                            window.misToast('berhasil', j.d.message);
+                            // Dimuat ulang supaya lencana statusnya ikut berubah.
+                            window.location.reload();
+                        })
+                        .catch(function () {
+                            window.misToast('gagal', 'Tidak bisa menghubungi peladen.');
+                        });
+                });
+            });
+        });
     })();
 
     /*

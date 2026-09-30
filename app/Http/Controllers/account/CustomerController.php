@@ -98,33 +98,40 @@ class CustomerController extends Controller
             : 'bergabung';
         $arah = $request->input('arah') === 'naik' ? 'asc' : 'desc';
 
+        // Dua saringan pintasan yang dipasang ubin ringkasan.
+        $punyaPesanan = $request->input('pesanan') === 'ada';
+        $baru = $request->input('baru') === '30';
+
         $dasar = User::query()->where('peran', User::PERAN_PELANGGAN);
 
-        // Ringkasan dihitung dari seluruh pelanggan, bukan dari halaman yang
-        // sedang tampil — angka yang berubah tiap ganti halaman menyesatkan.
         /*
-         * Ubin ketiga dulu "Email terverifikasi", dan itu angka mati.
+         * Jumlah pesanan seluruh pelanggan dihitung SEKALI di sini.
          *
-         * Terukur pada seluruh pelanggan: 65 aktif, 65 terverifikasi, NOL yang
-         * berbeda ke salah satu arah — sebab verifyEmail() menyetel
-         * email_verified_at dan status = active sekaligus, jadi keduanya
-         * terkunci. Satu dari empat ubin tidak membawa keterangan apa pun.
-         * Diganti jumlah pelanggan yang PERNAH MEMESAN, yang memang berbeda
-         * (29 dari 102) dan menjawab pertanyaan yang sebenarnya dicari orang.
+         * Dulu dua kali: sekali untuk ubin ringkasan dan sekali lagi untuk
+         * baris yang tampil, masing-masing membaca keempat tabel layanan —
+         * delapan pembacaan tabel per muat halaman padahal empat sudah cukup.
+         * Petanya berkunci id, jadi tampilan tinggal mencarinya per baris.
+         *
+         * Ubin ketiga dulu "Email terverifikasi", dan itu angka mati: terukur
+         * 65 aktif dan 65 terverifikasi, NOL yang berbeda ke salah satu arah,
+         * sebab verifyEmail() menyetel keduanya sekaligus.
          */
         $semua = (clone $dasar)->get();
+        $pesanan = PesananPelanggan::ringkas($semua);
 
+        // Angkanya dari SELURUH pelanggan, bukan dari halaman yang sedang
+        // tampil — angka yang berubah tiap ganti halaman menyesatkan.
         $ringkasan = [
             'total' => $semua->count(),
             'aktif' => $semua->where('status', 'active')->count(),
-            'memesan' => count(PesananPelanggan::ringkas($semua)),
+            'memesan' => count($pesanan),
             'baru' => $semua->where('created_at', '>=', now()->subDays(30))->count(),
         ];
 
-        $disaring = $this->saring($dasar, $cari, $status, $verifikasi);
+        $disaring = $this->saring($dasar, $cari, $status, $verifikasi, $punyaPesanan, $baru, $pesanan);
 
         if ($urut === 'pesanan') {
-            $pelanggan = $this->urutkanPesanan($disaring, $arah, $request);
+            $pelanggan = $this->urutkanPesanan($disaring, $arah, $request, $pesanan);
         } else {
             $pelanggan = $disaring
                 ->orderBy(self::URUTAN[$urut], $arah)
@@ -132,13 +139,9 @@ class CustomerController extends Controller
                 ->withQueryString();
         }
 
-        // Jumlah pesanan dan tanggal terakhir untuk SELURUH halaman sekaligus,
-        // bukan per baris — dua belas baris akan jadi puluhan kueri.
-        $pesanan = PesananPelanggan::ringkas($pelanggan->getCollection());
-
         return view('account.customer.index', compact(
             'pelanggan', 'ringkasan', 'cari', 'status', 'verifikasi', 'urut', 'arah', 'pesanan'
-        ));
+        ) + ['punyaPesanan' => $punyaPesanan, 'baru' => $baru]);
     }
 
     /**
@@ -155,10 +158,9 @@ class CustomerController extends Controller
      * hanya terjadi saat kolom ini yang dipakai mengurutkan — lima urutan
      * lainnya tetap lewat SQL seperti biasa.
      */
-    private function urutkanPesanan($kueri, string $arah, Request $request): LengthAwarePaginator
+    private function urutkanPesanan($kueri, string $arah, Request $request, array $ringkas): LengthAwarePaginator
     {
         $semua = $kueri->orderBy('full_name')->get();
-        $ringkas = PesananPelanggan::ringkas($semua);
 
         $terurut = $semua->sortBy(
             fn ($orang) => $ringkas[$orang->id]['jumlah'] ?? 0,
@@ -177,14 +179,61 @@ class CustomerController extends Controller
         );
     }
 
+    /**
+     * Kolom telp tanpa tanda baca, sebagai pecahan SQL.
+     *
+     * Diperiksa pada data yang ada: hanya "-" (250 kali) dan "+" (6 kali) yang
+     * muncul. Spasi, kurung, dan titik ikut dibuang juga supaya bentuk yang
+     * belum pernah masuk tidak lolos begitu saja nanti.
+     */
+    private function telpAngka(): string
+    {
+        $bersih = 'telp';
+
+        foreach (['-', ' ', '(', ')', '+', '.'] as $tanda) {
+            $bersih = "REPLACE({$bersih}, '{$tanda}', '')";
+        }
+
+        return $bersih;
+    }
+
     /** Saringan yang sama dipakai daftar dan ekspor; ditulis sekali di sini. */
-    private function saring($kueri, string $cari, $status, $verifikasi)
+    private function saring($kueri, string $cari, $status, $verifikasi, bool $punyaPesanan = false, bool $baru = false, array $pesanan = [])
     {
         return $kueri
             ->when($cari !== '', function ($q) use ($cari) {
                 $q->where(function ($sub) use ($cari) {
-                    foreach (['full_name', 'username', 'email', 'telp'] as $kolom) {
+                    foreach (['full_name', 'username', 'email'] as $kolom) {
                         $sub->orWhere($kolom, 'LIKE', '%' . $cari . '%');
+                    }
+
+                    /*
+                     * Nomor telepon dicocokkan tanpa tanda baca, di KEDUA sisi.
+                     *
+                     * Terukur: 93 dari 101 nomor pelanggan bertanda hubung,
+                     * sehingga mencari "085842761933" atas nomor tersimpan
+                     * "0858-4276-1933" mengembalikan NOL hasil — dan yang
+                     * disalin orang dari WhatsApp memang tidak bertanda hubung.
+                     * Bentuk kode negara ikut diterima: "6285842761933" dan
+                     * "+6285842761933" menunjuk orang yang sama dengan "0858...".
+                     */
+                    $angka = preg_replace('/\D+/', '', $cari) ?? '';
+
+                    if ($angka === '') {
+                        // Tanpa angka sama sekali, pencarian nomor tidak ada
+                        // gunanya — dan LIKE '%%' akan mencocokkan semuanya.
+                        $sub->orWhere('telp', 'LIKE', '%' . $cari . '%');
+
+                        return;
+                    }
+
+                    $bentuk = array_unique(array_filter([
+                        $angka,
+                        PesananPelanggan::nomorBaku($angka),
+                    ]));
+
+                    foreach ($bentuk as $b) {
+                        $sub->orWhereRaw($this->telpAngka() . ' LIKE ?', ['%' . $b . '%']);
                     }
                 });
             })
@@ -193,7 +242,11 @@ class CustomerController extends Controller
                 $sub->whereNull('status')->orWhere('status', '!=', 'active');
             }))
             ->when($verifikasi === 'sudah', fn ($q) => $q->whereNotNull('email_verified_at'))
-            ->when($verifikasi === 'belum', fn ($q) => $q->whereNull('email_verified_at'));
+            ->when($verifikasi === 'belum', fn ($q) => $q->whereNull('email_verified_at'))
+            // Pintasan dari ubin ringkasan. Daftar id-nya datang dari peta yang
+            // sudah dihitung, jadi tidak ada kueri tambahan.
+            ->when($punyaPesanan, fn ($q) => $q->whereIn('id', array_keys($pesanan) ?: [0]))
+            ->when($baru, fn ($q) => $q->where('created_at', '>=', now()->subDays(30)));
     }
 
     /**
@@ -249,9 +302,7 @@ class CustomerController extends Controller
         $status = $request->input('status');
         $verifikasi = $request->input('verifikasi');
 
-        $pelanggan = $this->saring(User::query()->where('peran', User::PERAN_PELANGGAN), $cari, $status, $verifikasi)
-            ->orderBy('full_name')
-            ->get();
+        $pelanggan = $this->terurutUntukEkspor($request, $cari, $status, $verifikasi);
 
         $html = view('account.customer.ekspor-pdf', [
             'pelanggan' => $pelanggan,
@@ -280,6 +331,87 @@ class CustomerController extends Controller
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $nama . '"',
+        ]);
+    }
+
+    /**
+     * Daftar untuk diunduh: saringan DAN urutan yang sedang dipakai di layar.
+     *
+     * Saringannya memang sudah ikut sejak awal, tetapi urutannya dulu selalu
+     * dipaksa menurut nama. Akibatnya orang yang mengurutkan daftarnya menurut
+     * jumlah pesanan lalu menekan Unduh mendapat berkas yang urutannya berbeda
+     * dari yang baru saja dilihatnya — dan mengira unduhannya salah isi.
+     */
+    private function terurutUntukEkspor(Request $request, string $cari, $status, $verifikasi)
+    {
+        $punyaPesanan = $request->input('pesanan') === 'ada';
+        $baru = $request->input('baru') === '30';
+
+        $dasar = User::query()->where('peran', User::PERAN_PELANGGAN);
+        $pesanan = PesananPelanggan::ringkas((clone $dasar)->get());
+
+        $kueri = $this->saring($dasar, $cari, $status, $verifikasi, $punyaPesanan, $baru, $pesanan);
+
+        // Tanpa urut di alamatnya, berkasnya tetap menurut nama seperti dulu —
+        // itu urutan yang paling masuk akal untuk daftar yang dibaca orang.
+        if (! array_key_exists((string) $request->input('urut'), self::URUTAN)) {
+            return $kueri->orderBy('full_name')->get();
+        }
+
+        $urut = (string) $request->input('urut');
+        $arah = $request->input('arah') === 'naik' ? 'asc' : 'desc';
+
+        if ($urut !== 'pesanan') {
+            return $kueri->orderBy(self::URUTAN[$urut], $arah)->get();
+        }
+
+        return $kueri->orderBy('full_name')->get()
+            ->sortBy(fn ($o) => $pesanan[$o->id]['jumlah'] ?? 0, SORT_REGULAR, $arah === 'desc')
+            ->values();
+    }
+
+    /**
+     * Mengubah status banyak pelanggan sekaligus.
+     *
+     * Hanya mengaktifkan dan menonaktifkan — TIDAK menghapus. Penghapusan
+     * massal berarti satu salah klik menghilangkan puluhan akun untuk
+     * selamanya, dan di sini tidak ada tong sampah yang bisa mengembalikannya.
+     */
+    public function massal(Request $request)
+    {
+        if (! Auth::user()?->adalahAdministrator()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya administrator yang boleh mengubah banyak pelanggan sekaligus.',
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'aksi' => ['required', 'in:aktifkan,nonaktifkan'],
+            'uuid' => ['required', 'array', 'min:1', 'max:200'],
+            'uuid.*' => ['uuid'],
+        ], [
+            'uuid.required' => 'Pilih dulu pelanggan yang ingin diubah.',
+            'uuid.max' => 'Paling banyak 200 pelanggan sekali jalan.',
+        ]);
+
+        $aktif = $data['aksi'] === 'aktifkan';
+
+        /*
+         * Dibatasi peran pelanggan juga, bukan hanya oleh daftar uuid-nya.
+         *
+         * uuid yang dikirim datang dari peramban; tanpa batas ini, satu uuid
+         * karyawan yang diselipkan ke kiriman bisa ikut dinonaktifkan dari
+         * layar yang seharusnya cuma menyentuh pelanggan.
+         */
+        $jumlah = User::whereIn('uuid', $data['uuid'])
+            ->where('peran', User::PERAN_PELANGGAN)
+            ->update(['status' => $aktif ? 'active' : 'non active']);
+
+        return response()->json([
+            'success' => true,
+            'jumlah' => $jumlah,
+            'message' => $jumlah . ' pelanggan ' . ($aktif ? 'diaktifkan.' : 'dinonaktifkan.'),
         ]);
     }
 
@@ -401,12 +533,12 @@ class CustomerController extends Controller
                 ->with('error', 'Anda tidak punya akses ke data pelanggan.');
         }
 
-        $pelanggan = $this->saring(
-            User::query()->where('peran', User::PERAN_PELANGGAN),
+        $pelanggan = $this->terurutUntukEkspor(
+            $request,
             trim((string) $request->input('cari')),
             $request->input('status'),
             $request->input('verifikasi')
-        )->orderBy('full_name')->get();
+        );
 
         return Excel::download(
             new PelangganExport($pelanggan, PesananPelanggan::ringkas($pelanggan)),

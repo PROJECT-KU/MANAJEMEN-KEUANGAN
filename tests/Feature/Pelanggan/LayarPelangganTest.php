@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -269,6 +270,192 @@ class LayarPelangganTest extends TestCase
             'data-pelanggan-',
             $jawab->headers->get('content-disposition')
         );
+    }
+
+    // -------------------------------------------------- pencarian & saringan
+
+    public static function bentukNomorDicari(): array
+    {
+        return [
+            'apa adanya' => ['0812-3456-7890'],
+            'tanpa tanda hubung' => ['081234567890'],
+            'kode negara' => ['6281234567890'],
+            'kode negara bertanda tambah' => ['+6281234567890'],
+            'sebagian tengah' => ['34567890'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('bentukNomorDicari')]
+    public function nomor_telepon_ketemu_ditulis_bagaimanapun(string $dicari): void
+    {
+        /*
+         * Terukur sebelum ini: 93 dari 101 nomor pelanggan bertanda hubung,
+         * sementara pencariannya memakai LIKE mentah. Mencari "081234567890"
+         * atas nomor tersimpan "0812-3456-7890" mengembalikan NOL hasil — dan
+         * yang disalin orang dari WhatsApp memang tidak bertanda hubung.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $orang = $this->akun(User::PERAN_PELANGGAN, ['telp' => '0812-3456-7890']);
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.index', ['cari' => $dicari]))
+            ->assertOk()
+            ->assertSee($orang->username);
+    }
+
+    #[Test]
+    public function kata_kunci_tanpa_angka_tidak_mencocokkan_semua_nomor(): void
+    {
+        // Kalau bagian nomornya dibiarkan jadi LIKE '%%', kata kunci yang tidak
+        // cocok dengan siapa pun justru mengembalikan seluruh daftar.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $orang = $this->akun(User::PERAN_PELANGGAN, ['telp' => '0812-3456-7890']);
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.index', ['cari' => 'zzzqqqtidakada']))
+            ->assertOk()
+            ->assertDontSee($orang->username)
+            ->assertSee('Tidak ada yang cocok');
+    }
+
+    #[Test]
+    public function ubin_ringkasan_menyaring_daftarnya(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $aktif = $this->akun(User::PERAN_PELANGGAN);
+        $mati = $this->akun(User::PERAN_PELANGGAN);
+        $mati->forceFill(['status' => 'non active'])->save();
+
+        $halaman = $this->actingAs($admin)->get(route('account.customer.index', ['status' => 'aktif']));
+
+        $halaman->assertOk()->assertSee($aktif->username)->assertDontSee($mati->username);
+    }
+
+    #[Test]
+    public function saringan_pernah_memesan_hanya_memuat_yang_punya_pesanan(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanpa = $this->akun(User::PERAN_PELANGGAN, ['telp' => '0899-0000-1234']);
+
+        $halaman = $this->actingAs($admin)->get(route('account.customer.index', ['pesanan' => 'ada']));
+
+        $halaman->assertOk()->assertDontSee($tanpa->username);
+    }
+
+    // ------------------------------------------------------------ aksi massal
+
+    #[Test]
+    public function administrator_bisa_menonaktifkan_banyak_sekaligus(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $a = $this->akun(User::PERAN_PELANGGAN);
+        $b = $this->akun(User::PERAN_PELANGGAN);
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.massal'), [
+                'aksi' => 'nonaktifkan',
+                'uuid' => [$a->uuid, $b->uuid],
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true, 'jumlah' => 2]);
+
+        $this->assertSame('non active', $a->refresh()->status);
+        $this->assertSame('non active', $b->refresh()->status);
+    }
+
+    #[Test]
+    public function aksi_massal_tidak_menyentuh_akun_yang_bukan_pelanggan(): void
+    {
+        /*
+         * uuid yang dikirim datang dari peramban. Tanpa batas peran di kueri,
+         * satu uuid karyawan yang diselipkan ke kiriman bisa ikut dinonaktifkan
+         * dari layar yang seharusnya cuma menyentuh pelanggan.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $karyawan = $this->akun(User::PERAN_KARYAWAN);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.massal'), [
+                'aksi' => 'nonaktifkan',
+                'uuid' => [$karyawan->uuid, $pelanggan->uuid],
+            ])
+            ->assertOk()
+            ->assertJson(['jumlah' => 1]);
+
+        $this->assertSame('active', $karyawan->refresh()->status, 'Akun karyawan tidak boleh ikut.');
+        $this->assertSame('non active', $pelanggan->refresh()->status);
+    }
+
+    #[Test]
+    public function karyawan_tidak_boleh_memakai_aksi_massal(): void
+    {
+        $karyawan = $this->akun(User::PERAN_KARYAWAN);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+
+        $this->actingAs($karyawan)
+            ->postJson(route('account.customer.massal'), [
+                'aksi' => 'nonaktifkan',
+                'uuid' => [$pelanggan->uuid],
+            ])
+            ->assertStatus(403);
+
+        $this->assertSame('active', $pelanggan->refresh()->status);
+    }
+
+    // ------------------------------------------------------ akses & penanda
+
+    #[Test]
+    public function hasil_pencarian_diumumkan_dan_arah_urutan_dinyatakan(): void
+    {
+        /*
+         * Isi tabel ditukar diam-diam tiap ketikan. Tanpa aria-live, pembaca
+         * layar tidak mengumumkan apa pun; tanpa aria-sort, ia menyebut kepala
+         * kolom sebagai tautan biasa tanpa menyatakan kolom mana yang sedang
+         * dipakai mengurutkan dan ke arah mana.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $halaman = $this->actingAs($admin)
+            ->get(route('account.customer.index', ['urut' => 'nama', 'arah' => 'naik']));
+
+        $halaman->assertOk();
+        $halaman->assertSee('aria-live="polite"', false);
+        $halaman->assertSee('aria-sort="ascending"', false);
+        $halaman->assertSee('aria-sort="none"', false);
+    }
+
+    #[Test]
+    public function email_yang_bentuknya_tidak_sah_ditandai(): void
+    {
+        // Lima alamat di data yang ada terpotong tepat di 30 huruf; surat ke
+        // sana tidak akan pernah sampai, dan tidak ada apa pun yang menandainya.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $rusak = $this->akun(User::PERAN_PELANGGAN);
+        $rusak->forceFill(['email' => 'terpotong@mail.unnes.a'])->save();
+
+        $halaman = $this->actingAs($admin)
+            ->get(route('account.customer.index', ['cari' => 'terpotong']));
+
+        $halaman->assertOk();
+        $halaman->assertSee('pel-email-rusak', false);
+        $halaman->assertDontSee('mailto:terpotong@mail.unnes.a', false);
+    }
+
+    #[Test]
+    public function unduhan_menghormati_urutan_yang_sedang_dipakai(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $jawab = $this->actingAs($admin)
+            ->get(route('account.customer.ekspor.excel', ['urut' => 'nama', 'arah' => 'turun']));
+
+        $jawab->assertOk();
+
+        // Isi berkasnya tidak dibedah di sini; yang dijaga cuma bahwa urutannya
+        // ikut diterima dan tidak membuat unduhannya galat.
+        $this->assertStringContainsString('data-pelanggan-', $jawab->headers->get('content-disposition'));
     }
 
     #[Test]
