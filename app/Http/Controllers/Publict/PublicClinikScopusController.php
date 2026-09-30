@@ -232,10 +232,18 @@ class PublicClinikScopusController extends Controller
     // <!--================== CEK PPN ==================-->
     public function cekPpn()
     {
-        $biaya = ClinikScopusBiayaPersesi::select('ppn')->first();
+        /*
+         * Lewat berlaku(), BUKAN first().
+         *
+         * first() tanpa menyaring status mengambil sembarang baris — termasuk
+         * tarif lama yang sudah tidak berlaku. Tabel itu menyimpan riwayat,
+         * jadi begitu tarifnya pernah diganti sekali saja, PPN yang ditagihkan
+         * ke pelanggan bisa datang dari harga yang sudah tidak dipakai.
+         */
+        $biaya = ClinikScopusBiayaPersesi::berlaku();
 
         return response()->json([
-            'ppn' => $biaya ? (int) $biaya->ppn : 0,
+            'ppn' => $biaya ? $biaya->ppn_persen : 0,
             'source' => 'clinikscopus_biaya_persesi'
         ]);
     }

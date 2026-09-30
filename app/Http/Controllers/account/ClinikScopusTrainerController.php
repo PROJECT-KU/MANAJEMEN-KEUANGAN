@@ -119,7 +119,7 @@ class ClinikScopusTrainerController extends Controller
             ->get();
 
         // 🔹 Ambil biaya persesi yang ACTIVE
-        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::where('status', 'active')->first();
+        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::berlaku();
 
         return view(
             'account.clinik_scopus.create',
@@ -213,7 +213,7 @@ class ClinikScopusTrainerController extends Controller
             ->get();
 
         // 🔹 Ambil biaya persesi yang ACTIVE
-        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::where('status', 'active')->first();
+        $biayaPersesiAktif = \App\ClinikScopusBiayaPersesi::berlaku();
 
         return view(
             'account.clinik_scopus.edit',

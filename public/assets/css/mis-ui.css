@@ -1948,6 +1948,12 @@ textarea:focus-visible,
 .mis-kuning { --warna: var(--mis-kuning); }
 .mis-jingga { --warna: var(--mis-jingga); }
 
+/* Netral, untuk ubin yang menandai sesuatu yang sudah TIDAK berlaku lagi —
+   baris riwayat, misalnya. Enam warna sebelumnya semuanya bicara "penting";
+   tidak ada satu pun yang bisa dipakai untuk "sudah lewat" tanpa terbaca
+   seperti keadaan yang perlu ditindak. */
+.mis-abu { --warna: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%); }
+
 .mis-ikon-ungu { color: #6366f1; }
 .mis-ikon-hijau { color: #10b981; }
 .mis-ikon-merah { color: #f43f5e; }
