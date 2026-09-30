@@ -460,6 +460,9 @@ Route::prefix('account')
             Route::post('/kategori-layanan', 'account\KategoriLayananController@store')->name('account.kategori-layanan.store');
             Route::post('/kategori-layanan/rakit', 'account\KategoriLayananController@rakit')->name('account.kategori-layanan.rakit');
             Route::get('/kategori-layanan/{angkatan}/ubah', 'account\KategoriLayananController@edit')->name('account.kategori-layanan.edit');
+            Route::post('/kategori-layanan/{angkatan}/gandakan', 'account\KategoriLayananController@gandakan')->name('account.kategori-layanan.gandakan');
+            Route::get('/kategori-layanan/cetak/pdf', 'account\KategoriLayananController@cetakPdf')->name('account.kategori-layanan.cetak');
+            Route::get('/kategori-layanan/cetak/excel', 'account\KategoriLayananController@cetakExcel')->name('account.kategori-layanan.excel');
             Route::post('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@update')->name('account.kategori-layanan.update');
             Route::delete('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@destroy')->name('account.kategori-layanan.destroy');
 

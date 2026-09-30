@@ -71,7 +71,7 @@ class AnalisisBibliometrikController extends Controller
             ->paginate(10);
 
 
-        return view('account.analisis_bibliometrik.index', compact('datas', 'startDate', 'endDate'));
+        return view('account.analisis_bibliometrik.index', compact('datas', 'startDate', 'endDate', 'kategori'));
     }
     // <!--================== END ==================-->
 
@@ -260,6 +260,19 @@ class AnalisisBibliometrikController extends Controller
                     ->orWhere('analisis_bibliometrik.total_pembayaran', 'LIKE', "%{$search}%")
                     ->orWhere('analisis_bibliometrik.status', 'LIKE', "%{$search}%");
             });
+
+
+        /*
+         * Saringan per angkatan. Ditambahkan supaya tautan "lihat pendaftar"
+         * dari daftar Angkatan Layanan punya tujuan yang berarti — sebelumnya
+         * kolom kuota menulis "14 dari 25" lalu berhenti di situ, dan untuk
+         * tahu siapa, admin harus pindah layar lalu mencari sendiri.
+         */
+        $kategori = $request->input('kategori');
+
+        if ($kategori) {
+            $query->where('analisis_bibliometrik.kategori_id', $kategori);
+        }
 
         // Filter tanggal kalau diinput
         if ($startDate && $endDate) {
