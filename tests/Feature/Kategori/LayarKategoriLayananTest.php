@@ -40,6 +40,8 @@ class LayarKategoriLayananTest extends TestCase
     {
         return array_merge([
             'layanan' => 'scopus_camp',
+            // Scopus Camp bervarian: fasilitas di Jawa dan luar Jawa berbeda.
+            'varian' => 'jawa',
             'nama' => 'SCOPUS CAMP YOGYAKARTA',
             'nama_ke' => '203',
             'mulai' => '2026-11-06',
@@ -91,6 +93,7 @@ class LayarKategoriLayananTest extends TestCase
     {
         return KategoriLayanan::create(array_merge([
             'layanan' => 'scopus_camp',
+            'varian' => 'jawa',
             'token' => Str::random(30),
             'nama' => 'Angkatan Uji',
             'mulai' => '2026-11-06 00:00:00',
@@ -173,7 +176,8 @@ class LayarKategoriLayananTest extends TestCase
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
 
         $this->actingAs($admin)
-            ->post(route('account.kategori-layanan.store'), $this->isian(['layanan' => 'bibliometrik']))
+            ->post(route('account.kategori-layanan.store'),
+                $this->isian(['layanan' => 'bibliometrik', 'varian' => null]))
             ->assertSessionHasErrors('varian');
     }
 

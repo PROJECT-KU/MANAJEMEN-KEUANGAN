@@ -105,6 +105,48 @@ class PerakitDeskripsiTest extends TestCase
             PerakitDeskripsi::rakit($this->angkatan('scopus_kafe', ['biaya' => null])));
     }
 
+    #[Test]
+    public function tiap_varian_scopus_camp_merakit_fasilitasnya_sendiri(): void
+    {
+        /*
+         * Inti permintaan 30 Sep 2026. Pengumuman Yogyakarta memuat penginapan
+         * dan mushola/kolam renang karena acaranya di rumah sendiri; Medan
+         * tidak, karena menyewa tempat.
+         *
+         * Harganya sama-sama 5,5jt, jadi uji yang cuma membandingkan harga
+         * tidak akan menangkap kalau kedua varian tertukar. Yang diperiksa
+         * di sini isinya.
+         */
+        $jawa = PerakitDeskripsi::rakit(KategoriLayanan::create([
+            'layanan' => 'scopus_camp', 'varian' => 'jawa',
+            'token' => 'uji' . uniqid(), 'nama' => 'SCOPUS CAMP YOGYAKARTA',
+            'lokasi' => 'Yogyakarta', 'mulai' => '2026-10-30', 'selesai' => '2026-11-01',
+            'status' => 'draft',
+        ]));
+
+        $luar = PerakitDeskripsi::rakit(KategoriLayanan::create([
+            'layanan' => 'scopus_camp', 'varian' => 'luar_jawa',
+            'token' => 'uji' . uniqid(), 'nama' => 'SCOPUS CAMP MEDAN',
+            'lokasi' => 'Medan', 'mulai' => '2026-09-18', 'selesai' => '2026-09-20',
+            'status' => 'draft',
+        ]));
+
+        $this->assertStringContainsString('Penginapan ala Rumah Scopus', $jawa);
+        $this->assertStringContainsString('Mushola, kolam renang & treadmill', $jawa);
+
+        $this->assertStringNotContainsString('Penginapan ala Rumah Scopus', $luar);
+        $this->assertStringNotContainsString('Mushola, kolam renang & treadmill', $luar);
+
+        // Yang sama tetap sama — keduanya program yang sama, bukan dua produk.
+        foreach (['Konsumsi selama kegiatan', 'Sertifikat & Seminar Kit', 'Cek plagiasi'] as $sama) {
+            $this->assertStringContainsString($sama, $jawa);
+            $this->assertStringContainsString($sama, $luar);
+        }
+
+        $this->assertStringContainsString('30 Oktober – 1 November 2026', $jawa);
+        $this->assertStringContainsString('18 – 20 September 2026', $luar);
+    }
+
     // ------------------------------------------------------ baris yang kosong
 
     #[Test]
