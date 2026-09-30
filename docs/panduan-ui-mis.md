@@ -471,3 +471,33 @@ dibuat supaya bisa tumbuh. Penyebabnya tiga pola yang sama:
 
 Jadi 40 → 20 dan 23 → 11, tanpa satu kueri pun yang berulang. Hitung kuerinya
 dengan `DB::listen` sebelum menyatakan layar selesai.
+
+## Ikon di dalam isian diposisikan terhadap ISIANNYA
+
+`position: absolute` mencari pembungkus ber-`position` terdekat. Kalau itu
+baris saringan yang juga memuat keterangan hasil, maka di ponsel — tempat
+barisnya menumpuk jadi dua — ikonnya ikut turun ke tengah keduanya, bukan ke
+tengah isiannya.
+
+Bungkus isiannya sendiri (`position: relative`), taruh ikon dan tombol
+kosongkan di dalamnya, dan pakai `top: 0; bottom: 0` daripada `height: 100%`.
+Terukur: selisih titik tengah ikon terhadap isian 0px di 1470/820/390/320.
+
+## Kotak pencarian wajib punya tombol kosongkan
+
+Dan silang bawaan peramban dimatikan
+(`input[type="search"]::-webkit-search-cancel-button { display: none }`),
+kalau tidak ada dua tombol berdampingan di Chrome — dan yang bawaan tidak
+memicu penyaringan ulang, jadi daftarnya tetap tersaring padahal kotaknya
+sudah kosong.
+
+Untuk pencarian yang dijalankan peladen, tombolnya berupa **tautan** ke daftar
+tanpa kata kunci, bukan tombol berskrip: ia tetap bekerja tanpa JavaScript.
+Esc juga mengosongkan, kebiasaan yang sudah dipunyai orang.
+
+## Jebakan mengukur: membaca keadaan SESUDAH menekan
+
+`b.click()` yang dipanggil sebelum `return { tampak: !b.hidden }` membaca
+keadaan sesudah tombolnya bekerja — jadi tombol yang benar-benar muncul selalu
+terbaca "tersembunyi", dan perbaikan yang benar terlihat gagal. Baca dulu ke
+peubah, baru tekan.
