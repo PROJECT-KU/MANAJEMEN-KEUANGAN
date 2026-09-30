@@ -28,6 +28,7 @@ class PelangganExport implements FromArray, ShouldAutoSize, WithEvents, WithHead
     public function __construct(
         private Collection $pelanggan,
         private array $pesanan,
+        private array $saringan = [],
     ) {}
 
     public function title(): string
@@ -90,12 +91,37 @@ class PelangganExport implements FromArray, ShouldAutoSize, WithEvents, WithHead
     public function registerEvents(): array
     {
         return [
-            // Baris kepala ditebalkan dan dibekukan supaya masih terlihat saat
-            // digulung — daftar seratus baris tidak bisa dibaca tanpa itu.
             AfterSheet::class => function (AfterSheet $acara) {
                 $lembar = $acara->sheet->getDelegate();
-                $lembar->getStyle('A1:J1')->getFont()->setBold(true);
-                $lembar->freezePane('A2');
+
+                /*
+                 * Keterangan berkas disisipkan DI ATAS kepala kolom.
+                 *
+                 * Tanpa ini, lembar kerja berisi 29 baris terbaca persis
+                 * seperti daftar pelanggan yang lengkap — dan lembar kerja
+                 * justru berkas yang paling sering diteruskan ke orang lain,
+                 * terlepas dari layar tempat ia diunduh.
+                 */
+                $lembar->insertNewRowBefore(1, 3);
+
+                $lembar->setCellValue('A1', 'Data Pelanggan — MIS Rumah Scopus');
+                $lembar->setCellValue('A2', 'Diunduh ' . now()->format('d/m/Y H:i') . ' WIB'
+                    . ' · ' . number_format($this->pelanggan->count()) . ' baris');
+                $lembar->setCellValue('A3', 'Saringan: ' . ($this->saringan === []
+                    ? 'tanpa saringan (seluruh pelanggan)'
+                    : implode(' · ', array_map(
+                        fn ($nama, $nilai) => $nama . ': ' . $nilai,
+                        array_keys($this->saringan),
+                        $this->saringan
+                    ))));
+
+                $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(13);
+                $lembar->getStyle('A2:A3')->getFont()->setSize(10);
+                $lembar->getStyle('A4:J4')->getFont()->setBold(true);
+
+                // Dibekukan di bawah kepala kolom supaya ia tetap terlihat saat
+                // digulung — daftar seratus baris tidak bisa dibaca tanpa itu.
+                $lembar->freezePane('A5');
             },
         ];
     }

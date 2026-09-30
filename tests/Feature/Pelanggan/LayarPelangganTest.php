@@ -3,10 +3,14 @@
 namespace Tests\Feature\Pelanggan;
 
 use App\AktivitasMasuk;
+use App\Mail\VerifikasiEmailMail;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -589,6 +593,174 @@ class LayarPelangganTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/class="tab-pane fade show active"\s+id="pel-panel-akun"/',
             $isi
+        );
+    }
+
+    // -------------------------------------------- berkas unduhan jujur soal saringan
+
+    #[Test]
+    public function pdf_menyebut_saringan_dari_ubin_ringkasan(): void
+    {
+        /*
+         * Templat PDF-nya sendiri sudah memperingatkan: "berkas berisi 12 baris
+         * tidak bisa dibedakan dari daftar yang memang cuma punya 12
+         * pelanggan." Sesudah dua saringan dari ubin ditambahkan tanpa
+         * memperbarui ringkasannya, berkas berisi 29 dari 101 pelanggan tetap
+         * mencetak "Tanpa saringan".
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $metode = new \ReflectionMethod(
+            \App\Http\Controllers\account\CustomerController::class,
+            'ringkasanSaringan'
+        );
+        $metode->setAccessible(true);
+
+        $pengendali = new \App\Http\Controllers\account\CustomerController();
+
+        $ringkas = $metode->invoke(
+            $pengendali,
+            \Illuminate\Http\Request::create('/', 'GET', ['pesanan' => 'ada']),
+            '', null, null
+        );
+
+        $this->assertArrayHasKey('Pesanan', $ringkas);
+        $this->assertSame('Pernah memesan', $ringkas['Pesanan']);
+
+        $ringkas = $metode->invoke(
+            $pengendali,
+            \Illuminate\Http\Request::create('/', 'GET', ['baru' => '30']),
+            '', null, null
+        );
+
+        $this->assertArrayHasKey('Bergabung', $ringkas);
+    }
+
+    #[Test]
+    public function lembar_kerja_memuat_keterangan_saringannya(): void
+    {
+        // Lembar kerja justru berkas yang paling sering diteruskan ke orang
+        // lain, terlepas dari layar tempat ia diunduh.
+        $ekspor = new \App\Exports\PelangganExport(collect(), [], ['Pesanan' => 'Pernah memesan']);
+
+        $this->assertNotEmpty($ekspor->registerEvents());
+        $this->assertArrayHasKey(\Maatwebsite\Excel\Events\AfterSheet::class, $ekspor->registerEvents());
+    }
+
+    // --------------------------------------------------- surat untuk pelanggan
+
+    #[Test]
+    public function administrator_bisa_mengirim_ulang_tautan_verifikasi(): void
+    {
+        Mail::fake();
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        $pelanggan->forceFill(['email_verified_at' => null])->save();
+        RateLimiter::clear('verifikasi|pelanggan|' . $pelanggan->getKey());
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        Mail::assertSent(VerifikasiEmailMail::class, fn ($s) => $s->hasTo($pelanggan->email));
+    }
+
+    #[Test]
+    public function tautan_verifikasi_tidak_dikirim_ke_alamat_yang_terpotong(): void
+    {
+        /*
+         * Lima alamat di data yang ada terpotong tepat di 30 huruf. Mengirim ke
+         * sana hanya menghasilkan surat pantulan, sementara layarnya terlanjur
+         * bilang "terkirim".
+         */
+        Mail::fake();
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        $pelanggan->forceFill(['email_verified_at' => null, 'email' => 'terpotong@mail.unnes.a'])->save();
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+            ->assertStatus(422)
+            ->assertJson(['success' => false]);
+
+        Mail::assertNothingSent();
+    }
+
+    #[Test]
+    public function yang_sudah_terverifikasi_tidak_dikirimi_tautan_lagi(): void
+    {
+        Mail::fake();
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        RateLimiter::clear('verifikasi|pelanggan|' . $pelanggan->getKey());
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+            ->assertStatus(422);
+
+        Mail::assertNothingSent();
+    }
+
+    #[Test]
+    public function karyawan_tidak_boleh_mengirim_surat_ke_pelanggan(): void
+    {
+        Mail::fake();
+        $karyawan = $this->akun(User::PERAN_KARYAWAN);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+
+        $this->actingAs($karyawan)
+            ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+            ->assertStatus(403);
+
+        $this->actingAs($karyawan)
+            ->postJson(route('account.customer.kirim.sandi', $pelanggan->uuid))
+            ->assertStatus(403);
+
+        Mail::assertNothingSent();
+    }
+
+    #[Test]
+    public function pengiriman_surat_dibatasi_lajunya(): void
+    {
+        // Tanpa batas, satu layar yang terbuka cukup untuk membanjiri kotak
+        // masuk seseorang — dan alamat pengirim kantor yang akan dianggap
+        // pengirim sampah.
+        Mail::fake();
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        $pelanggan->forceFill(['email_verified_at' => null])->save();
+        RateLimiter::clear('verifikasi|pelanggan|' . $pelanggan->getKey());
+
+        for ($i = 0; $i < 3; $i++) {
+            $this->actingAs($admin)
+                ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+                ->assertOk();
+        }
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.kirim.verifikasi', $pelanggan->uuid))
+            ->assertStatus(429);
+    }
+
+    #[Test]
+    public function tautan_atur_ulang_sandi_terkirim_dan_tercatat_di_jejak(): void
+    {
+        Notification::fake();
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        RateLimiter::clear('atur-ulang|pelanggan|' . $pelanggan->getKey());
+
+        $this->actingAs($admin)
+            ->postJson(route('account.customer.kirim.sandi', $pelanggan->uuid))
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        // Tindakan orang dalam atas akun orang lain harus meninggalkan jejak.
+        $this->assertTrue(
+            AktivitasMasuk::where('user_id', $pelanggan->getKey())
+                ->where('alasan', 'like', '%atur ulang kata sandi%')
+                ->exists()
         );
     }
 

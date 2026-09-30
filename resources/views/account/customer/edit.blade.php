@@ -798,8 +798,22 @@
                         @endif
 
                         @if ($bolehUbah && ! $user->email_verified_at)
-                            <button type="button" class="mis-tombol mis-tombol-hijau" id="pel-tombol-verifikasi">
-                                <i class="fas fa-check-circle"></i> Tandai terverifikasi
+                            {{-- Kirim ulang DIDAHULUKAN atas "Tandai terverifikasi".
+                                 Tombol kedua itu menyatakan alamatnya benar tanpa
+                                 bukti apa pun dari pemiliknya; meminta pemiliknya
+                                 membuktikan sendiri seharusnya yang dicoba lebih
+                                 dulu, jadi ia yang berwarna. --}}
+                            <button type="button" class="mis-tombol mis-tombol-ungu pel-hubungi"
+                                data-kirim="{{ route('account.customer.kirim.verifikasi', $user) }}"
+                                data-judul="Kirim ulang tautan verifikasi?"
+                                data-pesan="Tautan verifikasi dikirim ke %s. Pelanggannya sendiri yang mengklik, jadi alamatnya terbukti benar."
+                                data-sorot="{{ $user->email }}"
+                                data-tombol="Ya, kirim"
+                                data-glif="fa-paper-plane">
+                                <i class="fas fa-paper-plane"></i> Kirim ulang verifikasi
+                            </button>
+                            <button type="button" class="mis-tombol mis-tombol-halus pel-hubungi" id="pel-tombol-verifikasi">
+                                <i class="fas fa-check-circle mis-ikon-hijau"></i> Tandai terverifikasi
                             </button>
                         @endif
                     </div>
@@ -843,6 +857,19 @@
                                 @endif
                             </p>
                             @if ($bolehUbah)
+                                {{-- Kata sandinya TIDAK diganti dari sini dan tidak
+                                     pernah terlihat siapa pun di kantor: yang dikirim
+                                     tautan, dan pelanggannya sendiri yang menentukan
+                                     kata sandi barunya. --}}
+                                <button type="button" class="mis-tombol mis-tombol-halus"
+                                    data-kirim="{{ route('account.customer.kirim.sandi', $user) }}"
+                                    data-judul="Kirim tautan atur ulang kata sandi?"
+                                    data-pesan="Tautan dikirim ke %s. Kata sandinya ditentukan sendiri oleh pelanggannya; Anda tidak akan melihatnya."
+                                    data-sorot="{{ $user->email }}"
+                                    data-tombol="Ya, kirim"
+                                    data-glif="fa-key">
+                                    <i class="fas fa-key mis-ikon-kuning"></i> Kirim tautan atur ulang sandi
+                                </button>
                                 <button type="submit" class="mis-tombol mis-tombol-ungu">
                                     <i class="fas fa-save"></i> Simpan kontak
                                 </button>
@@ -1069,6 +1096,49 @@
             simpan.hidden = false;
             simpan.disabled = false;
             tampilkanPratinjau(berkas);
+        });
+    })();
+
+    /*
+     * Tombol yang mengirim surat ke pelanggan: satu penangan untuk semuanya.
+     *
+     * Judul, kalimat, dan alamat tujuannya datang dari atribut data-* di
+     * markah — bukan dirangkai di sini — supaya menambah tombol berikutnya
+     * tidak menuntut menyentuh skrip ini lagi.
+     */
+    (function () {
+        document.querySelectorAll('[data-kirim]').forEach(function (tombol) {
+            tombol.addEventListener('click', function () {
+                window.misKonfirmasi({
+                    judul: tombol.dataset.judul,
+                    pesan: tombol.dataset.pesan,
+                    sorot: tombol.dataset.sorot,
+                    tombol: tombol.dataset.tombol,
+                    jenis: 'tanya',
+                    glif: tombol.dataset.glif,
+                }).then(function (ya) {
+                    if (!ya) return;
+
+                    tombol.disabled = true;
+
+                    fetch(tombol.dataset.kirim, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                    })
+                        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                        .then(function (j) {
+                            window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal',
+                                j.d.message || 'Suratnya belum terkirim.');
+                        })
+                        .catch(function () {
+                            window.misToast('gagal', 'Tidak bisa menghubungi peladen.');
+                        })
+                        .finally(function () { tombol.disabled = false; });
+                });
+            });
         });
     })();
 
