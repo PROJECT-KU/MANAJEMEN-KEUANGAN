@@ -20,6 +20,8 @@ dan tidak satu pun menimbulkan pesan galat yang menunjuk sebabnya.
 |---|---|---|
 | **Cabang ponsel dipilih peladen** dari User-Agent, bukan lebar layar | menyempitkan jendela peramban TIDAK pernah menukar tampilan | timpa User-Agent saat menguji; `layouts/account.blade.php` bercabang lewat `new Agent()` yang membaca `$_SERVER` |
 | **Font Awesome 5** yang dibundel | nama gaya FA6 (`fa-circle-info`, `fa-mug-hot`) tidak menimbulkan galat — ikonnya sekadar tidak tergambar | `tests/Unit/IkonAdaGlifnyaTest.php` menjaganya; ia memindai Blade **dan** `mis-ui.js` |
+| **Layout memasang `.fas { font-size: 20px }`** untuk seluruh halaman | mengecilkan pembungkus ikon tidak mengubah glifnya — ikonnya tetap 20px berapa kali pun ubinnya dikecilkan | tiap pembungkus ikon memberi glifnya `font-size: inherit`, plus `width: 100%` dan `text-align: center` supaya ikon yang tidak persegi tidak bergeser dari titik tengah |
+| **Stisla memaksa `min-width: 800px`** pada tabel di dalam `.table-responsive` | tiap daftar harus digeser ke samping di ponsel — bukan salah markah halamannya | `.mis-tabel-kartu` menimpanya |
 | **`line-height` MUTLAK dari tema Stisla** | sel berisi satu lencana 20px tetap setinggi 28px; kalimat dua baris terbaca seperti dua paragraf | setel `line-height` sendiri di layar yang rapat |
 | **`.mis-isian` memasang `align-self: start`** | di susunan menurun, tiap isian selebar isinya — tepinya ragged | timpa `align-self: stretch` di dalam wadah menurun |
 | **`flex-basis` berganti sumbu** | `flex: 1 1 200px` yang benar di baris mendatar jadi tinggi 200px di susunan menurun | setel ulang `flex` di dalam media query ponsel |
@@ -109,6 +111,16 @@ Urutannya tetap, dari atas:
 
 Dua kolom: kartu identitas di kiri (tetap), kartu bertab di kanan (melar).
 Tabnya `.mis-tab` + `.mis-tab-kepala` + `.mis-tab-isi`.
+
+Kolom berdampingan memakai `align-items: start`, **bukan** `stretch`. Dengan
+stretch, kartu yang isinya pendek ikut setinggi kolom sebelahnya dan sisanya
+jadi petak putih **di dalam** kartu — pernah terukur 341px kosong di bawah
+daftar syarat kata sandi. Kartu yang berhenti di ujung isinya jauh lebih enak
+dilihat daripada kartu yang dipaksa rata bawah.
+
+Kisi isian memakai `repeat(auto-fit, minmax(210px, 1fr))`, bukan `col-md-*`:
+tiga kolom di layar lebar, dua di tablet, satu di ponsel, tanpa titik putus
+yang harus dijaga satu per satu. Kartunya wajib `align-content: start`.
 
 ---
 
