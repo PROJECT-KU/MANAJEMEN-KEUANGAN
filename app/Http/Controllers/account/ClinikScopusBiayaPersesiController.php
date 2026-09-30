@@ -66,7 +66,23 @@ class ClinikScopusBiayaPersesiController extends Controller
          * juga menyuguhkan pengaturan layanan itu sendiri — dan pengaturannya
          * butuh id serta daftar varian aslinya.
          */
-        $model = Layanan::where('aktif', true)->orderBy('urutan')->orderBy('nama')->get()->keyBy('kode');
+        /*
+         * Penyetel tiap tarif dimuat sekali untuk semua kartu. Dibaca lewat
+         * relasi per kartu, tiap kartu yang punya jejak menambah satu kueri
+         * ke tabel users — belum terasa sekarang karena baru sedikit baris
+         * yang punya jejaknya, dan justru akan muncul begitu layarnya dipakai.
+         */
+        $penyetel = \App\User::whereIn('id', collect($kartu)->pluck('tarif.penginput_id')->filter()->unique())
+            ->get(['id', 'full_name', 'username'])->keyBy('id');
+
+        foreach ($kartu as $i => $k) {
+            if ($k['tarif'] && $k['tarif']->penginput_id) {
+                $kartu[$i]['tarif']->setRelation('penginput', $penyetel[$k['tarif']->penginput_id] ?? null);
+            }
+        }
+
+        $model = Layanan::aktifBerurutan();
+        $berlaku = ClinikScopusBiayaPersesi::semuaYangBerlaku();
 
         foreach (Layanan::katalog() as $kunci => $tentang) {
             $varian = $tentang['varian'] ?: [null => null];
@@ -80,7 +96,7 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'satuan' => $tentang['satuan'],
                     'ikon' => $tentang['ikon'],
                     'warna' => $tentang['warna'],
-                    'tarif' => ClinikScopusBiayaPersesi::berlaku($kunci, $kodeVarian ?: null),
+                    'tarif' => $berlaku[$kunci . '|' . ($kodeVarian ?: '')] ?? null,
                     // Hanya kartu PERTAMA tiap layanan yang menyuguhkan tombol
                     // pengaturan; dua kartu varian mengatur layanan yang sama,
                     // dan dua tombol untuk satu hal cuma membingungkan.
@@ -218,6 +234,20 @@ class ClinikScopusBiayaPersesiController extends Controller
         $cetakan = trim((string) ($data['template_deskripsi'] ?? '')) ?: null;
 
         $sebutan = $tentang['nama'] . ($varian ? ' (' . $tentang['varian'][$varian] . ')' : '');
+
+        /*
+         * "Perbaiki" membetulkan tarif yang SEDANG berlaku; tanggal mulai
+         * menjadwalkan yang AKAN berlaku. Keduanya bertentangan, dan cabang
+         * perbaikan tidak memakai tanggalnya sama sekali — jadi dibiarkan,
+         * tanggal yang dikirim hilang tanpa kabar apa pun.
+         */
+        if (! empty($data['perbaiki']) && ! empty($data['berlaku_mulai'])) {
+            return back()->withInput()->withErrors([
+                'berlaku_mulai' => 'Tidak bisa sekaligus memperbaiki tarif yang berlaku dan '
+                    . 'menjadwalkan yang baru. Ubah angkanya supaya jadi tarif baru, '
+                    . 'atau kosongkan tanggalnya.',
+            ]);
+        }
 
         if (! empty($data['perbaiki'])) {
             $lama = ClinikScopusBiayaPersesi::find($data['perbaiki']);

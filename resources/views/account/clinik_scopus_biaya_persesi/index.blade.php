@@ -141,6 +141,12 @@ Tarif Layanan | MIS
     }
 
     .tar-fasilitas .fas { font-size: 10px !important; color: #10b981; margin-top: 3px; }
+    .tar-fasilitas .tar-lebih { display: none; }
+
+    /* Kepala cetak: tidak ada di layar sama sekali. */
+    .tar-kepala-cetak { display: none; }
+    .tar-cetak-judul { margin: 0; line-height: 1.3; font-size: 1.05rem; font-weight: 800; color: var(--mis-tinta); }
+    .tar-cetak-tanggal { margin: 3px 0 14px; line-height: 1.4; font-size: .8rem; color: var(--mis-tinta-3); }
 
     /* Daftar dipotong supaya kartunya tetap sepadan; selengkapnya ada di
        dialog. Empat butir cukup untuk tahu ini layanan yang mana. */
@@ -472,19 +478,36 @@ Tarif Layanan | MIS
      * tombol, saringan, riwayat, dan dialog tidak ada artinya di kertas.
      */
     @media print {
+        .mis-kepala,
         .mis-kepala-aksi,
         .tar-saring,
         .tar-kaki,
+        .tar-atur,
+        .tar-jadwal,
         .tar-jadwal-bagian,
         .tar-nonaktif,
         .tar-tambah,
+        .tar-kosong-kotak,
         .mis-bagian:has(.tar-tabel),
         dialog { display: none !important; }
+
+        /*
+         * Layanan yang tarifnya belum disetel TIDAK ikut tercetak. Di layar,
+         * "Belum disetel" adalah peringatan yang berguna; di kertas yang
+         * diberikan ke calon peserta ia cuma memalukan.
+         */
+        .tar-kartu.kosong { display: none !important; }
+
+        /* Kebalikan dari layar: di kertas justru seluruh fasilitas ditampilkan
+           dan penanda "+N lainnya" yang tidak perlu. */
+        .tar-fasilitas .tar-lebih { display: grid !important; }
+        .tar-sisa { display: none !important; }
+
+        .tar-kepala-cetak { display: block !important; }
 
         .tar-kisi { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         .tar-kartu { border: 1px solid #cbd5e1; box-shadow: none; break-inside: avoid; }
         .tar-angka { font-size: 1.2rem; }
-        .tar-sisa { display: none; }
     }
 
     @media (max-width: 767.98px) {
@@ -518,6 +541,15 @@ Tarif Layanan | MIS
 @section('content')
 <div class="main-content mis-badan">
     <section class="section">
+
+        {{-- Hanya tampil di kertas. Daftar harga tanpa tanggal tidak bisa
+             dipercaya siapa pun yang menerimanya seminggu kemudian. --}}
+        <div class="tar-kepala-cetak" aria-hidden="true">
+            <p class="tar-cetak-judul">Daftar Harga Layanan — Rumah Scopus Foundation</p>
+            <p class="tar-cetak-tanggal">
+                Berlaku per {{ now()->locale('id')->translatedFormat('d F Y') }}
+            </p>
+        </div>
 
         {{-- ------------------------------------------------ kepala --}}
         <div class="mis-kepala">
@@ -626,9 +658,14 @@ Tarif Layanan | MIS
                     @endif
 
                     @if ($fasilitas)
+                        {{-- SELURUH fasilitas dirender; yang lebih dari empat
+                             disembunyikan di layar lewat kelas, bukan dipotong dari
+                             markahnya. Dipotong di sini, daftar harga yang dicetak
+                             diam-diam tidak lengkap — dan daftar harga yang menyembunyikan
+                             sebagian isinya lebih berbahaya daripada tidak ada. --}}
                         <ul class="tar-fasilitas">
-                            @foreach (array_slice($fasilitas, 0, 4) as $f)
-                                <li>
+                            @foreach ($fasilitas as $i => $f)
+                                <li class="{{ $i >= 4 ? 'tar-lebih' : '' }}">
                                     <i class="fas fa-check" aria-hidden="true"></i>
                                     <span>{{ $f }}</span>
                                 </li>
