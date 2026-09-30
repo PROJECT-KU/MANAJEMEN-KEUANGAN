@@ -855,24 +855,17 @@ Data Pelanggan | MIS
         const tombol = e.target.closest('[data-hapus]');
         if (!tombol) return;
 
-        Swal.fire({
-            title: 'Hapus pelanggan ini?',
-            html: 'Data <strong></strong> dan riwayatnya ikut terhapus. Tindakan ini tidak bisa dibatalkan.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, hapus',
-            cancelButtonText: 'Batal',
-            reverseButtons: true,
-            customClass: { confirmButton: 'mis-tombol mis-tombol-bahaya', cancelButton: 'mis-tombol mis-tombol-halus' },
-            buttonsStyling: false,
-            didOpen: function (el) {
-                // Nama disisipkan sebagai teks, bukan dirangkai ke HTML:
-                // nama pelanggan datang dari isian orang.
-                const kuat = el.querySelector('strong');
-                if (kuat) kuat.textContent = tombol.dataset.nama || 'ini';
-            },
-        }).then(function (hasil) {
-            if (!hasil.isConfirmed) return;
+        /* Lewat pembungkus bersama, bukan Swal.fire sendiri: nama pelanggannya
+           disisipkan sebagai teks (ia datang dari isian orang), tombolnya
+           memakai kelas berteks yang benar, dan Batal yang jadi tumpuan fokus. */
+        window.misKonfirmasi({
+            judul: 'Hapus pelanggan ini?',
+            pesan: 'Data %s dan seluruh riwayat masuknya ikut terhapus. Tindakan ini tidak bisa dibatalkan.',
+            sorot: tombol.dataset.nama || 'pelanggan ini',
+            tombol: 'Ya, hapus',
+            jenis: 'bahaya',
+        }).then(function (ya) {
+            if (!ya) return;
 
             fetch(tombol.dataset.hapus, {
                 method: 'DELETE',

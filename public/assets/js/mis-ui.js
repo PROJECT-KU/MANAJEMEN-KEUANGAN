@@ -401,3 +401,150 @@
         }
     });
 })();
+
+/**
+ * Dialog konfirmasi bersama (SweetAlert2).
+ *
+ * Sebelum ini tiap layar merakit Swal.fire-nya sendiri — delapan puluh empat
+ * berkas tampilan memanggilnya langsung — sehingga rupanya berbeda-beda dan
+ * tiap layar mengulangi pilihan yang sama: tombol mana yang merah, mana yang
+ * di kiri, ikon apa yang dipakai. Yang paling sering keliru: tombol
+ * konfirmasinya diberi kelas .mis-tombol-bahaya, yang sebenarnya kotak 34x34
+ * untuk ikon saja, sehingga tulisannya menembus keluar kotak.
+ *
+ *   misKonfirmasi({
+ *       judul: 'Hapus pelanggan ini?',
+ *       pesan: 'Data %s dan riwayatnya ikut terhapus.',
+ *       sorot: 'Sugeng',
+ *       tombol: 'Ya, hapus',
+ *       jenis: 'bahaya',
+ *   }).then(function (ya) { if (ya) { ... } });
+ */
+(function () {
+    'use strict';
+
+    /*
+     * Ikon bawaan SweetAlert2 tidak dipakai, dengan alasan yang sama seperti
+     * pada toast di atas: garisnya dipatok dalam em terhadap ukuran bawaannya,
+     * jadi begitu ubinnya diubah ukuran tandanya melenceng dari titik tengah.
+     * Diganti ubin bergradien berisi glif Font Awesome.
+     *
+     * Nama glifnya harus ada di Font Awesome 5.5; lihat IkonAdaGlifnyaTest.
+     */
+    var JENIS = {
+        bahaya: {
+            glif: 'fa-trash-alt',
+            warna: 'linear-gradient(135deg, #e11d48 0%, #fb7185 100%)',
+            bayang: 'rgba(225, 29, 72, .9)',
+            kelasTombol: 'mis-tombol mis-tombol-hapus'
+        },
+        peringatan: {
+            glif: 'fa-exclamation-triangle',
+            warna: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+            bayang: 'rgba(245, 158, 11, .9)',
+            kelasTombol: 'mis-tombol mis-tombol-ungu'
+        },
+        tanya: {
+            glif: 'fa-question',
+            warna: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+            bayang: 'rgba(99, 102, 241, .9)',
+            kelasTombol: 'mis-tombol mis-tombol-ungu'
+        }
+    };
+
+    /*
+     * Isinya dirakit sebagai simpul, bukan untaian HTML.
+     *
+     * Yang disisipkan di sini nama orang — datang dari isian yang diketik
+     * orang lain. Lewat textContent, tanda < atau & di dalamnya tidak pernah
+     * tertafsir sebagai markah.
+     */
+    function rakitIsi(pilih, opsi) {
+        var bungkus = document.createElement('div');
+
+        var pesan = document.createElement('p');
+        pesan.style.margin = '0';
+
+        // %s pada pesannya diganti nama yang disorot; tanpa penanda itu,
+        // namanya ditempel di depan.
+        var teks = String(opsi.pesan || '');
+        var sorot = opsi.sorot ? String(opsi.sorot) : '';
+
+        if (sorot === '') {
+            pesan.textContent = teks;
+        } else {
+            var belah = teks.split('%s');
+            pesan.appendChild(document.createTextNode(belah[0]));
+
+            var kuat = document.createElement('strong');
+            kuat.className = 'mis-konfirm-sorot';
+            kuat.textContent = sorot;
+            pesan.appendChild(kuat);
+
+            pesan.appendChild(document.createTextNode(belah.length > 1 ? belah.slice(1).join('%s') : ''));
+        }
+
+        bungkus.appendChild(pesan);
+
+        return bungkus;
+    }
+
+    function tanya(opsi) {
+        opsi = opsi || {};
+
+        // Halaman yang belum memuat SweetAlert2 tidak boleh kehilangan
+        // aksinya sama sekali; confirm() bawaan peramban jadi cadangannya.
+        if (typeof window.Swal === 'undefined') {
+            var jawab = window.confirm(
+                (opsi.judul || 'Lanjutkan?') + '\n\n' +
+                String(opsi.pesan || '').replace('%s', opsi.sorot || '')
+            );
+
+            return Promise.resolve(jawab);
+        }
+
+        var pilih = JENIS[opsi.jenis] || JENIS.bahaya;
+
+        return window.Swal.fire({
+            // Judulnya selalu kalimat tetap dari kode, bukan isian orang.
+            title: opsi.judul || 'Lanjutkan?',
+            html: rakitIsi(pilih, opsi),
+            /*
+             * Ikonnya lewat slot ikon milik SweetAlert, bukan diselipkan ke
+             * dalam isi. Slot itulah yang dirender DI ATAS judul; ditaruh di
+             * dalam isi, ubinnya muncul di bawah judul dan urutan bacanya jadi
+             * judul - gambar - kalimat.
+             *
+             * Rupa bawaan slot itu ditimpa habis di mis-ui.css; yang dipakai
+             * cuma tempatnya.
+             */
+            icon: 'warning',
+            iconHtml: '<i class="fas ' + (opsi.glif || pilih.glif) + '" aria-hidden="true"></i>',
+            showCancelButton: true,
+            confirmButtonText: opsi.tombol || 'Ya, lanjutkan',
+            cancelButtonText: opsi.batal || 'Batal',
+            // Batal di kiri dan jadi tumpuan fokus: tombol yang menghapus
+            // untuk selamanya tidak boleh jadi yang paling gampang tertekan.
+            reverseButtons: true,
+            focusCancel: true,
+            buttonsStyling: false,
+            customClass: {
+                icon: 'mis-konfirm-ubin',
+                confirmButton: pilih.kelasTombol,
+                cancelButton: 'mis-tombol mis-tombol-halus'
+            },
+            didOpen: function (el) {
+                var ubin = el.querySelector('.mis-konfirm-ubin');
+
+                if (ubin) {
+                    ubin.style.setProperty('--mis-konfirm-warna', pilih.warna);
+                    ubin.style.setProperty('--mis-konfirm-bayang', pilih.bayang);
+                }
+            }
+        }).then(function (hasil) {
+            return !! hasil.isConfirmed;
+        });
+    }
+
+    window.misKonfirmasi = tanya;
+})();

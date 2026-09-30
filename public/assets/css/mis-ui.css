@@ -2168,6 +2168,133 @@ select.form-control-modern {
     transition: all .25s ease;
 }
 
+/*
+ * Tombol aksi merusak yang BERTEKS.
+ *
+ * .mis-tombol-bahaya di atas sengaja 34x34 untuk tombol berisi ikon saja, dan
+ * komentarnya sendiri sudah menyebut bahwa sistem ini belum punya padanan
+ * berteks. Akibatnya dialog konfirmasi hapus memakainya juga: terukur, tombol
+ * "Ya, hapus" mendapat lebar 34px padahal tulisannya menuntut 98px, sehingga
+ * teksnya menembus keluar kotaknya sendiri.
+ *
+ * Yang ini berlatar penuh, bukan samar seperti tombol ikonnya: ia satu-satunya
+ * tombol di layar yang menghapus data untuk selamanya, dan harus terbaca
+ * sebagai tombol yang paling berat di dialognya.
+ */
+.mis-tombol-hapus {
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+    color: #fff;
+    box-shadow: 0 8px 18px -10px rgba(225, 29, 72, .9);
+}
+
+.mis-tombol-hapus:hover:not(:disabled),
+.mis-tombol-hapus:focus-visible {
+    background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+    color: #fff;
+}
+
+/* --------------------------------------------- dialog konfirmasi bersama */
+
+/*
+ * Rupa dialog SweetAlert2 disamakan dengan sisa sistem.
+ *
+ * :not(.swal2-toast) penting: toast memakai kelas popup yang sama, dan tanpa
+ * pengecualian ini bantalan 26px beserta sudut 20px ikut menimpanya.
+ */
+.swal2-popup:not(.swal2-toast) {
+    width: 30em;
+    max-width: calc(100vw - 32px);
+    padding: 26px 26px 20px;
+    border: 1px solid var(--ui-garis);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px -20px rgba(15, 23, 42, .35);
+    font-family: inherit;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-title {
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--ui-tinta);
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-html-container,
+.swal2-popup:not(.swal2-toast) .swal2-html-container p {
+    margin: 8px 2px 0;
+    font-size: .86rem;
+    /* Tema bawaan Stisla memasang line-height MUTLAK untuk seluruh halaman,
+       jadi kalimat 13,6px pun berjarak 28px — hampir dua kali lipat, dan
+       kalimat dua baris terbaca seperti dua paragraf terpisah. */
+    line-height: 1.55;
+    color: var(--ui-tinta-3);
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-actions {
+    gap: 8px;
+    width: 100%;
+    margin: 22px 0 0;
+}
+
+/*
+ * Kedua tombol dibuat sama lebar dan tidak boleh menyusut.
+ *
+ * .swal2-actions itu wadah flex, dan tanpa flex-basis yang sama tombolnya
+ * selebar tulisannya masing-masing — "Batal" jadi jauh lebih kecil daripada
+ * "Ya, hapus" dan pasangannya terlihat timpang.
+ */
+.swal2-popup:not(.swal2-toast) .swal2-actions .mis-tombol {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 200px;
+    justify-content: center;
+}
+
+/*
+ * Ubin ikon dialog: bahasa rupa yang sama dengan .mis-medali dan ubin toast.
+ *
+ * Ia menempati slot ikon milik SweetAlert — itu satu-satunya tempat yang
+ * dirender di ATAS judul — jadi rupa bawaan slot itu (lingkaran bergaris tebal
+ * berwarna, 80x80) ditimpa seluruhnya di sini.
+ */
+.swal2-popup:not(.swal2-toast) .mis-konfirm-ubin {
+    display: grid !important;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 16px;
+    border: 0;
+    border-radius: 18px;
+    background: var(--mis-konfirm-warna, linear-gradient(135deg, #f43f5e 0%, #fb7185 100%));
+    box-shadow: 0 12px 24px -12px var(--mis-konfirm-bayang, rgba(244, 63, 94, .9));
+    color: #fff;
+}
+
+/* Slot ikon SweetAlert membungkus isinya lagi di .swal2-icon-content. */
+.swal2-popup:not(.swal2-toast) .mis-konfirm-ubin .swal2-icon-content {
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.swal2-popup:not(.swal2-toast) .mis-konfirm-ubin .fas {
+    font-size: 22px !important;
+    line-height: 1;
+}
+
+/* Cincin denyut bawaannya tidak dipakai; ia digambar untuk lingkaran 80px. */
+.swal2-popup:not(.swal2-toast) .mis-konfirm-ubin .swal2-success-ring,
+.swal2-popup:not(.swal2-toast) .mis-konfirm-ubin .swal2-icon-content ~ * {
+    display: none;
+}
+
+/* Nama yang sedang ditindak ditebalkan supaya jelas SIAPA yang terkena. */
+.mis-konfirm-sorot {
+    font-weight: 800;
+    color: var(--ui-tinta);
+}
+
 .mis-tombol-bahaya:hover {
     background: #e11d48;
     border-color: #e11d48;
