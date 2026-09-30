@@ -1070,21 +1070,17 @@
         if (!tombol || !borang) return;
 
         tombol.addEventListener('click', function () {
-            Swal.fire({
-                title: 'Tandai email terverifikasi?',
-                text: 'Anda menyatakan alamat ini benar tanpa menunggu pelanggannya mengklik tautan verifikasi.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, tandai',
-                cancelButtonText: 'Batal',
-                reverseButtons: true,
-                buttonsStyling: false,
-                customClass: {
-                    confirmButton: 'mis-tombol mis-tombol-hijau',
-                    cancelButton: 'mis-tombol mis-tombol-halus',
-                },
-            }).then(function (hasil) {
-                if (hasil.isConfirmed) borang.submit();
+            window.misKonfirmasi({
+                judul: 'Tandai email terverifikasi?',
+                pesan: 'Anda menyatakan alamat %s benar tanpa menunggu pelanggannya mengklik tautan verifikasi.',
+                sorot: @json($user->email),
+                tombol: 'Ya, tandai',
+                // Bukan 'bahaya': ini tidak menghapus apa pun, hanya perlu
+                // dipastikan karena menyatakan sesuatu tanpa bukti.
+                jenis: 'tanya',
+                glif: 'fa-envelope-open-text',
+            }).then(function (ya) {
+                if (ya) borang.submit();
             });
         });
     })();

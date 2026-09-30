@@ -49,7 +49,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=62">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=64">
 
     <style>
         .fas,
@@ -716,7 +716,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     {{-- Mengingat posisi gulir sidebar antar halaman. --}}
-    <script src="{{ asset('assets/js/mis-ui.js') }}?v=9"></script>
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=11"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
