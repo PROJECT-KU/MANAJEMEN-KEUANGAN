@@ -269,3 +269,28 @@ Contoh yang dipakai di repo ini:
 
 Ingat: **komentar CSS ikut terkirim ke peramban.** Jangan mengutip label
 tombol di dalamnya kalau ada uji yang memeriksa tulisan halaman.
+
+## Kartu berisi borangnya sendiri
+
+Dipakai pertama kali di **Tarif layanan** (`clinik_scopus_biaya_persesi`), untuk
+layar yang isinya beberapa hal sejenis dan tiap hal punya sedikit isian.
+
+- Kisinya `repeat(auto-fit, minmax(320px, 1fr))` — jumlah kartunya boleh
+  bertambah tanpa titik putus baru yang harus dijaga.
+- Kisinya **wajib** `align-items: start`. Dengan `stretch` bawaan, membuka
+  borang di satu kartu menarik seisi barisnya jadi setinggi itu (terukur 294px
+  jadi 590px) dan kartu sebelahnya menyisakan petak putih hampir 300px.
+- Borangnya di dalam `<details>`, tertutup secara bawaan. Tujuh borang terbuka
+  sekaligus menuntut menggulung jauh hanya untuk melihat nilai yang berlaku —
+  padahal itu yang paling sering dicari.
+- Hal yang belum terisi tetap ditampilkan, ditandai tepi kuning. Kartunya
+  disusun dari **katalog di kode**, bukan dari isi tabel: disusun dari tabel,
+  yang belum terisi hilang dari layar dan tidak ada yang tahu ia terlewat.
+- Satuan seperti "Rp" dan "%" menempel di dalam kotaknya sebagai awalan atau
+  akhiran, bukan jadi label sendiri.
+- Pratinjau hitungan diberi `aria-live="polite"` dan tulisan tombolnya ikut
+  berubah mengikuti apa yang sebenarnya akan terjadi (di sini: "Berlakukan"
+  untuk nilai baru, "Perbaiki" untuk nilai yang sama).
+
+Terukur di 1470/820/390/320px: tiga, dua, satu, satu kolom; tidak ada gulung
+mendatar; tidak ada yang meluber.
