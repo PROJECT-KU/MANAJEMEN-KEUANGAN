@@ -4,6 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\ClinikScopusBiayaPersesi;
 use App\Http\Controllers\Controller;
+use Dompdf\Dompdf;
 use App\Layanan;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -166,6 +167,68 @@ class ClinikScopusBiayaPersesiController extends Controller
             'totalRiwayat' => $totalRiwayat,
             'ppnLazim' => $ppnLazim ? (int) $ppnLazim : null,
             'saringRiwayat' => $saringRiwayat,
+        ]);
+    }
+
+    /**
+     * Mengunduh daftar harga sebagai PDF.
+     *
+     * Dulu ini `window.print()` dengan gaya @media print, dan hasilnya tidak
+     * serupa dengan berkas lain yang keluar dari MIS: tanpa logo, tanpa kepala
+     * berulang, tanpa kaki. Sekarang memakai cetakan yang sama dengan ekspor
+     * Data Pelanggan.
+     *
+     * Hanya layanan yang tarifnya SUDAH disetel yang ikut: "Belum disetel" itu
+     * peringatan untuk admin, bukan keterangan untuk calon peserta.
+     */
+    public function cetakPdf()
+    {
+        if (! $this->bolehMelihat()) {
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke tarif layanan.');
+        }
+
+        $berlaku = ClinikScopusBiayaPersesi::semuaYangBerlaku();
+        $baris = [];
+
+        foreach (Layanan::katalog() as $kunci => $tentang) {
+            $varian = $tentang['varian'] ?: [null => null];
+
+            foreach ($varian as $kodeVarian => $namaVarian) {
+                $tarif = $berlaku[$kunci . '|' . ($kodeVarian ?: '')] ?? null;
+
+                if (! $tarif) {
+                    continue;
+                }
+
+                $baris[] = [
+                    'nama' => $tentang['nama'],
+                    'namaVarian' => $namaVarian,
+                    'satuan' => $tentang['satuan'],
+                    'tarif' => $tarif,
+                ];
+            }
+        }
+
+        $html = view('account.clinik_scopus_biaya_persesi.cetak-pdf', ['baris' => $baris])->render();
+
+        $dompdf = new Dompdf();
+        $pengaturan = $dompdf->getOptions();
+        $pengaturan->setIsPhpEnabled(true);
+        $pengaturan->setIsRemoteEnabled(false);
+        $dompdf->setOptions($pengaturan);
+        $dompdf->loadHtml($html);
+        // Tegak: tiga kolom, dan daftar fasilitasnya butuh tinggi bukan lebar.
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $nama = 'daftar-harga-layanan-' . now()->format('Ymd-His') . '.pdf';
+
+        // response(), bukan $dompdf->stream(): stream() memanggil header() dan
+        // echo sendiri sehingga kepalanya lewat dari lapisan respons Laravel.
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $nama . '"',
         ]);
     }
 
