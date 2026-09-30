@@ -18,14 +18,9 @@ use Illuminate\Support\Str;
  * pasangan layanan+varian pada satu waktu, dan baris lama dipertahankan
  * karena pesanan yang sudah terjadi memakai harga saat itu.
  *
- * Varian membedakan harga di dalam satu layanan:
- *
- *   Bibliometrik   online / offline   — offline menanggung tempat & konsumsi
- *
- *   Scopus Camp    jawa / luar_jawa   — fasilitasnya berbeda, bukan cuma
- *                                       harganya
- *
- * Varian dipakai untuk beda PRODUK, bukan beda angkatan.
+ * Varian membedakan harga atau fasilitas di dalam satu layanan — Bibliometrik
+ * online/offline, Scopus Camp Jawa/luar Jawa. Dipakai untuk beda PRODUK, bukan
+ * beda angkatan. Daftarnya ikut katalog di tabel `layanan`.
  *
  * Layanan tanpa varian menyimpan NULL, bukan untaian kosong: keduanya berbeda
  * di whereNull, dan kolom kosong yang tercampur membuat pencarian tarifnya
@@ -63,57 +58,19 @@ class ClinikScopusBiayaPersesi extends Model
     public const NONAKTIF = 'non active';
 
     /**
-     * Katalog layanan beserta varian dan satuannya.
+     * Katalog layanan — sekarang datanya, bukan konstanta.
      *
-     * Ditulis sebagai data, bukan disebar sebagai @if di tampilan: menambah
-     * layanan berikutnya cukup menambah satu baris di sini, dan layarnya
-     * langsung ikut.
+     * Dulu daftar ini ditulis di sini sebagai const LAYANAN, jadi menambah
+     * satu layanan berarti mengubah kode lalu deploy. Sekarang ia tabel
+     * `layanan` yang diisi admin sendiri; bentuk larik yang dikembalikan sama
+     * persis dengan konstanta lamanya.
+     *
+     * @return array<string, array<string, mixed>>
      */
-    public const LAYANAN = [
-        'clinik_scopus' => [
-            'nama' => 'Clinik Scopus',
-            'satuan' => 'per satu sesi',
-            'ikon' => 'fa-user-md',
-            'warna' => 'mis-biru',
-            'varian' => [],
-        ],
-        'bibliometrik' => [
-            'nama' => 'Analisis Bibliometrik',
-            'satuan' => 'per peserta',
-            'ikon' => 'fa-chart-line',
-            'warna' => 'mis-ungu',
-            'varian' => ['online' => 'Online', 'offline' => 'Offline'],
-        ],
-        'scopus_camp' => [
-            'nama' => 'Scopus Camp',
-            'satuan' => 'per peserta',
-            'ikon' => 'fa-campground',
-            'warna' => 'mis-hijau',
-            /*
-             * Yang membedakan bukan harganya — keduanya 5,5jt sekarang —
-             * melainkan FASILITASNYA: di Jawa acaranya di rumah sendiri, jadi
-             * dapat penginapan plus mushola, kolam renang & treadmill; di luar
-             * Jawa menyewa tempat, jadi lima butir saja. Perbedaan itu tidak
-             * kelihatan sama sekali dari kolom biaya, dan itulah sebabnya
-             * sempat salah dibaca sebagai kenaikan harga biasa.
-             */
-            'varian' => ['jawa' => 'Pulau Jawa', 'luar_jawa' => 'Luar Pulau Jawa'],
-        ],
-        'scopus_kafe' => [
-            'nama' => 'Scopus Kafe',
-            'satuan' => 'per pertemuan',
-            'ikon' => 'fa-coffee',
-            'warna' => 'mis-jingga',
-            'varian' => [],
-        ],
-        'online_training' => [
-            'nama' => 'Online Training',
-            'satuan' => 'per paket',
-            'ikon' => 'fa-chalkboard-teacher',
-            'warna' => 'mis-kuning',
-            'varian' => [],
-        ],
-    ];
+    public static function layanan(): array
+    {
+        return Layanan::katalog();
+    }
 
     protected static function boot()
     {
@@ -223,7 +180,7 @@ class ClinikScopusBiayaPersesi extends Model
 
     public function getNamaLayananAttribute(): string
     {
-        return self::LAYANAN[$this->layanan]['nama'] ?? Str::title(str_replace('_', ' ', (string) $this->layanan));
+        return self::layanan()[$this->layanan]['nama'] ?? Str::title(str_replace('_', ' ', (string) $this->layanan));
     }
 
     public function getNamaVarianAttribute(): ?string
@@ -232,13 +189,13 @@ class ClinikScopusBiayaPersesi extends Model
             return null;
         }
 
-        return self::LAYANAN[$this->layanan]['varian'][$this->varian]
+        return self::layanan()[$this->layanan]['varian'][$this->varian]
             ?? Str::title(str_replace('_', ' ', $this->varian));
     }
 
     public function getSatuanAttribute(): string
     {
-        return self::LAYANAN[$this->layanan]['satuan'] ?? 'per satuan';
+        return self::layanan()[$this->layanan]['satuan'] ?? 'per satuan';
     }
 
     /** Daftar fasilitas, selalu berupa larik walau kolomnya kosong. */

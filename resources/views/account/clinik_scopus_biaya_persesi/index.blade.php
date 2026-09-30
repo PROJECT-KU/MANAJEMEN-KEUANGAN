@@ -55,6 +55,23 @@ Tarif Layanan | MIS
 
     .tar-kartu:hover { border-color: #c7d2fe; box-shadow: 0 10px 24px -18px rgba(99, 102, 241, .9); }
 
+    /* Kartu ajakan menambah layanan. Bertepi putus-putus dan tanpa bayangan
+       supaya jelas ia bukan data, melainkan tindakan. */
+    .tar-tambah {
+        display: grid; place-content: center; justify-items: center;
+        gap: 9px; min-height: 180px; padding: 24px;
+        border: 2px dashed var(--mis-garis); border-radius: var(--mis-radius);
+        background: transparent;
+        color: var(--mis-tinta-3); text-align: center;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .tar-tambah:hover { border-color: #a5b4fc; background: #f5f3ff; color: #4f46e5; }
+    .tar-tambah-judul { margin: 0; line-height: 1.3; font-size: .86rem; font-weight: 800; }
+    .tar-tambah-ket { margin: 0; line-height: 1.45; font-size: .74rem; max-width: 24ch; }
+    .tar-tambah .mis-medali { margin-bottom: 2px; }
+
     /* Yang belum punya tarif ditandai, bukan disembunyikan: layanan yang
        terlewat harus kelihatan justru karena terlewat. */
     .tar-kartu.kosong { border-color: #fde68a; background: linear-gradient(180deg, #fffbeb 0%, #fff 60%); }
@@ -62,11 +79,12 @@ Tarif Layanan | MIS
 
     .tar-kartu-kepala {
         display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: auto minmax(0, 1fr) auto;
         column-gap: 11px; row-gap: 4px; align-items: center;
     }
 
     .tar-kartu-kepala > .mis-medali { grid-row: 1 / span 2; align-self: center; }
+    .tar-atur { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
 
     .tar-nama {
         grid-column: 2; grid-row: 1; margin: 0;
@@ -269,6 +287,28 @@ Tarif Layanan | MIS
         font-size: .72rem; white-space: nowrap;
     }
 
+    .tar-wajib { color: #e11d48; font-weight: 800; }
+    .tar-opsional { font-weight: 600; color: var(--mis-tinta-4); text-transform: none; }
+
+    .lyn-pratinjau {
+        display: flex; align-items: center; gap: 10px;
+        margin-top: 9px; padding: 9px 11px;
+        border-radius: 11px; background: #f8fafc;
+        font-size: .75rem; color: var(--mis-tinta-3);
+    }
+
+    .lyn-aktif {
+        display: grid; grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px; align-items: start;
+        margin: 0; padding: 11px 13px;
+        border: 1px solid var(--mis-garis); border-radius: 12px;
+        line-height: 1.5; font-size: .79rem; font-weight: 700; color: var(--mis-tinta-2);
+        cursor: pointer;
+    }
+
+    .lyn-aktif input { margin-top: 3px; }
+    .lyn-aktif-ket { display: block; margin-top: 3px; font-size: .73rem; font-weight: 400; color: var(--mis-tinta-3); }
+
     .tar-pratinjau {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
         padding: 9px 11px; border-radius: 10px; background: #f5f3ff;
@@ -333,6 +373,24 @@ Tarif Layanan | MIS
                             <i class="fas {{ $k['ikon'] }}"></i>
                         </span>
                         <h2 class="tar-nama">{{ $k['nama'] }}</h2>
+                        @if ($bolehUbah && $k['pengatur'])
+                            <button type="button" class="mis-tombol mis-tombol-garis tar-atur"
+                                title="Ubah layanan {{ $k['nama'] }}"
+                                data-layanan="{{ json_encode([
+                                    'alamat' => route('account.layanan.update', $k['pengatur']),
+                                    'hapus' => route('account.layanan.destroy', $k['pengatur']),
+                                    'nama' => $k['pengatur']->nama,
+                                    'satuan' => $k['pengatur']->satuan,
+                                    'ikon' => $k['pengatur']->ikon,
+                                    'warna' => $k['pengatur']->warna,
+                                    'aktif' => $k['pengatur']->aktif,
+                                    'varian' => implode("\n", array_values($k['pengatur']->varian_peta)),
+                                    'terpakai' => $k['pengatur']->jumlah_tarif + $k['pengatur']->jumlah_angkatan,
+                                ]) }}">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        @endif
+
                         <div class="tar-lencana">
                             @if ($k['namaVarian'])
                                 <span class="mis-pil mis-pil-ungu">
@@ -414,6 +472,16 @@ Tarif Layanan | MIS
                     </div>
                 </div>
             @endforeach
+
+            @if ($bolehUbah)
+                <button type="button" class="tar-tambah" data-layanan-baru>
+                    <span class="mis-medali mis-ungu" aria-hidden="true"><i class="fas fa-plus"></i></span>
+                    <p class="tar-tambah-judul">Tambah layanan</p>
+                    <p class="tar-tambah-ket">
+                        Jenis jasa baru — misalnya sharing session eksklusif — beserta tarifnya.
+                    </p>
+                </button>
+            @endif
         </div>
 
         @unless ($bolehUbah)
@@ -452,7 +520,7 @@ Tarif Layanan | MIS
                         </thead>
                         <tbody>
                             @foreach ($riwayat as $item)
-                                @php($tentang = \App\ClinikScopusBiayaPersesi::LAYANAN[$item->layanan] ?? null)
+                                @php($tentang = \App\Layanan::katalog()[$item->layanan] ?? null)
                                 <tr>
                                     <td class="mis-td-utama">
                                         <span class="mis-sel-utama">
@@ -634,11 +702,114 @@ Tarif Layanan | MIS
             </div>
         </form>
     </dialog>
+
+    {{-- ---------------------------------------- dialog layanan --}}
+    <dialog class="tar-dialog" id="lyn-dialog">
+        <form method="POST" action="{{ route('account.layanan.store') }}"
+            class="tar-dialog-borang" id="lyn-borang">
+            @csrf
+
+            <div class="tar-dialog-kepala">
+                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                <div>
+                    <h2 class="tar-dialog-judul" id="lyn-judul">Layanan baru</h2>
+                    <p class="tar-dialog-sub" id="lyn-sub">Setelah disimpan, tarifnya disetel di kartu yang muncul.</p>
+                </div>
+                <button type="button" class="tar-tutup" data-tutup aria-label="Tutup">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="tar-dialog-isi">
+                <div class="mis-isian">
+                    <label class="mis-label" for="lyn-nama">
+                        Nama layanan <span class="tar-wajib" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text" class="form-control-modern" id="lyn-nama" name="nama" required
+                        maxlength="120" placeholder="mis. Sharing Session Eksklusif">
+                    <p class="mis-bantuan" id="lyn-kode-ket">
+                        Kode internalnya dibuat otomatis dari nama ini dan tidak berubah lagi —
+                        tarif serta angkatan menunjuk kode itu.
+                    </p>
+                </div>
+
+                <div class="tar-dua">
+                    <div class="mis-isian">
+                        <label class="mis-label" for="lyn-satuan">
+                            Satuan <span class="tar-wajib" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text" class="form-control-modern" id="lyn-satuan" name="satuan" required
+                            maxlength="60" placeholder="per peserta">
+                        <p class="mis-bantuan">Tertulis di bawah harga: &ldquo;Rp 250.000 per peserta&rdquo;.</p>
+                    </div>
+
+                    <div class="mis-isian">
+                        <label class="mis-label" for="lyn-warna">Warna ubin</label>
+                        <select class="form-control-modern" id="lyn-warna" name="warna">
+                            @foreach ($daftarWarna as $kode => $nama)
+                                <option value="{{ $kode }}">{{ $nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mis-isian">
+                    <label class="mis-label" for="lyn-ikon">Ikon</label>
+                    <select class="form-control-modern" id="lyn-ikon" name="ikon">
+                        @foreach ($daftarIkon as $kode => $arti)
+                            <option value="{{ $kode }}">{{ $arti }}</option>
+                        @endforeach
+                    </select>
+
+                    {{-- Ikonnya dipilih dari daftar tertutup, bukan diketik: proyek ini
+                         memakai Font Awesome 5, dan nama FA6 tidak merender apa pun tanpa
+                         galat sama sekali. --}}
+                    <div class="lyn-pratinjau">
+                        <span class="mis-medali" id="lyn-ubin" aria-hidden="true"><i class="fas fa-tag"></i></span>
+                        <span>Begini tampilannya di kartu.</span>
+                    </div>
+                </div>
+
+                <div class="mis-isian">
+                    <label class="mis-label" for="lyn-varian">Varian <span class="tar-opsional">opsional</span></label>
+                    <textarea class="tar-area tar-pendek" id="lyn-varian" name="varian" rows="3"
+                        placeholder="Kosongkan kalau harganya satu saja&#10;Pulau Jawa&#10;Luar Pulau Jawa"></textarea>
+                    <p class="mis-bantuan">
+                        Satu varian per baris. Dipakai kalau <strong>harga atau fasilitasnya
+                        berbeda</strong> di dalam satu layanan — tiap varian dapat kartu tarifnya
+                        sendiri. Varian yang sudah dipakai tidak bisa dibuang.
+                    </p>
+                </div>
+
+                <label class="lyn-aktif" for="lyn-aktif">
+                    <input type="checkbox" id="lyn-aktif" name="aktif" value="1" checked>
+                    <span>
+                        Masih dijual
+                        <span class="lyn-aktif-ket">
+                            Dilepas centangnya, layanan ini hilang dari daftar tanpa menghapus
+                            tarif maupun angkatan yang sudah ada.
+                        </span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="tar-dialog-kaki">
+                <button type="submit" class="mis-tombol mis-tombol-ungu" id="lyn-simpan">
+                    <i class="fas fa-save"></i> Simpan layanan
+                </button>
+                <button type="button" class="mis-tombol mis-tombol-halus" data-tutup>Batal</button>
+                <button type="button" class="mis-tombol mis-tombol-hapus" id="lyn-hapus" hidden>
+                    <i class="fas fa-trash-alt"></i> Hapus
+                </button>
+            </div>
+        </form>
+    </dialog>
 @endif
 @endsection
 
 @push('scripts')
 <script>
+    @if ($bolehUbah)
     /*
      * Dialog tarif: satu borang yang diisi ulang tiap kali dibuka.
      */
@@ -734,6 +905,112 @@ Tarif Layanan | MIS
             if (e.target === dialog) dialog.close();
         });
     })();
+
+    /*
+     * Dialog layanan: menambah jenis jasa baru, dan mengubah yang sudah ada.
+     *
+     * Satu borang untuk dua keadaan, dibedakan alamat kirimnya. Dua borang
+     * terpisah berarti dua salinan daftar ikon dan warna yang sama.
+     */
+    (function () {
+        const dialog = document.getElementById('lyn-dialog');
+        if (!dialog) return;
+
+        const el = (id) => document.getElementById(id);
+        const borang = el('lyn-borang');
+        const ikon = el('lyn-ikon');
+        const warna = el('lyn-warna');
+        const ubin = el('lyn-ubin');
+        const hapus = el('lyn-hapus');
+        const ALAMAT_BARU = borang.getAttribute('action');
+
+        let alamatHapus = null;
+
+        function segarkanUbin() {
+            ubin.className = 'mis-medali ' + warna.value;
+            ubin.innerHTML = '<i class="fas ' + ikon.value + '"></i>';
+        }
+
+        ikon.addEventListener('change', segarkanUbin);
+        warna.addEventListener('change', segarkanUbin);
+
+        function buka(d) {
+            const baru = d === null;
+
+            borang.setAttribute('action', baru ? ALAMAT_BARU : d.alamat);
+            el('lyn-judul').textContent = baru ? 'Layanan baru' : 'Ubah ' + d.nama;
+            el('lyn-sub').textContent = baru
+                ? 'Setelah disimpan, tarifnya disetel di kartu yang muncul.'
+                : (d.terpakai > 0
+                    ? 'Dipakai ' + d.terpakai + ' tarif & angkatan — kodenya tidak bisa diubah.'
+                    : 'Belum dipakai data mana pun.');
+
+            el('lyn-nama').value = baru ? '' : d.nama;
+            el('lyn-satuan').value = baru ? '' : d.satuan;
+            el('lyn-varian').value = baru ? '' : d.varian;
+            el('lyn-aktif').checked = baru ? true : d.aktif;
+            ikon.value = baru ? 'fa-star' : d.ikon;
+            warna.value = baru ? 'mis-ungu' : d.warna;
+
+            // Nama yang sudah dipakai tetap boleh diubah — yang dikunci
+            // kodenya, dan kode tidak ikut nama setelah dibuat.
+            el('lyn-kode-ket').hidden = ! baru;
+
+            // Menghapus hanya ditawarkan kalau memang belum dipakai apa pun.
+            const bolehHapus = ! baru && d.terpakai === 0;
+            hapus.hidden = ! bolehHapus;
+            alamatHapus = bolehHapus ? d.hapus : null;
+
+            segarkanUbin();
+            dialog.showModal();
+            el('lyn-nama').focus();
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-layanan-baru]')) { buka(null); return; }
+
+            const atur = e.target.closest('[data-layanan]');
+            if (atur) buka(JSON.parse(atur.dataset.layanan));
+        });
+
+        hapus.addEventListener('click', function () {
+            if (!alamatHapus) return;
+
+            window.misKonfirmasi({
+                judul: 'Hapus layanan ini?',
+                pesan: '%s hilang dari daftar layanan. Hanya bisa kalau belum dipakai tarif maupun angkatan.',
+                sorot: el('lyn-nama').value,
+                tombol: 'Ya, hapus',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                fetch(alamatHapus, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (j) {
+                        window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal', j.d.message);
+                        if (j.ok && j.d.success) setTimeout(function () { window.location.reload(); }, 900);
+                    })
+                    .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-tutup]') && dialog.open) dialog.close();
+        });
+
+        dialog.addEventListener('click', function (e) {
+            if (e.target === dialog) dialog.close();
+        });
+    })();
+
+    @endif
 
     /*
      * Memberlakukan tarif lama dan menghapus baris riwayat.

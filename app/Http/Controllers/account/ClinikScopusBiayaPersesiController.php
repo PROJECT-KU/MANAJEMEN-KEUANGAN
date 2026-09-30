@@ -4,6 +4,7 @@ namespace App\Http\Controllers\account;
 
 use App\ClinikScopusBiayaPersesi;
 use App\Http\Controllers\Controller;
+use App\Layanan;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,7 +61,14 @@ class ClinikScopusBiayaPersesiController extends Controller
          */
         $kartu = [];
 
-        foreach (ClinikScopusBiayaPersesi::LAYANAN as $kunci => $tentang) {
+        /*
+         * Layanannya diambil sebagai model, bukan cuma katalog, karena layarnya
+         * juga menyuguhkan pengaturan layanan itu sendiri — dan pengaturannya
+         * butuh id serta daftar varian aslinya.
+         */
+        $model = Layanan::where('aktif', true)->orderBy('urutan')->orderBy('nama')->get()->keyBy('kode');
+
+        foreach (Layanan::katalog() as $kunci => $tentang) {
             $varian = $tentang['varian'] ?: [null => null];
 
             foreach ($varian as $kodeVarian => $namaVarian) {
@@ -73,6 +81,10 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'ikon' => $tentang['ikon'],
                     'warna' => $tentang['warna'],
                     'tarif' => ClinikScopusBiayaPersesi::berlaku($kunci, $kodeVarian ?: null),
+                    // Hanya kartu PERTAMA tiap layanan yang menyuguhkan tombol
+                    // pengaturan; dua kartu varian mengatur layanan yang sama,
+                    // dan dua tombol untuk satu hal cuma membingungkan.
+                    'pengatur' => $kodeVarian === array_key_first($varian) ? ($model[$kunci] ?? null) : null,
                 ];
             }
         }
@@ -91,6 +103,8 @@ class ClinikScopusBiayaPersesiController extends Controller
             'bolehUbah' => $this->bolehMengubah(),
             'adaTarif' => $adaTarif,
             'totalKartu' => count($kartu),
+            'daftarIkon' => Layanan::IKON,
+            'daftarWarna' => Layanan::WARNA,
         ]);
     }
 
@@ -113,7 +127,7 @@ class ClinikScopusBiayaPersesiController extends Controller
         }
 
         $data = $request->validate([
-            'layanan' => ['required', Rule::in(array_keys(ClinikScopusBiayaPersesi::LAYANAN))],
+            'layanan' => ['required', Rule::in(array_keys(Layanan::katalog()))],
             'varian' => ['nullable', 'string', 'max:40'],
             'biaya_persesi' => ['required', 'string'],
             'ppn' => ['nullable', 'integer', 'min:0', 'max:100'],
@@ -128,7 +142,7 @@ class ClinikScopusBiayaPersesiController extends Controller
             'ppn.max' => 'PPN tidak masuk akal kalau lebih dari 100 persen.',
         ]);
 
-        $tentang = ClinikScopusBiayaPersesi::LAYANAN[$data['layanan']];
+        $tentang = Layanan::katalog()[$data['layanan']];
         $varian = ($data['varian'] ?? null) ?: null;
 
         // Varian yang tidak dikenal layanannya ditolak: kiriman datang dari

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\account;
 use App\ClinikScopusBiayaPersesi;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
+use App\Layanan;
 use App\Support\PerakitDeskripsi;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -63,7 +64,7 @@ class KategoriLayananController extends Controller
 
         $kueri = KategoriLayanan::query();
 
-        if ($layanan && array_key_exists($layanan, ClinikScopusBiayaPersesi::LAYANAN)) {
+        if ($layanan && array_key_exists($layanan, Layanan::katalog())) {
             $kueri->where('layanan', $layanan);
         }
 
@@ -96,7 +97,7 @@ class KategoriLayananController extends Controller
             'status' => $status,
             'cari' => $cari,
             'bolehUbah' => $this->bolehMengubah(),
-            'katalog' => ClinikScopusBiayaPersesi::LAYANAN,
+            'katalog' => Layanan::katalog(),
         ]);
     }
 
@@ -111,7 +112,7 @@ class KategoriLayananController extends Controller
         return view('account.kategori_layanan.form', [
             'angkatan' => new KategoriLayanan(['layanan' => $request->query('layanan', 'scopus_camp')]),
             'sunting' => false,
-            'katalog' => ClinikScopusBiayaPersesi::LAYANAN,
+            'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
         ]);
     }
@@ -125,7 +126,7 @@ class KategoriLayananController extends Controller
         return view('account.kategori_layanan.form', [
             'angkatan' => $angkatan,
             'sunting' => true,
-            'katalog' => ClinikScopusBiayaPersesi::LAYANAN,
+            'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
         ]);
     }
@@ -140,7 +141,7 @@ class KategoriLayananController extends Controller
     {
         $hasil = [];
 
-        foreach (ClinikScopusBiayaPersesi::LAYANAN as $kunci => $tentang) {
+        foreach (Layanan::katalog() as $kunci => $tentang) {
             $varian = $tentang['varian'] ?: [null => null];
 
             foreach ($varian as $kodeVarian => $namaVarian) {
@@ -191,7 +192,7 @@ class KategoriLayananController extends Controller
     private function periksa(Request $request, ?KategoriLayanan $angkatan = null): array
     {
         $data = $request->validate([
-            'layanan' => ['required', Rule::in(array_keys(ClinikScopusBiayaPersesi::LAYANAN))],
+            'layanan' => ['required', Rule::in(array_keys(Layanan::katalog()))],
             'varian' => ['nullable', 'string', 'max:40'],
             'nama' => ['required', 'string', 'max:255'],
             'nama_ke' => ['nullable', 'string', 'max:20'],
@@ -227,7 +228,7 @@ class KategoriLayananController extends Controller
             'group_wa', 'desc',
         ], null), $data);
 
-        $tentang = ClinikScopusBiayaPersesi::LAYANAN[$data['layanan']];
+        $tentang = Layanan::katalog()[$data['layanan']];
         $varian = $data['varian'] ?: null;
 
         if ($varian !== null && ! array_key_exists($varian, $tentang['varian'])) {

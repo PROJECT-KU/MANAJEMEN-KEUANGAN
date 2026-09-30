@@ -337,7 +337,7 @@ class BiayaPersesiTest extends TestCase
          */
         $this->assertSame(
             ['jawa' => 'Pulau Jawa', 'luar_jawa' => 'Luar Pulau Jawa'],
-            ClinikScopusBiayaPersesi::LAYANAN['scopus_camp']['varian']
+            ClinikScopusBiayaPersesi::layanan()['scopus_camp']['varian']
         );
 
         $jawa = ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa');
@@ -634,7 +634,7 @@ class BiayaPersesiTest extends TestCase
 
         $halaman->assertOk();
 
-        foreach (ClinikScopusBiayaPersesi::LAYANAN as $tentang) {
+        foreach (ClinikScopusBiayaPersesi::layanan() as $tentang) {
             $halaman->assertSee($tentang['nama'], false);
         }
 
