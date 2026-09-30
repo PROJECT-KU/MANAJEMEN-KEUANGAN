@@ -312,6 +312,50 @@ class TarifAuditDuaTest extends TestCase
             ->assertHeader('Content-Type', 'application/pdf');
     }
 
+    // ------------------------------------------------------------ pencarian
+
+    #[Test]
+    public function saringan_berbentuk_sama_dengan_data_pelanggan(): void
+    {
+        /*
+         * Bentuknya disamakan dengan .pel-saring-kartu: kartu putih berlabel,
+         * tombol hapus ketikan di dalam kotaknya, tombol Reset, dan keadaan
+         * kosong "Tidak ada yang cocok" dengan kalimat yang sama.
+         *
+         * Diperiksa dari markahnya, bukan dari gayanya: ukurannya sudah
+         * dibandingkan langsung di peramban, tetapi bagian-bagiannya yang
+         * gampang hilang saat layarnya disunting lagi.
+         */
+        $admin = $this->akun();
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))->getContent();
+
+        $this->assertStringContainsString('tar-saring-kartu', $isi, 'Kotak cari harus di dalam kartu saringan.');
+        $this->assertStringContainsString('id="tar-reset"', $isi, 'Tombol Reset harus ada.');
+        $this->assertStringContainsString('id="tar-kosong-cari"', $isi, 'Keadaan kosong pencarian harus ada.');
+
+        // Kalimatnya persis sama dengan Data Pelanggan.
+        $this->assertStringContainsString('Tidak ada yang cocok', $isi);
+        $this->assertStringContainsString('Coba ganti kata kuncinya, atau hapus saringannya.', $isi);
+
+        // Labelnya ada; kotak cari tanpa label hanya bisa ditebak dari
+        // placeholder, yang hilang begitu diketik.
+        $this->assertMatchesRegularExpression('/<label[^>]*for="tar-cari"/', $isi);
+    }
+
+    #[Test]
+    public function reset_menunjuk_layar_yang_sama_tanpa_saringan(): void
+    {
+        // Alamatnya tetap ada sebagai cadangan kalau skripnya tidak termuat;
+        // dengan skrip, pengosongannya dikerjakan di tempat.
+        $admin = $this->akun();
+
+        $this->actingAs($admin)
+            ->get(route('account.Clinik-Scopus-Biaya-Persesi.index'))
+            ->assertSee('href="' . route('account.Clinik-Scopus-Biaya-Persesi.index') . '"', false);
+    }
+
     // ----------------------------------------------------- tanggal & perbaiki
 
     #[Test]
