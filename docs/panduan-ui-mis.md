@@ -359,3 +359,36 @@ Jadi apa pun yang urutannya berarti bagi orang (varian layanan, langkah,
 pilihan) disimpan sebagai **larik berurut** `[{kode, nama}, ...]`, bukan objek
 `{kode: nama}`. Urutan yang diketik admin hilang tanpa jejak kalau memakai
 objek.
+
+## Menyembunyikan sesuatu harus ada jalan kembalinya
+
+Layar yang menyaring daftarnya (`where('aktif', true)`) membuat yang
+dinonaktifkan **lenyap sama sekali** — termasuk dari jangkauan admin yang baru
+saja menonaktifkannya. Di Tarif layanan, pesan penolakan hapus bahkan
+menyarankan "nonaktifkan saja", lalu menutup pintunya sendiri.
+
+Aturan: setiap layar yang bisa menonaktifkan sesuatu **wajib** punya bagian
+terpisah yang memajang yang nonaktif, redup, dengan tombol mengaktifkan lagi.
+
+## Dua pintu ke satu tempat harus punya aturan sama
+
+Borang penyetelan tarif menolak nominal nol; tombol "Berlakukan lagi" di
+riwayat dulu tidak memeriksa apa pun, jadi satu klik bisa menjadikan baris
+Rp 0 sebagai tarif yang berlaku. Setiap kali ada jalan pintas ke keadaan yang
+sama, aturannya disalin — bukan diandaikan sudah dijaga di tempat lain.
+
+## Angka yang tidak diketahui bukan nol
+
+Kolom "Dipakai" di riwayat tarif menghitung `biaya_persesi_id`, yang hanya
+dimiliki sesi Clinik Scopus. Angkatan layanan lain menyalin angkanya, tidak
+menunjuk barisnya — jadi untuk mereka jumlahnya **tidak diketahui**, bukan nol.
+Menuliskannya "Belum dipakai" adalah angka yang berbohong, dan angka yang
+berbohong lebih berbahaya daripada kolom kosong. Tulis "tidak tertaut".
+
+## `@media (pointer: coarse)` saja tidak cukup
+
+Ciri itu tidak selalu dilaporkan peramban, dan emulasi DevTools pun tidak
+menyetelnya — jadi aturan yang hanya bergantung padanya bisa **tidak pernah
+aktif tanpa ada yang tahu**, dan tidak bisa dibuktikan lewat pengukuran.
+Sebutkan lebar ponsel juga: `@media (pointer: coarse), (max-width: 767.98px)`.
+Sasaran sentuh minimal 44x44.

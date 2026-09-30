@@ -89,11 +89,36 @@ class ClinikScopusBiayaPersesiController extends Controller
             }
         }
 
+        /*
+         * Riwayat bisa disaring per layanan. Dengan katalog yang kini boleh
+         * tumbuh sendiri, riwayat semua layanan bercampur jadi satu daftar
+         * yang tidak bisa dibaca.
+         */
+        $saringRiwayat = $request->query('riwayat');
+
         $riwayat = ClinikScopusBiayaPersesi::query()
             ->where('status', ClinikScopusBiayaPersesi::NONAKTIF)
+            ->when($saringRiwayat && array_key_exists($saringRiwayat, Layanan::katalog()),
+                fn ($q) => $q->where('layanan', $saringRiwayat))
             ->withCount('clinikScopus')
+            ->with('penginput:id,full_name,username')
             ->orderByDesc('updated_at')
-            ->paginate(self::PER_HALAMAN);
+            ->paginate(self::PER_HALAMAN)
+            ->withQueryString();
+
+        /*
+         * Layanan yang dinonaktifkan TETAP ditampilkan, terpisah dan redup.
+         * Tanpa ini ia lenyap dari layar dan tidak ada cara mengaktifkannya
+         * lagi — padahal pesan penolakan hapus justru menyarankan
+         * menonaktifkan. Jalan buntu yang dibuat oleh nasihat kita sendiri.
+         */
+        $nonaktif = Layanan::where('aktif', false)->orderBy('nama')->get();
+
+        // Tarif yang sudah disetel tapi menunggu tanggalnya.
+        $terjadwal = ClinikScopusBiayaPersesi::query()
+            ->where('status', ClinikScopusBiayaPersesi::TERJADWAL)
+            ->orderBy('berlaku_mulai')
+            ->get();
 
         $adaTarif = collect($kartu)->filter(fn ($k) => $k['tarif'] !== null)->count();
 
@@ -105,6 +130,9 @@ class ClinikScopusBiayaPersesiController extends Controller
             'totalKartu' => count($kartu),
             'daftarIkon' => Layanan::IKON,
             'daftarWarna' => Layanan::WARNA,
+            'nonaktif' => $nonaktif,
+            'terjadwal' => $terjadwal,
+            'saringRiwayat' => $saringRiwayat,
         ]);
     }
 
@@ -135,11 +163,14 @@ class ClinikScopusBiayaPersesiController extends Controller
             'kegiatan' => ['nullable', 'string', 'max:8000'],
             'kontak' => ['nullable', 'string', 'max:500'],
             'template_deskripsi' => ['nullable', 'string', 'max:20000'],
+            'berlaku_mulai' => ['nullable', 'date', 'after:today'],
             'perbaiki' => ['nullable', 'uuid'],
         ], [
             'layanan.required' => 'Layanannya tidak dikenali.',
             'biaya_persesi.required' => 'Isi dulu tarifnya.',
             'ppn.max' => 'PPN tidak masuk akal kalau lebih dari 100 persen.',
+            'berlaku_mulai.after' => 'Tanggal mulainya harus setelah hari ini. '
+                . 'Untuk berlaku sekarang juga, kosongkan saja.',
         ]);
 
         $tentang = Layanan::katalog()[$data['layanan']];
@@ -191,6 +222,8 @@ class ClinikScopusBiayaPersesiController extends Controller
             }
         }
 
+        $mulai = $data['berlaku_mulai'] ?? null;
+
         $baru = ClinikScopusBiayaPersesi::create([
             'layanan' => $data['layanan'],
             'varian' => $varian,
@@ -200,8 +233,24 @@ class ClinikScopusBiayaPersesiController extends Controller
             'kegiatan' => $kegiatan,
             'kontak' => $kontak,
             'template_deskripsi' => $cetakan,
+            'berlaku_mulai' => $mulai,
             'status' => ClinikScopusBiayaPersesi::NONAKTIF,
         ]);
+
+        /*
+         * Bertanggal: disimpan menunggu, tarif yang sekarang TIDAK diganggu.
+         * Ia naik sendiri saat tanggalnya tiba — lihat naikkanYangSudahWaktunya
+         * di modelnya.
+         */
+        if ($mulai) {
+            $baru->forceFill(['status' => ClinikScopusBiayaPersesi::TERJADWAL])->save();
+
+            return redirect()
+                ->route('account.Clinik-Scopus-Biaya-Persesi.index')
+                ->with('success', 'Tarif ' . $sebutan . ' ' . $baru->tarif_terbaca
+                    . ' dijadwalkan mulai ' . $baru->berlaku_mulai->locale('id')->translatedFormat('d F Y')
+                    . '. Harga sekarang tidak berubah.');
+        }
 
         $baru->jadikanBerlaku();
 
@@ -324,6 +373,21 @@ class ClinikScopusBiayaPersesiController extends Controller
                 'success' => false,
                 'message' => 'Hanya administrator yang boleh mengubah tarif.',
             ], 403);
+        }
+
+        /*
+         * Nominalnya diperiksa di sini juga, bukan hanya di borang penyetelan.
+         * Baris riwayat berharga nol memang ada (Online Training disetel nol
+         * saat datanya diisi awal), dan tanpa pemeriksaan ini satu klik
+         * menjadikannya tarif yang berlaku — padahal borangnya menolak nol
+         * mentah-mentah. Dua pintu ke satu tempat harus punya aturan sama.
+         */
+        if ((int) $tarif->biaya_persesi < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tarif ini bernilai nol, jadi tidak bisa diberlakukan. '
+                    . 'Setel harga barunya lewat tombol di kartu layanan.',
+            ], 409);
         }
 
         $tarif->jadikanBerlaku();
