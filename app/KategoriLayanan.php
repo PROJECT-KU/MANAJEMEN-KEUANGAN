@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  * harus diubah setiap kali aturannya berubah.
  *
  * Kolom `layanan` memakai kunci yang SAMA dengan katalog di
- * ClinikScopusBiayaPersesi::LAYANAN, supaya satu angkatan bisa langsung
+ * katalog Layanan, supaya satu angkatan bisa langsung
  * menemukan tarif dan fasilitas induknya tanpa peta perantara.
  *
  * `lokasi` dan `best_price` hanya terpakai Scopus Camp; keduanya boleh NULL
@@ -86,7 +86,7 @@ class KategoriLayanan extends Model
 
     public function getNamaLayananAttribute(): string
     {
-        return ClinikScopusBiayaPersesi::LAYANAN[$this->layanan]['nama']
+        return Layanan::katalog()[$this->layanan]['nama']
             ?? Str::title(str_replace('_', ' ', (string) $this->layanan));
     }
 
