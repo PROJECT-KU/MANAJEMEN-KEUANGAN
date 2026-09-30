@@ -7,19 +7,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 /**
- * Tarif per sesi Clinik Scopus.
+ * Tarif seluruh layanan jasa — satu layar untuk lima layanan.
  *
- * Layar ini bukan daftar pilihan melainkan SATU pengaturan: berapa harga satu
- * sesi sekarang, dan berapa persen PPN-nya. Baris lamanya disimpan sebagai
- * riwayat karena sesi yang sudah dipesan menunjuk ke barisnya.
+ * Sebelumnya tiap layanan mengurus harganya sendiri-sendiri: Clinik Scopus
+ * punya tabel tarif, Bibliometrik dan Scopus Camp menyimpannya per angkatan,
+ * Scopus Kafe diketik ulang di tiap pendaftaran, dan Online Training tidak
+ * tercatat di mana pun. Akibatnya harga yang sama diketik berkali-kali, dan
+ * tidak ada satu tempat pun yang bisa ditanya "sekarang berapa".
  *
- * Bentuk lamanya CRUD biasa — daftar, tambah, ubah, hapus, lengkap dengan menu
- * status yang bisa disetel bebas. Bentuk itu membiarkan dua tarif berstatus
- * berlaku sekaligus, dan tidak ada yang memberi tahu tarif mana yang sebenarnya
- * dipakai saat pelanggan memesan.
+ * Layar ini jadi acuannya. Angkatan dan pendaftaran tetap menyimpan harganya
+ * sendiri — pesanan yang sudah terjadi tidak boleh berubah harga hanya karena
+ * tarifnya dinaikkan — tetapi mereka mengisi diri dari sini, jadi admin tidak
+ * mengetik ulang angka maupun daftar fasilitasnya.
  */
 class ClinikScopusBiayaPersesiController extends Controller
 {
@@ -30,7 +32,6 @@ class ClinikScopusBiayaPersesiController extends Controller
         $this->middleware('auth');
     }
 
-    /** Hanya orang dalam yang boleh melihat tarif. */
     private function bolehMelihat(): bool
     {
         return (bool) Auth::user()?->adalahOrangDalam();
@@ -42,51 +43,68 @@ class ClinikScopusBiayaPersesiController extends Controller
         return (bool) Auth::user()?->adalahAdministrator();
     }
 
-    private function tolak(string $pesan)
-    {
-        return redirect()->route('account.dashboard.index')->with('error', $pesan);
-    }
-
     public function index(Request $request)
     {
         if (! $this->bolehMelihat()) {
-            return $this->tolak('Anda tidak punya akses ke tarif Clinik Scopus.');
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke tarif layanan.');
         }
 
-        $berlaku = ClinikScopusBiayaPersesi::berlaku();
-
         /*
-         * Riwayat TIDAK memuat tarif yang sedang berlaku: ia sudah tampil utuh
-         * di kartu paling atas, dan mengulangnya di daftar membuat orang
-         * mengira ada dua tarif.
+         * Kartu disusun dari KATALOG, bukan dari isi tabel.
+         *
+         * Dengan begitu layanan yang tarifnya belum pernah disetel tetap
+         * muncul — lengkap dengan tanda bahwa ia belum punya harga. Disusun
+         * dari isi tabel, layanan seperti itu hilang sama sekali dari layar,
+         * dan tidak ada yang tahu ia terlewat.
          */
+        $kartu = [];
+
+        foreach (ClinikScopusBiayaPersesi::LAYANAN as $kunci => $tentang) {
+            $varian = $tentang['varian'] ?: [null => null];
+
+            foreach ($varian as $kodeVarian => $namaVarian) {
+                $kartu[] = [
+                    'layanan' => $kunci,
+                    'varian' => $kodeVarian ?: null,
+                    'nama' => $tentang['nama'],
+                    'namaVarian' => $namaVarian,
+                    'satuan' => $tentang['satuan'],
+                    'ikon' => $tentang['ikon'],
+                    'warna' => $tentang['warna'],
+                    'tarif' => ClinikScopusBiayaPersesi::berlaku($kunci, $kodeVarian ?: null),
+                ];
+            }
+        }
+
         $riwayat = ClinikScopusBiayaPersesi::query()
-            ->when($berlaku, fn ($q) => $q->where('id', '!=', $berlaku->getKey()))
+            ->where('status', ClinikScopusBiayaPersesi::NONAKTIF)
             ->withCount('clinikScopus')
             ->orderByDesc('updated_at')
             ->paginate(self::PER_HALAMAN);
 
+        $adaTarif = collect($kartu)->filter(fn ($k) => $k['tarif'] !== null)->count();
+
         return view('account.clinik_scopus_biaya_persesi.index', [
-            'berlaku' => $berlaku,
+            'kartu' => $kartu,
             'riwayat' => $riwayat,
             'bolehUbah' => $this->bolehMengubah(),
-            'jumlahTarif' => ClinikScopusBiayaPersesi::count(),
-            'sesiMemakai' => $berlaku ? $berlaku->dipakai_sesi : 0,
+            'adaTarif' => $adaTarif,
+            'totalKartu' => count($kartu),
         ]);
     }
 
     /**
-     * Menyetel tarif yang berlaku.
+     * Menyetel tarif satu layanan.
      *
-     * Satu pintu untuk dua keadaan yang dulu jadi dua halaman terpisah:
+     * Satu pintu untuk dua keadaan:
      *
-     * - tanpa id  -> tarif BARU, dan langsung diberlakukan
-     * - dengan id -> memperbaiki tarif yang sedang berlaku
+     *   tanpa perbaiki  -> tarif BARU untuk pasangan itu, langsung berlaku
+     *   dengan perbaiki -> membetulkan tarif yang sedang berlaku
      *
      * Dibedakan dari niatnya, bukan dari tombol yang ditekan: menaikkan harga
-     * itu peristiwa yang layak dicatat sebagai baris baru, sementara
-     * membetulkan salah ketik tidak boleh meninggalkan jejak seolah harganya
-     * pernah berubah.
+     * layak dicatat sebagai baris baru, sementara membetulkan salah ketik
+     * tidak boleh meninggalkan jejak seolah harganya pernah berubah.
      */
     public function simpan(Request $request)
     {
@@ -95,41 +113,67 @@ class ClinikScopusBiayaPersesiController extends Controller
         }
 
         $data = $request->validate([
+            'layanan' => ['required', Rule::in(array_keys(ClinikScopusBiayaPersesi::LAYANAN))],
+            'varian' => ['nullable', 'string', 'max:40'],
             'biaya_persesi' => ['required', 'string'],
             'ppn' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'fasilitas' => ['nullable', 'string', 'max:2000'],
             'perbaiki' => ['nullable', 'uuid'],
         ], [
-            'biaya_persesi.required' => 'Isi dulu tarif per sesinya.',
+            'layanan.required' => 'Layanannya tidak dikenali.',
+            'biaya_persesi.required' => 'Isi dulu tarifnya.',
             'ppn.max' => 'PPN tidak masuk akal kalau lebih dari 100 persen.',
         ]);
 
-        // Isian tarif diketik berformat "Rp 125.000" oleh pemolesnya di layar.
+        $tentang = ClinikScopusBiayaPersesi::LAYANAN[$data['layanan']];
+        $varian = ($data['varian'] ?? null) ?: null;
+
+        // Varian yang tidak dikenal layanannya ditolak: kiriman datang dari
+        // peramban, dan varian karangan akan membuat tarif yang tidak pernah
+        // terbaca oleh siapa pun.
+        if ($varian !== null && ! array_key_exists($varian, $tentang['varian'])) {
+            return back()->withInput()->withErrors(['varian' => 'Varian itu tidak ada pada layanan tersebut.']);
+        }
+
+        if ($varian === null && $tentang['varian'] !== []) {
+            return back()->withInput()->withErrors(['varian' => 'Layanan ini harus punya varian.']);
+        }
+
+        // Isian tarif diketik berformat "Rp 4.500.000" oleh pemolesnya di layar.
         $tarif = (int) preg_replace('/\D+/', '', $data['biaya_persesi']);
 
         if ($tarif < 1) {
-            return back()
-                ->withInput()
-                ->withErrors(['biaya_persesi' => 'Tarifnya harus lebih dari nol.']);
+            return back()->withInput()->withErrors(['biaya_persesi' => 'Tarifnya harus lebih dari nol.']);
         }
 
         $ppn = $request->filled('ppn') ? (int) $data['ppn'] : null;
+        $fasilitas = $this->uraikanFasilitas($data['fasilitas'] ?? null);
+
+        $sebutan = $tentang['nama'] . ($varian ? ' (' . $tentang['varian'][$varian] . ')' : '');
 
         if (! empty($data['perbaiki'])) {
             $lama = ClinikScopusBiayaPersesi::find($data['perbaiki']);
 
-            if ($lama) {
-                $lama->update(['biaya_persesi' => $tarif, 'ppn' => $ppn]);
+            if ($lama && $lama->layanan === $data['layanan'] && $lama->varian === $varian) {
+                $lama->update([
+                    'biaya_persesi' => $tarif,
+                    'ppn' => $ppn,
+                    'fasilitas' => $fasilitas,
+                ]);
                 $lama->jadikanBerlaku();
 
                 return redirect()
                     ->route('account.Clinik-Scopus-Biaya-Persesi.index')
-                    ->with('success', 'Tarif diperbarui jadi ' . $lama->tarif_terbaca . ' per sesi.');
+                    ->with('success', 'Tarif ' . $sebutan . ' diperbarui jadi ' . $lama->tarif_terbaca . '.');
             }
         }
 
         $baru = ClinikScopusBiayaPersesi::create([
+            'layanan' => $data['layanan'],
+            'varian' => $varian,
             'biaya_persesi' => $tarif,
             'ppn' => $ppn,
+            'fasilitas' => $fasilitas,
             'status' => ClinikScopusBiayaPersesi::NONAKTIF,
         ]);
 
@@ -137,7 +181,30 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         return redirect()
             ->route('account.Clinik-Scopus-Biaya-Persesi.index')
-            ->with('success', 'Tarif baru ' . $baru->tarif_terbaca . ' per sesi mulai berlaku.');
+            ->with('success', 'Tarif ' . $sebutan . ' ' . $baru->tarif_terbaca . ' mulai berlaku.');
+    }
+
+    /**
+     * Fasilitas diketik satu per baris, disimpan sebagai larik.
+     *
+     * Satu baris satu fasilitas — bukan dipisah koma — karena fasilitasnya
+     * sendiri kerap memuat koma ("Konsumsi pagi, siang, dan sore").
+     *
+     * @return array<int, string>|null
+     */
+    private function uraikanFasilitas(?string $teks): ?array
+    {
+        $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
+
+        $bersih = array_values(array_filter(
+            // Penanda /u wajib: tanpa itu kelas karakternya dicocokkan per
+            // BITA, jadi "•" terpotong separuh dan sisanya UTF-8 rusak yang
+            // gagal disandikan ke JSON saat disimpan.
+            array_map(fn ($b) => trim(preg_replace('/^[-\x{2022}\x{00B7}*\x{2013}]\s*/u', '', $b)), $baris),
+            fn ($b) => $b !== ''
+        ));
+
+        return $bersih === [] ? null : $bersih;
     }
 
     /** Memberlakukan lagi tarif lama, tanpa mengetik ulang angkanya. */
@@ -152,9 +219,11 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         $tarif->jadikanBerlaku();
 
+        $sebutan = $tarif->nama_layanan . ($tarif->nama_varian ? ' (' . $tarif->nama_varian . ')' : '');
+
         return response()->json([
             'success' => true,
-            'message' => 'Tarif ' . $tarif->tarif_terbaca . ' per sesi kembali berlaku.',
+            'message' => 'Tarif ' . $sebutan . ' ' . $tarif->tarif_terbaca . ' kembali berlaku.',
         ]);
     }
 
@@ -162,9 +231,9 @@ class ClinikScopusBiayaPersesiController extends Controller
      * Menghapus satu baris riwayat tarif.
      *
      * Diperiksa lebih dulu, bukan dicoba lalu ditangkap: clinikscopus.
-     * biaya_persesi_id berkunci asing ON DELETE NO ACTION, jadi menghapus tarif
-     * yang masih dipakai sesi mana pun ditolak MySQL dengan galat 1451 — dan
-     * galat itu, kalau sampai ke layar, hanya menyebut nama constraint-nya.
+     * biaya_persesi_id berkunci asing ON DELETE NO ACTION, jadi menghapus
+     * tarif yang masih dipakai sesi mana pun ditolak MySQL dengan galat 1451
+     * yang hanya menyebut nama constraint-nya.
      */
     public function destroy(ClinikScopusBiayaPersesi $tarif)
     {
