@@ -580,3 +580,40 @@ Ketahuan hanya karena pengukuran di peramban menghitung kartunya.
 Pakai suntingan yang menyebut teks lama dan teks barunya secara utuh. Kalau
 sudah terlanjur, `git checkout --` berkas itu dan ulangi — jauh lebih murah
 daripada menambal hasil gandanya.
+
+## Perbaiki sejenisnya sekaligus, jangan satu per satu
+
+Empat ronde audit berturut-turut di layar Tarif layanan, dan temuan terbesar
+tiap ronde selalu pekerjaan ronde sebelumnya: jadwal yang tak bisa dibatalkan,
+cetak yang tak lengkap, PDF tanpa nomor halaman, keadaan kosong yang setengah
+dibungkus. Penyebabnya sama tiap kali — satu hal diperbaiki, tetangganya yang
+sejenis tidak ditengok.
+
+Sebelum menyentuh satu, **daftar dulu semuanya**: semua keadaan kosong, semua
+keluaran PDF, semua status, semua dialog di layar itu. Inventarisnya sendiri
+yang menemukan cacat: mendaftar keadaan kosong menyingkap riwayat tersaring
+yang berbunyi "Belum ada tarif lama" padahal riwayatnya ada.
+
+## Pencarian menjangkau isi, bukan cuma judul
+
+Orang mencari lewat apa yang mereka ingat. Di Tarif layanan, `data-cari`
+sempat berisi nama + varian saja, jadi mengetik "penginapan" tidak menemukan
+apa pun padahal itu fasilitas Scopus Camp Pulau Jawa. Sertakan isi yang
+membedakan barisnya — fasilitas, satuan, kegiatan.
+
+## `<dialog>` tetap perlu `aria-labelledby`
+
+`showModal()` memberi semantik modal, tetapi tanpa nama pembaca layar
+mengumumkan "dialog" saja. Tunjuk judulnya dengan `aria-labelledby`, isinya
+dengan `aria-describedby`, dan tulis `aria-modal="true"` eksplisit.
+
+## Penjaga berbasis sumber: periksa yang persis dimaksud
+
+Dua penjaga di repo ini sempat salah menandai kode yang benar: satu memeriksa
+`DB::table` per baris sehingga kueri berbilang baris tertuduh, satu memindai
+semua `.mis-kosong` dengan jendela 220 aksara sehingga keadaan kosong yang
+sudah di dalam kartu tertuduh. Jendela sepanjang apa pun cuma memindah batas
+salahnya.
+
+Periksa keadaan yang PERSIS dimaksud — kelas penanda yang spesifik, atau
+seluruh pernyataan sampai titik komanya — bukan kemiripan tekstual.
