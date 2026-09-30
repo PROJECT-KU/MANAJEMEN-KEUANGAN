@@ -440,6 +440,7 @@ Route::prefix('account')
              */
             Route::get('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@index')->name('account.Clinik-Scopus-Biaya-Persesi.index');
             Route::post('/Clinik-Scopus-Biaya-Persesi/data', 'account\ClinikScopusBiayaPersesiController@simpan')->name('account.Clinik-Scopus-Biaya-Persesi.simpan');
+            Route::get('/Clinik-Scopus-Biaya-Persesi/cetak', 'account\ClinikScopusBiayaPersesiController@cetakPdf')->name('account.Clinik-Scopus-Biaya-Persesi.cetak');
             Route::post('/Clinik-Scopus-Biaya-Persesi/data/{tarif}/berlakukan', 'account\ClinikScopusBiayaPersesiController@berlakukan')->name('account.Clinik-Scopus-Biaya-Persesi.berlakukan');
             Route::delete('/Clinik-Scopus-Biaya-Persesi/data/{tarif}', 'account\ClinikScopusBiayaPersesiController@destroy')->name('account.Clinik-Scopus-Biaya-Persesi.destroy');
 

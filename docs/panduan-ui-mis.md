@@ -443,6 +443,25 @@ Render **seluruh** butirnya, sembunyikan kelebihannya dengan kelas
 (`.tar-lebih { display: none }`), lalu tampilkan lagi di `@media print`
 sekaligus sembunyikan penanda "+N lainnya" yang jadi tidak perlu.
 
+## Berkas yang keluar dari MIS memakai satu cetakan
+
+Daftar harga sempat memakai `window.print()` dengan `@media print`, sementara
+Data Pelanggan memakai Dompdf dengan logo, kepala berulang, dan kaki — dua
+hasil yang tidak serupa dari satu sistem.
+
+Acuannya `resources/views/account/customer/ekspor-pdf.blade.php`: logo sebagai
+**data URI** (Dompdf tidak mengambil berkas luar kecuali `isRemoteEnabled`),
+kepala dan kaki `position: fixed` supaya terulang tiap halaman, garis indigo
+2px di bawah kepala, strip "keterangan berkas", dan tabel berkepala indigo.
+
+Dompdf hanya mengenal sebagian kecil CSS: tidak ada flexbox, grid, maupun
+custom property. Tata letaknya tabel dan lebar persen, satuan **pt** bukan px
+(dompdf memampatkan px dengan 0,75). Kirim lewat `response()`, bukan
+`$dompdf->stream()` — stream memanggil `header()` dan `echo` sendiri sehingga
+kepalanya lewat dari lapisan respons Laravel.
+
+Jangan sisakan jalur cetak kedua. Dua pintu ke satu keluaran pasti berselisih.
+
 ## Gaya cetak diperiksa dengan melihat hasilnya
 
 `@media print` tidak pernah terlihat saat mengembangkan, jadi ia lolos dari
