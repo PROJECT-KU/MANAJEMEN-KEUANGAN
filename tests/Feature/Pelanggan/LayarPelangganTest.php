@@ -282,6 +282,16 @@ class LayarPelangganTest extends TestCase
             'kode negara' => ['6281234567890'],
             'kode negara bertanda tambah' => ['+6281234567890'],
             'sebagian tengah' => ['34567890'],
+
+            /*
+             * Bentuk yang ditulis WhatsApp: kode negara, spasi, lalu kelompok
+             * bertanda hubung. Tanda tambahnya sengaja diuji apa adanya —
+             * pada alamat URL "+" berarti SPASI, jadi kata kunci ini sampai
+             * ke peladen sebagai " 62 812 3456 7890" dan tetap harus ketemu.
+             */
+            'gaya WhatsApp' => ['+62 812-3456-7890'],
+            'berspasi seluruhnya' => ['+62 812 3456 7890'],
+            'kode negara berspasi tanpa tambah' => ['62 812-3456-7890'],
         ];
     }
 
