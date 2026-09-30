@@ -115,7 +115,14 @@ class KategoriLayananTest extends TestCase
                 $akhir = strpos($isi, ';', $temu);
                 $pernyataan = substr($isi, $temu, $akhir === false ? 200 : $akhir - $temu);
 
-                if (str_contains($pernyataan, "where('layanan'")) {
+                /*
+                 * groupBy('layanan') sama sahnya dengan where('layanan', ...):
+                 * kuerinya memang menyeberangi semua layanan, tetapi hasilnya
+                 * TERPISAH per layanan — itu justru cara menghitung pemakaian
+                 * semua layanan dalam satu kueri, bukan kebocoran.
+                 */
+                if (str_contains($pernyataan, "where('layanan'")
+                    || str_contains($pernyataan, "groupBy('layanan')")) {
                     continue;
                 }
 

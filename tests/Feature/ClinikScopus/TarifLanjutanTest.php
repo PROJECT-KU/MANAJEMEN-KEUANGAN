@@ -27,6 +27,10 @@ class TarifLanjutanTest extends TestCase
     {
         parent::setUp();
         Layanan::lupakanKatalog();
+        // Penanda "jadwal sudah diperiksa" berumur satu permintaan di produksi,
+        // tetapi satu PROSES di uji — tanpa dibuang, uji berikutnya tidak
+        // pernah menaikkan tarif terjadwalnya.
+        \App\ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
     }
 
     private function akun(string $peran): User

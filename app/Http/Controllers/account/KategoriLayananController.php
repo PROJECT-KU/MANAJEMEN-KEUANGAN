@@ -140,12 +140,13 @@ class KategoriLayananController extends Controller
     private function tarifPerLayanan(): array
     {
         $hasil = [];
+        $berlaku = ClinikScopusBiayaPersesi::semuaYangBerlaku();
 
         foreach (Layanan::katalog() as $kunci => $tentang) {
             $varian = $tentang['varian'] ?: [null => null];
 
             foreach ($varian as $kodeVarian => $namaVarian) {
-                $tarif = ClinikScopusBiayaPersesi::berlaku($kunci, $kodeVarian ?: null);
+                $tarif = $berlaku[$kunci . '|' . ($kodeVarian ?: '')] ?? null;
 
                 $hasil[$kunci . '|' . ($kodeVarian ?: '')] = [
                     'biaya' => $tarif ? (int) $tarif->biaya_persesi : null,

@@ -63,6 +63,9 @@ class ClinikScopusBiayaPersesi extends Model
     /** Sudah disetel, menunggu tanggalnya. Naik sendiri saat harinya tiba. */
     public const TERJADWAL = 'terjadwal';
 
+    /** Penanda bahwa jadwal sudah diperiksa sekali dalam permintaan ini. */
+    private static bool $sudahDiperiksa = false;
+
     /**
      * Katalog layanan — sekarang datanya, bukan konstanta.
      *
@@ -129,7 +132,7 @@ class ClinikScopusBiayaPersesi extends Model
      */
     public static function berlaku(string $layanan = 'clinik_scopus', ?string $varian = null): ?self
     {
-        self::naikkanYangSudahWaktunya($layanan, $varian);
+        self::naikkanYangSudahWaktunya();
 
         return static::query()
             ->untuk($layanan, $varian)
@@ -150,10 +153,23 @@ class ClinikScopusBiayaPersesi extends Model
      * Dibungkus transaksi dan diperiksa ulang di dalamnya supaya dua
      * permintaan yang datang bersamaan tidak menaikkan dua kali.
      */
-    private static function naikkanYangSudahWaktunya(string $layanan, ?string $varian): void
+    private static function naikkanYangSudahWaktunya(): void
     {
+        /*
+         * Diperiksa SEKALI per permintaan, untuk semua layanan sekaligus.
+         *
+         * Semula pemeriksaannya per pasangan layanan+varian, jadi satu halaman
+         * dengan tujuh kartu menjalankan tujuh kueri `exists` yang hampir
+         * selalu menjawab "tidak ada" — dan jumlahnya tumbuh seiring layanan
+         * bertambah, tepat karena katalognya dibuat supaya tumbuh.
+         */
+        if (self::$sudahDiperiksa) {
+            return;
+        }
+
+        self::$sudahDiperiksa = true;
+
         $adaJatuhTempo = static::query()
-            ->untuk($layanan, $varian)
             ->where('status', self::TERJADWAL)
             ->whereDate('berlaku_mulai', '<=', now())
             ->exists();
@@ -162,9 +178,8 @@ class ClinikScopusBiayaPersesi extends Model
             return;
         }
 
-        DB::transaction(function () use ($layanan, $varian) {
+        DB::transaction(function () {
             $jatuhTempo = static::query()
-                ->untuk($layanan, $varian)
                 ->where('status', self::TERJADWAL)
                 ->whereDate('berlaku_mulai', '<=', now())
                 ->orderBy('berlaku_mulai')
@@ -172,11 +187,41 @@ class ClinikScopusBiayaPersesi extends Model
                 ->get();
 
             // Kalau ada beberapa yang terlewat sekaligus, yang paling akhir
-            // tanggalnya yang menang; sisanya turun jadi riwayat.
+            // tanggalnya yang menang; sisanya turun jadi riwayat. jadikanBerlaku
+            // sendiri membatasi diri pada pasangan layanan+varian barisnya.
             foreach ($jatuhTempo as $t) {
                 $t->jadikanBerlaku();
             }
         });
+    }
+
+    /** Dibuang uji yang perlu memeriksa ulang dalam satu permintaan. */
+    public static function lupakanPemeriksaanJadwal(): void
+    {
+        self::$sudahDiperiksa = false;
+    }
+
+    /**
+     * Semua tarif yang berlaku, dalam SATU kueri.
+     *
+     * berlaku() dipanggil sekali per kartu, dan layar tarif maupun borang
+     * angkatan menyusun satu kartu per pasangan layanan+varian — jadi tujuh
+     * kueri yang bentuknya sama persis, tumbuh seiring katalognya bertambah.
+     *
+     * Kuncinya "layanan|varian", dengan varian kosong untuk yang tidak
+     * bervarian. Yang paling belakangan disetel menang, sama seperti berlaku().
+     *
+     * @return \Illuminate\Support\Collection<string, self>
+     */
+    public static function semuaYangBerlaku()
+    {
+        self::naikkanYangSudahWaktunya();
+
+        return static::query()
+            ->aktif()
+            ->orderBy('updated_at')
+            ->get()
+            ->keyBy(fn (self $t) => $t->layanan . '|' . ($t->varian ?: ''));
     }
 
     // ------------------------------------------------------------- perubahan

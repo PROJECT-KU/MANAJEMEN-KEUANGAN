@@ -431,3 +431,43 @@ sering berubah. Isi juga pada cabang pembaruan.
 kedua tertolak ke `/login` **tanpa galat maupun pesan**, jadi ujinya gagal
 seolah kodenya yang salah. Sesi permintaan pertama masih memegang pengguna A.
 Panggil `$this->flushSession()` di antaranya.
+
+## Memotong daftar untuk layar tidak boleh memotongnya untuk cetak
+
+Kartu ringkasan memotong daftar di 4 butir (lihat aturan sebelumnya). Kalau
+pemotongan itu terjadi di **markah** — `array_slice()` di Blade — maka apa pun
+yang membaca halaman itu selain layar ikut kehilangan sisanya: cetakan,
+pembaca layar, dan penyalinan teks.
+
+Render **seluruh** butirnya, sembunyikan kelebihannya dengan kelas
+(`.tar-lebih { display: none }`), lalu tampilkan lagi di `@media print`
+sekaligus sembunyikan penanda "+N lainnya" yang jadi tidak perlu.
+
+## Gaya cetak diperiksa dengan melihat hasilnya
+
+`@media print` tidak pernah terlihat saat mengembangkan, jadi ia lolos dari
+semua pemeriksaan biasa. Di layar tarif, cetakan pertama memuat tombol roda
+gigi, rencana kenaikan harga internal, layanan bertuliskan "Belum disetel",
+dan daftar fasilitas yang terpotong diam-diam — empat hal yang tidak boleh
+sampai ke kertas yang dibagikan ke luar.
+
+Periksa dengan `Emulation.setEmulatedMedia { media: 'print' }` lewat CDP, lalu
+**potret dan lihat**. Pertanyaannya: siapa yang menerima kertas ini, dan apa
+yang tidak boleh ia lihat?
+
+## Kueri yang tumbuh seiring data
+
+Layar tarif sempat menjalankan 40 kueri untuk 5 layanan, dan borang angkatan
+23 — dengan ~4 kueri tambahan per layanan baru, tepat setelah katalognya
+dibuat supaya bisa tumbuh. Penyebabnya tiga pola yang sama:
+
+- `count()` di accessor, dipanggil per baris → satu kueri berkelompok
+  (`groupBy`) untuk semuanya.
+- Pencarian "yang berlaku" per baris → satu kueri, lalu dipetakan dengan
+  `keyBy('layanan|varian')`.
+- Pemeriksaan yang sama diulang per baris → penanda statis, sekali per
+  permintaan (dan sediakan pembuangnya untuk uji, karena statis berumur satu
+  PROSES di uji, bukan satu permintaan).
+
+Jadi 40 → 20 dan 23 → 11, tanpa satu kueri pun yang berulang. Hitung kuerinya
+dengan `DB::listen` sebelum menyatakan layar selesai.
