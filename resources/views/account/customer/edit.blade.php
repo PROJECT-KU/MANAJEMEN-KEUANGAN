@@ -128,6 +128,11 @@
         font-size: .78rem;
     }
 
+    /* Tombol hubungi di kartu email: selebar isinya, tidak ikut melar. */
+    .pel-hubungi {
+        flex: 0 0 auto;
+    }
+
     /* ---------------------------------------------- daftar berbaris */
 
     .pel-pesanan {
@@ -301,6 +306,7 @@
     /* Baris email: nilai di kiri, tombol verifikasi di kanan. */
     .pel-email {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 10px;
         padding: 11px 13px;
@@ -518,6 +524,7 @@
                      Tombol simpannya disembunyikan sampai ada berkas dipilih —
                      tombol mati yang selalu terlihat hanya memakan ruang dan
                      tidak menerangkan apa pun. --}}
+                @if ($bolehUbah)
                 <form class="pel-unggah mis-unggah-bungkus" method="POST" enctype="multipart/form-data"
                     action="{{ route('account.pengguna.update.updatePhoto', $user) }}"
                     data-sibuk data-sibuk-teks="Mengunggah…">
@@ -534,6 +541,7 @@
                         <i class="fas fa-cloud-upload-alt"></i> Simpan foto
                     </button>
                 </form>
+                @endif
             </aside>
 
             {{-- =========================================== kolom kanan --}}
@@ -619,7 +627,7 @@
                         <div class="mis-kisi-isian">
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-nama">Nama lengkap</label>
-                                <input type="text" class="form-control-modern @error('full_name') is-invalid @enderror"
+                                <input type="text" @disabled(! $bolehUbah) class="form-control-modern @error('full_name') is-invalid @enderror"
                                     id="pel-nama" name="full_name"
                                     value="{{ old('full_name', $user->full_name) }}" maxlength="255">
                                 @error('full_name')
@@ -629,7 +637,7 @@
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-username">Username</label>
-                                <input type="text" class="form-control-modern @error('username') is-invalid @enderror"
+                                <input type="text" @disabled(! $bolehUbah) class="form-control-modern @error('username') is-invalid @enderror"
                                     id="pel-username" name="username"
                                     value="{{ old('username', $user->username) }}" maxlength="150">
                                 @error('username')
@@ -641,7 +649,7 @@
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-status">Status akun</label>
-                                <select class="form-control-modern" id="pel-status" name="status">
+                                <select @disabled(! $bolehUbah) class="form-control-modern" id="pel-status" name="status">
                                     <option value="active" @selected($user->status === 'active')>Aktif</option>
                                     <option value="non active" @selected($user->status !== 'active')>Nonaktif</option>
                                 </select>
@@ -650,7 +658,7 @@
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-jenis">Jenis akun</label>
-                                <select class="form-control-modern" id="pel-jenis" name="jenis">
+                                <select @disabled(! $bolehUbah) class="form-control-modern" id="pel-jenis" name="jenis">
                                     <option value="perorangan" @selected($user->jenis === 'perorangan')>Perorangan</option>
                                     <option value="perusahaan" @selected($user->jenis === 'perusahaan')>Perusahaan</option>
                                 </select>
@@ -673,10 +681,17 @@
                                     <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-user-shield"></i></span>
                                     <div>
                                         <p class="mis-statis-label">Ditetapkan pengelola</p>
-                                        <p class="mis-statis-nilai">{{ \Illuminate\Support\Str::title($user->peran) }}</p>
+                                        <p class="mis-statis-nilai">{{ $user->peranTerbaca() }}</p>
                                     </div>
                                 </div>
-                                <p class="mis-bantuan">Diubah lewat halaman pengelolaan pengguna.</p>
+                                {{-- Petunjuknya dulu berbunyi "Diubah lewat halaman
+                                     pengelolaan pengguna" — dan itu jalan buntu:
+                                     halaman itu menyaring level IN (staff, karyawan,
+                                     trainer, manager, ceo), sedangkan pelanggan
+                                     ber-level user, jadi ia tidak pernah muncul di
+                                     sana. Menunjuk tempat yang tidak memuat orangnya
+                                     lebih buruk daripada tidak menunjuk apa-apa. --}}
+                                <p class="mis-bantuan">Peran tidak bisa diubah dari layar ini.</p>
                             </div>
 
                             {{-- Sel ketiga baris kedua. Diisi tanggal perubahan
@@ -706,13 +721,24 @@
                              pengguna, dan menaruh kendalinya di sini membuat satu
                              salah klik mengubah hak akses tanpa disengaja. --}}
                         <div class="pel-baris-aksi">
+                            {{-- Kenapa isiannya mati disebutkan di tempat tombol simpan
+                                 seharusnya berada. Sebelum ini karyawan melihat borang
+                                 yang tampak bisa diisi, mengetik, menekan Simpan, lalu
+                                 ditolak 403 — pemberitahuan sesudah orang bekerja. --}}
                             <p class="pel-aksi-catatan">
-                                <i class="fas fa-info-circle mis-ikon-ungu"></i>
-                                Perubahan tercatat di tab Jejak beserta nama Anda.
+                                @if ($bolehUbah)
+                                    <i class="fas fa-info-circle mis-ikon-ungu"></i>
+                                    Perubahan tercatat di tab Jejak beserta nama Anda.
+                                @else
+                                    <i class="fas fa-lock mis-ikon-kuning"></i>
+                                    Hanya administrator yang boleh mengubah data pelanggan.
+                                @endif
                             </p>
-                            <button type="submit" class="mis-tombol mis-tombol-ungu">
-                                <i class="fas fa-save"></i> Simpan perubahan
-                            </button>
+                            @if ($bolehUbah)
+                                <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                    <i class="fas fa-save"></i> Simpan perubahan
+                                </button>
+                            @endif
                         </div>
                     </form>
                 </section>
@@ -742,11 +768,27 @@
                             </p>
                         </div>
 
-                        @unless ($user->email_verified_at)
+                        {{-- Kartu ini judulnya "Cara menghubungi pelanggan ini",
+                             jadi ia menyediakan caranya — bukan hanya
+                             menampilkan alamatnya untuk disalin manual. --}}
+                        <a class="mis-tombol mis-tombol-halus pel-hubungi" href="mailto:{{ $user->email }}"
+                            title="Kirim email ke {{ $user->email }}">
+                            <i class="fas fa-paper-plane mis-ikon-biru"></i> Email
+                        </a>
+
+                        @php ($wa = \App\Support\PesananPelanggan::nomorWa($user->telp))
+                        @if ($wa)
+                            <a class="mis-tombol mis-tombol-halus pel-hubungi" target="_blank" rel="noopener"
+                                href="https://wa.me/{{ $wa }}" title="Hubungi {{ $user->telp }} lewat WhatsApp">
+                                <i class="fab fa-whatsapp mis-ikon-hijau"></i> WhatsApp
+                            </a>
+                        @endif
+
+                        @if ($bolehUbah && ! $user->email_verified_at)
                             <button type="button" class="mis-tombol mis-tombol-hijau" id="pel-tombol-verifikasi">
                                 <i class="fas fa-check-circle"></i> Tandai terverifikasi
                             </button>
-                        @endunless
+                        @endif
                     </div>
 
                     <form method="POST" action="{{ route('account.pengguna.update.datadiri', $user) }}" class="mt-3">
@@ -754,7 +796,7 @@
                         <div class="mis-kisi-isian">
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-email-baru">Alamat email</label>
-                                <input type="email" class="form-control-modern @error('email') is-invalid @enderror"
+                                <input type="email" @disabled(! $bolehUbah) class="form-control-modern @error('email') is-invalid @enderror"
                                     id="pel-email-baru" name="email"
                                     value="{{ old('email', $user->email) }}" required>
                                 @error('email')
@@ -764,7 +806,7 @@
 
                             <div class="mis-isian">
                                 <label class="mis-label" for="pel-telp">Nomor WhatsApp</label>
-                                <input type="tel" class="form-control-modern @error('telp') is-invalid @enderror"
+                                <input type="tel" @disabled(! $bolehUbah) class="form-control-modern @error('telp') is-invalid @enderror"
                                     id="pel-telp" name="telp"
                                     value="{{ old('telp', $user->telp) }}" inputmode="numeric"
                                     placeholder="08xxxxxxxxxx">
@@ -779,12 +821,19 @@
                              formulir terpisah berisi satu isian masing-masing. --}}
                         <div class="pel-baris-aksi">
                             <p class="pel-aksi-catatan">
-                                <i class="fas fa-shield-alt mis-ikon-hijau"></i>
-                                Mengganti email membuat verifikasinya kembali kosong.
+                                @if ($bolehUbah)
+                                    <i class="fas fa-shield-alt mis-ikon-hijau"></i>
+                                    Mengganti email membuat verifikasinya kembali kosong.
+                                @else
+                                    <i class="fas fa-lock mis-ikon-kuning"></i>
+                                    Hanya administrator yang boleh mengubah data pelanggan.
+                                @endif
                             </p>
-                            <button type="submit" class="mis-tombol mis-tombol-ungu">
-                                <i class="fas fa-save"></i> Simpan kontak
-                            </button>
+                            @if ($bolehUbah)
+                                <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                    <i class="fas fa-save"></i> Simpan kontak
+                                </button>
+                            @endif
                         </div>
                     </form>
                 </section>
