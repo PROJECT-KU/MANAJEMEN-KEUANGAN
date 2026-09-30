@@ -84,6 +84,22 @@ Angkatan Layanan | MIS
 
     /* ------------------------------------------------------------------ tabel */
 
+    .ang-cari-kotak { position: relative; display: block; }
+    .ang-cari-kotak .form-control-modern { width: 100%; padding-right: 40px; }
+    .ang-cari-kotak input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+    .ang-cari-bersih {
+        position: absolute; right: 5px; top: 50%;
+        transform: translateY(-50%);
+        display: grid; place-items: center;
+        width: 30px; height: 30px;
+        border-radius: 8px;
+        color: var(--mis-tinta-4);
+    }
+
+    .ang-cari-bersih:hover { background: #fef2f2; color: #e11d48; text-decoration: none; }
+    .ang-cari-bersih .fas { font-size: 12px !important; }
+
     .ang-nama { margin: 0; line-height: 1.3; font-size: .86rem; font-weight: 700; color: var(--mis-tinta); overflow-wrap: anywhere; }
     .ang-ket { margin: 1px 0 0; line-height: 1.4; font-size: .73rem; color: var(--mis-tinta-3); }
     .ang-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
@@ -156,8 +172,22 @@ Angkatan Layanan | MIS
 
                 <div class="mis-isian">
                     <label class="mis-label" for="ang-cari">Cari angkatan</label>
-                    <input type="search" class="form-control-modern" id="ang-cari" name="cari"
-                        value="{{ $cari }}" placeholder="Nama, nomor angkatan, atau lokasi">
+                    <div class="ang-cari-kotak">
+                        <input type="search" class="form-control-modern" id="ang-cari" name="cari"
+                            value="{{ $cari }}" placeholder="Nama, nomor angkatan, atau lokasi">
+                        @if ($cari !== '')
+                            {{-- Tautan, bukan tombol berskrip: pencariannya dijalankan
+                                 peladen, jadi mengosongkannya berarti membuka daftar
+                                 tanpa kata kunci — dan tautan tetap bekerja tanpa
+                                 JavaScript. --}}
+                            <a href="{{ route('account.kategori-layanan.index', array_filter([
+                                'layanan' => $layanan, 'status' => $status,
+                            ])) }}" class="ang-cari-bersih" aria-label="Kosongkan pencarian"
+                                title="Kosongkan pencarian">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="mis-isian">
