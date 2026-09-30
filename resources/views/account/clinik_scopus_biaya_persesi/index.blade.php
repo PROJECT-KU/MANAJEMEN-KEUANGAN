@@ -820,13 +820,24 @@ Tarif Layanan | MIS
                 </div>
             @endforeach
 
-            {{-- Muncul saat pencarian tidak menemukan apa pun. Kalimatnya
-                 disamakan dengan Data Pelanggan; tanpa ini yang tersisa cuma
-                 kisi kosong tanpa keterangan apa-apa. --}}
-            <div class="mis-kosong tar-kosong-semua" id="tar-kosong-cari" hidden>
-                <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
-                <p class="mis-kosong-judul">Tidak ada yang cocok</p>
-                <p class="mis-kosong-teks">Coba ganti kata kuncinya, atau hapus saringannya.</p>
+            {{-- Muncul saat pencarian tidak menemukan apa pun, menggantikan
+                 seluruh kisi. Dibungkus kartu putih dan diberi ikon bergerak,
+                 sama dengan keadaan kosong di Data Pelanggan. --}}
+            <div class="mis-bagian tar-kosong-semua" id="tar-kosong-cari" hidden>
+                <div class="mis-kosong mis-kosong-cari">
+                    <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                    <p class="mis-kosong-judul">Tidak ada yang cocok</p>
+                    <p class="mis-kosong-teks">
+                        Tidak ada layanan bernama <strong id="tar-kosong-kata"></strong>.
+                        Coba kata kunci lain, atau hapus saringannya.
+                    </p>
+                    {{-- Jalan keluarnya ada di tempat orang menyadari ada masalah,
+                         bukan di ujung lain halaman. --}}
+                    <button type="button" class="mis-tombol mis-tombol-halus mis-kosong-aksi"
+                        data-hapus-saringan>
+                        <i class="fas fa-times"></i> Hapus saringan
+                    </button>
+                </div>
             </div>
 
             @if ($totalKartu === 0)
@@ -1396,7 +1407,14 @@ Tarif Layanan | MIS
                     : 'Menampilkan ' + tampil + ' dari ' + kartu.length + ' layanan.');
 
             // Keadaan kosong menggantikan kisi, bukan menemaninya.
-            if (kosong) kosong.hidden = ! (menyaring && tampil === 0);
+            if (kosong) {
+                kosong.hidden = ! (menyaring && tampil === 0);
+
+                // Kata kuncinya ikut disebut: "tidak ada yang cocok" tanpa
+                // menyebut apa yang dicari menyisakan satu langkah menebak.
+                const kata_ditulis = document.getElementById('tar-kosong-kata');
+                if (kata_ditulis) kata_ditulis.textContent = '“' + cari.value.trim() + '”';
+            }
 
             // Tombol hapus dan Reset hanya ada saat memang ada yang disaring.
             bersih.hidden = cari.value === '';
@@ -1406,6 +1424,15 @@ Tarif Layanan | MIS
         cari.addEventListener('input', saring);
 
         bersih.addEventListener('click', function () {
+            cari.value = '';
+            saring();
+            cari.focus();
+        });
+
+        // Tombol di dalam keadaan kosong memakai pengosong yang sama.
+        document.addEventListener('click', function (e) {
+            if (! e.target.closest('[data-hapus-saringan]')) return;
+
             cari.value = '';
             saring();
             cari.focus();

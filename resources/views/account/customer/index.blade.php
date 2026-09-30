@@ -849,16 +849,32 @@ Data Pelanggan | MIS
         <div id="pel-hasil" role="status" aria-live="polite" aria-atomic="false">
         @if ($pelanggan->isEmpty())
             <div class="mis-bagian">
-                <div class="mis-kosong">
-                    <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-users"></i></span>
+                {{-- Dua keadaan yang terasa sama di layar padahal jalan keluarnya
+                     berbeda: yang satu ganti kata kunci, yang lain tunggu ada yang
+                     mendaftar. Hanya yang pertama yang dapat ikon bergerak. --}}
+                <div class="mis-kosong {{ $adaSaringan ? 'mis-kosong-cari' : '' }}">
+                    <span class="mis-kosong-ikon" aria-hidden="true">
+                        <i class="fas {{ $adaSaringan ? 'fa-search' : 'fa-users' }}"></i>
+                    </span>
                     <p class="mis-kosong-judul">
                         {{ $adaSaringan ? 'Tidak ada yang cocok' : 'Belum ada pelanggan' }}
                     </p>
                     <p class="mis-kosong-teks">
-                        {{ $adaSaringan
-                            ? 'Coba ganti kata kuncinya, atau hapus saringannya.'
-                            : 'Pelanggan muncul di sini setelah mendaftar di layanan.' }}
+                        @if ($adaSaringan)
+                            @if ($cari !== '')
+                                Tidak ada pelanggan bernama &ldquo;<strong>{{ $cari }}</strong>&rdquo;.
+                            @endif
+                            Coba kata kunci lain, atau hapus saringannya.
+                        @else
+                            Pelanggan muncul di sini setelah mendaftar di layanan.
+                        @endif
                     </p>
+                    @if ($adaSaringan)
+                        <a href="{{ route('account.customer.index') }}"
+                            class="mis-tombol mis-tombol-halus mis-kosong-aksi">
+                            <i class="fas fa-times"></i> Hapus saringan
+                        </a>
+                    @endif
                 </div>
             </div>
         @else
