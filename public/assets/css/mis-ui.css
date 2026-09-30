@@ -1347,32 +1347,62 @@ body.sidebar-show .main-footer {
 }
 
 /*
- * Di ponsel tabnya disusun dua kolom, bukan satu baris memanjang.
+ * Di ponsel tabnya jadi SATU BARIS yang bisa digeser, seperti halaman profil.
  *
- * Terukur pada layar 390px: strip tab hanya selebar 302px sementara isinya
- * menuntut 444px — 142px tersembunyi, dan dua dari empat tab ("Pesanan" dan
- * "Jejak") berada di luar layar. Stripnya memang bisa digulung ke samping,
- * tetapi tidak ada tanda apa pun bahwa masih ada isi di kanan: "Jejak" tidak
- * terlihat sama sekali, jadi tab itu praktis tidak ada bagi pengguna ponsel.
+ * Empat tab tidak muat berjajar — terukur pada 390px, isinya menuntut 444px
+ * sementara stripnya cuma 302px. Dua kolom pernah dipakai di sini dan memang
+ * memuat semuanya, tetapi ia memakan dua baris tinggi (114px) untuk sesuatu
+ * yang hanya dilihat sekilas.
  *
- * Membuang ikonnya saja sudah dicoba dan TIDAK cukup: isinya turun dari 444px
- * ke 337px, masih 35px lebih lebar daripada ruangnya, dan di 320px ruangnya
- * cuma 232px. Selama tabnya sebaris, menambah tab berikutnya akan mengulang
- * persoalan yang sama.
- *
- * Dua kolom memberi tiap tab sekitar 145px di layar 390px dan 110px di 320px —
- * cukup untuk tulisan beserta ikonnya, dan tidak ada yang tersembunyi pada
- * lebar berapa pun.
+ * Yang dulu membuat satu baris tidak bisa dipakai bukan penggesernya,
+ * melainkan tidak adanya tanda bahwa masih ada isi di kanan: "Jejak" tidak
+ * terlihat sama sekali, jadi tab itu praktis tidak ada. Karena itu di sini
+ * geserannya DISERTAI penanda — lihat .mis-tab-geser-kanan/kiri di bawah.
  */
 @media (max-width: 575.98px) {
     .mis-tab {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+
+    .mis-tab::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mis-tab > li {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
     }
 
     .mis-tab .nav-link {
-        padding: 9px 6px;
-        font-size: .76rem;
+        padding: 10px 14px;
+        font-size: .78rem;
+    }
+
+    /*
+     * Penanda "masih ada lagi": tepi yang memudar.
+     *
+     * Kelasnya dipasang skrip sesuai posisi geserannya, jadi pudarnya hilang
+     * begitu sudah mentok — tepi yang selalu pudar justru berbohong, ia
+     * menjanjikan isi yang sebenarnya sudah habis.
+     *
+     * mask-image dipilih daripada lapisan bergradien di atasnya: stripnya
+     * berlatar #f1f5f9 di dalam kartu putih, jadi lapisan berwarna apa pun
+     * akan salah warna di salah satu sisi.
+     */
+    .mis-tab-geser-kanan {
+        mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent 100%);
+    }
+
+    .mis-tab-geser-kiri {
+        mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent 100%);
+    }
+
+    .mis-tab-geser-kiri.mis-tab-geser-kanan {
+        mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
     }
 }
 
