@@ -404,6 +404,16 @@
             /* Susunannya menurun di sini; margin kanan otomatis tidak ada
                gunanya dan hanya menyisakan sifat yang membingungkan. */
             margin-right: 0;
+            /*
+             * flex disetel ulang, dan ini yang paling penting.
+             *
+             * flex: 1 1 200px dipasang untuk susunan MENDATAR, tempat 200px
+             * berarti lebar. Di susunan menurun, flex-basis berlaku pada
+             * TINGGI — terukur, catatan setinggi 200px padahal teksnya cuma
+             * satu sampai dua baris, jadi sekitar 160px ruang kosong menganga
+             * di bawah tombolnya.
+             */
+            flex: 0 0 auto;
         }
 
         .pel-baris-aksi .mis-tombol {
