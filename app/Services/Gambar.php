@@ -156,8 +156,22 @@ class Gambar
     {
         $tentang = @getimagesize($jalur);
 
+        /*
+         * getimagesize() tidak mengenal HEIC/HEIF — format bawaan foto iPhone.
+         * Yang seperti itu dibongkar dulu jadi PNG sementara oleh alat luar,
+         * baru dibaca GD seperti biasa.
+         */
         if ($tentang === false) {
-            return null;
+            $sementara = $this->heicJadiPng($jalur);
+
+            if ($sementara === null) {
+                return null;
+            }
+
+            $gambar = @imagecreatefrompng($sementara);
+            @unlink($sementara);
+
+            return $gambar === false ? null : $gambar;
         }
 
         $gambar = match ($tentang[2]) {
@@ -168,7 +182,200 @@ class Gambar
             default => false,
         };
 
-        return $gambar === false ? null : $gambar;
+        if ($gambar === false) {
+            return null;
+        }
+
+        return $this->luruskan($gambar, $jalur, $tentang[2]);
+    }
+
+    /**
+     * Memutar gambar mengikuti penanda EXIF Orientation.
+     *
+     * Foto dari ponsel hampir selalu disimpan MIRING, dengan penanda EXIF yang
+     * memberi tahu berapa derajat ia harus diputar saat ditampilkan. Peramban
+     * menghormati penanda itu, jadi fotonya terlihat benar di galeri ponsel dan
+     * di pratinjau unggahan.
+     *
+     * GD TIDAK membacanya. imagecreatefromjpeg() mengembalikan piksel apa
+     * adanya — miring — dan WebP yang ditulis dari situ TIDAK membawa penanda
+     * EXIF sama sekali. Jadi tidak ada lagi yang meluruskannya, dan hasilnya
+     * foto yang terbalik 90 derajat di layar.
+     *
+     * Diluruskan di sini, sekali, pada satu-satunya pintu masuk unggahan.
+     *
+     * @param  \GdImage  $gambar
+     * @return \GdImage
+     */
+    private function luruskan($gambar, string $jalur, int $jenis)
+    {
+        // Hanya JPEG yang membawa EXIF; PNG dan WebP tidak.
+        if ($jenis !== IMAGETYPE_JPEG || ! function_exists('exif_read_data')) {
+            return $gambar;
+        }
+
+        $exif = @exif_read_data($jalur);
+        $arah = (int) ($exif['Orientation'] ?? 0);
+
+        if ($arah < 2 || $arah > 8) {
+            return $gambar;
+        }
+
+        /*
+         * Delapan nilai yang mungkin, bukan cuma putaran. Empat di antaranya
+         * juga TERCERMIN — foto swafoto yang dibalik kamera depan. Mengurusi
+         * putarannya saja membuat sebagian foto lurus tetapi terbalik kiri-
+         * kanan, dan itu lebih sulit disadari daripada miring 90 derajat.
+         *
+         * Sudut imagerotate() berlawanan arah jarum jam.
+         */
+        $putar = match ($arah) {
+            3, 4 => 180,
+            5, 6 => -90,
+            7, 8 => 90,
+            default => 0,
+        };
+
+        $cermin = in_array($arah, [2, 4, 5, 7], true);
+
+        if ($putar !== 0) {
+            $hasil = imagerotate($gambar, $putar, imagecolorallocatealpha($gambar, 0, 0, 0, 127));
+
+            if ($hasil !== false) {
+                imagedestroy($gambar);
+                $gambar = $hasil;
+            }
+        }
+
+        if ($cermin) {
+            imageflip($gambar, IMG_FLIP_HORIZONTAL);
+        }
+
+        imagealphablending($gambar, false);
+        imagesavealpha($gambar, true);
+
+        return $gambar;
+    }
+
+    /**
+     * Membongkar HEIC/HEIF jadi PNG sementara; null kalau tidak ada yang bisa.
+     *
+     * HEIC adalah format bawaan foto iPhone, dan GD tidak bisa membacanya sama
+     * sekali. Yang bisa membongkarnya berbeda-beda per peladen, jadi dicoba
+     * berurutan — bukan dipatok satu:
+     *
+     *   1. Imagick dengan delegasi libheif, kalau ekstensinya terpasang
+     *   2. `heif-convert` dari libheif-tools, yang lazim di peladen Linux
+     *   3. `sips`, hanya ada di macOS — berguna di mesin pengembang
+     *
+     * Kalau TIDAK ADA yang bisa, mengembalikan null dan pengunggahnya diberi
+     * tahu terus terang. Itu jauh lebih baik daripada diam: foto yang hilang
+     * tanpa penjelasan membuat orang mengunggahnya berkali-kali.
+     */
+    private function heicJadiPng(string $jalur): ?string
+    {
+        if (! $this->sepertiHeic($jalur)) {
+            return null;
+        }
+
+        $keluar = sys_get_temp_dir() . '/heic-' . Str::uuid() . '.png';
+
+        // 1. Imagick — paling bersih, tanpa memanggil proses luar.
+        if (class_exists(\Imagick::class)) {
+            try {
+                $im = new \Imagick($jalur);
+                $im->setImageFormat('png');
+                $im->writeImage($keluar);
+                $im->clear();
+
+                if (is_file($keluar)) {
+                    return $keluar;
+                }
+            } catch (\Throwable $e) {
+                // Lanjut ke cara berikutnya; bukan kegagalan yang perlu
+                // dilaporkan selama masih ada jalan lain.
+            }
+        }
+
+        // 2 & 3. Alat baris perintah. Dilewati kalau exec() dimatikan hosting —
+        // itu hal biasa di hosting bersama.
+        foreach ([
+            ['heif-convert', '%s %s'],
+            ['sips', '-s format png %s --out %s'],
+        ] as [$alat, $pola]) {
+            $lokasi = $this->cariAlat($alat);
+
+            if ($lokasi === null) {
+                continue;
+            }
+
+            $perintah = $lokasi . ' ' . sprintf($pola, escapeshellarg($jalur), escapeshellarg($keluar));
+            @exec($perintah . ' 2>/dev/null', $keluaran, $kode);
+
+            if ($kode === 0 && is_file($keluar) && @getimagesize($keluar) !== false) {
+                return $keluar;
+            }
+        }
+
+        @unlink($keluar);
+
+        return null;
+    }
+
+    /** Berkasnya memang HEIC/HEIF, dilihat dari isinya — bukan dari namanya. */
+    private function sepertiHeic(string $jalur): bool
+    {
+        $kepala = @file_get_contents($jalur, false, null, 0, 32);
+
+        if ($kepala === false || strlen($kepala) < 12) {
+            return false;
+        }
+
+        /*
+         * Kotak "ftyp" pada bita ke-4, lalu merek berawalan heic/heix/mif1/msf1
+         * — bentuk berkas HEIF. Diperiksa dari ISINYA, bukan ekstensinya: nama
+         * berakhiran .jpg yang isinya HEIC itu hal biasa pada berkas yang sudah
+         * berpindah-pindah aplikasi.
+         */
+        if (substr($kepala, 4, 4) !== 'ftyp') {
+            return false;
+        }
+
+        $merek = strtolower(substr($kepala, 8, 4));
+
+        return in_array($merek, ['heic', 'heix', 'heim', 'heis', 'hevc', 'mif1', 'msf1', 'avif'], true);
+    }
+
+    /** Lokasi alat baris perintah; null kalau tidak ada atau exec dimatikan. */
+    private function cariAlat(string $nama): ?string
+    {
+        $mati = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+
+        if (! function_exists('exec') || in_array('exec', $mati, true)) {
+            return null;
+        }
+
+        @exec('command -v ' . escapeshellarg($nama) . ' 2>/dev/null', $keluaran, $kode);
+
+        $lokasi = trim((string) ($keluaran[0] ?? ''));
+
+        return $kode === 0 && $lokasi !== '' ? $lokasi : null;
+    }
+
+    /** Peladen ini bisa membaca HEIC. Dipakai layar unggah untuk berterus terang. */
+    public function bisaHeic(): bool
+    {
+        if (class_exists(\Imagick::class)) {
+            try {
+                if (in_array('HEIC', (new \Imagick())->queryFormats(), true)) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                // abaikan; coba alat baris perintah
+            }
+        }
+
+        return $this->cariAlat('heif-convert') !== null || $this->cariAlat('sips') !== null;
     }
 
     /**

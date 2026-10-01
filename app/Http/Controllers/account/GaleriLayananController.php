@@ -58,6 +58,9 @@ class GaleriLayananController extends Controller
         $foto = GaleriLayanan::layanan($layanan)->get();
 
         return view('account.galeri_layanan.index', [
+            // Layar berterus terang soal HEIC, bukan membiarkan orang mencoba
+            // lalu kehilangan fotonya tanpa penjelasan.
+            'bisaHeic' => $this->gambar->bisaHeic(),
             'layanan' => $layanan,
             'katalog' => $katalog,
             'foto' => $foto,
@@ -87,13 +90,26 @@ class GaleriLayananController extends Controller
             'layanan' => ['required', Rule::in(array_keys(Layanan::katalog()))],
             'kategori_id' => ['nullable', 'uuid'],
             'berkas' => ['required', 'array', 'min:1', 'max:20'],
-            'berkas.*' => ['image', 'mimes:jpeg,jpg,png,webp', 'max:8192'],
+            /*
+             * 'file', BUKAN 'image'. Aturan 'image' memakai getimagesize(),
+             * dan getimagesize() tidak mengenal HEIC sama sekali — foto iPhone
+             * akan ditolak sebelum sempat dikonversi.
+             *
+             * Penjagaannya dipindah, bukan dihilangkan: ekstensinya dibatasi
+             * daftar tertutup di bawah, dan isinya tetap harus terbaca sebagai
+             * gambar oleh App\Services\Gambar — kalau tidak, berkasnya
+             * dilewati dan tidak ada baris yang dibuat.
+             */
+            'berkas.*' => ['file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:30720'],
             'keterangan' => ['nullable', 'string', 'max:160'],
         ], [
             'berkas.required' => 'Pilih dulu fotonya.',
             'berkas.max' => 'Maksimal 20 foto sekali unggah.',
-            'berkas.*.image' => 'Ada berkas yang bukan gambar.',
-            'berkas.*.max' => 'Ada foto yang lebih besar dari 8 MB.',
+            'berkas.*.mimes' => 'Yang bisa diunggah: JPG, PNG, WebP, atau HEIC.',
+            // 30 MB: foto HEIC dari iPhone terbaru bisa 10-15 MB sebelum
+            // dikonversi, dan batas 8 MB menolaknya tanpa alasan yang masuk
+            // akal bagi pengunggahnya.
+            'berkas.*.max' => 'Ada foto yang lebih besar dari 30 MB.',
         ]);
 
         // Angkatan yang ditunjuk harus memang milik layanan yang sama; kalau
@@ -130,7 +146,13 @@ class GaleriLayananController extends Controller
         $pesan = $masuk . ' foto masuk galeri dan sudah diubah jadi WebP.';
 
         if ($gagal > 0) {
-            $pesan .= ' ' . $gagal . ' dilewati karena berkasnya tidak terbaca.';
+            $pesan .= ' ' . $gagal . ' dilewati karena berkasnya tidak terbaca';
+
+            // Sebabnya disebut kalau memang itu. "Tidak terbaca" saja membuat
+            // orang mengunggah ulang berkas yang sama berkali-kali.
+            $pesan .= $this->gambar->bisaHeic()
+                ? '.'
+                : ' — peladen ini belum bisa membaca HEIC, jadi ubah dulu ke JPG.';
         }
 
         return redirect()->route('account.galeri-layanan.index', ['layanan' => $data['layanan']])
