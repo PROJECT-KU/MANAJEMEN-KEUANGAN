@@ -833,8 +833,7 @@
  * gaya bawaan peramban, dan menimpanya dari CSS tidak bisa diandalkan antar
  * peramban.
  *
- * Perjanjian markahnya: <details class="mis-lipat" data-mis-lipat> — ditambah
- * data-mis-lipat-terpakai kalau ada saringan atau urutan yang sedang berlaku.
+ * Perjanjian markahnya: <details class="mis-lipat" data-mis-lipat>.
  */
 (function () {
     'use strict';
@@ -843,17 +842,18 @@
 
     document.querySelectorAll('[data-mis-lipat]').forEach(function (lipat) {
         /*
-         * Di ponsel penyaringnya terlipat — dan di dalamnya ada menu Urutkan,
-         * satu-satunya cara mengurutkan di sana. Terukur: sebelum dibuka,
-         * elementFromPoint di titik tengah menu itu tidak menunjuk apa pun.
-         * Jadi begitu ada saringan atau urutan yang bukan bawaan, penyaringnya
-         * dibuka sendiri: yang sedang berlaku harus terlihat, bukan tersembunyi
-         * di balik satu ketukan lagi.
+         * Di ponsel penyaringnya SELALU mulai tertutup, termasuk saat ada
+         * saringan yang sedang berlaku.
+         *
+         * Versi sebelumnya membukanya sendiri begitu ada saringan aktif, dengan
+         * alasan "yang sedang berlaku harus terlihat". Yang terjadi di layar
+         * sempit justru sebaliknya: empat kendali terbuka memakan satu layar
+         * penuh, dan yang dicari orang — datanya — terdorong ke bawah lipatan.
+         * Bahwa ada saringan yang berlaku sudah dikabari lencana "aktif" di
+         * ringkasannya, jadi tidak ada keterangan yang hilang.
          */
-        var terpakai = lipat.hasAttribute('data-mis-lipat-terpakai');
-
         function setel() {
-            if (lebar.matches || terpakai) lipat.setAttribute('open', '');
+            if (lebar.matches) lipat.setAttribute('open', '');
         }
 
         setel();
