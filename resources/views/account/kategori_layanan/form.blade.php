@@ -11,14 +11,22 @@
 <style>
     .brg-kisi {
         display: grid;
-        /* auto-fit + minmax, bukan col-md-*: tiga kolom di layar lebar, dua di
-           tablet, satu di ponsel tanpa titik putus yang harus dijaga. */
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        /*
+         * auto-fit + minmax, bukan col-md-*: tiga kolom di layar lebar, dua di
+         * tablet, satu di ponsel tanpa titik putus yang harus dijaga.
+         *
+         * 190px, bukan 210px. Dengan 210px, tiga kolom menuntut 654px
+         * sementara isi kartunya terukur 621px — kurang 33px, dan kisinya diam-
+         * diam jatuh ke dua kolom di layar selebar apa pun. Isian tersempit di
+         * sini kotak tanggal, yang butuh 150px.
+         */
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 12px;
         align-content: start;
     }
 
     .brg-penuh { grid-column: 1 / -1; }
+
 
     /* Penanda wajib. Merah dan kelihatan tanpa hover — hanya dipasang pada
        medan yang validatornya memang required, supaya tandanya tetap berarti. */
@@ -29,7 +37,7 @@
            (20 aksara), bukan dari induknya — terukur 180px di dalam kartu
            selebar 570px, dan teksnya terpatah-patah jadi kolom sempit. */
         width: 100%;
-        min-height: 300px; padding: 12px 14px;
+        min-height: 320px; padding: 12px 14px;
         border: 1px solid var(--mis-garis); border-radius: 11px;
         background: #fff;
         line-height: 1.55; font-size: .8rem; color: var(--mis-tinta);
@@ -38,15 +46,39 @@
 
     .brg-area:focus { outline: none; border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(99, 102, 241, .5); }
 
-    /* Kartu berdampingan pakai align-items: start, BUKAN stretch. Dengan
-       stretch, kartu yang isinya pendek ikut setinggi kartu deskripsi dan
-       sisanya jadi petak putih DI DALAM kartu. */
+    /*
+     * Dua kartu berdampingan, TIDAK lagi 50/50.
+     *
+     * Kartu kiri memuat dua belas isian, kartu kanan satu kotak teks. Dibagi
+     * rata, terukur kartu kiri 839px dan kanan 534px — 306px ruang kosong
+     * menganga di bawah kotak deskripsi (211px di borang tambah). Itulah yang
+     * membuat layarnya terlihat tidak rapi.
+     *
+     * Kiri diberi 1,35 bagian supaya kisi isiannya muat tiga kolom, bukan dua;
+     * kartunya jadi lebih pendek sekaligus lebih mudah dipindai.
+     */
     .brg-dua {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
         gap: var(--mis-jarak);
-        align-items: start;
+        /*
+         * stretch, bukan start. Dulu start, dengan alasan yang benar untuk
+         * keadaan waktu itu: kartu pendek tidak boleh ikut ditarik setinggi
+         * kartu panjang. Di sini yang pendek justru kartu deskripsi, dan
+         * kotak teksnya memang ingin setinggi mungkin — jadi ditarik penuh,
+         * lalu <textarea> mengisi sisanya.
+         */
+        align-items: stretch;
     }
+
+    /* Kartu deskripsi jadi kolom lentur supaya kotak teksnya bisa memakan
+       seluruh sisa tinggi kartunya. */
+    .brg-kartu-desk {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .brg-kartu-desk .brg-area { flex: 1 1 auto; }
 
     /* Kartu bergembok: nilai yang tidak bisa disunting. */
     .brg-harga {
@@ -201,17 +233,22 @@
                             <select class="form-control-modern" id="brg-varian" name="varian"></select>
                         </div>
 
+                        {{-- Nomor angkatan duduk di baris pertama bersama Layanan dan
+                             Varian, bukan sesudah Nama. Ketiganya sama-sama medan
+                             identitas, dan tanpa yang ketiga baris pertama cuma
+                             mengisi dua dari tiga kolom — terukur 212px menganga di
+                             kanannya. --}}
+                        <div class="mis-isian brg-isian">
+                            <label class="mis-label" for="brg-nomor">Angkatan ke-</label>
+                            <input type="text" class="form-control-modern" id="brg-nomor" name="nama_ke"
+                                value="{{ old('nama_ke', $angkatan->nama_ke) }}" placeholder="202">
+                        </div>
+
                         <div class="mis-isian brg-isian brg-penuh">
                             <label class="mis-label" for="brg-nama">Nama angkatan <span class="brg-wajib" title="Wajib diisi" aria-hidden="true">*</span></label>
                             <input type="text" class="form-control-modern" id="brg-nama" name="nama" required
                                 value="{{ old('nama', $angkatan->nama) }}"
                                 placeholder="mis. SCOPUS CAMP YOGYAKARTA">
-                        </div>
-
-                        <div class="mis-isian brg-isian">
-                            <label class="mis-label" for="brg-nomor">Angkatan ke-</label>
-                            <input type="text" class="form-control-modern" id="brg-nomor" name="nama_ke"
-                                value="{{ old('nama_ke', $angkatan->nama_ke) }}" placeholder="202">
                         </div>
 
                         <div class="mis-isian brg-isian">
@@ -264,6 +301,10 @@
                         {{-- Harga tidak diketik. Nilai yang tidak bisa disunting
                              ditampilkan sebagai kartu bergembok, bukan isian
                              disabled — itu aturan di docs/panduan-ui-mis.md. --}}
+                        {{-- Selebar penuh. Sesudah nomor angkatan naik ke baris
+                             pertama, borang ubah punya sembilan isian sempit dan
+                             terbagi pas 3+3+3 — tidak ada lagi sisa kolom yang perlu
+                             didampingi kartu ini. --}}
                         <div class="brg-harga brg-penuh">
                             <span class="mis-medali kecil mis-hijau" aria-hidden="true">
                                 <i class="fas fa-lock"></i>
@@ -313,6 +354,12 @@
                                  menampilkan "no-image". Semua 58 angkatan yang ada
                                  punya sampul, jadi angkatan tanpa gambar akan
                                  langsung terlihat ganjil di antara mereka. --}}
+                            {{-- Perangkat unggah milik MIS (.mis-berkas + .mis-unggah),
+                                 bukan <input type="file"> polos. Yang polos digambar
+                                 peramban sendiri: tombol abu "Choose file" bertulisan
+                                 Inggris, tingginya tidak sama dengan isian lain, dan
+                                 tidak bisa diberi gaya. Layar Data Pelanggan sudah
+                                 memakai perangkat ini sejak awal. --}}
                             <div class="brg-sampul">
                                 <span class="brg-sampul-pratinjau" id="brg-sampul-pratinjau">
                                     @if ($sunting && $angkatan->alamat_sampul)
@@ -322,15 +369,23 @@
                                     @endif
                                 </span>
 
-                                <div class="brg-sampul-isi">
-                                    <input type="file" class="form-control-modern" id="brg-sampul"
+                                <div class="mis-unggah-bungkus">
+                                    <input type="file" class="mis-berkas" id="brg-sampul"
                                         name="gambar" accept="image/jpeg,image/png,image/webp">
-                                    <p class="mis-bantuan">
-                                        JPG, PNG, atau WebP, maksimal 4 MB.
-                                        {{ $sunting && $angkatan->gambar
-                                            ? 'Dibiarkan kosong, sampul yang sekarang tetap dipakai.'
-                                            : 'Ukuran yang pas mengikuti flyer pengumuman.' }}
-                                    </p>
+                                    <label class="mis-unggah" for="brg-sampul">
+                                        <span class="mis-medali kecil mis-ungu" aria-hidden="true">
+                                            <i class="fas fa-image"></i>
+                                        </span>
+                                        <span class="mis-unggah-nama" id="brg-sampul-nama">
+                                            {{ $sunting && $angkatan->gambar ? 'Ganti sampul' : 'Pilih sampul' }}
+                                        </span>
+                                        <span class="mis-bantuan">
+                                            JPG, PNG, atau WebP &middot; maksimal 4 MB &middot;
+                                            {{ $sunting && $angkatan->gambar
+                                                ? 'dibiarkan kosong, yang sekarang tetap dipakai'
+                                                : 'ukurannya mengikuti flyer pengumuman' }}
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -344,14 +399,17 @@
                 </div>
 
                 {{-- ------------------------------------------- deskripsi --}}
-                <div class="mis-bagian">
+                <div class="mis-bagian brg-kartu-desk">
                     <p class="mis-kartu-judul">
                         <i class="fas fa-file-alt mis-ikon-ungu"></i> Deskripsi angkatan
                     </p>
 
                     <div class="brg-alat">
-                        <button type="button" class="mis-tombol mis-tombol-ungu" id="brg-rakit">
-                            <i class="fas fa-magic"></i> Rakit dari cetakan
+                        {{-- Halus, bukan ungu. Tindakan utama layar ini "Simpan";
+                             dua tombol ungu di satu layar membuat keduanya berebut
+                             mata, dan yang menang justru yang bukan tujuannya. --}}
+                        <button type="button" class="mis-tombol mis-tombol-halus" id="brg-rakit">
+                            <i class="fas fa-magic mis-ikon-ungu"></i> Rakit dari cetakan
                         </button>
                         <p class="brg-catatan">
                             Mengisi ulang kotak di bawah memakai cetakan layanan, dengan tanggal,
@@ -530,6 +588,12 @@
 
                 const kotak = document.getElementById('brg-sampul-pratinjau');
                 const alamat = URL.createObjectURL(berkas);
+
+                // Nama berkasnya ditulis di labelnya: perangkat unggah MIS
+                // menyembunyikan isian aslinya, jadi tanpa ini tidak ada tanda
+                // apa pun bahwa berkasnya sudah terpilih.
+                const nama = document.getElementById('brg-sampul-nama');
+                if (nama) nama.textContent = berkas.name;
 
                 kotak.innerHTML = '';
                 const gbr = document.createElement('img');
