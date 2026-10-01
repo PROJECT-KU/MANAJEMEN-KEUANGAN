@@ -2668,49 +2668,56 @@ body.mis-latar-terkunci {
     }
 
     /* Bawaannya selebar kartu, satu keterangan satu baris. */
-    .mis-tabel.mis-tabel-kartu tbody td { flex: 1 1 100%; }
+    .mis-tabel.mis-tabel-kartu tbody td { flex: 1 1 100%; order: 1; }
 
     /*
-     * Dua sel TERAKHIR berbagi satu baris.
+     * KAKI KARTU: lencana di kiri, tombol di kanan, satu baris.
      *
-     * Flexbox, bukan grid: dengan grid saya harus menyebut "Status" dan "Aksi"
-     * dengan namanya, dan itu cuma kebetulan cocok di layar Angkatan — di Data
-     * Pelanggan dua sel lain berdiri di antaranya, jadi tombolnya tetap jatuh
-     * ke baris sendiri. :nth-last-child menunjuk POSISI, bukan nama, jadi
-     * aturannya berlaku di layar mana pun tanpa tahu kolomnya apa.
+     * Dipasangkan lewat `order`, bukan lewat posisi. Percobaan sebelumnya
+     * memakai :nth-last-child(2) — itu menyamakan "sel kedua dari belakang"
+     * dengan "sel status", dan itu cuma kebetulan benar di layar Angkatan. Di
+     * Data Pelanggan sel kedua dari belakang adalah tanggal bergabung, jadi
+     * yang dirapatkan ke kiri justru sebuah tanggal: terukur tepi kanannya
+     * berhenti di 193px sementara nilai baris lain di 345px — 152px ragged,
+     * dan itu yang terlihat sebagai "status belum rapi".
      *
-     * Sel yang disembunyikan (display: none) tetap terhitung nth-child —
-     * kebetulan itu yang kita mau: yang dihitung urutan markahnya, dan sel
-     * tersembunyi memang tidak pernah jadi baris.
+     * :has(.mis-pil) menunjuk ISI, bukan posisi: sel mana pun yang berisi
+     * lencana naik ke kaki kartu bersama tombolnya, di layar mana pun.
      */
-    .mis-tabel.mis-tabel-kartu tbody td:nth-last-child(2) {
-        flex: 1 1 auto;
+    .mis-tabel.mis-tabel-kartu tbody td:has(.mis-pil) {
+        order: 2;
         /*
-         * Rapat ke kiri, BUKAN space-between.
-         *
-         * Dengan space-between, nilainya berhenti di tepi kiri tombol dan
-         * bukan di tepi kartu — jadi ia sendirian tidak selurus nilai baris
-         * di atasnya, dan tepi kanannya terlihat ragged. Dirapatkan ke kiri,
-         * bedanya terbaca sengaja: label dan nilainya satu pasang, tombolnya
-         * urusan lain.
+         * flex-basis 0, bukan auto: selnya MENGECIL mengikuti sisa ruang, jadi
+         * lencana keduanya membungkus di dalam kolomnya sendiri. Dengan auto,
+         * dua lencana memenuhi baris dan tombolnya yang terdorong turun —
+         * meninggalkan baris tombol yang menggantung sendirian di bawah.
          */
+        flex: 1 1 0;
+        min-width: 0;
         justify-content: flex-start;
         flex-wrap: wrap;
-        gap: 6px 10px;
+        gap: 6px;
         text-align: left;
     }
 
+    /*
+     * Labelnya dibuang di kaki ini. "Aktif", "Draf", "Perlu dicek" sudah
+     * menerangkan dirinya sendiri, dan tanpa label, baris ini berhenti
+     * menyamar jadi baris keterangan — jadi tidak ada lagi nilai rata kiri di
+     * antara nilai-nilai rata kanan.
+     */
+    .mis-tabel.mis-tabel-kartu tbody td:has(.mis-pil)::before { display: none; }
+
     .mis-tabel.mis-tabel-kartu tbody td:last-child {
+        order: 2;
         flex: 0 0 auto;
         justify-content: flex-end;
         /*
-         * margin-left: auto, bukan sekadar justify-content.
-         *
-         * Saat lencana statusnya dua, barisnya penuh dan tombolnya turun ke
-         * baris sendiri — di situ justify-content tidak berpengaruh apa-apa
-         * (kotaknya selebar isinya) dan tombolnya menempel ke KIRI, berseberangan
-         * dengan semua baris lain. Margin otomatis mendorongnya ke kanan di
-         * kedua keadaan.
+         * margin-left: auto, bukan sekadar justify-content: saat lencananya
+         * banyak dan barisnya penuh, tombolnya turun baris — di situ
+         * justify-content tidak berpengaruh apa-apa (kotaknya selebar isinya)
+         * dan tombolnya menempel ke KIRI. Margin otomatis mendorongnya ke kanan
+         * di kedua keadaan.
          */
         margin-left: auto;
     }
