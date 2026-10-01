@@ -24,6 +24,7 @@ class PerakitDeskripsi
         '{layanan}' => 'Nama layanan, mis. "Scopus Camp"',
         '{nomor}' => 'Nomor angkatan, mis. "202"',
         '{tanggal}' => 'Rentang tanggal, mis. "30 Oktober – 1 November 2026"',
+        '{durasi}' => 'Lama acara dihitung dari tanggalnya, mis. "3 hari 2 malam"',
         '{lokasi}' => 'Lokasi angkatan',
         '{harga}' => 'Harga normal, mis. "Rp 5.500.000"',
         '{harga_promo}' => 'Harga sesudah diskon; kosong kalau tidak ada promo',
@@ -77,6 +78,7 @@ class PerakitDeskripsi
                 $angkatan->mulai ? Carbon::parse($angkatan->mulai) : null,
                 $angkatan->selesai ? Carbon::parse($angkatan->selesai) : null
             ),
+            '{durasi}' => self::durasi($angkatan),
             '{lokasi}' => (string) $angkatan->lokasi,
             '{harga}' => $rupiah($harga),
             '{harga_promo}' => $rupiah($promo),
@@ -135,6 +137,38 @@ class PerakitDeskripsi
         }
 
         return true;
+    }
+
+    /**
+     * Lama acara, dihitung dari tanggalnya.
+     *
+     * Sebelum ini cetakan Scopus Camp menulis "Selama 3 hari 2 malam" apa
+     * adanya. Angkanya lalu ikut tercetak di angkatan yang tanggalnya 1–2
+     * Oktober — dua hari, bukan tiga — dan pembacanya tidak punya cara tahu
+     * mana yang benar.
+     */
+    private static function durasi(KategoriLayanan $angkatan): string
+    {
+        if (! $angkatan->mulai) {
+            return '';
+        }
+
+        $mulai = Carbon::parse($angkatan->mulai)->startOfDay();
+        $selesai = $angkatan->selesai ? Carbon::parse($angkatan->selesai)->startOfDay() : $mulai;
+
+        if ($selesai->lessThan($mulai)) {
+            return '';
+        }
+
+        $hari = $mulai->diffInDays($selesai) + 1;
+
+        if ($hari <= 1) {
+            return 'sehari penuh';
+        }
+
+        // "malam" dihitung dari jumlah pergantian hari, bukan dari jumlah hari:
+        // acara tiga hari menginap dua malam.
+        return $hari . ' hari ' . ($hari - 1) . ' malam';
     }
 
     /** @param array<int, string> $butir */
