@@ -595,6 +595,169 @@ class GaleriTest extends TestCase
         $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($jalur));
     }
 
+    // ------------------------------------------------------ folder berkas
+
+    #[Test]
+    public function foto_satu_layanan_masuk_folder_layanannya(): void
+    {
+        /*
+         * Dipilah per layanan supaya isinya bisa ditelusuri lewat Finder, bukan
+         * satu tumpukan berisi ratusan berkas berkode acak.
+         */
+        $this->assertSame(
+            'galeri/webinar_eksklusif',
+            Galeri::folderUntuk(['webinar_eksklusif'])
+        );
+    }
+
+    #[Test]
+    public function foto_lintas_layanan_masuk_folder_bersama(): void
+    {
+        /*
+         * Memaksanya ke salah satu layanan berarti foldernya berbohong tentang
+         * siapa yang memakainya.
+         */
+        $this->assertSame(
+            Galeri::FOLDER_BERSAMA,
+            Galeri::folderUntuk(['webinar_eksklusif', 'scopus_camp'])
+        );
+
+        $this->assertSame(
+            Galeri::FOLDER_BERSAMA,
+            Galeri::folderUntuk([], true),
+            'Foto "semua layanan" juga masuk folder bersama.'
+        );
+
+        $this->assertSame(
+            Galeri::FOLDER_BERSAMA,
+            Galeri::folderUntuk([]),
+            'Tanpa layanan sama sekali pun jangan menebak satu layanan.'
+        );
+    }
+
+    #[Test]
+    public function layanan_karangan_tidak_jadi_nama_folder(): void
+    {
+        // Nilainya datang dari borang; kode karangan tidak boleh jadi folder.
+        $this->assertSame(
+            'galeri/scopus_camp',
+            Galeri::folderUntuk(['scopus_camp', 'layanan_karangan'])
+        );
+    }
+
+    #[Test]
+    public function unggahan_mendarat_di_folder_layanannya(): void
+    {
+        $this->actingAs($this->akun())
+            ->post(route('account.galeri.store'), [
+                'layanan' => ['scopus_camp'],
+                'keterangan' => 'Uji folder layanan',
+                'berkas' => [$this->berkasPng(400, 300)],
+            ])
+            ->assertRedirect();
+
+        $g = Galeri::where('keterangan', 'Uji folder layanan')->first();
+        $this->sampah[] = $g->berkas;
+
+        $this->assertStringStartsWith('galeri/scopus_camp/', $g->berkas);
+    }
+
+    #[Test]
+    public function unggahan_lintas_layanan_mendarat_di_bersama(): void
+    {
+        $this->actingAs($this->akun())
+            ->post(route('account.galeri.store'), [
+                'layanan' => ['scopus_camp', 'webinar_eksklusif'],
+                'keterangan' => 'Uji folder bersama',
+                'berkas' => [$this->berkasPng(400, 300)],
+            ])
+            ->assertRedirect();
+
+        $g = Galeri::where('keterangan', 'Uji folder bersama')->first();
+        $this->sampah[] = $g->berkas;
+
+        $this->assertStringStartsWith(Galeri::FOLDER_BERSAMA . '/', $g->berkas);
+    }
+
+    #[Test]
+    public function berkas_tidak_pindah_sendiri_saat_layanannya_diubah(): void
+    {
+        /*
+         * Memindahkan berkas MENGUBAH ALAMATNYA, dan alamat yang sudah beredar
+         * di halaman publik serta ditembolok peramban akan mati. Jadi folder
+         * cuma tempat berkasnya tinggal — yang menentukan foto tampil di mana
+         * tetap tabel sambungan. Yang merapikan `galeri:rapikan`, dijalankan
+         * sengaja.
+         */
+        $berkas = app(Gambar::class)->simpan(
+            $this->berkasPng(400, 300),
+            Galeri::folderUntuk(['scopus_camp'])
+        );
+        $this->sampah[] = $berkas;
+
+        $g = $this->foto(['berkas' => $berkas], ['scopus_camp']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.update', $g), [
+                'layanan' => ['webinar_eksklusif', 'bibliometrik'],
+            ])
+            ->assertOk();
+
+        $segar = $g->fresh();
+
+        $this->assertSame($berkas, $segar->berkas, 'Berkasnya tidak boleh pindah sendiri.');
+        // Tetapi ia TAHU seharusnya di mana, dan galeri:rapikan yang memindahkan.
+        $this->assertSame(Galeri::FOLDER_BERSAMA, $segar->folderSeharusnya());
+    }
+
+    #[Test]
+    public function perintah_rapikan_memindahkan_ke_folder_yang_benar(): void
+    {
+        $berkas = app(Gambar::class)->simpan($this->berkasPng(400, 300), Galeri::FOLDER);
+
+        $g = $this->foto(['berkas' => $berkas], ['scopus_camp']);
+
+        $this->artisan('galeri:rapikan')->assertSuccessful();
+
+        $segar = $g->fresh();
+        $this->sampah[] = $segar->berkas;
+
+        $this->assertStringStartsWith('galeri/scopus_camp/', $segar->berkas);
+        $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($segar->berkas));
+        $this->assertFalse(Storage::disk(Gambar::CAKRAM)->exists($berkas),
+            'Berkas di tempat lamanya harus sudah tidak ada.');
+    }
+
+    #[Test]
+    public function jalan_kering_rapikan_tidak_memindahkan(): void
+    {
+        $berkas = app(Gambar::class)->simpan($this->berkasPng(400, 300), Galeri::FOLDER);
+        $this->sampah[] = $berkas;
+
+        $g = $this->foto(['berkas' => $berkas], ['scopus_camp']);
+
+        $this->artisan('galeri:rapikan', ['--kering' => true])->assertSuccessful();
+
+        $this->assertSame($berkas, $g->fresh()->berkas);
+        $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($berkas));
+    }
+
+    #[Test]
+    public function berkas_yatim_tidak_dihapus_tanpa_diminta(): void
+    {
+        /*
+         * Berkas yatim bisa saja sisa percobaan, tetapi bisa juga foto yang
+         * barisnya terhapus karena kekeliruan — dan yang kedua tidak bisa
+         * dikembalikan.
+         */
+        $yatim = app(Gambar::class)->simpan($this->berkasPng(400, 300), Galeri::FOLDER_BERSAMA);
+        $this->sampah[] = $yatim;
+
+        $this->artisan('galeri:rapikan')->assertSuccessful();
+
+        $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($yatim));
+    }
+
     // ------------------------------------------------- dipakai lintas layanan
 
     #[Test]

@@ -35,8 +35,49 @@ class Galeri extends Model
         'aktif' => 'boolean',
     ];
 
-    /** Folder tempat berkas galeri disimpan di storage. */
+    /** Akar folder galeri di storage. */
     public const FOLDER = 'galeri';
+
+    /** Folder untuk foto yang dipakai lebih dari satu layanan. */
+    public const FOLDER_BERSAMA = 'galeri/bersama';
+
+    /**
+     * Folder tempat satu foto disimpan.
+     *
+     * Dipilah per layanan supaya isinya bisa ditelusuri lewat Finder, bukan
+     * satu tumpukan berisi ratusan berkas berkode acak.
+     *
+     * Foto yang dipakai BEBERAPA layanan — atau semuanya — masuk ke
+     * `galeri/bersama`. Memaksanya ke salah satu layanan berarti foldernya
+     * berbohong tentang siapa yang memakainya.
+     *
+     * Yang menentukan foto tampil di mana tetap tabel sambungan, BUKAN folder
+     * ini. Folder cuma tempat berkasnya tinggal: kalau daftar layanannya
+     * diubah belakangan, berkasnya sengaja TIDAK dipindah — memindahkannya
+     * mengubah alamat yang mungkin sudah beredar dan sudah ditembolok.
+     * `galeri:rapikan` yang merapikannya kalau memang diminta.
+     *
+     * @param  array<int, string>  $layanan
+     */
+    public static function folderUntuk(array $layanan, bool $semua = false): string
+    {
+        $sah = array_values(array_unique(array_filter(
+            $layanan,
+            fn ($k) => array_key_exists($k, Layanan::katalog())
+        )));
+
+        if ($semua || count($sah) !== 1) {
+            return self::FOLDER_BERSAMA;
+        }
+
+        return self::FOLDER . '/' . $sah[0];
+    }
+
+    /** Folder tempat foto ini SEHARUSNYA tinggal menurut layanannya sekarang. */
+    public function folderSeharusnya(): string
+    {
+        return self::folderUntuk($this->daftar_layanan, (bool) $this->semua_layanan);
+    }
 
     protected static function boot()
     {
