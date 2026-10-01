@@ -148,8 +148,12 @@ class GaleriController extends Controller
         $masuk = 0;
         $gagal = 0;
 
+        // Folder dipilah per layanan; yang dipakai beberapa layanan masuk ke
+        // galeri/bersama. Lihat Galeri::folderUntuk().
+        $folder = Galeri::folderUntuk($pilihan, $semua);
+
         foreach ($request->file('berkas') as $berkas) {
-            $jalur = $this->gambar->simpan($berkas, Galeri::FOLDER);
+            $jalur = $this->gambar->simpan($berkas, $folder);
 
             if ($jalur === null) {
                 $gagal++;
