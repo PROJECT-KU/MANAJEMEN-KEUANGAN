@@ -489,6 +489,7 @@ Route::prefix('account')
             Route::get('/galeri', 'account\GaleriController@index')->name('account.galeri.index');
             Route::post('/galeri', 'account\GaleriController@store')->name('account.galeri.store');
             Route::post('/galeri/{galeri}/ubah', 'account\GaleriController@update')->name('account.galeri.update');
+            Route::post('/galeri/{galeri}/putar', 'account\GaleriController@putar')->name('account.galeri.putar');
             Route::delete('/galeri/{galeri}', 'account\GaleriController@destroy')->name('account.galeri.destroy');
 
             // riwayat pemesanan clinik scopus
