@@ -466,6 +466,8 @@ Route::prefix('account')
             // menghapus tidak bisa dibatalkan.
             Route::post('/kategori-layanan/massal/hapus', 'account\KategoriLayananController@massalHapus')->name('account.kategori-layanan.massal-hapus');
             Route::get('/kategori-layanan/{angkatan}/detail', 'account\KategoriLayananController@detail')->name('account.kategori-layanan.detail');
+            // Mengembalikan angkatan yang baru dihapus, lewat jejaknya.
+            Route::post('/kategori-layanan/pulihkan/{jejak}', 'account\KategoriLayananController@pulihkan')->name('account.kategori-layanan.pulihkan');
             Route::get('/kategori-layanan/cetak/pdf', 'account\KategoriLayananController@cetakPdf')->name('account.kategori-layanan.cetak');
             Route::get('/kategori-layanan/cetak/excel', 'account\KategoriLayananController@cetakExcel')->name('account.kategori-layanan.excel');
             Route::post('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@update')->name('account.kategori-layanan.update');

@@ -23,6 +23,12 @@ class Kernel extends ConsoleKernel
         // Ingatkan sekali akun yang mendaftar dua hari lalu tapi emailnya
         // belum diverifikasi.
         $schedule->command('verifikasi:ingatkan')->dailyAt('09:00');
+
+        // Tutup angkatan yang tanggalnya sudah lewat. Dijalankan pagi, bukan
+        // tengah malam: angkatan yang selesai hari ini baru boleh ditutup
+        // setelah harinya benar-benar habis, dan jam 01:10 memberi jarak dari
+        // pekerjaan tengah malam lain di peladen yang sama.
+        $schedule->command('angkatan:tutup-lewat')->dailyAt('01:10');
     }
 
     protected function commands()

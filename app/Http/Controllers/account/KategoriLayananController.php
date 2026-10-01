@@ -5,6 +5,7 @@ namespace App\Http\Controllers\account;
 use App\ClinikScopusBiayaPersesi;
 use App\Exports\AngkatanLayananExport;
 use App\Http\Controllers\Controller;
+use App\AngkatanJejak;
 use App\KategoriLayanan;
 use App\Layanan;
 use App\Support\PerakitDeskripsi;
@@ -32,6 +33,23 @@ use Illuminate\Validation\Rule;
 class KategoriLayananController extends Controller
 {
     private const PER_HALAMAN = 10;
+
+    /**
+     * Kolom yang boleh dipakai mengurutkan, beserta namanya di layar.
+     *
+     * Daftar TERTUTUP: nilainya datang dari alamat, dan nama kolom sembarang
+     * akan sampai ke orderBy apa adanya. Satu konstanta, bukan dua salinan —
+     * layar dan unduhan pernah berselisih karena masing-masing punya
+     * daftarnya sendiri.
+     */
+    private const BOLEH_URUT = [
+        'mulai' => 'Tanggal mulai',
+        'nama' => 'Nama angkatan',
+        'sisa_kuota' => 'Sisa kuota',
+        'status' => 'Status',
+        'layanan' => 'Layanan',
+        'biaya' => 'Biaya',
+    ];
 
     public function __construct()
     {
@@ -73,6 +91,10 @@ class KategoriLayananController extends Controller
             ? $request->query('perlu')
             : null;
 
+        $periode = array_key_exists((string) $request->query('periode'), KategoriLayanan::PERIODE)
+            ? $request->query('periode')
+            : null;
+
         /*
          * Dua kueri, bukan satu: yang dasar memakai layanan dan kata kunci
          * saja, dan ubin ringkasan dihitung dari situ.
@@ -95,6 +117,8 @@ class KategoriLayananController extends Controller
             });
         }
 
+        $kueriDasar->periode($periode);
+
         $kueri = clone $kueriDasar;
 
         if ($status) {
@@ -111,14 +135,7 @@ class KategoriLayananController extends Controller
          * Kolomnya dibatasi daftar tertutup: nilainya datang dari alamat, dan
          * nama kolom sembarang akan sampai ke orderBy apa adanya.
          */
-        $bolehUrut = [
-            'mulai' => 'Tanggal mulai',
-            'nama' => 'Nama angkatan',
-            'sisa_kuota' => 'Sisa kuota',
-            'status' => 'Status',
-            'layanan' => 'Layanan',
-            'biaya' => 'Biaya',
-        ];
+        $bolehUrut = self::BOLEH_URUT;
 
         $urut = array_key_exists((string) $request->query('urut'), $bolehUrut)
             ? $request->query('urut')
@@ -189,9 +206,11 @@ class KategoriLayananController extends Controller
             'arahKode' => $arah,
             'bolehUrut' => $bolehUrut,
             'perlu' => $perlu,
+            'periode' => $periode,
             'jumlahPerlu' => $jumlahPerlu,
             'totalPerlu' => $totalPerlu,
-            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan || (bool) $perlu,
+            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan
+                || (bool) $perlu || (bool) $periode,
             'bolehUbah' => $this->bolehMengubah(),
             'katalog' => Layanan::katalog(),
         ]);
@@ -216,9 +235,11 @@ class KategoriLayananController extends Controller
         // Unduhan membawa saringan yang SEDANG dipakai, termasuk yang ini:
         // yang diunduh orang hampir selalu yang sedang dilihatnya.
         $perlu = $request->query('perlu');
+        $periode = $request->query('periode');
 
         $kueri = KategoriLayanan::query()
             ->perlu($perlu)
+            ->periode($periode)
             ->when($layanan && array_key_exists($layanan, Layanan::katalog()),
                 fn ($q) => $q->where('layanan', $layanan))
             ->when($status, fn ($q) => $q->where('status', $status))
@@ -228,15 +249,21 @@ class KategoriLayananController extends Controller
                     ->orWhere('lokasi', 'like', "%{$cari}%");
             }));
 
-        $urut = in_array($request->query('urut'), ['mulai', 'nama', 'sisa_kuota', 'status'], true)
+        /*
+         * Daftar kolomnya harus SAMA dengan yang di layar. Sebelumnya di sini
+         * cuma empat — tanpa 'layanan' dan 'biaya' — jadi mengurutkan daftar
+         * menurut Biaya lalu menekan Unduh menghasilkan berkas yang urutannya
+         * diam-diam kembali ke tanggal, dan tidak ada yang memberi tahu.
+         */
+        $urut = array_key_exists((string) $request->query('urut'), self::BOLEH_URUT)
             ? $request->query('urut')
             : 'mulai';
 
         $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
 
         return $kueri
-            ->when($urut === 'sisa_kuota',
-                fn ($q) => $q->orderByRaw('CAST(sisa_kuota AS UNSIGNED) ' . $arah),
+            ->when(in_array($urut, ['sisa_kuota', 'biaya'], true),
+                fn ($q) => $q->orderByRaw('CAST(' . $urut . ' AS UNSIGNED) ' . $arah),
                 fn ($q) => $q->orderBy($urut, $arah))
             ->get();
     }
@@ -319,6 +346,13 @@ class KategoriLayananController extends Controller
 
         if ($c = trim((string) $request->query('cari'))) {
             $bagian[] = 'kata kunci "' . $c . '"';
+        }
+
+        // Rentang waktu ikut disebut dengan alasan yang sama seperti "perlu
+        // dicek" di bawah: berkas berisi angkatan bulan depan saja tidak boleh
+        // berkepala "tanpa saringan".
+        if ($p = $request->query('periode')) {
+            $bagian[] = 'periode ' . lcfirst(KategoriLayanan::PERIODE[$p] ?? $p);
         }
 
         /*
@@ -567,6 +601,20 @@ class KategoriLayananController extends Controller
                         . 'jadi kuotanya tidak bisa kurang dari itu.',
                 ]);
             }
+
+            /*
+             * Sisa kuota yang diketik juga harus masuk akal terhadap jumlah
+             * orang yang sudah terdaftar. Tanpa ini, total 25 dengan 25 orang
+             * terdaftar masih boleh diberi sisa 10, dan halaman publik akan
+             * menerima sepuluh pendaftar lagi di atas kuota.
+             */
+            if ($data['sisa_kuota'] !== null
+                && (int) $data['sisa_kuota'] + $pendaftar > (int) $data['total_kuota']) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'sisa_kuota' => 'Dengan ' . $pendaftar . ' orang yang sudah mendaftar, '
+                        . 'sisanya paling banyak ' . max(0, (int) $data['total_kuota'] - $pendaftar) . '.',
+                ]);
+            }
         }
 
         // Sisa tidak boleh melebihi totalnya; kalau tidak, angkatan bisa
@@ -576,6 +624,36 @@ class KategoriLayananController extends Controller
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'sisa_kuota' => 'Sisa kuota tidak boleh lebih besar daripada total kuotanya.',
             ]);
+        }
+
+        /*
+         * Nomor angkatan tidak boleh kembar dengan angkatan lain di layanan
+         * dan lokasi yang sama. Nomor itu yang dipakai orang menyebutnya
+         * ("Camp ke-188"), jadi dua yang bernomor sama membuat percakapan
+         * admin dengan peserta jadi ambigu.
+         *
+         * Yang diperiksa hanya nomor yang BERUBAH. Memeriksa semuanya berarti
+         * tujuh pasang kembar yang sudah terlanjur ada tidak bisa disunting
+         * sama sekali — termasuk untuk memperbaiki nomornya sendiri. Yang
+         * lama ditandai lencana "Perlu dicek" supaya tetap kelihatan.
+         */
+        $nomorBaru = trim((string) $data['nama_ke']);
+
+        if ($nomorBaru !== '' && $nomorBaru !== trim((string) $angkatan?->nama_ke)) {
+            $kembar = KategoriLayanan::query()
+                ->where('layanan', $data['layanan'])
+                ->whereRaw("coalesce(lokasi, '') = ?", [(string) $data['lokasi']])
+                ->where('nama_ke', $nomorBaru)
+                ->when($angkatan !== null, fn ($q) => $q->whereKeyNot($angkatan->getKey()))
+                ->exists();
+
+            if ($kembar) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'nama_ke' => 'Angkatan ke-' . $nomorBaru . ' sudah ada'
+                        . ($data['lokasi'] ? ' di ' . $data['lokasi'] : '')
+                        . '. Pakai nomor lain.',
+                ]);
+            }
         }
 
         /*
@@ -755,11 +833,16 @@ class KategoriLayananController extends Controller
         $salinan->status = 'draft';
         $salinan->sisa_kuota = $angkatan->total_kuota;
 
-        // Nomor angkatan dinaikkan satu kalau memang angka; kalau bukan,
-        // dibiarkan apa adanya daripada mengarang.
-        $salinan->nama_ke = is_numeric($angkatan->nama_ke)
-            ? (string) ((int) $angkatan->nama_ke + 1)
-            : $angkatan->nama_ke;
+        /*
+         * Nomor BEBAS berikutnya, bukan sekadar +1. Menggandakan ke-187
+         * menghasilkan 188, dan 188 sudah dipakai dua angkatan Yogyakarta —
+         * jadi menaikkan asal satu justru menambah kembar ketiga.
+         *
+         * Kalau nomornya bukan angka, dibiarkan apa adanya daripada mengarang.
+         */
+        $salinan->nama_ke = KategoriLayanan::nomorBebas(
+            $angkatan->layanan, $angkatan->lokasi, (string) $angkatan->nama_ke
+        );
 
         // Tanggalnya sengaja dikosongkan, tetapi kolomnya wajib isi — diisi
         // hari ini supaya borangnya terbuka, dan admin tinggal menggantinya.
@@ -875,6 +958,9 @@ class KategoriLayananController extends Controller
             'angkatan' => $angkatan,
             'tarif' => $angkatan->tarif(),
             'bolehUbah' => $this->bolehMengubah(),
+            // Dua belas terakhir: yang ditanyakan orang selalu "siapa yang
+            // baru saja mengubah ini", bukan riwayat setahun penuh.
+            'jejak' => $angkatan->jejak()->limit(12)->get(),
         ]);
     }
 
@@ -911,18 +997,27 @@ class KategoriLayananController extends Controller
          * pilihan membuat sembilan belas lainnya ikut gagal tanpa alasan yang
          * kelihatan — dan orangnya harus menebak yang mana.
          */
-        $berpendaftar = DB::table('analisis_bibliometrik')
-            ->whereIn('kategori_id', $data['id'])->distinct()->pluck('kategori_id')
-            ->merge(DB::table('scopus_camp_pendaftaran')
+        $berpendaftar = collect(KategoriLayanan::TABEL_PENDAFTARAN)
+            ->flatMap(fn ($tabel) => DB::table($tabel)
                 ->whereIn('kategori_id', $data['id'])->distinct()->pluck('kategori_id'))
-            ->unique()->all();
+            ->unique()->values()->all();
 
         $bolehHapus = array_values(array_diff($data['id'], $berpendaftar));
         $dihapus = 0;
 
         if ($bolehHapus !== []) {
             try {
-                $dihapus = KategoriLayanan::whereIn('id', $bolehHapus)->delete();
+                /*
+                 * Dihapus satu per satu lewat model, BUKAN satu delete massal:
+                 * penghapusan massal tidak membangkitkan kait model, jadi
+                 * tidak ada satu pun jejak yang tertulis — dan dua ratus
+                 * angkatan hilang tanpa jalan kembali.
+                 */
+                KategoriLayanan::whereIn('id', $bolehHapus)->get()
+                    ->each(function ($a) use (&$dihapus) {
+                        $a->delete();
+                        $dihapus++;
+                    });
             } catch (QueryException $e) {
                 report($e);
 
@@ -945,6 +1040,38 @@ class KategoriLayananController extends Controller
         ]);
     }
 
+    /**
+     * Mengembalikan angkatan yang baru saja dihapus.
+     *
+     * Barisnya dimasukkan kembali dari salinan di jejak, dengan id yang SAMA —
+     * pendaftaran lama menunjuk id itu, dan memulihkannya dengan id baru
+     * berarti pesertanya tetap kehilangan angkatannya.
+     */
+    public function pulihkan(AngkatanJejak $jejak)
+    {
+        if (! $this->bolehMengubah()) {
+            return $this->tolak();
+        }
+
+        if ($jejak->aksi !== 'dihapus' || ! is_array($jejak->data)) {
+            return back()->with('error', 'Jejak ini bukan penghapusan, jadi tidak ada yang bisa dipulihkan.');
+        }
+
+        if (KategoriLayanan::whereKey($jejak->kategori_id)->exists()) {
+            return redirect()->route('account.kategori-layanan.index')
+                ->with('error', 'Angkatan itu sudah ada lagi; tidak jadi dipulihkan.');
+        }
+
+        $angkatan = new KategoriLayanan;
+        $angkatan->forceFill($jejak->data);
+        $angkatan->save();
+
+        AngkatanJejak::catat($angkatan, 'dipulihkan', 'dikembalikan dari keranjang');
+
+        return redirect()->route('account.kategori-layanan.index')
+            ->with('success', 'Angkatan "' . $angkatan->nama . '" dikembalikan.');
+    }
+
     public function destroy(KategoriLayanan $angkatan)
     {
         if (! $this->bolehMengubah()) {
@@ -956,13 +1083,16 @@ class KategoriLayananController extends Controller
          * berkunci asing ke sini, dan MySQL menolaknya dengan galat 1451 yang
          * hanya menyebut nama constraint-nya.
          */
-        $terpakai = DB::table('analisis_bibliometrik')->where('kategori_id', $angkatan->getKey())->count()
-            + DB::table('scopus_camp_pendaftaran')->where('kategori_id', $angkatan->getKey())->count();
+        $terpakai = $angkatan->jumlah_pendaftaran;
 
         if ($terpakai > 0) {
+            $orang = $angkatan->jumlah_pendaftar;
+
             return response()->json([
                 'success' => false,
-                'message' => 'Angkatan ini sudah punya ' . $terpakai . ' pendaftar, jadi tidak bisa dihapus.',
+                'message' => 'Angkatan ini sudah punya ' . $orang . ' peserta'
+                    . ($orang !== $terpakai ? ' (' . $terpakai . ' pendaftaran)' : '')
+                    . ', jadi tidak bisa dihapus.',
             ], 409);
         }
 
@@ -977,6 +1107,19 @@ class KategoriLayananController extends Controller
             ], 409);
         }
 
-        return response()->json(['success' => true, 'message' => 'Angkatan dihapus.']);
+        /*
+         * Alamat untuk mengurungkan ikut dikirim. Menghapus angkatan yang
+         * salah adalah kesalahan yang paling mahal di layar ini — 60 baris
+         * yang namanya nyaris sama persis, dan sebelum ini tidak ada jalan
+         * kembali sama sekali.
+         */
+        $jejak = AngkatanJejak::where('kategori_id', $angkatan->getKey())
+            ->where('aksi', 'dihapus')->latest('created_at')->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Angkatan dihapus.',
+            'pulihkan' => $jejak ? route('account.kategori-layanan.pulihkan', $jejak) : null,
+        ]);
     }
 }

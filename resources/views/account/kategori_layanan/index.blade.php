@@ -44,13 +44,13 @@ Angkatan Layanan | MIS
      * baris lagi — barisnya jadi 99px, dan tingginya berbeda-beda antar baris
      * tergantung panjang namanya.
      */
-    .ang-k-nama { width: 28%; }
-    .ang-k-layanan { width: 13%; }
-    .ang-k-tanggal { width: 14%; }
+    .ang-k-nama { width: 34%; }
+    .ang-k-layanan { width: 11%; }
+    .ang-k-tanggal { width: 13%; }
     .ang-k-kuota { width: 11%; }
-    .ang-k-biaya { width: 14%; }
-    .ang-k-status { width: 8%; }
-    .ang-k-aksi { width: 12%; }
+    .ang-k-biaya { width: 12%; }
+    .ang-k-status { width: 9%; }
+    .ang-k-aksi { width: 10%; }
 
     .ang-sampul {
         width: 38px; height: 38px;
@@ -71,12 +71,8 @@ Angkatan Layanan | MIS
         padding-right: 0 !important;
     }
 
-    .ang-centang-sel input {
-        width: 16px;
-        height: 16px;
-        accent-color: #4f46e5;
-        cursor: pointer;
-    }
+    /* Ukuran dan daerah tekannya datang dari .mis-centang di mis-ui.css —
+       dipakai bersama Data Pelanggan supaya tidak jadi dua ukuran lagi. */
 
     .ang-massal {
         display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
@@ -161,6 +157,80 @@ Angkatan Layanan | MIS
         .mis-tabel.mis-tabel-kartu.ang-tabel tbody td[data-judul="Biaya"] { display: none; }
     }
 
+    /*
+     * Pemberitahuan "Urungkan" sesudah menghapus.
+     *
+     * Ditempel di bawah layar, bukan di atas: bilah pilih-massal sudah
+     * menempati tepi atas, dan dua pita yang saling menimpa membuat keduanya
+     * tidak terbaca.
+     *
+     * DI LUAR media query mana pun. Ditaruh di dalam, ia pernah menyisip ke
+     * tengah daftar pemilih "sembunyikan kolom Layanan dan Biaya" dan
+     * memutusnya — kedua kolom itu muncul kembali di 768px dan tabelnya harus
+     * digeser ke samping, sementara pemberitahuannya sendiri tidak bergaya
+     * sama sekali di layar lebar.
+     */
+    .ang-urung {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        z-index: 1080;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: calc(100vw - 32px);
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: #1e293b;
+        color: #f8fafc;
+        font-size: .88rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, .28);
+    }
+
+    .ang-urung form { margin: 0; }
+
+    .ang-urung-tombol {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 14px;
+        background: #fbbf24;
+        color: #1f2937;
+        font-weight: 700;
+        font-size: .85rem;
+        /* 36px penuh: ini tombol yang ditekan orang yang sedang panik. */
+        min-height: 36px;
+        cursor: pointer;
+    }
+
+    .ang-urung-tombol:hover { background: #f59e0b; }
+
+    @media (max-width: 767.98px) {
+        /*
+         * Direntangkan selebar layar, bukan dibiarkan selebar isinya.
+         *
+         * Dibiarkan menyusut, terukur lebarnya cuma 214px dan nama angkatan
+         * patah jadi empat baris — kotaknya 130px tinggi dan menutupi dua
+         * kartu di bawahnya. Tombolnya tetap di kanan.
+         */
+        .ang-urung {
+            left: 16px;
+            right: 16px;
+            transform: none;
+            max-width: none;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .ang-urung > span {
+            flex: 1 1 0;
+            min-width: 0;
+            font-size: .82rem;
+        }
+
+        .ang-urung-tombol { padding: 8px 12px; }
+    }
+
     @media (max-width: 767.98px) {
 
         /* Tiap baris jadi kartu, seperti daftar pelanggan: garis 1px terlalu
@@ -229,7 +299,7 @@ Angkatan Layanan | MIS
                 <h1 class="mis-judul">Angkatan layanan</h1>
                 <p class="mis-sub">Semua angkatan jasa dalam satu daftar — harga dan deskripsinya ikut tarif induk.</p>
             </div>
-            <div class="mis-kepala-aksi">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
                 {{-- Layar kategori yang digantikan layar ini SUDAH punya unduhan
                      PDF dan Excel; menyatukannya tanpa keduanya berarti
                      diam-diam mencabut kemampuan yang sudah dipakai orang.
@@ -263,7 +333,11 @@ Angkatan Layanan | MIS
              Tiap ubin membawa layanan dan kata kunci yang sedang dipakai,
              jadi menekannya mempersempit — bukan mengulang dari nol. --}}
         @php
-            $bawaUbin = array_filter(['layanan' => $layanan, 'cari' => $cari !== '' ? $cari : null]);
+            $bawaUbin = array_filter([
+                'layanan' => $layanan,
+                'periode' => $periode,
+                'cari' => $cari !== '' ? $cari : null,
+            ]);
             $ubin = [
                 [null, 'Seluruh angkatan', $perStatus->sum(), 'mis-ungu', 'fa-layer-group'],
                 ['active', 'Sedang aktif', $perStatus['active'] ?? 0, 'mis-hijau', 'fa-check-circle'],
@@ -308,7 +382,10 @@ Angkatan Layanan | MIS
                     href="{{ route('account.kategori-layanan.index',
                         array_merge($bawaUbin, ['perlu' => $perluPertama])) }}"
                     title="Saring: angkatan yang perlu ditindaklanjuti">
-                    <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
+                    {{-- Merah, bukan kuning: "Masih draf" tepat di sebelahnya sudah
+                         kuning, dan dua ubin sewarna untuk dua arti berbeda membuat
+                         keduanya harus dibaca dulu sebelum bisa dibedakan. --}}
+                    <span class="mis-medali kecil mis-merah" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
                     <div>
                         <p class="mis-ubin-angka">{{ number_format($totalPerlu) }}</p>
                         <p class="mis-ubin-label">Perlu dicek</p>
@@ -359,6 +436,7 @@ Angkatan Layanan | MIS
                              dirender bersyarat tidak akan pernah muncul. --}}
                     <a href="{{ route('account.kategori-layanan.index', array_filter([
                         'layanan' => $layanan, 'status' => $status,
+                        'perlu' => $perlu, 'periode' => $periode,
                     ])) }}" class="mis-saring-hapus" aria-label="Kosongkan pencarian"
                         title="Kosongkan pencarian" data-mis-kosongkan
                         @if ($cari === '') hidden @endif>
@@ -390,6 +468,19 @@ Angkatan Layanan | MIS
                         <option value="">Semua status</option>
                         @foreach (['active' => 'Aktif', 'non active' => 'Nonaktif', 'draft' => 'Draf'] as $k => $l)
                             <option value="{{ $k }}" @selected($status === $k)>{{ $l }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Pilihan jadi, bukan dua kotak tanggal: yang ditanyakan selalu
+                     "yang mana bulan depan", dan pemilih tanggal adalah kendali
+                     yang paling sering salah dipakai di layar-layar ini. --}}
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="ang-periode">Periode</label>
+                    <select class="form-control-modern" id="ang-periode" name="periode">
+                        <option value="">Kapan saja</option>
+                        @foreach (\App\KategoriLayanan::PERIODE as $kunci => $label)
+                            <option value="{{ $kunci }}" @selected($periode === $kunci)>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -538,17 +629,26 @@ Angkatan Layanan | MIS
                                 // Saringan yang ikut dibawa tiap tautan pengurut; tanpa
                                 // ini, mengurutkan membuang layanan dan kata kunci yang
                                 // sedang dipakai dan daftarnya melompat kembali ke awal.
+                                //
+                                // SEMUA saringan, bukan tiga. 'perlu' sempat tertinggal:
+                                // menyaring "Draf kadaluwarsa" lalu menekan kepala kolom
+                                // mengembalikan seluruh 60 baris, dan yang terbaca orang
+                                // cuma "urutannya berubah".
                                 $bawaUrut = array_filter([
                                     'layanan' => $layanan,
                                     'status' => $status,
+                                    'perlu' => $perlu,
+                                    'periode' => $periode,
                                     'cari' => $cari !== '' ? $cari : null,
                                 ]);
                             @endphp
                             <tr>
                                 @if ($bolehUbah)
                                     <th class="ang-centang-sel">
-                                        <input type="checkbox" id="ang-pilih-semua"
-                                            aria-label="Pilih semua angkatan di halaman ini">
+                                        <label class="mis-centang-bungkus">
+                                            <input type="checkbox" id="ang-pilih-semua" class="mis-centang"
+                                                aria-label="Pilih semua angkatan di halaman ini">
+                                        </label>
                                     </th>
                                 @endif
                                 {{-- aria-sort memberi tahu pembaca layar kolom mana yang
@@ -592,8 +692,11 @@ Angkatan Layanan | MIS
                                                  querySelectorAll('.ang-pilih') ikut menjaring
                                                  keenam pil sehingga centang-semua tak pernah
                                                  bisa penuh. --}}
-                                            <input type="checkbox" class="ang-centang" value="{{ $a->id }}"
-                                                aria-label="Pilih {{ $a->nama }}">
+                                            <label class="mis-centang-bungkus">
+                                                <input type="checkbox" class="ang-centang mis-centang"
+                                                    value="{{ $a->id }}"
+                                                    aria-label="Pilih {{ $a->nama }}">
+                                            </label>
                                         </td>
                                     @endif
                                     <td class="mis-td-utama">
@@ -654,15 +757,28 @@ Angkatan Layanan | MIS
                                             </span>
                                         @endif
 
-                                        @php($pendaftar = $a->jumlah_pendaftar)
-                                        @if ($pendaftar > 0 && $tautanPendaftar($a))
+                                        {{-- "peserta", bukan "pendaftar": yang dihitung ORANG,
+                                             dan satu pendaftaran boleh membawa rombongan.
+                                             Jumlah barisnya ikut disebut hanya kalau memang
+                                             berbeda, supaya yang membuka daftarnya tidak
+                                             bingung menemukan 5 baris untuk 25 orang. --}}
+                                        @if ($a->jumlah_pendaftar > 0 && $tautanPendaftar($a))
                                             {{-- "14 dari 25" lalu berhenti di situ menyisakan
                                                  pertanyaan "siapa"; jawabannya satu klik. --}}
                                             <a href="{{ $tautanPendaftar($a) }}" class="ang-tautan">
-                                                lihat {{ $pendaftar }} pendaftar
+                                                lihat {{ $a->sebutPeserta() }}
                                             </a>
-                                        @elseif ($pendaftar > 0)
-                                            <span class="ang-ket">{{ $pendaftar }} pendaftar</span>
+                                        @elseif ($a->jumlah_pendaftar > 0)
+                                            <span class="ang-ket">{{ $a->sebutPeserta() }}</span>
+                                        @elseif ($a->belumPunyaPendaftaran())
+                                            {{-- Angkatan Scopus Cafe / Clinik Scopus: kuotanya
+                                                 TIDAK akan pernah berkurang sendiri karena
+                                                 layanannya belum punya tabel pendaftaran. Tanpa
+                                                 kalimat ini, "20 dari 20" terbaca seperti belum
+                                                 ada yang daftar. --}}
+                                            <span class="ang-ket" title="Layanan ini belum punya layar pendaftaran, jadi sisa kuotanya diisi tangan">
+                                                pendaftaran belum tercatat
+                                            </span>
                                         @endif
                                     </td>
 
@@ -876,8 +992,8 @@ Angkatan Layanan | MIS
 
             window.misKonfirmasi({
                 judul: 'Hapus angkatan terpilih?',
-                pesan: '%s dihapus permanen dan tidak bisa dikembalikan. '
-                    + 'Yang sudah punya pendaftar akan dilewati.',
+                pesan: '%s dihapus dari daftar. Yang sudah punya peserta akan dilewati. '
+                    + 'Masing-masing masih bisa dikembalikan lewat halaman rinciannya.',
                 sorot: dipilih.size + ' angkatan',
                 tombol: 'Ya, hapus',
                 jenis: 'bahaya',
@@ -977,13 +1093,53 @@ Angkatan Layanan | MIS
         segarkan();
     })();
 
+    /**
+     * Pemberitahuan berisi tombol "Urungkan".
+     *
+     * Dibuat di sini, bukan lewat window.misToast: pemberitahuan bersama itu
+     * hanya menerima teks, dan menambahinya tombol akan mengubah perilaku
+     * sepuluh layar lain yang memakainya.
+     */
+    function tawarkanUrung(alamat, nama) {
+        const kotak = document.createElement('div');
+        kotak.className = 'ang-urung';
+        kotak.setAttribute('role', 'status');
+
+        const teks = document.createElement('span');
+        teks.textContent = (nama || 'Angkatan') + ' dihapus.';
+
+        const borang = document.createElement('form');
+        borang.method = 'POST';
+        borang.action = alamat;
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const tombol = document.createElement('button');
+        tombol.type = 'submit';
+        tombol.className = 'ang-urung-tombol';
+        tombol.textContent = 'Urungkan';
+
+        borang.appendChild(csrf);
+        borang.appendChild(tombol);
+        kotak.appendChild(teks);
+        kotak.appendChild(borang);
+        document.body.appendChild(kotak);
+
+        // Lima belas detik: cukup untuk sadar dan menekan, tidak cukup lama
+        // untuk menutupi daftar yang sedang dipakai.
+        setTimeout(function () { kotak.remove(); }, 15000);
+    }
+
     document.addEventListener('click', function (e) {
         const tombol = e.target.closest('[data-hapus]');
         if (!tombol) return;
 
         window.misKonfirmasi({
             judul: 'Hapus angkatan ini?',
-            pesan: '%s dihapus permanen. Angkatan yang sudah punya pendaftar tidak bisa dihapus.',
+            pesan: '%s dihapus dari daftar. Angkatan yang sudah punya peserta tidak bisa dihapus.',
             sorot: tombol.dataset.nama,
             tombol: 'Ya, hapus',
             jenis: 'bahaya',
@@ -999,8 +1155,22 @@ Angkatan Layanan | MIS
             })
                 .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
                 .then(function (j) {
-                    window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal', j.d.message);
-                    if (j.ok && j.d.success) tombol.closest('tr').remove();
+                    if (!(j.ok && j.d.success)) {
+                        window.misToast('gagal', j.d.message);
+                        return;
+                    }
+
+                    tombol.closest('tr').remove();
+
+                    /* Jalan kembali ditawarkan di tempat, bukan disembunyikan di
+                       halaman lain: yang menghapus angkatan yang salah baru sadar
+                       beberapa detik kemudian, dan saat itu ia masih menatap layar
+                       yang sama. */
+                    if (j.d.pulihkan) {
+                        tawarkanUrung(j.d.pulihkan, tombol.dataset.nama);
+                    } else {
+                        window.misToast('berhasil', j.d.message);
+                    }
                 })
                 .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
         });

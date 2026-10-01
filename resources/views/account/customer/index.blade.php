@@ -29,12 +29,8 @@ Data Pelanggan | MIS
         padding-right: 0 !important;
     }
 
-    .pel-centang-sel input {
-        width: 16px;
-        height: 16px;
-        accent-color: #4f46e5;
-        cursor: pointer;
-    }
+    /* Ukuran dan daerah tekannya datang dari .mis-centang di mis-ui.css —
+       dipakai bersama Angkatan Layanan. */
 
     /*
      * Baris aksi massal muncul hanya saat ada yang dipilih.
@@ -366,7 +362,7 @@ Data Pelanggan | MIS
                 <h1 class="mis-judul">Data Pelanggan</h1>
                 <p class="mis-sub">Orang luar yang memakai layanan jasa Rumah Scopus.</p>
             </div>
-            <div class="mis-kepala-aksi">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
                 {{-- Ekspor membawa saringan yang sedang dipakai, bukan seluruh
                      tabel: yang diunduh orang hampir selalu yang dilihatnya. --}}
                 {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibaca dan
@@ -611,8 +607,10 @@ Data Pelanggan | MIS
                             @endphp
                             @if (auth()->user()->adalahAdministrator())
                                 <th class="pel-centang-sel">
-                                    <input type="checkbox" id="pel-centang-semua"
-                                        aria-label="Pilih semua pelanggan di halaman ini">
+                                    <label class="mis-centang-bungkus">
+                                        <input type="checkbox" id="pel-centang-semua" class="mis-centang"
+                                            aria-label="Pilih semua pelanggan di halaman ini">
+                                    </label>
                                 </th>
                             @endif
                             <th aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'nama', 'label' => 'Pelanggan'])</th>
@@ -634,8 +632,11 @@ Data Pelanggan | MIS
                                          ponsel: terukur 12 kotak centang ada di
                                          markah dan nol terlihat. --}}
                                     <td class="pel-centang-sel">
-                                        <input type="checkbox" class="pel-centang" value="{{ $orang->uuid }}"
-                                            aria-label="Pilih {{ $orang->full_name ?: $orang->username }}">
+                                        <label class="mis-centang-bungkus">
+                                            <input type="checkbox" class="pel-centang mis-centang"
+                                                value="{{ $orang->uuid }}"
+                                                aria-label="Pilih {{ $orang->full_name ?: $orang->username }}">
+                                        </label>
                                     </td>
                                 @endif
                                 <td class="mis-td-utama">
