@@ -188,7 +188,7 @@ class AngkatanPerluDicekTest extends TestCase
 
         // Menu saringannya menyebut jumlah tiap keadaan; yang bukan sedang
         // dipilih tidak boleh jadi nol.
-        $this->assertMatchesRegularExpression('/Tidak menemukan tarif induk \((?!0\))\d+\)/', $isi);
+        $this->assertMatchesRegularExpression('/Tanpa tarif induk \((?!0\))\d+\)/', $isi);
     }
 
     #[Test]
@@ -222,6 +222,110 @@ class AngkatanPerluDicekTest extends TestCase
 
         $this->assertSame([], $sehat->perlu_dicek);
         $this->assertFalse(KategoriLayanan::perluApaPun()->where('id', $sehat->id)->exists());
+    }
+
+    // ------------------------------------------- aktif tapi sudah lewat
+
+    #[Test]
+    public function aktif_yang_tanggalnya_lewat_ikut_perlu_dicek(): void
+    {
+        /*
+         * Yang PALING mendesak justru ini: angkatannya masih terpajang di
+         * halaman publik padahal acaranya sudah selesai. Versi pertama ubin
+         * "Perlu dicek" melewatkannya.
+         */
+        $a = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->subMonths(2), 'selesai' => now()->subMonths(2)->addDay(),
+        ]);
+
+        $this->assertContains('masih aktif padahal tanggalnya sudah lewat', $a->perlu_dicek);
+        $this->assertTrue(KategoriLayanan::perlu('aktif-lewat')->where('id', $a->id)->exists());
+        $this->assertTrue(KategoriLayanan::perluApaPun()->where('id', $a->id)->exists());
+    }
+
+    #[Test]
+    public function yang_sudah_punya_lencana_sendiri_tidak_dilencanai_dua_kali(): void
+    {
+        // Lencana "Lewat" sudah ada dan bisa ditekan untuk menonaktifkan;
+        // menambahkan "Perlu dicek" di sebelahnya berarti dua peringatan untuk
+        // satu hal yang sama.
+        $a = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->subMonths(2), 'selesai' => now()->subMonths(2)->addDay(),
+        ]);
+
+        $this->assertNotEmpty($a->perlu_dicek);
+        $this->assertSame([], $a->perlu_dicek_lain);
+    }
+
+    // ------------------------------------------------ unduhan & cetakan
+
+    #[Test]
+    public function ringkasan_cetakan_menyebut_saringan_perlu(): void
+    {
+        /*
+         * Tanpa ini, berkas yang dicetak sambil menyaring draf kadaluwarsa
+         * tetap berkepala "Seluruh angkatan, tanpa saringan." — pernyataan
+         * yang salah di dokumen yang mungkin diarsipkan orang.
+         */
+        // Diperiksa lewat perakit kalimatnya, bukan isi berkas PDF-nya:
+        // keluarannya terkompresi, jadi mencari kata di dalamnya menguji
+        // pemampatan dompdf, bukan kalimat yang kita tulis.
+        $perakit = new \ReflectionMethod(
+            \App\Http\Controllers\account\KategoriLayananController::class,
+            'ringkasanSaringan'
+        );
+        $perakit->setAccessible(true);
+
+        $pengendali = app(\App\Http\Controllers\account\KategoriLayananController::class);
+
+        $tanpa = $perakit->invoke($pengendali, \Illuminate\Http\Request::create('/'));
+        $dengan = $perakit->invoke($pengendali,
+            \Illuminate\Http\Request::create('/', 'GET', ['perlu' => 'draf-lewat']));
+
+        $this->assertStringContainsString('tanpa saringan', $tanpa);
+        $this->assertStringNotContainsString('tanpa saringan', $dengan);
+        $this->assertStringContainsString('draf kadaluwarsa', $dengan);
+    }
+
+    #[Test]
+    public function unduhan_excel_membawa_kolom_perlu_dicek(): void
+    {
+        $kepala = (new \App\Exports\AngkatanLayananExport(collect()))->headings();
+
+        $this->assertContains('Perlu dicek', $kepala,
+            'daftar yang diunduh untuk ditindaklanjuti kehilangan keterangan yang membuatnya perlu ditindaklanjuti');
+    }
+
+    // ------------------------------------------------------ pengurutan
+
+    #[Test]
+    public function biaya_diurutkan_sebagai_bilangan_bukan_huruf(): void
+    {
+        $this->actingAs($this->akun());
+
+        // Sebagai huruf, "999000" berdiri di atas "5500000".
+        $mahal = $this->angkatan(['nama' => 'ZZ Mahal Uji', 'biaya' => '5500000']);
+        $murah = $this->angkatan(['nama' => 'ZZ Murah Uji', 'biaya' => '999000']);
+
+        $urutan = KategoriLayanan::whereIn('id', [$mahal->id, $murah->id])
+            ->orderByRaw('CAST(biaya AS UNSIGNED) desc')->pluck('nama')->all();
+
+        $this->assertSame(['ZZ Mahal Uji', 'ZZ Murah Uji'], $urutan);
+
+        $this->get(route('account.kategori-layanan.index', ['urut' => 'biaya', 'arah' => 'turun']))
+            ->assertOk();
+    }
+
+    #[Test]
+    public function kolom_urut_karangan_tetap_ditolak(): void
+    {
+        $this->actingAs($this->akun());
+
+        // Nilainya datang dari alamat; nama kolom sembarang tidak boleh sampai
+        // ke orderBy apa adanya.
+        $this->get(route('account.kategori-layanan.index', ['urut' => 'password']))->assertOk();
     }
 
     // --------------------------------------------------- hapus massal

@@ -89,6 +89,9 @@
 
     .det-fasilitas .fas { font-size: 11px !important; color: #10b981; margin-top: 3px; }
 
+    /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
+    .det-gandakan { display: inline-flex; margin: 0; }
+
     @media (max-width: 991.98px) {
         .det-kisi { grid-template-columns: minmax(0, 1fr); }
     }
@@ -116,10 +119,30 @@
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
                 @if ($bolehUbah)
+                    {{-- Menggandakan dan menghapus tersedia di sini juga, bukan
+                         cuma di daftar. Begitu orang membuka rincian sebuah
+                         angkatan, DI SITULAH ia memutuskan — memaksanya kembali
+                         ke daftar berarti mencari barisnya lagi di antara enam
+                         puluh baris. --}}
+                    <form method="POST" action="{{ route('account.kategori-layanan.gandakan', $angkatan) }}"
+                        class="det-gandakan">
+                        @csrf
+                        <button type="submit" class="mis-tombol mis-tombol-halus"
+                            title="Salin jadi rancangan baru">
+                            <i class="fas fa-copy mis-ikon-biru"></i> Gandakan
+                        </button>
+                    </form>
+
                     <a href="{{ route('account.kategori-layanan.edit', $angkatan) }}"
                         class="mis-tombol mis-tombol-ungu">
                         <i class="fas fa-edit"></i> Ubah
                     </a>
+
+                    <button type="button" class="mis-tombol mis-tombol-hapus" id="det-hapus"
+                        data-hapus="{{ route('account.kategori-layanan.destroy', $angkatan) }}"
+                        data-nama="{{ $angkatan->nama }}">
+                        <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
                 @endif
             </div>
         </div>
@@ -267,3 +290,46 @@
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    /* Menghapus dari halaman rincian; aturannya sama dengan di daftar, dan
+       sesudahnya kembali ke daftar sebab barisnya sudah tidak ada. */
+    (function () {
+        const tombol = document.getElementById('det-hapus');
+        if (!tombol) return;
+
+        tombol.addEventListener('click', function () {
+            window.misKonfirmasi({
+                judul: 'Hapus angkatan ini?',
+                pesan: '%s dihapus permanen. Angkatan yang sudah punya pendaftar tidak bisa dihapus.',
+                sorot: tombol.dataset.nama,
+                tombol: 'Ya, hapus',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                fetch(tombol.dataset.hapus, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (j) {
+                        if (!j.ok || !j.d.success) {
+                            window.misToast('gagal', j.d.message || 'Gagal menghapus angkatan.');
+                            return;
+                        }
+                        window.misToast('berhasil', j.d.message);
+                        setTimeout(function () {
+                            window.location.href = @json(route('account.kategori-layanan.index'));
+                        }, 900);
+                    })
+                    .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+            });
+        });
+    })();
+</script>
+@endpush
