@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Data Sharing Session untuk halaman landing di subdomain tersendiri.
+ * Data Webinar Eksklusif untuk halaman landing di subdomain tersendiri.
  *
  * Halaman itu statis dan sudah terpasang di subdomainnya sendiri; sebelum ini
  * tanggal, topik, pemateri, flyer, dan harganya diketik langsung ke dalam
@@ -41,9 +41,9 @@ use Illuminate\Http\JsonResponse;
  * toArray() atau only(): menambah kolom pada tabel angkatan tidak boleh
  * diam-diam ikut menerbitkannya ke internet.
  */
-class ApiSharingSessionController extends Controller
+class ApiWebinarEksklusifController extends Controller
 {
-    private const KODE = 'sharing_session';
+    private const KODE = 'webinar_eksklusif';
 
     /** Berapa lama jawabannya boleh ditembolok peramban dan CDN. */
     private const DETIK_TEMBOLOK = 60;
@@ -203,7 +203,7 @@ class ApiSharingSessionController extends Controller
 
             // Alamat borang pendaftaran di aplikasi; halaman landing cukup
             // memasangnya ke tombolnya tanpa tahu bagaimana ia dirakit.
-            'daftar_url' => route('public.sharingsession.daftar', [$a->getKey(), $a->token]),
+            'daftar_url' => route('public.webinareksklusif.daftar', [$a->getKey(), $a->token]),
         ];
     }
 

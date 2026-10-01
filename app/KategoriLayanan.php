@@ -207,7 +207,7 @@ class KategoriLayanan extends Model
     public const TABEL_PENDAFTARAN = [
         'scopus_camp' => 'scopus_camp_pendaftaran',
         'bibliometrik' => 'analisis_bibliometrik',
-        'sharing_session' => 'sharing_session_pendaftaran',
+        'webinar_eksklusif' => 'webinar_eksklusif_pendaftaran',
     ];
 
     /** Layanan ini belum punya tempat menyimpan pendaftar sama sekali. */
@@ -338,7 +338,7 @@ class KategoriLayanan extends Model
     public const FOLDER_SAMPUL = [
         'scopus_camp' => 'ScopusCamp',
         'bibliometrik' => 'bibliometrik',
-        'sharing_session' => 'SharingSession',
+        'webinar_eksklusif' => 'WebinarEksklusif',
     ];
 
     public function folderSampul(): string

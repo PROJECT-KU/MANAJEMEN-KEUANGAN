@@ -5,23 +5,23 @@ namespace App\Http\Controllers\Publict;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Services\Doku;
-use App\SharingSessionPendaftaran;
+use App\WebinarEksklusifPendaftaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Halaman publik Sharing Session: borang pendaftaran dan pembayarannya.
+ * Halaman publik Webinar Eksklusif: borang pendaftaran dan pembayarannya.
  *
  * Halaman pemasarannya sendiri ada di subdomain tersendiri dan mengambil
- * datanya lewat ApiSharingSessionController. Yang di sini bagian yang tidak
+ * datanya lewat ApiWebinarEksklusifController. Yang di sini bagian yang tidak
  * boleh ada di halaman statis: borang yang menulis ke basis data, penjaga
  * kuota, dan jalur pembayaran.
  */
-class PublicSharingSessionController extends Controller
+class PublicWebinarEksklusifController extends Controller
 {
-    private const KODE = 'sharing_session';
+    private const KODE = 'webinar_eksklusif';
 
     public function __construct(private Doku $doku)
     {
@@ -34,7 +34,7 @@ class PublicSharingSessionController extends Controller
     {
         KategoriLayanan::hitungPendaftar();
 
-        return view('public.sharing_session.index', [
+        return view('public.webinar_eksklusif.index', [
             'sesi' => $this->kueriAktif()->get(),
         ]);
     }
@@ -57,7 +57,7 @@ class PublicSharingSessionController extends Controller
 
         KategoriLayanan::hitungPendaftar();
 
-        return view('public.sharing_session.form_pendaftaran', [
+        return view('public.webinar_eksklusif.form_pendaftaran', [
             'sesi' => $sesi,
             'tarif' => $sesi->tarif(),
             // Dikirim ke tampilan supaya kalimat di layar menyesuaikan, bukan
@@ -122,7 +122,7 @@ class PublicSharingSessionController extends Controller
                 $harga = (int) $terkunci->biaya;
                 $total = $harga * $data['jumlah_pendaftar'];
 
-                $pendaftaran = SharingSessionPendaftaran::create([
+                $pendaftaran = WebinarEksklusifPendaftaran::create([
                     'kategori_id' => $terkunci->getKey(),
                     'nama' => trim($data['nama']),
                     'email' => mb_strtolower(trim($data['email'])),
@@ -167,10 +167,10 @@ class PublicSharingSessionController extends Controller
      * karena kesalahan yang bukan miliknya. Ia diarahkan ke halaman status
      * yang memuat cara bayar manual dan nomor panitia.
      */
-    private function mulaiBayar(SharingSessionPendaftaran $pendaftaran, KategoriLayanan $sesi)
+    private function mulaiBayar(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi)
     {
         if (! $this->doku->siap()) {
-            return redirect()->route('public.sharingsession.status', $pendaftaran->token);
+            return redirect()->route('public.webinareksklusif.status', $pendaftaran->token);
         }
 
         $hasil = $this->doku->buatTagihan([
@@ -182,7 +182,7 @@ class PublicSharingSessionController extends Controller
             'nama' => $pendaftaran->nama,
             'email' => $pendaftaran->email,
             'telp' => $pendaftaran->telp,
-            'kembali' => route('public.sharingsession.status', $pendaftaran->token),
+            'kembali' => route('public.webinareksklusif.status', $pendaftaran->token),
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {
@@ -191,7 +191,7 @@ class PublicSharingSessionController extends Controller
                 'note' => 'Pembayaran daring gagal dibuat: ' . ($hasil['pesan'] ?? 'tidak diketahui'),
             ])->save();
 
-            return redirect()->route('public.sharingsession.status', $pendaftaran->token)
+            return redirect()->route('public.webinareksklusif.status', $pendaftaran->token)
                 ->with('error', 'Pembayaran daring sedang bermasalah. '
                     . 'Pendaftaran Anda sudah tersimpan — silakan bayar lewat transfer.');
         }
@@ -209,13 +209,13 @@ class PublicSharingSessionController extends Controller
     /** Halaman status satu pendaftaran; tautannya dikirim ke email peserta. */
     public function status(string $token)
     {
-        $pendaftaran = SharingSessionPendaftaran::where('token', $token)->first();
+        $pendaftaran = WebinarEksklusifPendaftaran::where('token', $token)->first();
 
         if ($pendaftaran === null) {
             return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
         }
 
-        return view('public.sharing_session.status', [
+        return view('public.webinar_eksklusif.status', [
             'pendaftaran' => $pendaftaran,
             'sesi' => $pendaftaran->angkatan,
         ]);
@@ -251,7 +251,7 @@ class PublicSharingSessionController extends Controller
         $nomor = (string) $request->input('order.invoice_number');
         $status = mb_strtolower((string) $request->input('transaction.status'));
 
-        $pendaftaran = SharingSessionPendaftaran::where('id_transaksi', $nomor)->first();
+        $pendaftaran = WebinarEksklusifPendaftaran::where('id_transaksi', $nomor)->first();
 
         if ($pendaftaran === null) {
             Log::warning('DOKU memberi tahu nomor yang tidak dikenal', ['nomor' => $nomor]);
@@ -297,7 +297,7 @@ class PublicSharingSessionController extends Controller
     }
 
     /** Mengembalikan kursi yang sempat dipesan tetapi tidak jadi dibayar. */
-    private function kembalikanKuota(SharingSessionPendaftaran $pendaftaran): void
+    private function kembalikanKuota(WebinarEksklusifPendaftaran $pendaftaran): void
     {
         $sesi = $pendaftaran->angkatan;
 
@@ -338,7 +338,7 @@ class PublicSharingSessionController extends Controller
 
     private function kembaliKeDaftar(string $pesan)
     {
-        return redirect()->route('public.sharingsession.index')->with('error', $pesan);
+        return redirect()->route('public.webinareksklusif.index')->with('error', $pesan);
     }
 
     /** Nomor telepon disimpan berangka saja supaya bisa langsung jadi tautan WA. */

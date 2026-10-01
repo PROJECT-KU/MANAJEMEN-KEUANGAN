@@ -1,21 +1,21 @@
 <?php
 
-namespace Tests\Feature\SharingSession;
+namespace Tests\Feature\WebinarEksklusif;
 
 use App\ClinikScopusBiayaPersesi;
 use App\KategoriLayanan;
 use App\Layanan;
-use App\SharingSessionPendaftaran;
+use App\WebinarEksklusifPendaftaran;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Layanan Sharing Session: API untuk halaman landing, borang pendaftaran,
+ * Layanan Webinar Eksklusif: API untuk halaman landing, borang pendaftaran,
  * penjaga kuota, dan pemberitahuan balik dari gerbang pembayaran.
  */
-class SharingSessionTest extends TestCase
+class WebinarEksklusifTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -37,14 +37,14 @@ class SharingSessionTest extends TestCase
      */
     private function tutupSemuaSesi(): void
     {
-        KategoriLayanan::where('layanan', 'sharing_session')
+        KategoriLayanan::where('layanan', 'webinar_eksklusif')
             ->update(['status' => 'non active']);
     }
 
     private function sesi(array $lain = []): KategoriLayanan
     {
         return KategoriLayanan::create(array_merge([
-            'layanan' => 'sharing_session',
+            'layanan' => 'webinar_eksklusif',
             'token' => Str::random(30),
             'nama' => 'Sesi Uji ' . Str::random(5),
             'nama_ke' => (string) random_int(7000, 7999),
@@ -67,11 +67,11 @@ class SharingSessionTest extends TestCase
     #[Test]
     public function layanan_dan_tarifnya_sudah_ada(): void
     {
-        $this->assertArrayHasKey('sharing_session', Layanan::katalog());
+        $this->assertArrayHasKey('webinar_eksklusif', Layanan::katalog());
 
-        $tarif = ClinikScopusBiayaPersesi::berlaku('sharing_session', null);
+        $tarif = ClinikScopusBiayaPersesi::berlaku('webinar_eksklusif', null);
 
-        $this->assertNotNull($tarif, 'Tarif Sharing Session harus ada.');
+        $this->assertNotNull($tarif, 'Tarif Webinar Eksklusif harus ada.');
         $this->assertSame(129000, (int) $tarif->biaya_persesi);
     }
 
@@ -79,14 +79,14 @@ class SharingSessionTest extends TestCase
     public function tabel_pendaftarannya_terdaftar_di_model(): void
     {
         /*
-         * Tanpa ini, peserta Sharing Session tidak terhitung di layar Angkatan
+         * Tanpa ini, peserta Webinar Eksklusif tidak terhitung di layar Angkatan
          * dan angkatannya bisa dihapus walau sudah ada yang mendaftar —
          * persis celah yang sudah ditemukan pada Scopus Cafe dan Clinik
          * Scopus sebelumnya.
          */
         $this->assertSame(
-            'sharing_session_pendaftaran',
-            KategoriLayanan::TABEL_PENDAFTARAN['sharing_session'] ?? null
+            'webinar_eksklusif_pendaftaran',
+            KategoriLayanan::TABEL_PENDAFTARAN['webinar_eksklusif'] ?? null
         );
 
         $this->assertFalse($this->sesi()->belumPunyaPendaftaran());
@@ -99,7 +99,7 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi(['nama' => 'Sesi API Uji']);
 
-        $jawab = $this->getJson('/api/sharing-session');
+        $jawab = $this->getJson('/api/webinar-eksklusif');
 
         $jawab->assertOk()
             ->assertJsonPath('ada', true)
@@ -131,7 +131,7 @@ class SharingSessionTest extends TestCase
             'selesai' => now()->subWeek()->toDateString(),
         ]);
 
-        $this->getJson('/api/sharing-session')->assertOk()->assertJsonPath('ada', false);
+        $this->getJson('/api/webinar-eksklusif')->assertOk()->assertJsonPath('ada', false);
     }
 
     #[Test]
@@ -141,7 +141,7 @@ class SharingSessionTest extends TestCase
         // halaman landing menampilkan galat merah padahal tidak ada yang rusak.
         $this->tutupSemuaSesi();
 
-        $this->getJson('/api/sharing-session')
+        $this->getJson('/api/webinar-eksklusif')
             ->assertOk()
             ->assertJsonPath('ada', false)
             ->assertJsonPath('sesi', null);
@@ -152,7 +152,7 @@ class SharingSessionTest extends TestCase
     {
         $this->sesi();
 
-        $kontak = $this->getJson('/api/sharing-session')->json('sesi.kontak');
+        $kontak = $this->getJson('/api/webinar-eksklusif')->json('sesi.kontak');
 
         $this->assertNotEmpty($kontak);
         // 0889... jadi 6289... supaya tautannya bisa dipakai langsung.
@@ -164,9 +164,9 @@ class SharingSessionTest extends TestCase
     {
         // Endpoint ini tanpa autentikasi dan terbuka ke internet; satu jalur
         // tulis di sana berarti siapa pun bisa mengubah data.
-        $this->postJson('/api/sharing-session')->assertStatus(405);
-        $this->putJson('/api/sharing-session')->assertStatus(405);
-        $this->deleteJson('/api/sharing-session')->assertStatus(405);
+        $this->postJson('/api/webinar-eksklusif')->assertStatus(405);
+        $this->putJson('/api/webinar-eksklusif')->assertStatus(405);
+        $this->deleteJson('/api/webinar-eksklusif')->assertStatus(405);
     }
 
     // ---------------------------------------------------------- pendaftaran
@@ -176,7 +176,7 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        $this->get(route('public.sharingsession.daftar', [$sesi->id, $sesi->token]))
+        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))
             ->assertOk()
             ->assertSee($sesi->nama)
             ->assertSee('Rp 129.000');
@@ -187,8 +187,8 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        $this->get(route('public.sharingsession.daftar', [$sesi->id, 'token-karangan']))
-            ->assertRedirect(route('public.sharingsession.index'));
+        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, 'token-karangan']))
+            ->assertRedirect(route('public.webinareksklusif.index'));
     }
 
     #[Test]
@@ -196,7 +196,7 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id,
             'nama' => 'Budi Santoso',
             'email' => 'Budi@Contoh.Test',
@@ -205,7 +205,7 @@ class SharingSessionTest extends TestCase
             'jumlah_pendaftar' => 3,
         ])->assertRedirect();
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
         $this->assertNotNull($p);
         $this->assertSame('budi@contoh.test', $p->email, 'Emailnya dikecilkan.');
@@ -224,14 +224,14 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Ani', 'email' => 'ani@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 1,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
-        $this->assertMatchesRegularExpression('/^SS-\d{8}-\d{4}$/', $p->id_transaksi);
+        $this->assertMatchesRegularExpression('/^WE-\d{8}-\d{4}$/', $p->id_transaksi);
     }
 
     #[Test]
@@ -239,12 +239,12 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '2']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Cici', 'email' => 'cici@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 5,
         ])->assertSessionHas('error');
 
-        $this->assertSame(0, SharingSessionPendaftaran::where('kategori_id', $sesi->id)->count());
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
         $this->assertSame(2, (int) $sesi->fresh()->sisa_kuota, 'Kuotanya tidak boleh ikut terpotong.');
     }
 
@@ -253,12 +253,12 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi(['status' => 'non active']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Dedi', 'email' => 'dedi@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 1,
-        ])->assertRedirect(route('public.sharingsession.index'));
+        ])->assertRedirect(route('public.webinareksklusif.index'));
 
-        $this->assertSame(0, SharingSessionPendaftaran::where('kategori_id', $sesi->id)->count());
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
     }
 
     #[Test]
@@ -266,14 +266,14 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Eka', 'email' => 'eka@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 1,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
-        $this->get(route('public.sharingsession.status', $p->token))
+        $this->get(route('public.webinareksklusif.status', $p->token))
             ->assertOk()
             ->assertSee($p->id_transaksi)
             ->assertSee('Rp 129.000');
@@ -292,14 +292,14 @@ class SharingSessionTest extends TestCase
          */
         $sesi = $this->sesi();
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Fani', 'email' => 'fani@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 1,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
-        $this->postJson(route('public.sharingsession.pemberitahuan'), [
+        $this->postJson(route('public.webinareksklusif.pemberitahuan'), [
             'order' => ['invoice_number' => $p->id_transaksi],
             'transaction' => ['status' => 'SUCCESS'],
         ])->assertStatus(401);
@@ -314,12 +314,12 @@ class SharingSessionTest extends TestCase
 
         $sesi = $this->sesi();
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Gina', 'email' => 'gina@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 2,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
         $this->kirimPemberitahuan($p->id_transaksi, 'SUCCESS')->assertOk();
 
@@ -339,12 +339,12 @@ class SharingSessionTest extends TestCase
 
         $sesi = $this->sesi();
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Hadi', 'email' => 'hadi@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 1,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
         $this->kirimPemberitahuan($p->id_transaksi, 'SUCCESS')->assertOk();
         $waktuPertama = $p->fresh()->bayar_pada;
@@ -362,14 +362,14 @@ class SharingSessionTest extends TestCase
 
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Ika', 'email' => 'ika@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 4,
         ]);
 
         $this->assertSame(16, (int) $sesi->fresh()->sisa_kuota);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
         $this->kirimPemberitahuan($p->id_transaksi, 'EXPIRED')->assertOk();
 
@@ -386,15 +386,15 @@ class SharingSessionTest extends TestCase
          */
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Joko', 'email' => 'joko@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 3,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
         $p->forceFill(['kedaluwarsa_pada' => now()->subHour()])->save();
 
-        $this->artisan('sharing-session:kedaluwarsakan')->assertSuccessful();
+        $this->artisan('webinar-eksklusif:kedaluwarsakan')->assertSuccessful();
 
         $this->assertSame('expired', $p->fresh()->status);
         $this->assertSame(20, (int) $sesi->fresh()->sisa_kuota);
@@ -405,15 +405,15 @@ class SharingSessionTest extends TestCase
     {
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
-        $this->post(route('public.sharingsession.store'), [
+        $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Kiki', 'email' => 'kiki@contoh.test',
             'telp' => '08123456789', 'jumlah_pendaftar' => 2,
         ]);
 
-        $p = SharingSessionPendaftaran::where('kategori_id', $sesi->id)->first();
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
         $p->forceFill(['kedaluwarsa_pada' => now()->subHour()])->save();
 
-        $this->artisan('sharing-session:kedaluwarsakan', ['--kering' => true])->assertSuccessful();
+        $this->artisan('webinar-eksklusif:kedaluwarsakan', ['--kering' => true])->assertSuccessful();
 
         $this->assertSame('pending', $p->fresh()->status);
         $this->assertSame(18, (int) $sesi->fresh()->sisa_kuota);
@@ -428,7 +428,7 @@ class SharingSessionTest extends TestCase
      */
     private function kirimPemberitahuan(string $nomor, string $status)
     {
-        $jalur = '/Sharing-Session/pemberitahuan/doku';
+        $jalur = '/Webinar-Eksklusif/pemberitahuan/doku';
 
         $isi = json_encode([
             'order' => ['invoice_number' => $nomor],

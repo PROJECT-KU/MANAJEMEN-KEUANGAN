@@ -13,8 +13,8 @@ use Illuminate\Validation\Rule;
 /**
  * Menambah dan mengubah layanan jasa.
  *
- * Katalognya dulu konstanta di kode, jadi layanan baru — misalnya sharing
- * session eksklusif yang berbayar — menunggu rilis. Sekarang admin
+ * Katalognya dulu konstanta di kode, jadi layanan baru — misalnya webinar
+ * eksklusif yang berbayar — menunggu rilis. Sekarang admin
  * menambahnya sendiri, dan seluruh layar yang membaca katalog itu (tarif,
  * angkatan) langsung ikut tanpa disentuh.
  */

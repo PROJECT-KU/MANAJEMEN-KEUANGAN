@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\KategoriLayanan;
-use App\SharingSessionPendaftaran;
+use App\WebinarEksklusifPendaftaran;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\DB;
  * peladen sedang mati, jaringannya putus — dan kursi yang hilang karena itu
  * tidak akan pernah kembali sendiri.
  */
-class KedaluwarsakanPendaftaranSharingSession extends Command
+class KedaluwarsakanPendaftaranWebinarEksklusif extends Command
 {
-    protected $signature = 'sharing-session:kedaluwarsakan {--kering : Hanya melaporkan, tidak mengubah apa pun}';
+    protected $signature = 'webinar-eksklusif:kedaluwarsakan {--kering : Hanya melaporkan, tidak mengubah apa pun}';
 
     protected $description = 'Melepas kursi dari pendaftaran yang batas bayarnya sudah lewat';
 
@@ -32,7 +32,7 @@ class KedaluwarsakanPendaftaranSharingSession extends Command
     {
         $kering = (bool) $this->option('kering');
 
-        $lewat = SharingSessionPendaftaran::where('status', 'pending')
+        $lewat = WebinarEksklusifPendaftaran::where('status', 'pending')
             ->whereNotNull('kedaluwarsa_pada')
             ->where('kedaluwarsa_pada', '<', now())
             ->get();

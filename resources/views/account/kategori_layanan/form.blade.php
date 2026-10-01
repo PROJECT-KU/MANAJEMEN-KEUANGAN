@@ -457,7 +457,7 @@
                         {{-- ------------------------------------------- acara daring --}}
                         {{-- Satu bagian tersendiri, bukan isian yang berserak di
                              antara yang lain: keenamnya hanya terpakai acara daring
-                             (Sharing Session, webinar), dan berserak ia membuat
+                             (Webinar Eksklusif, webinar), dan berserak ia membuat
                              borang Scopus Camp memuat enam isian kosong yang tidak
                              pernah diisi siapa pun.
 
@@ -468,7 +468,7 @@
                             <summary>
                                 <i class="fas fa-video" aria-hidden="true"></i>
                                 <span>Acara daring — jam, platform, dan pemateri</span>
-                                <small>Isi kalau ini webinar atau sharing session. Boleh dikosongkan.</small>
+                                <small>Isi kalau ini webinar atau webinar eksklusif. Boleh dikosongkan.</small>
                             </summary>
 
                             <div class="brg-kisi">
