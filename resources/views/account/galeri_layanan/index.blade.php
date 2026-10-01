@@ -1,6 +1,11 @@
-@extends('livewire.layout.templateindex')
+@extends('layouts.account')
+@extends('layouts.loader')
 
-@section('title', 'Galeri Layanan')
+@section('title')
+Galeri Layanan | MIS
+@stop
+
+@include('partials.toast-flash')
 
 @push('gaya')
 <style>
@@ -93,6 +98,21 @@
     }
 
     .gal-terang > .fas { margin: 0 !important; margin-top: 2px !important; }
+
+    /* Penanda wajib. Merah dan kelihatan tanpa hover — hanya dipasang pada
+       medan yang validatornya memang required, supaya tandanya tetap berarti.
+
+       Span biasa, BUKAN komponen Blade bernama "wajib": proyek ini tidak punya
+       satu pun komponen (tidak ada resources/views/components), dan memakainya
+       membuat seluruh halaman galat 500 dengan pesan "Unable to locate a class
+       or view for component" — galat yang menunjuk middleware, bukan
+       tampilannya.
+
+       Nama komponennya sengaja ditulis TANPA kurung sudut di komentar ini.
+       Pemindai komponen Blade tidak peduli teksnya ada di dalam komentar CSS:
+       menuliskannya utuh di sini membuat komentar penjelas ini sendiri yang
+       menggagalkan halamannya. */
+    .gal-wajib { color: #e11d48; font-weight: 800; }
 </style>
 @endpush
 
@@ -128,10 +148,25 @@
                 <input type="hidden" name="layanan" value="{{ $layanan }}">
 
                 <div class="mis-isian">
-                    <label class="mis-label" for="gal-berkas">Pilih foto <x-wajib /></label>
+                    <label class="mis-label" for="gal-berkas">
+                        Pilih foto <span class="gal-wajib" title="Wajib diisi" aria-hidden="true">*</span>
+                    </label>
+                    {{-- .heic dan .heif ikut disebut di accept: di iPhone, dialog
+                         berkas MENYEMBUNYIKAN foto yang jenisnya tidak disebut,
+                         jadi tanpa ini sebagian besar foto pengguna iPhone tidak
+                         akan kelihatan sama sekali saat memilih. --}}
                     <input type="file" class="form-control-modern" id="gal-berkas" name="berkas[]"
-                        accept="image/jpeg,image/png,image/webp" multiple required>
-                    <p class="mis-bantuan">Boleh beberapa sekaligus, paling banyak 20.</p>
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                        multiple required>
+                    <p class="mis-bantuan">
+                        Boleh beberapa sekaligus, paling banyak 20.
+                        @if ($bisaHeic)
+                            JPG, PNG, WebP, dan HEIC dari iPhone — semuanya diubah jadi WebP.
+                        @else
+                            JPG, PNG, dan WebP. <strong>HEIC belum bisa dibaca peladen ini</strong>,
+                            ubah dulu ke JPG.
+                        @endif
+                    </p>
                 </div>
 
                 <div class="mis-isian">

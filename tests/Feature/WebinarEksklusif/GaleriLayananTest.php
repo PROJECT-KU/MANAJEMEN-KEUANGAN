@@ -27,12 +27,22 @@ class GaleriLayananTest extends TestCase
     /** @var array<int, string> berkas yang dibuat uji ini, dibersihkan di akhir */
     private array $sampah = [];
 
+    /**
+     * @var array<int, string> berkas yang SUDAH ADA sebelum uji ini jalan
+     *
+     * Dipotret di setUp dan dipakai tearDown sebagai pagar: berkas yang ada di
+     * daftar ini TIDAK PERNAH dihapus, apa pun yang masuk $sampah.
+     */
+    private array $milikOrang = [];
+
     protected function setUp(): void
     {
         parent::setUp();
         Layanan::lupakanKatalog();
         KategoriLayanan::lupakanPendaftar();
         ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
+
+        $this->milikOrang = GaleriLayanan::pluck('berkas')->filter()->all();
     }
 
     protected function tearDown(): void
@@ -41,8 +51,22 @@ class GaleriLayananTest extends TestCase
          * Berkasnya dibersihkan sendiri. DatabaseTransactions mengembalikan
          * barisnya, TETAPI tidak menyentuh cakram sama sekali — tanpa ini,
          * tiap jalan uji meninggalkan WebP baru di storage pengembang.
+         *
+         * PAGARNYA: berkas yang sudah ada sebelum uji ini jalan tidak pernah
+         * dihapus. Versi pertama uji ini menyapu seluruh baris layanan itu ke
+         * dalam $sampah, dan yang ikut terhapus adalah FOTO SUNGGUHAN yang
+         * baru saja diunggah orang lewat layar admin — berkasnya hilang, dan
+         * barisnya tertinggal menunjuk ke berkas yang tidak ada.
+         *
+         * Menyaring menurut keterangan sudah memperbaikinya, tetapi itu
+         * konvensi yang bisa lupa dipakai uji berikutnya. Pagar ini bekerja
+         * walau konvensinya dilanggar.
          */
         foreach ($this->sampah as $jalur) {
+            if ($jalur === null || in_array($jalur, $this->milikOrang, true)) {
+                continue;
+            }
+
             Storage::disk(Gambar::CAKRAM)->delete($jalur);
         }
 
@@ -100,6 +124,35 @@ class GaleriLayananTest extends TestCase
             'total_kuota' => '50', 'sisa_kuota' => '50',
             'biaya' => '129000', 'status' => 'active',
         ]);
+    }
+
+    // --------------------------------------------------------- layar admin
+
+    #[Test]
+    public function layar_galeri_terbuka(): void
+    {
+        /*
+         * Uji yang paling sederhana dan paling sering menyelamatkan: halamannya
+         * BISA DIBUKA. Dua kesalahan sekaligus lolos tanpa ini — komponen Blade
+         * <x-wajib /> yang tidak ada di proyek ini, dan @extends ke layout
+         * milik proyek lain. Keduanya galat 500, dan keduanya hanya ketahuan
+         * saat halamannya benar-benar dibuka orang.
+         */
+        $this->actingAs($this->akun())
+            ->get(route('account.galeri-layanan.index'))
+            ->assertOk()
+            ->assertSee('Galeri layanan');
+    }
+
+    #[Test]
+    public function orang_luar_tidak_bisa_membuka_galeri(): void
+    {
+        $pelanggan = $this->akun();
+        $pelanggan->forceFill(['peran' => User::PERAN_PELANGGAN])->save();
+
+        $this->actingAs($pelanggan->refresh())
+            ->get(route('account.galeri-layanan.index'))
+            ->assertRedirect();
     }
 
     // ------------------------------------------------------------ konversi
@@ -189,6 +242,137 @@ class GaleriLayananTest extends TestCase
         $this->assertFileExists($luar, 'Berkas di luar folder unggahan tidak boleh tersentuh.');
     }
 
+    // ------------------------------------------------- putaran EXIF & HEIC
+
+    /**
+     * Membuat JPEG yang BERTANDA miring, seperti foto dari ponsel.
+     *
+     * Penanda EXIF-nya ditulis dengan merakit blok APP1 sendiri — tanpa
+     * perpustakaan tambahan, dan isinya cuma satu medan Orientation.
+     */
+    private function jpegMiring(int $arah, int $l = 800, int $t = 400): string
+    {
+        $im = imagecreatetruecolor($l, $t);
+        imagefill($im, 0, 0, imagecolorallocate($im, 20, 40, 90));
+        // Penanda di sudut KIRI ATAS, supaya putarannya bisa dibuktikan.
+        imagefilledrectangle($im, 0, 0, (int) ($l / 8), (int) ($t / 8),
+            imagecolorallocate($im, 255, 200, 0));
+
+        $jalur = sys_get_temp_dir() . '/exif-' . Str::random(8) . '.jpg';
+        imagejpeg($im, $jalur, 92);
+        imagedestroy($im);
+
+        // APP1/Exif: TIFF little-endian, satu IFD berisi Orientation (0x0112).
+        $tiff = "II\x2a\x00\x08\x00\x00\x00"
+            . "\x01\x00"
+            . "\x12\x01\x03\x00\x01\x00\x00\x00" . pack('v', $arah) . "\x00\x00"
+            . "\x00\x00\x00\x00";
+
+        $app1 = "Exif\x00\x00" . $tiff;
+        $blok = "\xFF\xE1" . pack('n', strlen($app1) + 2) . $app1;
+
+        $isi = file_get_contents($jalur);
+        file_put_contents($jalur, substr($isi, 0, 2) . $blok . substr($isi, 2));
+
+        return $jalur;
+    }
+
+    #[Test]
+    public function foto_bertanda_miring_diluruskan(): void
+    {
+        /*
+         * Foto dari ponsel hampir selalu disimpan MIRING dengan penanda EXIF
+         * yang memberi tahu putarannya. GD mengabaikan penanda itu, dan WebP
+         * tidak membawanya sama sekali — jadi tanpa diluruskan di sini,
+         * hasilnya foto terbalik 90 derajat di layar.
+         *
+         * Orientation 6 = harus diputar 90 derajat searah jarum jam, sehingga
+         * gambar 800x400 jadi 400x800.
+         */
+        $jalur = $this->jpegMiring(6, 800, 400);
+
+        $hasil = app(Gambar::class)->simpan(
+            new UploadedFile($jalur, basename($jalur), 'image/jpeg', null, true),
+            'uji/galeri'
+        );
+        $this->sampah[] = $hasil;
+
+        $tentang = getimagesizefromstring(Storage::disk(Gambar::CAKRAM)->get($hasil));
+
+        $this->assertSame(400, $tentang[0], 'Lebarnya harus jadi 400 sesudah diputar.');
+        $this->assertSame(800, $tentang[1], 'Tingginya harus jadi 800 sesudah diputar.');
+    }
+
+    #[Test]
+    public function foto_tanpa_tanda_miring_tidak_diputar(): void
+    {
+        // Orientation 1 = sudah lurus. Memutarnya justru merusak.
+        $jalur = $this->jpegMiring(1, 800, 400);
+
+        $hasil = app(Gambar::class)->simpan(
+            new UploadedFile($jalur, basename($jalur), 'image/jpeg', null, true),
+            'uji/galeri'
+        );
+        $this->sampah[] = $hasil;
+
+        $tentang = getimagesizefromstring(Storage::disk(Gambar::CAKRAM)->get($hasil));
+
+        $this->assertSame(800, $tentang[0]);
+        $this->assertSame(400, $tentang[1]);
+    }
+
+    #[Test]
+    public function heic_ikut_dikonversi_jadi_webp(): void
+    {
+        $gambar = app(Gambar::class);
+
+        if (! $gambar->bisaHeic()) {
+            $this->markTestSkipped('Peladen ini belum bisa membaca HEIC.');
+        }
+
+        $jalur = $this->berkasHeic();
+
+        if ($jalur === null) {
+            $this->markTestSkipped('Tidak bisa membuat berkas HEIC contoh di mesin ini.');
+        }
+
+        $hasil = $gambar->simpan(
+            new UploadedFile($jalur, basename($jalur), 'image/heic', null, true),
+            'uji/galeri'
+        );
+        $this->sampah[] = $hasil;
+
+        $this->assertNotNull($hasil, 'HEIC harus bisa dibaca dan dikonversi.');
+        $this->assertStringEndsWith('.webp', $hasil);
+
+        $isi = Storage::disk(Gambar::CAKRAM)->get($hasil);
+        $this->assertSame('WEBP', substr($isi, 8, 4), 'Hasilnya harus benar-benar WebP.');
+        $this->assertNotNull(getimagesizefromstring($isi));
+    }
+
+    /** Berkas HEIC contoh; null kalau mesin ini tidak bisa membuatnya. */
+    private function berkasHeic(): ?string
+    {
+        $sumber = sys_get_temp_dir() . '/heic-sumber-' . Str::random(6) . '.jpg';
+        $tujuan = sys_get_temp_dir() . '/heic-uji-' . Str::random(6) . '.heic';
+
+        $im = imagecreatetruecolor(600, 400);
+        imagefill($im, 0, 0, imagecolorallocate($im, 200, 80, 20));
+        imagejpeg($im, $sumber);
+        imagedestroy($im);
+
+        @exec('command -v sips 2>/dev/null', $ada, $kode);
+
+        if ($kode === 0) {
+            @exec(sprintf('sips -s format heic %s --out %s 2>/dev/null',
+                escapeshellarg($sumber), escapeshellarg($tujuan)));
+        }
+
+        @unlink($sumber);
+
+        return is_file($tujuan) ? $tujuan : null;
+    }
+
     // -------------------------------------------------------------- galeri
 
     #[Test]
@@ -203,7 +387,14 @@ class GaleriLayananTest extends TestCase
 
         $jawab->assertRedirect();
 
-        $foto = GaleriLayanan::where('layanan', 'webinar_eksklusif')->get();
+        /*
+         * Disaring menurut keterangannya, BUKAN seluruh baris layanan itu:
+         * galeri sungguhan di basis data pengembang ikut terhitung, dan ujinya
+         * merah karena data yang sama sekali tidak ada hubungannya.
+         */
+        $foto = GaleriLayanan::where('layanan', 'webinar_eksklusif')
+            ->where('keterangan', 'Suasana sesi uji')->get();
+
         $this->sampah = array_merge($this->sampah, $foto->pluck('berkas')->all());
 
         $this->assertCount(2, $foto);
