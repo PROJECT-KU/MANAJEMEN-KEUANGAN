@@ -256,6 +256,66 @@ class PerakitDeskripsiTest extends TestCase
         }
     }
 
+    // -------------------------------------------------- blok menggantung
+
+    #[Test]
+    public function judul_ikut_terbuang_kalau_daftarnya_kosong(): void
+    {
+        /*
+         * Aturan per baris saja tidak cukup: "🔹 Yang dipelajari" tidak
+         * berpenanda, jadi ia bertahan walau daftarnya kosong — dan untuk
+         * layanan yang kegiatannya belum diisi, judul itu menggantung tanpa
+         * isi apa pun di bawahnya.
+         */
+        $this->tarifDenganCetakan('scopus_kafe',
+            "{nama}\n\n🔹 Yang dipelajari\n{kegiatan}\n\n💰 {harga}",
+            ['kegiatan' => []]);
+
+        $hasil = PerakitDeskripsi::rakit($this->angkatan('scopus_kafe'));
+
+        $this->assertStringNotContainsString('Yang dipelajari', $hasil);
+        $this->assertStringContainsString('💰', $hasil);
+    }
+
+    #[Test]
+    public function judul_tetap_ada_selama_daftarnya_terisi(): void
+    {
+        $this->tarifDenganCetakan('scopus_kafe',
+            "{nama}\n\n🔹 Yang dipelajari\n{kegiatan}",
+            ['kegiatan' => ['Diskusi kelompok']]);
+
+        $hasil = PerakitDeskripsi::rakit($this->angkatan('scopus_kafe'));
+
+        $this->assertStringContainsString('Yang dipelajari', $hasil);
+        $this->assertStringContainsString('1. Diskusi kelompok', $hasil);
+    }
+
+    #[Test]
+    public function blok_yang_sebagian_penandanya_terisi_tetap_utuh(): void
+    {
+        // Satu blok berisi tanggal DAN lokasi. Tanggalnya terisi, jadi bloknya
+        // bertahan — yang dibuang cuma baris lokasinya.
+        $this->tarifDenganCetakan('scopus_kafe', "🗓 {tanggal}\n📍 {lokasi}");
+
+        $hasil = PerakitDeskripsi::rakit($this->angkatan('scopus_kafe', ['lokasi' => null]));
+
+        $this->assertStringContainsString('🗓 30 Oktober – 1 November 2026', $hasil);
+        $this->assertStringNotContainsString('📍', $hasil);
+    }
+
+    #[Test]
+    public function kalimat_tanpa_penanda_tidak_pernah_disentuh(): void
+    {
+        // Alinea yang memang ditulis admin, tanpa penanda sama sekali, bukan
+        // urusan aturan ini.
+        $this->tarifDenganCetakan('scopus_kafe',
+            "{nama}\n\nKelas ini dibuka untuk umum.\n\n{kegiatan}",
+            ['kegiatan' => []]);
+
+        $this->assertStringContainsString('Kelas ini dibuka untuk umum.',
+            PerakitDeskripsi::rakit($this->angkatan('scopus_kafe')));
+    }
+
     // ------------------------------------------------------------ durasi
 
     #[Test]
