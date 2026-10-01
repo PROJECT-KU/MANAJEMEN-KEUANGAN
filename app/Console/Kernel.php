@@ -29,6 +29,11 @@ class Kernel extends ConsoleKernel
         // setelah harinya benar-benar habis, dan jam 01:10 memberi jarak dari
         // pekerjaan tengah malam lain di peladen yang sama.
         $schedule->command('angkatan:tutup-lewat')->dailyAt('01:10');
+
+        // Lepas kursi Sharing Session yang dipesan tetapi tidak jadi dibayar.
+        // Tiap sepuluh menit, bukan harian: batas bayarnya satu jam, dan kursi
+        // yang tertahan semalaman adalah peserta yang batal mendaftar.
+        $schedule->command('sharing-session:kedaluwarsakan')->everyTenMinutes();
     }
 
     protected function commands()
