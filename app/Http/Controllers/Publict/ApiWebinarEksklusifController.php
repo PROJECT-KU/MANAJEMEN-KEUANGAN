@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Publict;
 
 use App\ClinikScopusBiayaPersesi;
+use App\GaleriLayanan;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Support\RentangTanggal;
@@ -139,6 +140,21 @@ class ApiWebinarEksklusifController extends Controller
             'kegiatan' => $tarif?->daftar_kegiatan ?? [],
             'fasilitas' => $tarif?->daftar_fasilitas ?? [],
             'kontak' => $this->kontak($tarif),
+
+            /*
+             * Galeri. Yang dikirim hanya alamat dan keterangannya — tidak ada
+             * id, tanggal unggah, atau siapa yang mengunggah. Daftar kolomnya
+             * ditulis satu per satu dengan alasan yang sama seperti sesi di
+             * atas: menambah kolom pada tabel galeri tidak boleh diam-diam
+             * ikut menerbitkannya ke internet.
+             */
+            'galeri' => GaleriLayanan::untukAngkatan($a)->get()
+                ->map(fn ($g) => ['gambar' => $g->alamat, 'keterangan' => $g->keterangan_tampil])
+                // Yang berkasnya sudah tidak ada di cakram dibuang di sini,
+                // bukan dikirim sebagai null — halaman landing tidak perlu
+                // tahu bahwa ada yang hilang.
+                ->filter(fn ($g) => $g['gambar'] !== null)
+                ->values(),
 
             'kuota' => [
                 'total' => $a->total_kuota === null ? null : (int) $a->total_kuota,

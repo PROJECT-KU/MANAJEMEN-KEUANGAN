@@ -346,16 +346,17 @@ class KategoriLayanan extends Model
         return self::FOLDER_SAMPUL[$this->layanan] ?? 'angkatan';
     }
 
-    /** Alamat sampul untuk ditampilkan; null kalau belum ada. */
+    /**
+     * Alamat sampul untuk ditampilkan; null kalau berkasnya memang tidak ada.
+     *
+     * Dilempar ke AlamatGambar supaya dua bentuk nilai sama-sama terbuka:
+     * WebP di storage (bentuk baru) dan nama berkas di public/<folder>
+     * (bentuk lama, 60 angkatan masih begitu sampai perintah konversi
+     * dijalankan di peladen).
+     */
     public function getAlamatSampulAttribute(): ?string
     {
-        if (! $this->gambar) {
-            return null;
-        }
-
-        $berkas = public_path($this->folderSampul() . '/' . basename($this->gambar));
-
-        return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->gambar)) : null;
+        return \App\Support\AlamatGambar::url($this->gambar, $this->folderSampul());
     }
 
     /**
@@ -672,13 +673,7 @@ class KategoriLayanan extends Model
      */
     public function getAlamatPemateriAttribute(): ?string
     {
-        if (! $this->pemateri_foto) {
-            return null;
-        }
-
-        $berkas = public_path($this->folderSampul() . '/' . basename($this->pemateri_foto));
-
-        return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->pemateri_foto)) : null;
+        return \App\Support\AlamatGambar::url($this->pemateri_foto, $this->folderSampul());
     }
 
     /**
@@ -923,16 +918,26 @@ class KategoriLayanan extends Model
                 continue;
             }
 
-            // Berkas yang sudah hilang dari cakram tidak diusulkan: yang
-            // tampil nanti gambar rusak, dan itu lebih membingungkan daripada
-            // kotak kosong.
-            if (! is_file(public_path($jalur))) {
+            /*
+             * Berkas yang sudah hilang dari cakram tidak diusulkan: yang tampil
+             * nanti gambar rusak, dan itu lebih membingungkan daripada kotak
+             * kosong.
+             *
+             * Dilempar ke AlamatGambar, BUKAN diperiksa dengan public_path():
+             * sejak sampul dikonversi, jalurnya menunjuk WebP di storage, dan
+             * pemeriksaan ke public/ membuat seluruh usulan warisan lenyap
+             * tanpa ada yang tahu kenapa.
+             */
+            $folder = self::FOLDER_SAMPUL[explode('|', $kunci)[0]] ?? null;
+            $alamat = \App\Support\AlamatGambar::url($jalur, $folder);
+
+            if ($alamat === null) {
                 continue;
             }
 
             $hasil[$kunci] = [
                 'jalur' => $jalur,
-                'alamat' => asset($jalur),
+                'alamat' => $alamat,
                 'jumlah' => $terbanyak,
             ];
         }

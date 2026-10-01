@@ -484,6 +484,13 @@ Route::prefix('account')
             Route::post('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@update')->name('account.kategori-layanan.update');
             Route::delete('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@destroy')->name('account.kategori-layanan.destroy');
 
+            // Galeri foto per layanan. Unggahannya langsung jadi WebP di
+            // storage; berkas aslinya dihapus.
+            Route::get('/galeri-layanan', 'account\GaleriLayananController@index')->name('account.galeri-layanan.index');
+            Route::post('/galeri-layanan', 'account\GaleriLayananController@store')->name('account.galeri-layanan.store');
+            Route::post('/galeri-layanan/{galeri}/ubah', 'account\GaleriLayananController@update')->name('account.galeri-layanan.update');
+            Route::delete('/galeri-layanan/{galeri}', 'account\GaleriLayananController@destroy')->name('account.galeri-layanan.destroy');
+
             // riwayat pemesanan clinik scopus
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/data', 'account\ClinikScopusRiwayatPemesananController@index')->name('account.Clinik-Scopus-Riwayat-Pemesanan.index');
             Route::get('/Clinik-Scopus-Riwayat-Pemesanan/detail/{id}', 'account\ClinikScopusRiwayatPemesananController@detail')->name('account.Clinik-Scopus-Riwayat-Pemesanan.detail');
