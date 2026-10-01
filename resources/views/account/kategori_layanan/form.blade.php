@@ -566,11 +566,73 @@
             hargaMentah.value = t.biaya;
         }
 
-        layanan.addEventListener('change', function () { segarkanVarian(); segarkanTarif(); });
+        /*
+         * Menutup sisa kolom di akhir baris.
+         *
+         * Jumlah isian sempitnya TIDAK tetap: borang ubah punya "sisa kuota"
+         * dan borang tambah tidak, lalu "varian" muncul-hilang mengikuti
+         * layanan yang dipilih — tanpa halaman dimuat ulang. Jadi tidak ada
+         * satu pun aturan CSS tetap yang pas di semua keadaan: yang menutup
+         * celah di borang tambah justru membuka celah di borang ubah.
+         *
+         * Yang dihitung di sini sisa pembagiannya, lalu isian TERAKHIR tiap
+         * rentetan dilebarkan sampai barisnya penuh. Rentetan dipotong tiap
+         * ketemu isian selebar penuh, sebab isian itu memulai baris baru.
+         */
+        const kisi = document.querySelector('.brg-kisi');
+
+        function rapatkanBarisTerakhir() {
+            // Jumlah kolom dibaca dari jalur yang SUDAH dihitung peramban;
+            // dengan auto-fit, jumlahnya tidak bisa disimpulkan dari CSS-nya.
+            const kolom = getComputedStyle(kisi).gridTemplateColumns.split(' ').filter(Boolean).length;
+
+            const rentetan = [];
+            let sekarang = [];
+
+            [...kisi.children].forEach(function (anak) {
+                if (anak.hidden || getComputedStyle(anak).display === 'none') return;
+
+                anak.style.gridColumn = '';
+
+                if (anak.classList.contains('brg-penuh')) {
+                    if (sekarang.length) rentetan.push(sekarang);
+                    sekarang = [];
+                    return;
+                }
+
+                sekarang.push(anak);
+            });
+
+            if (sekarang.length) rentetan.push(sekarang);
+
+            if (kolom < 2) return;
+
+            rentetan.forEach(function (deret) {
+                const sisa = deret.length % kolom;
+                if (sisa === 0) return;
+
+                deret[deret.length - 1].style.gridColumn = 'span ' + (kolom - sisa + 1);
+            });
+        }
+
+        layanan.addEventListener('change', function () {
+            segarkanVarian();
+            segarkanTarif();
+            rapatkanBarisTerakhir();
+        });
         varian.addEventListener('change', segarkanTarif);
 
         segarkanVarian();
         segarkanTarif();
+        rapatkanBarisTerakhir();
+
+        // Jumlah kolomnya berubah mengikuti lebar kartunya, bukan lebar layar,
+        // jadi yang disimak kisinya sendiri.
+        if (window.ResizeObserver) {
+            new ResizeObserver(rapatkanBarisTerakhir).observe(kisi);
+        } else {
+            window.addEventListener('resize', rapatkanBarisTerakhir);
+        }
 
         /*
          * Perakitan deskripsi dikerjakan peladen, bukan di sini. Disalin ke
