@@ -860,3 +860,63 @@
         lebar.addEventListener('change', setel);
     });
 })();
+
+/*
+ * Barisan ubin yang digeser di ponsel.
+ *
+ * Tiga hal yang membuatnya lebih dari sekadar overflow-x: auto:
+ *
+ *   1. Petunjuk hanya menyala kalau MEMANG ada yang belum terlihat. Di layar
+ *      lebar ubinnya kisi biasa, tidak ada yang digeser, dan petunjuk yang
+ *      tetap terpampang di sana cuma berbohong.
+ *   2. Petunjuknya padam begitu barisnya tergeser sampai ujung. Petunjuk yang
+ *      masih terpampang sesudah dituruti berhenti dibaca orang.
+ *   3. Wadah yang bisa digeser diberi tabindex supaya bisa dijangkau papan
+ *      ketik. Chrome tidak memberikannya sendiri, dan tanpa itu isi yang
+ *      tergeser sama sekali tidak terjangkau tanpa tetikus — tetapi tabindex
+ *      itu DILEPAS lagi di layar lebar, supaya tidak jadi perhentian Tab yang
+ *      tidak melakukan apa-apa.
+ *
+ * Perjanjian markahnya:
+ *
+ *   <div class="mis-ringkas-geser" data-mis-geser>
+ *     <div class="mis-ringkas"> ...ubin... </div>
+ *     <p class="mis-ringkas-petunjuk">…</p>
+ *   </div>
+ */
+(function () {
+    'use strict';
+
+    document.querySelectorAll('[data-mis-geser]').forEach(function (bungkus) {
+        var baris = bungkus.querySelector('.mis-ringkas');
+        if (!baris) return;
+
+        function periksa() {
+            // 2px toleransi: lebar hasil hitungan peramban kerap meleset
+            // sepersekian piksel, dan tanpa toleransi petunjuknya menyala di
+            // layar lebar yang sebenarnya tidak bergeser sama sekali.
+            var bisa = baris.scrollWidth - baris.clientWidth > 2;
+            var mentok = baris.scrollLeft + baris.clientWidth >= baris.scrollWidth - 2;
+
+            bungkus.classList.toggle('bisa-geser', bisa && !mentok);
+
+            if (bisa) {
+                baris.setAttribute('tabindex', '0');
+                baris.setAttribute('role', 'group');
+            } else {
+                baris.removeAttribute('tabindex');
+                baris.removeAttribute('role');
+            }
+        }
+
+        baris.addEventListener('scroll', periksa, { passive: true });
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(periksa).observe(baris);
+        } else {
+            window.addEventListener('resize', periksa);
+        }
+
+        periksa();
+    });
+})();

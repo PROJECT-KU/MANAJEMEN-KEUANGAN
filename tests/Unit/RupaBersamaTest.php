@@ -87,6 +87,7 @@ class RupaBersamaTest extends TestCase
         $css = file_get_contents(public_path('assets/css/mis-ui.css'));
 
         foreach (['.mis-ringkas', '.mis-ubin', '.mis-ubin-angka', '.mis-ubin-label',
+            '.mis-ringkas-petunjuk',
             '.mis-urut', '.mis-urut-ponsel', '.mis-saring-kartu', '.mis-saring',
             '.mis-saring-cari', '.mis-saring-pilih', '.mis-saring-hapus',
             '.mis-saring-sibuk', '.mis-hasil'] as $kelas) {
@@ -145,6 +146,43 @@ class RupaBersamaTest extends TestCase
     }
 
     #[Test]
+    public function barisan_ubin_yang_digeser_memakai_perjanjian_yang_sama(): void
+    {
+        /*
+         * Di bawah 1100px ubinnya jadi barisan yang digeser. Pembungkus
+         * data-mis-geser itulah yang dicari mis-ui.js untuk menyalakan
+         * petunjuknya — tanpa pembungkusnya, barisannya tetap bisa digeser
+         * tetapi tidak ada satu pun tanda bahwa ia bisa.
+         */
+        foreach ([
+            'account/customer/index.blade.php',
+            'account/kategori_layanan/index.blade.php',
+        ] as $relatif) {
+            $isi = file_get_contents(resource_path('views/' . $relatif));
+
+            $this->assertStringContainsString('data-mis-geser', $isi, $relatif);
+            $this->assertStringContainsString('mis-ringkas-petunjuk', $isi, $relatif);
+        }
+    }
+
+    #[Test]
+    public function petunjuk_geser_tersembunyi_sebagai_bawaan(): void
+    {
+        /*
+         * Aturannya harus di LUAR media query. Ditaruh di dalamnya, di layar
+         * lebar <p>-nya tidak punya display sama sekali dan tampil sebagai
+         * paragraf biasa — mengajak menggeser barisan yang tidak bergeser ke
+         * mana-mana. Terukur begitu pada percobaan pertama.
+         */
+        $css = file_get_contents(public_path('assets/css/mis-ui.css'));
+
+        $sebelumMedia = substr($css, 0, strpos($css, '@media (max-width: 1100px)'));
+
+        $this->assertStringContainsString('.mis-ringkas-petunjuk { display: none; }', $sebelumMedia,
+            'petunjuk geser harus tersembunyi sebagai bawaan, di luar media query');
+    }
+
+    #[Test]
     public function penanda_versi_css_ikut_naik(): void
     {
         /*
@@ -158,13 +196,13 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(75, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(78, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
 
         preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);
 
         $this->assertNotEmpty($cocokJs, 'penanda ?v= pada mis-ui.js tidak ketemu');
-        $this->assertGreaterThanOrEqual(13, (int) $cocokJs[1],
+        $this->assertGreaterThanOrEqual(15, (int) $cocokJs[1],
             'mis-ui.js berubah tetapi penanda ?v=-nya belum dinaikkan');
     }
 }
