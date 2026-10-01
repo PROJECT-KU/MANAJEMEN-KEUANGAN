@@ -122,13 +122,31 @@
         font-size: .74rem; color: var(--mis-tinta-3);
     }
 
+    /*
+     * Ikon sejajar dengan BARIS PERTAMA teksnya, bukan terdorong ke baris
+     * sendiri.
+     *
+     * Versi sebelumnya flex-wrap: wrap. Di layar 390px kalimatnya tidak muat
+     * sebaris, jadi ia pindah ke baris berikutnya seluruhnya — dan ikonnya
+     * tertinggal sendirian di atas. Terukur: titik tengah ikon 27px di atas
+     * titik tengah baris pertama teksnya.
+     *
+     * Jalan keluarnya bukan membuang wrap, melainkan menyuruh teksnya MENGECIL
+     * (flex: 1 1 0 + min-width: 0) sehingga ia membungkus di dalam kolomnya
+     * sendiri, di sebelah ikon. align-items: start, mengikuti banner lain di
+     * borang ini: ikon yang menandai pesan menempel ke baris pertamanya, bukan
+     * melayang di tengah blok tiga baris.
+     */
     .brg-tarif {
-        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        display: flex; align-items: flex-start; gap: 8px;
         padding: 10px 12px; margin-bottom: 12px;
         border: 1px dashed var(--mis-garis); border-radius: 11px;
         background: #f8fafc;
         line-height: 1.45; font-size: .76rem; color: var(--mis-tinta-3);
     }
+
+    .brg-tarif > .fas { flex: 0 0 auto; margin-top: 2px; }
+    .brg-tarif > span { flex: 1 1 0; min-width: 0; }
 
     .brg-tarif strong { font-size: .84rem; font-weight: 800; color: var(--mis-tinta); }
 
@@ -151,13 +169,19 @@
 
     /* Catatan sampul warisan: hijau, sebab ia mengabarkan sesuatu yang sudah
        beres — bukan peringatan dan bukan galat. */
+    /* Bentuknya sama dengan .brg-tarif, dan sebabnya sama: kalimatnya panjang
+       dan akan meninggalkan ikonnya sendirian di layar sempit. Tombol "Jangan
+       pakai" tetap boleh turun baris — ia tindakan, bukan bagian kalimatnya. */
     .brg-warisan {
-        display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+        display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px;
         margin: 0; padding: 8px 11px;
         border: 1px solid #bbf7d0; border-radius: 11px;
         background: #f0fdf4;
         line-height: 1.45; font-size: .74rem; color: #166534;
     }
+
+    .brg-warisan > .fas { flex: 0 0 auto; margin-top: 2px; }
+    .brg-warisan > span { flex: 1 1 0; min-width: 0; }
 
     .brg-warisan .fas { font-size: 12px !important; }
 

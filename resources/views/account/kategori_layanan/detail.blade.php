@@ -82,8 +82,11 @@
     .det-kosong { line-height: 1.5; font-size: .8rem; color: var(--mis-tinta-4); }
     .det-fasilitas { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 
+    /* Sama seperti daftar fasilitas di layar Tarif: tanpa align-items: start,
+       centang pada butir dua baris melayang di tengah blok. */
     .det-fasilitas li {
         display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px;
+        align-items: start;
         line-height: 1.45; font-size: .8rem; color: var(--mis-tinta-2);
     }
 
