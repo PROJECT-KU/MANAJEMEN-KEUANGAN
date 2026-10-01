@@ -87,7 +87,9 @@ class RupaBersamaTest extends TestCase
         $css = file_get_contents(public_path('assets/css/mis-ui.css'));
 
         foreach (['.mis-ringkas', '.mis-ubin', '.mis-ubin-angka', '.mis-ubin-label',
-            '.mis-urut', '.mis-urut-ponsel'] as $kelas) {
+            '.mis-urut', '.mis-urut-ponsel', '.mis-saring-kartu', '.mis-saring',
+            '.mis-saring-cari', '.mis-saring-pilih', '.mis-saring-hapus',
+            '.mis-saring-sibuk', '.mis-hasil'] as $kelas) {
             $this->assertStringContainsString($kelas . ' {', $css,
                 $kelas . ' dipakai layar tetapi tidak didefinisikan di mis-ui.css');
         }
@@ -98,6 +100,48 @@ class RupaBersamaTest extends TestCase
     {
         $this->assertFileExists(resource_path('views/partials/urut-kolom.blade.php'));
         $this->assertFileDoesNotExist(resource_path('views/account/customer/partials/urut.blade.php'));
+    }
+
+    #[Test]
+    public function dua_layar_yang_sudah_dipindah_tidak_merakit_sendiri_lagi(): void
+    {
+        /*
+         * Penandanya DOMParser: menukar sepotong halaman hasil permintaan latar
+         * hanya bisa dikerjakan dengan mengurai jawabannya, jadi kemunculannya
+         * di layar ini berarti perilakunya ditulis ulang padahal sudah ada di
+         * mis-ui.js.
+         *
+         * Dibatasi dua layar yang memang sudah dipindah. SEMBILAN layar lama —
+         * clinik_scopus, pengguna, gaji, presensi, promo, analisis_bibliometrik,
+         * pendaftaran_scopus_camp, dan dua layar kategori yang sudah
+         * digantikan — masih punya salinannya sendiri. Memasukkan mereka ke
+         * sini berarti uji yang merah sejak lahir, dan uji merah yang dibiarkan
+         * berhenti dibaca orang.
+         */
+        foreach ([
+            'account/customer/index.blade.php',
+            'account/kategori_layanan/index.blade.php',
+        ] as $relatif) {
+            $this->assertStringNotContainsString('new DOMParser(',
+                file_get_contents(resource_path('views/' . $relatif)), $relatif);
+        }
+    }
+
+    #[Test]
+    public function layar_daftar_memakai_perjanjian_saringan_bersama(): void
+    {
+        // Dua layar daftar besar MIS; keduanya harus memakai atribut yang sama.
+        foreach ([
+            'account/customer/index.blade.php',
+            'account/kategori_layanan/index.blade.php',
+        ] as $relatif) {
+            $isi = file_get_contents(resource_path('views/' . $relatif));
+
+            $this->assertStringContainsString('data-mis-saring=', $isi, $relatif);
+            $this->assertStringContainsString('data-mis-cari', $isi, $relatif);
+            $this->assertStringContainsString('data-mis-terapkan', $isi, $relatif);
+            $this->assertStringContainsString('class="mis-saring-kartu"', $isi, $relatif);
+        }
     }
 
     #[Test]
@@ -114,7 +158,13 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(73, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(75, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
+
+        preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);
+
+        $this->assertNotEmpty($cocokJs, 'penanda ?v= pada mis-ui.js tidak ketemu');
+        $this->assertGreaterThanOrEqual(13, (int) $cocokJs[1],
+            'mis-ui.js berubah tetapi penanda ?v=-nya belum dinaikkan');
     }
 }

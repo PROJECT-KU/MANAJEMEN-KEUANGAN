@@ -23,84 +23,9 @@ Angkatan Layanan | MIS
     .ang-kepala-judul { grid-column: 2; grid-row: 1; margin: 0; line-height: 1.25; font-size: .92rem; font-weight: 800; color: var(--mis-tinta); }
     .ang-kepala-sub { grid-column: 2; grid-row: 2; margin: 0; line-height: 1.45; font-size: .75rem; color: var(--mis-tinta-3); }
 
-    /* ------------------------------------------------------- saringan layanan */
-
-    /* Strip yang bisa digeser di ponsel, bukan lencana yang membungkus jadi
-       empat baris — polanya sama dengan strip tab di Profil. */
-    .ang-strip {
-        display: flex; gap: 8px;
-        overflow-x: auto; scroll-snap-type: x proximity;
-        /*
-         * Padding 5px memberi ruang untuk cincin fokus, yang kalau tidak
-         * akan terpotong oleh overflow-x: auto. TANPA margin negatif
-         * penyeimbang: terukur, margin itu membuat strip 1170px di dalam
-         * bagian selebar 1160px — meluber 5px ke kanan. Lebih baik lencananya
-         * masuk 5px daripada halamannya punya lebar yang bukan lebarnya.
-         */
-        padding: 5px; margin: 0 0 12px;
-        scrollbar-width: none;
-    }
-
-    .ang-strip::-webkit-scrollbar { display: none; }
-
-    .ang-pilih {
-        display: inline-flex; align-items: center; gap: 7px;
-        flex: 0 0 auto; scroll-snap-align: start;
-        height: 38px; padding: 0 14px;
-        border: 1px solid var(--mis-garis); border-radius: 12px;
-        background: #fff;
-        font-size: .78rem; font-weight: 700; color: var(--mis-tinta-2);
-        text-decoration: none; white-space: nowrap;
-        transition: all .2s ease;
-    }
-
-    .ang-pilih:hover { border-color: #c7d2fe; color: #4f46e5; text-decoration: none; }
-
-    .ang-pilih.aktif {
-        border-color: transparent; color: #fff;
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        box-shadow: 0 6px 16px -12px rgba(99, 102, 241, .9);
-    }
-
-    .ang-pilih .fas { font-size: 13px !important; }
-
-    .ang-hitung {
-        display: inline-grid; place-items: center;
-        min-width: 21px; height: 19px; padding: 0 6px;
-        border-radius: 999px; background: #eef2ff;
-        font-size: .68rem; font-weight: 800; color: #4f46e5;
-    }
-
-    .ang-pilih.aktif .ang-hitung { background: rgba(255, 255, 255, .22); color: #fff; }
-
     /* --------------------------------------------------------------- saringan */
 
-    .ang-saring {
-        display: grid;
-        /* Empat kendali sejak pengurut ditambahkan; kisinya masih untuk tiga,
-           jadi tombol Saring jatuh ke baris sendiri selebar penuh. */
-        grid-template-columns: minmax(0, 1fr) 170px 190px auto;
-        gap: 10px; align-items: end;
-        margin-bottom: var(--mis-jarak);
-    }
-
     /* ------------------------------------------------------------------ tabel */
-
-    .ang-cari-kotak { position: relative; display: block; }
-    .ang-cari-kotak .form-control-modern { width: 100%; padding-right: 40px; }
-    .ang-cari-kotak input[type="search"]::-webkit-search-cancel-button { display: none; }
-
-    .ang-cari-bersih {
-        position: absolute; right: 5px; top: 50%;
-        transform: translateY(-50%);
-        display: grid; place-items: center;
-        width: 30px; height: 30px;
-        border-radius: 8px;
-        color: var(--mis-tinta-4);
-    }
-
-    .ang-cari-bersih:hover { background: #fef2f2; color: #e11d48; text-decoration: none; }
-    .ang-cari-bersih .fas { font-size: 12px !important; }
 
     .ang-nama { margin: 0; line-height: 1.3; font-size: .86rem; font-weight: 700; color: var(--mis-tinta); overflow-wrap: anywhere; }
     .ang-ket { margin: 1px 0 0; line-height: 1.4; font-size: .73rem; color: var(--mis-tinta-3); }
@@ -194,8 +119,6 @@ Angkatan Layanan | MIS
      * baris ketiga.
      */
     @media (max-width: 1199.98px) {
-        .ang-saring { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-        .ang-saring > .mis-tombol { grid-column: 2; }
     }
 
     /*
@@ -239,7 +162,6 @@ Angkatan Layanan | MIS
     }
 
     @media (max-width: 767.98px) {
-        .ang-saring { grid-template-columns: minmax(0, 1fr); }
 
         /* Tiap baris jadi kartu, seperti daftar pelanggan: garis 1px terlalu
            sepi untuk memisahkan enam keterangan berlabel. */
@@ -314,11 +236,11 @@ Angkatan Layanan | MIS
                      Saringan yang sedang aktif ikut terbawa. --}}
                 <a href="{{ route('account.kategori-layanan.excel', request()->query()) }}"
                     class="mis-tombol mis-tombol-halus">
-                    <i class="fas fa-file-excel"></i> Excel
+                    <i class="fas fa-file-excel"></i> Unduh Excel
                 </a>
                 <a href="{{ route('account.kategori-layanan.cetak', request()->query()) }}"
                     class="mis-tombol mis-tombol-halus">
-                    <i class="fas fa-file-pdf"></i> PDF
+                    <i class="fas fa-file-pdf"></i> Unduh PDF
                 </a>
                 @if ($bolehUbah)
                     <a href="{{ route('account.kategori-layanan.create', ['layanan' => $layanan ?: 'scopus_camp']) }}"
@@ -327,24 +249,6 @@ Angkatan Layanan | MIS
                     </a>
                 @endif
             </div>
-        </div>
-
-        {{-- Strip layanan. Tautan biasa, bukan JavaScript: bisa dibuka di tab
-             baru dan alamatnya bisa disimpan. --}}
-        <div class="ang-strip" role="tablist" aria-label="Saring menurut layanan">
-            <a href="{{ route('account.kategori-layanan.index') }}"
-                class="ang-pilih {{ $layanan ? '' : 'aktif' }}">
-                <i class="fas fa-th-large"></i> Semua
-                <span class="ang-hitung">{{ $jumlah->sum() }}</span>
-            </a>
-
-            @foreach ($katalog as $kunci => $tentang)
-                <a href="{{ route('account.kategori-layanan.index', ['layanan' => $kunci]) }}"
-                    class="ang-pilih {{ $layanan === $kunci ? 'aktif' : '' }}">
-                    <i class="fas {{ $tentang['ikon'] }}"></i> {{ $tentang['nama'] }}
-                    <span class="ang-hitung">{{ $jumlah[$kunci] ?? 0 }}</span>
-                </a>
-            @endforeach
         </div>
 
         {{-- ---------------------------------------------- ringkasan --}}
@@ -382,35 +286,71 @@ Angkatan Layanan | MIS
             @endforeach
         </div>
 
-        <div class="mis-bagian">
-            <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="ang-saring">
-                <input type="hidden" name="layanan" value="{{ $layanan }}">
+        {{-- ---------------------------------------------- penyaring --}}
+        {{-- <details> membungkus penyaringnya, sama seperti Data Pelanggan: di
+             ponsel empat kendali yang selalu terbuka memakan satu layar penuh
+             sebelum baris pertama data kelihatan. Di layar lebar ia dipaksa
+             terbuka oleh mis-ui.js dan ringkasannya disembunyikan, jadi tampak
+             seperti baris penyaring biasa. --}}
+        <details class="mis-lipat" data-mis-lipat
+            @if ($adaSaringan || $urut !== 'mulai' || $arahKode !== 'desc') data-mis-lipat-terpakai @endif>
+            <summary>
+                <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
+                Cari &amp; saring
+                @if ($adaSaringan)
+                    <span class="mis-pil mis-pil-ungu">aktif</span>
+                @endif
+            </summary>
+
+        <div class="mis-saring-kartu">
+            <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="mis-saring"
+                data-mis-saring="ang-hasil">
                 {{-- Menu pengurut menulis ke dua isian ini, bukan mengirim
                      namanya sendiri: peladen hanya mengenal 'urut' dan 'arah'. --}}
                 <input type="hidden" name="urut" id="ang-urut-kolom" value="{{ $urut }}">
                 <input type="hidden" name="arah" id="ang-urut-arah" value="{{ $arah }}">
 
-                <div class="mis-isian">
-                    <label class="mis-label" for="ang-cari">Cari angkatan</label>
-                    <div class="ang-cari-kotak">
-                        <input type="search" class="form-control-modern" id="ang-cari" name="cari"
-                            value="{{ $cari }}" placeholder="Nama, nomor angkatan, atau lokasi">
-                        @if ($cari !== '')
-                            {{-- Tautan, bukan tombol berskrip: pencariannya dijalankan
-                                 peladen, jadi mengosongkannya berarti membuka daftar
-                                 tanpa kata kunci — dan tautan tetap bekerja tanpa
-                                 JavaScript. --}}
-                            <a href="{{ route('account.kategori-layanan.index', array_filter([
-                                'layanan' => $layanan, 'status' => $status,
-                            ])) }}" class="ang-cari-bersih" aria-label="Kosongkan pencarian"
-                                title="Kosongkan pencarian">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
-                    </div>
+                <div class="mis-isian mis-saring-cari">
+                    <label class="mis-label" for="ang-cari">Cari</label>
+                    <input type="search" class="form-control-modern" id="ang-cari" name="cari"
+                        value="{{ $cari }}" placeholder="Nama, nomor angkatan, atau lokasi"
+                        autocomplete="off" aria-controls="ang-hasil" data-mis-cari>
+                        {{-- Tautan, bukan tombol: tanpa JavaScript ia tetap membuka
+                             daftar tanpa kata kunci. Dengan JavaScript, mis-ui.js
+                             menahan tautannya dan mengosongkan di tempat.
+
+                             Selalu ada di markah, disembunyikan lewat `hidden`:
+                             dengan saringan hidup, kotaknya bisa jadi kosong atau
+                             terisi tanpa halamannya dimuat ulang, jadi yang
+                             dirender bersyarat tidak akan pernah muncul. --}}
+                    <a href="{{ route('account.kategori-layanan.index', array_filter([
+                        'layanan' => $layanan, 'status' => $status,
+                    ])) }}" class="mis-saring-hapus" aria-label="Kosongkan pencarian"
+                        title="Kosongkan pencarian" data-mis-kosongkan
+                        @if ($cari === '') hidden @endif>
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </a>
+                    <span class="mis-saring-sibuk" aria-hidden="true"></span>
                 </div>
 
-                <div class="mis-isian">
+                {{-- Dulu sederet pil di atas halaman. Dijadikan menu supaya
+                     susunan layarnya sama dengan Data Pelanggan — kepala, ubin,
+                     kartu saringan, tabel — dan supaya satu pita penuh di atas
+                     daftar tidak lagi memakan ruang sebelum baris pertama
+                     terlihat. Jumlahnya ikut dibawa ke dalam labelnya. --}}
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="ang-layanan">Layanan</label>
+                    <select class="form-control-modern" id="ang-layanan" name="layanan">
+                        <option value="">Semua layanan ({{ $jumlah->sum() }})</option>
+                        @foreach ($katalog as $kunci => $tentang)
+                            <option value="{{ $kunci }}" @selected($layanan === $kunci)>
+                                {{ $tentang['nama'] }} ({{ $jumlah[$kunci] ?? 0 }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mis-isian mis-saring-pilih">
                     <label class="mis-label" for="ang-status">Status</label>
                     <select class="form-control-modern" id="ang-status" name="status">
                         <option value="">Semua status</option>
@@ -422,9 +362,9 @@ Angkatan Layanan | MIS
 
                 {{-- Di layar lebar kepala kolomnya yang mengurutkan; menu ini
                      penggantinya di ponsel, tempat <thead> disembunyikan. --}}
-                <div class="mis-isian mis-urut-ponsel">
+                <div class="mis-isian mis-saring-pilih mis-urut-ponsel">
                     <label class="mis-label" for="ang-urut">Urutkan</label>
-                    <select class="form-control-modern" id="ang-urut" name="urutgabung">
+                    <select class="form-control-modern" id="ang-urut" name="urutgabung" data-mis-urut-ponsel>
                         @php
                             // Larik bersarang, bukan kunci "kolom|arah" yang dibelah
                             // di dalam @foreach: @php(...) sebaris tidak menangani
@@ -447,35 +387,56 @@ Angkatan Layanan | MIS
                     </select>
                 </div>
 
-                <button type="submit" class="mis-tombol mis-tombol-halus">
-                    <i class="fas fa-search"></i> Saring
+                {{-- Tombolnya tetap ada di markah dan baru disembunyikan oleh
+                     mis-ui.js. Tanpa JavaScript — peramban lama, berkasnya gagal
+                     termuat, jaringan putus di tengah — penyaringnya masih bisa
+                     dipakai seperti formulir biasa. --}}
+                <button type="submit" class="mis-tombol mis-tombol-ungu" data-mis-terapkan>
+                    <i class="fas fa-search"></i> Terapkan
                 </button>
+
+                @if ($adaSaringan)
+                    <a href="{{ route('account.kategori-layanan.index') }}"
+                        class="mis-tombol mis-tombol-halus" title="Hapus semua saringan">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                @endif
             </form>
+        </div>
+        </details>
 
-            @if ($bolehUbah)
-                {{-- Bilah muncul HANYA saat ada yang dipilih. Bilah kosong yang
-                     bertuliskan "0 dipilih" menempati ruang tanpa memberi tahu
-                     apa pun, dan di ponsel ia menutupi barisnya. --}}
-                <div class="ang-massal" id="ang-massal" hidden>
-                    <span class="ang-massal-jumlah"><strong id="ang-massal-n">0</strong> dipilih</span>
+        @if ($bolehUbah)
+            {{-- Bilah muncul HANYA saat ada yang dipilih. Bilah kosong yang
+                 bertuliskan "0 dipilih" menempati ruang tanpa memberi tahu apa
+                 pun, dan di ponsel ia menutupi barisnya.
 
-                    <div class="ang-massal-tombol">
-                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="active">
-                            <i class="fas fa-check-circle"></i> Aktifkan
-                        </button>
-                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="non active">
-                            <i class="fas fa-times-circle"></i> Nonaktifkan
-                        </button>
-                        <button type="button" class="mis-tombol mis-tombol-halus" data-massal="draft">
-                            <i class="fas fa-pen"></i> Jadikan draf
-                        </button>
-                        <button type="button" class="mis-tombol mis-tombol-halus" id="ang-massal-batal">
-                            Batal
-                        </button>
-                    </div>
+                 Letaknya DI LUAR #ang-hasil: isi wadah itu ditukar tiap kali
+                 mengetik, dan bilah yang ikut tertukar akan kehilangan
+                 hitungannya di tengah pemilihan. --}}
+            <div class="ang-massal" id="ang-massal" hidden>
+                <span class="ang-massal-jumlah"><strong id="ang-massal-n">0</strong> dipilih</span>
+
+                <div class="ang-massal-tombol">
+                    <button type="button" class="mis-tombol mis-tombol-halus" data-massal="active">
+                        <i class="fas fa-check-circle"></i> Aktifkan
+                    </button>
+                    <button type="button" class="mis-tombol mis-tombol-halus" data-massal="non active">
+                        <i class="fas fa-times-circle"></i> Nonaktifkan
+                    </button>
+                    <button type="button" class="mis-tombol mis-tombol-halus" data-massal="draft">
+                        <i class="fas fa-pen"></i> Jadikan draf
+                    </button>
+                    <button type="button" class="mis-tombol mis-tombol-halus" id="ang-massal-batal">
+                        Batal
+                    </button>
                 </div>
-            @endif
+            </div>
+        @endif
 
+        {{-- role=status + aria-live: isi bagian ini ditukar diam-diam tiap
+             ketikan. Tanpa penanda ini, pembaca layar tidak mengumumkan apa pun
+             dan orangnya tidak tahu daftarnya sudah berubah. --}}
+        <div class="mis-hasil" id="ang-hasil" role="status" aria-live="polite" aria-atomic="false">
             @if ($angkatan->isEmpty())
                 {{-- Judulnya ikut berubah, bukan cuma subjudulnya: "Belum ada
                      angkatan" pada daftar yang sedang disaring adalah kalimat
@@ -738,66 +699,78 @@ Angkatan Layanan | MIS
 @push('scripts')
 <script>
     /*
-     * Menu pengurut menulis ke isian tersembunyi urut/arah lalu mengirim
-     * borangnya. Namanya sengaja 'urutgabung' supaya nilainya sendiri tidak
-     * ikut terkirim ke peladen, yang cuma mengenal dua nama itu.
+     * Pilihan massal.
+     *
+     * Penangannya dipasang di wadah #ang-hasil, bukan di tiap kotak centang:
+     * isi wadah itu ditukar tiap kali mengetik atau berpindah halaman, dan
+     * pemasangan langsung akan hilang begitu isinya diganti pertama kali.
+     *
+     * Pilihannya disimpan di Set, BUKAN dibaca dari kotak yang sedang tampil.
+     * Dengan pilihan yang hanya hidup di kotaknya, mencentang sepuluh angkatan
+     * lalu tanpa sengaja mengetik satu huruf di kotak cari menghapusnya tanpa
+     * sepatah kata. Disimpan terpisah, pilihan bertahan menyeberangi pencarian
+     * dan halaman — sama persis dengan Data Pelanggan.
      */
     (function () {
-        const pilih = document.getElementById('ang-urut');
-        if (!pilih) return;
-
-        pilih.addEventListener('change', function () {
-            const bagian = pilih.value.split('|');
-            document.getElementById('ang-urut-kolom').value = bagian[0];
-            document.getElementById('ang-urut-arah').value = bagian[1];
-            pilih.form.submit();
-        });
-    })();
-
-    /*
-     * Pilihan massal. Bilahnya muncul hanya saat ada yang dipilih, dan
-     * pilihannya TIDAK bertahan antar halaman: daftar berhalaman yang diam-diam
-     * mengingat pilihan di halaman lain membuat orang mengubah baris yang tidak
-     * sedang dilihatnya.
-     */
-    (function () {
+        const hasil = document.getElementById('ang-hasil');
         const bilah = document.getElementById('ang-massal');
-        if (!bilah) return;
+        if (!hasil || !bilah) return;
 
-        const semua = document.getElementById('ang-pilih-semua');
-        const kotak = [...document.querySelectorAll('.ang-centang')];
         const angka = document.getElementById('ang-massal-n');
+        const dipilih = new Set();
 
-        function terpilih() {
-            return kotak.filter(function (k) { return k.checked; }).map(function (k) { return k.value; });
+        function kotakTampil() {
+            return [...hasil.querySelectorAll('.ang-centang')];
         }
 
         function segarkan() {
-            const n = terpilih().length;
+            const n = dipilih.size;
             angka.textContent = n;
             bilah.hidden = n === 0;
 
+            const kotak = kotakTampil();
+            const semua = hasil.querySelector('#ang-pilih-semua');
+
             if (semua) {
-                semua.checked = n > 0 && n === kotak.length;
+                const tercentang = kotak.filter(function (k) { return dipilih.has(k.value); }).length;
+                semua.checked = kotak.length > 0 && tercentang === kotak.length;
                 // Sebagian terpilih ditandai setengah, bukan kosong: kosong
                 // terbaca seolah tidak ada yang dipilih sama sekali.
-                semua.indeterminate = n > 0 && n < kotak.length;
+                semua.indeterminate = tercentang > 0 && tercentang < kotak.length;
             }
         }
 
-        kotak.forEach(function (k) { k.addEventListener('change', segarkan); });
-
-        if (semua) {
-            semua.addEventListener('change', function () {
-                kotak.forEach(function (k) { k.checked = semua.checked; });
-                segarkan();
-            });
+        // Kotak yang baru digambar disamakan dengan pilihan yang tersimpan;
+        // tanpa ini, menyaring lalu kembali membuat centangnya hilang di layar
+        // padahal pilihannya masih tercatat.
+        function pulihkan() {
+            kotakTampil().forEach(function (k) { k.checked = dipilih.has(k.value); });
+            segarkan();
         }
 
-        document.getElementById('ang-massal-batal').addEventListener('click', function () {
-            kotak.forEach(function (k) { k.checked = false; });
+        hasil.addEventListener('change', function (e) {
+            if (e.target.id === 'ang-pilih-semua') {
+                kotakTampil().forEach(function (k) {
+                    k.checked = e.target.checked;
+                    if (e.target.checked) dipilih.add(k.value); else dipilih.delete(k.value);
+                });
+                segarkan();
+                return;
+            }
+
+            if (!e.target.classList.contains('ang-centang')) return;
+
+            if (e.target.checked) dipilih.add(e.target.value); else dipilih.delete(e.target.value);
             segarkan();
         });
+
+        document.getElementById('ang-massal-batal').addEventListener('click', function () {
+            dipilih.clear();
+            pulihkan();
+        });
+
+        // Daftar baru selesai dimuat: centangnya dipasang ulang.
+        document.addEventListener('mis:saring-selesai', pulihkan);
 
         function ubahStatus(id, status, kalimat, sorot) {
             window.misKonfirmasi({
@@ -842,24 +815,24 @@ Angkatan Layanan | MIS
 
         bilah.querySelectorAll('[data-massal]').forEach(function (b) {
             b.addEventListener('click', function () {
-                const id = terpilih();
-                if (id.length === 0) return;
+                if (dipilih.size === 0) return;
 
-                ubahStatus(id, b.dataset.massal,
+                ubahStatus([...dipilih], b.dataset.massal,
                     '%s akan diubah statusnya. Angkatan yang sudah punya pendaftar tetap utuh; '
                         + 'yang berubah cuma tampil atau tidaknya di halaman publik.',
-                    id.length + ' angkatan');
+                    dipilih.size + ' angkatan');
             });
         });
 
-        // Lencana "Lewat" memakai jalur yang sama dengan satu id.
-        document.addEventListener('click', function (e) {
+        // Lencana "Lewat" memakai jalur yang sama dengan satu id. Dipasang di
+        // wadahnya juga, sebab lencananya ikut tertukar saat menyaring.
+        hasil.addEventListener('click', function (e) {
             const pil = e.target.closest('[data-nonaktifkan]');
             if (!pil) return;
 
-            // %s disulih nama angkatannya, jadi kalimatnya harus dimulai
-            // dengan nama itu. "Tanggal %s sudah lewat" terbaca "Tanggal
-            // SCOPUS CAMP YOGYAKARTA sudah lewat" — bukan kalimat Indonesia.
+            // %s disulih nama angkatannya, jadi kalimatnya harus dimulai dengan
+            // nama itu. "Tanggal %s sudah lewat" terbaca "Tanggal SCOPUS CAMP
+            // YOGYAKARTA sudah lewat" — bukan kalimat Indonesia.
             ubahStatus([pil.dataset.nonaktifkan], 'non active',
                 '%s sudah selesai tanggalnya tetapi statusnya masih Aktif. Nonaktifkan sekarang?',
                 pil.dataset.nama);

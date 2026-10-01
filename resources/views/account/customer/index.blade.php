@@ -110,22 +110,6 @@ Data Pelanggan | MIS
      * putih; di antara keduanya, tiga kendali tanpa latar terbaca seperti
      * tercecer di luar susunan, bukan seperti satu perangkat yang utuh.
      */
-    .pel-saring-kartu {
-        padding: 14px 16px;
-        margin-bottom: 14px;
-        border: 1px solid #e7ecf5;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
-    }
-
-    .pel-saring {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-end;
-        gap: 10px;
-    }
-
     /*
      * Ketiga kendali berbagi baris dengan perbandingan tetap 2:1:1.
      *
@@ -140,108 +124,8 @@ Data Pelanggan | MIS
      * kotak cari — satu-satunya yang menerima tulisan bebas — tetap yang
      * terlebar tanpa jadi enam kali lipat menu di sebelahnya.
      */
-    .pel-saring-cari {
-        position: relative;
-        flex: 2 1 260px;
-        min-width: 0;
-    }
-
-    /* Tombol hapus di dalam kotak cari. */
-    .pel-hapus {
-        position: absolute;
-        right: 10px;
-        bottom: 9px;
-        display: grid;
-        place-items: center;
-        width: 24px;
-        height: 24px;
-        padding: 0;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        color: var(--mis-tinta-4);
-        cursor: pointer;
-        transition: background .18s ease, color .18s ease;
-    }
-
-    .pel-hapus:hover {
-        background: #eef2ff;
-        color: #4f46e5;
-    }
-
-    .pel-hapus > .fas {
-        /* Aturan global layout mengunci .fas ke 20px dengan bobot yang sama,
-           jadi di sini perlu lebih kuat. */
-        font-size: .78rem !important;
-    }
-
-    /* Isian diberi ruang di kanan supaya ketikan panjang tidak menyelinap
-       ke bawah tombol hapus. */
-    .pel-saring-cari .form-control-modern {
-        padding-right: 40px;
-    }
-
-    /* Cincin berputar kecil di dalam kotak cari. Menggantikan tempat tombol
-       hapus selagi permintaannya berjalan, bukan berdampingan dengannya —
-       dua tanda di sudut yang sama hanya membingungkan. */
-    .pel-sibuk {
-        position: absolute;
-        right: 15px;
-        bottom: 13px;
-        width: 15px;
-        height: 15px;
-        border: 2px solid #e2e8f0;
-        border-top-color: #6366f1;
-        border-radius: 50%;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity .15s ease;
-    }
-
-    .pel-saring.sibuk .pel-sibuk {
-        opacity: 1;
-        animation: pel-putar .7s linear infinite;
-    }
-
-    .pel-saring.sibuk .pel-hapus {
-        visibility: hidden;
-    }
-
-    @keyframes pel-putar {
-        to { transform: rotate(360deg); }
-    }
-
     /* Hasil diredupkan selagi diganti, supaya jelas angkanya sedang berubah
        — tanpa menghilangkannya, yang membuat halaman berkedip dan melompat. */
-    #pel-hasil {
-        transition: opacity .15s ease;
-    }
-
-    #pel-hasil.sibuk {
-        opacity: .45;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .pel-saring.sibuk .pel-sibuk {
-            animation: none;
-        }
-
-        #pel-hasil {
-            transition: none;
-        }
-    }
-
-    .pel-saring-pilih {
-        flex: 1 1 170px;
-        min-width: 0;
-    }
-
-    /* Ringkasan pelipat hanya berguna di ponsel; di layar lebar penyaringnya
-       memang selalu terbuka, jadi ringkasannya tidak perlu ada. */
-    .pel-lipat > summary {
-        display: none;
-    }
-
     /* ---------------------------------------------------------- daftar */
 
     /* Sel nama: foto + nama + username dalam satu sel supaya barisnya tidak
@@ -455,69 +339,6 @@ Data Pelanggan | MIS
     }
 
     @media (max-width: 767.98px) {
-        /*
-         * Penyaring dilipat di ponsel.
-         *
-         * Tiga kendali yang selalu terbuka memakan satu layar penuh sebelum
-         * baris pertama data kelihatan, padahal yang dicari orang justru
-         * datanya. <details>/<summary> dipakai supaya tidak perlu JavaScript
-         * dan tetap bisa dibuka pembaca layar.
-         */
-        .pel-lipat > summary {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 13px;
-            border: 1px solid var(--mis-garis);
-            border-radius: 12px;
-            background: #fff;
-            font-size: .8rem;
-            font-weight: 700;
-            color: var(--mis-tinta-2);
-            cursor: pointer;
-            list-style: none;
-        }
-
-        .pel-lipat > summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .pel-lipat[open] > summary {
-            margin-bottom: 10px;
-        }
-
-        .pel-saring {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
-
-        .pel-saring-cari,
-        .pel-saring-pilih {
-            flex: 1 1 auto;
-            /*
-             * align-self: stretch menimpa .mis-isian, yang memasang
-             * align-self: start.
-             *
-             * Dalam susunan menurun, sifat itu membuat tiap kendali selebar
-             * isinya sendiri: terukur 220/144/172/183px pada layar 390px,
-             * jadi keempatnya bertepi ragged dan 109px di kanan menganga.
-             * Bukan akibat perubahan lebar di layar lebar — diperiksa pada
-             * keadaan sebelumnya, angkanya sama persis.
-             */
-            align-self: stretch;
-        }
-
-        .pel-saring .mis-tombol {
-            width: 100%;
-        }
-    }
-
-    /* Tombol tidak ikut berbagi perbandingan: ia bukan penyaring, dan melar
-       selebar sepertiga baris hanya membuatnya tampak seperti kendali ketiga. */
-    .pel-saring > .mis-tombol {
-        flex: 0 0 auto;
-        align-self: flex-end;
     }
 
     @media (max-width: 575.98px) {
@@ -620,7 +441,8 @@ Data Pelanggan | MIS
              sebelum baris pertama data kelihatan. Di layar lebar ia dipaksa
              terbuka oleh skrip di bawah dan ringkasannya disembunyikan, jadi
              tampak seperti baris penyaring biasa. --}}
-        <details class="pel-lipat" id="pel-penyaring">
+        <details class="mis-lipat" id="pel-penyaring" data-mis-lipat
+            @if ($adaSaringan || $urut !== 'bergabung' || $arah !== 'desc') data-mis-lipat-terpakai @endif>
             <summary>
                 <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
                 Cari &amp; saring
@@ -629,30 +451,30 @@ Data Pelanggan | MIS
                 @endif
             </summary>
 
-        <div class="pel-saring-kartu">
-        <form method="GET" action="{{ route('account.customer.index') }}" class="pel-saring" id="pel-borang">
+        <div class="mis-saring-kartu">
+        <form method="GET" action="{{ route('account.customer.index') }}" class="mis-saring" id="pel-borang" data-mis-saring="pel-hasil">
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan Terapkan
                  diam-diam mengembalikan urutannya ke bawaan. --}}
             <input type="hidden" name="urut" value="{{ $urut }}">
             <input type="hidden" name="arah" value="{{ $arah === 'asc' ? 'naik' : 'turun' }}">
-            <div class="mis-isian pel-saring-cari">
+            <div class="mis-isian mis-saring-cari">
                 <label class="mis-label" for="pel-cari">Cari</label>
-                <input type="search" class="form-control-modern" id="pel-cari" name="cari"
+                <input type="search" class="form-control-modern" id="pel-cari" name="cari" data-mis-cari
                     value="{{ $cari }}" placeholder="Nama, username, email, atau telepon"
                     autocomplete="off" aria-controls="pel-hasil">
                 {{-- Tombol hapus ketikan. Diberi type=button supaya tidak
                      ikut mengirim formulir, dan disembunyikan saat kotaknya
                      kosong — tanda silang di kotak kosong tidak ada gunanya
                      dan hanya menambah satu hal untuk dipahami. --}}
-                <button type="button" class="pel-hapus" id="pel-hapus"
+                <button type="button" class="mis-saring-hapus" id="pel-hapus" data-mis-kosongkan
                     aria-label="Hapus kata kunci pencarian" title="Hapus kata kunci"
                     @if ($cari === '') hidden @endif>
                     <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
-                <span class="pel-sibuk" id="pel-sibuk" aria-hidden="true"></span>
+                <span class="mis-saring-sibuk" id="pel-sibuk" aria-hidden="true"></span>
             </div>
 
-            <div class="mis-isian pel-saring-pilih">
+            <div class="mis-isian mis-saring-pilih">
                 <label class="mis-label" for="pel-status">Status akun</label>
                 <select class="form-control-modern" id="pel-status" name="status">
                     <option value="">Semua status</option>
@@ -661,7 +483,7 @@ Data Pelanggan | MIS
                 </select>
             </div>
 
-            <div class="mis-isian pel-saring-pilih">
+            <div class="mis-isian mis-saring-pilih">
                 <label class="mis-label" for="pel-verifikasi">Email</label>
                 <select class="form-control-modern" id="pel-verifikasi" name="verifikasi">
                     <option value="">Semua email</option>
@@ -680,9 +502,9 @@ Data Pelanggan | MIS
               Menu ini menggantikannya di sana, dan disembunyikan di layar lebar
               karena kepala kolomnya sudah melakukan tugas yang sama.
             --}}
-            <div class="mis-isian pel-saring-pilih mis-urut-ponsel">
+            <div class="mis-isian mis-saring-pilih mis-urut-ponsel">
                 <label class="mis-label" for="pel-urut-pilih">Urutkan</label>
-                <select class="form-control-modern" id="pel-urut-pilih" name="urutgabung">
+                <select class="form-control-modern" id="pel-urut-pilih" name="urutgabung" data-mis-urut-ponsel>
                     @php
                         // Larik bersarang, bukan kunci "kolom|arah" yang dibelah
                         // di dalam @foreach: @php(...) sebaris tidak menangani
@@ -709,7 +531,7 @@ Data Pelanggan | MIS
                  skrip di bawah. Tanpa JavaScript — peramban lama, skrip gagal
                  termuat, jaringan putus di tengah — penyaringnya masih bisa
                  dipakai seperti formulir biasa. --}}
-            <button type="submit" class="mis-tombol mis-tombol-ungu" id="pel-terapkan">
+            <button type="submit" class="mis-tombol mis-tombol-ungu" id="pel-terapkan" data-mis-terapkan>
                 <i class="fas fa-search"></i> Terapkan
             </button>
 
@@ -731,7 +553,7 @@ Data Pelanggan | MIS
              pun — orang yang tidak melihat layarnya mengetik lalu tidak tahu
              daftarnya sudah berubah, apalagi jadi berapa baris. Kalimat
              ringkasnya ada di .pel-jumlah di bawah. --}}
-        <div id="pel-hasil" role="status" aria-live="polite" aria-atomic="false">
+        <div class="mis-hasil" id="pel-hasil" role="status" aria-live="polite" aria-atomic="false">
         @if ($pelanggan->isEmpty())
             <div class="mis-bagian">
                 {{-- Dua keadaan yang terasa sama di layar padahal jalan keluarnya
@@ -971,212 +793,11 @@ Data Pelanggan | MIS
 @push('scripts')
 <script>
     /*
-     * Mencari sambil mengetik, tanpa menekan tombol apa pun.
-     *
-     * Yang ditukar HANYA #pel-hasil, bukan seluruh halaman: kalau halamannya
-     * dimuat ulang tiap ketikan, fokus keluar dari kotak cari dan huruf
-     * berikutnya hilang.
-     *
-     * Tiga hal yang membuat ini tidak sekadar "panggil fetch tiap ketikan":
-     *
-     *   1. Jeda 300 ms. Tanpa itu, mengetik "budi" mengirim empat permintaan
-     *      dan tiga di antaranya sia-sia.
-     *   2. Permintaan lama dibatalkan. Tanpa itu, jawaban untuk "bud" bisa
-     *      tiba SESUDAH jawaban untuk "budi" dan menimpanya — daftarnya lalu
-     *      tidak cocok dengan apa yang tertulis di kotak cari.
-     *   3. Alamat halaman ikut diperbarui. Tanpa itu, menyegarkan halaman
-     *      atau menyalin tautannya mengembalikan daftar tanpa saringan.
+     * Mencari sambil mengetik ditangani mis-ui.js lewat atribut
+     * data-mis-saring pada formulirnya. Dulu 167 baris di berkas ini; begitu
+     * Angkatan Layanan membutuhkan hal yang sama persis, menyalinnya berarti
+     * dua salinan yang harus diperbaiki dua kali.
      */
-    (function () {
-        const borang = document.getElementById('pel-borang');
-        const hasil = document.getElementById('pel-hasil');
-        const cari = document.getElementById('pel-cari');
-        const terapkan = document.getElementById('pel-terapkan');
-        if (!borang || !hasil || !cari) return;
-
-        // Baru disembunyikan di sini: kalau skrip ini tidak jalan, tombolnya
-        // tetap ada dan penyaringnya masih bisa dipakai.
-        if (terapkan) terapkan.hidden = true;
-
-        let jeda = null;
-        let batal = null;
-
-        const muat = function (alamat, doronganRiwayat) {
-            if (batal) batal.abort();
-            batal = new AbortController();
-
-            borang.classList.add('sibuk');
-            hasil.classList.add('sibuk');
-
-            fetch(alamat, {
-                signal: batal.signal,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then(function (r) {
-                    if (!r.ok) throw new Error('status ' + r.status);
-                    return r.text();
-                })
-                .then(function (teks) {
-                    // Diurai sebagai dokumen, bukan disisipkan mentah: yang
-                    // dibutuhkan cuma satu bagiannya, dan mengurai lebih dulu
-                    // berarti skrip di dalamnya tidak ikut dijalankan.
-                    const doc = new DOMParser().parseFromString(teks, 'text/html');
-                    const baru = doc.getElementById('pel-hasil');
-                    if (baru) hasil.innerHTML = baru.innerHTML;
-
-                    if (doronganRiwayat) {
-                        history.replaceState(null, '', alamat);
-                    }
-
-                    /*
-                     * Isian tersembunyi urut/arah disamakan dengan alamat yang
-                     * baru dimuat.
-                     *
-                     * Tanpa ini, menekan kepala kolom memang mengubah urutan —
-                     * tetapi formulirnya masih memegang urutan lama, sehingga
-                     * huruf berikutnya yang diketik diam-diam mengembalikan
-                     * urutannya ke keadaan sebelum ditekan.
-                     */
-                    const par = new URL(alamat, location.origin).searchParams;
-                    borang.querySelectorAll('input[type=hidden]').forEach(function (i) {
-                        if (par.has(i.name)) i.value = par.get(i.name);
-                    });
-                })
-                .catch(function (e) {
-                    // Pembatalan bukan kegagalan: ia memang disengaja saat
-                    // huruf berikutnya diketik.
-                    if (e.name === 'AbortError') return;
-                    window.misToast('gagal', 'Gagal memuat daftar. Coba lagi.');
-                })
-                .finally(function () {
-                    borang.classList.remove('sibuk');
-                    hasil.classList.remove('sibuk');
-                });
-        };
-
-        const alamatSekarang = function () {
-            const data = new FormData(borang);
-            const p = new URLSearchParams();
-
-            for (const [k, v] of data.entries()) {
-                if (String(v).trim() !== '') p.set(k, v);
-            }
-
-            const q = p.toString();
-            return borang.action + (q ? '?' + q : '');
-        };
-
-        const jadwalkan = function (tundaan) {
-            clearTimeout(jeda);
-            jeda = setTimeout(function () { muat(alamatSekarang(), true); }, tundaan);
-        };
-
-        const hapus = document.getElementById('pel-hapus');
-
-        const setelHapus = function () {
-            if (hapus) hapus.hidden = cari.value === '';
-        };
-
-        cari.addEventListener('input', function () {
-            setelHapus();
-            jadwalkan(300);
-        });
-
-        if (hapus) {
-            hapus.addEventListener('click', function () {
-                cari.value = '';
-                setelHapus();
-                // Fokus dikembalikan ke kotaknya: yang menghapus kata kunci
-                // hampir selalu mau mengetik kata kunci lain.
-                cari.focus();
-                jadwalkan(0);
-            });
-        }
-
-        // Tombol silang bawaan <input type=search> di sebagian peramban
-        // mengosongkan isian tanpa memicu 'input', jadi 'search' ikut didengar.
-        cari.addEventListener('search', function () {
-            setelHapus();
-            jadwalkan(0);
-        });
-
-        /*
-         * Menu pengurut khusus ponsel menulis ke isian tersembunyi urut/arah,
-         * bukan mengirim namanya sendiri: peladen hanya mengenal dua nama itu,
-         * dan namanya sengaja 'urutgabung' supaya tidak ikut terkirim.
-         */
-        const pilihUrut = document.getElementById('pel-urut-pilih');
-
-        if (pilihUrut) {
-            pilihUrut.addEventListener('change', function () {
-                const bagian = pilihUrut.value.split('|');
-                const setel = function (nama, nilai) {
-                    const i = borang.querySelector('input[type=hidden][name="' + nama + '"]');
-                    if (i) i.value = nilai;
-                };
-                setel('urut', bagian[0]);
-                setel('arah', bagian[1]);
-                jadwalkan(0);
-            });
-        }
-
-        // Menu pilihan tidak perlu ditunda: satu klik sudah keputusan penuh.
-        borang.querySelectorAll('select').forEach(function (s) {
-            if (s.id === 'pel-urut-pilih') return;
-            s.addEventListener('change', function () { jadwalkan(0); });
-        });
-
-        // Enter tidak boleh memuat ulang halaman; hasilnya sudah tampil.
-        borang.addEventListener('submit', function (e) {
-            e.preventDefault();
-            jadwalkan(0);
-        });
-
-        /*
-         * Penomoran halaman dan kepala kolom pengurut ikut ditangani di sini.
-         * Keduanya berada DI DALAM bagian yang ditukar, jadi penangan harus
-         * dipasang di wadahnya — pemasangan langsung akan hilang begitu isinya
-         * diganti pertama kali.
-         */
-        hasil.addEventListener('click', function (e) {
-            const tautan = e.target.closest('.pagination a, .mis-urut');
-            if (!tautan || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-
-            e.preventDefault();
-            muat(tautan.href, true);
-            hasil.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        });
-    })();
-
-    /*
-     * Penyaring terbuka sendiri mulai 768px dan terlipat di bawah itu.
-     *
-     * Dikerjakan skrip, bukan CSS: isi <details> yang tertutup disembunyikan
-     * oleh gaya bawaan peramban, dan menimpanya dari CSS tidak bisa diandalkan
-     * antar peramban.
-     */
-    (function () {
-        const lipat = document.getElementById('pel-penyaring');
-        if (!lipat) return;
-        const lebar = window.matchMedia('(min-width: 768px)');
-
-        /*
-         * Di ponsel penyaringnya terlipat — dan di dalamnya ada menu Urutkan,
-         * satu-satunya cara mengurutkan di sana. Terukur: sebelum dibuka,
-         * elementFromPoint di titik tengah menu itu tidak menunjuk apa pun.
-         * Jadi begitu ada saringan atau urutan yang bukan bawaan, penyaringnya
-         * dibuka sendiri: yang sedang berlaku harus terlihat, bukan tersembunyi
-         * di balik satu ketukan lagi.
-         */
-        const sedangDipakai = @json($adaSaringan) || @json($urut !== 'bergabung' || $arah !== 'desc');
-
-        const setel = function () {
-            if (lebar.matches || sedangDipakai) lipat.setAttribute('open', '');
-        };
-
-        setel();
-        lebar.addEventListener('change', setel);
-    })();
 
     /*
      * Pilih banyak, lalu aktifkan/nonaktifkan sekaligus.
