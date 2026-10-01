@@ -438,18 +438,64 @@ class AngkatanAuditDuaTest extends TestCase
     // ------------------------------------------------- nomor & deskripsi
 
     #[Test]
-    public function borang_tambah_menyodorkan_nomor_berikutnya(): void
+    public function nomor_berikutnya_dihitung_per_lokasi(): void
     {
-        $this->actingAs($this->akun());
-        $this->angkatan(['nama_ke' => '888']);
+        $this->angkatan(['lokasi' => 'Surabaya', 'nama_ke' => '888']);
 
         // Nomor tertinggi dibaca sebagai ANGKA, bukan teks: sebagai teks, '9'
         // lebih besar daripada '888' dan angkatan berikutnya jadi nomor 10.
-        $this->angkatan(['nama_ke' => '9']);
+        $this->angkatan(['lokasi' => 'Surabaya', 'nama_ke' => '9']);
+        $this->angkatan(['lokasi' => 'Palu', 'nama_ke' => '3']);
 
+        $peta = KategoriLayanan::nomorBerikutnyaPerLokasi();
+
+        $this->assertSame(889, $peta['scopus_camp|surabaya']);
+
+        // Palu TIDAK ikut melanjutkan nomor Surabaya; deretnya sendiri.
+        $this->assertSame(4, $peta['scopus_camp|palu']);
+    }
+
+    #[Test]
+    public function nomor_bukan_angka_tidak_menyeret_deretnya(): void
+    {
+        $this->angkatan(['lokasi' => 'Kupang', 'nama_ke' => '7']);
+
+        // Dibaca sebagai bilangan, "VIP" jadi 0 — dan kalau ikut dihitung, ia
+        // bisa menurunkan maksimumnya.
+        $this->angkatan(['lokasi' => 'Kupang', 'nama_ke' => 'VIP']);
+
+        $this->assertSame(8, KategoriLayanan::nomorBerikutnyaPerLokasi()['scopus_camp|kupang']);
+    }
+
+    #[Test]
+    public function borang_tambah_mulai_dari_nol_sebelum_lokasinya_diketik(): void
+    {
+        $this->actingAs($this->akun());
+
+        /*
+         * Lokasinya belum diketik, jadi belum ada deret yang bisa dilanjutkan.
+         * Dulu di sini tertulis nomor tertinggi SELURUH layanan — 203, milik
+         * Yogyakarta — dan nomor itu ikut terbawa ke angkatan Medan.
+         */
         $this->get(route('account.kategori-layanan.create', ['layanan' => 'scopus_camp']))
             ->assertOk()
-            ->assertSee('value="889"', false);
+            ->assertSee('value="0"', false);
+    }
+
+    #[Test]
+    public function layanan_tanpa_lokasi_tetap_melanjutkan_deretnya(): void
+    {
+        $this->actingAs($this->akun());
+
+        // Angkatan Bibliometrik memang tidak berlokasi; deretnya satu untuk
+        // seluruh layanan, dan itu tidak boleh ikut berubah jadi 0.
+        $this->assertArrayHasKey('bibliometrik|', KategoriLayanan::nomorBerikutnyaPerLokasi());
+
+        $nomor = KategoriLayanan::nomorBerikutnyaPerLokasi()['bibliometrik|'];
+
+        $this->get(route('account.kategori-layanan.create', ['layanan' => 'bibliometrik']))
+            ->assertOk()
+            ->assertSee('value="' . $nomor . '"', false);
     }
 
     #[Test]

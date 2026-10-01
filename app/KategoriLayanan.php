@@ -189,6 +189,38 @@ class KategoriLayanan extends Model
     }
 
     /**
+     * Nomor angkatan berikutnya untuk tiap pasangan layanan + lokasi.
+     *
+     * Nomornya berjalan PER LOKASI, bukan per layanan: Yogyakarta sudah sampai
+     * 202 sementara Jakarta baru 9 dan Medan baru 3. Dihitung per layanan saja,
+     * borang tambah menyodorkan 203 untuk angkatan Medan — nomor milik kota
+     * lain, dan lompatannya baru ketahuan berbulan-bulan kemudian.
+     *
+     * Layanan yang angkatannya tidak berlokasi (Bibliometrik) masuk ke kunci
+     * berlokasi kosong, jadi deretnya tetap berjalan seperti semula.
+     *
+     * @return array<string, int> Berkunci "layanan|lokasi", lokasi huruf kecil.
+     */
+    public static function nomorBerikutnyaPerLokasi(): array
+    {
+        $baris = DB::table('kategori_layanan')
+            // Nomor yang bukan angka murni dilewati: dibaca sebagai bilangan,
+            // "VIP" jadi 0 dan menyeret maksimumnya.
+            ->whereRaw("nama_ke REGEXP '^[0-9]+$'")
+            ->selectRaw("layanan, lower(trim(coalesce(lokasi, ''))) as lok, max(cast(nama_ke as unsigned)) as maks")
+            ->groupBy('layanan', 'lok')
+            ->get();
+
+        $hasil = [];
+
+        foreach ($baris as $b) {
+            $hasil[$b->layanan . '|' . $b->lok] = ((int) $b->maks) + 1;
+        }
+
+        return $hasil;
+    }
+
+    /**
      * Sampul yang sudah jadi KEBIASAAN untuk pasangan layanan + lokasi.
      *
      * Empat puluh satu angkatan Scopus Camp Yogyakarta memakai satu flyer yang
