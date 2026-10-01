@@ -3109,3 +3109,179 @@ a.mis-ubin.terpilih {
         padding-right: 12px !important;
     }
 }
+
+/* ==========================================================================
+   Kartu saringan daftar
+
+   Perangkat ketiga yang dipindah dari layar Data Pelanggan ke sini, dengan
+   alasan yang sama: Angkatan Layanan butuh kartu saringan yang persis sama,
+   dan kartu yang tampil beda di dua layar sejenis itulah yang bikin orang
+   bilang "belum seragam".
+   ========================================================================== */
+
+/* Ringkasan pelipat hanya berguna di ponsel; di layar lebar penyaringnya
+   memang selalu terbuka, jadi ringkasannya tidak perlu ada. */
+.mis-lipat > summary { display: none; }
+
+.mis-saring-kartu {
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e7ecf5;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.mis-saring {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+/* Kotak cari dapat jatah dua kali lipat: kata kunci bisa panjang, pilihan
+   tidak. */
+.mis-saring-cari {
+    position: relative;
+    flex: 2 1 260px;
+    min-width: 0;
+}
+
+.mis-saring-pilih {
+    flex: 1 1 170px;
+    min-width: 0;
+}
+
+/* Tombol silang pengosong kata kunci, di dalam kotaknya. */
+.mis-saring-hapus {
+    position: absolute;
+    right: 10px;
+    bottom: 9px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--mis-tinta-4);
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease;
+}
+
+.mis-saring-hapus:hover {
+    background: #eef2ff;
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.mis-saring-hapus > .fas {
+    /* Aturan global layout mengunci .fas ke 20px dengan bobot yang sama, jadi
+       di sini perlu lebih kuat. */
+    font-size: .78rem !important;
+}
+
+/* Isian diberi ruang di kanan supaya ketikan panjang tidak menyelinap ke bawah
+   tombol hapus. */
+.mis-saring-cari .form-control-modern { padding-right: 40px; }
+
+/* Tombol silang bawaan peramban dimatikan: berdampingan dengan tombol hapus
+   kita, ada DUA silang di sudut yang sama dan yang bawaan tidak ikut
+   mengosongkan saringannya. */
+.mis-saring-cari input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+/* Cincin berputar kecil di dalam kotak cari. Menggantikan TEMPAT tombol hapus
+   selagi permintaannya berjalan, bukan berdampingan dengannya — dua tanda di
+   sudut yang sama hanya membingungkan. */
+.mis-saring-sibuk {
+    position: absolute;
+    right: 15px;
+    bottom: 13px;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+}
+
+.mis-saring.sibuk .mis-saring-sibuk {
+    opacity: 1;
+    animation: mis-saring-putar .7s linear infinite;
+}
+
+@keyframes mis-saring-putar {
+    to { transform: rotate(360deg); }
+}
+
+/* Sedang memuat: hasilnya diredupkan, bukan dikosongkan. Dikosongkan, daftar
+   berkedip putih tiap huruf yang diketik. */
+.mis-saring.sibuk .mis-saring-hapus { visibility: hidden; }
+
+/* Tombol tidak ikut berbagi perbandingan: ia bukan penyaring, dan melar
+   selebar sepertiga baris hanya membuatnya tampak seperti kendali ketiga. */
+.mis-saring > .mis-tombol {
+    flex: 0 0 auto;
+    align-self: flex-end;
+}
+
+.mis-hasil { transition: opacity .15s ease; }
+.mis-hasil.sibuk { opacity: .45; }
+
+@media (prefers-reduced-motion: reduce) {
+    .mis-hasil { transition: none; }
+    .mis-saring.sibuk .mis-saring-sibuk { animation: none; }
+}
+
+@media (max-width: 767.98px) {
+    .mis-saring {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mis-saring-cari,
+    .mis-saring-pilih {
+        flex: 1 1 auto;
+        /*
+         * align-self: stretch menimpa .mis-isian, yang memasang
+         * align-self: start.
+         *
+         * Dalam susunan menurun, sifat itu membuat tiap kendali selebar isinya
+         * sendiri: terukur 220/144/172/183px pada layar 390px, jadi keempatnya
+         * bertepi ragged dan 109px di kanan menganga.
+         */
+        align-self: stretch;
+    }
+
+    .mis-saring .mis-tombol { width: 100%; }
+
+    /*
+     * Penyaring dilipat di ponsel.
+     *
+     * Kendali yang selalu terbuka memakan satu layar penuh sebelum baris
+     * pertama data kelihatan, padahal yang dicari orang justru datanya.
+     * <details>/<summary> dipakai supaya tidak perlu JavaScript dan tetap bisa
+     * dibuka pembaca layar.
+     */
+    .mis-lipat > summary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 13px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 12px;
+        background: #fff;
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--mis-tinta-2);
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .mis-lipat > summary::-webkit-details-marker { display: none; }
+
+    .mis-lipat[open] > summary { margin-bottom: 10px; }
+}
