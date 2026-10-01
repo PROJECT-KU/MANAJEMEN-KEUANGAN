@@ -217,6 +217,29 @@
         margin-top: var(--mis-jarak);
     }
 
+    @media (max-width: 767.98px) {
+        /*
+         * Tiga tombol dengan lebar isinya masing-masing membungkus jadi dua
+         * baris yang tepi kanannya tidak satu pun sama — terukur 195px, 277px,
+         * dan 180px di layar 390px.
+         *
+         * Tombol utamanya melar mengisi sisa baris, jadi barisnya berhenti di
+         * tepi yang sama dengan "Batal".
+         */
+        .brg-kaki > .mis-tombol-ungu { flex: 1 1 auto; }
+
+        /*
+         * Menghapus turun ke barisnya sendiri, selebar penuh, dan diberi jarak
+         * lebih. Berdempetan dengan "Simpan" pada layar yang dioperasikan
+         * jempol, tombol yang tidak bisa dibatalkan terlalu dekat dengan tombol
+         * yang paling sering ditekan.
+         */
+        .brg-kaki > .mis-tombol-hapus {
+            flex: 1 1 100%;
+            margin-top: 8px;
+        }
+    }
+
     .brg-isian .form-control-modern { width: 100%; }
 
     @media (max-width: 991.98px) {
