@@ -901,7 +901,7 @@ Tarif Layanan | MIS
                     <span class="mis-medali mis-ungu" aria-hidden="true"><i class="fas fa-plus"></i></span>
                     <span class="tar-tambah-judul">Tambah layanan</span>
                     <span class="tar-tambah-ket">
-                        Jenis jasa baru — misalnya sharing session eksklusif — beserta tarifnya.
+                        Jenis jasa baru — misalnya webinar eksklusif — beserta tarifnya.
                     </span>
                 </button>
             @endif
@@ -1343,7 +1343,7 @@ Tarif Layanan | MIS
                         Nama layanan <span class="tar-wajib" aria-hidden="true">*</span>
                     </label>
                     <input type="text" class="form-control-modern" id="lyn-nama" name="nama" required
-                        maxlength="120" placeholder="mis. Sharing Session Eksklusif">
+                        maxlength="120" placeholder="mis. Webinar Eksklusif">
                     <p class="mis-bantuan" id="lyn-kode-ket">
                         Kode internalnya dibuat otomatis dari nama ini dan tidak berubah lagi —
                         tarif serta angkatan menunjuk kode itu.

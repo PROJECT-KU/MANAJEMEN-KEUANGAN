@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Layanan baru: Sharing Session (webinar eksklusif berbayar).
+ * Layanan baru: Webinar Eksklusif (webinar eksklusif berbayar).
  *
- * Sebelum ini sesi sharing dijalankan lewat satu halaman HTML statis di
+ * Sebelum ini webinarnya dijalankan lewat satu halaman HTML statis di
  * subdomain tersendiri — tanggal, topik, pemateri, flyer, dan harganya semua
  * diketik langsung ke dalam berkasnya, dan mendaftar berarti mengirim pesan
  * WhatsApp. Tidak ada satu pun pesertanya yang tercatat di sistem.
@@ -20,9 +20,9 @@ use Illuminate\Support\Str;
  *    boleh NULL dan diabaikan layanan yang tidak memakainya, persis seperti
  *    `lokasi` yang sudah lebih dulu begitu untuk Scopus Camp.
  *
- * 2. Layanan `sharing_session` di katalog, dengan tarifnya Rp 129.000.
+ * 2. Layanan `webinar_eksklusif` di katalog, dengan tarifnya Rp 129.000.
  *
- * 3. Tabel `sharing_session_pendaftaran`, bentuknya mengikuti
+ * 3. Tabel `webinar_eksklusif_pendaftaran`, bentuknya mengikuti
  *    `scopus_camp_pendaftaran` supaya satu layar pendaftar dan satu
  *    penghitung peserta bisa melayani keduanya.
  *
@@ -31,7 +31,7 @@ use Illuminate\Support\Str;
  */
 return new class extends Migration
 {
-    private const KODE = 'sharing_session';
+    private const KODE = 'webinar_eksklusif';
 
     public function up(): void
     {
@@ -57,7 +57,7 @@ return new class extends Migration
         $this->tambahLayanan();
         $this->tambahTarif();
 
-        Schema::create('sharing_session_pendaftaran', function (Blueprint $t) {
+        Schema::create('webinar_eksklusif_pendaftaran', function (Blueprint $t) {
             /*
              * Bentuknya SENGAJA sama dengan scopus_camp_pendaftaran, sampai ke
              * nama kolomnya. Penghitung peserta, penjaga hapus angkatan, dan
@@ -117,7 +117,7 @@ return new class extends Migration
         DB::table('layanan')->insert([
             'id' => (string) Str::uuid(),
             'kode' => self::KODE,
-            'nama' => 'Sharing Session',
+            'nama' => 'Webinar Eksklusif',
             'satuan' => 'peserta',
             'ikon' => 'fa-microphone',
             'warna' => 'mis-jingga',
@@ -195,7 +195,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('sharing_session_pendaftaran');
+        Schema::dropIfExists('webinar_eksklusif_pendaftaran');
 
         DB::table('clinikscopus_biaya_persesi')->where('layanan', self::KODE)->delete();
 
