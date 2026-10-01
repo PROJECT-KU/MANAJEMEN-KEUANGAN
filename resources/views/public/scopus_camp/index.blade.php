@@ -120,7 +120,7 @@
                         @endif
 
                         <div class="card-img-wrapper">
-                            <img src="{{ !empty($item->gambar) ? asset('ScopusCamp/' . basename($item->gambar)) : asset('ScopusCamp/no-image.jpg') }}"
+                            <img src="{{ \App\Support\AlamatGambar::url($item->gambar ?? null, 'ScopusCamp') ?: asset('ScopusCamp/no-image.jpg') }}"
                                 class="img-fluid-custom" alt="Scopus Camp">
                         </div>
 

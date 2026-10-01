@@ -381,7 +381,7 @@ Analisis Bibliometrik Selengkapnya | Rumah Scopus
                     <div class="sidebar-list mt-4">
                         @foreach($terbaru as $data)
                         @if($data->status === 'active') <a href="{{ route('public.analisisbibliometrik.Selengkapnya', ['id' => $data->id, 'token' => $data->token]) }}" class="sidebar-item-glass">
-                            <img src="{{ !empty($data->gambar) ? asset('bibliometrik/' . basename($data->gambar)) : asset('bibliometrik/no-image.jpg') }}" alt="Gambar" class="sidebar-img">
+                            <img src="{{ \App\Support\AlamatGambar::url($data->gambar ?? null, 'bibliometrik') ?: asset('bibliometrik/no-image.jpg') }}" alt="Gambar" class="sidebar-img">
 
                             <div class="sidebar-info">
                                 <strong>{{ $data->nama }} #{{ $data->nama_ke }}</strong>

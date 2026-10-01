@@ -115,7 +115,7 @@
                         @endif
 
                         <div class="card-img-wrapper">
-                            <img src="{{ !empty($item->gambar) ? asset('bibliometrik/' . basename($item->gambar)) : asset('bibliometrik/no-image.jpg') }}"
+                            <img src="{{ \App\Support\AlamatGambar::url($item->gambar ?? null, 'bibliometrik') ?: asset('bibliometrik/no-image.jpg') }}"
                                 class="img-fluid-custom" alt="Analisis Bibliometrik">
                         </div>
 
