@@ -29,10 +29,18 @@ class KategoriLayanan extends Model
     /** @var array<string, int>|null */
     private static ?array $pendaftar = null;
 
+    /** @var array<string, int>|null */
+    private static ?array $pendaftaran = null;
+
+    /** @var array<int, string>|null */
+    private static ?array $nomorGanda = null;
+
     /** Dibuang uji yang mengubah pendaftarnya di tengah jalan. */
     public static function lupakanPendaftar(): void
     {
         self::$pendaftar = null;
+        self::$pendaftaran = null;
+        self::$nomorGanda = null;
     }
 
     protected $table = 'kategori_layanan';
@@ -77,6 +85,87 @@ class KategoriLayanan extends Model
                 $model->{$model->getKeyName()} = (string) Str::uuid();
             }
         });
+
+        /*
+         * Jejak ditulis dari kait model, BUKAN dari pengendali. Angkatan
+         * diubah dari enam tempat — borang, tindakan massal, tombol Gandakan,
+         * perintah penutup otomatis, dan dua layar lama yang masih hidup —
+         * jadi mencatat di pengendali berarti lima tempat yang akan terlewat.
+         */
+        static::created(fn ($m) => AngkatanJejak::catat($m, 'dibuat'));
+
+        static::updated(function ($m) {
+            $berubah = $m->ringkasPerubahan();
+
+            // Penyimpanan yang tidak mengubah apa pun tidak dicatat; kalau
+            // tidak, jejaknya penuh baris "diubah" tanpa isi.
+            if ($berubah !== '') {
+                AngkatanJejak::catat($m, 'diubah', $berubah);
+            }
+        });
+
+        /*
+         * Salinan utuh barisnya ikut disimpan supaya bisa dipulihkan. Dicatat
+         * di `deleted`, bukan `deleting`: kalau penghapusannya gagal karena
+         * kunci asing, tidak boleh ada jejak yang mengaku sudah terhapus.
+         */
+        static::deleted(fn ($m) => AngkatanJejak::catat(
+            $m, 'dihapus', 'bisa dipulihkan dari sini', $m->getOriginal()
+        ));
+    }
+
+    /**
+     * Kalimat pendek berisi apa saja yang berubah pada penyimpanan terakhir.
+     *
+     * Hanya kolom yang BERARTI bagi orang. `updated_at` selalu berubah dan
+     * menyebutkannya cuma membuat tiap jejak berbunyi sama.
+     */
+    public function ringkasPerubahan(): string
+    {
+        $nama = [
+            'status' => 'status',
+            'nama' => 'nama',
+            'nama_ke' => 'nomor angkatan',
+            'mulai' => 'tanggal mulai',
+            'selesai' => 'tanggal selesai',
+            'lokasi' => 'lokasi',
+            'total_kuota' => 'total kuota',
+            'sisa_kuota' => 'sisa kuota',
+            'biaya' => 'biaya',
+            'total_biaya' => 'harga promo',
+            'gambar' => 'sampul',
+            'desc' => 'deskripsi',
+            'group_wa' => 'tautan grup',
+            'varian' => 'varian',
+        ];
+
+        $bagian = [];
+
+        foreach ($this->getChanges() as $kolom => $baru) {
+            if (! array_key_exists($kolom, $nama)) {
+                continue;
+            }
+
+            $lama = $this->getOriginal($kolom);
+
+            // Deskripsi bisa ribuan huruf; yang berguna cuma "berubah".
+            if (in_array($kolom, ['desc', 'gambar'], true)) {
+                $bagian[] = $nama[$kolom] . ' diganti';
+
+                continue;
+            }
+
+            $bagian[] = $nama[$kolom] . ': ' . ($lama === null || $lama === '' ? '(kosong)' : $lama)
+                . ' → ' . ($baru === null || $baru === '' ? '(kosong)' : $baru);
+        }
+
+        return implode(', ', $bagian);
+    }
+
+    /** Jejak perubahan angkatan ini, terbaru dulu. */
+    public function jejak()
+    {
+        return $this->hasMany(AngkatanJejak::class, 'kategori_id')->latest('created_at');
     }
 
     // ----------------------------------------------------------------- kueri
@@ -95,14 +184,48 @@ class KategoriLayanan extends Model
     }
 
     /**
-     * Jumlah pendaftar SEMUA angkatan sekaligus, dalam dua kueri berkelompok.
+     * Tabel pendaftaran per layanan: kunci layanan -> nama tabelnya.
+     *
+     * Didaftar di satu tempat karena dibaca dari empat tempat — penghitung
+     * peserta, penjaga hapus satuan, penjaga hapus massal, dan penjaga kuota
+     * di borang. Sebelumnya nama tabelnya diketik ulang di masing-masing, dan
+     * layanan yang belum punya tabel pendaftaran tidak kelihatan dari mana
+     * pun.
+     *
+     * Layanan yang TIDAK ada di sini — Scopus Cafe dan Clinik Scopus — memang
+     * belum punya tabel pendaftaran. Angkatannya boleh dibuat, tetapi peserta
+     * dan sisa kuotanya akan selalu 0; itu dinyatakan terang-terangan lewat
+     * belumPunyaPendaftaran() daripada dibiarkan terbaca seperti "memang
+     * belum ada yang daftar".
+     */
+    public const TABEL_PENDAFTARAN = [
+        'scopus_camp' => 'scopus_camp_pendaftaran',
+        'bibliometrik' => 'analisis_bibliometrik',
+    ];
+
+    /** Layanan ini belum punya tempat menyimpan pendaftar sama sekali. */
+    public function belumPunyaPendaftaran(): bool
+    {
+        return ! array_key_exists((string) $this->layanan, self::TABEL_PENDAFTARAN);
+    }
+
+    /**
+     * Jumlah PESERTA semua angkatan sekaligus, dalam dua kueri berkelompok.
      *
      * Bukan satu kueri per baris: daftarnya berhalaman sepuluh dan jumlahnya
-     * dipakai di tiga tempat (lencana kuota, penjaga kuota, tautan pendaftar),
+     * dipakai di tiga tempat (lencana kuota, penjaga kuota, tautan peserta),
      * jadi dibaca satu per satu ia jadi tiga puluh kueri.
      *
-     * Dua tabel karena pendaftarannya memang dua: Scopus Camp dan Bibliometrik
-     * menyimpan pendaftarnya sendiri-sendiri, keduanya menunjuk `kategori_id`.
+     * Yang dijumlahkan `jumlah_pendaftar`, BUKAN jumlah barisnya. Satu baris
+     * pendaftaran boleh berisi rombongan: dari 80 baris Scopus Camp isinya
+     * 105 orang, dan angkatan ke-175 yang barisnya 5 sebenarnya 25 orang.
+     * Menghitung baris membuat layar ini menulis 5 sementara halaman publik —
+     * yang sejak dulu memakai sum() — menulis 25 untuk angkatan yang sama,
+     * dan membuat penjaga kuota mengizinkan kuota disetel di bawah jumlah
+     * orang yang sudah terdaftar.
+     *
+     * Baris tanpa isian dihitung satu orang, bukan nol: yang mendaftar tetap
+     * ada walau jumlahnya tidak terisi.
      *
      * @return array<string, int>
      */
@@ -114,10 +237,10 @@ class KategoriLayanan extends Model
 
         $hasil = [];
 
-        foreach (['scopus_camp_pendaftaran', 'analisis_bibliometrik'] as $tabel) {
+        foreach (self::TABEL_PENDAFTARAN as $tabel) {
             $baris = DB::table($tabel)
                 ->whereNotNull('kategori_id')
-                ->selectRaw('kategori_id, count(*) as n')
+                ->selectRaw('kategori_id, sum(greatest(coalesce(jumlah_pendaftar, 1), 1)) as n')
                 ->groupBy('kategori_id')
                 ->pluck('n', 'kategori_id');
 
@@ -129,10 +252,48 @@ class KategoriLayanan extends Model
         return self::$pendaftar = $hasil;
     }
 
-    /** Berapa orang yang sudah mendaftar di angkatan ini. */
+    /**
+     * Jumlah BARIS pendaftaran per angkatan — bukan jumlah orangnya.
+     *
+     * Dipakai hanya untuk menyebut "3 pendaftaran" di samping jumlah orang
+     * saat keduanya berbeda, supaya admin yang membuka daftar pendaftar tidak
+     * bingung menemukan tiga baris padahal layar ini menulis tujuh orang.
+     *
+     * @return array<string, int>
+     */
+    public static function hitungPendaftaran(): array
+    {
+        if (self::$pendaftaran !== null) {
+            return self::$pendaftaran;
+        }
+
+        $hasil = [];
+
+        foreach (self::TABEL_PENDAFTARAN as $tabel) {
+            $baris = DB::table($tabel)
+                ->whereNotNull('kategori_id')
+                ->selectRaw('kategori_id, count(*) as n')
+                ->groupBy('kategori_id')
+                ->pluck('n', 'kategori_id');
+
+            foreach ($baris as $id => $n) {
+                $hasil[$id] = ($hasil[$id] ?? 0) + (int) $n;
+            }
+        }
+
+        return self::$pendaftaran = $hasil;
+    }
+
+    /** Berapa ORANG yang sudah mendaftar di angkatan ini. */
     public function getJumlahPendaftarAttribute(): int
     {
         return self::hitungPendaftar()[$this->getKey()] ?? 0;
+    }
+
+    /** Berapa BARIS pendaftaran yang masuk ke angkatan ini. */
+    public function getJumlahPendaftaranAttribute(): int
+    {
+        return self::hitungPendaftaran()[$this->getKey()] ?? 0;
     }
 
     /** Kuotanya sudah habis. */
@@ -201,6 +362,8 @@ class KategoriLayanan extends Model
         'draf-lewat' => 'Draf kadaluwarsa',
         'tanpa-tarif' => 'Tanpa tarif induk',
         'sampul-hilang' => 'Sampul hilang',
+        'kuota-melenceng' => 'Sisa kuota melenceng',
+        'nomor-ganda' => 'Nomor angkatan ganda',
     ];
 
     /**
@@ -261,6 +424,15 @@ class KategoriLayanan extends Model
             $alasan[] = 'berkas sampulnya tidak ada di peladen';
         }
 
+        if ($this->kuota_melenceng) {
+            $alasan[] = 'sisa kuotanya ' . (int) $this->sisa_kuota . ', seharusnya '
+                . $this->sisa_kuota_seharusnya;
+        }
+
+        if ($this->nomor_ganda) {
+            $alasan[] = 'nomor angkatannya dipakai angkatan lain di lokasi yang sama';
+        }
+
         return $alasan;
     }
 
@@ -291,6 +463,181 @@ class KategoriLayanan extends Model
     public function getSampulHilangAttribute(): bool
     {
         return trim((string) $this->gambar) !== '' && $this->alamat_sampul === null;
+    }
+
+    /**
+     * Sisa kuota yang SEHARUSNYA, dihitung dari total dikurangi peserta.
+     *
+     * null kalau tidak bisa dihitung: tanpa total kuota tidak ada yang bisa
+     * dikurangi, dan layanan yang belum punya tabel pendaftaran sisanya
+     * memang diisi tangan.
+     */
+    public function getSisaKuotaSeharusnyaAttribute(): ?int
+    {
+        if ($this->total_kuota === null || $this->belumPunyaPendaftaran()) {
+            return null;
+        }
+
+        return max(0, (int) $this->total_kuota - $this->jumlah_pendaftar);
+    }
+
+    /**
+     * Sisa kuota tersimpan tidak cocok dengan total dikurangi peserta.
+     *
+     * `sisa_kuota` bukan hitungan, melainkan kolom yang dinaik-turunkan tangan
+     * di empat pengendali berbeda — dua layar pendaftaran admin, dan dua
+     * halaman publik. Begitu salah satunya gagal di tengah jalan, angkanya
+     * melenceng dan tidak ada apa pun yang memberi tahu: terukur 2 dari 60
+     * angkatan, yang terburuk menulis sisa 11 padahal seharusnya 31.
+     *
+     * Yang dibaca halaman publik adalah kolom ini, jadi melencengnya berarti
+     * angkatan menerima lebih banyak atau lebih sedikit orang daripada yang
+     * disediakan.
+     */
+    public function getKuotaMelencengAttribute(): bool
+    {
+        $seharusnya = $this->sisa_kuota_seharusnya;
+
+        return $seharusnya !== null && (int) $this->sisa_kuota !== $seharusnya;
+    }
+
+    /**
+     * Id angkatan yang sisa kuotanya melenceng.
+     *
+     * Dihitung sekali untuk semua baris, lalu dipakai scopePerlu() menyaring
+     * di SQL. Tanpa daftar ini, menyaring "sisa kuota melenceng" berarti
+     * memuat seluruh tabel lalu menyaring di PHP, dan penomoran halamannya
+     * ikut rusak.
+     *
+     * @return array<int, string>
+     */
+    public static function idKuotaMelenceng(): array
+    {
+        $peserta = self::hitungPendaftar();
+        $id = [];
+
+        self::query()
+            ->whereNotNull('total_kuota')
+            ->whereIn('layanan', array_keys(self::TABEL_PENDAFTARAN))
+            ->select('id', 'total_kuota', 'sisa_kuota')
+            ->get()
+            ->each(function ($a) use ($peserta, &$id) {
+                $seharusnya = max(0, (int) $a->total_kuota - ($peserta[$a->id] ?? 0));
+
+                if ((int) $a->sisa_kuota !== $seharusnya) {
+                    $id[] = $a->id;
+                }
+            });
+
+        return $id;
+    }
+
+    /**
+     * Nomor angkatannya sudah dipakai angkatan lain di lokasi yang sama.
+     *
+     * Nomor itu yang dipakai orang menyebut angkatannya ("Camp ke-188"), jadi
+     * dua angkatan bernomor sama membuat percakapan admin dan peserta jadi
+     * ambigu — dan keduanya tetap tampil berdampingan di halaman publik.
+     * Terukur 7 pasang dari 60 angkatan.
+     */
+    public function getNomorGandaAttribute(): bool
+    {
+        return in_array($this->getKey(), self::idNomorGanda(), true);
+    }
+
+    /**
+     * Id semua angkatan yang nomornya kembar dengan angkatan lain.
+     *
+     * Dihitung sekali lewat satu kueri berkelompok, bukan sekali per baris.
+     *
+     * @return array<int, string>
+     */
+    public static function idNomorGanda(): array
+    {
+        if (self::$nomorGanda !== null) {
+            return self::$nomorGanda;
+        }
+
+        /*
+         * Yang dibandingkan layanan + lokasi + nomor. Nomor berjalan PER
+         * LOKASI, jadi Camp Jakarta ke-9 dan Camp Medan ke-9 bukan kembar.
+         * Lokasi kosong disamakan jadi untaian kosong supaya Bibliometrik —
+         * yang lokasinya memang selalu NULL — tetap terbandingkan.
+         */
+        $kembar = self::query()
+            ->whereNotNull('nama_ke')->where('nama_ke', '!=', '')
+            ->selectRaw("layanan, coalesce(lokasi, '') as lok, nama_ke")
+            ->groupBy('layanan', 'lok', 'nama_ke')
+            ->havingRaw('count(*) > 1')
+            ->get();
+
+        if ($kembar->isEmpty()) {
+            return self::$nomorGanda = [];
+        }
+
+        $kueri = self::query()->select('id');
+
+        $kueri->where(function (Builder $q) use ($kembar) {
+            foreach ($kembar as $k) {
+                $q->orWhere(fn (Builder $x) => $x
+                    ->where('layanan', $k->layanan)
+                    ->whereRaw("coalesce(lokasi, '') = ?", [$k->lok])
+                    ->where('nama_ke', $k->nama_ke));
+            }
+        });
+
+        return self::$nomorGanda = $kueri->pluck('id')->all();
+    }
+
+    /**
+     * Nomor angkatan BEBAS berikutnya untuk layanan + lokasi ini.
+     *
+     * Dipakai tombol Gandakan. Menaikkan nomor asal satu saja tidak cukup:
+     * menggandakan ke-187 menghasilkan 188, dan 188 sudah ada dua di
+     * Yogyakarta — jadi menggandakan justru menambah kembar ketiga.
+     */
+    public static function nomorBebas(string $layanan, ?string $lokasi, string $dari): string
+    {
+        if (! is_numeric($dari)) {
+            return $dari;
+        }
+
+        $terpakai = self::query()
+            ->where('layanan', $layanan)
+            ->whereRaw("coalesce(lokasi, '') = ?", [(string) $lokasi])
+            ->pluck('nama_ke')
+            ->map(fn ($n) => (string) $n)
+            ->all();
+
+        $nomor = (int) $dari;
+
+        // Dibatasi supaya tidak berputar selamanya kalau datanya aneh; 500
+        // sudah jauh di atas angkatan tertinggi yang ada (202).
+        for ($i = 0; $i < 500; $i++) {
+            $nomor++;
+
+            if (! in_array((string) $nomor, $terpakai, true)) {
+                return (string) $nomor;
+            }
+        }
+
+        return (string) $nomor;
+    }
+
+    /**
+     * Sebutan jumlah peserta untuk ditampilkan.
+     *
+     * Jumlah BARISnya ikut disebut hanya kalau berbeda dari jumlah orang —
+     * angkatan ke-175 punya 5 pendaftaran berisi 25 orang, dan menulis "25
+     * peserta" saja membuat admin yang membuka daftarnya mengira ada yang
+     * hilang.
+     */
+    public function sebutPeserta(): string
+    {
+        $orang = $this->jumlah_pendaftar;
+        $baris = $this->jumlah_pendaftaran;
+
+        return $orang . ' peserta' . ($baris > 0 && $baris !== $orang ? ' / ' . $baris . ' pendaftaran' : '');
     }
 
     /**
@@ -355,8 +702,61 @@ class KategoriLayanan extends Model
                     DB::raw("concat(layanan, '|', coalesce(varian, ''))"),
                     $bertarif
                 )
-                ->orWhereIn('gambar', $sampulHilang);
+                ->orWhereIn('gambar', $sampulHilang)
+                ->orWhereIn('id', self::idKuotaMelenceng())
+                ->orWhereIn('id', self::idNomorGanda());
         });
+    }
+
+    /**
+     * Rentang waktu siap pakai; kuncinya dipakai di alamat.
+     *
+     * Pilihan jadi, bukan dua kotak tanggal. Yang memakai layar ini bukan
+     * orang yang terbiasa dengan pemilih tanggal, dan pertanyaan yang benar-
+     * benar ditanyakan selalu bentuknya "yang mana bulan depan" — bukan
+     * "antara 3 dan 19 November".
+     */
+    public const PERIODE = [
+        'bulan-ini' => 'Bulan ini',
+        'bulan-depan' => 'Bulan depan',
+        'tiga-bulan' => '3 bulan ke depan',
+        'tahun-ini' => 'Tahun ini',
+        'sudah-lewat' => 'Sudah lewat',
+    ];
+
+    /**
+     * Saringan rentang waktu; kunci yang tidak dikenal diabaikan.
+     *
+     * Yang dibandingkan tanggal MULAI, kecuali "sudah lewat" yang memakai
+     * tanggal selesai — angkatan tiga hari yang mulai kemarin belum lewat.
+     */
+    public function scopePeriode(Builder $kueri, ?string $jenis): Builder
+    {
+        $hariIni = Carbon::today();
+
+        return match ($jenis) {
+            'bulan-ini' => $kueri->whereBetween('mulai', [
+                $hariIni->copy()->startOfMonth(), $hariIni->copy()->endOfMonth(),
+            ]),
+
+            'bulan-depan' => $kueri->whereBetween('mulai', [
+                $hariIni->copy()->addMonthNoOverflow()->startOfMonth(),
+                $hariIni->copy()->addMonthNoOverflow()->endOfMonth(),
+            ]),
+
+            'tiga-bulan' => $kueri->whereBetween('mulai', [
+                $hariIni->copy()->startOfDay(),
+                $hariIni->copy()->addMonthsNoOverflow(3)->endOfDay(),
+            ]),
+
+            'tahun-ini' => $kueri->whereBetween('mulai', [
+                $hariIni->copy()->startOfYear(), $hariIni->copy()->endOfYear(),
+            ]),
+
+            'sudah-lewat' => $kueri->whereRaw('coalesce(selesai, mulai) < ?', [$hariIni->toDateString()]),
+
+            default => $kueri,
+        };
     }
 
     /** Saringan "perlu ditindaklanjuti"; kunci yang tidak dikenal diabaikan. */
@@ -377,6 +777,10 @@ class KategoriLayanan extends Model
             // Larik kosong pada whereIn menghasilkan "0 = 1" di SQL, yang
             // justru benar: tidak ada satu pun yang sampulnya hilang.
             'sampul-hilang' => $kueri->whereIn('gambar', self::jalurSampulHilang()),
+
+            'kuota-melenceng' => $kueri->whereIn('id', self::idKuotaMelenceng()),
+
+            'nomor-ganda' => $kueri->whereIn('id', self::idNomorGanda()),
 
             default => $kueri,
         };

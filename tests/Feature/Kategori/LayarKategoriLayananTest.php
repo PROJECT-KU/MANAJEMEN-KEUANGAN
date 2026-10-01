@@ -331,7 +331,9 @@ class LayarKategoriLayananTest extends TestCase
             route('account.kategori-layanan.destroy', $terpakai));
 
         $jawab->assertStatus(409);
-        $this->assertStringContainsString('pendaftar', $jawab->json('message'));
+        // "peserta", bukan "pendaftar": yang disebut jumlah ORANG, dan satu
+        // pendaftaran boleh membawa rombongan.
+        $this->assertStringContainsString('peserta', $jawab->json('message'));
         $this->assertNotNull(KategoriLayanan::find($terpakai));
     }
 
