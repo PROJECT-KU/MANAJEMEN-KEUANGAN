@@ -185,6 +185,14 @@ Angkatan Layanan | MIS
 
         .mis-tabel.mis-tabel-kartu.ang-tabel tbody td.ang-centang-sel::before { display: none; }
 
+        /* Sel status boleh membungkus: dua lencana berdampingan pada kartu
+           selebar 360px memaksa seluruh tabel digeser ke samping. */
+        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td[data-judul="Status"] {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
         /* Kartu yang terpilih diberi warna: di antara kartu-kartu berjarak,
            kotak 16px di sudut terlalu kecil untuk menunjukkan mana yang ikut. */
         .mis-tabel-kartu.ang-tabel tbody tr:has(.ang-centang:checked) {
@@ -271,7 +279,19 @@ Angkatan Layanan | MIS
                 ['non active', 'Nonaktif', $perStatus['non active'] ?? 0, 'mis-abu', 'fa-pause-circle'],
             ];
         @endphp
-        <div class="mis-ringkas">
+        @php
+            /*
+             * Blok @php, BUKAN @php(...) sebaris.
+             *
+             * Penanda sebaris itu ditutup Blade di kurung PERTAMA yang
+             * ditemuinya, jadi array_sum($jumlahPerlu) membuat kurungnya
+             * timpang: sisanya jadi kode PHP mentah, kompilasinya berhenti di
+             * situ, dan halamannya galat 500 dengan menyebut variabel lain
+             * yang sama sekali tidak bersalah.
+             */
+            $perluPertama = array_key_first(array_filter($jumlahPerlu));
+        @endphp
+        <div class="mis-ringkas {{ $totalPerlu > 0 ? 'mis-ringkas-5' : '' }}">
             @foreach ($ubin as [$nilaiStatus, $label, $angka, $warna, $glif])
                 <a class="mis-ubin {{ $status === $nilaiStatus ? 'terpilih' : '' }}"
                     href="{{ route('account.kategori-layanan.index',
@@ -284,6 +304,22 @@ Angkatan Layanan | MIS
                     </div>
                 </a>
             @endforeach
+
+            {{-- Ubin kelima hanya muncul kalau memang ada yang perlu dicek.
+                 Ubin bertuliskan 0 menempati ruang tanpa memberi tahu apa pun,
+                 dan di layar sempit ia mendesak empat ubin lain. --}}
+            @if ($totalPerlu > 0)
+                <a class="mis-ubin {{ $perlu ? 'terpilih' : '' }}"
+                    href="{{ route('account.kategori-layanan.index',
+                        array_merge($bawaUbin, ['perlu' => $perluPertama])) }}"
+                    title="Saring: angkatan yang perlu ditindaklanjuti">
+                    <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div>
+                        <p class="mis-ubin-angka">{{ number_format($totalPerlu) }}</p>
+                        <p class="mis-ubin-label">Perlu dicek</p>
+                    </div>
+                </a>
+            @endif
         </div>
 
         {{-- ---------------------------------------------- penyaring --}}
@@ -360,6 +396,18 @@ Angkatan Layanan | MIS
                     </select>
                 </div>
 
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="ang-perlu">Perlu dicek</label>
+                    <select class="form-control-modern" id="ang-perlu" name="perlu">
+                        <option value="">Semua angkatan</option>
+                        @foreach (\App\KategoriLayanan::PERLU as $kunci => $label)
+                            <option value="{{ $kunci }}" @selected($perlu === $kunci)>
+                                {{ $label }} ({{ $jumlahPerlu[$kunci] ?? 0 }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 {{-- Di layar lebar kepala kolomnya yang mengurutkan; menu ini
                      penggantinya di ponsel, tempat <thead> disembunyikan. --}}
                 <div class="mis-isian mis-saring-pilih mis-urut-ponsel">
@@ -425,6 +473,9 @@ Angkatan Layanan | MIS
                     </button>
                     <button type="button" class="mis-tombol mis-tombol-halus" data-massal="draft">
                         <i class="fas fa-pen"></i> Jadikan draf
+                    </button>
+                    <button type="button" class="mis-tombol mis-tombol-hapus" id="ang-massal-hapus">
+                        <i class="fas fa-trash-alt"></i> Hapus
                     </button>
                     <button type="button" class="mis-tombol mis-tombol-halus" id="ang-massal-batal">
                         Batal
@@ -651,6 +702,32 @@ Angkatan Layanan | MIS
                                                 </span>
                                             @endif
                                         @endif
+
+                                        {{-- Ketiga keadaan "perlu dicek" jadi SATU lencana,
+                                             bukan tiga.
+
+                                             Tiga lencana terpisah membuat baris Bibliometrik
+                                             memuat empat lencana sekaligus — terukur menuntut
+                                             504px di kartu selebar 360px, jadi tabelnya harus
+                                             digeser ke samping, dan di layar lebar barisnya
+                                             membengkak dari 71px jadi 118px.
+
+                                             Yang perlu diketahui sekilas cuma "baris ini
+                                             perlu dicek"; perinciannya menyusul di tooltip
+                                             dan di halaman rincian. --}}
+                                        {{-- Alasannya dihitung di model, BUKAN di blok
+                                             @php di sini: blok seperti itu akan dipasangkan
+                                             Blade dengan @php(...) sebaris yang sudah ada di
+                                             atas, dan semua di antaranya ikut tertelan. --}}
+                                        @if ($a->perlu_dicek)
+                                            <span class="mis-pil mis-pil-merah"
+                                                title="Perlu dicek: {{ implode('; ', $a->perlu_dicek) }}">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ count($a->perlu_dicek) > 1
+                                                    ? 'Perlu dicek ' . count($a->perlu_dicek) . ' hal'
+                                                    : 'Perlu dicek' }}
+                                            </span>
+                                        @endif
                                     </td>
 
                                     <td data-judul="Aksi">
@@ -767,6 +844,46 @@ Angkatan Layanan | MIS
         document.getElementById('ang-massal-batal').addEventListener('click', function () {
             dipilih.clear();
             pulihkan();
+        });
+
+        /*
+         * Menghapus massal lewat jalurnya sendiri, dan konfirmasinya menyebut
+         * angkanya. Angkatan yang sudah punya pendaftar dilewati peladen, bukan
+         * membatalkan seluruh tindakan — jawabannya menyebut berapa yang
+         * dilewati.
+         */
+        document.getElementById('ang-massal-hapus').addEventListener('click', function () {
+            if (dipilih.size === 0) return;
+
+            window.misKonfirmasi({
+                judul: 'Hapus angkatan terpilih?',
+                pesan: '%s dihapus permanen dan tidak bisa dikembalikan. '
+                    + 'Yang sudah punya pendaftar akan dilewati.',
+                sorot: dipilih.size + ' angkatan',
+                tombol: 'Ya, hapus',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (!ya) return;
+
+                const isi = new FormData();
+                [...dipilih].forEach(function (x) { isi.append('id[]', x); });
+
+                fetch(@json(route('account.kategori-layanan.massal-hapus')), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                    body: isi,
+                })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (j) {
+                        window.misToast(j.ok && j.d.success ? 'berhasil' : 'gagal',
+                            j.d.message || 'Penghapusannya gagal.');
+                        if (j.ok && j.d.success) setTimeout(function () { window.location.reload(); }, 1200);
+                    })
+                    .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+            });
         });
 
         // Daftar baru selesai dimuat: centangnya dipasang ulang.
