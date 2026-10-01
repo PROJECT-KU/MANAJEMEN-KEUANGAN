@@ -335,8 +335,7 @@ Angkatan Layanan | MIS
              sebelum baris pertama data kelihatan. Di layar lebar ia dipaksa
              terbuka oleh mis-ui.js dan ringkasannya disembunyikan, jadi tampak
              seperti baris penyaring biasa. --}}
-        <details class="mis-lipat" data-mis-lipat
-            @if ($adaSaringan || $urut !== 'mulai' || $arahKode !== 'desc') data-mis-lipat-terpakai @endif>
+        <details class="mis-lipat" data-mis-lipat>
             <summary>
                 <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
                 Cari &amp; saring

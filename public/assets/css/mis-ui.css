@@ -1918,6 +1918,27 @@ textarea:focus-visible,
     text-align: center;
 }
 
+/*
+ * Glif di dalam medali dipaksa tanpa margin.
+ *
+ * style.css punya aturan
+ *   a:not(.btn-social-icon):not(.btn-social):not(.page-link) .fas { margin-left: 4px }
+ * dan ubin ringkasan memang <a>. Akibatnya glifnya meleset 2px ke kanan dari
+ * titik tengah medalinya — kecil, tetapi terlihat begitu lima medali berjajar
+ * dan semuanya meleset ke arah yang sama.
+ *
+ * !important dipakai karena bobot aturan itu (0,4,1) tidak terkejar pemilih
+ * yang masuk akal di sini; lihat catatan "timpa terbatas" di
+ * docs/panduan-ui-mis.md.
+ */
+.mis-medali > .fas,
+.mis-medali > .far,
+.mis-medali > .fab,
+.mis-medali > .fal,
+.mis-medali > .ion {
+    margin: 0 !important;
+}
+
 .mis-medali.kecil {
     width: 30px;
     height: 30px;
