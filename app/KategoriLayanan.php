@@ -188,6 +188,71 @@ class KategoriLayanan extends Model
         return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->gambar)) : null;
     }
 
+    /**
+     * Sampul yang sudah jadi KEBIASAAN untuk pasangan layanan + lokasi.
+     *
+     * Empat puluh satu angkatan Scopus Camp Yogyakarta memakai satu flyer yang
+     * sama, dan tiap angkatan baru di sana selalu memakainya lagi — tetapi
+     * admin harus mencarinya sendiri di cakram dan mengunggah ulang berkas yang
+     * sudah ada di peladen.
+     *
+     * Yang diusulkan HANYA kalau memang sudah jadi kebiasaan: berkasnya dipakai
+     * sedikitnya dua angkatan DAN jadi mayoritas di lokasi itu. Jakarta punya
+     * lima berkas berbeda dan tak satu pun dipakai lebih dari sekali — di sana
+     * menebak satu di antaranya sama saja dengan menebak acak, dan flyer salah
+     * yang terlanjur terbit di halaman publik lebih mahal daripada tidak ada
+     * usulan sama sekali.
+     *
+     * @return array<string, array{jalur: string, alamat: string, jumlah: int}>
+     *         Berkunci "layanan|lokasi" dengan lokasi huruf kecil.
+     */
+    public static function sampulLazim(): array
+    {
+        $baris = DB::table('kategori_layanan')
+            ->whereNotNull('gambar')->where('gambar', '<>', '')
+            ->whereNotNull('lokasi')->where('lokasi', '<>', '')
+            ->selectRaw('layanan, lower(trim(lokasi)) as lok, gambar, count(*) as n')
+            ->groupBy('layanan', 'lok', 'gambar')
+            ->get();
+
+        // Dikelompokkan di PHP, bukan lewat satu kueri berjenjang: MySQL tidak
+        // punya cara ringkas memilih baris terbanyak per kelompok, dan jumlah
+        // barisnya di sini puluhan, bukan ribuan.
+        $per = [];
+
+        foreach ($baris as $b) {
+            $per[$b->layanan . '|' . $b->lok][$b->gambar] = (int) $b->n;
+        }
+
+        $hasil = [];
+
+        foreach ($per as $kunci => $berkas) {
+            arsort($berkas);
+
+            $jalur = (string) array_key_first($berkas);
+            $terbanyak = (int) reset($berkas);
+
+            if ($terbanyak < 2 || $terbanyak <= array_sum($berkas) - $terbanyak) {
+                continue;
+            }
+
+            // Berkas yang sudah hilang dari cakram tidak diusulkan: yang
+            // tampil nanti gambar rusak, dan itu lebih membingungkan daripada
+            // kotak kosong.
+            if (! is_file(public_path($jalur))) {
+                continue;
+            }
+
+            $hasil[$kunci] = [
+                'jalur' => $jalur,
+                'alamat' => asset($jalur),
+                'jumlah' => $terbanyak,
+            ];
+        }
+
+        return $hasil;
+    }
+
     // ------------------------------------------------------------- tampilan
 
     public function getNamaLayananAttribute(): string
