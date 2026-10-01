@@ -120,9 +120,15 @@ class KategoriLayananTest extends TestCase
                  * kuerinya memang menyeberangi semua layanan, tetapi hasilnya
                  * TERPISAH per layanan — itu justru cara menghitung pemakaian
                  * semua layanan dalam satu kueri, bukan kebocoran.
+                 *
+                 * Tanda kurung penutupnya TIDAK ikut dicocokkan. Dengan
+                 * "groupBy('layanan')" utuh, kueri yang mengelompokkan menurut
+                 * beberapa kolom — groupBy('layanan', 'lok', 'gambar') —
+                 * dituduh lengah padahal layanan tetap kunci pertamanya dan
+                 * hasilnya tetap terpisah.
                  */
                 if (str_contains($pernyataan, "where('layanan'")
-                    || str_contains($pernyataan, "groupBy('layanan')")) {
+                    || str_contains($pernyataan, "groupBy('layanan'")) {
                     continue;
                 }
 

@@ -149,6 +149,24 @@
     .brg-sampul-pratinjau img { width: 100%; height: 100%; object-fit: cover; }
     .brg-sampul-pratinjau .fas { font-size: 22px !important; }
 
+    /* Catatan sampul warisan: hijau, sebab ia mengabarkan sesuatu yang sudah
+       beres — bukan peringatan dan bukan galat. */
+    .brg-warisan {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+        margin: 0; padding: 8px 11px;
+        border: 1px solid #bbf7d0; border-radius: 11px;
+        background: #f0fdf4;
+        line-height: 1.45; font-size: .74rem; color: #166534;
+    }
+
+    .brg-warisan .fas { font-size: 12px !important; }
+
+    .brg-warisan-batal {
+        padding: 0; border: 0; background: none;
+        font-size: .74rem; font-weight: 700; color: #166534;
+        text-decoration: underline; cursor: pointer;
+    }
+
     .brg-kaki {
         display: flex; flex-wrap: wrap; gap: 10px;
         margin-top: var(--mis-jarak);
@@ -370,6 +388,13 @@
                                 </span>
 
                                 <div class="mis-unggah-bungkus">
+                                    {{-- Jalur sampul yang diwarisi dari angkatan lain di
+                                         lokasi yang sama. Diisi skrip, dan peladen memeriksa
+                                         ulang pasangan layanan+lokasinya — jalur dari
+                                         peramban tidak pernah dipercaya apa adanya. --}}
+                                    <input type="hidden" name="sampul_warisan" id="brg-sampul-warisan"
+                                        value="{{ old('sampul_warisan') }}">
+
                                     <input type="file" class="mis-berkas" id="brg-sampul"
                                         name="gambar" accept="image/jpeg,image/png,image/webp">
                                     <label class="mis-unggah" for="brg-sampul">
@@ -386,6 +411,14 @@
                                                 : 'ukurannya mengikuti flyer pengumuman' }}
                                         </span>
                                     </label>
+
+                                    <p class="brg-warisan" id="brg-warisan" hidden>
+                                        <i class="fas fa-check-circle mis-ikon-hijau" aria-hidden="true"></i>
+                                        <span id="brg-warisan-teks"></span>
+                                        <button type="button" class="brg-warisan-batal" id="brg-warisan-batal">
+                                            Jangan pakai
+                                        </button>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -639,6 +672,101 @@
          * JavaScript, format tanggal dan aturan baris kosongnya pasti
          * berselisih dengan yang dipakai saat menyimpan.
          */
+        /*
+         * Sampul yang diwarisi dari angkatan lain di lokasi yang sama.
+         *
+         * Empat puluh satu angkatan Scopus Camp Yogyakarta memakai satu flyer
+         * yang sama. Sebelum ini admin harus mencarinya sendiri di cakram dan
+         * mengunggah ulang berkas yang sudah ada di peladen — dan tiap unggahan
+         * jadi SALINAN baru, jadi mengganti flyer-nya nanti berarti mengganti
+         * satu per satu.
+         *
+         * Yang diusulkan hanya pasangan layanan+lokasi yang berkasnya memang
+         * sudah jadi kebiasaan; aturannya ada di KategoriLayanan::sampulLazim().
+         */
+        (function () {
+            const LAZIM = @json($sampulLazim);
+
+            const lokasi = document.getElementById('brg-lokasi');
+            const kotak = document.getElementById('brg-sampul-pratinjau');
+            const tersembunyi = document.getElementById('brg-sampul-warisan');
+            const catatan = document.getElementById('brg-warisan');
+            const catatanTeks = document.getElementById('brg-warisan-teks');
+            const batal = document.getElementById('brg-warisan-batal');
+            const berkas = document.getElementById('brg-sampul');
+            const namaBerkas = document.getElementById('brg-sampul-nama');
+            if (!lokasi || !kotak || !tersembunyi) return;
+
+            // Angkatan yang SUDAH punya sampul tidak diganggu; begitu juga
+            // begitu admin memilih berkasnya sendiri.
+            const sudahAda = !!kotak.querySelector('img');
+            let ditolak = false;
+
+            function kosongkan() {
+                tersembunyi.value = '';
+                catatan.hidden = true;
+
+                if (!sudahAda && kotak.dataset.warisan === '1') {
+                    kotak.innerHTML = '<i class="fas fa-image" aria-hidden="true"></i>';
+                    delete kotak.dataset.warisan;
+
+                    // Label ikut dikembalikan. Tertinggal berbunyi "Ganti dengan
+                    // berkas lain" padahal pratinjaunya sudah kosong, ia
+                    // menjanjikan ada yang bisa diganti — padahal tidak ada.
+                    if (namaBerkas && !(berkas.files && berkas.files.length)) {
+                        namaBerkas.textContent = 'Pilih sampul';
+                    }
+                }
+            }
+
+            function usulkan() {
+                if (sudahAda || ditolak || (berkas.files && berkas.files.length)) return;
+
+                const kunci = document.getElementById('brg-layanan').value
+                    + '|' + lokasi.value.trim().toLowerCase();
+                const lazim = LAZIM[kunci];
+
+                if (!lazim) {
+                    kosongkan();
+                    return;
+                }
+
+                if (tersembunyi.value === lazim.jalur) return;
+
+                tersembunyi.value = lazim.jalur;
+                kotak.dataset.warisan = '1';
+                kotak.innerHTML = '';
+
+                const gbr = document.createElement('img');
+                gbr.src = lazim.alamat;
+                gbr.alt = 'Sampul yang dipakai angkatan lain di lokasi ini';
+                kotak.appendChild(gbr);
+
+                catatanTeks.textContent = 'Memakai flyer yang sama dengan '
+                    + lazim.jumlah + ' angkatan lain di lokasi ini.';
+                catatan.hidden = false;
+                if (namaBerkas) namaBerkas.textContent = 'Ganti dengan berkas lain';
+            }
+
+            // Tiap ketikan, bukan hanya saat selesai mengetik: lokasinya pendek,
+            // dan menunggu blur berarti gambarnya baru muncul sesudah pindah
+            // isian — justru saat matanya sudah tidak di situ.
+            lokasi.addEventListener('input', usulkan);
+            document.getElementById('brg-layanan').addEventListener('change', usulkan);
+
+            batal.addEventListener('click', function () {
+                ditolak = true;
+                kosongkan();
+                if (namaBerkas) namaBerkas.textContent = 'Pilih sampul';
+            });
+
+            berkas.addEventListener('change', function () {
+                if (berkas.files && berkas.files.length) kosongkan();
+            });
+
+            usulkan();
+        })();
+
         /* Pratinjau sampul sebelum disimpan: mengunggah gambar yang salah lalu
            baru tahu sesudah halaman publiknya terbit itu mahal. */
         const sampul = document.getElementById('brg-sampul');
