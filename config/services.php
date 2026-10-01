@@ -30,4 +30,21 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+     * DOKU Checkout — pembayaran Sharing Session.
+     *
+     * Kosong sampai kredensialnya diisi di .env. Selama kosong, borang
+     * pendaftaran menawarkan transfer manual dan mengatakannya terus terang,
+     * bukan melempar galat di tengah pendaftaran.
+     *
+     * 'produksi' sengaja HARUS dinyatakan eksplisit dan bawaannya false:
+     * salah arah di sini berarti uang sungguhan masuk ke lingkungan uji coba,
+     * atau sebaliknya pembayaran uji dianggap nyata.
+     */
+    'doku' => [
+        'client_id' => env('DOKU_CLIENT_ID'),
+        'secret_key' => env('DOKU_SECRET_KEY'),
+        'produksi' => env('DOKU_PRODUKSI', false),
+    ],
+
 ];

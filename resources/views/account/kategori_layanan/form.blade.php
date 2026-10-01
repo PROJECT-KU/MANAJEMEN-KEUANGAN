@@ -27,6 +27,75 @@
 
     .brg-penuh { grid-column: 1 / -1; }
 
+    /* ------------------------------------------------------ acara daring */
+
+    /* <details>, bukan kotak yang selalu terbuka: keenam isiannya hanya
+       terpakai webinar, dan selalu terbuka ia menambah satu layar penuh
+       isian kosong ke borang Scopus Camp yang sudah panjang. */
+    .brg-daring {
+        border: 1px solid var(--mis-garis);
+        border-radius: 14px;
+        background: #fbfcfe;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .brg-daring > summary {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 4px 12px;
+        padding: 14px 16px;
+        cursor: pointer;
+        list-style: none;
+        font-weight: 700;
+        font-size: .9rem;
+        color: var(--mis-tinta);
+    }
+
+    /* Segitiga bawaan dibuang di kedua mesin peramban; penanda bukanya
+       diambil alih ikon di kiri supaya tingginya tidak berubah saat dibuka. */
+    .brg-daring > summary::-webkit-details-marker { display: none; }
+    .brg-daring > summary::marker { content: ''; }
+
+    .brg-daring > summary > .fas {
+        grid-row: 1 / span 2;
+        /* !important sempit: style.css Stisla memaksa margin-left pada .fas
+           di dalam <a>/<summary> dengan bobot (0,4,1). */
+        margin: 0 !important;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #ede9fe;
+        color: #6d28d9;
+        font-size: .85rem;
+    }
+
+    .brg-daring > summary small {
+        grid-column: 2;
+        font-weight: 400;
+        font-size: .76rem;
+        color: var(--mis-tinta-3);
+    }
+
+    .brg-daring[open] > summary { border-bottom: 1px solid var(--mis-garis); }
+
+    .brg-daring .brg-kisi { padding: 16px; }
+
+    .brg-pemateri-pratinjau {
+        display: block;
+        width: 96px;
+        height: 120px;
+        margin: 0 16px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--mis-garis);
+        object-fit: cover;
+    }
+
+    .brg-peringatan { color: #b45309; }
+
 
     /* Penanda wajib. Merah dan kelihatan tanpa hover — hanya dipasang pada
        medan yang validatornya memang required, supaya tandanya tetap berarti. */
@@ -384,6 +453,89 @@
                                 <p class="mis-bantuan">Berkurang sendiri tiap ada yang mendaftar.</p>
                             </div>
                         @endif
+
+                        {{-- ------------------------------------------- acara daring --}}
+                        {{-- Satu bagian tersendiri, bukan isian yang berserak di
+                             antara yang lain: keenamnya hanya terpakai acara daring
+                             (Sharing Session, webinar), dan berserak ia membuat
+                             borang Scopus Camp memuat enam isian kosong yang tidak
+                             pernah diisi siapa pun.
+
+                             Dibuka sendiri kalau angkatannya memang sudah berisi,
+                             supaya menyuntingnya tidak perlu tahu harus menekan
+                             apa dulu. --}}
+                        <details class="brg-daring brg-penuh" {{ $angkatan->acaraDaring() ? 'open' : '' }}>
+                            <summary>
+                                <i class="fas fa-video" aria-hidden="true"></i>
+                                <span>Acara daring — jam, platform, dan pemateri</span>
+                                <small>Isi kalau ini webinar atau sharing session. Boleh dikosongkan.</small>
+                            </summary>
+
+                            <div class="brg-kisi">
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-jam-mulai">Jam mulai</label>
+                                    <input type="time" class="form-control-modern" id="brg-jam-mulai" name="jam_mulai"
+                                        value="{{ old('jam_mulai', $angkatan->jam_mulai ? \Carbon\Carbon::parse($angkatan->jam_mulai)->format('H:i') : '') }}">
+                                </div>
+
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-jam-selesai">Jam selesai</label>
+                                    <input type="time" class="form-control-modern" id="brg-jam-selesai" name="jam_selesai"
+                                        value="{{ old('jam_selesai', $angkatan->jam_selesai ? \Carbon\Carbon::parse($angkatan->jam_selesai)->format('H:i') : '') }}">
+                                </div>
+
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-platform">Platform</label>
+                                    <input type="text" class="form-control-modern" id="brg-platform" name="platform"
+                                        list="brg-platform-lazim"
+                                        value="{{ old('platform', $angkatan->platform) }}" placeholder="Zoom">
+                                    {{-- Daftar saran, bukan daftar tertutup: menambah
+                                         satu nama platform tidak boleh berarti mengubah
+                                         kode lalu deploy. --}}
+                                    <datalist id="brg-platform-lazim">
+                                        <option value="Zoom"></option>
+                                        <option value="Google Meet"></option>
+                                        <option value="Microsoft Teams"></option>
+                                        <option value="YouTube Live"></option>
+                                    </datalist>
+                                </div>
+
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-pemateri">Nama pemateri</label>
+                                    <input type="text" class="form-control-modern" id="brg-pemateri" name="pemateri"
+                                        value="{{ old('pemateri', $angkatan->pemateri) }}" placeholder="Nofand A.M, S.Kom">
+                                </div>
+
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-pemateri-jabatan">Jabatan pemateri</label>
+                                    <input type="text" class="form-control-modern" id="brg-pemateri-jabatan"
+                                        name="pemateri_jabatan"
+                                        value="{{ old('pemateri_jabatan', $angkatan->pemateri_jabatan) }}"
+                                        placeholder="Trainer Rumah Scopus">
+                                </div>
+
+                                <div class="mis-isian brg-isian">
+                                    <label class="mis-label" for="brg-pemateri-foto">Foto pemateri</label>
+                                    <input type="file" class="form-control-modern" id="brg-pemateri-foto"
+                                        name="pemateri_foto" accept="image/jpeg,image/png,image/webp">
+                                    @if ($angkatan->alamat_pemateri)
+                                        <p class="mis-bantuan">
+                                            Sudah ada fotonya. Pilih berkas baru hanya kalau mau diganti.
+                                        </p>
+                                    @elseif ($angkatan->pemateri_foto)
+                                        <p class="mis-bantuan brg-peringatan">
+                                            Berkas fotonya tidak ada di peladen, jadi halaman publik memakai
+                                            gambar cadangan.
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if ($angkatan->alamat_pemateri)
+                                <img src="{{ $angkatan->alamat_pemateri }}" alt="Foto pemateri sekarang"
+                                    class="brg-pemateri-pratinjau" loading="lazy">
+                            @endif
+                        </details>
 
                         <div class="mis-isian brg-isian">
                             <label class="mis-label" for="brg-status">Status <span class="brg-wajib" title="Wajib diisi" aria-hidden="true">*</span></label>

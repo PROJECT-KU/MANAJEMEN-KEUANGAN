@@ -477,8 +477,18 @@ class KategoriLayananController extends Controller
         $angkatan = KategoriLayanan::create($data);
 
         // Sesudah barisnya ada: foldernya ditentukan layanannya.
+        $berkas = [];
+
         if ($sampul = $this->simpanSampul($request, $angkatan, $data)) {
-            $angkatan->forceFill(['gambar' => $sampul])->save();
+            $berkas['gambar'] = $sampul;
+        }
+
+        if ($foto = $this->simpanFotoPemateri($request, $angkatan)) {
+            $berkas['pemateri_foto'] = $foto;
+        }
+
+        if ($berkas !== []) {
+            $angkatan->forceFill($berkas)->save();
         }
 
         return redirect()->route('account.kategori-layanan.index', ['layanan' => $angkatan->layanan])
@@ -495,6 +505,10 @@ class KategoriLayananController extends Controller
 
         if ($sampul = $this->simpanSampul($request, $angkatan, $data)) {
             $data['gambar'] = $sampul;
+        }
+
+        if ($foto = $this->simpanFotoPemateri($request, $angkatan)) {
+            $data['pemateri_foto'] = $foto;
         }
 
         $angkatan->update($data);
@@ -514,6 +528,17 @@ class KategoriLayananController extends Controller
             'mulai' => ['required', 'date'],
             'selesai' => ['nullable', 'date', 'after_or_equal:mulai'],
             'lokasi' => ['nullable', 'string', 'max:255'],
+            /*
+             * Acara daring. Semuanya boleh kosong — layanan luring tidak
+             * memakainya sama sekali, dan memaksanya wajib berarti borang
+             * Scopus Camp tidak bisa disimpan.
+             */
+            'jam_mulai' => ['nullable', 'date_format:H:i'],
+            'jam_selesai' => ['nullable', 'date_format:H:i', 'after:jam_mulai'],
+            'platform' => ['nullable', 'string', 'max:60'],
+            'pemateri' => ['nullable', 'string', 'max:120'],
+            'pemateri_jabatan' => ['nullable', 'string', 'max:120'],
+            'pemateri_foto' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
             'total_kuota' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'sisa_kuota' => ['nullable', 'integer', 'min:0', 'max:10000'],
             // Harga, harga promo, dan kode promo TIDAK lagi diketik di sini.
@@ -540,6 +565,7 @@ class KategoriLayananController extends Controller
             'nama.required' => 'Isi dulu nama angkatannya.',
             'mulai.required' => 'Isi dulu tanggal mulainya.',
             'selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+            'jam_selesai.after' => 'Jam selesai harus sesudah jam mulai.',
         ]);
 
         /*
@@ -555,7 +581,13 @@ class KategoriLayananController extends Controller
         $data = array_merge(array_fill_keys([
             'varian', 'nama_ke', 'selesai', 'lokasi', 'total_kuota', 'sisa_kuota',
             'group_wa', 'desc', 'sampul_warisan',
+            'jam_mulai', 'jam_selesai', 'platform', 'pemateri', 'pemateri_jabatan',
         ], null), $data);
+
+        // Berkasnya diurus simpanFoto(), bukan disimpan apa adanya: yang ada
+        // di sini objek unggahan, dan menyimpannya ke kolom akan menulis
+        // "Illuminate\Http\UploadedFile" ke basis data.
+        unset($data['pemateri_foto']);
 
         /*
          * Deskripsi yang ditempel dari ChatGPT atau Word ikut membawa HTML-nya.
@@ -762,6 +794,56 @@ class KategoriLayananController extends Controller
 
             $dipakaiLain = KategoriLayanan::where('id', '!=', $angkatan->getKey())
                 ->where('gambar', 'like', '%' . $lama)
+                ->exists();
+
+            $berkasLama = public_path($folder . '/' . $lama);
+
+            if (! $dipakaiLain && is_file($berkasLama)) {
+                @unlink($berkasLama);
+            }
+        }
+
+        return $folder . '/' . $nama;
+    }
+
+    /**
+     * Menyimpan foto pemateri dan mengembalikan jalur simpannya.
+     *
+     * Ditaruh di FOLDER yang sama dengan sampul layanan itu, bukan di folder
+     * tersendiri: halaman publik membaca keduanya lewat basename() dari folder
+     * yang ditentukan folderSampul(), dan dua folder berarti dua aturan.
+     *
+     * Nama berkasnya UUID berawalan "pemateri-", bukan nama asli. Nama
+     * unggahan bisa memuat apostrof, dan apostrof di nama berkas ditolak
+     * firewall hosting sebelum PHP sempat jalan.
+     */
+    private function simpanFotoPemateri(Request $request, KategoriLayanan $angkatan): ?string
+    {
+        if (! $request->hasFile('pemateri_foto')) {
+            return null;
+        }
+
+        $berkas = $request->file('pemateri_foto');
+        $folder = $angkatan->folderSampul();
+        $tujuan = public_path($folder);
+
+        if (! is_dir($tujuan)) {
+            mkdir($tujuan, 0755, true);
+        }
+
+        $nama = 'pemateri-' . Str::uuid() . '.' . strtolower($berkas->getClientOriginalExtension());
+        $berkas->move($tujuan, $nama);
+
+        /*
+         * Foto lama dihapus SESUDAH yang baru tersimpan, dan hanya kalau tidak
+         * ada angkatan lain yang memakainya — satu pemateri biasa mengisi
+         * beberapa sesi, dan fotonya memang dipakai bersama.
+         */
+        if ($angkatan->pemateri_foto) {
+            $lama = basename($angkatan->pemateri_foto);
+
+            $dipakaiLain = KategoriLayanan::where('id', '!=', $angkatan->getKey())
+                ->where('pemateri_foto', 'like', '%' . $lama)
                 ->exists();
 
             $berkasLama = public_path($folder . '/' . $lama);

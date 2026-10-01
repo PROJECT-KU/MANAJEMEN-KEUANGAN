@@ -61,6 +61,17 @@ Route::get('/Scopus-Camp/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusCa
 Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
 Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
 
+// SHARING SESSION
+// Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
+// lewat /api/sharing-session; yang di sini bagian yang menulis ke basis data.
+Route::get('/Sharing-Session', 'Publict\PublicSharingSessionController@index')->name('public.sharingsession.index');
+Route::get('/Sharing-Session/Daftar/{id}/{token}', 'Publict\PublicSharingSessionController@daftar')->name('public.sharingsession.daftar');
+Route::post('/Sharing-Session/store', 'Publict\PublicSharingSessionController@store')->name('public.sharingsession.store');
+Route::get('/Sharing-Session/Status/{token}', 'Publict\PublicSharingSessionController@status')->name('public.sharingsession.status');
+// Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
+// penggantinya pemeriksaan tanda tangan di dalam pengendalinya.
+Route::post('/Sharing-Session/pemberitahuan/doku', 'Publict\PublicSharingSessionController@pemberitahuan')->name('public.sharingsession.pemberitahuan');
+
 // CLINIK SCOPUS
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');
 Route::get('/Clinik-Scopus/Sesi/{id}', 'Publict\PublicClinikScopusController@sesi')->name('public.clinikscopus.sesi');

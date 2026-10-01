@@ -26,6 +26,9 @@ class PerakitDeskripsi
         '{tanggal}' => 'Rentang tanggal, mis. "30 Oktober – 1 November 2026"',
         '{durasi}' => 'Lama acara dihitung dari tanggalnya, mis. "3 hari 2 malam"',
         '{lokasi}' => 'Lokasi angkatan',
+        '{jam}' => 'Jam acara, mis. "09.30 - 11.30 WIB"; kosong kalau belum diisi',
+        '{platform}' => 'Tempat acara daring, mis. "Zoom"',
+        '{pemateri}' => 'Nama pemateri beserta jabatannya',
         '{harga}' => 'Harga normal, mis. "Rp 5.500.000"',
         '{harga_promo}' => 'Harga sesudah diskon; kosong kalau tidak ada promo',
         '{kode_promo}' => 'Kode diskon; kosong kalau tidak ada promo',
@@ -80,6 +83,12 @@ class PerakitDeskripsi
             ),
             '{durasi}' => self::durasi($angkatan),
             '{lokasi}' => (string) $angkatan->lokasi,
+            '{jam}' => (string) $angkatan->jam,
+            '{platform}' => (string) $angkatan->platform,
+            // Jabatan ikut hanya kalau ada, supaya tidak ada tanda hubung
+            // menggantung di belakang nama.
+            '{pemateri}' => trim((string) $angkatan->pemateri
+                . ($angkatan->pemateri_jabatan ? ' — ' . $angkatan->pemateri_jabatan : '')),
             '{harga}' => $rupiah($harga),
             '{harga_promo}' => $rupiah($promo),
             '{kode_promo}' => (string) $angkatan->kode_diskon,

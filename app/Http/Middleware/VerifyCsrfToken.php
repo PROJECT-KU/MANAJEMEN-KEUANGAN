@@ -19,6 +19,16 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        /*
+         * Pemberitahuan balik dari DOKU. Pengirimnya peladen DOKU, bukan
+         * peramban peserta, jadi ia tidak punya — dan tidak mungkin punya —
+         * token CSRF.
+         *
+         * Penjagaannya dipindah, BUKAN dihilangkan: isi permintaannya
+         * ditandatangani HMAC-SHA256 dengan kunci rahasia, dan tanda tangan
+         * itu diperiksa paling awal di PublicSharingSessionController
+         * sebelum satu pun status diubah.
+         */
+        'Sharing-Session/pemberitahuan/doku',
     ];
 }
