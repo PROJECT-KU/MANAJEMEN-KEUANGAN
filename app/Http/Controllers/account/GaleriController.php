@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\account;
 
-use App\GaleriLayanan;
+use App\Galeri;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Layanan;
 use App\Services\Gambar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ use Illuminate\Validation\Rule;
  * pengendali ini tidak pernah menyentuh berkas sendiri — satu pintu, supaya
  * tidak ada jalan yang lupa mengonversi.
  */
-class GaleriLayananController extends Controller
+class GaleriController extends Controller
 {
     public function __construct(private Gambar $gambar)
     {
@@ -46,18 +47,18 @@ class GaleriLayananController extends Controller
         $katalog = Layanan::katalog();
 
         /*
-         * Webinar Eksklusif jadi bawaannya. Layar ini dibuat untuk layanan itu
-         * lebih dulu — itu yang mendesak — dan membuka layar galeri pada
-         * layanan yang belum punya foto satu pun cuma memperlihatkan keadaan
-         * kosong.
+         * Saringan layanan, dan bawaannya SEMUA. Galerinya kini dipakai
+         * bersama lintas layanan, jadi membuka layar ini pada satu layanan
+         * saja menyembunyikan sebagian besar isinya tanpa ada yang
+         * memberitahu.
          */
         $layanan = array_key_exists((string) $request->query('layanan'), $katalog)
             ? $request->query('layanan')
-            : (array_key_exists('webinar_eksklusif', $katalog) ? 'webinar_eksklusif' : array_key_first($katalog));
+            : null;
 
-        $foto = GaleriLayanan::layanan($layanan)->get();
+        $foto = Galeri::layanan($layanan)->get();
 
-        return view('account.galeri_layanan.index', [
+        return view('account.galeri.index', [
             // Layar berterus terang soal HEIC, bukan membiarkan orang mencoba
             // lalu kehilangan fotonya tanpa penjelasan.
             'bisaHeic' => $this->gambar->bisaHeic(),
@@ -87,7 +88,11 @@ class GaleriLayananController extends Controller
         }
 
         $data = $request->validate([
-            'layanan' => ['required', Rule::in(array_keys(Layanan::katalog()))],
+            // Larik, bukan satu nilai: satu foto boleh dipakai beberapa
+            // layanan sekaligus.
+            'layanan' => ['nullable', 'array'],
+            'layanan.*' => [Rule::in(array_keys(Layanan::katalog()))],
+            'semua_layanan' => ['nullable', 'boolean'],
             'kategori_id' => ['nullable', 'uuid'],
             'berkas' => ['required', 'array', 'min:1', 'max:20'],
             /*
@@ -104,6 +109,7 @@ class GaleriLayananController extends Controller
             'keterangan' => ['nullable', 'string', 'max:160'],
         ], [
             'berkas.required' => 'Pilih dulu fotonya.',
+            'layanan.*.in' => 'Ada layanan yang tidak dikenal.',
             'berkas.max' => 'Maksimal 20 foto sekali unggah.',
             'berkas.*.mimes' => 'Yang bisa diunggah: JPG, PNG, WebP, atau HEIC.',
             // 30 MB: foto HEIC dari iPhone terbaru bisa 10-15 MB sebelum
@@ -112,20 +118,38 @@ class GaleriLayananController extends Controller
             'berkas.*.max' => 'Ada foto yang lebih besar dari 30 MB.',
         ]);
 
-        // Angkatan yang ditunjuk harus memang milik layanan yang sama; kalau
-        // tidak, fotonya tidak akan pernah muncul di mana pun.
+        $semua = (bool) ($data['semua_layanan'] ?? false);
+        $pilihan = $semua ? [] : array_values($data['layanan'] ?? []);
+
+        /*
+         * Harus terpilih SESUATU. Tanpa penjagaan ini, foto yang diunggah
+         * tanpa mencentang apa pun tersimpan rapi tetapi tidak pernah muncul
+         * di halaman mana pun — dan yang mengunggahnya tidak punya petunjuk
+         * kenapa.
+         */
+        if (! $semua && $pilihan === []) {
+            return back()->withInput()
+                ->with('error', 'Pilih dulu layanannya, atau centang "Semua layanan".');
+        }
+
+        /*
+         * Angkatan yang ditunjuk harus memang milik salah satu layanan yang
+         * dipilih; kalau tidak, fotonya tidak akan pernah muncul di mana pun.
+         * Saat "semua layanan" dicentang, angkatan mana pun boleh.
+         */
         $kategoriId = null;
 
         if (! empty($data['kategori_id'])) {
             $kategoriId = KategoriLayanan::whereKey($data['kategori_id'])
-                ->where('layanan', $data['layanan'])->value('id');
+                ->when(! $semua, fn ($q) => $q->whereIn('layanan', $pilihan))
+                ->value('id');
         }
 
         $masuk = 0;
         $gagal = 0;
 
         foreach ($request->file('berkas') as $berkas) {
-            $jalur = $this->gambar->simpan($berkas, GaleriLayanan::folder($data['layanan']));
+            $jalur = $this->gambar->simpan($berkas, Galeri::FOLDER);
 
             if ($jalur === null) {
                 $gagal++;
@@ -133,12 +157,14 @@ class GaleriLayananController extends Controller
                 continue;
             }
 
-            GaleriLayanan::create([
-                'layanan' => $data['layanan'],
-                'kategori_id' => $kategoriId,
+            $foto = Galeri::create([
                 'berkas' => $jalur,
                 'keterangan' => $data['keterangan'] ?? null,
+                'semua_layanan' => $semua,
+                'kategori_id' => $kategoriId,
             ]);
+
+            $foto->setLayanan($pilihan);
 
             $masuk++;
         }
@@ -155,11 +181,11 @@ class GaleriLayananController extends Controller
                 : ' — peladen ini belum bisa membaca HEIC, jadi ubah dulu ke JPG.';
         }
 
-        return redirect()->route('account.galeri-layanan.index', ['layanan' => $data['layanan']])
+        return redirect()->route('account.galeri.index')
             ->with($masuk > 0 ? 'success' : 'error', $pesan);
     }
 
-    public function update(Request $request, GaleriLayanan $galeri)
+    public function update(Request $request, Galeri $galeri)
     {
         if (! $this->boleh()) {
             return response()->json(['success' => false, 'message' => 'Tidak diizinkan.'], 403);
@@ -169,14 +195,31 @@ class GaleriLayananController extends Controller
             'keterangan' => ['nullable', 'string', 'max:160'],
             'urutan' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'aktif' => ['nullable', 'boolean'],
+            'semua_layanan' => ['nullable', 'boolean'],
+            'layanan' => ['nullable', 'array'],
+            'layanan.*' => [Rule::in(array_keys(Layanan::katalog()))],
         ]);
 
-        $galeri->fill(array_filter($data, fn ($v) => $v !== null))->save();
+        $galeri->fill(array_filter(
+            Arr::only($data, ['keterangan', 'urutan', 'aktif', 'semua_layanan']),
+            fn ($v) => $v !== null
+        ))->save();
 
-        return response()->json(['success' => true, 'message' => 'Foto diperbarui.']);
+        // Daftar layanannya hanya disentuh kalau memang dikirim; isian lain
+        // dikirim sendiri-sendiri saat ditinggalkan, dan menimpanya dengan
+        // larik kosong akan mencabut seluruh layanan foto itu.
+        if ($request->has('layanan')) {
+            $galeri->setLayanan($data['layanan'] ?? []);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto diperbarui.',
+            'sebut' => $galeri->fresh()->sebut_layanan,
+        ]);
     }
 
-    public function destroy(GaleriLayanan $galeri)
+    public function destroy(Galeri $galeri)
     {
         if (! $this->boleh()) {
             return response()->json(['success' => false, 'message' => 'Tidak diizinkan.'], 403);
@@ -190,7 +233,7 @@ class GaleriLayananController extends Controller
         $berkas = $galeri->berkas;
         $galeri->delete();
 
-        if (! GaleriLayanan::where('berkas', $berkas)->exists()) {
+        if (! Galeri::where('berkas', $berkas)->exists()) {
             $this->gambar->buang($berkas);
         }
 

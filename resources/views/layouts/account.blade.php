@@ -365,9 +365,9 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
-                        <li class="{{ setActive('account/galeri-layanan') }}">
-                            <a class="nav-link" href="{{ route('account.galeri-layanan.index') }}">
-                                <i class="fas fa-images"></i> <span>Galeri Layanan</span>
+                        <li class="{{ setActive('account/galeri') }}">
+                            <a class="nav-link" href="{{ route('account.galeri.index') }}">
+                                <i class="fas fa-images"></i> <span>Galeri Foto</span>
                             </a>
                         </li>
 

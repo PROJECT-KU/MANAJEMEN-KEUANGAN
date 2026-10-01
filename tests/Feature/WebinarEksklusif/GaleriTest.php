@@ -3,7 +3,7 @@
 namespace Tests\Feature\WebinarEksklusif;
 
 use App\ClinikScopusBiayaPersesi;
-use App\GaleriLayanan;
+use App\Galeri;
 use App\KategoriLayanan;
 use App\Layanan;
 use App\Services\Gambar;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 /**
  * Galeri layanan: unggahan jadi WebP di storage, berkas aslinya dihapus.
  */
-class GaleriLayananTest extends TestCase
+class GaleriTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -42,7 +42,7 @@ class GaleriLayananTest extends TestCase
         KategoriLayanan::lupakanPendaftar();
         ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
 
-        $this->milikOrang = GaleriLayanan::pluck('berkas')->filter()->all();
+        $this->milikOrang = Galeri::pluck('berkas')->filter()->all();
     }
 
     protected function tearDown(): void
@@ -111,10 +111,24 @@ class GaleriLayananTest extends TestCase
         return new UploadedFile($jalur, basename($jalur), 'image/png', null, true);
     }
 
-    private function sesi(): KategoriLayanan
+    /**
+     * Membuat satu foto galeri beserta daftar layanannya.
+     *
+     * @param  array<string, mixed>  $isi
+     * @param  array<int, string>  $layanan
+     */
+    private function foto(array $isi, array $layanan = []): Galeri
+    {
+        $g = Galeri::create($isi);
+        $g->setLayanan($layanan);
+
+        return $g->refresh();
+    }
+
+    private function sesi(string $layanan = 'webinar_eksklusif'): KategoriLayanan
     {
         return KategoriLayanan::create([
-            'layanan' => 'webinar_eksklusif',
+            'layanan' => $layanan,
             'token' => Str::random(30),
             'nama' => 'Sesi Galeri ' . Str::random(5),
             'nama_ke' => (string) random_int(6000, 6999),
@@ -123,6 +137,9 @@ class GaleriLayananTest extends TestCase
             'jam_mulai' => '09:30', 'jam_selesai' => '11:30', 'platform' => 'Zoom',
             'total_kuota' => '50', 'sisa_kuota' => '50',
             'biaya' => '129000', 'status' => 'active',
+            // Varian diisi hanya untuk layanan yang memang punya; create()
+            // di sini melewati validasi borang, jadi aman dibiarkan null.
+            'varian' => $layanan === 'scopus_camp' ? 'jawa' : null,
         ]);
     }
 
@@ -139,9 +156,9 @@ class GaleriLayananTest extends TestCase
          * saat halamannya benar-benar dibuka orang.
          */
         $this->actingAs($this->akun())
-            ->get(route('account.galeri-layanan.index'))
+            ->get(route('account.galeri.index'))
             ->assertOk()
-            ->assertSee('Galeri layanan');
+            ->assertSee('Galeri foto');
     }
 
     #[Test]
@@ -151,7 +168,7 @@ class GaleriLayananTest extends TestCase
         $pelanggan->forceFill(['peran' => User::PERAN_PELANGGAN])->save();
 
         $this->actingAs($pelanggan->refresh())
-            ->get(route('account.galeri-layanan.index'))
+            ->get(route('account.galeri.index'))
             ->assertRedirect();
     }
 
@@ -379,8 +396,8 @@ class GaleriLayananTest extends TestCase
     public function mengunggah_beberapa_foto_sekaligus(): void
     {
         $jawab = $this->actingAs($this->akun())
-            ->post(route('account.galeri-layanan.store'), [
-                'layanan' => 'webinar_eksklusif',
+            ->post(route('account.galeri.store'), [
+                'layanan' => ['webinar_eksklusif', 'scopus_camp'],
                 'keterangan' => 'Suasana sesi uji',
                 'berkas' => [$this->berkasPng(600, 400), $this->berkasPng(600, 400)],
             ]);
@@ -388,12 +405,11 @@ class GaleriLayananTest extends TestCase
         $jawab->assertRedirect();
 
         /*
-         * Disaring menurut keterangannya, BUKAN seluruh baris layanan itu:
-         * galeri sungguhan di basis data pengembang ikut terhitung, dan ujinya
-         * merah karena data yang sama sekali tidak ada hubungannya.
+         * Disaring menurut keterangannya, BUKAN seluruh baris: galeri sungguhan
+         * di basis data pengembang ikut terhitung, dan ujinya merah karena data
+         * yang sama sekali tidak ada hubungannya.
          */
-        $foto = GaleriLayanan::where('layanan', 'webinar_eksklusif')
-            ->where('keterangan', 'Suasana sesi uji')->get();
+        $foto = Galeri::where('keterangan', 'Suasana sesi uji')->get();
 
         $this->sampah = array_merge($this->sampah, $foto->pluck('berkas')->all());
 
@@ -403,6 +419,10 @@ class GaleriLayananTest extends TestCase
             $this->assertStringEndsWith('.webp', $g->berkas);
             $this->assertNotNull($g->alamat, 'Alamatnya harus bisa dirakit.');
             $this->assertSame('Suasana sesi uji', $g->keterangan);
+
+            // SATU foto, DUA layanan — bukan dua baris yang disalin.
+            $this->assertSame(['scopus_camp', 'webinar_eksklusif'], $g->daftar_layanan);
+            $this->assertFalse($g->semua_layanan);
         }
 
         // Urutannya berbeda, supaya tidak berebut tempat pertama.
@@ -415,19 +435,17 @@ class GaleriLayananTest extends TestCase
         $sesi = $this->sesi();
         $lain = $this->sesi();
 
-        $umum = GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'berkas' => 'uji/umum.webp', 'urutan' => 5,
-        ]);
-        $milikSesi = GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'kategori_id' => $sesi->getKey(),
-            'berkas' => 'uji/sesi.webp', 'urutan' => 9,
-        ]);
-        $milikLain = GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'kategori_id' => $lain->getKey(),
-            'berkas' => 'uji/lain.webp', 'urutan' => 1,
-        ]);
+        $umum = $this->foto(['berkas' => 'uji/umum.webp', 'urutan' => 5], ['webinar_eksklusif']);
+        $milikSesi = $this->foto(
+            ['berkas' => 'uji/sesi.webp', 'urutan' => 9, 'kategori_id' => $sesi->getKey()],
+            ['webinar_eksklusif']
+        );
+        $milikLain = $this->foto(
+            ['berkas' => 'uji/lain.webp', 'urutan' => 1, 'kategori_id' => $lain->getKey()],
+            ['webinar_eksklusif']
+        );
 
-        $tampil = GaleriLayanan::untukAngkatan($sesi)->pluck('id')->all();
+        $tampil = Galeri::untukAngkatan($sesi)->pluck('id')->all();
 
         $this->assertContains($milikSesi->id, $tampil);
         $this->assertContains($umum->id, $tampil, 'Foto umum ikut supaya sesi baru tidak kosong.');
@@ -442,11 +460,9 @@ class GaleriLayananTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'berkas' => 'uji/mati.webp', 'aktif' => false,
-        ]);
+        $this->foto(['berkas' => 'uji/mati.webp', 'aktif' => false], ['webinar_eksklusif']);
 
-        $this->assertCount(0, GaleriLayanan::untukAngkatan($sesi)->get());
+        $this->assertCount(0, Galeri::untukAngkatan($sesi)->get());
     }
 
     #[Test]
@@ -454,13 +470,13 @@ class GaleriLayananTest extends TestCase
     {
         $jalur = app(Gambar::class)->simpan($this->berkasPng(400, 300), 'uji/galeri');
 
-        $g = GaleriLayanan::create(['layanan' => 'webinar_eksklusif', 'berkas' => $jalur]);
+        $g = $this->foto(['berkas' => $jalur], ['webinar_eksklusif']);
 
         $this->actingAs($this->akun())
-            ->deleteJson(route('account.galeri-layanan.destroy', $g))
+            ->deleteJson(route('account.galeri.destroy', $g))
             ->assertOk();
 
-        $this->assertNull(GaleriLayanan::find($g->id));
+        $this->assertNull(Galeri::find($g->id));
         $this->assertFalse(Storage::disk(Gambar::CAKRAM)->exists($jalur));
     }
 
@@ -472,14 +488,135 @@ class GaleriLayananTest extends TestCase
         $jalur = app(Gambar::class)->simpan($this->berkasPng(400, 300), 'uji/galeri');
         $this->sampah[] = $jalur;
 
-        $satu = GaleriLayanan::create(['layanan' => 'webinar_eksklusif', 'berkas' => $jalur]);
-        GaleriLayanan::create(['layanan' => 'scopus_camp', 'berkas' => $jalur]);
+        $satu = $this->foto(['berkas' => $jalur], ['webinar_eksklusif']);
+        $this->foto(['berkas' => $jalur], ['scopus_camp']);
 
         $this->actingAs($this->akun())
-            ->deleteJson(route('account.galeri-layanan.destroy', $satu))
+            ->deleteJson(route('account.galeri.destroy', $satu))
             ->assertOk();
 
         $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($jalur));
+    }
+
+    // ------------------------------------------------- dipakai lintas layanan
+
+    #[Test]
+    public function satu_foto_bisa_dipakai_beberapa_layanan(): void
+    {
+        /*
+         * SATU baris, dua layanan — bukan dua baris yang isinya disalin.
+         * Disalin, mengganti keterangannya harus dua kali, dan salah satunya
+         * pasti akan terlupa.
+         */
+        $camp = $this->sesi('scopus_camp');
+        $webinar = $this->sesi('webinar_eksklusif');
+
+        $g = $this->foto(['berkas' => 'uji/berdua.webp'], ['scopus_camp', 'webinar_eksklusif']);
+
+        $this->assertContains($g->id, Galeri::untukAngkatan($camp)->pluck('id')->all());
+        $this->assertContains($g->id, Galeri::untukAngkatan($webinar)->pluck('id')->all());
+    }
+
+    #[Test]
+    public function foto_semua_layanan_tampil_di_layanan_mana_pun(): void
+    {
+        $g = $this->foto(['berkas' => 'uji/semua.webp', 'semua_layanan' => true], []);
+
+        foreach (['scopus_camp', 'webinar_eksklusif', 'bibliometrik'] as $kode) {
+            $this->assertContains(
+                $g->id,
+                Galeri::untukAngkatan($this->sesi($kode))->pluck('id')->all(),
+                'Foto "semua layanan" harus tampil di ' . $kode
+            );
+        }
+
+        $this->assertSame('Semua layanan', $g->sebut_layanan);
+    }
+
+    #[Test]
+    public function foto_yang_layanannya_tidak_cocok_tidak_tampil(): void
+    {
+        $g = $this->foto(['berkas' => 'uji/camp-saja.webp'], ['scopus_camp']);
+
+        $this->assertNotContains(
+            $g->id,
+            Galeri::untukAngkatan($this->sesi('webinar_eksklusif'))->pluck('id')->all()
+        );
+    }
+
+    #[Test]
+    public function unggahan_tanpa_layanan_ditolak(): void
+    {
+        /*
+         * Tanpa penjagaan ini, foto tersimpan rapi tetapi tidak pernah muncul
+         * di halaman mana pun — dan yang mengunggahnya tidak punya petunjuk
+         * kenapa.
+         */
+        $sebelum = Galeri::count();
+
+        $this->actingAs($this->akun())
+            ->post(route('account.galeri.store'), [
+                'keterangan' => 'Tanpa layanan',
+                'berkas' => [$this->berkasPng(400, 300)],
+            ])
+            ->assertSessionHas('error');
+
+        $this->assertSame($sebelum, Galeri::count());
+    }
+
+    #[Test]
+    public function daftar_layanan_bisa_diubah_belakangan(): void
+    {
+        $g = $this->foto(['berkas' => 'uji/ubah.webp'], ['scopus_camp']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.update', $g), [
+                'layanan' => ['webinar_eksklusif', 'bibliometrik'],
+            ])
+            ->assertOk();
+
+        $this->assertSame(['bibliometrik', 'webinar_eksklusif'], $g->fresh()->daftar_layanan);
+    }
+
+    #[Test]
+    public function mengubah_keterangan_tidak_mencabut_layanannya(): void
+    {
+        /*
+         * Isian di layar dikirim sendiri-sendiri saat ditinggalkan. Kalau
+         * daftar layanan ikut ditimpa tiap kali, mengetik satu huruf di
+         * keterangan akan mencabut seluruh layanan fotonya.
+         */
+        $g = $this->foto(['berkas' => 'uji/jaga.webp'], ['scopus_camp', 'webinar_eksklusif']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.update', $g), ['keterangan' => 'Keterangan baru'])
+            ->assertOk();
+
+        $segar = $g->fresh();
+
+        $this->assertSame('Keterangan baru', $segar->keterangan);
+        $this->assertSame(['scopus_camp', 'webinar_eksklusif'], $segar->daftar_layanan);
+    }
+
+    #[Test]
+    public function layanan_yang_tidak_dikenal_diabaikan(): void
+    {
+        // Nilainya datang dari borang; kode karangan tidak boleh tersimpan.
+        $g = $this->foto(['berkas' => 'uji/karangan.webp'], ['scopus_camp', 'layanan_karangan']);
+
+        $this->assertSame(['scopus_camp'], $g->daftar_layanan);
+    }
+
+    #[Test]
+    public function menghapus_foto_ikut_membuang_baris_sambungannya(): void
+    {
+        $g = $this->foto(['berkas' => 'uji/sambung.webp'], ['scopus_camp', 'webinar_eksklusif']);
+        $id = $g->id;
+
+        $g->delete();
+
+        $this->assertSame(0, \Illuminate\Support\Facades\DB::table('galeri_layanan')
+            ->where('galeri_id', $id)->count());
     }
 
     // ----------------------------------------------------------------- API
@@ -491,10 +628,10 @@ class GaleriLayananTest extends TestCase
         $jalur = app(Gambar::class)->simpan($this->berkasPng(600, 400), 'uji/galeri');
         $this->sampah[] = $jalur;
 
-        GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'kategori_id' => $sesi->getKey(),
-            'berkas' => $jalur, 'keterangan' => 'Foto uji API',
-        ]);
+        $this->foto(
+            ['berkas' => $jalur, 'kategori_id' => $sesi->getKey(), 'keterangan' => 'Foto uji API'],
+            ['webinar_eksklusif']
+        );
 
         $galeri = $this->getJson('/api/webinar-eksklusif')->assertOk()->json('sesi.galeri');
 
@@ -510,10 +647,10 @@ class GaleriLayananTest extends TestCase
         // perlu tahu bahwa ada yang hilang.
         $sesi = $this->sesi();
 
-        GaleriLayanan::create([
-            'layanan' => 'webinar_eksklusif', 'kategori_id' => $sesi->getKey(),
-            'berkas' => 'uji/tidak-ada-sama-sekali.webp',
-        ]);
+        $this->foto(
+            ['berkas' => 'uji/tidak-ada-sama-sekali.webp', 'kategori_id' => $sesi->getKey()],
+            ['webinar_eksklusif']
+        );
 
         $this->assertSame([], $this->getJson('/api/webinar-eksklusif')->json('sesi.galeri'));
     }

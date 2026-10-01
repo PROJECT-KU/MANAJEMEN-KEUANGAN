@@ -2,7 +2,7 @@
 @extends('layouts.loader')
 
 @section('title')
-Galeri Layanan | MIS
+Galeri Foto | MIS
 @stop
 
 @include('partials.toast-flash')
@@ -75,6 +75,41 @@ Galeri Layanan | MIS
 
     .gal-pil-sesi { background: #ede9fe; color: #5b21b6; }
     .gal-pil-umum { background: #e0f2fe; color: #075985; }
+    .gal-pil-semua { background: #dcfce7; color: #166534; }
+
+    /* Pemilih layanan selebar penuh: daftar centangnya tidak muat di satu
+       kolom borang yang lebarnya 210px. */
+    .gal-penuh { grid-column: 1 / -1; }
+
+    .gal-layanan {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 8px 16px;
+        padding: 12px 14px;
+        border: 1px solid var(--mis-garis);
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .gal-centang {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0;
+        font-size: .86rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    /* "Semua layanan" dipisah garis: ia MENIMPA pilihan di bawahnya, dan
+       berjajar rapat ia terbaca seperti pilihan yang setara. */
+    .gal-centang-semua {
+        grid-column: 1 / -1;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed var(--mis-garis);
+    }
+
+    .gal-centang input { flex: 0 0 auto; width: 18px; height: 18px; }
 
     .gal-unggah {
         display: grid;
@@ -124,9 +159,9 @@ Galeri Layanan | MIS
         <div class="mis-kartu mis-kepala">
             <span class="mis-medali mis-ungu" aria-hidden="true"><i class="fas fa-images"></i></span>
             <div class="mis-kepala-teks">
-                <h1 class="mis-judul">Galeri layanan</h1>
+                <h1 class="mis-judul">Galeri foto</h1>
                 <p class="mis-sub">
-                    Foto yang tampil di halaman landing. Diunggah sekali, dipakai semua sesi layanan itu.
+                    Foto yang tampil di halaman landing. Satu foto bisa dipakai beberapa layanan sekaligus.
                 </p>
             </div>
         </div>
@@ -142,7 +177,7 @@ Galeri Layanan | MIS
                 </span>
             </p>
 
-            <form method="POST" action="{{ route('account.galeri-layanan.store') }}"
+            <form method="POST" action="{{ route('account.galeri.store') }}"
                 enctype="multipart/form-data" class="gal-unggah">
                 @csrf
                 <input type="hidden" name="layanan" value="{{ $layanan }}">
@@ -167,6 +202,32 @@ Galeri Layanan | MIS
                             ubah dulu ke JPG.
                         @endif
                     </p>
+                </div>
+
+                <div class="mis-isian gal-penuh">
+                    <label class="mis-label">
+                        Dipakai layanan <span class="gal-wajib" title="Wajib dipilih" aria-hidden="true">*</span>
+                    </label>
+
+                    {{-- Centang banyak, bukan satu pilihan: satu foto boleh
+                         dipakai beberapa layanan sekaligus. Dokumentasi satu
+                         acara yang dihadiri peserta dua layanan sama-sama
+                         relevan di kedua halaman. --}}
+                    <div class="gal-layanan">
+                        <label class="gal-centang gal-centang-semua">
+                            <input type="checkbox" class="mis-centang" name="semua_layanan" value="1"
+                                id="gal-semua">
+                            <span><strong>Semua layanan</strong> — termasuk layanan yang ditambahkan nanti</span>
+                        </label>
+
+                        @foreach ($katalog as $kunci => $tentang)
+                            <label class="gal-centang">
+                                <input type="checkbox" class="mis-centang gal-satu" name="layanan[]"
+                                    value="{{ $kunci }}">
+                                <span>{{ $tentang['nama'] }}</span>
+                            </label>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="mis-isian">
@@ -204,10 +265,12 @@ Galeri Layanan | MIS
                     <label class="mis-label" for="gal-layanan">Layanan</label>
                     <select class="form-control-modern" id="gal-layanan" name="layanan"
                         onchange="this.form.submit()">
+                        <option value="">Semua layanan</option>
                         @foreach ($katalog as $kunci => $tentang)
                             <option value="{{ $kunci }}" @selected($layanan === $kunci)>{{ $tentang['nama'] }}</option>
                         @endforeach
                     </select>
+                    <p class="mis-bantuan">Foto bertanda "Semua layanan" selalu ikut tampil.</p>
                 </div>
             </form>
         </div>
@@ -244,9 +307,12 @@ Galeri Layanan | MIS
                             @endif
 
                             <div class="gal-isi">
-                                <span class="gal-pil {{ $g->kategori_id ? 'gal-pil-sesi' : 'gal-pil-umum' }}">
-                                    {{ $g->kategori_id ? 'Sesi tertentu' : 'Semua sesi' }}
-                                </span>
+                                <span class="gal-pil {{ $g->semua_layanan ? 'gal-pil-semua' : 'gal-pil-umum' }}"
+                                    data-sebut>{{ $g->sebut_layanan }}</span>
+
+                                @if ($g->kategori_id)
+                                    <span class="gal-pil gal-pil-sesi">Khusus satu sesi</span>
+                                @endif
 
                                 <input type="text" value="{{ $g->keterangan }}" maxlength="160"
                                     placeholder="Keterangan foto" data-ubah="keterangan"
@@ -264,7 +330,7 @@ Galeri Layanan | MIS
 
                                 <div class="gal-aksi">
                                     <button type="button" class="mis-tombol mis-tombol-bahaya"
-                                        title="Hapus foto" data-hapus="{{ route('account.galeri-layanan.destroy', $g) }}">
+                                        title="Hapus foto" data-hapus="{{ route('account.galeri.destroy', $g) }}">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
@@ -286,6 +352,25 @@ Galeri Layanan | MIS
 
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+        /* "Semua layanan" mematikan pilihan per layanan: keduanya tercentang
+           bersamaan tidak punya arti, dan yang dikirim ke peladen pun hanya
+           salah satunya. Dimatikan di layar supaya itu kelihatan. */
+        var semua = document.getElementById('gal-semua');
+
+        if (semua) {
+            var satuan = document.querySelectorAll('.gal-satu');
+
+            var selaraskan = function () {
+                Array.prototype.forEach.call(satuan, function (c) {
+                    c.disabled = semua.checked;
+                    c.closest('.gal-centang').style.opacity = semua.checked ? '.45' : '';
+                });
+            };
+
+            semua.addEventListener('change', selaraskan);
+            selaraskan();
+        }
+
         /* Perubahan dikirim saat isian DITINGGALKAN, bukan tiap ketukan: satu
            keterangan enam kata akan jadi tiga puluh permintaan ke peladen. */
         document.addEventListener('change', function (e) {
@@ -301,7 +386,7 @@ Galeri Layanan | MIS
             var medan = isian.dataset.ubah;
             isi.append(medan, isian.type === 'checkbox' ? (isian.checked ? 1 : 0) : isian.value);
 
-            fetch('{{ url('account/galeri-layanan') }}/' + kartu.dataset.id + '/ubah', {
+            fetch('{{ url('account/galeri') }}/' + kartu.dataset.id + '/ubah', {
                 method: 'POST',
                 headers: { 'Accept': 'application/json' },
                 body: isi

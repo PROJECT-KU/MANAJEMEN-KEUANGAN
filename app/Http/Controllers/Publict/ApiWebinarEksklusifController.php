@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Publict;
 
 use App\ClinikScopusBiayaPersesi;
-use App\GaleriLayanan;
+use App\Galeri;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Support\RentangTanggal;
@@ -148,7 +148,7 @@ class ApiWebinarEksklusifController extends Controller
              * atas: menambah kolom pada tabel galeri tidak boleh diam-diam
              * ikut menerbitkannya ke internet.
              */
-            'galeri' => GaleriLayanan::untukAngkatan($a)->get()
+            'galeri' => Galeri::untukAngkatan($a)->get()
                 ->map(fn ($g) => ['gambar' => $g->alamat, 'keterangan' => $g->keterangan_tampil])
                 // Yang berkasnya sudah tidak ada di cakram dibuang di sini,
                 // bukan dikirim sebagai null — halaman landing tidak perlu
