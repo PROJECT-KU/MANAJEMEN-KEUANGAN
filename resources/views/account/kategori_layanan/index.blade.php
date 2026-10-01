@@ -185,14 +185,6 @@ Angkatan Layanan | MIS
 
         .mis-tabel.mis-tabel-kartu.ang-tabel tbody td.ang-centang-sel::before { display: none; }
 
-        /* Sel status boleh membungkus: dua lencana berdampingan pada kartu
-           selebar 360px memaksa seluruh tabel digeser ke samping. */
-        .mis-tabel.mis-tabel-kartu.ang-tabel tbody td[data-judul="Status"] {
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: 4px;
-        }
-
         /* Kartu yang terpilih diberi warna: di antara kartu-kartu berjarak,
            kotak 16px di sudut terlalu kecil untuk menunjukkan mana yang ikut. */
         .mis-tabel-kartu.ang-tabel tbody tr:has(.ang-centang:checked) {
