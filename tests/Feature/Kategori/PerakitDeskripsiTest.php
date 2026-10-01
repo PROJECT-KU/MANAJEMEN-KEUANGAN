@@ -131,14 +131,17 @@ class PerakitDeskripsiTest extends TestCase
             'status' => 'draft',
         ]));
 
-        $this->assertStringContainsString('Penginapan ala Rumah Scopus', $jawa);
-        $this->assertStringContainsString('Mushola, kolam renang & treadmill', $jawa);
+        // Kalimatnya ditulis ulang supaya terbaca orang awam; yang dijaga uji
+        // ini tetap sama, yaitu APA yang membedakan kedua varian.
+        $this->assertStringContainsString('Penginapan di tempat acara', $jawa);
+        $this->assertStringContainsString('Mushola, kolam renang, dan treadmill', $jawa);
 
-        $this->assertStringNotContainsString('Penginapan ala Rumah Scopus', $luar);
-        $this->assertStringNotContainsString('Mushola, kolam renang & treadmill', $luar);
+        $this->assertStringNotContainsString('Penginapan di tempat acara', $luar);
+        $this->assertStringNotContainsString('Mushola, kolam renang', $luar);
 
         // Yang sama tetap sama — keduanya program yang sama, bukan dua produk.
-        foreach (['Konsumsi selama kegiatan', 'Sertifikat & Seminar Kit', 'Cek plagiasi'] as $sama) {
+        foreach (['Makan dan minum selama acara', 'Sertifikat dan perlengkapan peserta',
+            'cek plagiasi'] as $sama) {
             $this->assertStringContainsString($sama, $jawa);
             $this->assertStringContainsString($sama, $luar);
         }
@@ -251,5 +254,52 @@ class PerakitDeskripsiTest extends TestCase
             $this->assertStringNotContainsString($penanda, $hasil,
                 "Penanda $penanda terdaftar tapi tidak pernah diganti.");
         }
+    }
+
+    // ------------------------------------------------------------ durasi
+
+    #[Test]
+    public function durasi_dihitung_dari_tanggalnya(): void
+    {
+        /*
+         * Cetakan Scopus Camp dulu menulis "Selama 3 hari 2 malam" apa adanya.
+         * Angkanya lalu ikut tercetak di angkatan 1–2 Oktober — dua hari, bukan
+         * tiga — dan pembacanya tidak punya cara tahu mana yang benar.
+         */
+        foreach ([
+            ['2026-10-01', '2026-10-02', '2 hari 1 malam'],
+            ['2026-10-01', '2026-10-03', '3 hari 2 malam'],
+            ['2026-10-01', '2026-10-05', '5 hari 4 malam'],
+        ] as [$mulai, $selesai, $harapan]) {
+            $this->assertSame($harapan, $this->rakitDurasi($mulai, $selesai),
+                $mulai . ' s/d ' . $selesai);
+        }
+    }
+
+    #[Test]
+    public function acara_sehari_tidak_menyebut_malam(): void
+    {
+        // "1 hari 0 malam" bukan cara orang menulisnya.
+        $this->assertSame('sehari penuh', $this->rakitDurasi('2026-10-01', null));
+        $this->assertSame('sehari penuh', $this->rakitDurasi('2026-10-01', '2026-10-01'));
+    }
+
+    #[Test]
+    public function tanggal_selesai_sebelum_mulai_tidak_bikin_angka_ganjil(): void
+    {
+        // Datanya memang tidak boleh begitu, tetapi kalau terlanjur ada, yang
+        // tercetak harus kosong — bukan "-2 hari -3 malam".
+        $this->assertSame('', $this->rakitDurasi('2026-10-05', '2026-10-01'));
+        $this->assertSame('', $this->rakitDurasi(null, null));
+    }
+
+    private function rakitDurasi(?string $mulai, ?string $selesai): string
+    {
+        $this->tarifDenganCetakan('scopus_kafe', '{durasi}');
+
+        return PerakitDeskripsi::rakit($this->angkatan('scopus_kafe', [
+            'mulai' => $mulai,
+            'selesai' => $selesai,
+        ]));
     }
 }
