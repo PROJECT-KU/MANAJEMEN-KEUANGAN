@@ -2651,12 +2651,73 @@ body.mis-latar-terkunci {
         white-space: nowrap;
     }
 
+    /*
+     * Kartu dua kolom, supaya Status dan Aksi berbagi SATU baris.
+     *
+     * Terukur sebelumnya: kartu Angkatan 205px dan kartu Pelanggan 247px —
+     * cuma dua kartu yang terlihat sekali layar. Di dalamnya, baris Aksi
+     * sendirian memakan 34px plus 8px sela, padahal isinya tiga tombol ikon
+     * yang muat di sisa ruang baris Status.
+     */
     .mis-tabel.mis-tabel-kartu tbody tr {
-        display: grid;
-        gap: 8px;
-        padding: 14px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        padding: 12px 14px;
         border-bottom: 1px solid #f1f5f9;
     }
+
+    /* Bawaannya selebar kartu, satu keterangan satu baris. */
+    .mis-tabel.mis-tabel-kartu tbody td { flex: 1 1 100%; }
+
+    /*
+     * Dua sel TERAKHIR berbagi satu baris.
+     *
+     * Flexbox, bukan grid: dengan grid saya harus menyebut "Status" dan "Aksi"
+     * dengan namanya, dan itu cuma kebetulan cocok di layar Angkatan — di Data
+     * Pelanggan dua sel lain berdiri di antaranya, jadi tombolnya tetap jatuh
+     * ke baris sendiri. :nth-last-child menunjuk POSISI, bukan nama, jadi
+     * aturannya berlaku di layar mana pun tanpa tahu kolomnya apa.
+     *
+     * Sel yang disembunyikan (display: none) tetap terhitung nth-child —
+     * kebetulan itu yang kita mau: yang dihitung urutan markahnya, dan sel
+     * tersembunyi memang tidak pernah jadi baris.
+     */
+    .mis-tabel.mis-tabel-kartu tbody td:nth-last-child(2) {
+        flex: 1 1 auto;
+        /*
+         * Rapat ke kiri, BUKAN space-between.
+         *
+         * Dengan space-between, nilainya berhenti di tepi kiri tombol dan
+         * bukan di tepi kartu — jadi ia sendirian tidak selurus nilai baris
+         * di atasnya, dan tepi kanannya terlihat ragged. Dirapatkan ke kiri,
+         * bedanya terbaca sengaja: label dan nilainya satu pasang, tombolnya
+         * urusan lain.
+         */
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        text-align: left;
+    }
+
+    .mis-tabel.mis-tabel-kartu tbody td:last-child {
+        flex: 0 0 auto;
+        justify-content: flex-end;
+        /*
+         * margin-left: auto, bukan sekadar justify-content.
+         *
+         * Saat lencana statusnya dua, barisnya penuh dan tombolnya turun ke
+         * baris sendiri — di situ justify-content tidak berpengaruh apa-apa
+         * (kotaknya selebar isinya) dan tombolnya menempel ke KIRI, berseberangan
+         * dengan semua baris lain. Margin otomatis mendorongnya ke kanan di
+         * kedua keadaan.
+         */
+        margin-left: auto;
+    }
+
+    /* Label "AKSI" dibuang: tiga tombol ikon sudah menerangkan dirinya, dan
+       di baris berbagi ini labelnya cuma mendesak lencana status. */
+    .mis-tabel.mis-tabel-kartu tbody td[data-judul="Aksi"]::before { display: none; }
 
     .mis-tabel.mis-tabel-kartu tbody td {
         display: flex;
