@@ -95,6 +95,42 @@
     /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
     .det-gandakan { display: inline-flex; margin: 0; }
 
+    /* Riwayat perubahan. */
+    .det-jejak { list-style: none; margin: 0; padding: 0; }
+
+    .det-jejak li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .det-jejak li:last-child { border-bottom: 0; }
+
+    .det-jejak-aksi {
+        flex: 0 0 auto;
+        min-width: 82px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: #ede9fe;
+        color: #5b21b6;
+        font-size: .72rem;
+        font-weight: 700;
+        text-align: center;
+        text-transform: capitalize;
+    }
+
+    .det-jejak-dihapus { background: #fee2e2; color: #991b1b; }
+    .det-jejak-dipulihkan { background: #dcfce7; color: #166534; }
+    .det-jejak-dibuat { background: #dbeafe; color: #1e40af; }
+
+    /* min-width: 0 supaya ringkasan panjang boleh patah; tanpa itu item
+       flex menolak menyusut dan barisnya meluber ke samping. */
+    .det-jejak-isi { flex: 1 1 0; min-width: 0; font-size: .86rem; color: #334155; }
+
+    .det-jejak-kapan { display: block; margin-top: 2px; font-size: .76rem; color: #94a3b8; }
+
     @media (max-width: 767.98px) {
         /*
          * Di ponsel tombol kepala melar selebar penuh lewat aturan bersama
@@ -128,7 +164,7 @@
                     @if ($angkatan->nama_ke) &middot; angkatan ke-{{ $angkatan->nama_ke }} @endif
                 </p>
             </div>
-            <div class="mis-kepala-aksi">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
                 <a href="{{ route('account.kategori-layanan.index') }}" class="mis-tombol mis-tombol-halus">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
@@ -213,8 +249,24 @@
                     </div>
 
                     <div class="det-baris">
-                        <span class="det-label">Pendaftar</span>
-                        <span class="det-nilai">{{ $angkatan->jumlah_pendaftar }} orang</span>
+                        <span class="det-label">Peserta</span>
+                        <span class="det-nilai">
+                            {{-- ORANG, bukan jumlah barisnya: satu pendaftaran boleh
+                                 membawa rombongan, dan angkatan ke-175 yang barisnya 5
+                                 sebenarnya 25 orang. --}}
+                            {{ $angkatan->jumlah_pendaftar }} orang
+                            @if ($angkatan->jumlah_pendaftaran !== $angkatan->jumlah_pendaftar)
+                                <span class="det-nilai samar">
+                                    &middot; dari {{ $angkatan->jumlah_pendaftaran }} pendaftaran
+                                </span>
+                            @endif
+                            @if ($angkatan->belumPunyaPendaftaran())
+                                <span class="det-nilai samar">
+                                    &middot; layanan ini belum punya layar pendaftaran, jadi sisa
+                                    kuotanya diisi tangan
+                                </span>
+                            @endif
+                        </span>
                     </div>
 
                     <div class="det-baris">
@@ -298,6 +350,35 @@
                 <p class="det-deskripsi">{{ $angkatan->desc }}</p>
             @else
                 <p class="det-kosong">Deskripsinya belum diisi.</p>
+            @endif
+        </div>
+
+        {{-- ----------------------------------------------------- jejak --}}
+        <div class="mis-bagian" style="margin-top: var(--mis-jarak);">
+            <p class="mis-kartu-judul">
+                <i class="fas fa-history mis-ikon-ungu"></i> Riwayat perubahan
+            </p>
+
+            @if ($jejak->isEmpty())
+                {{-- Jejak baru mulai dicatat sekarang, jadi angkatan lama memang
+                     kosong. Dikatakan terus terang supaya tidak terbaca seperti
+                     "tidak pernah diubah". --}}
+                <p class="det-kosong">
+                    Belum ada yang tercatat. Perubahan mulai dicatat sejak fitur ini dipasang,
+                    jadi perubahan yang lebih lama memang tidak ada jejaknya.
+                </p>
+            @else
+                <ul class="det-jejak">
+                    @foreach ($jejak as $j)
+                        <li>
+                            <span class="det-jejak-aksi det-jejak-{{ $j->aksi }}">{{ $j->aksi }}</span>
+                            <span class="det-jejak-isi">
+                                {{ $j->ringkasan ?: '—' }}
+                                <span class="det-jejak-kapan">{{ $j->waktu }} &middot; {{ $j->oleh }}</span>
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
             @endif
         </div>
 

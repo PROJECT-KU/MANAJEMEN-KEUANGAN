@@ -90,7 +90,10 @@ class RupaBersamaTest extends TestCase
             '.mis-ringkas-petunjuk',
             '.mis-urut', '.mis-urut-ponsel', '.mis-saring-kartu', '.mis-saring',
             '.mis-saring-cari', '.mis-saring-pilih', '.mis-saring-hapus',
-            '.mis-saring-sibuk', '.mis-hasil'] as $kelas) {
+            '.mis-saring-sibuk', '.mis-hasil',
+            // Ukuran sentuh kotak centang: dua layar beraksi massal pernah
+            // menulis aturannya sendiri-sendiri dan keduanya berakhir 16x16.
+            '.mis-centang', '.mis-centang-bungkus'] as $kelas) {
             $this->assertStringContainsString($kelas . ' {', $css,
                 $kelas . ' dipakai layar tetapi tidak didefinisikan di mis-ui.css');
         }
@@ -183,6 +186,29 @@ class RupaBersamaTest extends TestCase
     }
 
     #[Test]
+    public function kotak_centang_daftar_memakai_ukuran_bersama(): void
+    {
+        /*
+         * Angkatan Layanan dan Data Pelanggan sama-sama punya aksi massal, dan
+         * sebelum ini keduanya menulis sendiri `width: 16px` untuk kotak
+         * centangnya — di bawah batas sasaran sentuh 24x24, untuk kendali yang
+         * memilih baris yang akan DIHAPUS.
+         */
+        foreach ([
+            'account/kategori_layanan/index.blade.php',
+            'account/customer/index.blade.php',
+        ] as $layar) {
+            $isi = file_get_contents(resource_path('views/' . $layar));
+
+            $this->assertStringContainsString('mis-centang-bungkus', $isi,
+                $layar . ' belum memakai pembungkus sasaran sentuh bersama');
+
+            $this->assertStringNotContainsString("-sel input {", $isi,
+                $layar . ' masih menentukan ukuran kotak centangnya sendiri');
+        }
+    }
+
+    #[Test]
     public function penanda_versi_css_ikut_naik(): void
     {
         /*
@@ -196,7 +222,7 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(78, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(87, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
 
         preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);

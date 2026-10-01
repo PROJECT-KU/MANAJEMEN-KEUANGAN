@@ -3428,3 +3428,98 @@ a.mis-ubin.terpilih {
 
     .mis-lipat[open] > summary { margin-bottom: 10px; }
 }
+
+/*
+ * ---------------------------------------------------------------------------
+ * Kotak centang daftar — ukuran sentuh
+ * ---------------------------------------------------------------------------
+ *
+ * Dipakai bersama Angkatan Layanan dan Data Pelanggan, dua layar yang sama-
+ * sama punya aksi massal. Sebelum ini keduanya menulis aturannya sendiri-
+ * sendiri, dan keduanya berakhir 16x16 — di bawah batas minimum sasaran sentuh
+ * 24x24, untuk kendali yang memilih baris yang akan DIHAPUS.
+ *
+ * Kotaknya sendiri tetap kecil supaya tidak mendominasi kartu; yang dibesarkan
+ * daerah tekannya, lewat label berbantalan 13px. Bantalan itu ditarik kembali
+ * dengan margin negatif sebesar yang sama, jadi letak kotaknya di layar tidak
+ * bergeser sedikit pun dari sebelumnya.
+ */
+.mis-centang-bungkus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 13px;
+    margin: -13px;
+    cursor: pointer;
+    /* Tanpa ini, bantalan label ikut menerima sorotan di peramban tertentu
+       dan terlihat seperti kotak abu-abu 44px di sudut kartu. */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mis-centang {
+    width: 18px;
+    height: 18px;
+    accent-color: #4f46e5;
+    cursor: pointer;
+}
+
+@media (max-width: 767.98px) {
+    /* Di ponsel kotaknya ikut dibesarkan: 18px di sudut kartu terlalu samar
+       untuk ditemukan, dan daerah tekannya jadi 44px penuh. */
+    .mis-centang {
+        width: 22px;
+        height: 22px;
+    }
+
+    .mis-centang-bungkus {
+        padding: 11px;
+        margin: -11px;
+    }
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * Sasaran sentuh di ponsel
+ * ---------------------------------------------------------------------------
+ *
+ * Tombol ikon di dalam tabel dipatok 34x34 — ukuran yang pas untuk tetikus,
+ * tetapi di bawah batas sentuh 44x44, dan di modus kartu ketiganya berjejer
+ * rapat di sudut kanan. Terukur di 390px: Ubah, Gandakan, dan Hapus bersisian
+ * dengan sela 6px, jadi jari yang meleset sedikit menekan tombol merah.
+ *
+ * Yang dibesarkan hanya di modus kartu; di layar lebar ukurannya tetap seperti
+ * semula supaya barisnya tidak ikut meninggi.
+ */
+@media (max-width: 767.98px) {
+    .mis-tabel-kartu tbody .mis-tombol-garis,
+    .mis-tabel-kartu tbody .mis-tombol-bahaya,
+    .mis-tabel-kartu tbody .btn-outline-modern {
+        width: 42px;
+        height: 42px;
+        font-size: .86rem;
+    }
+
+    /* Sela diperlebar bersamaan: tombol yang lebih besar dengan sela yang sama
+       justru membuat ketiganya terbaca seperti satu bongkah. */
+    .mis-tabel-kartu tbody td:last-child > div { gap: 10px; }
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * Dua tombol sekunder berbagi satu baris di ponsel
+ * ---------------------------------------------------------------------------
+ *
+ * Opt-in lewat kelas tambahan, BUKAN aturan untuk semua kepala halaman: layar
+ * yang tombol sekundernya cuma satu akan mendapat tombol selebar separuh yang
+ * menggantung sendirian, dan ada empat layar seperti itu.
+ *
+ * Terukur di 390px: tiga tombol bertumpuk membuat kepala halaman memakan 259px
+ * dan kartu pertama baru mulai di 537px dari 844px layar — 64% layar pertama
+ * habis sebelum ada satu data pun yang terlihat.
+ */
+@media (max-width: 767.98px) {
+    .mis-kepala-aksi-pasangan .mis-tombol-halus {
+        width: calc(50% - 5px);
+        padding: 0 10px;
+    }
+}

@@ -124,9 +124,27 @@ class AngkatanLanjutanTest extends TestCase
             ->post(route('account.kategori-layanan.gandakan', $asal))
             ->assertRedirect();
 
-        $salinan = KategoriLayanan::where('nama_ke', '191')->latest('created_at')->first();
+        $salinan = KategoriLayanan::where('layanan', $asal->layanan)
+            ->whereKeyNot($asal->getKey())
+            ->latest('created_at')->first();
 
-        $this->assertNotNull($salinan, 'Nomor angkatannya harus naik satu.');
+        $this->assertNotNull($salinan, 'Salinannya harus ada.');
+
+        /*
+         * Nomornya harus BEBAS, bukan sekadar naik satu.
+         *
+         * Menaikkan asal satu membuat tombol ini sendiri yang memproduksi
+         * kembar: menggandakan ke-187 menghasilkan 188, dan 188 sudah dipakai
+         * dua angkatan Yogyakarta. Yang dijaga di sini cuma satu hal — nomor
+         * hasilnya belum dipakai angkatan lain mana pun di lokasi yang sama.
+         */
+        $this->assertGreaterThan(190, (int) $salinan->nama_ke,
+            'Nomornya harus lebih besar daripada yang digandakan.');
+
+        $this->assertSame(1, KategoriLayanan::where('layanan', $asal->layanan)
+            ->whereRaw("coalesce(lokasi, '') = ?", [(string) $asal->lokasi])
+            ->where('nama_ke', $salinan->nama_ke)->count(),
+            'Nomor hasil penggandaan tidak boleh kembar dengan yang sudah ada.');
         $this->assertSame($asal->nama, $salinan->nama);
         $this->assertSame($asal->lokasi, $salinan->lokasi);
         $this->assertSame($asal->desc, $salinan->desc);
@@ -275,15 +293,55 @@ class AngkatanLanjutanTest extends TestCase
     }
 
     #[Test]
-    public function pendaftar_dihitung_dari_dua_tabel_pendaftaran(): void
+    public function peserta_dihitung_per_orang_bukan_per_baris(): void
     {
-        // Scopus Camp dan Bibliometrik menyimpan pendaftarnya sendiri-sendiri,
-        // keduanya menunjuk kategori_id.
+        /*
+         * Yang dijumlahkan `jumlah_pendaftar`, BUKAN jumlah barisnya.
+         *
+         * Satu baris pendaftaran boleh berisi rombongan: dari 80 baris Scopus
+         * Camp isinya 105 orang. Dihitung per baris, layar ini menulis 5
+         * peserta untuk angkatan ke-175 sementara halaman publik — yang sejak
+         * dulu memakai sum() — menulis 25 untuk angkatan yang sama, dan
+         * penjaga kuota mengizinkan kuota disetel di bawah jumlah orang yang
+         * sudah terdaftar.
+         */
+        KategoriLayanan::lupakanPendaftar();
         $hitung = KategoriLayanan::hitungPendaftar();
 
-        $camp = DB::table('scopus_camp_pendaftaran')->whereNotNull('kategori_id')->count();
-        $biblio = DB::table('analisis_bibliometrik')->whereNotNull('kategori_id')->count();
+        $orang = 0;
+        $baris = 0;
 
-        $this->assertSame($camp + $biblio, array_sum($hitung));
+        foreach (KategoriLayanan::TABEL_PENDAFTARAN as $tabel) {
+            $orang += (int) DB::table($tabel)->whereNotNull('kategori_id')
+                ->selectRaw('sum(greatest(coalesce(jumlah_pendaftar, 1), 1)) as n')->value('n');
+            $baris += DB::table($tabel)->whereNotNull('kategori_id')->count();
+        }
+
+        $this->assertSame($orang, array_sum($hitung));
+        $this->assertSame($baris, array_sum(KategoriLayanan::hitungPendaftaran()));
+    }
+
+    #[Test]
+    public function menggandakan_tidak_boleh_memakai_nomor_yang_sudah_terpakai(): void
+    {
+        // Dua angkatan bernomor berurutan: menggandakan yang pertama harus
+        // MELEWATI yang kedua, bukan menabraknya.
+        $satu = $this->angkatan(['nama_ke' => '910', 'lokasi' => 'Kota Uji']);
+        $dua = $this->angkatan(['nama_ke' => '911', 'lokasi' => 'Kota Uji']);
+
+        $this->actingAs($this->akun())
+            ->post(route('account.kategori-layanan.gandakan', $satu))
+            ->assertRedirect();
+
+        /*
+         * Dipilih dengan menyingkirkan dua yang sudah dikenal, BUKAN dengan
+         * latest('created_at'): ketiganya dibuat pada detik yang sama, dan
+         * urutannya jadi tidak menentukan — ujinya merah berselang-seling
+         * sambil menunjuk kode yang benar.
+         */
+        $salinan = KategoriLayanan::where('lokasi', 'Kota Uji')
+            ->whereKeyNot($satu->getKey())->whereKeyNot($dua->getKey())->first();
+
+        $this->assertSame('912', (string) $salinan->nama_ke);
     }
 }
