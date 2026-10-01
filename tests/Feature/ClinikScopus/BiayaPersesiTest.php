@@ -346,8 +346,8 @@ class BiayaPersesiTest extends TestCase
         $this->assertNotNull($jawa, 'Varian Pulau Jawa harus punya tarif berlaku.');
         $this->assertNotNull($luar, 'Varian luar Jawa harus punya tarif berlaku.');
 
-        $this->assertContains('Penginapan ala Rumah Scopus', $jawa->daftar_fasilitas);
-        $this->assertNotContains('Penginapan ala Rumah Scopus', $luar->daftar_fasilitas,
+        $this->assertContains('Penginapan di tempat acara', $jawa->daftar_fasilitas);
+        $this->assertNotContains('Penginapan di tempat acara', $luar->daftar_fasilitas,
             'Di luar Jawa acaranya menyewa tempat, jadi tidak ada penginapan.');
 
         $this->assertGreaterThan(
