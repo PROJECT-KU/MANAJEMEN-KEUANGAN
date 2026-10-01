@@ -148,8 +148,13 @@ Tarif Layanan | MIS
         display: grid; gap: 5px;
     }
 
+    /* align-items: start, bukan bawaan stretch: butir yang teksnya patah dua
+       baris membuat kotak ikonnya ikut setinggi dua baris, dan centangnya
+       melayang di tengah blok — terukur 10px di bawah baris pertamanya di layar
+       390px. margin-top 3px di bawah yang meluruskannya secara optis. */
     .tar-fasilitas li {
         display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 7px;
+        align-items: start;
         line-height: 1.4; font-size: .76rem; color: var(--mis-tinta-2);
     }
 
