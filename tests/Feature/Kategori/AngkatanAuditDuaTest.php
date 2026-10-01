@@ -206,6 +206,132 @@ class AngkatanAuditDuaTest extends TestCase
         $this->assertNull($angkatan->alamat_sampul);
     }
 
+    // ------------------------------------------------- sampul warisan
+
+    #[Test]
+    public function sampul_diwarisi_dari_angkatan_lain_di_lokasi_yang_sama(): void
+    {
+        $this->actingAs($this->akun());
+
+        // 41 angkatan Scopus Camp Yogyakarta memakai satu flyer yang sama;
+        // angkatan baru di sana tidak perlu mengunggahnya lagi.
+        $lazim = KategoriLayanan::sampulLazim()['scopus_camp|yogyakarta'] ?? null;
+        $this->assertNotNull($lazim, 'flyer Yogyakarta belum jadi kebiasaan di data ini');
+
+        $this->post(route('account.kategori-layanan.store'), $this->isian([
+            'nama_ke' => '905', 'lokasi' => 'Yogyakarta',
+            'sampul_warisan' => $lazim['jalur'],
+        ]))->assertRedirect();
+
+        $baru = KategoriLayanan::where('nama_ke', '905')->firstOrFail();
+
+        $this->assertSame($lazim['jalur'], $baru->gambar);
+
+        // Berkasnya TIDAK disalin: semuanya menunjuk satu berkas yang sama,
+        // dan itu yang membuat mengganti flyer cukup sekali untuk semuanya.
+        $this->assertNotNull($baru->alamat_sampul);
+    }
+
+    #[Test]
+    public function ejaan_lokasi_tidak_perlu_sama_persis(): void
+    {
+        $this->actingAs($this->akun());
+        $lazim = KategoriLayanan::sampulLazim()['scopus_camp|yogyakarta'];
+
+        $this->post(route('account.kategori-layanan.store'), $this->isian([
+            'nama_ke' => '906', 'lokasi' => '  yOgYaKaRtA  ',
+            'sampul_warisan' => $lazim['jalur'],
+        ]))->assertRedirect();
+
+        $this->assertSame($lazim['jalur'], KategoriLayanan::where('nama_ke', '906')->firstOrFail()->gambar);
+    }
+
+    #[Test]
+    public function jalur_sampul_di_luar_daftar_ditolak(): void
+    {
+        $this->actingAs($this->akun());
+
+        // Jalurnya datang dari peramban. Tanpa daftar tertutup, siapa pun yang
+        // bisa mengirim borang ini boleh menunjuk berkas mana saja di public/.
+        $this->post(route('account.kategori-layanan.store'), $this->isian([
+            'nama_ke' => '907', 'lokasi' => 'Yogyakarta',
+            'sampul_warisan' => '../../.env',
+        ]))->assertSessionHasErrors('sampul_warisan');
+
+        $this->assertNull(KategoriLayanan::where('nama_ke', '907')->first());
+    }
+
+    #[Test]
+    public function jalur_sah_tetapi_lokasinya_tidak_cocok_diabaikan(): void
+    {
+        $this->actingAs($this->akun());
+        $lazim = KategoriLayanan::sampulLazim()['scopus_camp|yogyakarta'];
+
+        // Jalurnya ada di daftar, jadi validator meloloskannya — yang menolak
+        // pemeriksaan pasangan layanan+lokasi di pengendali.
+        $this->post(route('account.kategori-layanan.store'), $this->isian([
+            'nama_ke' => '908', 'lokasi' => 'Surabaya',
+            'sampul_warisan' => $lazim['jalur'],
+        ]))->assertRedirect();
+
+        $this->assertNull(KategoriLayanan::where('nama_ke', '908')->firstOrFail()->gambar);
+    }
+
+    #[Test]
+    public function sampul_yang_sudah_ada_tidak_ditimpa_warisan(): void
+    {
+        $this->actingAs($this->akun());
+        $lazim = KategoriLayanan::sampulLazim()['scopus_camp|yogyakarta'];
+
+        $punyaSendiri = 'ScopusCamp/milik-sendiri-' . Str::random(6) . '.jpg';
+        $angkatan = $this->angkatan(['lokasi' => 'Yogyakarta', 'gambar' => $punyaSendiri]);
+
+        $this->post(route('account.kategori-layanan.update', $angkatan), $this->isian([
+            'nama' => $angkatan->nama, 'nama_ke' => $angkatan->nama_ke,
+            'lokasi' => 'Yogyakarta', 'sampul_warisan' => $lazim['jalur'],
+        ]))->assertRedirect();
+
+        $this->assertSame($punyaSendiri, $angkatan->refresh()->gambar);
+    }
+
+    #[Test]
+    public function berkas_yang_diunggah_mengalahkan_warisan(): void
+    {
+        $this->actingAs($this->akun());
+        $lazim = KategoriLayanan::sampulLazim()['scopus_camp|yogyakarta'];
+
+        $this->post(route('account.kategori-layanan.store'), $this->isian([
+            'nama_ke' => '909', 'lokasi' => 'Yogyakarta',
+            'sampul_warisan' => $lazim['jalur'],
+            'gambar' => UploadedFile::fake()->image('punya-sendiri.jpg'),
+        ]))->assertRedirect();
+
+        $baru = KategoriLayanan::where('nama_ke', '909')->firstOrFail();
+        $this->sampah[] = public_path($baru->gambar);
+
+        $this->assertNotSame($lazim['jalur'], $baru->gambar);
+        $this->assertFileExists(public_path($baru->gambar));
+    }
+
+    #[Test]
+    public function usulan_hanya_untuk_yang_sudah_jadi_kebiasaan(): void
+    {
+        /*
+         * Jakarta punya lima berkas berbeda dan tak satu pun dipakai lebih dari
+         * sekali. Menebak salah satunya sama saja menebak acak, dan flyer salah
+         * yang terlanjur terbit di halaman publik lebih mahal daripada tidak
+         * ada usulan sama sekali.
+         */
+        $lazim = KategoriLayanan::sampulLazim();
+
+        foreach ($lazim as $kunci => $isi) {
+            $this->assertGreaterThanOrEqual(2, $isi['jumlah'],
+                $kunci . ' diusulkan padahal berkasnya baru dipakai sekali');
+            $this->assertFileExists(public_path($isi['jalur']),
+                $kunci . ' menunjuk berkas yang tidak ada di cakram');
+        }
+    }
+
     // -------------------------------------------------------- ubah massal
 
     #[Test]

@@ -306,6 +306,7 @@ class KategoriLayananController extends Controller
             'sunting' => false,
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
+            'sampulLazim' => KategoriLayanan::sampulLazim(),
         ]);
     }
 
@@ -320,6 +321,7 @@ class KategoriLayananController extends Controller
             'sunting' => true,
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
+            'sampulLazim' => KategoriLayanan::sampulLazim(),
         ]);
     }
 
@@ -382,7 +384,7 @@ class KategoriLayananController extends Controller
         $angkatan = KategoriLayanan::create($data);
 
         // Sesudah barisnya ada: foldernya ditentukan layanannya.
-        if ($sampul = $this->simpanSampul($request, $angkatan)) {
+        if ($sampul = $this->simpanSampul($request, $angkatan, $data)) {
             $angkatan->forceFill(['gambar' => $sampul])->save();
         }
 
@@ -398,7 +400,7 @@ class KategoriLayananController extends Controller
 
         $data = $this->periksa($request, $angkatan);
 
-        if ($sampul = $this->simpanSampul($request, $angkatan)) {
+        if ($sampul = $this->simpanSampul($request, $angkatan, $data)) {
             $data['gambar'] = $sampul;
         }
 
@@ -430,6 +432,17 @@ class KategoriLayananController extends Controller
             // Sampul: jenisnya dibatasi daftar tertutup. 4 MB cukup untuk
             // flyer; di atas itu halaman publiknya lambat dimuat pengunjung.
             'gambar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
+            /*
+             * Sampul yang diwarisi dari angkatan lain di lokasi yang sama.
+             *
+             * Isinya jalur berkas yang datang dari peramban, jadi dibatasi
+             * daftar tertutup berisi jalur yang MEMANG sudah dipakai angkatan
+             * yang ada. Tanpa itu, siapa pun yang bisa mengirim borang ini
+             * boleh menunjuk berkas mana saja di dalam public/.
+             */
+            'sampul_warisan' => ['nullable', 'string', Rule::in(
+                array_column(KategoriLayanan::sampulLazim(), 'jalur')
+            )],
         ], [
             'nama.required' => 'Isi dulu nama angkatannya.',
             'mulai.required' => 'Isi dulu tanggal mulainya.',
@@ -448,7 +461,7 @@ class KategoriLayananController extends Controller
          */
         $data = array_merge(array_fill_keys([
             'varian', 'nama_ke', 'selesai', 'lokasi', 'total_kuota', 'sisa_kuota',
-            'group_wa', 'desc',
+            'group_wa', 'desc', 'sampul_warisan',
         ], null), $data);
 
         /*
@@ -547,10 +560,48 @@ class KategoriLayananController extends Controller
      * apostrof, dan apostrof di nama berkas ditolak firewall hosting sebelum
      * PHP sempat jalan.
      */
-    private function simpanSampul(Request $request, KategoriLayanan $angkatan): ?string
+    /**
+     * Sampul yang diwarisi dari angkatan lain di layanan + lokasi yang sama.
+     *
+     * Berkasnya TIDAK disalin: empat puluh satu angkatan Yogyakarta memang
+     * sudah menunjuk satu berkas yang sama, dan itu yang membuat mengganti
+     * flyer cukup sekali untuk semuanya.
+     */
+    private function sampulWarisan(KategoriLayanan $angkatan, array $data, ?string $warisan): ?string
+    {
+        if (! $warisan) {
+            return null;
+        }
+
+        // Angkatan yang sudah punya sampul tidak ditimpa diam-diam.
+        if ($angkatan->gambar) {
+            return null;
+        }
+
+        /*
+         * Layanan dan lokasinya diambil dari $data, BUKAN dari modelnya.
+         *
+         * Saat menyunting, update() baru dijalankan sesudah ini — jadi model
+         * yang dibaca di sini masih memegang lokasi LAMA. Admin yang mengubah
+         * lokasi jadi Yogyakarta lalu menyimpan akan ditolak usulannya, dan
+         * sebabnya tidak kelihatan dari mana pun.
+         *
+         * Pasangannya diperiksa ulang, bukan cuma jalurnya. Validator hanya
+         * memastikan jalur itu ADA di daftar; tanpa pemeriksaan ini, borang
+         * yang dikirim dengan layanan "bibliometrik" dan jalur flyer Scopus
+         * Camp tetap diterima — dan sampulnya lalu dicari di folder
+         * bibliometrik/, tempat berkas itu tidak ada.
+         */
+        $kunci = $data['layanan'] . '|' . mb_strtolower(trim((string) ($data['lokasi'] ?? '')));
+        $lazim = KategoriLayanan::sampulLazim()[$kunci] ?? null;
+
+        return $lazim && $lazim['jalur'] === $warisan ? $warisan : null;
+    }
+
+    private function simpanSampul(Request $request, KategoriLayanan $angkatan, array $data = []): ?string
     {
         if (! $request->hasFile('gambar')) {
-            return null;
+            return $this->sampulWarisan($angkatan, $data, $data['sampul_warisan'] ?? null);
         }
 
         $berkas = $request->file('gambar');
