@@ -651,3 +651,35 @@ Kalau data yang sama diketik ulang berkali-kali — 41 angkatan Yogyakarta yang
 isinya nyaris sama persis — sediakan penggandaan. Yang TIDAK ikut disalin:
 tanggal, sisa kuota, token, dan statusnya. Salinannya selalu **draf**, supaya
 tidak ada yang terbit hanya karena tombol tertekan.
+
+## Blok `@php … @endphp` sesudah `@php(...)` sebaris
+
+**Jangan menaruh blok `@php … @endphp` di berkas Blade yang sudah memakai
+`@php(...)` sebaris di atasnya.**
+
+Blade memproses blok `@php … @endphp` lebih dulu daripada direktif biasa, dan
+pencocokannya hanya "dari `@php` sampai `@endphp` terdekat". Penanda sebaris
+`@php($x = ...)` ikut dianggap pembuka blok, lalu dipasangkan dengan `@endphp`
+milik blok baru di bawahnya — dan **semua markah di antaranya tertelan** jadi
+kode PHP.
+
+Gejalanya menyesatkan: halaman galat 500 sambil menyebut variabel yang
+dideklarasikan di blok baru itu ("Undefined variable $x"), padahal yang rusak
+justru bagian jauh di atasnya. Diuji sendirian, potongan barunya kompilasi
+dengan bersih; rusaknya hanya muncul di dalam berkas utuh.
+
+Cara memeriksanya tanpa menebak:
+
+```php
+$h = Blade::compileString(file_get_contents($berkas));
+str_contains($h, '<?php(');   // true = ada penanda sebaris yang tertelan
+```
+
+Jalan keluarnya: pindahkan perhitungannya ke model atau pengendali. Itu juga
+menghilangkan alasan menaruh logika di dalam tampilan sejak awal.
+
+## Kurung di dalam untaian pada `{{ }}`
+
+Hindari `{{ $n > 1 ? ' (' . $n . ')' : '' }}`. Kurung buka di dalam untaian
+ikut terbaca pemindai direktif Blade. Rakit kalimatnya di PHP, lalu cetak
+hasilnya saja.

@@ -11,13 +11,25 @@
 <style>
     /* Bahasa rupanya mengikuti docs/panduan-ui-mis.md. */
 
+    /*
+     * Dua kolom, dan tingginya DIBIARKAN berbeda — tetapi kartunya ditarik
+     * sama tinggi.
+     *
+     * Dulu align-items: start, dengan alasan yang benar untuk keadaan waktu
+     * itu. Yang tidak terduga: arah timpangnya berganti-ganti tergantung isi.
+     * Terukur di 1470px — ada sampul: kiri 325px, kanan 670px, jadi 345px
+     * menganga di bawah kartu kiri; tanpa sampul: kiri 325px, kanan 114px,
+     * 211px menganga di bawah kartu kanan.
+     *
+     * Ditarik sama tinggi, yang tersisa cuma ruang DI DALAM satu kartu, dan
+     * itu jauh lebih tenang dilihat daripada dua kartu yang ujungnya tidak
+     * pernah bertemu.
+     */
     .det-kisi {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
         gap: var(--mis-jarak);
-        /* start, bukan stretch: kartu yang isinya pendek tidak ikut setinggi
-           kartu deskripsi, dan sisanya tidak jadi petak putih di dalamnya. */
-        align-items: start;
+        align-items: stretch;
     }
 
     .det-sampul {
@@ -208,10 +220,28 @@
                     </p>
                 @endif
 
-                @if ($tarif && $tarif->daftar_fasilitas)
-                    <p class="mis-kartu-judul" style="margin-top: 16px;">
-                        <i class="fas fa-check-circle mis-ikon-hijau"></i> Fasilitas dari tarif induk
+                <p class="mis-kartu-judul" style="margin-top: 16px;">
+                    <i class="fas fa-check-circle mis-ikon-hijau"></i> Fasilitas dari tarif induk
+                </p>
+
+                {{-- Dulu seluruh blok ini hilang begitu saja kalau tarifnya tidak
+                     ketemu — padahal sampul yang kosong tepat di atasnya justru
+                     dijelaskan. Dua kekurangan di kartu yang sama, satu diterangkan
+                     dan satu disembunyikan, membuat yang disembunyikan terbaca
+                     seolah layanan ini memang tidak punya fasilitas. --}}
+                @if (! $tarif)
+                    <p class="det-kosong">
+                        Angkatan ini tidak menemukan tarif induknya
+                        (<strong>{{ $angkatan->nama_layanan }}{{ $angkatan->varian ? ' · ' . $angkatan->varian : '' }}</strong>),
+                        jadi harga, fasilitas, dan perakit deskripsinya kosong.
+                        Setel variannya di borang ubah, atau tambahkan tarifnya di
+                        <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.index') }}">Tarif Layanan</a>.
                     </p>
+                @elseif (! $tarif->daftar_fasilitas)
+                    <p class="det-kosong">
+                        Tarif induknya belum mencantumkan fasilitas apa pun.
+                    </p>
+                @else
                     <ul class="det-fasilitas">
                         @foreach ($tarif->daftar_fasilitas as $f)
                             <li><i class="fas fa-check" aria-hidden="true"></i> <span>{{ $f }}</span></li>
