@@ -66,6 +66,13 @@ class KategoriLayananController extends Controller
         $status = $request->query('status');
         $cari = trim((string) $request->query('cari'));
 
+        // Daftar tertutup: nilainya datang dari alamat, dan scopePerlu()
+        // mengabaikan yang tidak dikenal — tetapi menyimpannya di sini membuat
+        // menu di layar ikut memilih yang benar.
+        $perlu = array_key_exists((string) $request->query('perlu'), KategoriLayanan::PERLU)
+            ? $request->query('perlu')
+            : null;
+
         /*
          * Dua kueri, bukan satu: yang dasar memakai layanan dan kata kunci
          * saja, dan ubin ringkasan dihitung dari situ.
@@ -93,6 +100,8 @@ class KategoriLayananController extends Controller
         if ($status) {
             $kueri->where('status', $status);
         }
+
+        $kueri->perlu($perlu);
 
         /*
          * Pengurutan. Daftarnya semula selalu tanggal mulai terbaru, jadi
@@ -144,6 +153,23 @@ class KategoriLayananController extends Controller
             ->select('status', DB::raw('count(*) as n'))
             ->groupBy('status')->pluck('n', 'status');
 
+        /*
+         * Jumlah tiap keadaan yang perlu ditindaklanjuti, dihitung dari kueri
+         * DASAR — tanpa saringan status maupun saringan ini sendiri. Kalau
+         * ikut tersaring, menekan "Draf kadaluwarsa" membuat angka dua lainnya
+         * jadi 0 dan jalan kembalinya hilang dari layar.
+         */
+        $jumlahPerlu = [];
+
+        foreach (array_keys(KategoriLayanan::PERLU) as $jenis) {
+            $jumlahPerlu[$jenis] = (clone $kueriDasar)->reorder()->perlu($jenis)->count();
+        }
+
+        // Baris UNIK, bukan jumlah ketiganya: satu angkatan bisa kena dua
+        // keadaan sekaligus, dan menjumlahkannya membuat ubinnya menulis 47
+        // dari 60 baris padahal yang benar jauh lebih sedikit.
+        $totalPerlu = (clone $kueriDasar)->reorder()->perluApaPun()->count();
+
         return view('account.kategori_layanan.index', [
             'angkatan' => $angkatan,
             'jumlah' => $jumlah,
@@ -157,7 +183,10 @@ class KategoriLayananController extends Controller
             // naik/turun. Keduanya dikirim daripada disulih di dalam Blade.
             'arahKode' => $arah,
             'bolehUrut' => $bolehUrut,
-            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan,
+            'perlu' => $perlu,
+            'jumlahPerlu' => $jumlahPerlu,
+            'totalPerlu' => $totalPerlu,
+            'adaSaringan' => $cari !== '' || (bool) $status || (bool) $layanan || (bool) $perlu,
             'bolehUbah' => $this->bolehMengubah(),
             'katalog' => Layanan::katalog(),
         ]);
@@ -179,7 +208,12 @@ class KategoriLayananController extends Controller
         $status = $request->query('status');
         $cari = trim((string) $request->query('cari'));
 
+        // Unduhan membawa saringan yang SEDANG dipakai, termasuk yang ini:
+        // yang diunduh orang hampir selalu yang sedang dilihatnya.
+        $perlu = $request->query('perlu');
+
         $kueri = KategoriLayanan::query()
+            ->perlu($perlu)
             ->when($layanan && array_key_exists($layanan, Layanan::katalog()),
                 fn ($q) => $q->where('layanan', $layanan))
             ->when($status, fn ($q) => $q->where('status', $status))
@@ -304,6 +338,7 @@ class KategoriLayananController extends Controller
                 'nama_ke' => $this->nomorAwal($layanan),
             ]),
             'sunting' => false,
+            'baruDigandakan' => false,
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
             'sampulLazim' => KategoriLayanan::sampulLazim(),
@@ -320,6 +355,7 @@ class KategoriLayananController extends Controller
         return view('account.kategori_layanan.form', [
             'angkatan' => $angkatan,
             'sunting' => true,
+            'baruDigandakan' => request()->boolean('digandakan'),
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
             'sampulLazim' => KategoriLayanan::sampulLazim(),
@@ -715,7 +751,13 @@ class KategoriLayananController extends Controller
 
         $salinan->save();
 
-        return redirect()->route('account.kategori-layanan.edit', $salinan)
+        /*
+         * Penanda ?digandakan=1 dibawa ke borangnya supaya tanggalnya bisa
+         * ditandai di layar. Pesan sukses saja tidak cukup: toast-nya hilang
+         * beberapa detik kemudian, sementara tanggal hari ini tetap duduk di
+         * isiannya dan terlihat seperti tanggal yang memang disengaja.
+         */
+        return redirect()->route('account.kategori-layanan.edit', [$salinan, 'digandakan' => 1])
             ->with('success', 'Angkatan digandakan jadi rancangan. '
                 . 'Ganti tanggalnya, lalu ubah statusnya kalau sudah siap.');
     }
@@ -820,6 +862,71 @@ class KategoriLayananController extends Controller
     }
 
     // ----------------------------------------------------------- penghapusan
+
+    /**
+     * Menghapus banyak angkatan sekaligus.
+     *
+     * Dipisah dari massal() yang mengubah status, bukan ditumpangkan sebagai
+     * salah satu nilainya: menghapus tidak bisa dibatalkan, dan satu endpoint
+     * yang menerima "active" dan "hapus" sebagai nilai setara membuat salah
+     * ketik berakibat jauh lebih mahal daripada yang dimaksud.
+     */
+    public function massalHapus(Request $request)
+    {
+        if (! $this->bolehMengubah()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak boleh menghapus angkatan.',
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'id' => ['required', 'array', 'min:1', 'max:200'],
+            'id.*' => ['uuid'],
+        ], [
+            'id.required' => 'Pilih dulu angkatan yang mau dihapus.',
+            'id.max' => 'Maksimal 200 angkatan sekali hapus.',
+        ]);
+
+        /*
+         * Yang punya pendaftar DILEWATI, bukan membatalkan seluruh tindakan.
+         * Membatalkan semuanya berarti satu angkatan berpendaftar di tengah
+         * pilihan membuat sembilan belas lainnya ikut gagal tanpa alasan yang
+         * kelihatan — dan orangnya harus menebak yang mana.
+         */
+        $berpendaftar = DB::table('analisis_bibliometrik')
+            ->whereIn('kategori_id', $data['id'])->distinct()->pluck('kategori_id')
+            ->merge(DB::table('scopus_camp_pendaftaran')
+                ->whereIn('kategori_id', $data['id'])->distinct()->pluck('kategori_id'))
+            ->unique()->all();
+
+        $bolehHapus = array_values(array_diff($data['id'], $berpendaftar));
+        $dihapus = 0;
+
+        if ($bolehHapus !== []) {
+            try {
+                $dihapus = KategoriLayanan::whereIn('id', $bolehHapus)->delete();
+            } catch (QueryException $e) {
+                report($e);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sebagian angkatan masih tertaut ke data lain.',
+                ], 409);
+            }
+        }
+
+        $pesan = $dihapus . ' angkatan dihapus.';
+
+        if ($berpendaftar !== []) {
+            $pesan .= ' ' . count($berpendaftar) . ' dilewati karena sudah punya pendaftar.';
+        }
+
+        return response()->json([
+            'success' => $dihapus > 0,
+            'message' => $dihapus > 0 ? $pesan : 'Tidak ada yang bisa dihapus; semuanya sudah punya pendaftar.',
+        ]);
+    }
 
     public function destroy(KategoriLayanan $angkatan)
     {

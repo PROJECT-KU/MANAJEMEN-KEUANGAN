@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\ClinikScopusBiayaPersesi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -186,6 +187,161 @@ class KategoriLayanan extends Model
         $berkas = public_path($this->folderSampul() . '/' . basename($this->gambar));
 
         return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->gambar)) : null;
+    }
+
+    /** Tiga keadaan yang perlu ditindaklanjuti; kuncinya dipakai di alamat. */
+    public const PERLU = [
+        'draf-lewat' => 'Draf yang tanggalnya lewat',
+        'tanpa-tarif' => 'Tidak menemukan tarif induk',
+        'sampul-hilang' => 'Berkas sampulnya hilang',
+    ];
+
+    /**
+     * Draf yang tanggalnya sudah lewat.
+     *
+     * Lencana "Lewat" hanya untuk angkatan AKTIF — ia memang peringatan bahwa
+     * sesuatu masih terpajang padahal sudah selesai. Draf tidak terpajang di
+     * mana pun, jadi ia tidak pernah ditandai dan menumpuk diam-diam: terukur
+     * 24 dari 60 baris, yang terlama bertanggal Oktober 2025.
+     */
+    public function getDrafKadaluwarsaAttribute(): bool
+    {
+        if ($this->status !== 'draft') {
+            return false;
+        }
+
+        $akhir = $this->selesai ?: $this->mulai;
+
+        return $akhir && Carbon::parse($akhir)->endOfDay()->isPast();
+    }
+
+    /**
+     * Alasan baris ini perlu dicek; kosong artinya tidak ada masalah.
+     *
+     * Dihitung di model, bukan di Blade. Versinya yang di Blade memakai blok
+     * @php ... @endphp — dan blok itu ditaruh SESUDAH beberapa @php(...)
+     * sebaris yang sudah ada di berkas yang sama. Blade memasangkan @php(
+     * sebaris itu dengan @endphp milik blok baru, menelan semua yang di
+     * antaranya, lalu berhenti mengompilasi; halamannya galat 500 sambil
+     * menyebut variabel yang sama sekali tidak bersalah.
+     *
+     * @return array<int, string>
+     */
+    public function getPerluDicekAttribute(): array
+    {
+        $alasan = [];
+
+        if ($this->draf_kadaluwarsa) {
+            $alasan[] = 'draf yang tanggalnya sudah lewat';
+        }
+
+        if ($this->tarif_hilang) {
+            $alasan[] = 'tidak menemukan tarif induk, jadi harga dan fasilitasnya kosong';
+        }
+
+        if ($this->sampul_hilang) {
+            $alasan[] = 'berkas sampulnya tidak ada di peladen';
+        }
+
+        return $alasan;
+    }
+
+    /** Tidak menemukan tarif induk, jadi harga dan fasilitasnya kosong. */
+    public function getTarifHilangAttribute(): bool
+    {
+        return $this->tarif() === null;
+    }
+
+    /** Kolom gambarnya terisi tetapi berkasnya tidak ada di cakram. */
+    public function getSampulHilangAttribute(): bool
+    {
+        return trim((string) $this->gambar) !== '' && $this->alamat_sampul === null;
+    }
+
+    /**
+     * Pasangan "layanan|varian" yang PUNYA tarif berlaku.
+     *
+     * Dipakai menyaring kebalikannya di SQL; tanpa ini, mencari angkatan yang
+     * tarifnya hilang berarti memuat seluruh tabel lalu menyaring di PHP, dan
+     * penomoran halamannya ikut rusak.
+     *
+     * @return array<int, string>
+     */
+    public static function pasanganBertarif(): array
+    {
+        return array_keys(ClinikScopusBiayaPersesi::semuaYangBerlaku()->all());
+    }
+
+    /**
+     * Jalur sampul yang berkasnya TIDAK ada di cakram.
+     *
+     * Yang diperiksa jalur yang BERBEDA, bukan tiap baris: empat puluh satu
+     * angkatan Yogyakarta menunjuk satu berkas yang sama, jadi memeriksa per
+     * baris berarti empat puluh satu kali stat() untuk jawaban yang sama.
+     *
+     * @return array<int, string>
+     */
+    public static function jalurSampulHilang(): array
+    {
+        $baris = self::query()
+            ->whereNotNull('gambar')->where('gambar', '<>', '')
+            ->select('layanan', 'gambar')->distinct()->get();
+
+        $hilang = [];
+
+        foreach ($baris as $b) {
+            $folder = self::FOLDER_SAMPUL[$b->layanan] ?? 'angkatan';
+
+            if (! is_file(public_path($folder . '/' . basename((string) $b->gambar)))) {
+                $hilang[] = $b->gambar;
+            }
+        }
+
+        return array_values(array_unique($hilang));
+    }
+
+    /**
+     * Baris yang kena SALAH SATU dari ketiga keadaan, dihitung sekali saja.
+     *
+     * Bukan penjumlahan ketiganya: angkatan Bibliometrik yang drafnya
+     * kadaluwarsa SEKALIGUS tidak menemukan tarif induk akan terhitung dua
+     * kali, dan ubinnya menulis 47 dari 60 baris padahal yang benar jauh
+     * lebih sedikit.
+     */
+    public function scopePerluApaPun(Builder $kueri): Builder
+    {
+        $bertarif = self::pasanganBertarif();
+        $sampulHilang = self::jalurSampulHilang();
+
+        return $kueri->where(function (Builder $q) use ($bertarif, $sampulHilang) {
+            $q->where(fn (Builder $x) => $x->where('status', 'draft')
+                ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]))
+                ->orWhereNotIn(
+                    DB::raw("concat(layanan, '|', coalesce(varian, ''))"),
+                    $bertarif
+                )
+                ->orWhereIn('gambar', $sampulHilang);
+        });
+    }
+
+    /** Saringan "perlu ditindaklanjuti"; kunci yang tidak dikenal diabaikan. */
+    public function scopePerlu(Builder $kueri, ?string $jenis): Builder
+    {
+        return match ($jenis) {
+            'draf-lewat' => $kueri->where('status', 'draft')
+                ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]),
+
+            'tanpa-tarif' => $kueri->whereNotIn(
+                DB::raw("concat(layanan, '|', coalesce(varian, ''))"),
+                self::pasanganBertarif()
+            ),
+
+            // Larik kosong pada whereIn menghasilkan "0 = 1" di SQL, yang
+            // justru benar: tidak ada satu pun yang sampulnya hilang.
+            'sampul-hilang' => $kueri->whereIn('gambar', self::jalurSampulHilang()),
+
+            default => $kueri,
+        };
     }
 
     /**

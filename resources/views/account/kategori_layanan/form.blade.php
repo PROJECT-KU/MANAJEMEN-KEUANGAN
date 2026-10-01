@@ -167,6 +167,27 @@
         text-decoration: underline; cursor: pointer;
     }
 
+    /* Peringatan tanggal pada hasil gandakan: kuning, sebab ia meminta
+       perhatian tetapi bukan galat — borangnya tetap bisa disimpan. */
+    .brg-digandakan {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px; align-items: start;
+        margin: 0 0 12px; padding: 11px 13px;
+        border: 1px solid #fde68a; border-radius: 12px;
+        background: #fffbeb;
+        line-height: 1.5; font-size: .78rem; color: #92400e;
+    }
+
+    .brg-digandakan .fas { font-size: 13px !important; margin-top: 2px; }
+
+    /* Isian tanggalnya ikut ditandai; kalimat saja mudah terlewat begitu
+       matanya sudah turun ke bawah. */
+    .brg-tandai .form-control-modern {
+        border-color: #fbbf24;
+        background: #fffbeb;
+    }
+
     .brg-kaki {
         display: flex; flex-wrap: wrap; gap: 10px;
         margin-top: var(--mis-jarak);
@@ -227,6 +248,21 @@
                         <i class="fas fa-info-circle mis-ikon-biru"></i> Keterangan angkatan
                     </p>
 
+                    @if ($baruDigandakan)
+                        {{-- Tanggalnya diisi hari ini saat menggandakan, sebab
+                             kolomnya wajib isi. Tanpa peringatan ini, admin yang
+                             lupa menggantinya akan menerbitkan angkatan
+                             bertanggal hari ini — dan tanggal itu ikut tercetak
+                             di pengumuman yang beredar. --}}
+                        <p class="brg-digandakan">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                            <span>
+                                Salinan ini memakai <strong>tanggal hari ini</strong> karena tanggalnya
+                                wajib diisi. Gantilah dulu sebelum statusnya dijadikan Aktif.
+                            </span>
+                        </p>
+                    @endif
+
                     <div class="brg-tarif" id="brg-tarif" aria-live="polite">
                         <i class="fas fa-tag mis-ikon-hijau" aria-hidden="true"></i>
                         <span id="brg-tarif-teks">Memuat tarif induk…</span>
@@ -275,13 +311,13 @@
                                 value="{{ old('lokasi', $angkatan->lokasi) }}" placeholder="Yogyakarta">
                         </div>
 
-                        <div class="mis-isian brg-isian">
+                        <div class="mis-isian brg-isian {{ $baruDigandakan ? 'brg-tandai' : '' }}">
                             <label class="mis-label" for="brg-mulai">Mulai <span class="brg-wajib" title="Wajib diisi" aria-hidden="true">*</span></label>
                             <input type="date" class="form-control-modern" id="brg-mulai" name="mulai" required
                                 value="{{ old('mulai', $angkatan->mulai ? \Carbon\Carbon::parse($angkatan->mulai)->format('Y-m-d') : '') }}">
                         </div>
 
-                        <div class="mis-isian brg-isian">
+                        <div class="mis-isian brg-isian {{ $baruDigandakan ? 'brg-tandai' : '' }}">
                             <label class="mis-label" for="brg-selesai">Selesai</label>
                             <input type="date" class="form-control-modern" id="brg-selesai" name="selesai"
                                 value="{{ old('selesai', $angkatan->selesai ? \Carbon\Carbon::parse($angkatan->selesai)->format('Y-m-d') : '') }}">

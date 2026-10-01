@@ -462,6 +462,9 @@ Route::prefix('account')
             Route::get('/kategori-layanan/{angkatan}/ubah', 'account\KategoriLayananController@edit')->name('account.kategori-layanan.edit');
             Route::post('/kategori-layanan/{angkatan}/gandakan', 'account\KategoriLayananController@gandakan')->name('account.kategori-layanan.gandakan');
             Route::post('/kategori-layanan/massal/status', 'account\KategoriLayananController@massal')->name('account.kategori-layanan.massal');
+            // Jalur sendiri, bukan salah satu nilai dari massal/status:
+            // menghapus tidak bisa dibatalkan.
+            Route::post('/kategori-layanan/massal/hapus', 'account\KategoriLayananController@massalHapus')->name('account.kategori-layanan.massal-hapus');
             Route::get('/kategori-layanan/{angkatan}/detail', 'account\KategoriLayananController@detail')->name('account.kategori-layanan.detail');
             Route::get('/kategori-layanan/cetak/pdf', 'account\KategoriLayananController@cetakPdf')->name('account.kategori-layanan.cetak');
             Route::get('/kategori-layanan/cetak/excel', 'account\KategoriLayananController@cetakExcel')->name('account.kategori-layanan.excel');
