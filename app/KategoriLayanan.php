@@ -189,11 +189,18 @@ class KategoriLayanan extends Model
         return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->gambar)) : null;
     }
 
-    /** Tiga keadaan yang perlu ditindaklanjuti; kuncinya dipakai di alamat. */
+    /**
+     * Keadaan yang perlu ditindaklanjuti; kuncinya dipakai di alamat.
+     *
+     * Labelnya sengaja pendek: ia tampil di dalam menu saringan selebar satu
+     * kolom, dan "Tidak menemukan tarif induk" terpotong jadi
+     * "Tidak menemukan tarif i…".
+     */
     public const PERLU = [
-        'draf-lewat' => 'Draf yang tanggalnya lewat',
-        'tanpa-tarif' => 'Tidak menemukan tarif induk',
-        'sampul-hilang' => 'Berkas sampulnya hilang',
+        'aktif-lewat' => 'Aktif tapi sudah lewat',
+        'draf-lewat' => 'Draf kadaluwarsa',
+        'tanpa-tarif' => 'Tanpa tarif induk',
+        'sampul-hilang' => 'Sampul hilang',
     ];
 
     /**
@@ -231,6 +238,17 @@ class KategoriLayanan extends Model
     {
         $alasan = [];
 
+        /*
+         * Yang PALING mendesak justru ini: angkatannya masih terpajang di
+         * halaman publik padahal acaranya sudah selesai. Versi pertama ubin
+         * "Perlu dicek" melewatkannya — ia cuma memuat tiga keadaan lain —
+         * sehingga keadaan yang paling perlu ditindaklanjuti tidak bisa
+         * ditemukan lewat saringan yang justru dibuat untuk itu.
+         */
+        if ($this->sudah_lewat) {
+            $alasan[] = 'masih aktif padahal tanggalnya sudah lewat';
+        }
+
         if ($this->draf_kadaluwarsa) {
             $alasan[] = 'draf yang tanggalnya sudah lewat';
         }
@@ -244,6 +262,23 @@ class KategoriLayanan extends Model
         }
 
         return $alasan;
+    }
+
+    /**
+     * Alasan yang belum punya lencananya sendiri di daftar.
+     *
+     * "Masih aktif padahal tanggalnya lewat" sudah ditandai lencana "Lewat"
+     * yang bisa ditekan untuk menonaktifkan. Menambahkan lencana "Perlu dicek"
+     * di sebelahnya berarti dua peringatan untuk satu hal yang sama.
+     *
+     * @return array<int, string>
+     */
+    public function getPerluDicekLainAttribute(): array
+    {
+        return array_values(array_filter(
+            $this->perlu_dicek,
+            fn ($a) => ! str_starts_with($a, 'masih aktif')
+        ));
     }
 
     /** Tidak menemukan tarif induk, jadi harga dan fasilitasnya kosong. */
@@ -314,7 +349,7 @@ class KategoriLayanan extends Model
         $sampulHilang = self::jalurSampulHilang();
 
         return $kueri->where(function (Builder $q) use ($bertarif, $sampulHilang) {
-            $q->where(fn (Builder $x) => $x->where('status', 'draft')
+            $q->where(fn (Builder $x) => $x->whereIn('status', ['draft', 'active'])
                 ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]))
                 ->orWhereNotIn(
                     DB::raw("concat(layanan, '|', coalesce(varian, ''))"),
@@ -328,6 +363,9 @@ class KategoriLayanan extends Model
     public function scopePerlu(Builder $kueri, ?string $jenis): Builder
     {
         return match ($jenis) {
+            'aktif-lewat' => $kueri->where('status', 'active')
+                ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]),
+
             'draf-lewat' => $kueri->where('status', 'draft')
                 ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]),
 

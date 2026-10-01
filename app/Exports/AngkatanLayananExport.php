@@ -35,7 +35,7 @@ class AngkatanLayananExport implements FromCollection, WithHeadings, WithMapping
         return [
             'Angkatan', 'Ke-', 'Layanan', 'Varian', 'Lokasi',
             'Tanggal', 'Total kuota', 'Sisa kuota', 'Pendaftar',
-            'Biaya', 'Harga promo', 'Kode promo', 'Status',
+            'Biaya', 'Harga promo', 'Kode promo', 'Status', 'Perlu dicek',
         ];
     }
 
@@ -64,6 +64,13 @@ class AngkatanLayananExport implements FromCollection, WithHeadings, WithMapping
                 ? (int) $a->total_biaya : null,
             $a->kode_diskon ?: '—',
             ['active' => 'Aktif', 'non active' => 'Nonaktif', 'draft' => 'Draf'][$a->status] ?? $a->status,
+            /*
+             * Daftar yang diunduh untuk DITINDAKLANJUTI kehilangan satu-satunya
+             * keterangan yang membuatnya perlu ditindaklanjuti kalau kolom ini
+             * tidak ada — orangnya harus kembali ke layar satu per satu untuk
+             * tahu baris mana yang bermasalah.
+             */
+            $a->perlu_dicek ? ucfirst(implode('; ', $a->perlu_dicek)) : '—',
         ];
     }
 

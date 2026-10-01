@@ -426,6 +426,9 @@ Angkatan Layanan | MIS
                                 ['sisa_kuota', 'naik', 'Sisa kuota paling sedikit'],
                                 ['sisa_kuota', 'turun', 'Sisa kuota paling banyak'],
                                 ['status', 'naik', 'Status'],
+                                ['biaya', 'turun', 'Biaya termahal'],
+                                ['biaya', 'naik', 'Biaya termurah'],
+                                ['layanan', 'naik', 'Layanan A–Z'],
                             ];
                         @endphp
                         @foreach ($pilihanUrut as $pilihan)
@@ -465,6 +468,13 @@ Angkatan Layanan | MIS
                 <span class="ang-massal-jumlah"><strong id="ang-massal-n">0</strong> dipilih</span>
 
                 <div class="ang-massal-tombol">
+                    {{-- Mencentang satu per satu 34 baris yang perlu dicek berarti
+                         empat halaman; tombol ini mencentang seluruh baris yang
+                         SEDANG tampil, dan pilihannya bertahan saat berpindah
+                         halaman. --}}
+                    <button type="button" class="mis-tombol mis-tombol-halus" id="ang-massal-semua">
+                        <i class="fas fa-check-double mis-ikon-ungu"></i> Pilih semua
+                    </button>
                     <button type="button" class="mis-tombol mis-tombol-halus" data-massal="active">
                         <i class="fas fa-check-circle"></i> Aktifkan
                     </button>
@@ -550,7 +560,10 @@ Angkatan Layanan | MIS
                                     @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
                                         'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'nama', 'label' => 'Angkatan'])
                                 </th>
-                                <th class="ang-k-layanan">Layanan</th>
+                                <th class="ang-k-layanan" aria-sort="{{ $ariaUrut('layanan') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'layanan', 'label' => 'Layanan'])
+                                </th>
                                 <th class="ang-k-tanggal" aria-sort="{{ $ariaUrut('mulai') }}">
                                     @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
                                         'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'mulai', 'label' => 'Tanggal'])
@@ -559,7 +572,10 @@ Angkatan Layanan | MIS
                                     @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
                                         'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'sisa_kuota', 'label' => 'Kuota'])
                                 </th>
-                                <th class="ang-k-biaya">Biaya</th>
+                                <th class="ang-k-biaya" aria-sort="{{ $ariaUrut('biaya') }}">
+                                    @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
+                                        'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'biaya', 'label' => 'Biaya'])
+                                </th>
                                 <th class="ang-k-status" aria-sort="{{ $ariaUrut('status') }}">
                                     @include('partials.urut-kolom', ['rute' => 'account.kategori-layanan.index',
                                         'bawa' => $bawaUrut, 'arah' => $arahKode, 'kolom' => 'status', 'label' => 'Status'])
@@ -719,12 +735,12 @@ Angkatan Layanan | MIS
                                              @php di sini: blok seperti itu akan dipasangkan
                                              Blade dengan @php(...) sebaris yang sudah ada di
                                              atas, dan semua di antaranya ikut tertelan. --}}
-                                        @if ($a->perlu_dicek)
+                                        @if ($a->perlu_dicek_lain)
                                             <span class="mis-pil mis-pil-merah"
-                                                title="Perlu dicek: {{ implode('; ', $a->perlu_dicek) }}">
+                                                title="Perlu dicek: {{ implode('; ', $a->perlu_dicek_lain) }}">
                                                 <i class="fas fa-exclamation-triangle"></i>
-                                                {{ count($a->perlu_dicek) > 1
-                                                    ? 'Perlu dicek ' . count($a->perlu_dicek) . ' hal'
+                                                {{ count($a->perlu_dicek_lain) > 1
+                                                    ? 'Perlu dicek ' . count($a->perlu_dicek_lain) . ' hal'
                                                     : 'Perlu dicek' }}
                                             </span>
                                         @endif
@@ -839,6 +855,11 @@ Angkatan Layanan | MIS
 
             if (e.target.checked) dipilih.add(e.target.value); else dipilih.delete(e.target.value);
             segarkan();
+        });
+
+        document.getElementById('ang-massal-semua').addEventListener('click', function () {
+            kotakTampil().forEach(function (k) { dipilih.add(k.value); });
+            pulihkan();
         });
 
         document.getElementById('ang-massal-batal').addEventListener('click', function () {
