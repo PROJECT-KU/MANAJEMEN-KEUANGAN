@@ -62,6 +62,12 @@ class KategoriLayanan extends Model
         'desc',
         'best_price',
         'lokasi',
+        'jam_mulai',
+        'jam_selesai',
+        'platform',
+        'pemateri',
+        'pemateri_jabatan',
+        'pemateri_foto',
         'biaya',
         'ppn',
         'tipe_diskon',
@@ -201,6 +207,7 @@ class KategoriLayanan extends Model
     public const TABEL_PENDAFTARAN = [
         'scopus_camp' => 'scopus_camp_pendaftaran',
         'bibliometrik' => 'analisis_bibliometrik',
+        'sharing_session' => 'sharing_session_pendaftaran',
     ];
 
     /** Layanan ini belum punya tempat menyimpan pendaftar sama sekali. */
@@ -331,6 +338,7 @@ class KategoriLayanan extends Model
     public const FOLDER_SAMPUL = [
         'scopus_camp' => 'ScopusCamp',
         'bibliometrik' => 'bibliometrik',
+        'sharing_session' => 'SharingSession',
     ];
 
     public function folderSampul(): string
@@ -622,6 +630,55 @@ class KategoriLayanan extends Model
         }
 
         return (string) $nomor;
+    }
+
+    /**
+     * Layanan ini acara DARING, jadi punya jam, platform, dan pemateri.
+     *
+     * Ditentukan dari ada-tidaknya isian itu, bukan dari daftar kode layanan:
+     * layanan baru yang juga daring tidak boleh perlu menyentuh kode ini,
+     * dan admin yang mengisi jamnya jelas bermaksud begitu.
+     */
+    public function acaraDaring(): bool
+    {
+        return $this->jam_mulai !== null || trim((string) $this->platform) !== '';
+    }
+
+    /**
+     * Jam acara dalam bentuk yang dibaca orang: "09.30 - 11.30 WIB".
+     *
+     * Titik, bukan titik dua: itu kebiasaan penulisan jam di seluruh materi
+     * Rumah Scopus, dan halaman ini dibaca orang yang sama.
+     */
+    public function getJamAttribute(): ?string
+    {
+        if ($this->jam_mulai === null) {
+            return null;
+        }
+
+        $tulis = fn ($j) => $j === null ? null : Carbon::parse($j)->format('H.i');
+
+        $akhir = $tulis($this->jam_selesai);
+
+        return $tulis($this->jam_mulai) . ($akhir ? ' - ' . $akhir : '') . ' WIB';
+    }
+
+    /**
+     * Alamat foto pemateri; null kalau berkasnya tidak ada.
+     *
+     * Diperiksa keberadaannya seperti sampul, dengan alasan yang sama: kolom
+     * yang terisi tetapi berkasnya hilang membuat halaman publik menampilkan
+     * gambar rusak, dan tidak ada yang tahu sampai ada yang melapor.
+     */
+    public function getAlamatPemateriAttribute(): ?string
+    {
+        if (! $this->pemateri_foto) {
+            return null;
+        }
+
+        $berkas = public_path($this->folderSampul() . '/' . basename($this->pemateri_foto));
+
+        return is_file($berkas) ? asset($this->folderSampul() . '/' . basename($this->pemateri_foto)) : null;
     }
 
     /**

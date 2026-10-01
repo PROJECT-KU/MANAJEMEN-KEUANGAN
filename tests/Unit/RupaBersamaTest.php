@@ -20,12 +20,21 @@ use Tests\TestCase;
  */
 class RupaBersamaTest extends TestCase
 {
+    /**
+     * Berkas Blade LAYAR ADMIN saja.
+     *
+     * Sistem rupa .mis- hanya berlaku di sana. Halaman publik memakai kerangka
+     * dan palet yang sama sekali lain — tidak satu pun memuat kelas .mis-, dan
+     * memindainya membuat uji ini menuduh nama kelas yang kebetulan berakhiran
+     * "-ubin" padahal artinya memang berbeda (ubin ikon status pada halaman
+     * Sharing Session, misalnya).
+     */
     private function berkasBlade(): array
     {
         $keluar = [];
 
         $jalan = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(resource_path('views'))
+            new \RecursiveDirectoryIterator(resource_path('views/account'))
         );
 
         foreach ($jalan as $berkas) {
