@@ -95,6 +95,17 @@
     /* Borang gandakan tidak boleh memakai ruang barisnya sendiri. */
     .det-gandakan { display: inline-flex; margin: 0; }
 
+    @media (max-width: 767.98px) {
+        /*
+         * Di ponsel tombol kepala melar selebar penuh lewat aturan bersama
+         * `.mis-kepala-aksi .mis-tombol { width: 100% }`. Tombol "Gandakan"
+         * terbungkus <form> yang inline-flex, jadi "100%" itu mengacu ke
+         * BORANGNYA — terukur 125px sementara tiga tombol lain 330px, dan
+         * tepinya sendirian berhenti di 155px.
+         */
+        .det-gandakan { display: flex; width: 100%; }
+    }
+
     @media (max-width: 991.98px) {
         .det-kisi { grid-template-columns: minmax(0, 1fr); }
     }
