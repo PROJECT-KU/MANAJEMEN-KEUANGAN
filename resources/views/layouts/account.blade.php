@@ -365,6 +365,12 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
+                        <li class="{{ setActive('account/galeri-layanan') }}">
+                            <a class="nav-link" href="{{ route('account.galeri-layanan.index') }}">
+                                <i class="fas fa-images"></i> <span>Galeri Layanan</span>
+                            </a>
+                        </li>
+
                         <li class="{{ setActive('account/Clinik-Scopus-Promo') }}">
                             <a class="nav-link" href="{{ route('account.Clinik-Scopus-Promo.index') }}">
                                 <i class="fas fa-tags"></i> <span>Promo</span>

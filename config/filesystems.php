@@ -80,6 +80,30 @@ return [
             'throw' => false,
         ],
 
+        /*
+         * Unggahan gambar: sampul angkatan, foto pemateri, dan galeri layanan.
+         *
+         * Cakram SENDIRI dengan alasan yang sama seperti 'profil' di atas —
+         * root cakram 'public' sudah dialihkan ke public/images dan dipakai
+         * ratusan berkas lain, jadi memakainya berarti unggahan baru menumpang
+         * di folder yang bukan tempatnya.
+         *
+         * Berkasnya tinggal di storage/app/public dan disajikan lewat tautan
+         * simbolik public/storage buatan `php artisan storage:link`. Isinya
+         * SELALU WebP; yang menjaganya App\Services\Gambar.
+         *
+         * 'url' sengaja RELATIF. Storage::url() menempelkan nilai ini apa
+         * adanya, dan dipatok ke APP_URL semua gambar akan menunjuk
+         * http://localhost — alamat yang benar hanya di mesin pengembang.
+         */
+        'unggahan' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => '/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

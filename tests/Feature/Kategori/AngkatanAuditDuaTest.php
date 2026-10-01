@@ -327,7 +327,13 @@ class AngkatanAuditDuaTest extends TestCase
         foreach ($lazim as $kunci => $isi) {
             $this->assertGreaterThanOrEqual(2, $isi['jumlah'],
                 $kunci . ' diusulkan padahal berkasnya baru dipakai sekali');
-            $this->assertFileExists(public_path($isi['jalur']),
+            /*
+             * Yang dijaga: berkasnya BISA DIBUKA — bukan bahwa ia ada di
+             * public/. Sejak sampul dikonversi jadi WebP, jalurnya menunjuk
+             * storage, dan menguji lokasinya berarti menguji tempat
+             * penyimpanan alih-alih maksudnya.
+             */
+            $this->assertNotNull($isi['alamat'],
                 $kunci . ' menunjuk berkas yang tidak ada di cakram');
         }
     }

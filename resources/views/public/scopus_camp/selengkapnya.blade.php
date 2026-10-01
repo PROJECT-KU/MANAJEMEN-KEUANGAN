@@ -367,7 +367,7 @@ Detail Scopus Camp | Rumah Scopus
                         @foreach($terbaru as $data)
                         @if($data->status === 'active')
                         <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $data->id, 'token' => $data->token]) }}" class="sidebar-item-glass">
-                            <img src="{{ !empty($data->gambar) ? asset('ScopusCamp/' . basename($data->gambar)) : asset('ScopusCamp/no-image.jpg') }}" alt="Gambar" class="sidebar-img">
+                            <img src="{{ \App\Support\AlamatGambar::url($data->gambar ?? null, 'ScopusCamp') ?: asset('ScopusCamp/no-image.jpg') }}" alt="Gambar" class="sidebar-img">
 
                             <div class="sidebar-info">
                                 <strong>{{ $data->nama }} #{{ $data->nama_ke }}</strong>
