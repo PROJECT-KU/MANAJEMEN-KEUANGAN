@@ -291,7 +291,10 @@ Angkatan Layanan | MIS
              */
             $perluPertama = array_key_first(array_filter($jumlahPerlu));
         @endphp
-        <div class="mis-ringkas {{ $totalPerlu > 0 ? 'mis-ringkas-5' : '' }}">
+        {{-- Di ponsel ubinnya jadi barisan yang digeser; pembungkus ini yang
+             memegang petunjuknya, sebab barisan itu sendiri yang menggeser. --}}
+        <div class="mis-ringkas-geser" data-mis-geser>
+        <div class="mis-ringkas {{ $totalPerlu > 0 ? 'mis-ringkas-5' : '' }}" aria-label="Ringkasan angkatan">
             @foreach ($ubin as [$nilaiStatus, $label, $angka, $warna, $glif])
                 <a class="mis-ubin {{ $status === $nilaiStatus ? 'terpilih' : '' }}"
                     href="{{ route('account.kategori-layanan.index',
@@ -320,6 +323,10 @@ Angkatan Layanan | MIS
                     </div>
                 </a>
             @endif
+        </div>
+            <p class="mis-ringkas-petunjuk" aria-hidden="true">
+                <i class="fas fa-arrows-alt-h"></i> Geser untuk lihat semua
+            </p>
         </div>
 
         {{-- ---------------------------------------------- penyaring --}}

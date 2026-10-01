@@ -3038,6 +3038,14 @@ a.mis-ubin.terpilih {
     color: var(--mis-tinta);
 }
 
+/*
+ * Petunjuk geser. Bawaannya TERSEMBUNYI, dan aturan ini sengaja di luar media
+ * query: ditaruh di dalamnya, di layar lebar ia tidak punya display sama
+ * sekali dan <p>-nya tampil sebagai paragraf biasa — mengajak menggeser
+ * barisan yang tidak bergeser ke mana-mana.
+ */
+.mis-ringkas-petunjuk { display: none; }
+
 .mis-ubin-label {
     margin: 2px 0 0;
     line-height: 1.4;
@@ -3071,22 +3079,68 @@ a.mis-ubin.terpilih {
 .mis-urut-ponsel { display: none; }
 
 @media (max-width: 1100px) {
-    .mis-ringkas,
-    .mis-ringkas-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .mis-ringkas-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+    /*
+     * Ubinnya jadi barisan yang DIGESER, bukan kisi.
+     *
+     * Sebagai kisi dua kolom, empat ubin memakan dua baris dan lima ubin
+     * memakan tiga — dengan satu petak kosong menganga di sebelah ubin
+     * terakhir. Terukur: 240px habis sebelum kartu data pertama terlihat.
+     * Sebagai barisan, tingginya satu ubin saja.
+     */
+    .mis-ringkas {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        /*
+         * Padding 4px memberi ruang cincin fokus, yang kalau tidak akan
+         * terpotong overflow-x. TANPA margin negatif penyeimbang: itu pernah
+         * membuat strip 1170px di dalam bagian selebar 1160px.
+         */
+        padding: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
 
-@media (max-width: 767.98px) {
-    .mis-ringkas { gap: 10px; }
+    .mis-ringkas::-webkit-scrollbar { display: none; }
 
-    .mis-ubin {
-        padding: 12px 13px;
+    .mis-ringkas > .mis-ubin {
+        /*
+         * Lebarnya dijepit, bukan 62% saja.
+         *
+         * 62% membuat ubin berikutnya SELALU terlihat sebagian — potongan di
+         * tepi kanan itu tanda paling kuat bahwa barisnya berlanjut, dan tidak
+         * perlu dibaca. Tetapi 62% dari layar 1000px berarti ubin 620px yang
+         * konyol, dan 62% dari 320px berarti 198px yang terlalu sempit untuk
+         * "Bergabung 30 hari terakhir". Jepitannya menjaga keduanya.
+         */
+        flex: 0 0 clamp(170px, 62%, 240px);
+        scroll-snap-align: start;
         border-radius: 14px;
     }
 
+    .mis-ubin { padding: 12px 13px; }
+
     .mis-ubin-angka { font-size: 1.15rem; }
 
-    .mis-ringkas-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* Petunjuk tertulis, untuk yang potongan ubinnya belum cukup. Disembunyikan
+       sendiri begitu barisnya tergeser sampai ujung — petunjuk yang tetap
+       terpampang sesudah dituruti berhenti dibaca orang. */
+    .mis-ringkas-petunjuk {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        margin: 0 0 12px;
+        line-height: 1.4;
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--mis-tinta-4);
+    }
+
+    .mis-ringkas-geser.bisa-geser .mis-ringkas-petunjuk { display: flex; }
+    .mis-ringkas-geser.bisa-geser .mis-ringkas { margin-bottom: 4px; }
+
+    .mis-ringkas-petunjuk .fas { font-size: 11px !important; }
 
     /* Di mode kartu <thead> disembunyikan untuk pembaca layar saja — terukur
        1x1 piksel dan terklip — jadi kepala kolom pengurutnya tidak bisa

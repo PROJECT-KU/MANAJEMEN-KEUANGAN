@@ -392,7 +392,8 @@ Data Pelanggan | MIS
              angkanya terlihat tetapi daftarnya tidak bisa dipersempit jadi
              orang-orang itu. Berupa TAUTAN, bukan tombol berskrip, jadi
              alamatnya bisa disalin dan tetap bekerja tanpa JavaScript. --}}
-        <div class="mis-ringkas">
+        <div class="mis-ringkas-geser" data-mis-geser>
+        <div class="mis-ringkas" aria-label="Ringkasan pelanggan">
             <a class="mis-ubin {{ ! $status && ! $verifikasi && ! $punyaPesanan && ! $baru ? 'terpilih' : '' }}"
                 href="{{ route('account.customer.index', request()->only('cari')) }}"
                 title="Tampilkan semua pelanggan">
@@ -433,6 +434,10 @@ Data Pelanggan | MIS
                     <p class="mis-ubin-label">Bergabung 30 hari terakhir</p>
                 </div>
             </a>
+        </div>
+            <p class="mis-ringkas-petunjuk" aria-hidden="true">
+                <i class="fas fa-arrows-alt-h"></i> Geser untuk lihat semua
+            </p>
         </div>
 
         {{-- ---------------------------------------------- penyaring --}}
