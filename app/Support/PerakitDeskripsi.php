@@ -99,7 +99,7 @@ class PerakitDeskripsi
     {
         $keluar = [];
 
-        foreach (preg_split('/\r\n|\r|\n/', $cetakan) as $baris) {
+        foreach (self::tanpaBlokKosong($cetakan, $nilai) as $baris) {
             preg_match_all('/\{[a-z_]+\}/', $baris, $ada);
             $penanda = array_filter($ada[0], fn ($p) => array_key_exists($p, $nilai));
 
@@ -122,6 +122,63 @@ class PerakitDeskripsi
         $rapi = preg_replace("/\n{3,}/", "\n\n", implode("\n", $keluar));
 
         return trim($rapi);
+    }
+
+    /**
+     * Membuang BLOK yang seluruh penandanya kosong, berikut judulnya.
+     *
+     * Aturan per baris di bawah hanya membuang baris yang berpenanda. Judul
+     * seperti "🔹 Yang dipelajari" tidak berpenanda, jadi ia bertahan — dan
+     * untuk layanan yang daftar kegiatannya masih kosong, judul itu
+     * menggantung tanpa isi apa pun di bawahnya. Begitu juga "📞 Kontak" pada
+     * tarif yang kontaknya belum diisi.
+     *
+     * Blok di sini artinya kumpulan baris yang dipisahkan baris kosong —
+     * persis cara orang membaca alinea. Blok dibuang hanya kalau ia MEMANG
+     * punya penanda dan semuanya kosong; blok tanpa penanda sama sekali, yang
+     * berarti kalimat yang sengaja ditulis admin, tidak pernah disentuh.
+     *
+     * @param  array<string, string>  $nilai
+     * @return array<int, string>
+     */
+    private static function tanpaBlokKosong(string $cetakan, array $nilai): array
+    {
+        $baris = preg_split('/\r\n|\r|\n/', $cetakan);
+
+        $keluar = [];
+        $blok = [];
+
+        $tuntaskan = function () use (&$keluar, &$blok, $nilai) {
+            if ($blok === []) {
+                return;
+            }
+
+            preg_match_all('/\{[a-z_]+\}/', implode("\n", $blok), $ada);
+            $penanda = array_filter($ada[0], fn ($p) => array_key_exists($p, $nilai));
+
+            if ($penanda === [] || ! self::semuaKosong($penanda, $nilai)) {
+                foreach ($blok as $b) {
+                    $keluar[] = $b;
+                }
+            }
+
+            $blok = [];
+        };
+
+        foreach ($baris as $b) {
+            if (trim($b) === '') {
+                $tuntaskan();
+                $keluar[] = $b;
+
+                continue;
+            }
+
+            $blok[] = $b;
+        }
+
+        $tuntaskan();
+
+        return $keluar;
     }
 
     /**
