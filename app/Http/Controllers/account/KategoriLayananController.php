@@ -301,12 +301,13 @@ class KategoriLayananController extends Controller
                 // Nomor berikutnya disarankan, bukan dipaksakan: admin
                 // mengingat-ingat nomor terakhir kalau tidak, dan angka yang
                 // dilompati baru ketahuan berbulan-bulan kemudian.
-                'nama_ke' => $this->nomorBerikutnya($layanan),
+                'nama_ke' => $this->nomorAwal($layanan),
             ]),
             'sunting' => false,
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
             'sampulLazim' => KategoriLayanan::sampulLazim(),
+            'nomorPerLokasi' => KategoriLayanan::nomorBerikutnyaPerLokasi(),
         ]);
     }
 
@@ -322,6 +323,7 @@ class KategoriLayananController extends Controller
             'katalog' => Layanan::katalog(),
             'tarifPer' => $this->tarifPerLayanan(),
             'sampulLazim' => KategoriLayanan::sampulLazim(),
+            'nomorPerLokasi' => KategoriLayanan::nomorBerikutnyaPerLokasi(),
         ]);
     }
 
@@ -338,13 +340,17 @@ class KategoriLayananController extends Controller
      * barisnya: angkatan yang dihapus akan membuat hitungan baris memberi
      * nomor yang sudah terpakai.
      */
-    private function nomorBerikutnya(string $layanan): ?string
+    /**
+     * Nomor yang disodorkan saat borang tambah baru dibuka.
+     *
+     * Dipakai kunci berlokasi KOSONG, sebab lokasinya memang belum diketik.
+     * Untuk Scopus Camp tidak ada angkatan tanpa lokasi, jadi hasilnya 0 dan
+     * nomornya baru terisi begitu lokasinya diketik; untuk Bibliometrik yang
+     * angkatannya memang tidak berlokasi, deretnya tetap berjalan.
+     */
+    private function nomorAwal(string $layanan): string
     {
-        $tertinggi = KategoriLayanan::where('layanan', $layanan)
-            ->whereRaw("nama_ke REGEXP '^[0-9]+$'")
-            ->max(DB::raw('CAST(nama_ke AS UNSIGNED)'));
-
-        return $tertinggi ? (string) ((int) $tertinggi + 1) : null;
+        return (string) (KategoriLayanan::nomorBerikutnyaPerLokasi()[$layanan . '|'] ?? 0);
     }
 
     private function tarifPerLayanan(): array

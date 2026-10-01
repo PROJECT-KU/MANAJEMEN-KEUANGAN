@@ -673,6 +673,49 @@
          * berselisih dengan yang dipakai saat menyimpan.
          */
         /*
+         * Nomor angkatan mengikuti LOKASI, bukan layanan.
+         *
+         * Yogyakarta sudah sampai 202 sementara Jakarta baru 9 dan Medan baru
+         * 3. Dihitung per layanan saja, borang ini menyodorkan 203 untuk
+         * angkatan Medan — nomor milik kota lain, dan lompatannya baru
+         * ketahuan berbulan-bulan kemudian.
+         *
+         * Hanya di borang TAMBAH. Angkatan yang sudah ada punya nomornya
+         * sendiri, dan nomor itu sudah tercetak di pengumuman yang beredar.
+         */
+        @if (! $sunting)
+        (function () {
+            const NOMOR = @json($nomorPerLokasi);
+
+            const lokasi = document.getElementById('brg-lokasi');
+            const nomor = document.getElementById('brg-nomor');
+            const layanan = document.getElementById('brg-layanan');
+            if (!lokasi || !nomor) return;
+
+            /*
+             * Begitu admin mengetik nomornya sendiri, usulannya berhenti
+             * mengikuti. Tanpa ini, mengoreksi lokasi karena salah ketik akan
+             * menghapus nomor yang baru saja diketik orangnya.
+             */
+            let diketikSendiri = false;
+            nomor.addEventListener('input', function () { diketikSendiri = true; });
+
+            function segarkanNomor() {
+                if (diketikSendiri) return;
+
+                const kunci = layanan.value + '|' + lokasi.value.trim().toLowerCase();
+
+                // Lokasi yang belum punya deret nomor mulai dari 0, bukan
+                // meneruskan nomor kota lain.
+                nomor.value = NOMOR[kunci] ?? 0;
+            }
+
+            lokasi.addEventListener('input', segarkanNomor);
+            layanan.addEventListener('change', segarkanNomor);
+        })();
+        @endif
+
+        /*
          * Sampul yang diwarisi dari angkatan lain di lokasi yang sama.
          *
          * Empat puluh satu angkatan Scopus Camp Yogyakarta memakai satu flyer
