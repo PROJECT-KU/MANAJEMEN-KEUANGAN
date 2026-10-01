@@ -182,81 +182,27 @@ class Gambar
             default => false,
         };
 
-        if ($gambar === false) {
-            return null;
-        }
-
-        return $this->luruskan($gambar, $jalur, $tentang[2]);
+        return $gambar === false ? null : $gambar;
     }
 
     /**
-     * Memutar gambar mengikuti penanda EXIF Orientation.
+     * Memutar berkas yang SUDAH tersimpan, atas perintah orang.
      *
-     * Foto dari ponsel hampir selalu disimpan MIRING, dengan penanda EXIF yang
-     * memberi tahu berapa derajat ia harus diputar saat ditampilkan. Peramban
-     * menghormati penanda itu, jadi fotonya terlihat benar di galeri ponsel dan
-     * di pratinjau unggahan.
+     * Putaran OTOMATIS mengikuti EXIF sengaja TIDAK dipakai. Pemiliknya minta
+     * sistem tidak memutar sendiri, dan alasannya terbukti di lapangan: foto
+     * yang sudah melewati WhatsApp atau alat ekspor lain kehilangan penanda
+     * EXIF-nya sementara pikselnya tetap miring — tidak ada yang bisa ditebak
+     * dari berkas seperti itu, dan menebak berarti sebagian foto justru
+     * dimiringkan oleh sistem.
      *
-     * GD TIDAK membacanya. imagecreatefromjpeg() mengembalikan piksel apa
-     * adanya — miring — dan WebP yang ditulis dari situ TIDAK membawa penanda
-     * EXIF sama sekali. Jadi tidak ada lagi yang meluruskannya, dan hasilnya
-     * foto yang terbalik 90 derajat di layar.
+     * Gantinya: yang tersimpan persis seperti yang diunggah, dan yang
+     * memutarnya orang, sekali klik, saat melihat hasilnya sendiri.
      *
-     * Diluruskan di sini, sekali, pada satu-satunya pintu masuk unggahan.
+     * Dicatat jujur: foto iPhone yang MASIH membawa penanda EXIF jadi perlu
+     * satu klik itu, padahal sebelumnya lurus sendiri.
      *
-     * @param  \GdImage  $gambar
-     * @return \GdImage
+     * @param  int  $derajat  90 atau -90; positif searah jarum jam
      */
-    private function luruskan($gambar, string $jalur, int $jenis)
-    {
-        // Hanya JPEG yang membawa EXIF; PNG dan WebP tidak.
-        if ($jenis !== IMAGETYPE_JPEG || ! function_exists('exif_read_data')) {
-            return $gambar;
-        }
-
-        $exif = @exif_read_data($jalur);
-        $arah = (int) ($exif['Orientation'] ?? 0);
-
-        if ($arah < 2 || $arah > 8) {
-            return $gambar;
-        }
-
-        /*
-         * Delapan nilai yang mungkin, bukan cuma putaran. Empat di antaranya
-         * juga TERCERMIN — foto swafoto yang dibalik kamera depan. Mengurusi
-         * putarannya saja membuat sebagian foto lurus tetapi terbalik kiri-
-         * kanan, dan itu lebih sulit disadari daripada miring 90 derajat.
-         *
-         * Sudut imagerotate() berlawanan arah jarum jam.
-         */
-        $putar = match ($arah) {
-            3, 4 => 180,
-            5, 6 => -90,
-            7, 8 => 90,
-            default => 0,
-        };
-
-        $cermin = in_array($arah, [2, 4, 5, 7], true);
-
-        if ($putar !== 0) {
-            $hasil = imagerotate($gambar, $putar, imagecolorallocatealpha($gambar, 0, 0, 0, 127));
-
-            if ($hasil !== false) {
-                imagedestroy($gambar);
-                $gambar = $hasil;
-            }
-        }
-
-        if ($cermin) {
-            imageflip($gambar, IMG_FLIP_HORIZONTAL);
-        }
-
-        imagealphablending($gambar, false);
-        imagesavealpha($gambar, true);
-
-        return $gambar;
-    }
-
     /**
      * Membongkar HEIC/HEIF jadi PNG sementara; null kalau tidak ada yang bisa.
      *
@@ -376,6 +322,50 @@ class Gambar
         }
 
         return $this->cariAlat('heif-convert') !== null || $this->cariAlat('sips') !== null;
+    }
+
+    public function putar(string $jalur, int $derajat): bool
+    {
+        if (! in_array($derajat, [90, -90, 180], true)) {
+            return false;
+        }
+
+        if (! Storage::disk(self::CAKRAM)->exists($jalur)) {
+            return false;
+        }
+
+        $sumber = @imagecreatefromstring(Storage::disk(self::CAKRAM)->get($jalur));
+
+        if ($sumber === false) {
+            return false;
+        }
+
+        /*
+         * Sudut imagerotate() berlawanan arah jarum jam, jadi tandanya dibalik
+         * supaya $derajat positif berarti searah jarum jam — itu yang dipahami
+         * orang saat menekan tombol "putar kanan".
+         */
+        $hasil = imagerotate($sumber, -$derajat, imagecolorallocatealpha($sumber, 0, 0, 0, 127));
+        imagedestroy($sumber);
+
+        if ($hasil === false) {
+            return false;
+        }
+
+        imagealphablending($hasil, false);
+        imagesavealpha($hasil, true);
+
+        ob_start();
+        imagewebp($hasil, null, self::MUTU);
+        $isi = (string) ob_get_clean();
+        imagedestroy($hasil);
+
+        // Ditulis ke jalur yang SAMA: alamatnya sudah beredar di halaman
+        // publik dan mungkin sudah ditembolok, jadi mengganti namanya berarti
+        // tautan lama menunjuk berkas yang tidak ada.
+        Storage::disk(self::CAKRAM)->put($jalur, $isi);
+
+        return true;
     }
 
     /**

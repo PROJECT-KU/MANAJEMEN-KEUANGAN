@@ -294,17 +294,49 @@ class GaleriTest extends TestCase
         return $jalur;
     }
 
+    /**
+     * Di sudut mana penanda kuningnya berada.
+     *
+     * Memeriksa POSISI, bukan cuma ukuran. Versi pertama uji ini hanya
+     * membandingkan 800x400 jadi 400x800 — dan itu lulus baik diputar searah
+     * maupun berlawanan jarum jam, jadi ia tidak membuktikan apa pun tentang
+     * arahnya.
+     */
+    private function sudutPenanda(string $isi): array
+    {
+        $im = imagecreatefromstring($isi);
+        $l = imagesx($im);
+        $t = imagesy($im);
+        $di = [];
+
+        foreach ([
+            ['kiri-atas', 6, 6], ['kanan-atas', $l - 7, 6],
+            ['kiri-bawah', 6, $t - 7], ['kanan-bawah', $l - 7, $t - 7],
+        ] as [$nama, $x, $y]) {
+            $c = imagecolorsforindex($im, imagecolorat($im, $x, $y));
+
+            if ($c['red'] > 200 && $c['green'] > 150 && $c['blue'] < 120) {
+                $di[] = $nama;
+            }
+        }
+
+        imagedestroy($im);
+
+        return $di;
+    }
+
     #[Test]
-    public function foto_bertanda_miring_diluruskan(): void
+    public function foto_bertanda_miring_TIDAK_diputar_sistem(): void
     {
         /*
-         * Foto dari ponsel hampir selalu disimpan MIRING dengan penanda EXIF
-         * yang memberi tahu putarannya. GD mengabaikan penanda itu, dan WebP
-         * tidak membawanya sama sekali — jadi tanpa diluruskan di sini,
-         * hasilnya foto terbalik 90 derajat di layar.
+         * Sistem sengaja tidak memutar sendiri, atas permintaan pemiliknya.
          *
-         * Orientation 6 = harus diputar 90 derajat searah jarum jam, sehingga
-         * gambar 800x400 jadi 400x800.
+         * Alasannya terbukti di lapangan: foto yang sudah melewati WhatsApp
+         * atau alat ekspor lain kehilangan penanda EXIF-nya sementara pikselnya
+         * tetap miring. Dari berkas seperti itu tidak ada yang bisa ditebak,
+         * dan menebak berarti sebagian foto justru dimiringkan oleh sistem.
+         *
+         * Gantinya tombol putar manual — diuji di bawah.
          */
         $jalur = $this->jpegMiring(6, 800, 400);
 
@@ -316,26 +348,88 @@ class GaleriTest extends TestCase
 
         $tentang = getimagesizefromstring(Storage::disk(Gambar::CAKRAM)->get($hasil));
 
-        $this->assertSame(400, $tentang[0], 'Lebarnya harus jadi 400 sesudah diputar.');
-        $this->assertSame(800, $tentang[1], 'Tingginya harus jadi 800 sesudah diputar.');
+        $this->assertSame(800, $tentang[0], 'Ukurannya harus tetap seperti aslinya.');
+        $this->assertSame(400, $tentang[1]);
     }
 
     #[Test]
-    public function foto_tanpa_tanda_miring_tidak_diputar(): void
+    public function tombol_putar_memutar_isinya_searah_jarum_jam(): void
     {
-        // Orientation 1 = sudah lurus. Memutarnya justru merusak.
-        $jalur = $this->jpegMiring(1, 800, 400);
+        // Penanda di KIRI-ATAS; sesudah diputar 90 searah jarum jam ia harus
+        // pindah ke KANAN-ATAS.
+        $jalur = $this->jpegMiring(1, 400, 200);
 
-        $hasil = app(Gambar::class)->simpan(
+        $berkas = app(Gambar::class)->simpan(
             new UploadedFile($jalur, basename($jalur), 'image/jpeg', null, true),
             'uji/galeri'
         );
-        $this->sampah[] = $hasil;
+        $this->sampah[] = $berkas;
 
-        $tentang = getimagesizefromstring(Storage::disk(Gambar::CAKRAM)->get($hasil));
+        $this->assertSame(
+            ['kiri-atas'],
+            $this->sudutPenanda(Storage::disk(Gambar::CAKRAM)->get($berkas)),
+            'Sebelum diputar, penandanya di kiri-atas.'
+        );
 
-        $this->assertSame(800, $tentang[0]);
+        $g = $this->foto(['berkas' => $berkas], ['webinar_eksklusif']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.putar', $g), ['derajat' => 90])
+            ->assertOk();
+
+        $isi = Storage::disk(Gambar::CAKRAM)->get($berkas);
+        $tentang = getimagesizefromstring($isi);
+
+        $this->assertSame(200, $tentang[0], 'Lebarnya jadi 200 sesudah diputar.');
         $this->assertSame(400, $tentang[1]);
+        $this->assertSame(['kanan-atas'], $this->sudutPenanda($isi));
+    }
+
+    #[Test]
+    public function tombol_putar_ke_kiri_arahnya_berlawanan(): void
+    {
+        $jalur = $this->jpegMiring(1, 400, 200);
+
+        $berkas = app(Gambar::class)->simpan(
+            new UploadedFile($jalur, basename($jalur), 'image/jpeg', null, true),
+            'uji/galeri'
+        );
+        $this->sampah[] = $berkas;
+
+        $g = $this->foto(['berkas' => $berkas], ['webinar_eksklusif']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.putar', $g), ['derajat' => -90])
+            ->assertOk();
+
+        // Kiri-atas diputar BERLAWANAN jarum jam mendarat di kiri-bawah.
+        $this->assertSame(
+            ['kiri-bawah'],
+            $this->sudutPenanda(Storage::disk(Gambar::CAKRAM)->get($berkas))
+        );
+    }
+
+    #[Test]
+    public function putaran_selain_sembilan_puluh_ditolak(): void
+    {
+        $g = $this->foto(['berkas' => 'uji/apa-saja.webp'], ['webinar_eksklusif']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.putar', $g), ['derajat' => 37])
+            ->assertStatus(422);
+    }
+
+    #[Test]
+    public function memutar_berkas_yang_hilang_dijawab_terus_terang(): void
+    {
+        // 409 beserta kalimatnya, bukan 500: berkas yang hilang itu keadaan
+        // yang memang mungkin, bukan kerusakan program.
+        $g = $this->foto(['berkas' => 'uji/tidak-ada-sama-sekali.webp'], ['webinar_eksklusif']);
+
+        $this->actingAs($this->akun())
+            ->postJson(route('account.galeri.putar', $g), ['derajat' => 90])
+            ->assertStatus(409)
+            ->assertJsonPath('success', false);
     }
 
     #[Test]
@@ -460,9 +554,12 @@ class GaleriTest extends TestCase
     {
         $sesi = $this->sesi();
 
-        $this->foto(['berkas' => 'uji/mati.webp', 'aktif' => false], ['webinar_eksklusif']);
+        $mati = $this->foto(['berkas' => 'uji/mati.webp', 'aktif' => false], ['webinar_eksklusif']);
 
-        $this->assertCount(0, Galeri::untukAngkatan($sesi)->get());
+        // Diperiksa FOTONYA SENDIRI, bukan "galerinya kosong": galeri sungguhan
+        // di basis data pengembang ikut terhitung, dan ujinya merah karena data
+        // yang sama sekali tidak ada hubungannya.
+        $this->assertNotContains($mati->id, Galeri::untukAngkatan($sesi)->pluck('id')->all());
     }
 
     #[Test]
@@ -647,12 +744,21 @@ class GaleriTest extends TestCase
         // perlu tahu bahwa ada yang hilang.
         $sesi = $this->sesi();
 
-        $this->foto(
+        $hilang = $this->foto(
             ['berkas' => 'uji/tidak-ada-sama-sekali.webp', 'kategori_id' => $sesi->getKey()],
             ['webinar_eksklusif']
         );
 
-        $this->assertSame([], $this->getJson('/api/webinar-eksklusif')->json('sesi.galeri'));
+        // Yang diperiksa: berkas INI tidak ikut terkirim — bukan bahwa
+        // galerinya kosong, sebab foto lain yang sah boleh saja ada.
+        $alamat = collect($this->getJson('/api/webinar-eksklusif')->json('sesi.galeri'))
+            ->pluck('gambar')->all();
+
+        foreach ($alamat as $a) {
+            $this->assertStringNotContainsString('tidak-ada-sama-sekali', (string) $a);
+        }
+
+        $this->assertNotNull($hilang->id);
     }
 
     // ------------------------------------------------- alamat bentuk lama

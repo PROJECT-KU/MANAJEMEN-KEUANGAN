@@ -197,6 +197,8 @@ Galeri Foto | MIS
                         Boleh beberapa sekaligus, paling banyak 20.
                         @if ($bisaHeic)
                             JPG, PNG, WebP, dan HEIC dari iPhone — semuanya diubah jadi WebP.
+                            Fotonya disimpan apa adanya, tidak diputar sendiri; pakai tombol putar
+                            di kartunya kalau ada yang miring.
                         @else
                             JPG, PNG, dan WebP. <strong>HEIC belum bisa dibaca peladen ini</strong>,
                             ubah dulu ke JPG.
@@ -329,6 +331,19 @@ Galeri Foto | MIS
                                 </div>
 
                                 <div class="gal-aksi">
+                                    {{-- Putar manual. Sistem sengaja TIDAK memutar sendiri:
+                                         foto yang sudah melewati WhatsApp kehilangan penanda
+                                         EXIF-nya sementara pikselnya tetap miring, dan menebak
+                                         berarti sebagian foto justru dimiringkan sistem. --}}
+                                    <button type="button" class="mis-tombol mis-tombol-garis"
+                                        title="Putar ke kiri" data-putar="-90">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                    <button type="button" class="mis-tombol mis-tombol-garis"
+                                        title="Putar ke kanan" data-putar="90">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+
                                     <button type="button" class="mis-tombol mis-tombol-bahaya"
                                         title="Hapus foto" data-hapus="{{ route('account.galeri.destroy', $g) }}">
                                         <i class="fas fa-trash-alt"></i>
@@ -397,6 +412,46 @@ Galeri Foto | MIS
                     if (medan === 'aktif') kartu.classList.toggle('nonaktif', !isian.checked);
                 })
                 .catch(function () { window.misToast('gagal', 'Tidak bisa menghubungi peladen.'); });
+        });
+
+        document.addEventListener('click', function (e) {
+            var putar = e.target.closest('[data-putar]');
+            if (!putar) return;
+
+            var kartu = putar.closest('.gal-kartu');
+            var gambar = kartu.querySelector('.gal-foto');
+
+            if (!gambar) {
+                window.misToast('gagal', 'Fotonya tidak ada untuk diputar.');
+                return;
+            }
+
+            var isi = new FormData();
+            isi.append('_token', csrf);
+            isi.append('derajat', putar.dataset.putar);
+
+            putar.disabled = true;
+
+            fetch('{{ url('account/galeri') }}/' + kartu.dataset.id + '/putar', {
+                method: 'POST', headers: { 'Accept': 'application/json' }, body: isi
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    putar.disabled = false;
+
+                    if (!d.success) { window.misToast('gagal', d.message); return; }
+
+                    /* Jalur berkasnya SENGAJA tidak berubah supaya tautan yang
+                       sudah beredar tetap hidup — jadi peramban harus dipaksa
+                       memuat ulang lewat penanda waktu, kalau tidak yang tampil
+                       salinan temboloknya yang masih miring. */
+                    var dasar = (gambar.getAttribute('src') || '').split('?')[0];
+                    gambar.setAttribute('src', dasar + '?v=' + d.penanda);
+                })
+                .catch(function () {
+                    putar.disabled = false;
+                    window.misToast('gagal', 'Tidak bisa menghubungi peladen.');
+                });
         });
 
         document.addEventListener('click', function (e) {

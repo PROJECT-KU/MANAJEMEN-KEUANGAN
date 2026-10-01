@@ -219,6 +219,42 @@ class GaleriController extends Controller
         ]);
     }
 
+    /**
+     * Memutar foto yang sudah tersimpan, 90 derajat ke kiri atau ke kanan.
+     *
+     * Sistem TIDAK memutar sendiri — lihat App\Services\Gambar::putar(). Yang
+     * memutuskan orang yang melihat hasilnya.
+     */
+    public function putar(Request $request, Galeri $galeri)
+    {
+        if (! $this->boleh()) {
+            return response()->json(['success' => false, 'message' => 'Tidak diizinkan.'], 403);
+        }
+
+        $data = $request->validate([
+            'derajat' => ['required', 'integer', Rule::in([90, -90, 180])],
+        ]);
+
+        if (! $this->gambar->putar($galeri->berkas, (int) $data['derajat'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fotonya tidak bisa diputar; berkasnya mungkin sudah tidak ada.',
+            ], 409);
+        }
+
+        /*
+         * Penanda waktu ikut dikirim supaya layar bisa memaksa gambarnya
+         * dimuat ulang. Jalurnya tidak berubah — kalau tidak, tautan yang
+         * sudah beredar jadi mati — jadi peramban akan memakai salinan
+         * temboloknya yang masih miring.
+         */
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto diputar.',
+            'penanda' => now()->timestamp,
+        ]);
+    }
+
     public function destroy(Galeri $galeri)
     {
         if (! $this->boleh()) {
