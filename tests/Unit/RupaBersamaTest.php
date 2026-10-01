@@ -27,7 +27,7 @@ class RupaBersamaTest extends TestCase
      * dan palet yang sama sekali lain — tidak satu pun memuat kelas .mis-, dan
      * memindainya membuat uji ini menuduh nama kelas yang kebetulan berakhiran
      * "-ubin" padahal artinya memang berbeda (ubin ikon status pada halaman
-     * Sharing Session, misalnya).
+     * Webinar Eksklusif, misalnya).
      */
     private function berkasBlade(): array
     {

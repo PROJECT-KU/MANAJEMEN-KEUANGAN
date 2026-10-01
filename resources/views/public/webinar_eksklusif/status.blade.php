@@ -139,7 +139,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </ol>
 
                         <a class="sta-wa"
-                            href="https://wa.me/6288983567819?text={{ rawurlencode('Halo, saya sudah mendaftar Sharing Session dengan nomor ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Berikut bukti transfernya.') }}"
+                            href="https://wa.me/6288983567819?text={{ rawurlencode('Halo, saya sudah mendaftar Webinar Eksklusif dengan nomor ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Berikut bukti transfernya.') }}"
                             target="_blank" rel="noopener">
                             <i class="fab fa-whatsapp" aria-hidden="true"></i>
                             Kirim bukti transfer
@@ -150,11 +150,11 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
             <div class="sta-aksi">
                 @if ($batal || $habis)
-                    <a href="{{ route('public.sharingsession.index') }}" class="sta-tombol">
+                    <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tombol">
                         Lihat sesi yang dibuka
                     </a>
                 @else
-                    <a href="{{ route('public.sharingsession.index') }}" class="sta-tautan">
+                    <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tautan">
                         Lihat sesi lainnya
                     </a>
                 @endif

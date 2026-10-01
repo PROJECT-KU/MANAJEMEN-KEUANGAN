@@ -26,9 +26,9 @@ class VerifyCsrfToken extends Middleware
          *
          * Penjagaannya dipindah, BUKAN dihilangkan: isi permintaannya
          * ditandatangani HMAC-SHA256 dengan kunci rahasia, dan tanda tangan
-         * itu diperiksa paling awal di PublicSharingSessionController
+         * itu diperiksa paling awal di PublicWebinarEksklusifController
          * sebelum satu pun status diubah.
          */
-        'Sharing-Session/pemberitahuan/doku',
+        'Webinar-Eksklusif/pemberitahuan/doku',
     ];
 }

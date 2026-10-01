@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
- * Satu pendaftaran Sharing Session.
+ * Satu pendaftaran Webinar Eksklusif.
  *
  * Bentuknya sengaja mengikuti `scopus_camp_pendaftaran` sampai ke nama
  * kolomnya, supaya penghitung peserta, penjaga hapus angkatan, dan layar
@@ -17,9 +17,9 @@ use Illuminate\Support\Str;
  * Bedanya satu: layanan ini dibayar lewat gerbang pembayaran, jadi ada kolom
  * `bayar_*` yang mencatat rujukan dan statusnya.
  */
-class SharingSessionPendaftaran extends Model
+class WebinarEksklusifPendaftaran extends Model
 {
-    protected $table = 'sharing_session_pendaftaran';
+    protected $table = 'webinar_eksklusif_pendaftaran';
 
     protected $keyType = 'string';
 
@@ -67,7 +67,7 @@ class SharingSessionPendaftaran extends Model
     }
 
     /**
-     * Nomor transaksi yang terbaca orang: SS-20261121-0007.
+     * Nomor transaksi yang terbaca orang: WE-20261121-0007.
      *
      * Dipakai sebagai rujukan ke gerbang pembayaran dan disebut peserta saat
      * bertanya lewat WhatsApp, jadi ia harus bisa dibacakan lewat telepon —
@@ -75,7 +75,7 @@ class SharingSessionPendaftaran extends Model
      */
     public static function nomorBaru(): string
     {
-        $awalan = 'SS-' . now()->format('Ymd') . '-';
+        $awalan = 'WE-' . now()->format('Ymd') . '-';
 
         $terakhir = self::where('id_transaksi', 'like', $awalan . '%')
             ->orderByDesc('id_transaksi')->value('id_transaksi');

@@ -1,7 +1,7 @@
 @extends('public.layout.header')
 
 @section('title')
-Sharing Session | Rumah Scopus
+Webinar Eksklusif | Rumah Scopus
 @stop
 
 @section('konten')
@@ -24,7 +24,7 @@ Sharing Session | Rumah Scopus
         @endif
 
         <div class="sel-kepala">
-            <span class="sel-lencana"><i class="fas fa-microphone" aria-hidden="true"></i> Sharing Session</span>
+            <span class="sel-lencana"><i class="fas fa-microphone" aria-hidden="true"></i> Webinar Eksklusif</span>
             <h1>Belajar langsung dari yang sudah menjalani</h1>
             <p>Sesi daring dua jam, materinya terapan, dan Anda bisa bertanya langsung.</p>
         </div>
@@ -84,7 +84,7 @@ Sharing Session | Rumah Scopus
                                 @if ($sisa !== null && $sisa < 1)
                                     <span class="sel-tombol sel-tombol-mati">Kuota penuh</span>
                                 @else
-                                    <a href="{{ route('public.sharingsession.daftar', [$s->id, $s->token]) }}"
+                                    <a href="{{ route('public.webinareksklusif.daftar', [$s->id, $s->token]) }}"
                                         class="sel-tombol">
                                         Daftar <i class="fas fa-arrow-right" aria-hidden="true"></i>
                                     </a>

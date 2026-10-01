@@ -61,16 +61,16 @@ Route::get('/Scopus-Camp/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusCa
 Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
 Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
 
-// SHARING SESSION
+// WEBINAR EKSKLUSIF
 // Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
-// lewat /api/sharing-session; yang di sini bagian yang menulis ke basis data.
-Route::get('/Sharing-Session', 'Publict\PublicSharingSessionController@index')->name('public.sharingsession.index');
-Route::get('/Sharing-Session/Daftar/{id}/{token}', 'Publict\PublicSharingSessionController@daftar')->name('public.sharingsession.daftar');
-Route::post('/Sharing-Session/store', 'Publict\PublicSharingSessionController@store')->name('public.sharingsession.store');
-Route::get('/Sharing-Session/Status/{token}', 'Publict\PublicSharingSessionController@status')->name('public.sharingsession.status');
+// lewat /api/webinar-eksklusif; yang di sini bagian yang menulis ke basis data.
+Route::get('/Webinar-Eksklusif', 'Publict\PublicWebinarEksklusifController@index')->name('public.webinareksklusif.index');
+Route::get('/Webinar-Eksklusif/Daftar/{id}/{token}', 'Publict\PublicWebinarEksklusifController@daftar')->name('public.webinareksklusif.daftar');
+Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')->name('public.webinareksklusif.store');
+Route::get('/Webinar-Eksklusif/Status/{token}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
 // penggantinya pemeriksaan tanda tangan di dalam pengendalinya.
-Route::post('/Sharing-Session/pemberitahuan/doku', 'Publict\PublicSharingSessionController@pemberitahuan')->name('public.sharingsession.pemberitahuan');
+Route::post('/Webinar-Eksklusif/pemberitahuan/doku', 'Publict\PublicWebinarEksklusifController@pemberitahuan')->name('public.webinareksklusif.pemberitahuan');
 
 // CLINIK SCOPUS
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');

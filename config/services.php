@@ -31,7 +31,7 @@ return [
     ],
 
     /*
-     * DOKU Checkout — pembayaran Sharing Session.
+     * DOKU Checkout — pembayaran Webinar Eksklusif.
      *
      * Kosong sampai kredensialnya diisi di .env. Selama kosong, borang
      * pendaftaran menawarkan transfer manual dan mengatakannya terus terang,

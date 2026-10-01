@@ -6,7 +6,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
 @section('konten')
 {{--
-    Borang pendaftaran Sharing Session.
+    Borang pendaftaran Webinar Eksklusif.
 
     Semua yang tampil di sini datang dari angkatannya — judul, tanggal, jam,
     platform, pemateri, flyer, harga, dan sisa kuota. Tidak ada satu pun yang
@@ -133,7 +133,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
             {{-- --------------------------------------------- kanan: isian --}}
             <div class="ses-kanan">
-                <form method="POST" action="{{ route('public.sharingsession.store') }}" class="ses-kartu"
+                <form method="POST" action="{{ route('public.webinareksklusif.store') }}" class="ses-kartu"
                     id="ses-borang">
                     @csrf
                     <input type="hidden" name="kategori_id" value="{{ $sesi->id }}">
@@ -252,7 +252,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 </section>
 
 <style>
-    /* Palet diambil dari halaman landing Sharing Session supaya orang yang
+    /* Palet diambil dari halaman landing Webinar Eksklusif supaya orang yang
        datang dari sana merasa masih di tempat yang sama. */
     .ses-latar {
         --navy: #0f2b5b;
