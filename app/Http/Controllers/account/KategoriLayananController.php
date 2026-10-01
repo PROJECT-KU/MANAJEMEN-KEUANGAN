@@ -116,6 +116,8 @@ class KategoriLayananController extends Controller
             'nama' => 'Nama angkatan',
             'sisa_kuota' => 'Sisa kuota',
             'status' => 'Status',
+            'layanan' => 'Layanan',
+            'biaya' => 'Biaya',
         ];
 
         $urut = array_key_exists((string) $request->query('urut'), $bolehUrut)
@@ -125,10 +127,13 @@ class KategoriLayananController extends Controller
         $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
 
         $angkatan = $kueri
-            // sisa_kuota kolom teks; tanpa dicetak jadi bilangan, "9" berdiri
-            // di atas "10" karena diurutkan sebagai huruf.
-            ->when($urut === 'sisa_kuota',
-                fn ($q) => $q->orderByRaw('CAST(sisa_kuota AS UNSIGNED) ' . $arah),
+            /*
+             * sisa_kuota dan biaya sama-sama kolom TEKS; tanpa dicetak jadi
+             * bilangan, "9" berdiri di atas "10" dan "Rp 999.000" di atas
+             * "Rp 5.500.000" karena keduanya diurutkan sebagai huruf.
+             */
+            ->when(in_array($urut, ['sisa_kuota', 'biaya'], true),
+                fn ($q) => $q->orderByRaw('CAST(' . $urut . ' AS UNSIGNED) ' . $arah),
                 fn ($q) => $q->orderBy($urut, $arah))
             ->paginate(self::PER_HALAMAN)
             ->withQueryString();
@@ -314,6 +319,18 @@ class KategoriLayananController extends Controller
 
         if ($c = trim((string) $request->query('cari'))) {
             $bagian[] = 'kata kunci "' . $c . '"';
+        }
+
+        /*
+         * Saringan "perlu dicek" IKUT disebut.
+         *
+         * Tanpa ini, berkas yang dicetak sambil menyaring draf kadaluwarsa
+         * tetap berkepala "Seluruh angkatan, tanpa saringan." — pernyataan
+         * yang salah di dokumen yang mungkin diarsipkan orang, dan yang
+         * membacanya tidak punya cara tahu bahwa isinya sudah dipersempit.
+         */
+        if ($p = $request->query('perlu')) {
+            $bagian[] = 'hanya yang ' . mb_strtolower(KategoriLayanan::PERLU[$p] ?? $p);
         }
 
         return $bagian === [] ? 'Seluruh angkatan, tanpa saringan.' : 'Disaring: ' . implode(', ', $bagian) . '.';

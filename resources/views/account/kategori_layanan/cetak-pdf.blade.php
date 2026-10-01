@@ -136,6 +136,13 @@
             color: #0f172a;
         }
 
+        /* Merah tua, bukan merah terang: dompdf mencetak merah terang jadi
+           abu kehitaman pada pencetak hitam-putih, dan keterangannya hilang. */
+        .perlu {
+            color: #9f1239;
+            font-size: 7.5px;
+        }
+
         .samar {
             color: #64748b;
         }
@@ -250,6 +257,16 @@
                             @endif
                             @if ($a->lokasi)
                                 <br><span class="samar">{{ $a->lokasi }}</span>
+                            @endif
+
+                            {{-- Ditaruh di bawah namanya, BUKAN sebagai kolom
+                                 ketujuh: enam kolomnya sudah dipatok persen dan
+                                 menambah satu lagi memaksa semuanya menyempit.
+                                 Di sini ia juga terbaca sebagai keterangan baris
+                                 itu, bukan sebagai angka yang harus dibandingkan
+                                 antarbaris. --}}
+                            @if ($a->perlu_dicek)
+                                <br><span class="perlu">Perlu dicek: {{ implode('; ', $a->perlu_dicek) }}</span>
                             @endif
                         </td>
 
