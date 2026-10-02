@@ -132,6 +132,48 @@ class Gambar
         return $jalur;
     }
 
+    /**
+     * Mengecilkan sebuah berkas dan menulisnya sebagai WebP ke jalur ABSOLUT.
+     *
+     * Dipakai oleh unggahan yang tujuannya bukan cakram `unggahan` melainkan
+     * folder di dalam public/ — sampul dan foto pemateri angkatan, yang
+     * alamatnya sudah telanjur beredar lewat folder itu dan tidak bisa
+     * dipindah tanpa memutus gambar di halaman yang sudah terbit.
+     *
+     * Mengembalikan true kalau berhasil. Pemanggil WAJIB menyiapkan jalan
+     * mundur: kalau gambarnya tidak terbaca (format aneh, berkas rusak),
+     * lebih baik menyimpan berkas aslinya daripada tidak menyimpan apa pun.
+     */
+    public function keJalur(string $jalurAsal, string $jalurTujuan): bool
+    {
+        if (! is_file($jalurAsal)) {
+            return false;
+        }
+
+        $sumber = $this->baca($jalurAsal);
+
+        if ($sumber === null) {
+            return false;
+        }
+
+        $hasil = $this->kecilkan($sumber);
+
+        if ($hasil !== $sumber) {
+            imagedestroy($sumber);
+        }
+
+        $folder = dirname($jalurTujuan);
+
+        if (! is_dir($folder)) {
+            mkdir($folder, 0755, true);
+        }
+
+        $berhasil = imagewebp($hasil, $jalurTujuan, self::MUTU);
+        imagedestroy($hasil);
+
+        return (bool) $berhasil;
+    }
+
     /** Membuang berkas WebP yang tidak dipakai lagi. */
     public function buang(?string $jalur): void
     {

@@ -781,8 +781,7 @@ class KategoriLayananController extends Controller
             mkdir($tujuan, 0755, true);
         }
 
-        $nama = (string) Str::uuid() . '.' . strtolower($berkas->getClientOriginalExtension());
-        $berkas->move($tujuan, $nama);
+        $nama = $this->simpanTerkompresi($berkas, $tujuan, (string) Str::uuid());
 
         /*
          * Sampul lama dihapus SESUDAH yang baru tersimpan, dan hanya kalau
@@ -804,6 +803,37 @@ class KategoriLayananController extends Controller
         }
 
         return $folder . '/' . $nama;
+    }
+
+    /**
+     * Menyimpan unggahan sebagai WebP yang sudah dikecilkan.
+     *
+     * Sebelum ini berkasnya dipindah MENTAH. Terukur 2 Okt 2026: foto pemateri
+     * yang terunggah 4000x2252 piksel, 2,8 MB, padahal di halaman publik
+     * tampil 230x287 — dan itu ikut terunduh di layar pertama halaman iklan.
+     *
+     * Dikecilkan lewat App\Services\Gambar supaya aturannya SATU dengan
+     * galeri: lebar maksimum 1400 px, WebP, mutu 82.
+     *
+     * Kalau gambarnya tidak terbaca GD — format aneh atau berkas rusak —
+     * berkas aslinya yang disimpan, bukan gagal menyimpan sama sekali.
+     * Gambar besar masih jauh lebih baik daripada tidak ada gambar.
+     */
+    private function simpanTerkompresi($berkas, string $tujuan, string $namaDasar): string
+    {
+        $gambar = app(\App\Services\Gambar::class);
+
+        $sementara = $berkas->getRealPath();
+        $namaWebp = $namaDasar . '.webp';
+
+        if ($sementara && $gambar->keJalur($sementara, $tujuan . '/' . $namaWebp)) {
+            return $namaWebp;
+        }
+
+        $namaAsli = $namaDasar . '.' . strtolower($berkas->getClientOriginalExtension());
+        $berkas->move($tujuan, $namaAsli);
+
+        return $namaAsli;
     }
 
     /**
@@ -831,8 +861,7 @@ class KategoriLayananController extends Controller
             mkdir($tujuan, 0755, true);
         }
 
-        $nama = 'pemateri-' . Str::uuid() . '.' . strtolower($berkas->getClientOriginalExtension());
-        $berkas->move($tujuan, $nama);
+        $nama = $this->simpanTerkompresi($berkas, $tujuan, 'pemateri-' . Str::uuid());
 
         /*
          * Foto lama dihapus SESUDAH yang baru tersimpan, dan hanya kalau tidak
