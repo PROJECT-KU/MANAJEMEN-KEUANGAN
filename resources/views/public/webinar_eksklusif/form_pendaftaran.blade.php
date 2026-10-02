@@ -59,14 +59,43 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                      halaman ini, jadi yang terbaca adalah hal yang sama dua
                      kali dalam dua bentuk. Yang dipakai di sini kegiatan dan
                      fasilitasnya langsung dari tarif induk. --}}
-                @if ($tarif && $tarif->daftar_kegiatan)
-                    <div class="ses-bahas">
-                        <h2 class="ses-bahas-judul">Yang dibahas di sesi ini</h2>
-                        <ol>
-                            @foreach ($tarif->daftar_kegiatan as $k)
-                                <li>{{ $k }}</li>
-                            @endforeach
-                        </ol>
+                {{--
+                    Yang DIBAHAS dan yang DIBAWA PULANG disandingkan, dan
+                    keduanya naik ke atas tepat di bawah judul.
+
+                    Dulu daftar manfaatnya berada paling bawah di kolom ini —
+                    sesudah fakta, pemateri, dan flyer setinggi 758 px. Jadi
+                    alasan terkuat untuk mendaftar justru yang paling jauh
+                    dari pandangan, dan paling besar kemungkinannya tidak
+                    terbaca sama sekali.
+
+                    Disandingkan, bukan ditumpuk: keduanya daftar pendek, dan
+                    bertumpuk mereka mendorong sisa halaman ke bawah tanpa
+                    memakai lebar yang sudah tersedia.
+                --}}
+                @if (($tarif && $tarif->daftar_kegiatan) || ($tarif && $tarif->daftar_fasilitas))
+                    <div class="ses-duo">
+                        @if ($tarif->daftar_kegiatan)
+                            <div class="ses-bahas">
+                                <h2 class="ses-bahas-judul">Yang dibahas di sesi ini</h2>
+                                <ol>
+                                    @foreach ($tarif->daftar_kegiatan as $k)
+                                        <li>{{ $k }}</li>
+                                    @endforeach
+                                </ol>
+                            </div>
+                        @endif
+
+                        @if ($tarif->daftar_fasilitas)
+                            <div class="ses-dapat">
+                                <h2 class="ses-dapat-judul">Yang Anda bawa pulang</h2>
+                                <ul>
+                                    @foreach ($tarif->daftar_fasilitas as $f)
+                                        <li><i class="fas fa-check-circle" aria-hidden="true"></i> <span>{{ $f }}</span></li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 @endif
 
@@ -119,16 +148,6 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         class="ses-flyer" loading="lazy">
                 @endif
 
-                @if ($tarif && $tarif->daftar_fasilitas)
-                    <div class="ses-dapat">
-                        <h2 class="ses-dapat-judul">Yang Anda bawa pulang</h2>
-                        <ul>
-                            @foreach ($tarif->daftar_fasilitas as $f)
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> <span>{{ $f }}</span></li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
             </div>
 
             {{-- --------------------------------------------- kanan: isian --}}
@@ -332,8 +351,28 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         color: var(--navy);
     }
 
+    /*
+     * Sepasang kartu sejajar. Petaknya 1fr 1fr supaya lebarnya sama rata,
+     * dan keduanya meregang setinggi yang tertinggi (bawaan grid), jadi
+     * dasarnya segaris walau jumlah butirnya berbeda — di sesi ini 3 lawan 4.
+     *
+     * Satu kolom sampai 576 px: di bawah itu dua kolom membuat tiap barisnya
+     * tinggal sekitar 20 huruf, dan daftarnya jadi lebih tinggi daripada
+     * kalau ditumpuk.
+     */
+    .ses-duo {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    @media (min-width: 576px) {
+        .ses-duo { grid-template-columns: 1fr 1fr; }
+    }
+
     .ses-bahas {
-        margin: 0 0 22px;
+        margin: 0;
         padding: 18px 22px;
         border-radius: 16px;
         border: 1px solid var(--garis);
