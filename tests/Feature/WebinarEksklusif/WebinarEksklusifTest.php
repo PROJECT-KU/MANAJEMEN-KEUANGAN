@@ -202,7 +202,7 @@ class WebinarEksklusifTest extends TestCase
             'email' => 'Budi@Contoh.Test',
             'telp' => '0812-3456-7890',
             'affiliasi' => 'Universitas Uji',
-            'jumlah_pendaftar' => 3,
+            'jumlah_pendaftar' => 3, 'setuju' => '1',
         ])->assertRedirect();
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -226,7 +226,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Ani', 'email' => 'ani@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -241,7 +241,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Cici', 'email' => 'cici@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 5,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 5, 'setuju' => '1',
         ])->assertSessionHas('error');
 
         $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
@@ -255,7 +255,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Dedi', 'email' => 'dedi@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ])->assertRedirect(route('public.webinareksklusif.index'));
 
         $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
@@ -268,7 +268,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Eka', 'email' => 'eka@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -294,7 +294,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Fani', 'email' => 'fani@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -316,7 +316,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Gina', 'email' => 'gina@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 2,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 2, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -341,7 +341,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Hadi', 'email' => 'hadi@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -364,7 +364,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Ika', 'email' => 'ika@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 4,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 4, 'setuju' => '1',
         ]);
 
         $this->assertSame(16, (int) $sesi->fresh()->sisa_kuota);
@@ -388,7 +388,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Joko', 'email' => 'joko@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 3,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 3, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -407,7 +407,7 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), [
             'kategori_id' => $sesi->id, 'nama' => 'Kiki', 'email' => 'kiki@contoh.test',
-            'telp' => '08123456789', 'jumlah_pendaftar' => 2,
+            'telp' => '08123456789', 'jumlah_pendaftar' => 2, 'setuju' => '1',
         ]);
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
@@ -458,5 +458,195 @@ class WebinarEksklusifTest extends TestCase
             'HTTP_REQUEST_TIMESTAMP' => $waktu,
             'HTTP_SIGNATURE' => $tanda,
         ], $isi);
+    }
+
+    // ----------------------------------------------- penjaga isian & ganda
+
+    /**
+     * Sampai 2 Okt 2026 nomor WhatsApp divalidasi sebagai teks biasa
+     * ('required|string|max:30'), lalu semua non-angka dibuang saat disimpan.
+     *
+     * Akibatnya "tidak punya wa" LOLOS dan yang tersimpan string kosong —
+     * pendaftarannya diterima, kursinya terpotong, dan panitia baru tahu saat
+     * hendak memasukkan orangnya ke grup. Tidak ada galat, tidak ada gejala.
+     */
+    #[Test]
+    public function nomor_whatsapp_yang_bukan_angka_ditolak(): void
+    {
+        $sesi = $this->sesi();
+
+        foreach (['tidak punya wa', 'abc', '-', '08'] as $buruk) {
+            $this->post(route('public.webinareksklusif.store'), [
+                'kategori_id' => $sesi->id, 'nama' => 'Uji', 'email' => 'uji+' . md5($buruk) . '@contoh.test',
+                'telp' => $buruk, 'jumlah_pendaftar' => 1, 'setuju' => '1',
+            ])->assertSessionHasErrors('telp');
+        }
+
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'tidak satu pun boleh tersimpan');
+
+        $this->assertSame('20', (string) $sesi->fresh()->sisa_kuota,
+            'kuotanya tidak boleh terpotong oleh kiriman yang ditolak');
+    }
+
+    #[Test]
+    public function nomor_whatsapp_yang_benar_tetap_diterima_dan_dirapikan(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Uji', 'email' => 'rapi@contoh.test',
+            'telp' => '+62 812-3456-7890', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ])->assertRedirect();
+
+        $this->assertSame('6281234567890',
+            WebinarEksklusifPendaftaran::where('email', 'rapi@contoh.test')->value('telp'));
+    }
+
+    #[Test]
+    public function persetujuan_wajib_dicentang(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Uji', 'email' => 'tanpa@contoh.test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1,
+        ])->assertSessionHasErrors('setuju');
+
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+    }
+
+    #[Test]
+    public function waktu_persetujuan_ikut_disimpan(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Uji', 'email' => 'setuju@contoh.test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        // Waktunya, bukan sekadar true: yang bisa dijawab saat ditanya
+        // belakangan adalah KAPAN orangnya menyetujui.
+        $this->assertNotNull(
+            WebinarEksklusifPendaftaran::where('email', 'setuju@contoh.test')->value('disetujui_pada')
+        );
+    }
+
+    /**
+     * Tiap pendaftaran langsung memotong kuota dan baru dikembalikan setengah
+     * jam kemudian saat kedaluwarsa. Tanpa penjaga ini, satu orang yang
+     * menekan "Daftar" tiga kali memakan tiga kursi.
+     */
+    #[Test]
+    public function email_yang_sama_tidak_memotong_kursi_dua_kali(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '10', 'sisa_kuota' => '10']);
+
+        $kirim = fn () => $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Budi', 'email' => 'budi@contoh.test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 2, 'setuju' => '1',
+        ]);
+
+        $kirim()->assertRedirect();
+        $kirim()->assertRedirect();
+        $kirim()->assertRedirect();
+
+        $this->assertSame(1, WebinarEksklusifPendaftaran::where('email', 'budi@contoh.test')->count(),
+            'kiriman berikutnya diantar ke pendaftaran yang sudah ada, bukan membuat yang baru');
+
+        $this->assertSame('8', (string) $sesi->fresh()->sisa_kuota,
+            'terpotong sekali saja, bukan tiga kali');
+    }
+
+    #[Test]
+    public function pendaftaran_yang_sudah_kedaluwarsa_boleh_mendaftar_lagi(): void
+    {
+        $sesi = $this->sesi();
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Lama', 'email' => 'lama@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->subHour(),
+        ]);
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Lama', 'email' => 'lama@contoh.test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ])->assertRedirect();
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('email', 'lama@contoh.test')->count(),
+            'yang lama sudah lewat batas waktunya, jadi tidak menghalangi');
+    }
+
+    // ------------------------------------------------------ pemberitahuan
+
+    /**
+     * Sampai 2 Okt 2026 fitur ini tidak mengirim apa pun — berbeda dengan
+     * Scopus Kafe yang sudah punya. Orang hanya memegang tautan status di
+     * layar, dan begitu tabnya ditutup, tautannya hilang.
+     */
+    #[Test]
+    public function bukti_pendaftaran_dikirim_ke_email_pendaftar(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Citra', 'email' => 'Citra@Contoh.Test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\WebinarEksklusifPendaftaranMail::class,
+            fn ($surat) => $surat->hasTo('citra@contoh.test')
+        );
+    }
+
+    /**
+     * Pendaftarannya sudah tersimpan dan kursinya sudah terpotong saat email
+     * dikirim. Kalau peladen suratnya bermasalah, yang pantas terjadi adalah
+     * galatnya dicatat — BUKAN orangnya melihat layar error padahal
+     * pendaftarannya berhasil.
+     */
+    #[Test]
+    public function peladen_surat_bermasalah_tidak_menggagalkan_pendaftaran(): void
+    {
+        \Illuminate\Support\Facades\Mail::shouldReceive('to')
+            ->andThrow(new \RuntimeException('peladen surat mati'));
+
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Dewi', 'email' => 'dewi@contoh.test',
+            'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ])->assertRedirect();
+
+        $this->assertSame(1, WebinarEksklusifPendaftaran::where('email', 'dewi@contoh.test')->count(),
+            'pendaftarannya tetap tersimpan');
+    }
+
+    /**
+     * Borangnya publik, diiklankan, dan tiap kiriman yang berhasil langsung
+     * memotong kuota — satu skrip bisa menghabiskan seluruh kursi.
+     */
+    #[Test]
+    public function kiriman_borang_dibatasi_per_menit(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '200', 'sisa_kuota' => '200']);
+
+        $jawaban = null;
+
+        for ($i = 0; $i < 9; $i++) {
+            $jawaban = $this->post(route('public.webinareksklusif.store'), [
+                'kategori_id' => $sesi->id, 'nama' => 'Beruntun ' . $i,
+                'email' => 'beruntun' . $i . '@contoh.test',
+                'telp' => '08123456789', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+            ]);
+        }
+
+        $jawaban->assertStatus(429);
     }
 }

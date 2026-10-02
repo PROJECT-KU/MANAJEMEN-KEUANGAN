@@ -66,7 +66,13 @@ Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->n
 // lewat /api/webinar-eksklusif; yang di sini bagian yang menulis ke basis data.
 Route::get('/Webinar-Eksklusif', 'Publict\PublicWebinarEksklusifController@index')->name('public.webinareksklusif.index');
 Route::get('/Webinar-Eksklusif/Daftar/{id}/{token}', 'Publict\PublicWebinarEksklusifController@daftar')->name('public.webinareksklusif.daftar');
-Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')->name('public.webinareksklusif.store');
+// Dibatasi 6 kiriman per menit per alamat IP. Borang ini publik, diiklankan,
+// dan TIAP kiriman yang berhasil langsung memotong kuota — satu skrip
+// sederhana bisa menghabiskan seluruh kursi sebelum ada yang sadar. Enam
+// masih longgar untuk orang yang salah ketik beberapa kali.
+Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')
+    ->middleware('throttle:6,1')
+    ->name('public.webinareksklusif.store');
 Route::get('/Webinar-Eksklusif/Status/{token}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
 // penggantinya pemeriksaan tanda tangan di dalam pengendalinya.

@@ -76,6 +76,74 @@ class AlamatGambar
         return null;
     }
 
+    /**
+     * Ukuran asli gambarnya: ['lebar' => int, 'tinggi' => int], atau null.
+     *
+     * Dipakai tampilan untuk MEMESAN RUANG lewat atribut width/height.
+     * Tanpa itu gambarnya setinggi nol sampai berkasnya tiba, lalu seluruh
+     * isi di bawahnya terdorong sekaligus — terukur di borang pendaftaran:
+     * halaman digulir ke pesan galat, flyernya menyusul termuat, dan
+     * pesannya terdorong keluar layar lagi.
+     *
+     * Hasilnya diingat selama satu permintaan: satu halaman bisa memanggil
+     * ini beberapa kali untuk gambar yang sama, dan getimagesize() membaca
+     * cakram tiap kali dipanggil.
+     *
+     * @return array{lebar:int,tinggi:int}|null
+     */
+    public static function ukuran(?string $nilai, ?string $folderLama = null): ?array
+    {
+        $jalur = self::jalurLokal($nilai, $folderLama);
+
+        if ($jalur === null) {
+            return null;
+        }
+
+        static $diingat = [];
+
+        if (! array_key_exists($jalur, $diingat)) {
+            $tentang = @getimagesize($jalur);
+
+            $diingat[$jalur] = ($tentang && $tentang[0] > 0 && $tentang[1] > 0)
+                ? ['lebar' => (int) $tentang[0], 'tinggi' => (int) $tentang[1]]
+                : null;
+        }
+
+        return $diingat[$jalur];
+    }
+
+    /**
+     * Jalur berkasnya di cakram, mengikuti urutan pencarian yang sama dengan
+     * url(). Null untuk alamat lengkap — ukurannya tidak bisa dibaca dari
+     * sini tanpa mengunduhnya, dan itu bukan pekerjaan saat merender halaman.
+     */
+    private static function jalurLokal(?string $nilai, ?string $folderLama = null): ?string
+    {
+        $nilai = trim((string) $nilai);
+
+        if ($nilai === '' || str_starts_with($nilai, 'http://') || str_starts_with($nilai, 'https://')) {
+            return null;
+        }
+
+        if (Storage::disk(self::CAKRAM)->exists($nilai)) {
+            return Storage::disk(self::CAKRAM)->path($nilai);
+        }
+
+        if ($folderLama) {
+            $berkas = public_path(trim($folderLama, '/') . '/' . basename($nilai));
+
+            if (is_file($berkas)) {
+                return $berkas;
+            }
+        }
+
+        if (str_contains($nilai, '/') && is_file(public_path($nilai))) {
+            return public_path($nilai);
+        }
+
+        return null;
+    }
+
     /** Berkasnya sudah dalam bentuk baru (WebP di storage). */
     public static function diStorage(?string $nilai): bool
     {
