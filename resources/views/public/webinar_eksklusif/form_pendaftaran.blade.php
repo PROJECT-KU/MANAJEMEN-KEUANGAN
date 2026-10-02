@@ -77,7 +77,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <div class="ses-duo">
                         @if ($tarif->daftar_kegiatan)
                             <div class="ses-bahas">
-                                <h2 class="ses-bahas-judul">Yang dibahas di sesi ini</h2>
+                                <h2 class="ses-bahas-judul">
+                                    <span class="ses-keping ses-keping-jingga" aria-hidden="true"><i class="fas fa-tasks"></i></span>
+                                    Yang dibahas di sesi ini
+                                </h2>
                                 <ol>
                                     @foreach ($tarif->daftar_kegiatan as $k)
                                         <li>{{ $k }}</li>
@@ -88,7 +91,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
                         @if ($tarif->daftar_fasilitas)
                             <div class="ses-dapat">
-                                <h2 class="ses-dapat-judul">Yang Anda bawa pulang</h2>
+                                <h2 class="ses-dapat-judul">
+                                    <span class="ses-keping ses-keping-hijau" aria-hidden="true"><i class="fas fa-gift"></i></span>
+                                    Yang Anda bawa pulang
+                                </h2>
                                 <ul>
                                     @foreach ($tarif->daftar_fasilitas as $f)
                                         <li><i class="fas fa-check-circle" aria-hidden="true"></i> <span>{{ $f }}</span></li>
@@ -730,6 +736,181 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
          */
         .ses-latar { padding-bottom: 110px; }
     }
+
+    /* ======================================================= RUPA KARTU */
+    /*
+     * Ditulis SESUDAH aturan kartu di atas, bukan menyunting di tempatnya:
+     * beberapa di antaranya menimpa aturan lama yang bobotnya sama, dan di
+     * CSS yang menang adalah yang ditulis belakangan.
+     */
+
+    /* Keping ikon di kepala kartu — titik tumpu supaya judulnya tidak
+       mengambang sebagai teks tebal biasa. */
+    .ses-keping {
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        font-size: .82rem;
+    }
+
+    .ses-keping > .fas { margin: 0 !important; }
+
+    .ses-keping-jingga {
+        background: linear-gradient(135deg, rgba(255, 140, 0, .16), rgba(230, 92, 0, .13));
+        color: var(--jingga);
+    }
+
+    .ses-keping-hijau {
+        background: rgba(16, 185, 129, .13);
+        color: #0f9b74;
+    }
+
+    .ses-bahas-judul,
+    .ses-dapat-judul {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eef2f7;
+        font-size: 1rem;
+    }
+
+    /*
+     * Tepi kiri jingga diganti pita bergradien di sisi atas kartu.
+     * Garis 4 px di kiri membuat kedua kartu tampak tidak sejenis padahal
+     * isinya sepasang; pita atas memberi warna tanpa memiringkan salah satu.
+     */
+    .ses-bahas,
+    .ses-dapat {
+        position: relative;
+        overflow: hidden;
+        border-left: 1px solid var(--garis);
+        box-shadow: 0 14px 34px -28px rgba(15, 43, 91, .5);
+
+        /*
+         * Isinya DISAMAKAN. Aturan lamanya memberi 18px pada kartu kiri dan
+         * 20px pada kartu kanan, dan selisih 2px itu membuat kedua judul
+         * tidak sebaris walau kartunya sendiri sudah sejajar sempurna —
+         * terukur judul kanan 2px lebih rendah. Pada sepasang kartu
+         * bersebelahan, meleset 2px terbaca sebagai sesuatu yang salah
+         * tanpa orang bisa menunjuk apa.
+         */
+        padding: 20px 22px;
+    }
+
+    .ses-bahas::before,
+    .ses-dapat::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+    }
+
+    .ses-bahas::before { background: linear-gradient(90deg, #ff8c00, #e65c00); }
+    .ses-dapat::before { background: linear-gradient(90deg, #10b981, #0f9b74); }
+
+    /* Nomor urut jadi keping bulat, bukan angka bawaan <ol> yang menempel
+       di tepi dan tidak sejajar dengan centang di kartu sebelahnya. */
+    .ses-bahas ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        counter-reset: ses-urut;
+    }
+
+    .ses-bahas li {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 7px 0;
+        counter-increment: ses-urut;
+    }
+
+    .ses-bahas li::before {
+        content: counter(ses-urut);
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 23px;
+        height: 23px;
+        margin-top: 1px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff8c00, #e65c00);
+        color: #fff;
+        font-size: .72rem;
+        font-weight: 800;
+        box-shadow: 0 5px 12px -6px rgba(230, 92, 0, .9);
+    }
+
+    /* Centang diberi alas bulat supaya setara dengan nomor di sebelahnya. */
+    .ses-dapat li { gap: 11px; padding: 7px 0; }
+
+    .ses-dapat li > .fas {
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 23px;
+        height: 23px;
+        margin: 1px 0 0 !important;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, .13);
+        color: #0f9b74;
+        font-size: .74rem;
+    }
+
+    /* Kotak fakta: ikonnya diberi keping, angkanya dibesarkan. */
+    .ses-fakta-item {
+        padding: 15px 16px;
+        background: #fff;
+        box-shadow: 0 12px 30px -28px rgba(15, 43, 91, .5);
+    }
+
+    .ses-fakta-label {
+        gap: 9px;
+        margin-bottom: 7px;
+        font-size: .68rem;
+    }
+
+    .ses-fakta-label > .fas {
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, rgba(255, 140, 0, .16), rgba(230, 92, 0, .13));
+        font-size: .76rem;
+    }
+
+    .ses-fakta-item strong { font-size: 1.04rem; font-weight: 800; }
+
+    /* Pemateri: fotonya diberi cincin, dan kartunya diberi bayangan yang
+       sama dengan sepasang kartu di atasnya supaya satu keluarga. */
+    .ses-pemateri {
+        box-shadow: 0 14px 34px -28px rgba(15, 43, 91, .5);
+    }
+
+    .ses-pemateri-foto,
+    .ses-pemateri-huruf {
+        width: 66px;
+        height: 66px;
+        box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(255, 140, 0, .35);
+    }
+
+    .ses-pemateri-teks small:first-child {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        color: var(--jingga);
+    }
+
+    .ses-pemateri-teks strong { font-size: 1.05rem; font-weight: 800; }
 
     /* ===================================================== GERAK HALAMAN */
     /*
