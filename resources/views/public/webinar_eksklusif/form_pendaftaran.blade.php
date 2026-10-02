@@ -130,7 +130,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                 @if ($sesi->pemateri)
                     <div class="ses-pemateri">
                         @if ($sesi->alamat_pemateri)
-                            <img src="{{ $sesi->alamat_pemateri }}" alt="" class="ses-pemateri-foto" loading="lazy">
+                            @php($ukuranPemateri = $sesi->ukuran_pemateri)
+                            <img src="{{ $sesi->alamat_pemateri }}" alt="" class="ses-pemateri-foto"
+                                @if ($ukuranPemateri) width="{{ $ukuranPemateri['lebar'] }}" height="{{ $ukuranPemateri['tinggi'] }}" @endif
+                                loading="lazy" decoding="async">
                         @else
                             {{-- Huruf awal namanya, bukan gambar cadangan: ikon
                                  orang abu-abu membuat pematerinya terasa belum
@@ -150,8 +153,21 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                 @endif
 
                 @if ($sesi->alamat_sampul)
+                    @php($ukuranFlyer = $sesi->ukuran_sampul)
+                    {{--
+                        width/height DIPASANG supaya ruangnya sudah dipesan
+                        sebelum gambarnya tiba. Tanpa itu flyernya setinggi nol
+                        dulu, lalu seluruh isi di bawahnya terdorong sekaligus
+                        saat berkasnya termuat — terukur: halaman yang baru
+                        digulir ke pesan galat terdorong lagi sampai pesannya
+                        keluar layar.
+
+                        Harus disertai height:auto di CSS, kalau tidak tinggi
+                        asli dari atribut ini menang atas lebar 100%.
+                    --}}
                     <img src="{{ $sesi->alamat_sampul }}" alt="Flyer {{ $sesi->nama }}"
-                        class="ses-flyer" loading="lazy">
+                        @if ($ukuranFlyer) width="{{ $ukuranFlyer['lebar'] }}" height="{{ $ukuranFlyer['tinggi'] }}" @endif
+                        class="ses-flyer" loading="lazy" decoding="async">
                 @endif
 
             </div>
@@ -166,39 +182,68 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <h2 class="ses-kartu-judul">Amankan kursi Anda</h2>
                     <p class="ses-kartu-sub">Isinya lima, tidak sampai satu menit.</p>
 
+                    {{--
+                        Ringkasan galat di KEPALA kartu, bukan hanya pesan per
+                        isian. Dengan pesan per isian saja, yang salah bisa
+                        berada di bawah lipatan layar dan orangnya cuma melihat
+                        borang yang sama tanpa tahu apa yang kurang.
+
+                        role="alert" supaya pembaca layar membacakannya begitu
+                        halamannya dimuat ulang.
+                    --}}
+                    @if ($errors->any())
+                        <div class="ses-ringkas-galat" id="ses-ringkas-galat" role="alert" tabindex="-1">
+                            <p class="ses-ringkas-judul">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                Ada {{ $errors->count() }} isian yang perlu diperbaiki
+                            </p>
+                            <ul>
+                                @foreach ($errors->all() as $pesan)
+                                    <li>{{ $pesan }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="ses-isian">
                         <label for="ses-nama">Nama lengkap <span aria-hidden="true">*</span></label>
                         <input type="text" id="ses-nama" name="nama" required maxlength="120"
                             value="{{ old('nama') }}" placeholder="Nama beserta gelar, untuk sertifikat"
-                            autocomplete="name">
-                        @error('nama') <p class="ses-salah">{{ $message }}</p> @enderror
+                            autocomplete="name"
+                            @error('nama') aria-invalid="true" aria-describedby="ses-nama-salah" @enderror>
+                        @error('nama') <p class="ses-salah" id="ses-nama-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
                         <label for="ses-email">Email aktif <span aria-hidden="true">*</span></label>
                         <input type="email" id="ses-email" name="email" required maxlength="120"
-                            value="{{ old('email') }}" placeholder="nama@email.com" autocomplete="email">
+                            value="{{ old('email') }}" placeholder="nama@email.com" autocomplete="email"
+                            aria-describedby="ses-email-bantu @error('email') ses-email-salah @enderror"
+                            @error('email') aria-invalid="true" @enderror>
                         {{-- Alasannya disebut, bukan cuma "wajib". Orang lebih
                              rela memberikan emailnya kalau tahu untuk apa. --}}
-                        <p class="ses-bantu">Tautan masuk dan sertifikat dikirim ke sini.</p>
-                        @error('email') <p class="ses-salah">{{ $message }}</p> @enderror
+                        <p class="ses-bantu" id="ses-email-bantu">Tautan masuk dan sertifikat dikirim ke sini.</p>
+                        @error('email') <p class="ses-salah" id="ses-email-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
                         <label for="ses-telp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
                         <input type="tel" id="ses-telp" name="telp" required maxlength="30"
                             value="{{ old('telp') }}" placeholder="0812 3456 7890" autocomplete="tel"
-                            inputmode="numeric">
-                        <p class="ses-bantu">Dipakai menambahkan Anda ke grup peserta.</p>
-                        @error('telp') <p class="ses-salah">{{ $message }}</p> @enderror
+                            inputmode="numeric"
+                            aria-describedby="ses-telp-bantu @error('telp') ses-telp-salah @enderror"
+                            @error('telp') aria-invalid="true" @enderror>
+                        <p class="ses-bantu" id="ses-telp-bantu">Dipakai menambahkan Anda ke grup peserta.</p>
+                        @error('telp') <p class="ses-salah" id="ses-telp-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
                         <label for="ses-affiliasi">Asal instansi</label>
                         <input type="text" id="ses-affiliasi" name="affiliasi" maxlength="160"
                             value="{{ old('affiliasi') }}" placeholder="Universitas / lembaga — boleh dikosongkan"
-                            autocomplete="organization">
-                        @error('affiliasi') <p class="ses-salah">{{ $message }}</p> @enderror
+                            autocomplete="organization"
+                            @error('affiliasi') aria-invalid="true" aria-describedby="ses-affiliasi-salah" @enderror>
+                        @error('affiliasi') <p class="ses-salah" id="ses-affiliasi-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
@@ -222,7 +267,11 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         @error('jumlah_pendaftar') <p class="ses-salah">{{ $message }}</p> @enderror
                     </div>
 
-                    <div class="ses-total">
+                    {{-- aria-live: angkanya berubah saat tombol +/- ditekan,
+                         dan tanpa ini pembaca layar tidak mengumumkan apa pun —
+                         orangnya menambah peserta tanpa tahu harganya ikut
+                         naik. "polite" supaya tidak memotong bacaan berjalan. --}}
+                    <div class="ses-total" aria-live="polite" aria-atomic="true">
                         <span>Total bayar</span>
                         {{-- Nilai awalnya dirender peladen, bukan dihitung
                              JavaScript saat halaman dibuka: tanpa itu, angkanya
@@ -233,6 +282,24 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <p class="ses-total-rincian" id="ses-total-rincian">
                         Rp {{ number_format($harga, 0, ',', '.') }} × 1 peserta
                     </p>
+
+                    {{--
+                        Persetujuan diminta DI SINI, tepat sebelum tombolnya —
+                        bukan di bawah tombol, tempat orang tidak lagi membaca.
+                        Kalimatnya menyebut untuk apa datanya dipakai, sebab
+                        "saya setuju dengan ketentuan" tanpa isi tidak
+                        memberitahu siapa pun apa pun.
+                    --}}
+                    <div class="ses-setuju">
+                        <input type="checkbox" id="ses-setuju" name="setuju" value="1"
+                            {{ old('setuju') ? 'checked' : '' }}
+                            @error('setuju') aria-invalid="true" aria-describedby="ses-setuju-salah" @enderror>
+                        <label for="ses-setuju">
+                            Saya setuju nama, email, dan nomor WhatsApp saya dipakai untuk
+                            mengirim tautan masuk, sertifikat, dan menambahkan saya ke grup peserta.
+                        </label>
+                    </div>
+                    @error('setuju') <p class="ses-salah" id="ses-setuju-salah">{{ $message }}</p> @enderror
 
                     @if ($sisa !== null && $sisa < 1)
                         <p class="ses-penuh"><i class="fas fa-times-circle" aria-hidden="true"></i>
@@ -493,6 +560,9 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-flyer {
         display: block;
         width: 100%;
+        /* WAJIB sejak atribut height dipasang di markup: tanpa ini tinggi
+           asli gambarnya menang atas lebar 100% dan flyernya melar. */
+        height: auto;
         max-width: 420px;
         margin-bottom: 22px;
         border-radius: 18px;
@@ -735,6 +805,65 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
          * footer yang tidak dipakai apa pun.
          */
         .ses-latar { padding-bottom: 110px; }
+    }
+
+    /* ---------------------------------------------- ringkasan galat */
+
+    .ses-ringkas-galat {
+        margin: 0 0 18px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+    }
+
+    .ses-ringkas-judul {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 8px;
+        font-size: .88rem;
+        font-weight: 800;
+        color: #991b1b;
+    }
+
+    .ses-ringkas-judul > .fas { margin: 0 !important; }
+
+    .ses-ringkas-galat ul { margin: 0; padding-left: 20px; }
+
+    .ses-ringkas-galat li {
+        font-size: .83rem;
+        line-height: 1.6;
+        color: #b91c1c;
+    }
+
+    /* ------------------------------------------------ kotak persetujuan */
+
+    .ses-setuju {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--garis);
+    }
+
+    .ses-setuju input {
+        flex: 0 0 auto;
+        /* 20px, dan padding sentuhnya diperlebar lewat label di sebelahnya:
+           kotak centang bawaan terlalu kecil untuk jempol di ponsel. */
+        width: 20px;
+        height: 20px;
+        margin-top: 1px;
+        accent-color: var(--jingga);
+        cursor: pointer;
+    }
+
+    .ses-setuju label {
+        font-size: .8rem;
+        line-height: 1.6;
+        color: var(--tinta-2);
+        cursor: pointer;
     }
 
     /* ======================================================= RUPA KARTU */
@@ -1227,6 +1356,69 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         });
 
         hitung();
+
+        /*
+         * SESUDAH VALIDASI GAGAL, ORANGNYA DIANTAR KE GALATNYA.
+         *
+         * Peladen mengirim balik halaman yang sama dan peramban mendarat di
+         * puncak. Di ponsel kartu isian berada JAUH di bawah kolom kiri —
+         * terukur pesan galatnya 1935 px dari puncak pada layar 900 px, jadi
+         * yang terlihat cuma halaman yang sama tanpa tanda apa pun bahwa ada
+         * yang salah. Orangnya mengira tombolnya tidak berfungsi.
+         *
+         * Digulir ke ringkasannya, lalu fokus dipindah ke isian pertama yang
+         * bermasalah supaya bisa langsung diperbaiki tanpa mencari.
+         */
+        (function () {
+            var ringkas = document.getElementById('ses-ringkas-galat');
+            if (!ringkas) return;
+
+            var halus = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function antarkan(mulus) {
+                ringkas.scrollIntoView({
+                    behavior: mulus ? 'smooth' : 'auto',
+                    block: 'center',
+                });
+            }
+
+            antarkan(halus);
+
+            /*
+             * DIULANG sesudah semua gambar selesai dimuat.
+             *
+             * Atribut width/height sudah memesan ruang untuk gambar yang
+             * ukurannya terbaca, tetapi sampul yang hilang atau yang
+             * alamatnya lengkap (http) tidak punya ukuran — dan begitu
+             * tingginya berubah, halaman yang sudah digulir ke pesan galat
+             * ikut bergeser dan pesannya keluar layar lagi.
+             *
+             * Diulang hanya kalau ringkasannya memang sudah tidak utuh
+             * terlihat, supaya tidak menarik halaman yang sudah digulir
+             * sendiri oleh orangnya.
+             */
+            window.addEventListener('load', function () {
+                var kotak = ringkas.getBoundingClientRect();
+
+                if (kotak.top < 0 || kotak.bottom > window.innerHeight) {
+                    antarkan(halus);
+                }
+            });
+
+            /*
+             * Fokusnya menyusul SESUDAH gulirnya selesai. Memfokus isian lebih
+             * dulu membuat peramban menggulir sendiri ke isian itu dan
+             * ringkasannya terlewat begitu saja.
+             */
+            setTimeout(function () {
+                var pertama = borang.querySelector('[aria-invalid="true"]');
+                if (pertama) {
+                    pertama.focus({ preventScroll: true });
+                } else {
+                    ringkas.focus({ preventScroll: true });
+                }
+            }, halus ? 650 : 0);
+        })();
 
         /*
          * PENYINGKAPAN BERTAHAP.

@@ -8,8 +8,10 @@ use App\Services\Doku;
 use App\WebinarEksklusifPendaftaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Mail\WebinarEksklusifPendaftaranMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Halaman publik Webinar Eksklusif: borang pendaftaran dan pembayarannya.
@@ -74,14 +76,37 @@ class PublicWebinarEksklusifController extends Controller
             'kategori_id' => ['required', 'uuid'],
             'nama' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:120'],
-            'telp' => ['required', 'string', 'max:30'],
+            /*
+             * Yang diperiksa ANGKANYA, bukan panjang teksnya.
+             *
+             * Dengan 'string|max:30' saja, "tidak punya wa" lolos — lalu
+             * rapikanTelp() membuang semua non-angka dan yang tersimpan
+             * string KOSONG. Terbukti: pendaftarannya diterima, kursinya
+             * terpotong, dan panitia baru tahu saat hendak memasukkan
+             * orangnya ke grup.
+             *
+             * 9 angka adalah nomor Indonesia terpendek yang masuk akal
+             * (08xx + 7), 15 batas E.164.
+             */
+            'telp' => ['required', 'string', 'max:30', function ($medan, $nilai, $gagal) {
+                $angka = preg_replace('/\\D+/', '', (string) $nilai);
+
+                if (strlen($angka) < 9 || strlen($angka) > 15) {
+                    $gagal('Nomor WhatsApp-nya belum benar — tulis angkanya saja, contoh 0812 3456 7890.');
+                }
+            }],
             'affiliasi' => ['nullable', 'string', 'max:160'],
             'jumlah_pendaftar' => ['required', 'integer', 'min:1', 'max:50'],
+            // Persetujuan dipakainya data. Disimpan waktunya, bukan cuma
+            // dicentang lalu dilupakan — kalau ditanya, harus bisa dijawab
+            // kapan orangnya menyetujui.
+            'setuju' => ['accepted'],
         ], [
             'nama.required' => 'Nama lengkapnya diisi dulu, ya.',
             'email.required' => 'Emailnya diisi dulu — tautan Zoom dikirim ke sana.',
             'email.email' => 'Alamat emailnya belum benar.',
             'telp.required' => 'Nomor WhatsApp-nya diisi dulu, ya.',
+            'setuju.accepted' => 'Centang persetujuannya dulu, ya.',
             'jumlah_pendaftar.min' => 'Minimal satu peserta.',
             'jumlah_pendaftar.max' => 'Lebih dari 50 peserta, hubungi panitia dulu ya.',
         ]);
@@ -109,6 +134,38 @@ class PublicWebinarEksklusifController extends Controller
          * halaman iklan — bersamaan itu justru keadaan yang biasa, bukan yang
          * langka.
          */
+        /*
+         * PENJAGA PENDAFTARAN GANDA.
+         *
+         * Diperiksa sebelum kuota dikunci: tanpa ini satu orang yang menekan
+         * "Daftar" berkali-kali — atau menyegarkan halaman pembayaran —
+         * membuat beberapa pendaftaran, dan TIAP SATUNYA memotong kursi yang
+         * baru kembali setengah jam kemudian saat kedaluwarsa.
+         *
+         * Yang sudah lunas tidak boleh mendaftar lagi; yang masih menunggu
+         * bayar diantar ke tagihannya yang lama, bukan dibuatkan yang baru.
+         */
+        $sudahAda = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
+            ->where('email', mb_strtolower(trim($data['email'])))
+            ->whereIn('status', ['pending', 'paid'])
+            ->where(function ($q) {
+                // Yang sudah dibayar selalu dihitung; yang masih menunggu
+                // hanya selama belum lewat batas waktunya.
+                $q->where('status', 'paid')
+                    ->orWhereNull('kedaluwarsa_pada')
+                    ->orWhere('kedaluwarsa_pada', '>', now());
+            })
+            ->latest()
+            ->first();
+
+        if ($sudahAda !== null) {
+            return redirect()->route('public.webinareksklusif.status', $sudahAda->token)
+                ->with('error', $sudahAda->status === 'paid'
+                    ? 'Email itu sudah terdaftar di sesi ini. Ini rincian pendaftaran Anda.'
+                    : 'Email itu sudah punya pendaftaran yang belum dibayar di sesi ini. '
+                        . 'Lanjutkan yang ini saja supaya kursinya tidak terpotong dua kali.');
+        }
+
         try {
             $pendaftaran = DB::transaction(function () use ($sesi, $data) {
                 $terkunci = KategoriLayanan::whereKey($sesi->getKey())->lockForUpdate()->first();
@@ -128,6 +185,7 @@ class PublicWebinarEksklusifController extends Controller
                     'email' => mb_strtolower(trim($data['email'])),
                     'telp' => $this->rapikanTelp($data['telp']),
                     'affiliasi' => $data['affiliasi'] ? trim($data['affiliasi']) : null,
+                    'disetujui_pada' => now(),
                     'jumlah_pendaftar' => $data['jumlah_pendaftar'],
                     'total_pembayaran' => (string) $total,
                     'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
@@ -155,6 +213,8 @@ class PublicWebinarEksklusifController extends Controller
         } catch (KuotaHabis $e) {
             return back()->withInput()->with('error', $e->pesanUntukOrang());
         }
+
+        $this->kirimEmailPendaftaran($pendaftaran, $sesi);
 
         return $this->mulaiBayar($pendaftaran, $sesi);
     }
@@ -342,6 +402,33 @@ class PublicWebinarEksklusifController extends Controller
     }
 
     /** Nomor telepon disimpan berangka saja supaya bisa langsung jadi tautan WA. */
+    /**
+     * Mengirim bukti pendaftaran ke email pendaftar.
+     *
+     * Sebelum ini tidak ada pemberitahuan apa pun: orang hanya memegang
+     * tautan status di layar, dan begitu tabnya ditutup, tautannya hilang —
+     * padahal emailnya sudah kita minta sejak awal.
+     *
+     * DIBUNGKUS try/catch dengan sengaja. Pendaftarannya sudah tersimpan dan
+     * kursinya sudah terpotong saat baris ini jalan; kalau peladen surat
+     * sedang bermasalah, yang pantas terjadi adalah galatnya dicatat, bukan
+     * orangnya melihat layar error padahal pendaftarannya berhasil.
+     */
+    private function kirimEmailPendaftaran(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi): void
+    {
+        try {
+            Mail::to($pendaftaran->email)->send(
+                new WebinarEksklusifPendaftaranMail($pendaftaran, $sesi)
+            );
+        } catch (\Throwable $e) {
+            Log::error('Email pendaftaran Webinar Eksklusif gagal dikirim', [
+                'pendaftaran' => $pendaftaran->getKey(),
+                'email' => $pendaftaran->email,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
+    }
+
     private function rapikanTelp(string $telp): string
     {
         $angka = preg_replace('/\D+/', '', $telp);

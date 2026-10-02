@@ -360,6 +360,26 @@ class KategoriLayanan extends Model
     }
 
     /**
+     * Ukuran asli sampulnya, untuk memesan ruang di tampilan.
+     *
+     * @return array{lebar:int,tinggi:int}|null
+     */
+    public function getUkuranSampulAttribute(): ?array
+    {
+        return \App\Support\AlamatGambar::ukuran($this->gambar, $this->folderSampul());
+    }
+
+    /**
+     * Ukuran asli foto pematerinya.
+     *
+     * @return array{lebar:int,tinggi:int}|null
+     */
+    public function getUkuranPemateriAttribute(): ?array
+    {
+        return \App\Support\AlamatGambar::ukuran($this->pemateri_foto, $this->folderSampul());
+    }
+
+    /**
      * Keadaan yang perlu ditindaklanjuti; kuncinya dipakai di alamat.
      *
      * Labelnya sengaja pendek: ia tampil di dalam menu saringan selebar satu
