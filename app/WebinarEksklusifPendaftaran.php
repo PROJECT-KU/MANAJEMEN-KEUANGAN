@@ -27,7 +27,7 @@ class WebinarEksklusifPendaftaran extends Model
 
     protected $fillable = [
         'token', 'id_transaksi', 'kategori_id',
-        'nama', 'email', 'telp', 'affiliasi', 'jumlah_pendaftar',
+        'nama', 'email', 'telp', 'affiliasi', 'disetujui_pada', 'jumlah_pendaftar',
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status',
         'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
@@ -37,6 +37,7 @@ class WebinarEksklusifPendaftaran extends Model
         'jumlah_pendaftar' => 'integer',
         'bayar_pada' => 'datetime',
         'kedaluwarsa_pada' => 'datetime',
+        'disetujui_pada' => 'datetime',
     ];
 
     /** Status pendaftaran; kuncinya tersimpan, nilainya yang dibaca orang. */
