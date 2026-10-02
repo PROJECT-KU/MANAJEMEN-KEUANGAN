@@ -645,6 +645,27 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
     @media (max-width: 991.98px) {
         /*
+         * PANAH "KE ATAS" DISINGKIRKAN SELAMA PITANYA TAMPIL.
+         *
+         * Panah itu milik layout publik bersama dan duduk di pojok kanan
+         * bawah - tepat di tempat tombol Daftar berada. Terukur di layar
+         * 390 px: panahnya 335-375 px, tombol Daftar 263-374 px, jadi 39 px
+         * tombolnya tertutup.
+         *
+         * Dan bukan cuma tertutup. z-index panahnya 99999 melawan 1040 milik
+         * pita, jadi panahnya yang menerima ketukan: menekan sisi kanan
+         * "Daftar" justru melompat ke puncak halaman, bukan mendaftar.
+         *
+         * Disembunyikan, bukan digeser: saat pitanya tampil, tindakan yang
+         * dituju sudah ada di layar, dan dua tombol melayang bertumpuk hanya
+         * membuat ragu harus menekan yang mana.
+         *
+         * !important perlu sebab panahnya memakai .d-flex bawaan Bootstrap
+         * yang sudah ber-!important.
+         */
+        body.ses-pita-tampil .back-to-top { display: none !important; }
+
+        /*
          * Ruang supaya pita bawah tidak menutupi isian terakhir.
          *
          * Terukur tinggi pitanya 71 px dari 320 px sampai 991 px - isinya
@@ -719,6 +740,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
             if (tombolAsli) {
                 new IntersectionObserver(function (masuk) {
                     tempel.hidden = masuk[0].isIntersecting;
+
+                    // Penanda di <body> supaya CSS bisa menyingkirkan panah
+                    // "ke atas" milik layout bersama selama pitanya tampil.
+                    document.body.classList.toggle('ses-pita-tampil', !tempel.hidden);
                 }, { rootMargin: '-20px 0px 0px 0px' }).observe(tombolAsli);
             }
         }
