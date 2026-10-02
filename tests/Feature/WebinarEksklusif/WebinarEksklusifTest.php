@@ -649,4 +649,241 @@ class WebinarEksklusifTest extends TestCase
 
         $jawaban->assertStatus(429);
     }
+
+    // -------------------------------------------- pelepasan kursi mandiri
+
+    /**
+     * Kursi yang ditinggalkan semula HANYA dilepas oleh perintah terjadwal.
+     *
+     * Itu satu titik kegagalan yang diam: kalau penjadwalnya tidak jalan,
+     * kursinya tertahan selamanya — terukur di basis data lokal, 2
+     * pendaftaran lewat batas menahan 50 kursi — sementara halaman status
+     * sudah memberitahu orangnya "kursinya sudah dilepas kembali".
+     */
+    #[Test]
+    public function membuka_halaman_borang_melepas_kursi_yang_ditinggalkan(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '10', 'sisa_kuota' => '4']);
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Ditinggalkan', 'email' => 'tinggal@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 6, 'total_pembayaran' => '774000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->subHour(),
+        ]);
+
+        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))
+            ->assertOk();
+
+        $this->assertSame('10', (string) $sesi->fresh()->sisa_kuota,
+            'kursinya kembali tanpa menunggu perintah terjadwal');
+
+        $this->assertSame('expired',
+            WebinarEksklusifPendaftaran::where('email', 'tinggal@contoh.test')->value('status'));
+    }
+
+    #[Test]
+    public function kursi_yang_masih_dalam_batas_waktu_tidak_ikut_dilepas(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '10', 'sisa_kuota' => '4']);
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Masih Bayar', 'email' => 'masih@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 6, 'total_pembayaran' => '774000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->addMinutes(20),
+        ]);
+
+        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))->assertOk();
+
+        $this->assertSame('4', (string) $sesi->fresh()->sisa_kuota,
+            'yang masih dalam batas waktu kursinya TIDAK boleh dilepas');
+
+        $this->assertSame('pending',
+            WebinarEksklusifPendaftaran::where('email', 'masih@contoh.test')->value('status'));
+    }
+
+    /**
+     * Dua penyapu bisa jalan bersamaan — perintah terjadwal dan orang yang
+     * sedang membuka halaman. Tanpa penguncian, keduanya melihat 'pending'
+     * dan sama-sama mengembalikan kursinya, jadi kursinya bertambah dua kali
+     * dan angkatan membuka tempat yang sebenarnya tidak ada.
+     */
+    #[Test]
+    public function menyapu_dua_kali_tidak_mengembalikan_kursi_dua_kali(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '10', 'sisa_kuota' => '4']);
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Ganda', 'email' => 'ganda@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 6, 'total_pembayaran' => '774000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->subHour(),
+        ]);
+
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->id);
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->id);
+        $this->artisan('webinar-eksklusif:kedaluwarsakan');
+
+        $this->assertSame('10', (string) $sesi->fresh()->sisa_kuota,
+            'dilepas sekali saja, berapa kali pun disapu');
+    }
+
+    // ------------------------------------------------ pengingat & kirim ulang
+
+    /**
+     * Jarak antara mendaftar dan hari-H bisa berminggu-minggu, dan tanpa
+     * pengingat yang membayar jauh hari lupa — kursinya terpakai tanpa ada
+     * orangnya.
+     */
+    #[Test]
+    public function pengingat_dikirim_ke_peserta_sesi_besok(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi(['mulai' => now()->addDay()->toDateString()]);
+
+        $p = WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Eka', 'email' => 'eka@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        $this->artisan('webinar-eksklusif:ingatkan')->assertSuccessful();
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\WebinarEksklusifPengingatMail::class,
+            fn ($surat) => $surat->hasTo('eka@contoh.test')
+        );
+
+        $this->assertNotNull($p->fresh()->pengingat_pada);
+    }
+
+    /**
+     * Perintahnya jalan tiap hari dan bisa dipanggil ulang tangan. Tanpa
+     * penanda, peserta yang sama menerima surat tiap kali ia jalan — dan yang
+     * menerima lima pengingat untuk satu sesi berhenti membaca surat dari
+     * kami sama sekali.
+     */
+    #[Test]
+    public function pengingat_tidak_dikirim_dua_kali(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi(['mulai' => now()->addDay()->toDateString()]);
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Dua', 'email' => 'dua@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        $this->artisan('webinar-eksklusif:ingatkan');
+        $this->artisan('webinar-eksklusif:ingatkan');
+        $this->artisan('webinar-eksklusif:ingatkan');
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\WebinarEksklusifPengingatMail::class, 1);
+    }
+
+    /**
+     * Yang kursinya sudah dilepas tidak boleh diingatkan — mengirimi mereka
+     * pengingat berarti menjanjikan tempat yang sudah tidak ada.
+     */
+    #[Test]
+    public function yang_batal_dan_kedaluwarsa_tidak_diingatkan(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi(['mulai' => now()->addDay()->toDateString()]);
+
+        foreach (['cancel', 'expired'] as $status) {
+            WebinarEksklusifPendaftaran::create([
+                'kategori_id' => $sesi->id, 'nama' => 'Tidak ' . $status,
+                'email' => $status . '@contoh.test',
+                'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+                'cara_bayar' => 'transfer', 'status' => $status,
+            ]);
+        }
+
+        $this->artisan('webinar-eksklusif:ingatkan');
+
+        \Illuminate\Support\Facades\Mail::assertNothingSent();
+    }
+
+    #[Test]
+    public function jalan_kering_pengingat_tidak_mengirim_apa_pun(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi(['mulai' => now()->addDay()->toDateString()]);
+
+        $p = WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Kering', 'email' => 'kering@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        $this->artisan('webinar-eksklusif:ingatkan', ['--kering' => true]);
+
+        \Illuminate\Support\Facades\Mail::assertNothingSent();
+        $this->assertNull($p->fresh()->pengingat_pada, 'jalan kering tidak boleh menandai apa pun');
+    }
+
+    /**
+     * Satu-satunya jalan kembali ke halaman status adalah tautan bertoken di
+     * email. Kalau emailnya terhapus, orangnya kehilangan nomor pendaftaran
+     * dan cara bayarnya sekaligus.
+     */
+    #[Test]
+    public function bukti_pendaftaran_bisa_dikirim_ulang(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi();
+
+        $p = WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Fani', 'email' => 'fani@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->addMinutes(20),
+        ]);
+
+        $this->post(route('public.webinareksklusif.kirimulang', $p->token))
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\WebinarEksklusifPendaftaranMail::class,
+            fn ($surat) => $surat->hasTo('fani@contoh.test')
+        );
+    }
+
+    /**
+     * Penerimanya diambil dari BASIS DATA, bukan dari yang dikirim peramban.
+     * Kalau bisa ditentukan dari luar, siapa pun yang memegang tautan ini
+     * bisa memakainya untuk mengirimi orang lain.
+     */
+    #[Test]
+    public function kirim_ulang_tidak_bisa_diarahkan_ke_email_lain(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi();
+
+        $p = WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Gita', 'email' => 'gita@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->addMinutes(20),
+        ]);
+
+        $this->post(route('public.webinareksklusif.kirimulang', $p->token), [
+            'email' => 'penyerang@contoh.test',
+        ]);
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\WebinarEksklusifPendaftaranMail::class,
+            fn ($surat) => $surat->hasTo('gita@contoh.test') && ! $surat->hasTo('penyerang@contoh.test')
+        );
+    }
 }

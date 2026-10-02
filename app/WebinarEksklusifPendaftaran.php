@@ -27,7 +27,7 @@ class WebinarEksklusifPendaftaran extends Model
 
     protected $fillable = [
         'token', 'id_transaksi', 'kategori_id',
-        'nama', 'email', 'telp', 'affiliasi', 'disetujui_pada', 'jumlah_pendaftar',
+        'nama', 'email', 'telp', 'affiliasi', 'disetujui_pada', 'pengingat_pada', 'jumlah_pendaftar',
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status',
         'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
@@ -38,6 +38,7 @@ class WebinarEksklusifPendaftaran extends Model
         'bayar_pada' => 'datetime',
         'kedaluwarsa_pada' => 'datetime',
         'disetujui_pada' => 'datetime',
+        'pengingat_pada' => 'datetime',
     ];
 
     /** Status pendaftaran; kuncinya tersimpan, nilainya yang dibaca orang. */
@@ -47,6 +48,84 @@ class WebinarEksklusifPendaftaran extends Model
         'cancel' => 'Batal',
         'expired' => 'Kedaluwarsa',
     ];
+
+    /**
+     * Melepas kembali kursi dari pendaftaran yang batas bayarnya sudah lewat.
+     *
+     * DIPAKAI BERSAMA oleh perintah terjadwal dan oleh halaman pendaftaran.
+     * Semula hanya perintah terjadwal yang melakukannya, dan itu satu titik
+     * kegagalan yang diam: kalau penjadwalnya tidak jalan, kursi yang
+     * ditinggalkan menahan tempatnya SELAMANYA — terukur di lokal, 2
+     * pendaftaran lewat batas menahan 50 kursi — sementara halaman status
+     * sudah memberitahu orangnya "kursinya sudah dilepas kembali".
+     *
+     * Dengan dipanggil juga saat kuota dibaca dan saat orang mendaftar,
+     * kursinya kembali tepat ketika dibutuhkan, tanpa bergantung penjadwal.
+     *
+     * @param  string|null  $kategoriId  batasi ke satu angkatan; null = semua
+     * @return int  jumlah kursi yang dilepas
+     */
+    public static function lepaskanYangKedaluwarsa(?string $kategoriId = null): int
+    {
+        $kueri = static::where('status', 'pending')
+            ->whereNotNull('kedaluwarsa_pada')
+            ->where('kedaluwarsa_pada', '<', now());
+
+        if ($kategoriId !== null) {
+            $kueri->where('kategori_id', $kategoriId);
+        }
+
+        $lewat = $kueri->get();
+
+        if ($lewat->isEmpty()) {
+            return 0;
+        }
+
+        $kursi = 0;
+
+        foreach ($lewat as $p) {
+            /*
+             * Status dan kuota diubah dalam SATU transaksi. Terpisah, proses
+             * yang gagal di tengah meninggalkan pendaftaran yang sudah
+             * kedaluwarsa tetapi kursinya belum kembali — dan tidak ada yang
+             * akan mengulangnya karena statusnya sudah bukan 'pending'.
+             */
+            \Illuminate\Support\Facades\DB::transaction(function () use ($p, &$kursi) {
+                /*
+                 * Dibaca ulang DI DALAM transaksi dan dikunci. Dua proses yang
+                 * menyapu bersamaan — perintah terjadwal dan orang yang sedang
+                 * membuka halaman — sama-sama melihat 'pending' dan sama-sama
+                 * mengembalikan kursinya, jadi kursinya bertambah dua kali.
+                 */
+                $segar = static::whereKey($p->getKey())->lockForUpdate()->first();
+
+                if ($segar === null || $segar->status !== 'pending') {
+                    return;
+                }
+
+                $segar->forceFill(['status' => 'expired', 'bayar_status' => 'kedaluwarsa'])->save();
+
+                $kursi += (int) $segar->jumlah_pendaftar;
+
+                $sesi = KategoriLayanan::whereKey($segar->kategori_id)->lockForUpdate()->first();
+
+                if ($sesi === null || $sesi->total_kuota === null) {
+                    return;
+                }
+
+                $sesi->forceFill([
+                    // Tidak boleh melebihi totalnya: pengembalian ganda akan
+                    // membuka kursi yang sebenarnya tidak ada.
+                    'sisa_kuota' => (string) min(
+                        (int) $sesi->total_kuota,
+                        (int) $sesi->sisa_kuota + (int) $segar->jumlah_pendaftar
+                    ),
+                ])->save();
+            });
+        }
+
+        return $kursi;
+    }
 
     protected static function boot()
     {

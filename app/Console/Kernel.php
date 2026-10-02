@@ -34,6 +34,13 @@ class Kernel extends ConsoleKernel
         // Tiap sepuluh menit, bukan harian: batas bayarnya satu jam, dan kursi
         // yang tertahan semalaman adalah peserta yang batal mendaftar.
         $schedule->command('webinar-eksklusif:kedaluwarsakan')->everyTenMinutes();
+
+        /*
+         * Pengingat H-1, pagi hari. Jam 08:00, bukan tengah malam: surat yang
+         * tiba pukul 00:05 tenggelam di antara surat semalam, dan yang
+         * membacanya pagi-pagi sudah melewatkan satu kesempatan mengingat.
+         */
+        $schedule->command('webinar-eksklusif:ingatkan')->dailyAt('08:00');
     }
 
     protected function commands()

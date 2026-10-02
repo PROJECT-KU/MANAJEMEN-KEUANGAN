@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\KategoriLayanan;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Melepas kembali kursi yang dipesan tetapi tidak jadi dibayar.
@@ -43,8 +41,6 @@ class KedaluwarsakanPendaftaranWebinarEksklusif extends Command
             return self::SUCCESS;
         }
 
-        $kursi = 0;
-
         foreach ($lewat as $p) {
             $this->line(sprintf(
                 '  %s — %s, %d peserta, batas %s',
@@ -53,37 +49,18 @@ class KedaluwarsakanPendaftaranWebinarEksklusif extends Command
                 $p->jumlah_pendaftar,
                 $p->kedaluwarsa_pada->format('d M Y H:i')
             ));
+        }
 
-            $kursi += $p->jumlah_pendaftar;
+        $kursi = $lewat->sum('jumlah_pendaftar');
 
-            if ($kering) {
-                continue;
-            }
-
+        if (! $kering) {
             /*
-             * Status dan kuota diubah dalam SATU transaksi. Terpisah, proses
-             * yang gagal di tengah meninggalkan pendaftaran yang sudah
-             * kedaluwarsa tetapi kursinya belum kembali — dan tidak ada yang
-             * akan mengulangnya karena statusnya sudah bukan 'pending'.
+             * Pelepasannya ada di model, dipakai bersama dengan halaman
+             * pendaftaran. Disalin ke sini, dua salinan itu akan berbeda
+             * perlahan — dan yang satu akan mengembalikan kursi dua kali
+             * sementara yang lain tidak.
              */
-            DB::transaction(function () use ($p) {
-                $p->forceFill(['status' => 'expired', 'bayar_status' => 'kedaluwarsa'])->save();
-
-                $sesi = KategoriLayanan::whereKey($p->kategori_id)->lockForUpdate()->first();
-
-                if ($sesi === null || $sesi->total_kuota === null) {
-                    return;
-                }
-
-                $sesi->forceFill([
-                    // Tidak boleh melebihi totalnya: pengembalian ganda akan
-                    // membuka kursi yang sebenarnya tidak ada.
-                    'sisa_kuota' => (string) min(
-                        (int) $sesi->total_kuota,
-                        (int) $sesi->sisa_kuota + $p->jumlah_pendaftar
-                    ),
-                ])->save();
-            });
+            $kursi = WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa();
         }
 
         $this->info(sprintf(

@@ -220,9 +220,19 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                             value="{{ old('email') }}" placeholder="nama@email.com" autocomplete="email"
                             aria-describedby="ses-email-bantu @error('email') ses-email-salah @enderror"
                             @error('email') aria-invalid="true" @enderror>
-                        {{-- Alasannya disebut, bukan cuma "wajib". Orang lebih
-                             rela memberikan emailnya kalau tahu untuk apa. --}}
-                        <p class="ses-bantu" id="ses-email-bantu">Tautan masuk dan sertifikat dikirim ke sini.</p>
+                        {{--
+                            Alasannya disebut, bukan cuma "wajib". Orang lebih
+                            rela memberikan emailnya kalau tahu untuk apa.
+
+                            Kalimatnya menyebut yang BENAR-BENAR dikirim.
+                            Sebelumnya tertulis "Tautan masuk dan sertifikat
+                            dikirim ke sini", padahal tidak ada kolom tautan
+                            Zoom di angkatan dan tidak ada penerbitan
+                            sertifikat — janji yang tidak bisa ditepati sistem,
+                            dan yang menanggung akibatnya panitia saat orang
+                            menunggu sesuatu yang tidak akan datang.
+                        --}}
+                        <p class="ses-bantu" id="ses-email-bantu">Bukti pendaftaran dikirim ke sini.</p>
                         @error('email') <p class="ses-salah" id="ses-email-salah">{{ $message }}</p> @enderror
                     </div>
 
@@ -929,6 +939,36 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
          * tanpa orang bisa menunjuk apa.
          */
         padding: 20px 22px;
+    }
+
+    /*
+     * DAFTARNYA yang mengisi sisa tinggi kartu, bukan kartunya yang
+     * menyisakan ruang kosong.
+     *
+     * Kedua kartu meregang setinggi yang tertinggi (3 butir lawan 4), dan
+     * terukur itu meninggalkan 49 px putih di dasar kartu kiri terhadap 21 px
+     * di kanan. Ruang kosong di DALAM kartu lebih mencolok daripada jarak
+     * biasa, sebab ia punya tepi dan bayangan yang mengurungnya.
+     *
+     * Dua jalan lain sudah diukur dan sama-sama memindahkan 28 px itu, bukan
+     * menghilangkannya: membiarkan kartunya memeluk isinya membuat tingginya
+     * berbeda 28 px, dan itu sama kelihatannya pada sepasang kartu
+     * bersebelahan. Dengan cara ini keduanya berdasar rata DAN berisi rata;
+     * yang berbeda tinggal jarak antarbutir, dan itu yang paling tidak
+     * tertangkap mata.
+     */
+    .ses-bahas,
+    .ses-dapat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ses-bahas ol,
+    .ses-dapat ul {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .ses-bahas::before,
