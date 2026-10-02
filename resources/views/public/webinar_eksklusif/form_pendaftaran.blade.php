@@ -61,7 +61,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                      fasilitasnya langsung dari tarif induk. --}}
                 @if ($tarif && $tarif->daftar_kegiatan)
                     <div class="ses-bahas">
-                        <p class="ses-bahas-judul">Yang dibahas di sesi ini</p>
+                        <h2 class="ses-bahas-judul">Yang dibahas di sesi ini</h2>
                         <ol>
                             @foreach ($tarif->daftar_kegiatan as $k)
                                 <li>{{ $k }}</li>
@@ -121,7 +121,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
                 @if ($tarif && $tarif->daftar_fasilitas)
                     <div class="ses-dapat">
-                        <p class="ses-dapat-judul">Yang Anda bawa pulang</p>
+                        <h2 class="ses-dapat-judul">Yang Anda bawa pulang</h2>
                         <ul>
                             @foreach ($tarif->daftar_fasilitas as $f)
                                 <li><i class="fas fa-check-circle" aria-hidden="true"></i> <span>{{ $f }}</span></li>
@@ -138,7 +138,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     @csrf
                     <input type="hidden" name="kategori_id" value="{{ $sesi->id }}">
 
-                    <p class="ses-kartu-judul">Amankan kursi Anda</p>
+                    <h2 class="ses-kartu-judul">Amankan kursi Anda</h2>
                     <p class="ses-kartu-sub">Isinya lima, tidak sampai satu menit.</p>
 
                     <div class="ses-isian">
@@ -346,14 +346,27 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-bahas ol { margin: 0; padding-left: 20px; }
     .ses-bahas li { padding: 4px 0; font-size: .93rem; line-height: 1.65; color: var(--tinta); }
 
+    /*
+     * Flex, bukan grid auto-fit.
+     *
+     * Dengan grid, tiga kotak di layar yang cuma muat dua kolom menyisakan
+     * kotak ketiga selebar separuh di pojok kiri baris kedua - terukur 177 px
+     * di layar 390 px, dengan 189 px kosong di sebelahnya. Petak grid lebarnya
+     * sudah ditetapkan, jadi kotak yatim itu tidak bisa melebar.
+     *
+     * Dengan flex-grow, kotak yang tersisa sendirian MEMANJANG mengisi
+     * barisnya. Menyesuaikan sendiri di tiap lebar dan tiap jumlah kotak -
+     * jam boleh tidak diisi, dan susunannya tetap rapi tanpa media query.
+     */
     .ses-fakta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 12px;
         margin-bottom: 22px;
     }
 
     .ses-fakta-item {
+        flex: 1 1 150px;
         padding: 14px 16px;
         border-radius: 14px;
         border: 1px solid var(--garis);
@@ -410,6 +423,12 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-pemateri-teks small { font-size: .76rem; color: var(--tinta-2); }
     .ses-pemateri-teks strong { font-size: 1rem; color: var(--navy); }
 
+    /*
+     * Batas 420 px hanya berlaku sampai tablet. Di layar lebar kolom kirinya
+     * 607 px, jadi batas itu meninggalkan 187 px kosong di sebelah kanan
+     * flyer - padahal kartu di atas dan di bawahnya selebar kolom penuh, jadi
+     * yang kosong itu terbaca seperti ada yang gagal dimuat.
+     */
     .ses-flyer {
         display: block;
         width: 100%;
@@ -418,6 +437,18 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         border-radius: 18px;
         border: 1px solid var(--garis);
         box-shadow: 0 18px 40px -24px rgba(15, 43, 91, .5);
+    }
+
+    /*
+     * DITULIS SESUDAH aturan di atas, bukan di media query .ses-kisi.
+     *
+     * Bobot pemilihnya sama persis (satu kelas), jadi yang menang yang
+     * ditulis belakangan - bukan yang di dalam media query. Ditaruh di atas,
+     * aturan ini kalah tanpa gejala apa pun: flyernya tetap 420 px dan
+     * tampak seperti media query-nya tidak pernah cocok.
+     */
+    @media (min-width: 992px) {
+        .ses-flyer { max-width: 100%; }
     }
 
     .ses-dapat {
@@ -613,8 +644,15 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     }
 
     @media (max-width: 991.98px) {
-        /* Ruang supaya pita bawah tidak menutupi isian terakhir. */
-        .ses-latar { padding-bottom: 150px; }
+        /*
+         * Ruang supaya pita bawah tidak menutupi isian terakhir.
+         *
+         * Terukur tinggi pitanya 71 px dari 320 px sampai 991 px - isinya
+         * cuma satu baris harga dan satu tombol, jadi tidak ikut tumbuh.
+         * Angka 150 px sebelumnya menyisakan 79 px ruang menganga di atas
+         * footer yang tidak dipakai apa pun.
+         */
+        .ses-latar { padding-bottom: 110px; }
     }
 </style>
 
