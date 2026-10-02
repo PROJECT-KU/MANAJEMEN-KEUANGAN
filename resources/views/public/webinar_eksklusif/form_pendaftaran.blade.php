@@ -288,6 +288,22 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         min-height: 100vh;
         font-family: 'Poppins', 'Inter', system-ui, sans-serif;
         color: var(--tinta);
+
+        /*
+         * clip, BUKAN hidden — dan ini yang menghidupkan kartu isian lengket.
+         *
+         * Stylesheet bersama memasang `section { overflow: hidden }`. hidden
+         * membuat unsurnya jadi wadah gulir, dan wadah gulir terdekat itulah
+         * yang mengurung position:sticky. Akibatnya kartu isian di kolom
+         * kanan ikut tergulung keluar layar padahal ruang jelajahnya ada
+         * 646 px — terukur puncaknya di -890 px saat halaman digulir 1100 px.
+         *
+         * clip memangkas persis seperti hidden tetapi TIDAK membuat wadah
+         * gulir, jadi pemangkasannya tetap ada dan lengketnya hidup. Peramban
+         * lama yang belum mengenal clip mengabaikan baris ini dan kembali ke
+         * hidden — tanpa gerak lengket, tetapi tidak ada yang rusak.
+         */
+        overflow: clip;
     }
 
     .ses-wadah { max-width: 1120px; }
@@ -714,6 +730,142 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
          */
         .ses-latar { padding-bottom: 110px; }
     }
+
+    /* ===================================================== GERAK HALAMAN */
+    /*
+     * Tiga aturan yang dipegang di seluruh blok ini:
+     *
+     * 1. Yang menyembunyikan isi HANYA berlaku setelah skrip memasang kelas
+     *    .ses-gerak di <body>. Kalau skripnya gagal dimuat, tidak ada satu
+     *    pun isi yang hilang — halaman ini halaman pendaftaran, dan isi yang
+     *    tak pernah muncul berarti kursi yang tak pernah terjual.
+     *
+     * 2. prefers-reduced-motion dihormati penuh di bagian paling bawah.
+     *
+     * 3. Tidak ada gerak yang menunda orang mengisi borang. Kartu isian
+     *    muncul paling dulu dan paling cepat; sisanya menyusul.
+     */
+
+    .ses-gerak .ses-muncul {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    .ses-gerak .ses-muncul.tampak {
+        opacity: 1;
+        transform: none;
+        transition: opacity .55s ease, transform .55s cubic-bezier(.22, .61, .36, 1);
+        /* Jeda berjenjang, dipasang skrip lewat --urut. */
+        transition-delay: calc(var(--urut, 0) * 70ms);
+    }
+
+    /* Kotak fakta menyusul satu per satu di dalam barisnya sendiri. */
+    .ses-gerak .ses-fakta.tampak .ses-fakta-item {
+        animation: ses-naik .5s cubic-bezier(.22, .61, .36, 1) backwards;
+        animation-delay: calc(var(--urut, 0) * 80ms);
+    }
+
+    @keyframes ses-naik {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    /*
+     * Pita bawah menyelusup naik saat muncul. Dipakai animation, bukan
+     * transition: pitanya disembunyikan lewat atribut hidden (display:none),
+     * dan transition tidak pernah jalan dari display:none. Animation jalan
+     * tepat saat unsurnya mulai ditampilkan.
+     */
+    .ses-gerak .ses-tempel:not([hidden]) {
+        animation: ses-pita-naik .3s cubic-bezier(.22, .61, .36, 1);
+    }
+
+    @keyframes ses-pita-naik {
+        from { transform: translateY(100%); }
+        to   { transform: none; }
+    }
+
+    /*
+     * Harga berdenyut sesaat setiap nilainya BERUBAH — bukan terus-menerus.
+     * Gerak yang berulang tanpa sebab berhenti diperhatikan; gerak yang
+     * menjawab tindakan orang justru memastikan tombol tambah-kurangnya
+     * memang bekerja.
+     */
+    .ses-total strong.ses-berubah,
+    .ses-tempel strong.ses-berubah {
+        animation: ses-denyut .42s ease;
+    }
+
+    @keyframes ses-denyut {
+        0%   { transform: none; }
+        35%  { transform: scale(1.09); color: var(--jingga); }
+        100% { transform: none; }
+    }
+
+    .ses-total strong,
+    .ses-tempel strong { display: inline-block; }
+
+    /* Panah tombol menyenggol ke depan, menandakan ada langkah lanjutan. */
+    .ses-tombol > .fas { transition: transform .25s ease; }
+    .ses-tombol:hover > .fas { transform: translateX(4px); }
+
+    /*
+     * Lencana sisa kursi berdenyut pelan — HANYA muncul kalau kursinya
+     * memang tinggal sedikit, jadi denyutnya menyampaikan sesuatu yang benar.
+     */
+    .ses-gerak .ses-lencana-merah {
+        animation: ses-kedip 2.4s ease-in-out infinite;
+    }
+
+    @keyframes ses-kedip {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, .34); }
+        50%      { box-shadow: 0 0 0 7px rgba(220, 38, 38, 0); }
+    }
+
+    /* Kartu di kolom kiri sedikit terangkat saat disentuh tetikus. */
+    @media (hover: hover) {
+        .ses-bahas, .ses-dapat, .ses-pemateri, .ses-fakta-item, .ses-flyer {
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .ses-bahas:hover, .ses-dapat:hover, .ses-pemateri:hover, .ses-flyer:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 38px -26px rgba(15, 43, 91, .6);
+        }
+    }
+
+    /*
+     * PENGHORMATAN PENUH pada pilihan sistem orangnya.
+     *
+     * Ditulis paling bawah supaya menang urutan sumber terhadap semua aturan
+     * di atas, dan menyebut .ses-gerak juga supaya bobotnya tidak kalah.
+     */
+    @media (prefers-reduced-motion: reduce) {
+        .ses-gerak .ses-muncul,
+        .ses-gerak .ses-muncul.tampak {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+        }
+
+        .ses-gerak .ses-fakta.tampak .ses-fakta-item,
+        .ses-gerak .ses-tempel:not([hidden]),
+        .ses-gerak .ses-lencana-merah,
+        .ses-total strong.ses-berubah,
+        .ses-tempel strong.ses-berubah {
+            animation: none !important;
+        }
+
+        .ses-bahas, .ses-dapat, .ses-pemateri, .ses-flyer,
+        .ses-tombol, .ses-tombol > .fas, .ses-isian input {
+            transition: none !important;
+        }
+
+        .ses-tombol:hover,
+        .ses-bahas:hover, .ses-dapat:hover, .ses-pemateri:hover, .ses-flyer:hover {
+            transform: none !important;
+        }
+    }
 </style>
 
 <script>
@@ -751,9 +903,31 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
             jumlah.value = n;
 
             var total = harga * n;
-            nilai.textContent = rupiah(total);
-            if (tempelNilai) tempelNilai.textContent = rupiah(total);
+            var baru = rupiah(total);
+
+            /*
+             * Denyutnya dipasang HANYA kalau angkanya berubah. hitung()
+             * dipanggil juga saat halaman dibuka dan tiap kali kotaknya
+             * disentuh, jadi tanpa penjagaan ini angkanya berdenyut tanpa
+             * ada yang berubah — dan gerak tanpa sebab berhenti diperhatikan.
+             */
+            var berubah = nilai.textContent !== baru;
+
+            nilai.textContent = baru;
+            if (tempelNilai) tempelNilai.textContent = baru;
             if (rincian) rincian.textContent = rupiah(harga) + ' × ' + n + ' peserta';
+
+            if (berubah) {
+                [nilai, tempelNilai].forEach(function (e) {
+                    if (!e) return;
+                    e.classList.remove('ses-berubah');
+                    // Dibaca paksa supaya animasinya bisa dijalankan ulang
+                    // beberapa kali berturut-turut; tanpa ini menekan "+"
+                    // dua kali cepat hanya berdenyut sekali.
+                    void e.offsetWidth;
+                    e.classList.add('ses-berubah');
+                });
+            }
         }
 
         jumlah.addEventListener('input', hitung);
@@ -767,6 +941,113 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         });
 
         hitung();
+
+        /*
+         * PENYINGKAPAN BERTAHAP.
+         *
+         * Kelas .ses-gerak dan .ses-muncul dipasang DI SINI, bukan ditulis di
+         * markup. Yang menyembunyikan isi ada di CSS di belakang .ses-gerak,
+         * jadi kalau berkas skrip ini gagal dimuat, tidak ada satu pun bagian
+         * halaman yang hilang — ia cuma tampil tanpa gerak.
+         *
+         * Urutannya disengaja: kartu isian lebih dulu daripada isi kolom
+         * kiri. Yang datang ke halaman ini sudah berniat mendaftar, jadi
+         * borangnya tidak boleh menunggu giliran.
+         */
+        (function () {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var sasaran = [].slice.call(document.querySelectorAll(
+                '.ses-kartu, .ses-lencana-baris, .ses-judul, .ses-duo > *, .ses-fakta, .ses-pemateri, .ses-flyer'
+            ));
+
+            if (!sasaran.length) return;
+
+            document.body.classList.add('ses-gerak');
+
+            sasaran.forEach(function (e, i) {
+                e.classList.add('ses-muncul');
+                e.style.setProperty('--urut', i);
+            });
+
+            // Kotak fakta menyusul satu per satu di dalam barisnya sendiri.
+            [].forEach.call(document.querySelectorAll('.ses-fakta-item'), function (e, i) {
+                e.style.setProperty('--urut', i);
+            });
+
+            function tampakkan(e) {
+                e.classList.add('tampak');
+                var i = tersisa.indexOf(e);
+                if (i !== -1) tersisa.splice(i, 1);
+            }
+
+            var tersisa = sasaran.slice();
+
+            if (!('IntersectionObserver' in window)) {
+                // Tanpa pengamat, semuanya langsung ditampilkan. Lebih baik
+                // tanpa gerak daripada ada yang tidak pernah terlihat.
+                sasaran.forEach(tampakkan);
+                return;
+            }
+
+            var pengamat = new IntersectionObserver(function (masuk) {
+                masuk.forEach(function (m) {
+                    if (!m.isIntersecting) return;
+                    pengamat.unobserve(m.target);
+                    tampakkan(m.target);
+                });
+            }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+            /*
+             * JARING PENGAMAN, dan ini bukan kehati-hatian berlebihan.
+             *
+             * IntersectionObserver hanya melapor saat ambangnya DILINTASI.
+             * Kalau halaman melompat — pemulihan posisi gulir sesudah borang
+             * ditolak validasi, atau Cmd+End — bagian di tengah berpindah
+             * dari "di bawah layar" langsung ke "di atas layar" tanpa pernah
+             * bersinggungan, jadi tidak ada laporan dan bagiannya tertinggal
+             * opasitas 0 SELAMANYA.
+             */
+            function sapu() {
+                tersisa.slice().forEach(function (e) {
+                    if (e.getBoundingClientRect().top < window.innerHeight) {
+                        pengamat.unobserve(e);
+                        tampakkan(e);
+                    }
+                });
+
+                if (!tersisa.length) {
+                    window.removeEventListener('scroll', jadwalkan2);
+                    window.removeEventListener('resize', jadwalkan2);
+                }
+            }
+
+            var terjadwal2 = false;
+
+            function jadwalkan2() {
+                if (terjadwal2) return;
+                terjadwal2 = true;
+                requestAnimationFrame(function () { terjadwal2 = false; sapu(); });
+            }
+
+            window.addEventListener('scroll', jadwalkan2, { passive: true });
+            window.addEventListener('resize', jadwalkan2);
+
+            sasaran.forEach(function (e) {
+                if (e.getBoundingClientRect().top < window.innerHeight * 0.95) {
+                    // Sudah terlihat sejak awal: ditampilkan di bingkai
+                    // berikutnya supaya transisinya tetap jalan, bukan
+                    // melompat begitu saja.
+                    requestAnimationFrame(function () {
+                        requestAnimationFrame(function () { tampakkan(e); });
+                    });
+
+                    return;
+                }
+
+                pengamat.observe(e);
+            });
+        })();
 
         /*
          * Pita bawah baru muncul setelah tombol daftar yang asli tergulung
