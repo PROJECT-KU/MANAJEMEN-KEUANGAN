@@ -74,6 +74,11 @@ Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifControlle
     ->middleware('throttle:6,1')
     ->name('public.webinareksklusif.store');
 Route::get('/Webinar-Eksklusif/Status/{token}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
+// Dibatasi 3 per menit: mengirim surat itu pekerjaan yang memakan waktu, dan
+// tombolnya bisa ditekan berkali-kali oleh orang yang tidak sabar menunggu.
+Route::post('/Webinar-Eksklusif/Status/{token}/kirim-ulang', 'Publict\PublicWebinarEksklusifController@kirimUlang')
+    ->middleware('throttle:3,1')
+    ->name('public.webinareksklusif.kirimulang');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
 // penggantinya pemeriksaan tanda tangan di dalam pengendalinya.
 Route::post('/Webinar-Eksklusif/pemberitahuan/doku', 'Publict\PublicWebinarEksklusifController@pemberitahuan')->name('public.webinareksklusif.pemberitahuan');

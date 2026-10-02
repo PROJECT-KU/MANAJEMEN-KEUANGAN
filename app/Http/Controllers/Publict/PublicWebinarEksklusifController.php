@@ -57,7 +57,21 @@ class PublicWebinarEksklusifController extends Controller
             return $this->kembaliKeDaftar('Sesi itu sudah tidak dibuka lagi.');
         }
 
+        /*
+         * Kursi yang ditinggalkan dilepas DI SINI, bukan hanya oleh perintah
+         * terjadwal.
+         *
+         * Bergantung penjadwal saja berarti satu titik kegagalan yang diam:
+         * kalau ia tidak jalan, kursi yang ditinggalkan menahan tempatnya
+         * selamanya, dan yang tampil di layar "Tersisa 0 kursi" padahal
+         * sebenarnya kosong. Dipanggil di sini, kursinya kembali tepat saat
+         * ada orang yang hendak memakainya.
+         */
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->getKey());
+
         KategoriLayanan::hitungPendaftar();
+
+        $sesi->refresh();
 
         return view('public.webinar_eksklusif.form_pendaftaran', [
             'sesi' => $sesi,
@@ -134,6 +148,10 @@ class PublicWebinarEksklusifController extends Controller
          * halaman iklan — bersamaan itu justru keadaan yang biasa, bukan yang
          * langka.
          */
+        // Lihat alasannya di daftar(): kursi yang ditinggalkan dilepas lebih
+        // dulu supaya pemeriksaan kuota di bawah memakai angka yang benar.
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->getKey());
+
         /*
          * PENJAGA PENDAFTARAN GANDA.
          *
@@ -402,6 +420,56 @@ class PublicWebinarEksklusifController extends Controller
     }
 
     /** Nomor telepon disimpan berangka saja supaya bisa langsung jadi tautan WA. */
+    /**
+     * Mengirim ULANG bukti pendaftaran ke email yang sama.
+     *
+     * Satu-satunya jalan kembali ke halaman ini adalah tautan bertoken. Kalau
+     * emailnya terhapus atau masuk folder sampah, orangnya kehilangan nomor
+     * pendaftaran dan cara bayarnya sekaligus — dan yang menanggung adalah
+     * panitia lewat WhatsApp.
+     *
+     * Dikirim ke alamat yang TERSIMPAN, bukan ke alamat yang diketik di
+     * borang: kalau penerimanya bisa ditentukan dari luar, siapa pun yang
+     * memegang tautan ini bisa memakainya untuk mengirimi orang lain.
+     */
+    public function kirimUlang(string $token)
+    {
+        $pendaftaran = WebinarEksklusifPendaftaran::where('token', $token)->first();
+
+        if ($pendaftaran === null) {
+            return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
+        }
+
+        $sesi = $pendaftaran->angkatan;
+
+        if ($sesi === null) {
+            return back()->with('error', 'Sesi pendaftaran ini sudah tidak ada.');
+        }
+
+        $this->kirimEmailPendaftaran($pendaftaran, $sesi);
+
+        return back()->with('sukses',
+            'Bukti pendaftaran dikirim ulang ke ' . $this->samarkanEmail($pendaftaran->email)
+            . '. Kalau belum masuk dalam beberapa menit, periksa folder spam.');
+    }
+
+    /**
+     * Email disamarkan di tengahnya sebelum ditampilkan.
+     *
+     * Halaman ini bisa dibuka siapa pun yang memegang tautannya — termasuk
+     * tautan yang ikut tersalin saat dibagikan. Menulis alamat lengkapnya di
+     * layar menyerahkan alamat orang lain kepada yang memegang tautan.
+     */
+    private function samarkanEmail(string $email): string
+    {
+        [$nama, $ranah] = array_pad(explode('@', $email, 2), 2, '');
+
+        $tampak = mb_substr($nama, 0, min(2, max(1, mb_strlen($nama) - 1)));
+
+        return $tampak . str_repeat('*', max(1, mb_strlen($nama) - mb_strlen($tampak)))
+            . ($ranah !== '' ? '@' . $ranah : '');
+    }
+
     /**
      * Mengirim bukti pendaftaran ke email pendaftar.
      *

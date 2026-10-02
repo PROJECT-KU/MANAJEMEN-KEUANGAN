@@ -23,6 +23,13 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             </div>
         @endif
 
+        @if (session('sukses'))
+            <div class="sta-sukses" role="status">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <span>{{ session('sukses') }}</span>
+            </div>
+        @endif
+
         @php($lunas = $pendaftaran->lunas)
         @php($habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired')
         @php($batal = $pendaftaran->status === 'cancel')
@@ -135,17 +142,45 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         <ol start="2">
                             <li>Kirim bukti transfer beserta nomor
                                 <code>{{ $pendaftaran->id_transaksi }}</code> ke panitia lewat WhatsApp.</li>
-                            <li>Panitia mengonfirmasi, lalu tautan masuk dikirim ke email Anda.</li>
+                            {{-- Yang BENAR-BENAR terjadi. Sebelumnya tertulis
+                                 "tautan masuk dikirim ke email Anda", padahal
+                                 tidak ada mekanismenya di sistem — panitia
+                                 membagikannya lewat grup. --}}
+                            <li>Panitia mengonfirmasi, lalu Anda dimasukkan ke grup peserta
+                                di WhatsApp — tautan masuk sesinya dibagikan di sana.</li>
                         </ol>
 
                         <a class="sta-wa"
-                            href="https://wa.me/6288983567819?text={{ rawurlencode('Halo, saya sudah mendaftar Webinar Eksklusif dengan nomor ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Berikut bukti transfernya.') }}"
+                            href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya sudah mendaftar Webinar Eksklusif dengan nomor ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Berikut bukti transfernya.') }}"
                             target="_blank" rel="noopener">
                             <i class="fab fa-whatsapp" aria-hidden="true"></i>
                             Kirim bukti transfer
                         </a>
                     </div>
                 @endif
+            @endif
+
+            {{--
+                Kirim ulang bukti pendaftaran.
+
+                Satu-satunya jalan kembali ke halaman ini adalah tautan
+                bertoken di email. Kalau emailnya terhapus atau masuk folder
+                sampah, orangnya kehilangan nomor pendaftaran dan cara
+                bayarnya sekaligus — dan yang menanggung panitia lewat
+                WhatsApp.
+
+                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
+                di sana tidak ada lagi yang perlu disimpan.
+            --}}
+            @if (! $batal && ! $habis)
+                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->token) }}"
+                    class="sta-kirim-ulang">
+                    @csrf
+                    <button type="submit">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        Kirim ulang bukti pendaftaran ke email saya
+                    </button>
+                </form>
             @endif
 
             <div class="sta-aksi">
@@ -186,17 +221,70 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     .sta-wadah { max-width: 640px; }
 
-    .sta-galat {
+    .sta-galat,
+    .sta-sukses {
         display: flex;
         align-items: flex-start;
         gap: 10px;
         margin-bottom: 22px;
         padding: 14px 18px;
         border-radius: 14px;
+        font-size: .9rem;
+    }
+
+    .sta-galat {
         border: 1px solid #fecaca;
         background: #fef2f2;
         color: #991b1b;
-        font-size: .9rem;
+    }
+
+    .sta-sukses {
+        border: 1px solid #a7f3d0;
+        background: #ecfdf5;
+        color: #065f46;
+    }
+
+    .sta-galat > .fas,
+    .sta-sukses > .fas { margin: 0 !important; margin-top: 2px !important; }
+
+    /* ---------------------------------------- kirim ulang bukti pendaftaran */
+
+    .sta-kirim-ulang { margin: 0 0 14px; text-align: center; }
+
+    .sta-kirim-ulang button {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 11px 18px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        color: #475569;
+        cursor: pointer;
+        transition: border-color .2s ease, color .2s ease, background .2s ease, transform .12s ease;
+    }
+
+    .sta-kirim-ulang button:hover {
+        border-color: var(--jingga, #ff6a00);
+        color: var(--jingga, #ff6a00);
+        background: #fff7ed;
+    }
+
+    .sta-kirim-ulang button:active { transform: scale(.97); }
+
+    .sta-kirim-ulang button > .fas { margin: 0 !important; }
+
+    .sta-kirim-ulang button:focus-visible {
+        outline: 3px solid rgba(255, 106, 0, .45);
+        outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sta-kirim-ulang button { transition: none !important; }
+        .sta-kirim-ulang button:active { transform: none !important; }
     }
 
     .sta-kartu {

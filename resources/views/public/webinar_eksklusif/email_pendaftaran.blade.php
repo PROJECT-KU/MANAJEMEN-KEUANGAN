@@ -37,7 +37,8 @@
                             Terima kasih, pendaftaran Anda untuk
                             <strong style="color:#0f2b5b;">{{ $sesi->nama }}</strong> sudah kami terima.
                             Simpan email ini — di dalamnya ada tautan untuk melihat status
-                            dan cara pembayaran Anda kapan saja.
+                            dan cara pembayaran Anda kapan saja. Tautan masuk ke sesinya
+                            dibagikan panitia lewat grup peserta di WhatsApp.
                         </p>
 
                         {{-- Nomor pendaftaran ditaruh paling menonjol: ini yang
