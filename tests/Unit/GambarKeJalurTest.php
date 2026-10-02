@@ -97,6 +97,83 @@ class GambarKeJalurTest extends TestCase
         $this->assertSame(600, $lebar, 'yang sudah di bawah batas dibiarkan apa adanya');
     }
 
+    /**
+     * JPEG dengan satu penanda warna di SUDUT KIRI ATAS, ditulis mendatar
+     * tetapi bertanda EXIF Orientation 6.
+     *
+     * Peramban memutar JPEG seperti ini saat menampilkannya, jadi di layar
+     * tampak tegak. GD mengabaikan tandanya dan WebP tidak membawanya - maka
+     * putarannya harus dibakukan ke pikselnya saat dikonversi.
+     */
+    private function buatJpegBerputar(): string
+    {
+        $jalur = $this->folder . '/berputar.jpg';
+
+        $im = imagecreatetruecolor(400, 200);
+        imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
+        // Penanda merah di sudut KIRI ATAS.
+        imagefilledrectangle($im, 0, 0, 59, 59, imagecolorallocate($im, 255, 0, 0));
+        imagejpeg($im, $jalur, 95);
+        imagedestroy($im);
+
+        /*
+         * Tanda EXIF disisipkan sebagai APP1 tepat sesudah SOI. Ditulis
+         * langsung karena PHP tidak punya penulis EXIF bawaan.
+         */
+        $isi = file_get_contents($jalur);
+
+        $tiff = "\x4D\x4D\x00\x2A\x00\x00\x00\x08"      // big-endian, IFD di offset 8
+            . "\x00\x01"                                     // satu entri
+            . "\x01\x12\x00\x03\x00\x00\x00\x01\x00\x06\x00\x00"  // Orientation = 6
+            . "\x00\x00\x00\x00";                          // tidak ada IFD berikutnya
+
+        $app1 = "Exif\x00\x00" . $tiff;
+        $segmen = "\xFF\xE1" . pack('n', strlen($app1) + 2) . $app1;
+
+        file_put_contents($jalur, substr($isi, 0, 2) . $segmen . substr($isi, 2));
+
+        return $jalur;
+    }
+
+    #[Test]
+    public function putaran_exif_dibakukan_ke_pikselnya(): void
+    {
+        $asal = $this->buatJpegBerputar();
+
+        $this->assertSame(6, @exif_read_data($asal)['Orientation'] ?? null,
+            'prasyarat ujinya: berkasnya memang harus bertanda Orientation 6');
+
+        $tujuan = $this->folder . '/tegak.webp';
+        $this->assertTrue(app(\App\Services\Gambar::class)->keJalur($asal, $tujuan));
+
+        [$lebar, $tinggi] = getimagesize($tujuan);
+
+        $this->assertGreaterThan($lebar, $tinggi,
+            'yang semula 400x200 mendatar harus jadi tegak sesudah putarannya dibakukan');
+
+        /*
+         * Arah putarannya diperiksa dari LETAK PENANDANYA, bukan dari ukuran
+         * saja - memutar 90 ke kiri dan ke kanan sama-sama menghasilkan
+         * gambar tegak, dan hanya satu di antaranya yang benar.
+         *
+         * Orientation 6 berarti diputar searah jarum jam saat ditampilkan,
+         * jadi penanda yang semula di kiri-atas pindah ke KANAN-ATAS.
+         */
+        $im = imagecreatefromwebp($tujuan);
+        $warna = function ($x, $y) use ($im) {
+            $c = imagecolorat($im, $x, $y);
+
+            return [($c >> 16) & 255, ($c >> 8) & 255, $c & 255];
+        };
+
+        [$r, $g, $b] = $warna($lebar - 10, 10);
+        imagedestroy($im);
+
+        $this->assertGreaterThan(180, $r, 'sudut kanan-atas harus merah');
+        $this->assertLessThan(90, $g);
+        $this->assertLessThan(90, $b);
+    }
+
     #[Test]
     public function berkas_yang_tidak_terbaca_mengembalikan_false(): void
     {

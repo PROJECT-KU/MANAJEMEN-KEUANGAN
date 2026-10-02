@@ -156,6 +156,8 @@ class Gambar
             return false;
         }
 
+        $sumber = $this->tegakkanDariExif($sumber, $jalurAsal);
+
         $hasil = $this->kecilkan($sumber);
 
         if ($hasil !== $sumber) {
@@ -172,6 +174,64 @@ class Gambar
         imagedestroy($hasil);
 
         return (bool) $berhasil;
+    }
+
+    /**
+     * Membakukan putaran EXIF ke pikselnya.
+     *
+     * BUKAN memutar gambar sesuka hati. Foto ponsel sering disimpan mendatar
+     * dengan satu tanda EXIF yang menyuruh penampilnya memutar; peramban
+     * menghormati tanda itu pada JPEG, jadi di layar tampak benar.
+     *
+     * GD mengabaikannya, dan WebP tidak membawa tanda itu. Jadi tanpa
+     * langkah ini, foto yang semula tampak tegak berubah jadi miring begitu
+     * dikonversi - terukur 2 Okt 2026 pada foto pemateri ber-Orientation 6.
+     *
+     * Hanya tiga nilai yang ditangani, dan hanya kalau tandanya MEMANG ada.
+     * Yang tanpa tanda tidak disentuh sama sekali.
+     */
+    private function tegakkanDariExif($gambar, string $jalur)
+    {
+        if (! function_exists('exif_read_data')) {
+            return $gambar;
+        }
+
+        $tentang = @getimagesize($jalur);
+
+        // exif_read_data() hanya berlaku untuk JPEG/TIFF; dipanggil pada
+        // format lain ia melempar peringatan tanpa guna.
+        if (($tentang[2] ?? null) !== IMAGETYPE_JPEG) {
+            return $gambar;
+        }
+
+        $exif = @exif_read_data($jalur);
+        $arah = $exif['Orientation'] ?? null;
+
+        /*
+         * imagerotate() memutar BERLAWANAN arah jarum jam untuk sudut positif
+         * - diperiksa langsung, bukan dibaca dari dokumentasi. Karena itu
+         * Orientation 6, yang perlu diputar searah jarum jam, memakai -90.
+         */
+        $derajat = match ($arah) {
+            3 => 180,
+            6 => -90,
+            8 => 90,
+            default => null,
+        };
+
+        if ($derajat === null) {
+            return $gambar;
+        }
+
+        $diputar = imagerotate($gambar, $derajat, 0);
+
+        if ($diputar === false) {
+            return $gambar;
+        }
+
+        imagedestroy($gambar);
+
+        return $diputar;
     }
 
     /** Membuang berkas WebP yang tidak dipakai lagi. */
