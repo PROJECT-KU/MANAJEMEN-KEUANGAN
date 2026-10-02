@@ -1015,6 +1015,98 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         }
     }
 
+    /* ================================================ GERAK SAAT DISENTUH */
+    /*
+     * Gerak di atas hanya terjadi sekali, saat halamannya dibuka. Yang di
+     * bawah ini hidup terus dan menjawab tindakan orang — itu yang membuat
+     * kendalinya terasa menanggapi, bukan gambar diam.
+     */
+
+    /*
+     * Tombol utama bernapas pelan. Lingkaran cahayanya mengembang lalu
+     * memudar tiap 3,2 detik — cukup untuk menarik mata ke tempat yang
+     * memang dituju halaman ini, cukup pelan untuk tidak mengganggu orang
+     * yang sedang mengisi.
+     *
+     * Berhenti saat tombolnya ditekan atau sedang dilayani: denyut pada
+     * tombol yang sudah dimatikan memberi janji yang tidak ditepati.
+     */
+    .ses-gerak .ses-tombol:not([disabled]) {
+        animation: ses-napas 3.2s ease-in-out infinite;
+    }
+
+    @keyframes ses-napas {
+        0%, 100% { box-shadow: 0 16px 30px -14px rgba(255, 106, 0, .7), 0 0 0 0 rgba(255, 106, 0, .34); }
+        55%      { box-shadow: 0 16px 30px -14px rgba(255, 106, 0, .7), 0 0 0 12px rgba(255, 106, 0, 0); }
+    }
+
+    /* Kilau yang menyapu tombol sesekali. overflow:hidden menahannya di
+       dalam lengkung tombolnya. */
+    .ses-tombol { position: relative; overflow: hidden; }
+
+    .ses-gerak .ses-tombol:not([disabled])::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 42%;
+        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .34), transparent);
+        animation: ses-kilau 4.6s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes ses-kilau {
+        0%, 62%  { left: -45%; }
+        92%, 100% { left: 110%; }
+    }
+
+    /*
+     * Umpan balik TEKAN. Ini yang paling sering dirasakan dan paling sering
+     * tidak ada: tanpa ini, menekan tombol di ponsel tidak memberi tanda apa
+     * pun sampai halamannya berganti, dan orang menekannya dua kali.
+     */
+    .ses-tombol:active:not([disabled]) { transform: scale(.975); }
+
+    .ses-hitung-tombol {
+        transition: background .18s ease, border-color .18s ease,
+                    transform .12s ease, color .18s ease;
+    }
+
+    .ses-hitung-tombol:hover {
+        border-color: var(--jingga);
+        color: var(--jingga);
+    }
+
+    .ses-hitung-tombol:active {
+        transform: scale(.9);
+        background: rgba(255, 106, 0, .14);
+        border-color: var(--jingga);
+        color: var(--jingga);
+    }
+
+    /* Jejak papan ketik dibuat terlihat — :focus-visible, bukan :focus,
+       supaya cincinnya tidak muncul saat ditekan tetikus. */
+    .ses-tombol:focus-visible,
+    .ses-hitung-tombol:focus-visible {
+        outline: 3px solid rgba(255, 106, 0, .45);
+        outline-offset: 3px;
+    }
+
+    /*
+     * Label ikut menyala saat isiannya sedang diisi. Di borang sepanjang
+     * ini, penanda baris mana yang sedang aktif menghemat satu lirikan tiap
+     * kali orang berpindah isian.
+     */
+    .ses-isian label { transition: color .18s ease; }
+    .ses-isian:focus-within label { color: var(--jingga); }
+
+    /* Keping ikon ikut membesar sedikit saat kartunya disentuh. */
+    @media (hover: hover) {
+        .ses-keping { transition: transform .25s ease; }
+        .ses-bahas:hover .ses-keping,
+        .ses-dapat:hover .ses-keping { transform: scale(1.1) rotate(-4deg); }
+    }
+
     /*
      * PENGHORMATAN PENUH pada pilihan sistem orangnya.
      *
@@ -1032,17 +1124,30 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         .ses-gerak .ses-fakta.tampak .ses-fakta-item,
         .ses-gerak .ses-tempel:not([hidden]),
         .ses-gerak .ses-lencana-merah,
+        .ses-gerak .ses-tombol:not([disabled]),
         .ses-total strong.ses-berubah,
         .ses-tempel strong.ses-berubah {
             animation: none !important;
         }
 
+        /* Kilau penyapu dibuang sama sekali, bukan cuma dihentikan — kalau
+           hanya animasinya yang dimatikan, pita putihnya diam menempel di
+           satu sisi tombol dan terlihat seperti cacat gambar. */
+        .ses-gerak .ses-tombol::after { display: none !important; }
+
         .ses-bahas, .ses-dapat, .ses-pemateri, .ses-flyer,
-        .ses-tombol, .ses-tombol > .fas, .ses-isian input {
+        .ses-tombol, .ses-tombol > .fas, .ses-isian input,
+        .ses-hitung-tombol, .ses-keping, .ses-isian label {
             transition: none !important;
         }
 
-        .ses-tombol:hover,
+        /* Panahnya ikut disebut. Mematikan transisinya saja tidak cukup —
+           transform:translateX(4px) tetap berlaku, cuma berpindahnya jadi
+           seketika. Terukur masih matrix(1,0,0,1,4,0) sebelum baris ini. */
+        .ses-tombol:hover > .fas,
+        .ses-tombol:hover, .ses-tombol:active,
+        .ses-hitung-tombol:active,
+        .ses-bahas:hover .ses-keping, .ses-dapat:hover .ses-keping,
         .ses-bahas:hover, .ses-dapat:hover, .ses-pemateri:hover, .ses-flyer:hover {
             transform: none !important;
         }
