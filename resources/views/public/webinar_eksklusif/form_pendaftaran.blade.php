@@ -205,6 +205,43 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         </div>
                     @endif
 
+                    {{--
+                        NOMOR WHATSAPP DITARUH PALING ATAS, dan itu yang
+                        membuat pengisian otomatisnya ada gunanya.
+
+                        Sebelumnya ia isian ketiga, sesudah nama dan email.
+                        Orang yang pernah mendaftar sudah terlanjur mengetik
+                        keduanya sebelum pencariannya sempat jalan — jadi
+                        fiturnya menghemat satu isian, bukan tiga.
+
+                        Dengan nomornya di muka, sisanya terisi sebelum ia
+                        menyentuh isian mana pun.
+                    --}}
+                    <div class="ses-isian">
+                        <label for="ses-telp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
+                        <input type="tel" id="ses-telp" name="telp" required maxlength="30"
+                            value="{{ old('telp', $isiAwal['telp'] ?? '') }}" placeholder="0812 3456 7890" autocomplete="tel"
+                            {{-- TANPA autofocus. Terukur: dengan autofocus
+                                 halaman terbuka sudah tergulir di 1340 px —
+                                 pengunjung mendarat langsung di borang dan
+                                 melewati judul sesi, tanggal, pemateri, dan
+                                 flyer, dan di ponsel papan ketiknya langsung
+                                 menutup separuh layar. --}}
+                            inputmode="numeric"
+                            aria-describedby="ses-telp-bantu @error('telp') ses-telp-salah @enderror"
+                            @error('telp') aria-invalid="true" @enderror>
+                        <p class="ses-bantu" id="ses-telp-bantu">
+                            Isi nomornya dulu — kalau Anda pernah mendaftar, sisanya kami isikan.
+                        </p>
+
+                        {{-- Kabar hasil pencarian. aria-live supaya pembaca
+                             layar ikut mendengar borangnya terisi sendiri —
+                             tanpa itu, isian yang berubah diam-diam justru
+                             membingungkan. --}}
+                        <p class="ses-isi-otomatis" id="ses-kabar-isi" role="status" aria-live="polite" hidden></p>
+                        @error('telp') <p class="ses-salah" id="ses-telp-salah">{{ $message }}</p> @enderror
+                    </div>
+
                     <div class="ses-isian">
                         <label for="ses-nama">Nama lengkap <span aria-hidden="true">*</span></label>
                         <input type="text" id="ses-nama" name="nama" required maxlength="120"
@@ -234,23 +271,6 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         --}}
                         <p class="ses-bantu" id="ses-email-bantu">Bukti pendaftaran dikirim ke sini.</p>
                         @error('email') <p class="ses-salah" id="ses-email-salah">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="ses-isian">
-                        <label for="ses-telp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
-                        <input type="tel" id="ses-telp" name="telp" required maxlength="30"
-                            value="{{ old('telp', $isiAwal['telp'] ?? '') }}" placeholder="0812 3456 7890" autocomplete="tel"
-                            inputmode="numeric"
-                            aria-describedby="ses-telp-bantu @error('telp') ses-telp-salah @enderror"
-                            @error('telp') aria-invalid="true" @enderror>
-                        <p class="ses-bantu" id="ses-telp-bantu">Dipakai menambahkan Anda ke grup peserta.</p>
-
-                        {{-- Kabar hasil pencarian. aria-live supaya pembaca
-                             layar ikut mendengar borangnya terisi sendiri —
-                             tanpa itu, isian yang berubah diam-diam justru
-                             membingungkan. --}}
-                        <p class="ses-isi-otomatis" id="ses-kabar-isi" role="status" aria-live="polite" hidden></p>
-                        @error('telp') <p class="ses-salah" id="ses-telp-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
@@ -1588,7 +1608,28 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     });
             }
 
-            // Saat selesai mengisi, bukan tiap ketukan.
+            /*
+             * Dicari saat mengetiknya BERHENTI sejenak, bukan hanya saat
+             * berpindah isian.
+             *
+             * Nomornya kini isian pertama. Kalau menunggu change/blur, sisanya
+             * baru terisi setelah orangnya sudah berpindah ke isian Nama — dan
+             * isian yang terisi sendiri tepat saat kursornya ada di sana
+             * justru mengagetkan. Dengan jeda, borangnya sudah lengkap sebelum
+             * ia menyentuh isian berikutnya.
+             *
+             * 600 ms: cukup lama untuk tidak mencari di tengah pengetikan
+             * nomor, cukup singkat untuk selesai sebelum orangnya berpindah.
+             */
+            var jadwal = null;
+
+            telp.addEventListener('input', function () {
+                clearTimeout(jadwal);
+                jadwal = setTimeout(cari, 600);
+            });
+
+            // Jaring pengaman: tempel dari papan klip atau isian otomatis
+            // peramban tidak selalu memicu 'input' di semua peramban.
             telp.addEventListener('change', cari);
             telp.addEventListener('blur', cari);
         })();
