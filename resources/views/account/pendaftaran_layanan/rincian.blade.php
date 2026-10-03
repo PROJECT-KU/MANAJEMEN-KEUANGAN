@@ -394,6 +394,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
      */
     $caraBayar = Pendaftaran::caraBayar($pendaftaran->cara_bayar ?? null);
 
+    /*
+     * Peserta lain dalam pendaftaran rombongan. Kelima tabel pendaftaran
+     * hanya menyimpan SATU nama, jadi tanpa ini daftar hadir rombongan tidak
+     * bisa dibuat dari sistem.
+     */
+    // Nama kolomnya berbeda tiap tabel (nama vs nama_pemesan), jadi dibaca
+    // dari katalog — bukan ditulis lima kali.
+    $kolomNama = Pendaftaran::sumber($layanan)['kolom']['nama_orang'];
+    $kolomEmail = Pendaftaran::sumber($layanan)['kolom']['email'];
+
+    $pesertaLain = \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())
+        ->terurut()
+        ->get(['nama', 'email']);
+
     $diskon = (int) ($pendaftaran->nominal_diskon ?: $pendaftaran->diskon);
 
     $berangkatan = Pendaftaran::berangkatan($layanan);
@@ -518,7 +532,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $bagianBayar = $bagianTab('bayar');
     $bagianSesi = $bagianTab('sesi');
 
-    $adaPeserta = $layanan === 'webinar_eksklusif' && $jumlahOrang > 1;
+    /*
+     * Tab peserta untuk SEMUA layanan, bukan webinar saja.
+     *
+     * Sejak panitia bisa mencatat nama rombongan untuk layanan mana pun,
+     * membatasinya ke webinar berarti nama yang sudah tersimpan tidak bisa
+     * dilihat di mana pun untuk empat layanan lainnya.
+     */
+    $adaPeserta = $jumlahOrang > 1 || $pesertaLain->isNotEmpty();
 
     /* Deret tab, hanya yang memang punya isi. */
     $tab = [['ringkasan', 'Ringkasan', 'fa-clipboard-check']];
@@ -575,6 +596,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 <p class="mis-sub">{{ $info['nama'] }} &middot; {{ $nomor }}</p>
             </div>
             <div class="mis-kepala-aksi">
+                {{-- Slip untuk diberikan ke orangnya. Pendaftar yang datang
+                     langsung dan membayar tunai sebelumnya pulang tanpa
+                     pegangan apa pun: nomor dan kode uniknya hanya ada di
+                     layar panitia dan di email — dan sebagian dari mereka
+                     tidak punya email. --}}
+                <a class="mis-tombol mis-tombol-halus" target="_blank" rel="noopener"
+                    href="{{ route('account.pendaftaran-layanan.slip', [$layanan, $pendaftaran->getKey()]) }}">
+                    <i class="fas fa-print" aria-hidden="true"></i> Cetak slip
+                </a>
                 <a class="mis-tombol mis-tombol-halus"
                     href="{{ route('account.pendaftaran-layanan.index', ['layanan' => $layanan]) }}">
                     <i class="fas fa-arrow-left" aria-hidden="true"></i> Kembali ke daftar
@@ -953,7 +983,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             id="rin-panel-peserta" role="tabpanel" aria-labelledby="rin-tab-peserta" tabindex="0">
 
                             @php
-                                $semuaPeserta = $pendaftaran->semuaPeserta();
+                                // Dirakit di sini, bukan lewat semuaPeserta():
+                                // metode itu hanya dipunyai model webinar,
+                                // sedangkan tabel pesertanya kini dipakai
+                                // kelima layanan.
+                                $semuaPeserta = collect([[
+                                    'nama' => (string) $pendaftaran->{$kolomNama},
+                                    'email' => (string) ($pendaftaran->{$kolomEmail} ?? ''),
+                                    'utama' => true,
+                                ]])->concat($pesertaLain->map(fn ($p) => [
+                                    'nama' => (string) $p->nama,
+                                    'email' => (string) ($p->email ?? ''),
+                                    'utama' => false,
+                                ]))->all();
+
                                 $terdaftar = count($semuaPeserta);
                             @endphp
 

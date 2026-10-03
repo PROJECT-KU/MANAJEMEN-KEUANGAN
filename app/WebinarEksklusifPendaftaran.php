@@ -174,9 +174,26 @@ class WebinarEksklusifPendaftaran extends Model
      */
     public function pesertaLain(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        // Selalu terurut seperti yang diketik pendaftarnya — created_at
-        // tidak bisa dipakai, beberapa baris lahir di detik yang sama.
-        return $this->hasMany(WebinarEksklusifPeserta::class, 'pendaftaran_id')->orderBy('urutan');
+        /*
+         * Diarahkan ke tabel peserta BERSAMA, bukan webinar_eksklusif_peserta.
+         *
+         * Tabel lama itu nol baris dan tidak pernah ditulis dari mana pun —
+         * satu-satunya pemakainya relasi ini. Sejak panitia bisa mencatat
+         * nama rombongan untuk layanan mana pun, dua tabel untuk satu hal
+         * yang sama berarti dua tempat yang harus diubah bersamaan selamanya.
+         *
+         * Tetap terurut seperti yang diketik; created_at tidak bisa dipakai,
+         * beberapa baris lahir di detik yang sama.
+         */
+        return $this->hasMany(PendaftaranPeserta::class, 'pendaftaran_id')
+            /*
+             * withAttributes(), BUKAN where(): keduanya menyaring sama, tetapi
+             * where() tidak menyetel kolomnya saat baris dibuat lewat relasi
+             * ini — barisnya ditolak MySQL dengan "Field 'layanan' doesn't
+             * have a default value".
+             */
+            ->withAttributes(['layanan' => 'webinar_eksklusif'])
+            ->orderBy('urutan');
     }
 
     /**

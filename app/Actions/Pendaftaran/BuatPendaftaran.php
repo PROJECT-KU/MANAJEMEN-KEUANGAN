@@ -147,6 +147,7 @@ class BuatPendaftaran
             $dibuat = $model::create($baris);
 
             $this->simpanBukti($layanan, $sumber, $dibuat, $isian['bukti'] ?? null);
+            $this->simpanPeserta($layanan, $dibuat, $isian['peserta'] ?? null, $jumlah);
 
             if ($angkatan !== null && $angkatan->total_kuota !== null) {
                 $angkatan->forceFill([
@@ -219,6 +220,59 @@ class BuatPendaftaran
             \Log::error('Bukti bayar gagal disimpan', [
                 'layanan' => $layanan,
                 'sebab' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Menyimpan nama peserta lain pada pendaftaran rombongan.
+     *
+     * Kelima tabel pendaftaran hanya punya SATU nama, sementara jumlahnya
+     * bisa lebih dari satu — jadi sebelum ini nama peserta selain pemesannya
+     * tidak tercatat di mana pun, dan daftar hadir rombongan tidak bisa
+     * dibuat dari sistem.
+     *
+     * Dibaca dari satu kotak teks, satu nama per baris. Bukan sederet isian
+     * terpisah: yang mengisinya panitia yang sedang menghadapi antrean, dan
+     * menempelkan daftar nama dari pesan WhatsApp jauh lebih cepat daripada
+     * mengetik ke lima kotak.
+     *
+     * Dibatasi jumlah yang dibayar: nama ke-enam pada rombongan berbayar lima
+     * adalah orang yang kursinya tidak pernah dibeli.
+     */
+    private function simpanPeserta(string $layanan, $model, $teks, int $jumlah): void
+    {
+        $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
+        $nama = [];
+
+        foreach ($baris as $b) {
+            // Penomoran yang ikut tersalin dari WhatsApp ("1. Budi") dibuang;
+            // nama orang tidak berawalan angka dan titik.
+            $bersih = trim(preg_replace('/^\s*\d+\s*[.)-]\s*/', '', $b));
+
+            if ($bersih !== '') {
+                $nama[] = mb_substr($bersih, 0, 255);
+            }
+        }
+
+        if ($nama === []) {
+            return;
+        }
+
+        /*
+         * Pemesannya sendiri sudah tercatat di baris pendaftarannya, jadi
+         * kotak ini untuk SISANYA — paling banyak jumlah dikurangi satu.
+         */
+        $nama = array_slice($nama, 0, max(0, $jumlah - 1));
+
+        foreach ($nama as $ke => $n) {
+            \App\PendaftaranPeserta::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $model->getKey(),
+                // Mulai dari 1: urutan 0 disediakan untuk pemesannya, yang
+                // tersimpan di baris pendaftarannya sendiri.
+                'urutan' => $ke + 1,
+                'nama' => $n,
             ]);
         }
     }

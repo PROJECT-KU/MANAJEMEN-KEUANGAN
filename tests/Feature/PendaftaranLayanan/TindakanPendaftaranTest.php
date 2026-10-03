@@ -741,6 +741,163 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertCount(6, array_unique($nominal), 'Nominalnya tidak boleh ada yang kembar.');
     }
 
+    #[Test]
+    public function nama_peserta_rombongan_tersimpan_dan_tampil(): void
+    {
+        /*
+         * Kelima tabel pendaftaran hanya punya SATU nama, sementara jumlahnya
+         * bisa lebih dari satu — terukur 6 baris sudah berjumlah lebih dari
+         * satu, dan nama peserta selain pemesannya tidak ada di mana pun.
+         * Daftar hadir rombongan jadi tidak bisa dibuat dari sistem.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemesan Rombongan',
+            'email' => 'rombongan' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0050',
+            'jumlah' => 3,
+            // Ditempel dari WhatsApp, lengkap dengan penomorannya.
+            'peserta' => "1. Budi Santoso\n2) Siti Rahma\n\n   ",
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemesan Rombongan')->first();
+        $this->assertNotNull($b);
+
+        $peserta = \App\PendaftaranPeserta::milik('scopus_camp', (string) $b->id)
+            ->terurut()->pluck('nama')->all();
+
+        // Penomorannya dibuang, baris kosongnya diabaikan, urutannya tetap.
+        $this->assertSame(['Budi Santoso', 'Siti Rahma'], $peserta);
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->id]))
+            ->assertOk()
+            ->assertSee('Budi Santoso')
+            ->assertSee('Siti Rahma')
+            ->assertSee('Pemesan Rombongan');
+    }
+
+    #[Test]
+    public function nama_peserta_dibatasi_jumlah_yang_dibayar(): void
+    {
+        /*
+         * Nama ke-empat pada rombongan berbayar tiga adalah orang yang
+         * kursinya tidak pernah dibeli — mencatatnya berarti daftar hadir
+         * yang lebih panjang daripada kursi yang terjual.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemesan Berlebih',
+            'email' => 'lebih' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0051',
+            'jumlah' => 2,
+            'peserta' => "Peserta Dua\nPeserta Tiga\nPeserta Empat",
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemesan Berlebih')->first();
+
+        $this->assertSame(
+            ['Peserta Dua'],
+            \App\PendaftaranPeserta::milik('scopus_camp', (string) $b->id)->terurut()->pluck('nama')->all(),
+            'Dua orang dibayar: pemesannya sendiri plus satu nama.'
+        );
+    }
+
+    #[Test]
+    public function peserta_rombongan_ikut_terhapus_bersama_pendaftarannya(): void
+    {
+        /*
+         * Pesertanya menunjuk pendaftarannya lewat pasangan (layanan,
+         * pendaftaran_id) tanpa kunci asing, jadi basis datanya tidak akan
+         * membersihkannya sendiri — barisnya akan tinggal sebagai yatim.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemesan Akan Dihapus',
+            'email' => 'hapus' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0052',
+            'jumlah' => 2,
+            'peserta' => 'Ikut Terhapus',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemesan Akan Dihapus')->first();
+        $id = (string) $b->id;
+
+        $this->assertSame(1, \App\PendaftaranPeserta::milik('scopus_camp', $id)->count());
+
+        $this->actingAs($orang)
+            ->delete(route('account.pendaftaran-layanan.hapus', ['scopus_camp', $id]))
+            ->assertRedirect();
+
+        $this->assertSame(
+            0,
+            \App\PendaftaranPeserta::milik('scopus_camp', $id)->count(),
+            'Pesertanya tidak boleh tertinggal sebagai baris yatim.'
+        );
+    }
+
+    #[Test]
+    public function slip_memuat_nomor_nominal_dan_peserta_rombongannya(): void
+    {
+        /*
+         * Pendaftar yang datang langsung dan membayar tunai sebelumnya pulang
+         * tanpa pegangan apa pun: nomor dan kode uniknya hanya ada di layar
+         * panitia dan di email — dan sebagian dari mereka tidak punya email.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemegang Slip',
+            'telp' => '0816-0000-0060',
+            'jumlah' => 2,
+            'peserta' => 'Teman Sebelah',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemegang Slip')->first();
+        $this->assertNotNull($b);
+
+        $jawab = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.slip', ['scopus_camp', $b->id]));
+
+        $jawab->assertOk();
+        $jawab->assertSee($b->id_transaksi);
+        $jawab->assertSee('Pemegang Slip');
+        $jawab->assertSee('Teman Sebelah');
+        $jawab->assertSee(number_format((int) $b->total_pembayaran, 0, ',', '.'));
+
+        // Nomor pendaftarannya dikirim tanpa email sama sekali — sejak email
+        // tidak lagi wajib, inilah satu-satunya pegangan orangnya.
+        $this->assertSame('', (string) $b->email);
+    }
+
+    #[Test]
+    public function slip_hanya_untuk_orang_dalam(): void
+    {
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        $baris = PendaftaranScopusCamp::first();
+
+        $this->assertNotNull($baris, 'Butuh satu baris untuk diuji.');
+
+        $this->actingAs($pelanggan)
+            ->get(route('account.pendaftaran-layanan.slip', ['scopus_camp', $baris->id]))
+            ->assertRedirect();
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User
