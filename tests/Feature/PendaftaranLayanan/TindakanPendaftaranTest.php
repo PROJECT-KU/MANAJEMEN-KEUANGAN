@@ -347,7 +347,7 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertNotNull($b);
         $this->assertSame('online', $b->varian);
-        $this->assertSame(900000, (int) $b->total_keseluruhan_pembayaran);
+        $this->assertSame(900000 + (int) $b->kode_unik_pembayaran, (int) $b->total_keseluruhan_pembayaran);
     }
 
     #[Test]
@@ -659,6 +659,86 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertNotNull($b);
         $this->assertSame('Sesi 1 — Menyusun pendahuluan', $b->sesi);
+    }
+
+    #[Test]
+    public function total_yang_diminta_sudah_memuat_kode_uniknya(): void
+    {
+        /*
+         * Kode uniknya harus MASUK ke total, bukan disimpan di sebelahnya.
+         *
+         * Begitulah jalur pendaftaran umum menyimpannya — terukur di basis
+         * data: total 4.500.072 dengan kode 72, 4.275.028 dengan kode 28.
+         * Jalur panitia dulu menyimpan 4.950.000 dengan kode 50, jadi nominal
+         * yang diminta tidak pernah memuat penandanya dan tidak ada transfer
+         * yang bisa dicocokkan dengannya. Suratnya bahkan menulis "angka 50 di
+         * ujungnya" pada angka yang berakhir 000.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '1000000'])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Kode Ikut',
+            'email' => 'kodeikut' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0040',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Peserta Kode Ikut')->first();
+
+        $this->assertNotNull($b);
+
+        $kode = (int) $b->kode_unik;
+        $total = (int) $b->total_pembayaran;
+
+        $this->assertGreaterThan(0, $kode, 'Scopus Camp memakai kode unik.');
+        $this->assertSame(1000000 + $kode, $total);
+
+        /*
+         * Tiga digit terakhir total HARUS sama dengan kode uniknya. Inilah
+         * yang dilihat panitia saat mencocokkan mutasi rekening, dan inilah
+         * yang dulu selalu 000.
+         */
+        $this->assertSame(
+            $kode,
+            $total % 1000,
+            'Tiga angka terakhir nominalnya harus kode uniknya sendiri.'
+        );
+    }
+
+    #[Test]
+    public function dua_pendaftar_seangkatan_tidak_pernah_bernominal_sama(): void
+    {
+        /*
+         * Nominal kembar membuat dua transfer tidak bisa dibedakan milik
+         * siapa. Pemeriksaannya mengadu kolom `total` apa adanya — sebab
+         * total itu SUDAH memuat kodenya; menambahkannya sekali lagi
+         * menghitung kodenya dua kali dan bentrokan yang sebenarnya tidak
+         * pernah terlihat.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '1000000'])->save();
+
+        $nominal = [];
+
+        for ($i = 1; $i <= 6; $i++) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Kembar Nominal ' . $i,
+                'email' => 'kembar' . $i . Str::random(6) . '@contoh.test',
+                'telp' => '0816-0000-01' . $i,
+                'abaikan_ganda' => '1',
+            ])->assertRedirect();
+
+            $nominal[] = (int) PendaftaranScopusCamp::where('nama', 'Kembar Nominal ' . $i)
+                ->value('total_pembayaran');
+        }
+
+        $this->assertCount(6, array_unique($nominal), 'Nominalnya tidak boleh ada yang kembar.');
     }
 
     // ------------------------------------------------------------- pembantu
@@ -1698,7 +1778,8 @@ class TindakanPendaftaranTest extends TestCase
         $jawab->assertRedirect(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->getKey()]));
 
         $this->assertSame('diproses', $baris->status, 'Status awalnya milik layanan itu.');
-        $this->assertSame(2700000, (int) $baris->total_pembayaran, '900.000 x 3 orang.');
+        $this->assertSame(2700000 + (int) $baris->kode_unik, (int) $baris->total_pembayaran,
+            '900.000 x 3 orang, plus kode uniknya.');
         $this->assertNotEmpty($baris->id_transaksi, 'Nomornya dibuat sistem.');
         $this->assertGreaterThan(0, (int) $baris->kode_unik, 'Kode uniknya dibuat sistem.');
         $this->assertStringContainsString('Didaftarkan panitia', (string) $baris->note);
@@ -1781,7 +1862,7 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertNotNull($b);
         // 900.000 x 2 = 1.800.000, dipotong 300.000.
-        $this->assertSame(1500000, (int) $b->total_pembayaran);
+        $this->assertSame(1500000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
         $this->assertSame(300000, (int) $b->nominal_diskon);
         $this->assertSame('SPONSOR', $b->kode_diskon);
         // Potongan yang tidak bisa dijelaskan enam bulan kemudian sama saja
@@ -1824,7 +1905,7 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertNotNull($b);
         // 1.000.000 x 2 = 2.000.000, potongan 10% = 200.000.
         $this->assertSame(200000, (int) $b->nominal_diskon);
-        $this->assertSame(1800000, (int) $b->total_pembayaran);
+        $this->assertSame(1800000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
         $this->assertSame('ALUMNI', $b->kode_diskon);
     }
 
@@ -1860,7 +1941,7 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertNotNull($b);
         $this->assertSame(100000, (int) $b->nominal_diskon, 'Hanya potongan alumni yang berlaku.');
-        $this->assertSame(900000, (int) $b->total_pembayaran);
+        $this->assertSame(900000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
         $this->assertSame('ALUMNI', $b->kode_diskon);
     }
 
@@ -1928,7 +2009,8 @@ class TindakanPendaftaranTest extends TestCase
         $b = PendaftaranScopusCamp::where('nama', 'Alumni Tanpa Aturan')->first();
 
         $this->assertNotNull($b);
-        $this->assertSame(1000000, (int) $b->total_pembayaran, 'Tidak ada potongan sama sekali.');
+        $this->assertSame(1000000 + (int) $b->kode_unik, (int) $b->total_pembayaran,
+            'Tidak ada potongan sama sekali.');
     }
 
     #[Test]
@@ -1953,7 +2035,8 @@ class TindakanPendaftaranTest extends TestCase
         $b = PendaftaranScopusCamp::where('nama', 'Potongan Kebablasan')->first();
 
         $this->assertNotNull($b);
-        $this->assertSame(0, (int) $b->total_pembayaran, 'Totalnya nol, bukan negatif.');
+        $this->assertSame((int) $b->kode_unik, (int) $b->total_pembayaran,
+            'Potongannya memakan seluruh tagihan; yang tersisa hanya kode uniknya.');
         $this->assertSame(500000, (int) $b->nominal_diskon, 'Potongannya dibatasi tagihannya.');
     }
 
@@ -1985,7 +2068,7 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertNotNull($b, 'Pendaftarannya tetap tersimpan, tidak gagal.');
         // Potongannya tetap mengurangi totalnya — yang tidak bisa cuma
         // mencatatnya di kolom tersendiri.
-        $this->assertSame(150000, (int) $b->total_keseluruhan_pembayaran);
+        $this->assertSame(150000 + (int) $b->kode_unik_pembayaran, (int) $b->total_keseluruhan_pembayaran);
     }
 
     #[Test]
@@ -2009,7 +2092,8 @@ class TindakanPendaftaranTest extends TestCase
         $baris = PendaftaranScopusKafe::where('nama', 'Pemesan Kafe Uji')->first();
 
         $this->assertNotNull($baris);
-        $this->assertSame(250000, (int) $baris->total_keseluruhan_pembayaran);
+        $this->assertSame(250000 + (int) $baris->kode_unik_pembayaran,
+            (int) $baris->total_keseluruhan_pembayaran);
         $this->assertSame('menunggu verifikasi', $baris->status);
         $this->assertNotEmpty($baris->id_pemesanan);
     }

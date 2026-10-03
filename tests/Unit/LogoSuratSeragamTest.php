@@ -17,6 +17,26 @@ class LogoSuratSeragamTest extends TestCase
 {
     private const LOGO = 'assets/img/logo-email.png';
 
+    /**
+     * Surat yang sengaja memakai logo YAYASAN, bukan logo alat.
+     *
+     * logo-email.png adalah logo MIS — "Management Integration System by
+     * Rumah Scopus" — dan itu memang pantas untuk surat akun dan keamanan,
+     * yang pembacanya orang dalam.
+     *
+     * Surat di daftar ini dibaca PENDAFTAR, bukan orang dalam. Mengirimi
+     * calon peserta logo alat administrasi internal menyampaikan merek yang
+     * salah, jadi yang dipakai LogoRSC.png. Ditetapkan 3 Okt 2026 atas
+     * permintaan pemilik produk sesudah melihat suratnya di kotak masuk.
+     *
+     * Daftar ini sengaja berupa daftar tertutup, bukan pengecualian terbuka:
+     * surat baru tetap memakai logo alat kecuali ada yang menuliskannya di
+     * sini beserta alasannya.
+     */
+    private const SURAT_YAYASAN = [
+        'emails/pendaftaran-dicatat.blade.php',
+    ];
+
     /** Berkas yang isinya surat, bukan halaman atau faktur. */
     private function templatSurat(): array
     {
@@ -50,6 +70,17 @@ class LogoSuratSeragamTest extends TestCase
         $melenceng = [];
 
         foreach ($this->templatSurat() as $relatif => $isi) {
+            if (in_array($relatif, self::SURAT_YAYASAN, true)) {
+                // Justru HARUS memakai logo yayasan; dibalik pemeriksaannya.
+                $this->assertStringContainsString(
+                    'LogoRSC',
+                    $isi,
+                    $relatif . ' terdaftar sebagai surat untuk pendaftar, jadi logonya logo yayasan.'
+                );
+
+                continue;
+            }
+
             if (str_contains($isi, 'LogoRSC')) {
                 $melenceng[] = $relatif;
             }

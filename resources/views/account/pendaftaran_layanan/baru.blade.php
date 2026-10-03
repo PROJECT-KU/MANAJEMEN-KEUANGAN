@@ -119,12 +119,20 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             background: linear-gradient(180deg, #c7d2fe 0%, #e0e7ff 55%, transparent 100%);
         }
 
+        /*
+         * Di ponsel relnya TETAP ADA, hanya lebih rapat.
+         *
+         * Versi sebelumnya membuangnya sama sekali supaya kartunya tidak
+         * tergeser 46px. Akibatnya urutan langkahnya justru terbaca paling
+         * lemah di layar yang paling sering dipakai. 26px cukup untuk
+         * menggambar relnya dan nomor yang lebih kecil, tanpa memakan lebar
+         * yang berarti.
+         */
         @media (max-width: 575.98px) {
-            /* Di ponsel kartunya sudah mepet tepi layar; rel menggeser seluruh
-               isinya 22px dan menyisakan lebar yang tidak sepadan dengan apa
-               yang didapat. */
             .bar-utama::before {
-                display: none;
+                left: 12px;
+                top: 28px;
+                bottom: 28px;
             }
         }
 
@@ -140,7 +148,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         @media (max-width: 575.98px) {
             .bar-langkah {
-                margin-left: 0;
+                margin-left: 26px;
             }
         }
 
@@ -179,11 +187,12 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         @media (max-width: 575.98px) {
             .bar-nomor {
-                position: static;
-                width: 30px;
-                height: 30px;
-                border-radius: 9px;
-                box-shadow: none;
+                left: -26px;
+                top: 9px;
+                width: 26px;
+                height: 26px;
+                font-size: .76rem;
+                box-shadow: 0 0 0 4px #f4f7ff;
             }
         }
 
@@ -555,6 +564,69 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         .mis-tombol[aria-busy="true"] {
             opacity: .65;
             pointer-events: none;
+        }
+
+        /* Yang baru saja dimasukkan: daftar ringkas di kolom samping. */
+        .bar-baru {
+            margin-top: 13px;
+            padding: 13px 15px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+        }
+
+        .bar-baru-judul {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 9px;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-3);
+        }
+
+        .bar-baru-daftar {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .bar-baru-daftar li + li {
+            margin-top: 3px;
+            padding-top: 3px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .bar-baru-daftar a {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 4px 0;
+            font-size: .8rem;
+            color: var(--mis-tinta);
+            text-decoration: none;
+        }
+
+        .bar-baru-daftar a:hover .bar-baru-nama {
+            text-decoration: underline;
+        }
+
+        .bar-baru-nama {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bar-baru-nomor {
+            flex: 0 0 auto;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            color: var(--mis-tinta-4);
         }
 
         /*
@@ -1181,11 +1253,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                             <span id="bar-sekilas-judul">Angkatan terpilih</span>
                         </p>
                         <dl class="bar-sekilas-isi">
-                            <div>
+                            <div id="bar-sekilas-baris-tanggal">
                                 <dt>Mulai</dt>
                                 <dd id="bar-sekilas-tanggal">—</dd>
                             </div>
-                            <div>
+                            <div id="bar-sekilas-baris-sisa">
                                 <dt>Sisa kursi</dt>
                                 <dd id="bar-sekilas-sisa">—</dd>
                             </div>
@@ -1403,15 +1475,18 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </div>
 
                     <div class="mis-isian">
-                        <label class="mis-label" for="bar-email">Email<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <label class="mis-label" for="bar-email">Email <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh kosong)</span></label>
                         <input type="email" class="form-control-modern @error('email') is-invalid @enderror" id="bar-email" @error('email') aria-invalid="true" @enderror name="email"
-                            value="{{ old('email') }}" required maxlength="255" autocomplete="off">
+                            value="{{ old('email') }}" maxlength="255" autocomplete="off">
                         @error('email')
                             <p class="bar-salah">
                                 <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
                                 <span>{{ $message }}</span>
                             </p>
                         @enderror
+                        <p class="mis-bantuan">
+                            Yang datang langsung sering tidak punya; nomor WhatsApp-nya yang wajib.
+                        </p>
                     </div>
 
                     <div class="mis-isian">
@@ -1534,6 +1609,31 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 <span id="bar-pola-nomor">nomornya mengikuti pola layanan yang dipilih</span>.
                 Kode unik itu yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
             </p>
+            {{-- Yang baru saja dimasukkan panitia ini hari ini.
+
+                 Sesudah "simpan & tambah lagi", panitia tidak bisa melihat
+                 siapa saja yang sudah ia masukkan tanpa meninggalkan borang —
+                 dan meninggalkan borang berarti kehilangan layanan serta
+                 angkatan yang sudah terpilih. --}}
+            @if ($baruSaja->isNotEmpty())
+                <div class="bar-baru">
+                    <p class="bar-baru-judul">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        Baru saja Anda masukkan hari ini
+                    </p>
+                    <ul class="bar-baru-daftar">
+                        @foreach ($baruSaja as $r)
+                            <li>
+                                <a href="{{ route('account.pendaftaran-layanan.rincian', [$r->layanan, $r->id]) }}">
+                                    <span class="bar-baru-nama">{{ $r->nama_orang }}</span>
+                                    <span class="bar-baru-nomor">{{ $r->nomor }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             </aside>
             </div>{{-- /bar-kerja --}}
 
@@ -1603,6 +1703,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var panelPotongan = el('bar-panel-potongan');
         var sekilas = el('bar-sekilas');
         var sekilasJudul = el('bar-sekilas-judul');
+        var barisTanggal = el('bar-sekilas-baris-tanggal');
+        var barisSisa = el('bar-sekilas-baris-sisa');
         var sekilasTanggal = el('bar-sekilas-tanggal');
         var sekilasSisa = el('bar-sekilas-sisa');
         var sekilasHarga = el('bar-sekilas-harga');
@@ -1698,9 +1800,19 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                  * tahu angkatan mana yang masih longgar — dan angkatan yang
                  * sudah penuh baru ketahuan sesudah kirimannya ditolak.
                  */
-                var sisa = a.sisa_kuota === null
-                    ? 'tanpa batas kuota'
-                    : ('sisa ' + a.sisa_kuota + ' kursi');
+                /*
+                 * Angkatan yang kursinya habis DITANDAI dan tidak bisa
+                 * dipilih. Peladen memang menolaknya, tetapi orangnya baru
+                 * tahu sesudah seluruh borang terisi — dan pilihan yang pasti
+                 * ditolak lebih baik tidak ditawarkan sejak awal.
+                 */
+                var penuh = a.sisa_kuota !== null && a.sisa_kuota <= 0;
+
+                o.disabled = penuh;
+
+                var sisa = penuh
+                    ? 'PENUH'
+                    : (a.sisa_kuota === null ? 'tanpa batas kuota' : ('sisa ' + a.sisa_kuota + ' kursi'));
 
                 var bagian = [];
 
@@ -1795,6 +1907,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             ket.textContent = kata.join(', ') + '.';
 
             sekilasJudul.textContent = a.nomor ? ('Angkatan ke-' + a.nomor) : a.nama;
+            tampil(barisTanggal, true);
+            tampil(barisSisa, true);
             sekilasTanggal.textContent = a.tanggal || 'belum dijadwalkan';
             sekilasSisa.textContent = a.sisa_kuota === null
                 ? 'tanpa batas'
@@ -2038,9 +2152,17 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     + ' belum disetel di Tarif Layanan, jadi nominalnya diketik sendiri.';
             }
 
+            /*
+             * Dua baris pertama DISEMBUNYIKAN untuk layanan tanpa angkatan.
+             *
+             * Scopus Kafe tidak punya tanggal mulai maupun kuota, jadi
+             * sebelumnya keduanya terisi kalimat pengisi — "menyesuaikan
+             * jadwal sesi" dan "tanpa batas" — dan dua dari tiga baris
+             * kartunya tidak membawa keterangan apa pun.
+             */
             sekilasJudul.textContent = daftar[r.value] || 'Varian terpilih';
-            sekilasTanggal.textContent = 'menyesuaikan jadwal sesi';
-            sekilasSisa.textContent = 'tanpa batas';
+            tampil(barisTanggal, false);
+            tampil(barisSisa, false);
             sekilasHarga.textContent = harga ? rupiah(harga) : 'belum disetel';
             tampil(sekilas, true);
 
