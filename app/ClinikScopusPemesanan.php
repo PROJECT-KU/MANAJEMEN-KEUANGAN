@@ -37,6 +37,7 @@ class ClinikScopusPemesanan extends Model
         'gambar',
         'ip_address',
         'browser',
+        'cara_bayar',
     ];
 
     protected $keyType = 'string';

@@ -150,6 +150,7 @@ class PendaftaranLayananController extends Controller
             'terpilih' => $terpilih,
             'angkatan' => $angkatan,
             'alumni' => $this->persenAlumni(array_keys($katalog)),
+            'caraBayar' => Pendaftaran::caraBayarPilihan(),
         ]);
     }
 
@@ -202,6 +203,14 @@ class PendaftaranLayananController extends Controller
             'potongan' => ['nullable', 'string', 'max:20'],
             'kode_potongan' => ['nullable', 'string', 'max:40'],
             'alumni' => ['nullable', 'boolean'],
+            /*
+             * Dibatasi ke yang boleh dipilih panitia. 'doku' sengaja TIDAK
+             * termasuk: nilainya ditulis jalur pendaftaran umum saat
+             * tagihannya dibuat, dan menerimanya dari borang ini berarti baris
+             * bertanda dibayar daring tanpa tagihan yang pernah ada.
+             */
+            'cara_bayar' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'uang_diterima' => ['nullable', 'boolean'],
         ];
 
         $layanan = (string) $request->input('layanan');
@@ -218,6 +227,7 @@ class PendaftaranLayananController extends Controller
             'kategori_id' => 'angkatan',
             'telp' => 'nomor WhatsApp',
             'total' => 'total bayar',
+            'cara_bayar' => 'cara bayar',
         ]);
 
         $hasil = (new BuatPendaftaran)->jalankan($layanan, $request->all(), $this->siapa());
@@ -639,6 +649,15 @@ class PendaftaranLayananController extends Controller
         $sampai = $this->tanggal($request->input('sampai'));
 
         /*
+         * Saringan cara bayar. Daftar putihnya SELURUH katalog, bukan hanya
+         * yang boleh dipilih panitia: baris berbayar DOKU tidak bisa dibuat
+         * dari layar ini, tetapi tetap harus bisa dicari dari sini.
+         */
+        $caraBayar = array_key_exists((string) $request->input('bayar'), Pendaftaran::CARA_BAYAR)
+            ? (string) $request->input('bayar')
+            : '';
+
+        /*
          * Pendaftaran yang menunggu terlalu lama. Nilainya cuma ada/tidak,
          * jadi apa pun selain '1' dianggap tidak dipakai.
          */
@@ -670,6 +689,7 @@ class PendaftaranLayananController extends Controller
             'menggantung' => $menggantung,
             'keadaanDipilih' => $keadaanDipilih,
             'bukti' => $bukti,
+            'caraBayar' => $caraBayar,
             'urut' => $urut,
             'arah' => $arah,
             /*
@@ -680,7 +700,7 @@ class PendaftaranLayananController extends Controller
              */
             'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== ''
                 || $bukti !== '' || $angkatan !== '' || $dari !== '' || $sampai !== ''
-                || $menggantung,
+                || $caraBayar !== '' || $menggantung,
         ];
     }
 
@@ -738,8 +758,19 @@ class PendaftaranLayananController extends Controller
             ->when($p['sampai'] !== '', fn ($q) => $q->where(
                 'waktu', '<', \Illuminate\Support\Carbon::parse($p['sampai'])->addDay()->toDateString() . ' 00:00:00'
             ))
+            ->when($p['caraBayar'] !== '', fn ($q) => $q->where('cara_bayar', $p['caraBayar']))
+            /*
+             * Yang membayar di tempat DIKECUALIKAN dari penanda menggantung.
+             *
+             * Penanda ini mencari pendaftar yang sudah lama menunggu tanpa
+             * kabar supaya ditagih. Pembayar tunai tidak sedang ditunggu
+             * transfernya — ia menyerahkan uangnya saat datang — jadi
+             * memasukkannya berarti daftar tagihan yang isinya orang yang
+             * tidak perlu ditagih, dan daftar seperti itu berhenti dibaca.
+             */
             ->when($p['menggantung'], fn ($q) => $q
                 ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
+                ->where('cara_bayar', '<>', 'tunai')
                 ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString()))
             ->when($p['bukti'] === 'ada', fn ($q) => $q->whereNotNull('bukti')->where('bukti', '<>', ''))
             ->when($p['bukti'] === 'belum', fn ($q) => $q->where(function ($sub) {
@@ -897,6 +928,7 @@ class PendaftaranLayananController extends Controller
             ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
             ->when($angkatan !== '', fn ($q) => $q->where('angkatan_id', $angkatan))
             ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
+            ->where('cara_bayar', '<>', 'tunai')
             ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString())
             ->count();
 
@@ -934,6 +966,9 @@ class PendaftaranLayananController extends Controller
                 'belum' => 'Belum diunggah',
                 default => null,
             },
+            'Cara bayar' => $p['caraBayar'] !== ''
+                ? Pendaftaran::CARA_BAYAR[$p['caraBayar']]['label']
+                : null,
             /*
              * Rentang tanggalnya WAJIB tercetak di berkas unduhan. Berkas
              * berisi pendaftaran satu bulan yang tidak menyebut bulannya
