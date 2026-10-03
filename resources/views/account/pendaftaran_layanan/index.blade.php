@@ -677,6 +677,15 @@ Pendaftar Layanan | MIS Rumah Scopus
                 </p>
             </div>
             <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
+                {{-- Tombol UTAMA, diletakkan pertama dan berwarna penuh:
+                     mendaftarkan orang itu tindakan, sementara kedua unduhan
+                     adalah pelengkap. Sebelum ada ini, yang mendaftar lewat
+                     WhatsApp atau datang langsung tidak bisa dimasukkan sama
+                     sekali. --}}
+                <a class="mis-tombol mis-tombol-ungu"
+                    href="{{ route('account.pendaftaran-layanan.baru') }}">
+                    <i class="fas fa-user-plus" aria-hidden="true"></i> Daftarkan
+                </a>
                 {{-- Unduhan membawa saringan yang sedang dipakai, bukan seluruh
                      tabel: yang diunduh orang hampir selalu yang dilihatnya.
                      Dua bentuk, bukan satu — PDF untuk dibaca dan dilampirkan,

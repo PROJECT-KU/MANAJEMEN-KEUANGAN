@@ -59,6 +59,12 @@ class PendaftaranSemuaLayanan
             'warna' => 'mis-hijau',
             'bukti_folder' => 'ScopusCamp',
             'kolom_catatan' => 'note',
+            'status_awal' => 'diproses',
+            'nomor_pola' => 'acak5',
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_transaksi',
+            'kode_unik_rentang' => [1, 99],
+            'boleh_dibuat_panitia' => true,
             'model' => \App\PendaftaranScopusCamp::class,
             'angkatan_model' => \App\CategoriesScopusCamp::class,
             'berangkatan' => true,
@@ -97,6 +103,12 @@ class PendaftaranSemuaLayanan
             'warna' => 'mis-ungu',
             'bukti_folder' => 'bibliometrik',
             'kolom_catatan' => 'note',
+            'status_awal' => 'diproses',
+            'nomor_pola' => 'acak5',
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_transaksi',
+            'kode_unik_rentang' => [1, 99],
+            'boleh_dibuat_panitia' => true,
             'model' => \App\AnalisisBibliometrik::class,
             'angkatan_model' => \App\CategoriesAnalisisBibliometrik::class,
             'berangkatan' => true,
@@ -138,6 +150,12 @@ class PendaftaranSemuaLayanan
             // lewat tangkapan layar. Terukur nol dari 4 baris berisi gambar.
             'bukti_folder' => null,
             'kolom_catatan' => 'note',
+            'status_awal' => 'pending',
+            'nomor_pola' => 'we_berurut',
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_transaksi',
+            'kode_unik_rentang' => [500, 1500],
+            'boleh_dibuat_panitia' => true,
             'model' => \App\WebinarEksklusifPendaftaran::class,
             'angkatan_model' => \App\KategoriLayanan::class,
             'berangkatan' => true,
@@ -178,6 +196,12 @@ class PendaftaranSemuaLayanan
             // tabel ini tidak punya tempat mencatat jejak sama sekali, dan
             // 11 dari 187 baris perubahannya tidak terlacak.
             'kolom_catatan' => 'note',
+            'status_awal' => 'menunggu verifikasi',
+            'nomor_pola' => 'acak5',
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_pemesanan',
+            'kode_unik_rentang' => [1, 999],
+            'boleh_dibuat_panitia' => true,
             'model' => \App\PendaftaranScopusKafe::class,
             'angkatan_model' => null,
             'berangkatan' => false,
@@ -209,6 +233,12 @@ class PendaftaranSemuaLayanan
             'tabel' => 'clinikscopus_pemesanan',
             'bukti_folder' => 'ClinikScopusPemesanan',
             'kolom_catatan' => 'note',
+            'status_awal' => 'pending',
+            'nomor_pola' => 'booking',
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_transaksi',
+            'kode_unik_rentang' => [1000, 1500],
+            'boleh_dibuat_panitia' => false,
             'model' => \App\ClinikScopusPemesanan::class,
             'angkatan_model' => null,
             'berangkatan' => false,
@@ -440,6 +470,153 @@ class PendaftaranSemuaLayanan
         }
 
         return self::SUMBER[$layanan]['surat'][$status] ?? null;
+    }
+
+    /**
+     * Status yang dipakai pendaftaran yang baru dibuat.
+     *
+     * Berbeda di tiap layanan — 'diproses', 'pending', dan 'menunggu
+     * verifikasi' — dan ketiganya berarti hal yang sama: uangnya belum masuk.
+     * Diambil dari katalog, bukan ditebak dari keadaan 'menunggu': keadaan
+     * itu memuat ketiga nilainya sekaligus dan tidak tahu mana milik layanan
+     * yang mana.
+     */
+    public static function statusAwal(string $layanan): ?string
+    {
+        return self::SUMBER[$layanan]['status_awal'] ?? null;
+    }
+
+    /**
+     * Nomor pendaftaran baru, mengikuti pola layanan yang bersangkutan.
+     *
+     * Tiga pola yang sudah dipakai jalur publik, dan ketiganya dipertahankan
+     * apa adanya supaya baris yang dibuat panitia tidak bisa dibedakan dari
+     * yang didaftarkan sendiri oleh orangnya:
+     *
+     *   acak5       lima huruf/angka besar — Scopus Camp, Bibliometrik, Kafe
+     *   we_berurut  WE-YYYYMMDD-NNNN, berurut dalam satu hari
+     *   booking     BOOK-dmYHis-ACAK5 — Clinik Scopus
+     *
+     * Keunikannya DIPERIKSA ke basis data, bukan diandaikan: lima aksara acak
+     * dari 36 kemungkinan memberi 60 juta kombinasi, tetapi "jarang
+     * bertabrakan" bukan "tidak pernah", dan nomor kembar berarti dua orang
+     * menyebut nomor yang sama saat menghubungi panitia.
+     */
+    public static function nomorBaru(string $layanan): string
+    {
+        $sumber = self::SUMBER[$layanan] ?? null;
+
+        if ($sumber === null) {
+            throw new \InvalidArgumentException('Layanan tidak dikenali: ' . $layanan);
+        }
+
+        /*
+         * Kolom tempat nomornya DITULIS, bukan ungkapan yang dipakai
+         * membacanya. Untuk Clinik Scopus keduanya berbeda: pembacanya
+         * COALESCE atas dua kolom, dan memakainya di `where` membuat MySQL
+         * mencari kolom bernama "COALESCE(...)" yang jelas tidak ada.
+         */
+        $kolom = $sumber['kolom_nomor'];
+        $model = $sumber['model'];
+
+        for ($coba = 0; $coba < 40; $coba++) {
+            $nomor = match ($sumber['nomor_pola']) {
+                'we_berurut' => self::nomorWebinar(),
+                'booking' => 'BOOK-' . now()->format('dmYHis') . '-' . self::acak(5),
+                default => self::acak(5),
+            };
+
+            if (! $model::where($kolom, $nomor)->exists()) {
+                return $nomor;
+            }
+        }
+
+        throw new \RuntimeException(
+            'Tidak menemukan nomor pendaftaran yang belum terpakai untuk ' . $layanan . '.'
+        );
+    }
+
+    /**
+     * Rentang kode unik yang dipakai satu layanan.
+     *
+     * Berbeda-beda, dan angkanya DIBACA dari data yang sudah ada supaya
+     * pendaftaran yang dibuat panitia tidak terlihat ganjil di sebelah yang
+     * didaftarkan sendiri: Scopus Camp dan Bibliometrik 1-99, Scopus Kafe
+     * sampai 999, Clinik Scopus 1.000-1.500, Webinar 500-1.500.
+     *
+     * @return array{0:int, 1:int}
+     */
+    public static function rentangKodeUnik(string $layanan): array
+    {
+        return self::SUMBER[$layanan]['kode_unik_rentang'] ?? [1, 999];
+    }
+
+    /** Kolom tempat nomor pendaftaran ditulis. */
+    public static function kolomNomor(string $layanan): ?string
+    {
+        return self::SUMBER[$layanan]['kolom_nomor'] ?? null;
+    }
+
+    /** Lima aksara dari abjad besar dan angka — pola jalur publik. */
+    private static function acak(int $panjang): string
+    {
+        $huruf = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $hasil = '';
+
+        for ($i = 0; $i < $panjang; $i++) {
+            $hasil .= $huruf[random_int(0, strlen($huruf) - 1)];
+        }
+
+        return $hasil;
+    }
+
+    /**
+     * WE-YYYYMMDD-NNNN, berurut dalam satu hari.
+     *
+     * Urutannya dihitung dari nomor TERBESAR hari itu, bukan dari jumlah
+     * barisnya: pendaftaran yang dihapus akan membuat hitungan baris memberi
+     * nomor yang sudah pernah dipakai.
+     */
+    private static function nomorWebinar(): string
+    {
+        $awalan = 'WE-' . now()->format('Ymd') . '-';
+
+        $terakhir = \App\WebinarEksklusifPendaftaran::where('id_transaksi', 'like', $awalan . '%')
+            ->orderByDesc('id_transaksi')
+            ->value('id_transaksi');
+
+        $urutan = $terakhir === null ? 1 : ((int) substr($terakhir, -4)) + 1;
+
+        return $awalan . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Apakah panitia boleh membuat pendaftaran layanan ini dari layar admin.
+     *
+     * Clinik Scopus TIDAK: pemesanannya mengikat sesi tertentu, trainer yang
+     * mendampingi, dan akun pelanggan — ketiganya kolom NOT NULL yang menunjuk
+     * baris lain, dan borang yang menebaknya akan membuat pemesanan yang
+     * menunjuk sesi atau trainer yang salah. Pemesanan Clinik dibuat lewat
+     * alurnya sendiri, yang memang memilih ketiganya.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function katalogBisaDibuat(): array
+    {
+        $hasil = [];
+
+        foreach (self::SUMBER as $kunci => $s) {
+            if (($s['boleh_dibuat_panitia'] ?? false) === true) {
+                $hasil[$kunci] = [
+                    'nama' => $s['nama'],
+                    'ikon' => $s['ikon'],
+                    'warna' => $s['warna'],
+                    'berangkatan' => (bool) ($s['berangkatan'] ?? false),
+                ];
+            }
+        }
+
+        return $hasil;
     }
 
     /** Apakah layanan ini memakai angkatan berkuota. */
