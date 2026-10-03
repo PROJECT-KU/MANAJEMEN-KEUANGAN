@@ -787,11 +787,21 @@ class PendaftaranSemuaLayanan
         }
 
         return self::$angkatan = KategoriLayanan::query()
-            ->get(['id', 'layanan', 'nama', 'mulai', 'total_kuota', 'sisa_kuota'])
+            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai', 'total_kuota', 'sisa_kuota'])
             ->mapWithKeys(fn ($a) => [$a->id => [
                 'layanan' => (string) $a->layanan,
                 'nama' => (string) $a->nama,
                 'ringkas' => self::namaRingkas((string) $a->layanan, (string) $a->nama),
+                /*
+                 * Nomor angkatannya — "batch ke berapa".
+                 *
+                 * Terisi di seluruh 59 angkatan, dan rentangnya jauh berbeda
+                 * antar tempat: Scopus Camp Yogyakarta sudah angkatan ke-202
+                 * sementara Jakarta baru ke-9. Jadi nama tempat saja tidak
+                 * cukup menunjuk satu angkatan, dan merekap tanpa nomornya
+                 * berarti menggabungkan dua ratus angkatan jadi satu baris.
+                 */
+                'nomor' => ($a->nama_ke === null || $a->nama_ke === '') ? null : (string) $a->nama_ke,
                 'mulai' => $a->mulai,
                 'total_kuota' => $a->total_kuota === null ? null : (int) $a->total_kuota,
                 'sisa_kuota' => $a->sisa_kuota === null ? null : (int) $a->sisa_kuota,
@@ -836,6 +846,32 @@ class PendaftaranSemuaLayanan
         $ringkas = trim((string) preg_replace($pola, '', $nama));
 
         return $ringkas === '' ? $nama : $ringkas;
+    }
+
+    /**
+     * Sebutan angkatan untuk berkas unduhan: nama penuh + nomornya.
+     *
+     * Dipakai PDF dan lembar kerja, yang justru berkas yang dipakai merekap —
+     * dan rekap yang menyebut "Scopus Camp Yogyakarta" tanpa nomornya
+     * menggabungkan dua ratus angkatan jadi satu baris.
+     */
+    public static function sesiUntukBerkas(object $baris): ?string
+    {
+        $angkatan = self::angkatanBaris($baris);
+
+        if ($angkatan === null) {
+            return self::sesiBaris($baris);
+        }
+
+        return $angkatan['nomor'] === null
+            ? $angkatan['nama']
+            : $angkatan['nama'] . ' — angkatan ke-' . $angkatan['nomor'];
+    }
+
+    /** Nomor angkatan satu baris, atau null. Dipakai kolom tersendiri di lembar kerja. */
+    public static function nomorAngkatanBaris(object $baris): ?string
+    {
+        return self::angkatanBaris($baris)['nomor'] ?? null;
     }
 
     /**

@@ -777,6 +777,195 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
+    public function nomor_angkatan_tampil_di_daftar_dan_ikut_kedua_berkas(): void
+    {
+        /*
+         * "Batch ke berapa" — yang dipakai admin merekap.
+         *
+         * Nama tempat saja TIDAK menunjuk satu angkatan: terukur, Scopus Camp
+         * Yogyakarta sudah angkatan ke-202 sementara Jakarta baru ke-9. Rekap
+         * yang menyebut "Scopus Camp Yogyakarta" tanpa nomornya menggabungkan
+         * dua ratus angkatan jadi satu baris.
+         *
+         * Diperiksa di KETIGA tempat sekaligus — layar, PDF, dan lembar
+         * kerja — sebab yang diunduh untuk direkap justru dua yang terakhir,
+         * dan nomor yang hanya ada di layar tidak menolong siapa pun.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Kota ' . $tanda,
+            'nama_ke' => '202',
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        $p = PendaftaranScopusCamp::create([
+            'id_transaksi' => 'NOMOR-' . $tanda,
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Nomor ' . $tanda,
+            'email' => $tanda . '@contoh.test',
+            'telp' => '0811-0000-0031',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        // 1. Di layar daftar.
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]))
+            ->assertOk()
+            ->assertSee('#202')
+            ->assertSee('Angkatan ke-202');
+
+        $baris = Pendaftaran::kueri()->where('id', $p->getKey())->first();
+
+        // 2. Di PDF — lewat sebutan yang dipakai templatnya.
+        $this->assertSame(
+            'Scopus Camp Kota ' . $tanda . ' — angkatan ke-202',
+            Pendaftaran::sesiUntukBerkas($baris)
+        );
+
+        // 3. Di lembar kerja, sebagai KOLOM TERSENDIRI supaya bisa dipakai
+        //    mengelompokkan — nomor yang menempel di dalam untaian nama tidak
+        //    bisa.
+        $ekspor = new \App\Exports\PendaftaranLayananExport(
+            collect([$baris]), Pendaftaran::katalog(), []
+        );
+
+        $kepala = $ekspor->headings();
+        $isi = $ekspor->array()[0];
+
+        $kolom = array_search('Angkatan ke-', $kepala, true);
+
+        $this->assertNotFalse($kolom, 'Lembar kerja harus punya kolom nomor angkatan.');
+        $this->assertSame('202', $isi[$kolom]);
+        $this->assertSame(count($kepala), count($isi), 'Jumlah kolom isi dan kepalanya harus sama.');
+    }
+
+    #[Test]
+    public function pencarian_menemukan_lewat_nama_dan_nomor_angkatan(): void
+    {
+        /*
+         * Orang mencari lewat apa yang mereka ingat, dan untuk merekap yang
+         * diingat biasanya "Yogyakarta" atau "202" — bukan nomor pendaftaran
+         * seseorang. Sebelum ini keduanya mengembalikan nol hasil.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Palu' . $tanda,
+            'nama_ke' => '777',
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        PendaftaranScopusCamp::create([
+            'id_transaksi' => 'CARIANGKATAN-' . $tanda,
+            'kategori_id' => $angkatan->id,
+            // Namanya sengaja TIDAK memuat kata yang dicari, supaya yang
+            // terbukti memang pencocokan lewat angkatannya.
+            'nama' => 'Orang Biasa Saja',
+            'email' => $tanda . '@contoh.test',
+            'telp' => '0811-0000-0033',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        foreach (['Palu' . $tanda, '777'] as $kataKunci) {
+            $this->actingAs($orang)
+                ->get(route('account.pendaftaran-layanan.index', ['cari' => $kataKunci]))
+                ->assertOk()
+                ->assertSee('CARIANGKATAN-' . $tanda);
+
+            $this->flushSession();
+        }
+    }
+
+    #[Test]
+    public function nomor_angkatan_dicocokkan_persis_bukan_sebagian(): void
+    {
+        /*
+         * Dengan LIKE, mencari "7" akan menarik angkatan ke-7, ke-70, ke-77,
+         * dan ke-777 sekaligus — dan rekap yang mengira dirinya satu angkatan
+         * sebenarnya memuat empat.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $a777 = KategoriLayanan::create([
+            'layanan' => 'scopus_camp', 'nama' => 'Scopus Camp Tujuh' . $tanda,
+            'nama_ke' => '777', 'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20', 'sisa_kuota' => '20', 'status' => 'active',
+        ]);
+
+        PendaftaranScopusCamp::create([
+            'id_transaksi' => 'TIGATUJUH-' . $tanda,
+            'kategori_id' => $a777->id,
+            'nama' => 'Peserta Tujuh Ratus', 'email' => 't' . $tanda . '@contoh.test',
+            'telp' => '0811-0000-0034', 'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000', 'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        // '7' TIDAK boleh menarik angkatan ke-777.
+        $halaman = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => '7', 'layanan' => 'scopus_camp']));
+
+        $halaman->assertOk();
+        $halaman->assertDontSee('TIGATUJUH-' . $tanda);
+    }
+
+    #[Test]
+    public function angkatan_tanpa_nomor_tidak_menampilkan_apa_apa(): void
+    {
+        // Kolom nama_ke boleh kosong; yang tidak boleh adalah layar atau
+        // berkas yang menulis "angkatan ke-" lalu berhenti.
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Tanpa Nomor ' . Str::random(5),
+            'nama_ke' => null,
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        $p = PendaftaranScopusCamp::create([
+            'id_transaksi' => 'TANPA-' . Str::random(6),
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Tanpa Nomor',
+            'email' => Str::random(6) . '@contoh.test',
+            'telp' => '0811-0000-0032',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        $baris = Pendaftaran::kueri()->where('id', $p->getKey())->first();
+
+        $this->assertNull(Pendaftaran::nomorAngkatanBaris($baris));
+        $this->assertStringNotContainsString('angkatan ke-', (string) Pendaftaran::sesiUntukBerkas($baris));
+        $this->assertSame($angkatan->nama, Pendaftaran::sesiUntukBerkas($baris));
+    }
+
+    #[Test]
     public function menu_angkatan_hanya_memuat_yang_punya_pendaftar(): void
     {
         /*

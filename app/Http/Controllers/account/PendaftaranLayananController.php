@@ -535,6 +535,7 @@ class PendaftaranLayananController extends Controller
             $keluar[$a['layanan']][] = [
                 'id' => $id,
                 'ringkas' => $a['ringkas'],
+                'nomor' => $a['nomor'],
                 'mulai' => $a['mulai'],
             ];
         }
@@ -720,6 +721,37 @@ class PendaftaranLayananController extends Controller
                 $q->where(function ($sub) use ($cari) {
                     foreach (['nomor', 'nama_orang', 'email', 'affiliasi'] as $kolom) {
                         $sub->orWhere($kolom, 'LIKE', '%' . $cari . '%');
+                    }
+
+                    /*
+                     * Nama dan NOMOR angkatannya ikut dicari.
+                     *
+                     * Orang mencari lewat apa yang mereka ingat, dan untuk
+                     * merekap yang diingat biasanya "Yogyakarta" atau "202" —
+                     * bukan nomor pendaftaran seseorang. Sebelum ini keduanya
+                     * mengembalikan nol hasil, sebab kueri gabungannya cuma
+                     * membawa id angkatannya.
+                     *
+                     * Dicocokkan di PHP atas keterangan angkatan yang sudah
+                     * dibaca sekali per permintaan, lalu diserahkan sebagai
+                     * daftar id — jadi tidak ada join maupun kueri tambahan.
+                     */
+                    $idAngkatan = [];
+
+                    foreach (Pendaftaran::angkatanLengkap() as $id => $a) {
+                        $cocokNama = stripos($a['nama'], $cari) !== false;
+                        // Nomornya dicocokkan PERSIS, bukan sebagian: dengan
+                        // LIKE, mencari "2" akan menarik angkatan ke-2, ke-20,
+                        // ke-200, dan ke-202 sekaligus.
+                        $cocokNomor = $a['nomor'] !== null && $a['nomor'] === $cari;
+
+                        if ($cocokNama || $cocokNomor) {
+                            $idAngkatan[] = $id;
+                        }
+                    }
+
+                    if ($idAngkatan !== []) {
+                        $sub->orWhereIn('angkatan_id', $idAngkatan);
                     }
 
                     /*
