@@ -1108,6 +1108,108 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertSame(5000000, (int) $b->nominal_diskon);
     }
 
+    #[Test]
+    public function pesanan_lembaga_boleh_melebihi_kuota_angkatannya(): void
+    {
+        /*
+         * Kuota 20 kursi sedangkan lembaga rutin memesan lebih — dan memaksa
+         * pesanan 30 orang dipecah ke dua angkatan berarti memecah satu
+         * rombongan yang seharusnya berangkat bersama, hanya karena angkanya
+         * tidak bulat. Keputusan pemilik produk, 4 Okt 2026.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'PIC Lembaga Besar',
+            'telp' => '0816-0000-0110',
+            'jumlah' => 30,
+            'lembaga_nama' => 'Universitas Besar ' . Str::random(4),
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'PIC Lembaga Besar')->first();
+
+        $this->assertNotNull($b, 'Pesanan lembaga 30 orang di kuota 20 harus tersimpan.');
+        $this->assertSame(30, (int) $b->jumlah_pendaftar);
+
+        /*
+         * Sisa kuotanya MINUS, bukan dijepit ke nol: dijepit, angkatan
+         * berkuota 20 yang diisi 30 terbaca "sisa 0" — sama persis dengan yang
+         * diisi tepat 20, dan kelebihannya hilang dari layar.
+         */
+        $this->assertSame(
+            -10,
+            (int) $angkatan->refresh()->sisa_kuota,
+            'Kelebihannya harus terlihat sebagai angka minus.'
+        );
+
+        // Jejaknya menyebut kelebihannya; enam bulan kemudian tidak ada yang
+        // ingat kenapa angkatan itu berisi 30 orang.
+        $this->assertStringContainsString('MELEBIHI kuota angkatan sebanyak 10 kursi', (string) $b->note);
+    }
+
+    #[Test]
+    public function pendaftar_perorangan_tetap_ditolak_kalau_kursinya_kurang(): void
+    {
+        /*
+         * Kuota itulah yang menjaga kelasnya tidak kebanjiran orang yang
+         * mendaftar sendiri-sendiri; kelonggarannya HANYA untuk pesanan
+         * lembaga.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Perorangan Rakus',
+            'telp' => '0816-0000-0111',
+            'jumlah' => 30,
+        ])->assertRedirect();
+
+        $this->assertNull(
+            PendaftaranScopusCamp::where('nama', 'Perorangan Rakus')->first(),
+            'Tanpa pesanan lembaga, kiriman yang melebihi kuota tetap ditolak.'
+        );
+
+        $this->assertSame(20, (int) $angkatan->refresh()->sisa_kuota, 'Kuotanya tidak boleh bergeser.');
+    }
+
+    #[Test]
+    public function angkatan_yang_sudah_kelebihan_tetap_bisa_ditambah_lembaga(): void
+    {
+        /*
+         * Pesanan lembaga sering datang bertahap. Angkatan yang sudah minus
+         * harus tetap menerima tambahan dari pesanan yang sama — kalau tidak,
+         * pembatasnya pindah dari kuota ke "sudah terlanjur lewat sekali".
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $lembaga = \App\PemesananLembaga::create([
+            'nama_lembaga' => 'Lembaga Bertahap',
+            'pic_nama' => 'PIC',
+            'dibuat_oleh' => 'uji',
+        ]);
+
+        foreach ([25, 5] as $ke => $jml) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Tahap ' . $ke,
+                'telp' => '0816-0000-012' . $ke,
+                'jumlah' => $jml,
+                'pemesanan_id' => $lembaga->id,
+                'abaikan_ganda' => '1',
+            ])->assertRedirect();
+        }
+
+        $this->assertSame(-10, (int) $angkatan->refresh()->sisa_kuota, '20 - 25 - 5 = -10.');
+        $this->assertSame(2, $lembaga->baris()->count());
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User

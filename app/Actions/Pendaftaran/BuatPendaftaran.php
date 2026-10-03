@@ -43,8 +43,13 @@ class BuatPendaftaran
         $galat = null;
         $dibuat = null;
 
+        // Berapa kursi yang MELEBIHI kuota angkatannya; 0 kalau masih muat.
+        // Dibawa keluar transaksi supaya pesan hasilnya bisa menyebutkannya.
+        $lewatKuota = 0;
+
         DB::transaction(function () use (
-            $layanan, $sumber, $isian, $jumlah, $olehSiapa, &$angkatan, &$galat, &$dibuat
+            $layanan, $sumber, $isian, $jumlah, $olehSiapa,
+            &$angkatan, &$galat, &$dibuat, &$lewatKuota
         ) {
             /*
              * Angkatannya DIKUNCI sebelum kuotanya dibaca.
@@ -71,7 +76,26 @@ class BuatPendaftaran
                     return;
                 }
 
-                if ($angkatan->total_kuota !== null && (int) $angkatan->sisa_kuota < $jumlah) {
+                /*
+                 * Pesanan LEMBAGA boleh melebihi kuota angkatannya.
+                 *
+                 * Kuotanya 20 kursi sedangkan lembaga rutin memesan lebih —
+                 * dan memaksa pesanan 30 orang dipecah ke dua angkatan berarti
+                 * memecah satu rombongan yang seharusnya berangkat bersama,
+                 * hanya karena angkanya tidak bulat. Keputusan pemilik produk,
+                 * 4 Okt 2026.
+                 *
+                 * Hanya untuk pesanan lembaga: pendaftar perorangan tetap
+                 * ditolak, sebab kuota itulah yang menjaga kelasnya tidak
+                 * kebanjiran orang yang mendaftar sendiri-sendiri.
+                 */
+                $bolehLewat = trim((string) ($isian['pemesanan_id'] ?? '')) !== '';
+
+                if ($angkatan->total_kuota !== null) {
+                    $lewatKuota = max(0, $jumlah - (int) $angkatan->sisa_kuota);
+                }
+
+                if (! $bolehLewat && $angkatan->total_kuota !== null && (int) $angkatan->sisa_kuota < $jumlah) {
                     $galat = 'Kursinya tidak cukup — tersisa ' . (int) $angkatan->sisa_kuota
                         . ' dari ' . (int) $angkatan->total_kuota . '.';
 
@@ -156,7 +180,7 @@ class BuatPendaftaran
 
             $baris = $this->rakitKolom(
                 $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa,
-                $potongan, $kodePotongan
+                $potongan, $kodePotongan, $lewatKuota
             );
 
             $model = $sumber['model'];
@@ -185,8 +209,20 @@ class BuatPendaftaran
             }
 
             if ($angkatan !== null && $angkatan->total_kuota !== null) {
+                /*
+                 * TANPA max(0, …): sisa kuota boleh minus, dan itu disengaja.
+                 *
+                 * Dijepit ke nol, angkatan berkuota 20 yang diisi 30 orang
+                 * terbaca "sisa 0" — sama persis dengan yang diisi tepat 20.
+                 * Kelebihannya hilang dari layar, padahal justru itu yang
+                 * harus dilihat panitia saat menyiapkan ruangan dan
+                 * konsumsinya.
+                 *
+                 * Tidak bisa minus di luar pesanan lembaga: pemeriksaan di
+                 * atas sudah menolak yang melebihi.
+                 */
                 $angkatan->forceFill([
-                    'sisa_kuota' => (string) max(0, (int) $angkatan->sisa_kuota - $jumlah),
+                    'sisa_kuota' => (string) ((int) $angkatan->sisa_kuota - $jumlah),
                 ])->save();
             }
         });
@@ -201,7 +237,10 @@ class BuatPendaftaran
             'berhasil' => true,
             'model' => $dibuat,
             'pesan' => 'Pendaftaran ' . $dibuat->{Pendaftaran::kolomNomor($layanan)}
-                . ' atas nama ' . ($isian['nama'] ?? '-') . ' tersimpan.',
+                . ' atas nama ' . ($isian['nama'] ?? '-') . ' tersimpan.'
+                . ($lewatKuota > 0
+                    ? ' Angkatannya kini KELEBIHAN ' . $lewatKuota . ' kursi dari kuotanya.'
+                    : ''),
         ];
     }
 
@@ -529,7 +568,8 @@ class BuatPendaftaran
         int $kodeUnik,
         ?string $olehSiapa,
         int $potongan = 0,
-        string $kodePotongan = 'KHUSUS'
+        string $kodePotongan = 'KHUSUS',
+        int $lewatKuota = 0
     ): array {
         $kolom = $sumber['kolom'];
 
@@ -655,6 +695,7 @@ class BuatPendaftaran
             $jejak = 'Didaftarkan panitia' . ($olehSiapa !== null ? ' oleh ' . $olehSiapa : '')
                 . ' pada ' . now()->format('d M Y H:i')
                 . ', ' . Pendaftaran::caraBayar($caraBayar)['label']
+                . ($lewatKuota > 0 ? ' — MELEBIHI kuota angkatan sebanyak ' . $lewatKuota . ' kursi' : '')
                 . ($lunasTunai ? ' (uang sudah diterima)' : '')
                 . ($potongan > 0
                     ? ' dengan potongan Rp ' . number_format($potongan, 0, ',', '.')
