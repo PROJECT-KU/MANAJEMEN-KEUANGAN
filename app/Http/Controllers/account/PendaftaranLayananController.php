@@ -172,6 +172,8 @@ class PendaftaranLayananController extends Controller
             'affiliasi' => ['nullable', 'string', 'max:255'],
             'jumlah' => ['nullable', 'integer', 'min:1', 'max:99'],
             'note' => ['nullable', 'string', 'max:1000'],
+            'potongan' => ['nullable', 'string', 'max:20'],
+            'kode_potongan' => ['nullable', 'string', 'max:40'],
         ];
 
         $layanan = (string) $request->input('layanan');

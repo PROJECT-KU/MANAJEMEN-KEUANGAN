@@ -152,17 +152,95 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             grid-column: 1 / -1;
         }
 
-        /* Ringkasan biaya: menempel di bawah layar supaya angkanya terlihat
-           tanpa menggulung kembali ke atas saat mengisi nama. */
+        /*
+         * Isian yang nilainya pendek TIDAK melar selebar kartu.
+         *
+         * Menu angkatan sempat merentang 1.500px untuk satu baris teks, dan
+         * isian selebar itu membuat mata menyapu jauh tanpa alasan. Dibatasi
+         * 520px — cukup untuk nama angkatan terpanjang beserta harga dan sisa
+         * kursinya — dan tetap menyusut sendiri di layar sempit.
+         */
+        .bar-penuh > select,
+        .bar-penuh > input {
+            max-width: 520px;
+        }
+
+        /* Batang biaya: angka besar di kiri, rincian di tengah, tombol di
+           kanan. Satu baris di layar lebar, menumpuk di ponsel. */
         .bar-biaya {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px 18px;
-            padding: 15px 18px;
+            gap: 14px 22px;
+            padding: 16px 20px;
             border: 1px solid var(--mis-garis);
             border-radius: var(--mis-radius);
             background: linear-gradient(135deg, #faf5ff 0%, #eef2ff 100%);
+        }
+
+        .bar-biaya-angka-blok {
+            flex: 0 0 auto;
+        }
+
+        /*
+         * Rincian biaya sebagai daftar istilah, bukan kalimat.
+         *
+         * <dl> dipakai memang untuk pasangan label-nilai, dan pembaca layar
+         * mengumumkannya sebagai pasangan — kalimat "harga 5.500.000 dikali 2
+         * dikurangi 500.000" menuntut didengar sampai habis untuk tahu
+         * angkanya.
+         */
+        .bar-rinci {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 20px;
+            margin: 0;
+            padding-left: 20px;
+            border-left: 1px solid #ddd6fe;
+        }
+
+        .bar-rinci > div {
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
+        }
+
+        .bar-rinci dt {
+            margin: 0;
+            font-size: .7rem;
+            font-weight: 600;
+            color: var(--mis-tinta-4);
+        }
+
+        .bar-rinci dd {
+            margin: 0;
+            font-size: .82rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--mis-tinta-2);
+        }
+
+        /* Potongan bertinta hijau dan berawalan minus: ia MENGURANGI, dan
+           angka yang mengurangi di antara angka yang menambah harus terbaca
+           berbeda tanpa membaca labelnya. */
+        .bar-rinci-kurang {
+            color: #047857 !important;
+        }
+
+        .bar-catatan-bawah {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 11px 2px 0;
+            font-size: .76rem;
+            line-height: 1.5;
+            color: var(--mis-tinta-4);
+        }
+
+        .bar-catatan-bawah i {
+            flex: 0 0 auto;
+            margin-top: 3px;
+            font-size: inherit;
         }
 
         .bar-biaya-angka {
@@ -185,6 +263,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         .bar-biaya-aksi {
             margin-left: auto;
+            align-self: center;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -292,6 +371,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <label>
                             <input type="radio" name="layanan" value="{{ $kunci }}"
                                 data-berangkatan="{{ $l['berangkatan'] ? '1' : '0' }}"
+                                data-potongan="{{ $l['bisa_potongan'] ? '1' : '0' }}"
                                 @checked(old('layanan', $terpilih) === $kunci) required>
                             <span class="bar-kartu">
                                 <span class="mis-medali {{ $l['warna'] }}" aria-hidden="true">
@@ -322,18 +402,25 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </p>
             </div>
 
-            {{-- ----------------------------------- langkah 2: angkatan --}}
-            <div class="mis-kartu bar-langkah" id="bar-langkah-angkatan">
+            {{-- ------------------------------ langkah 2: angkatan & biaya --}}
+            {{-- SELALU ada, tidak pernah disembunyikan.
+
+                 Versi sebelumnya menyembunyikan langkah ini untuk layanan
+                 tanpa angkatan, sehingga nomor langkahnya melompat 1 ke 3 dan
+                 terbaca seperti ada yang rusak. Sekarang isinya yang berganti:
+                 angkatan untuk yang berangkatan, nominal ketik untuk yang
+                 tidak — keduanya sama-sama "berapa yang dibayar". --}}
+            <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
                     <span class="bar-nomor" aria-hidden="true">2</span>
                     <div>
-                        <p class="bar-langkah-judul">Angkatan mana?</p>
-                        <p class="bar-langkah-sub">Harga dan sisa kursinya ikut dari angkatan yang dipilih.</p>
+                        <p class="bar-langkah-judul">Berapa yang dibayar?</p>
+                        <p class="bar-langkah-sub" id="bar-sub-biaya">Pilih layanannya dulu.</p>
                     </div>
                 </div>
 
                 <div class="bar-isian-kisi">
-                    <div class="mis-isian bar-penuh">
+                    <div class="mis-isian bar-penuh" id="bar-bungkus-angkatan">
                         <label class="mis-label" for="bar-angkatan">Angkatan</label>
                         <select class="form-control-modern" id="bar-angkatan" name="kategori_id">
                             <option value="">Pilih layanan dulu</option>
@@ -341,6 +428,44 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <p class="mis-bantuan" id="bar-angkatan-ket">
                             Hanya angkatan yang belum lewat yang ditawarkan.
                         </p>
+                    </div>
+
+                    <div class="mis-isian" id="bar-bungkus-jumlah">
+                        <label class="mis-label" for="bar-jumlah">Jumlah orang</label>
+                        <input type="number" class="form-control-modern" id="bar-jumlah" name="jumlah"
+                            value="{{ old('jumlah', 1) }}" min="1" max="99">
+                        <p class="mis-bantuan">Untuk pendaftaran rombongan.</p>
+                    </div>
+
+                    <div class="mis-isian" id="bar-bungkus-total" hidden>
+                        <label class="mis-label" for="bar-total">Total bayar</label>
+                        <input type="text" class="form-control-modern" id="bar-total" name="total"
+                            value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
+                        <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
+                    </div>
+
+                    {{-- Potongan KHUSUS, di atas potongan bawaan angkatannya.
+
+                         Angkatan sudah punya diskonnya sendiri dan itu sudah
+                         terhitung di harganya; yang ini untuk hal yang tidak
+                         bisa diketahui angkatan — peserta yang disponsori,
+                         harga mitra, atau kesepakatan di tempat. --}}
+                    <div class="mis-isian" id="bar-bungkus-potongan">
+                        <label class="mis-label" for="bar-potongan">Potongan khusus</label>
+                        <input type="text" class="form-control-modern" id="bar-potongan" name="potongan"
+                            value="{{ old('potongan') }}" inputmode="numeric" placeholder="boleh dikosongkan">
+                        <p class="mis-bantuan">Rupiah, di luar diskon angkatannya.</p>
+                    </div>
+
+                    <div class="mis-isian" id="bar-bungkus-kode">
+                        <label class="mis-label" for="bar-kode-potongan">Alasan potongan</label>
+                        <input type="text" class="form-control-modern" id="bar-kode-potongan"
+                            name="kode_potongan" value="{{ old('kode_potongan') }}" maxlength="40"
+                            placeholder="mis. SPONSOR, MITRA">
+                        {{-- Tanpa keterangan, potongan Rp 500.000 pada satu
+                             pendaftaran tidak bisa dijelaskan siapa pun enam
+                             bulan kemudian. --}}
+                        <p class="mis-bantuan">Supaya potongannya bisa dijelaskan nanti.</p>
                     </div>
                 </div>
             </div>
@@ -351,7 +476,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     <span class="bar-nomor" aria-hidden="true">3</span>
                     <div>
                         <p class="bar-langkah-judul">Siapa yang mendaftar?</p>
-                        <p class="bar-langkah-sub">Empat isian; sisanya diisi sistem sendiri.</p>
+                        <p class="bar-langkah-sub">Empat isian; nomor, status, dan kode uniknya diisi sistem.</p>
                     </div>
                 </div>
 
@@ -382,20 +507,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                             placeholder="boleh dikosongkan">
                     </div>
 
-                    <div class="mis-isian" id="bar-bungkus-jumlah">
-                        <label class="mis-label" for="bar-jumlah">Jumlah orang</label>
-                        <input type="number" class="form-control-modern" id="bar-jumlah" name="jumlah"
-                            value="{{ old('jumlah', 1) }}" min="1" max="99">
-                        <p class="mis-bantuan">Untuk pendaftaran rombongan.</p>
-                    </div>
-
-                    <div class="mis-isian" id="bar-bungkus-total" hidden>
-                        <label class="mis-label" for="bar-total">Total bayar</label>
-                        <input type="text" class="form-control-modern" id="bar-total" name="total"
-                            value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
-                        <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
-                    </div>
-
                     <div class="mis-isian bar-penuh">
                         <label class="mis-label" for="bar-note">Catatan panitia</label>
                         <textarea class="form-control-modern" id="bar-note" name="note" rows="2"
@@ -404,20 +515,32 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
             </div>
 
-            {{-- -------------------------------------------- ringkasan --}}
+            {{-- -------------------------------------------- biaya --}}
             <div class="bar-biaya">
-                <div>
+                <div class="bar-biaya-angka-blok">
                     <p class="bar-biaya-angka" id="bar-angka">Rp 0</p>
-                    <p class="bar-biaya-label">Perkiraan total bayar</p>
+                    <p class="bar-biaya-label">Total bayar</p>
                 </div>
 
-                <p class="mis-bantuan" style="margin: 0; max-width: 340px;">
-                    {{-- Disebut di muka supaya nomor dan kode unik yang muncul
-                         di halaman berikutnya tidak terasa datang entah dari
-                         mana. --}}
-                    Nomor pendaftaran, status, dan kode unik dibuat sistem sesudah disimpan.
-                    Kode unik yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
-                </p>
+                {{-- Rinciannya disebut, bukan cuma hasil akhirnya: panitia yang
+                     memberi potongan perlu melihat potongannya memang masuk,
+                     dan yang tidak memberi potongan tidak perlu melihat baris
+                     yang selalu nol. Karena itu tiap barisnya hanya muncul
+                     saat memang ada isinya. --}}
+                <dl class="bar-rinci" id="bar-rinci" hidden>
+                    <div id="bar-rinci-satuan" hidden>
+                        <dt>Harga satuan</dt>
+                        <dd id="bar-nilai-satuan">—</dd>
+                    </div>
+                    <div id="bar-rinci-jumlah" hidden>
+                        <dt>Jumlah orang</dt>
+                        <dd id="bar-nilai-jumlah">—</dd>
+                    </div>
+                    <div id="bar-rinci-potongan" hidden>
+                        <dt>Potongan khusus</dt>
+                        <dd id="bar-nilai-potongan" class="bar-rinci-kurang">—</dd>
+                    </div>
+                </dl>
 
                 <div class="bar-biaya-aksi">
                     <a class="mis-tombol mis-tombol-halus" href="{{ route('account.pendaftaran-layanan.index') }}">
@@ -428,6 +551,17 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </button>
                 </div>
             </div>
+
+            {{-- Keterangan apa yang dibuat sistem ditaruh DI BAWAH batang
+                 biaya, bukan di dalamnya: ia dibaca sekali lalu tidak pernah
+                 dilihat lagi, sementara angka di atasnya dilihat tiap kali
+                 isiannya berubah. --}}
+            <p class="bar-catatan-bawah">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                Nomor pendaftaran, status, dan kode unik dibuat sistem sesudah disimpan.
+                Kode unik itu yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
+            </p>
+
         </form>
 
     </section>
@@ -456,22 +590,46 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             return;
         }
 
-        var menuAngkatan = document.getElementById('bar-angkatan');
-        var langkahAngkatan = document.getElementById('bar-langkah-angkatan');
-        var bungkusTotal = document.getElementById('bar-bungkus-total');
-        var bungkusJumlah = document.getElementById('bar-bungkus-jumlah');
-        var isianTotal = document.getElementById('bar-total');
-        var isianJumlah = document.getElementById('bar-jumlah');
-        var angka = document.getElementById('bar-angka');
-        var ket = document.getElementById('bar-angkatan-ket');
+        var el = function (id) { return document.getElementById(id); };
+
+        var menuAngkatan = el('bar-angkatan');
+        var bungkusAngkatan = el('bar-bungkus-angkatan');
+        var bungkusJumlah = el('bar-bungkus-jumlah');
+        var bungkusTotal = el('bar-bungkus-total');
+        var bungkusPotongan = el('bar-bungkus-potongan');
+        var bungkusKode = el('bar-bungkus-kode');
+        var isianTotal = el('bar-total');
+        var isianJumlah = el('bar-jumlah');
+        var isianPotongan = el('bar-potongan');
+        var angka = el('bar-angka');
+        var ket = el('bar-angkatan-ket');
+        var subBiaya = el('bar-sub-biaya');
+
+        var rinci = el('bar-rinci');
+        var rinciSatuan = el('bar-rinci-satuan');
+        var rinciJumlah = el('bar-rinci-jumlah');
+        var rinciPotongan = el('bar-rinci-potongan');
+        var nilaiSatuan = el('bar-nilai-satuan');
+        var nilaiJumlah = el('bar-nilai-jumlah');
+        var nilaiPotongan = el('bar-nilai-potongan');
 
         var rupiah = function (n) {
             return 'Rp ' + (n || 0).toLocaleString('id-ID');
         };
 
+        var angkaDari = function (teks) {
+            var n = parseInt(String(teks || '').replace(/\D+/g, ''), 10);
+            return isNaN(n) ? 0 : n;
+        };
+
         var layananTerpilih = function () {
             var r = borang.querySelector('input[name="layanan"]:checked');
-            return r ? { nilai: r.value, berangkatan: r.dataset.berangkatan === '1' } : null;
+
+            return r ? {
+                nilai: r.value,
+                berangkatan: r.dataset.berangkatan === '1',
+                bisaPotongan: r.dataset.potongan === '1',
+            } : null;
         };
 
         var isiAngkatan = function (layanan) {
@@ -492,7 +650,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 var o = document.createElement('option');
                 o.value = a.id;
                 o.dataset.harga = a.harga;
-                o.dataset.sisa = a.sisa_kuota === null ? '' : a.sisa_kuota;
 
                 /*
                  * Harga dan sisa kursi ikut tertulis di pilihannya.
@@ -517,48 +674,81 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         };
 
+        var tampil = function (unsur, tampak) {
+            if (unsur) {
+                unsur.hidden = !tampak;
+            }
+        };
+
         var hitung = function () {
             var pilih = layananTerpilih();
 
             if (!pilih) {
                 angka.textContent = 'Rp 0';
+                tampil(rinci, false);
                 return;
             }
+
+            var satuan = 0;
+            var jml = 1;
 
             if (pilih.berangkatan) {
                 var o = menuAngkatan.options[menuAngkatan.selectedIndex];
-                var harga = o ? parseInt(o.dataset.harga || '0', 10) : 0;
-                var jml = parseInt(isianJumlah.value || '1', 10);
-
-                angka.textContent = rupiah(harga * (isNaN(jml) || jml < 1 ? 1 : jml));
-                return;
+                satuan = o ? parseInt(o.dataset.harga || '0', 10) : 0;
+                jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
+            } else {
+                // Nominal diketik: yang bukan angka dibuang, sama dengan cara
+                // peladen membacanya — jadi angka di layar dan yang tersimpan
+                // tidak pernah berbeda.
+                satuan = angkaDari(isianTotal.value);
             }
 
-            // Nominal diketik: yang bukan angka dibuang, sama dengan cara
-            // peladen membacanya — jadi angka di layar dan yang tersimpan
-            // tidak pernah berbeda.
-            var ketik = parseInt((isianTotal.value || '').replace(/\D+/g, ''), 10);
-            angka.textContent = rupiah(isNaN(ketik) ? 0 : ketik);
+            var subtotal = satuan * jml;
+            // Potongan DIBATASI subtotalnya, sama dengan di peladen: total
+            // negatif tidak berarti apa-apa sebagai nominal transfer.
+            var potongan = pilih.bisaPotongan ? Math.min(subtotal, angkaDari(isianPotongan.value)) : 0;
+
+            angka.textContent = rupiah(subtotal - potongan);
+
+            nilaiSatuan.textContent = rupiah(satuan);
+            nilaiJumlah.textContent = jml + ' orang';
+            nilaiPotongan.textContent = '− ' + rupiah(potongan);
+
+            // Tiap baris rincian hanya muncul kalau memang ada isinya; baris
+            // yang selalu nol cuma menambah yang harus dibaca.
+            tampil(rinciSatuan, pilih.berangkatan && satuan > 0);
+            tampil(rinciJumlah, pilih.berangkatan && jml > 1);
+            tampil(rinciPotongan, potongan > 0);
+
+            tampil(rinci, (pilih.berangkatan && satuan > 0 && (jml > 1 || potongan > 0)) || potongan > 0);
         };
 
         var segarkan = function () {
             var pilih = layananTerpilih();
 
             if (!pilih) {
-                langkahAngkatan.hidden = true;
-                bungkusTotal.hidden = true;
+                subBiaya.textContent = 'Pilih layanannya dulu.';
+                tampil(bungkusAngkatan, false);
+                tampil(bungkusJumlah, false);
+                tampil(bungkusTotal, false);
+                tampil(bungkusPotongan, false);
+                tampil(bungkusKode, false);
                 hitung();
                 return;
             }
 
-            langkahAngkatan.hidden = !pilih.berangkatan;
-            bungkusTotal.hidden = pilih.berangkatan;
-            // Rombongan hanya berlaku untuk layanan berangkatan; dua layanan
-            // lainnya satu baris memang satu orang.
-            bungkusJumlah.hidden = !pilih.berangkatan;
+            tampil(bungkusAngkatan, pilih.berangkatan);
+            tampil(bungkusJumlah, pilih.berangkatan);
+            tampil(bungkusTotal, !pilih.berangkatan);
+            tampil(bungkusPotongan, pilih.bisaPotongan);
+            tampil(bungkusKode, pilih.bisaPotongan);
 
             menuAngkatan.required = pilih.berangkatan;
             isianTotal.required = !pilih.berangkatan;
+
+            subBiaya.textContent = pilih.berangkatan
+                ? 'Harga dan sisa kursinya ikut dari angkatan yang dipilih.'
+                : 'Layanan ini tidak berangkatan, jadi nominalnya diketik sendiri.';
 
             if (pilih.berangkatan) {
                 isiAngkatan(pilih.nilai);
@@ -570,13 +760,14 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         borang.addEventListener('change', function (e) {
             if (e.target.name === 'layanan') {
                 segarkan();
-            } else if (e.target === menuAngkatan || e.target === isianJumlah) {
+            } else {
                 hitung();
             }
         });
 
-        isianTotal.addEventListener('input', hitung);
-        isianJumlah.addEventListener('input', hitung);
+        [isianTotal, isianJumlah, isianPotongan].forEach(function (n) {
+            n.addEventListener('input', hitung);
+        });
 
         segarkan();
     })();
