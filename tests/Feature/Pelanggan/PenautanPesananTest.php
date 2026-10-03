@@ -220,7 +220,7 @@ class PenautanPesananTest extends TestCase
     // -------------------------------------------------------------- sumbernya
 
     #[Test]
-    public function keempat_tabel_layanan_dan_kolomnya_benar_benar_ada(): void
+    public function kelima_tabel_layanan_dan_kolomnya_benar_benar_ada(): void
     {
         /*
          * Nama tabel dan kolom ditulis sebagai untaian, jadi salah ketik tidak
@@ -229,7 +229,18 @@ class PenautanPesananTest extends TestCase
          */
         $sumber = (new \ReflectionClass(PesananPelanggan::class))->getConstant('SUMBER');
 
-        $this->assertCount(4, $sumber, 'Scopus Camp seharusnya sudah ikut.');
+        /*
+         * Lima, bukan empat. Webinar Eksklusif ditambahkan 3 Okt 2026: ia
+         * lahir sesudah daftar ini dibuat untuk empat layanan, dan akibatnya
+         * pendaftaran webinar seseorang tidak pernah muncul di halaman
+         * pelanggannya sementara jumlah pesanannya terhitung kurang.
+         *
+         * Angkanya disebut persis supaya layanan berikutnya yang terlewat
+         * ketahuan di sini, bukan di halaman pelanggan yang kehilangan baris.
+         */
+        $this->assertCount(5, $sumber,
+            'Kelima layanan yang punya tabel pendaftaran harus ikut: Clinik Scopus, '
+            . 'Analisis Bibliometrik, Scopus Kafe, Scopus Camp, Webinar Eksklusif.');
 
         foreach ($sumber as $s) {
             $kolom = array_map(

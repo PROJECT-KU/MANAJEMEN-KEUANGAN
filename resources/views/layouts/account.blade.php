@@ -365,6 +365,22 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
+                        {{-- Pendaftar SELURUH layanan. Ditaruh di atas entri
+                             Pendaftar Webinar sebab ia mencakupnya: pendaftar
+                             kelima layanan ada di satu daftar, dan dari sanalah
+                             orang berangkat sebelum masuk ke layar satu layanan.
+
+                             Kelima layar pendaftar lama tetap di menunya
+                             masing-masing. Mereka punya kemampuan yang layar
+                             terpadu ini sengaja tidak punya — menyunting,
+                             menghapus, menandai lunas — dan membuang entrinya
+                             berarti mencabut kemampuan itu tanpa pengganti. --}}
+                        <li class="{{ setActive('account/Pendaftaran-Layanan') }}">
+                            <a class="nav-link" href="{{ route('account.pendaftaran-layanan.index') }}">
+                                <i class="fas fa-clipboard-list"></i> <span>Pendaftar Layanan</span>
+                            </a>
+                        </li>
+
                         {{-- Pendaftar Webinar Eksklusif. Ditaruh tepat di bawah
                              Angkatan Layanan sebab dari sanalah sesinya dibuat,
                              dan ke sinilah panitia menandai pembayarannya lunas.

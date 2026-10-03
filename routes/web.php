@@ -473,6 +473,21 @@ Route::prefix('account')
             Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
 
             /*
+             * Pendaftar SELURUH layanan dalam satu daftar.
+             *
+             * Bukan pengganti kelima layar pendaftar yang sudah ada, melainkan
+             * satu tempat untuk menjawab pertanyaan yang tidak bisa dijawab di
+             * satu pun dari kelimanya: siapa saja yang belum bayar, dan orang
+             * ini mendaftar apa saja. Tindakannya tetap di layar layanannya.
+             */
+            Route::get('Pendaftaran-Layanan', 'account\\PendaftaranLayananController@index')
+                ->name('account.pendaftaran-layanan.index');
+            Route::get('Pendaftaran-Layanan/unduh-pdf', 'account\\PendaftaranLayananController@eksporPdf')
+                ->name('account.pendaftaran-layanan.pdf');
+            Route::get('Pendaftaran-Layanan/unduh-excel', 'account\\PendaftaranLayananController@eksporExcel')
+                ->name('account.pendaftaran-layanan.excel');
+
+            /*
              * Pendaftaran Webinar Eksklusif.
              *
              * Layar ini yang menutup lubang terbesar fiturnya: sebelum ada,

@@ -114,8 +114,10 @@ class CustomerController extends Controller
          * Jumlah pesanan seluruh pelanggan dihitung SEKALI di sini.
          *
          * Dulu dua kali: sekali untuk ubin ringkasan dan sekali lagi untuk
-         * baris yang tampil, masing-masing membaca keempat tabel layanan —
-         * delapan pembacaan tabel per muat halaman padahal empat sudah cukup.
+         * baris yang tampil, masing-masing membaca seluruh tabel layanan —
+         * terukur delapan pembacaan tabel per muat halaman saat sumbernya
+         * masih empat, padahal separuhnya sudah cukup. Sekarang sumbernya
+         * lima, jadi selisihnya ikut bertambah.
          * Petanya berkunci id, jadi tampilan tinggal mencarinya per baris.
          *
          * Ubin ketiga dulu "Email terverifikasi", dan itu angka mati: terukur
