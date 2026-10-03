@@ -51,7 +51,7 @@ Blog | Rumah Scopus
                         <div class="info-box">
                             <i class="bi bi-telephone"></i>
                             <h3>Telp</h3>
-                            <p class="mb-2"><b>[Dinar]</b> +62 812-2688-3280 <a href="https://wa.me/+6281226883280" target="_blank"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a></p>
+                            <p class="mb-2"><b>Dinar</b> +62 812-2688-3280 <a href="https://wa.me/+6281226883280" target="_blank"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a></p>
                             <p><b>[Elsa]</b> +62 857-4781-0881 <a href="https://wa.me/+6285747810881" target="_blank"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a></p>
                         </div>
                     </div>

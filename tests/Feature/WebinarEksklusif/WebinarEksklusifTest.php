@@ -1745,4 +1745,99 @@ class WebinarEksklusifTest extends TestCase
             // sepanjang "Nama lengkap + gelar" terpotong di layar 320 px.
             ->assertSee('beserta gelarnya', false);
     }
+
+    // --------------------------------------------- pemeriksa kode diskon
+
+    /**
+     * Kode diperiksa SEBELUM borangnya dikirim.
+     *
+     * Tanpa jalur ini, orang yang mengetik kode tidak mendapat tanda apa pun:
+     * totalnya di layar tetap harga penuh, tidak ada kabar benar atau salah,
+     * dan baru ketahuan sesudah mengirim. Yang salah ketik membayar penuh
+     * tanpa tahu kenapa.
+     */
+    #[Test]
+    public function kode_diskon_bisa_diperiksa_sebelum_mengirim(): void
+    {
+        $sesi = $this->sesi(['kode_diskon' => 'HEMAT30', 'nominal_diskon' => '30000']);
+
+        $this->postJson(route('public.webinareksklusif.cekdiskon', $sesi->id), ['kode' => 'HEMAT30'])
+            ->assertOk()
+            ->assertJson(['cocok' => true, 'potongan' => 30000, 'total' => 99000]);
+
+        // Jumlah peserta ikut diperhitungkan.
+        $this->postJson(route('public.webinareksklusif.cekdiskon', $sesi->id),
+            ['kode' => 'HEMAT30', 'jumlah' => 3])
+            ->assertOk()
+            ->assertJson(['cocok' => true, 'total' => 357000]);
+    }
+
+    #[Test]
+    public function kode_yang_salah_dijawab_tidak_cocok(): void
+    {
+        $sesi = $this->sesi(['kode_diskon' => 'HEMAT30', 'nominal_diskon' => '30000']);
+
+        foreach (['SALAH', 'hemat30'] as $kode) {
+            $this->postJson(route('public.webinareksklusif.cekdiskon', $sesi->id), ['kode' => $kode])
+                ->assertOk()
+                ->assertJson(['cocok' => false]);
+        }
+    }
+
+    /**
+     * Jawaban pemeriksa TIDAK pernah dipercaya sebagai dasar menagih:
+     * potongannya dihitung ulang dari angkatannya saat menyimpan.
+     */
+    #[Test]
+    public function potongan_tetap_dihitung_ulang_saat_menyimpan(): void
+    {
+        $sesi = $this->sesi(['kode_diskon' => 'HEMAT30', 'nominal_diskon' => '30000']);
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Curang', 'email' => 'curang@contoh.test',
+            'telp' => '08123456700', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+            'kode_diskon' => 'HEMAT30',
+            // Nilai-nilai ini dikirim peramban dan HARUS diabaikan.
+            'nominal_diskon' => '129000',
+            'total_pembayaran' => '0',
+        ]);
+
+        $this->assertSame('99000',
+            (string) WebinarEksklusifPendaftaran::where('email', 'curang@contoh.test')
+                ->value('total_pembayaran'),
+            'yang berlaku nominal dari angkatannya, bukan yang dikirim peramban');
+    }
+
+    // ------------------------------------------------- tinggi kartu isian
+
+    /**
+     * Tombol daftar harus ada DI ATAS LIPATAN saat halaman dibuka.
+     *
+     * Terukur 3 Okt 2026: kartunya tumbuh jadi 992 px sementara layar 900 px,
+     * jadi tombol "Daftar sekarang" jatuh di bawah lipatan di semua lebar —
+     * di halaman yang seluruh tujuannya mendaftar. Penyebabnya penumpukan
+     * perbaikan kecil: kotak persetujuan, petunjuk rombongan, keterangan
+     * kuota, isian kode diskon. Masing-masing benar sendiri; akumulasinya
+     * tidak.
+     *
+     * Yang dijaga di sini bagian yang bisa diperiksa dari markup: baris-baris
+     * yang dulu selalu tampil kini hanya muncul saat memang berguna.
+     */
+    #[Test]
+    public function baris_yang_hanya_berguna_untuk_rombongan_tidak_tampil_di_muka(): void
+    {
+        $sesi = $this->sesi();
+
+        $isi = $this->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->getContent();
+
+        foreach (['ses-bantu-rombongan', 'ses-total-rincian', 'ses-peserta'] as $id) {
+            $this->assertMatchesRegularExpression(
+                '/id="' . $id . '"[^>]*\bhidden\b/',
+                $isi,
+                $id . ' harus tersembunyi saat pesertanya baru satu'
+            );
+        }
+    }
 }
