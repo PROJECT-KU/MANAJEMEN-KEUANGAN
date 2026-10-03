@@ -70,6 +70,15 @@ class HapusPendaftaran
                     ClinikScopusTestimoni::where('clinikscopus_pemesanan_id', $pendaftaran->getKey())->delete();
                 }
 
+                /*
+                 * Peserta rombongannya menunjuk pendaftarannya lewat pasangan
+                 * (layanan, pendaftaran_id) tanpa kunci asing — sasarannya
+                 * lima tabel berbeda, dan MySQL tidak bisa menyatakan kendala
+                 * seperti itu. Jadi basis datanya tidak akan
+                 * membersihkannya sendiri, persis seperti testimoni di atas.
+                 */
+                \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())->delete();
+
                 $pendaftaran->delete();
             });
         } catch (\Throwable $e) {

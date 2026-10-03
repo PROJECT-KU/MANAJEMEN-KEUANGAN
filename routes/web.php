@@ -492,6 +492,12 @@ Route::prefix('account')
              * Ditaruh SESUDAH rute unduhan supaya 'unduh-pdf' tidak terbaca
              * sebagai nama layanan.
              */
+            /*
+             * Slip cetak. DI ATAS rute rincian: '{id}/slip' tidak boleh
+             * terbaca sebagai id sebuah pendaftaran.
+             */
+            Route::get('Pendaftaran-Layanan/{layanan}/{id}/slip', 'account\\PendaftaranLayananController@slip')
+                ->name('account.pendaftaran-layanan.slip');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@rincian')
                 ->name('account.pendaftaran-layanan.rincian');
             Route::put('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@ubahData')

@@ -1169,6 +1169,17 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 <div class="bar-isian-kisi">
                     <div class="mis-isian bar-lebar" id="bar-bungkus-angkatan">
                         <label class="mis-label" for="bar-angkatan">Angkatan<span class="bar-wajib" aria-hidden="true">*</span></label>
+
+                        {{-- Kotak saring, HANYA kalau angkatannya banyak.
+
+                             Menu bawaan peramban tidak bisa dicari. Sekarang
+                             paling banyak lima angkatan akan datang, jadi
+                             kotaknya menyusahkan lebih daripada menolong —
+                             tetapi Scopus Camp punya 48 angkatan seluruhnya,
+                             dan menu berisi dua puluhan sudah berat digulir. --}}
+                        <input type="text" class="form-control-modern" id="bar-cari-angkatan" hidden
+                            placeholder="Saring: ketik nomor, kota, atau bulannya"
+                            autocomplete="off" style="margin-bottom: 8px;">
                         <select class="form-control-modern @error('kategori_id') is-invalid @enderror" id="bar-angkatan" @error('kategori_id') aria-invalid="true" @enderror name="kategori_id">
                             <option value="">Pilih layanan dulu</option>
                         </select>
@@ -1515,6 +1526,35 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         @enderror
                     </div>
 
+                    {{-- Nama peserta lain, hanya saat rombongan.
+
+                         Kelima tabel pendaftaran hanya punya SATU nama,
+                         sementara jumlahnya bisa lebih dari satu — jadi nama
+                         peserta selain pemesannya tidak tercatat di mana pun,
+                         dan daftar hadir rombongan tidak bisa dibuat dari
+                         sistem. Satu kotak teks, bukan sederet isian:
+                         menempelkan daftar nama dari pesan WhatsApp jauh
+                         lebih cepat daripada mengetik ke lima kotak. --}}
+                    <div class="mis-isian bar-penuh" id="bar-bungkus-peserta" hidden>
+                        <label class="mis-label" for="bar-peserta">
+                            Nama peserta lain <span id="bar-peserta-sisa"
+                                style="font-weight:500;text-transform:none;letter-spacing:0;"></span>
+                        </label>
+                        <textarea class="form-control-modern @error('peserta') is-invalid @enderror" id="bar-peserta"
+                            name="peserta" rows="3"
+                            placeholder="Satu nama per baris, misalnya:&#10;Budi Santoso&#10;Siti Rahma">{{ old('peserta') }}</textarea>
+                        @error('peserta')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
+                        <p class="mis-bantuan">
+                            Pemesannya sudah terisi di atas; kotak ini untuk sisanya.
+                            Boleh ditempel langsung dari WhatsApp — penomorannya dibuang sendiri.
+                        </p>
+                    </div>
+
                     <div class="mis-isian bar-lebar" id="bar-bungkus-kabari">
                         <span class="mis-label">Kabar ke pendaftar</span>
                         <label class="bar-centang" for="bar-kabari">
@@ -1692,6 +1732,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var cariAngkatan = el('bar-cari-angkatan');
+        var bungkusPeserta = el('bar-bungkus-peserta');
+        var sisaPeserta = el('bar-peserta-sisa');
         var bungkusSesi = el('bar-bungkus-sesi');
         var bungkusBukti = el('bar-bungkus-bukti');
         var isianBukti = el('bar-bukti');
@@ -1761,17 +1804,35 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             } : null;
         };
 
-        var isiAngkatan = function (layanan) {
-            var daftar = ANGKATAN[layanan] || [];
+        var isiAngkatan = function (layanan, saring) {
+            var semua = ANGKATAN[layanan] || [];
+
+            /*
+             * Disaring di sini, bukan dengan menyembunyikan <option>:
+             * menyembunyikan pilihan di menu bawaan tidak dihormati seragam
+             * oleh peramban, dan pilihan tersembunyi yang masih bisa terpilih
+             * lebih buruk daripada tidak ada saringan.
+             */
+            var cari = (saring || '').trim().toLowerCase();
+            var daftar = cari === '' ? semua : semua.filter(function (a) {
+                return [a.nama, a.nomor, a.tanggal].join(' ').toLowerCase().indexOf(cari) >= 0;
+            });
+
+            // Kotak saringnya baru berguna kalau menunya memang panjang.
+            tampil(cariAngkatan, semua.length > 8);
 
             menuAngkatan.innerHTML = '';
 
             if (!daftar.length) {
                 var kosong = document.createElement('option');
                 kosong.value = '';
-                kosong.textContent = 'Belum ada angkatan yang akan datang';
+                kosong.textContent = cari === ''
+                    ? 'Belum ada angkatan yang akan datang'
+                    : 'Tidak ada angkatan yang cocok';
                 menuAngkatan.appendChild(kosong);
-                ket.textContent = 'Buat angkatannya dulu di layar Angkatan Layanan.';
+                ket.textContent = cari === ''
+                    ? 'Buat angkatannya dulu di layar Angkatan Layanan.'
+                    : 'Hapus isian saringnya untuk melihat semuanya lagi.';
                 return;
             }
 
@@ -2243,6 +2304,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(panelPotongan, pilih.bisaPotongan || !bungkusAlumni.hidden);
 
             batasiJumlah();
+            segarkanPeserta();
             hitung();
         };
 
@@ -2330,6 +2392,36 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         };
 
+        /*
+         * Kotak nama peserta muncul begitu jumlahnya lebih dari satu, dan
+         * menyebutkan BERAPA nama yang diharapkan — tanpa angka itu panitia
+         * tidak tahu apakah pemesannya ikut dihitung.
+         */
+        var segarkanPeserta = function () {
+            var pilih = layananTerpilih();
+            var jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
+            var perlu = (pilih && pilih.berangkatan) ? jml - 1 : 0;
+
+            tampil(bungkusPeserta, perlu > 0);
+
+            if (perlu > 0) {
+                sisaPeserta.textContent = '(' + perlu + ' nama lagi, selain pemesannya)';
+            }
+        };
+
+        isianJumlah.addEventListener('input', segarkanPeserta);
+
+        cariAngkatan.addEventListener('input', function () {
+            var pilih = layananTerpilih();
+
+            if (pilih && pilih.berangkatan) {
+                isiAngkatan(pilih.nilai, cariAngkatan.value);
+                tegaskanAngkatan(pilih.nilai);
+                batasiJumlah();
+                hitung();
+            }
+        });
+
         if (isianBukti) {
             isianBukti.addEventListener('change', function () {
                 var f = isianBukti.files && isianBukti.files[0];
@@ -2372,6 +2464,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         segarkan();
         segarkanBayar();
         batasiJumlah();
+        segarkanPeserta();
     })();
 </script>
 @endpush
