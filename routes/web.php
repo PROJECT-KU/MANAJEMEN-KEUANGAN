@@ -473,6 +473,17 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.excel');
 
             /*
+             * Mendaftarkan orang dari sisi panitia — untuk yang mendaftar
+             * lewat WhatsApp atau datang langsung. Ditaruh SEBELUM rute
+             * rincian yang berpola {layanan}/{id} supaya 'baru' tidak terbaca
+             * sebagai nama layanan.
+             */
+            Route::get('Pendaftaran-Layanan/baru', 'account\\PendaftaranLayananController@baru')
+                ->name('account.pendaftaran-layanan.baru');
+            Route::post('Pendaftaran-Layanan/baru', 'account\\PendaftaranLayananController@simpan')
+                ->name('account.pendaftaran-layanan.simpan');
+
+            /*
              * Rincian satu pendaftaran, dan ketiga tindakannya.
              *
              * {layanan} ditaruh di alamatnya supaya satu rute melayani kelima
