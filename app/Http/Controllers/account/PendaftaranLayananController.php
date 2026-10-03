@@ -146,6 +146,10 @@ class PendaftaranLayananController extends Controller
             'pilihanStatus' => Pendaftaran::pilihanStatus($layanan),
             'medan' => UbahDataPendaftaran::medan($layanan),
             'bolehMenghapus' => $this->bolehMenghapus(),
+            // Tab yang terbuka saat halaman dibuka. Datang dari session supaya
+            // galat validasi dan penyimpanan yang berhasil keduanya mendarat
+            // di tab yang bersangkutan.
+            'tabAktif' => session('tab', 'ringkasan'),
         ]);
     }
 
@@ -164,13 +168,19 @@ class PendaftaranLayananController extends Controller
          * Divalidasi di sini, bukan di dalam tindakannya: pesan galat harus
          * kembali ke borangnya beserta isian yang sudah diketik, dan itu
          * urusan lapisan HTTP.
+         *
+         * Semuanya 'sometimes', dan itu yang membuat borang bertab bisa
+         * disimpan satu tab saja. Tanpa itu, menyimpan tab "Angkatan & bayar"
+         * ditolak karena nama dan email tidak ikut terkirim — padahal keduanya
+         * ada di tab lain dan tidak sedang diubah. Yang dijaga tetap sama:
+         * medan yang DIKIRIM tidak boleh dikosongkan atau diisi sembarang.
          */
         $aturan = [];
         $medan = UbahDataPendaftaran::medan($layanan);
 
         foreach (['nama', 'nama_pemesan'] as $k) {
             if (isset($medan[$k])) {
-                $aturan[$k] = ['required', 'string', 'max:255'];
+                $aturan[$k] = ['sometimes', 'required', 'string', 'max:255'];
             }
         }
 
@@ -180,22 +190,22 @@ class PendaftaranLayananController extends Controller
                 // sudah ada memuat domain yang kadang tidak bisa dicari dari
                 // peladen ini, dan menolaknya membuat baris lama tidak bisa
                 // disunting sama sekali.
-                $aturan[$k] = ['required', 'email', 'max:255'];
+                $aturan[$k] = ['sometimes', 'required', 'email', 'max:255'];
             }
         }
 
         foreach (['telp', 'telp_pemesan'] as $k) {
             if (isset($medan[$k])) {
-                $aturan[$k] = ['required', 'string', 'max:30'];
+                $aturan[$k] = ['sometimes', 'required', 'string', 'max:30'];
             }
         }
 
         if (isset($medan['kategori_id'])) {
-            $aturan['kategori_id'] = ['required', 'string', 'exists:kategori_layanan,id'];
+            $aturan['kategori_id'] = ['sometimes', 'required', 'string', 'exists:kategori_layanan,id'];
         }
 
         if (isset($medan['jumlah_pendaftar'])) {
-            $aturan['jumlah_pendaftar'] = ['required', 'integer', 'min:1', 'max:99'];
+            $aturan['jumlah_pendaftar'] = ['sometimes', 'required', 'integer', 'min:1', 'max:99'];
         }
 
         $request->validate($aturan);
@@ -203,12 +213,54 @@ class PendaftaranLayananController extends Controller
         $hasil = (new UbahDataPendaftaran)->jalankan($layanan, $id, $request->all());
 
         if (! $hasil['berhasil']) {
-            return back()->withInput()->with('error', $hasil['pesan']);
+            return back()->withInput()
+                ->with('error', $hasil['pesan'])
+                ->with('tab', $this->tabDari(array_keys($request->all())));
         }
 
         return redirect()
             ->route('account.pendaftaran-layanan.rincian', [$layanan, $id])
-            ->with('sukses', $hasil['pesan']);
+            ->with('sukses', $hasil['pesan'])
+            // Dikembalikan ke tab yang baru disimpan, bukan ke tab pertama:
+            // orang yang membetulkan nominal ingin melihat hasilnya, bukan
+            // mencari tabnya lagi.
+            ->with('tab', $this->tabDari(array_keys($request->all())));
+    }
+
+    /**
+     * Tab mana yang memuat medan-medan yang baru dikirim.
+     *
+     * Dipakai dua arah: mengembalikan orang ke tab yang baru ia simpan, dan
+     * MEMBUKA tab tempat galat validasinya. Galat yang dilaporkan di tab
+     * pertama sementara isiannya ada di tab keempat praktis tidak bisa
+     * ditemukan — orangnya melihat pesan merah tanpa tahu isian mana.
+     *
+     * @param  array<int, string>  $medanKiriman
+     */
+    private function tabDari(array $medanKiriman): string
+    {
+        $peta = [
+            'bayar' => ['kategori_id', 'jumlah_pendaftar', 'ppn', 'kode_unik',
+                'kode_diskon', 'nominal_diskon', 'total_pembayaran',
+                'total_keseluruhan_pembayaran'],
+            'sesi' => ['tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai',
+                'waktu_selesai', 'lokasi', 'biaya', 'kode_unik_pembayaran',
+                'subtotal_pembayaran', 'sesi_kedua', 'sesi_ketiga',
+                'tanggal_reschedule', 'group_wa'],
+            'diri' => ['nama', 'nama_pemesan', 'email', 'email_pemesan', 'telp',
+                'telp_pemesan', 'affiliasi', 'afiliasi_pemesan', 'note',
+                'kendala', 'desc_kendala'],
+        ];
+
+        foreach ($peta as $tab => $daftar) {
+            foreach ($medanKiriman as $k) {
+                if (in_array($k, $daftar, true)) {
+                    return $tab;
+                }
+            }
+        }
+
+        return 'diri';
     }
 
     /** Memindahkan status satu pendaftaran. */
