@@ -123,6 +123,21 @@ class BuatPendaftaran
 
             $kodeUnik = $this->kodeUnikBebas($layanan, $isian['kategori_id'] ?? null, $total);
 
+            /*
+             * Kode uniknya DITAMBAHKAN ke total, bukan disimpan di sebelahnya.
+             *
+             * Begitulah jalur pendaftaran umum menyimpannya — terukur di basis
+             * data: total 4.500.072 dengan kode 72, 4.275.028 dengan kode 28.
+             * Jalur panitia tidak melakukannya, jadi barisnya tersimpan
+             * 4.950.000 dengan kode 50: nominal yang diminta ke pendaftar
+             * tidak pernah memuat penandanya, dan tidak ada transfer yang bisa
+             * dicocokkan dengan kode itu. Surat ke pendaftarnya bahkan
+             * menuliskan "angka 50 di ujungnya" pada angka yang berakhir 000.
+             */
+            if (isset($sumber['kolom']['kode_unik'])) {
+                $total += $kodeUnik;
+            }
+
             $baris = $this->rakitKolom(
                 $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa,
                 $potongan, $kodePotongan
@@ -335,7 +350,13 @@ class BuatPendaftaran
             ->where('layanan', $layanan)
             ->when($kategoriId, fn ($q) => $q->where('angkatan_id', $kategoriId))
             ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
-            ->selectRaw('CAST(total AS UNSIGNED) + CAST(kode_unik AS UNSIGNED) as jumlahnya')
+            /*
+             * Yang diadu NOMINAL TRANSFERNYA, dan nominal itu sudah termasuk
+             * kode uniknya di kolom `total` — menambahkannya sekali lagi
+             * menghitung kodenya dua kali, sehingga bentrokan yang sebenarnya
+             * tidak pernah terlihat.
+             */
+            ->selectRaw('CAST(total AS UNSIGNED) as jumlahnya')
             ->pluck('jumlahnya')
             ->map(fn ($x) => (int) $x)
             ->all();
