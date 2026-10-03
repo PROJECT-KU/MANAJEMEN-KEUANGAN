@@ -308,6 +308,23 @@ Pendaftar Layanan | MIS Rumah Scopus
         /* Keterangan angkatan: tanggal mulai dan sisa kursinya, di bawah
            namanya. Satu baris kecil, bukan kolom sendiri — keduanya
            keterangan TENTANG angkatan itu, bukan nilai yang dibaca sendiri. */
+        /* Nomor angkatan. Ungu dan bertebal, bukan abu seperti keterangan
+           lain di bawahnya: ia PENANDA yang dipakai merekap, bukan catatan
+           pendamping — dan di antara dua ratus angkatan Yogyakarta, nomornya
+           satu-satunya yang membedakan. */
+        .pdl-angkatan-no {
+            display: inline-block;
+            margin-left: 5px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: #eef2ff;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #4338ca;
+            cursor: help;
+        }
+
         .pdl-sesi-ket {
             display: flex;
             flex-wrap: wrap;
@@ -425,6 +442,18 @@ Pendaftar Layanan | MIS Rumah Scopus
                tablet ~40px itu yang menyisakan selisih 1-3px terakhir. */
             .pdl-tabel .pdl-tanggal {
                 white-space: normal;
+            }
+
+            /* Keping nomor angkatan turun ke barisnya sendiri, tidak lagi
+               menempel di samping nama angkatannya. Terukur: di samping nama,
+               ia menambah lebar min-content kolom Sesi secukupnya untuk
+               membuat tabelnya terklip 4px di 768px. Nomornya tetap terbaca
+               utuh, cuma pindah baris. */
+            .pdl-tabel .pdl-angkatan-no {
+                display: block;
+                width: max-content;
+                margin: 3px 0 0;
+                padding: 0 5px;
             }
         }
 
@@ -882,7 +911,7 @@ Pendaftar Layanan | MIS Rumah Scopus
             <div class="mis-isian mis-saring-cari">
                 <label class="mis-label" for="pdl-cari">Cari</label>
                 <input type="search" class="form-control-modern" id="pdl-cari" name="cari" data-mis-cari
-                    value="{{ $cari }}" placeholder="Nama, email, nomor WA, nomor pendaftaran, atau afiliasi"
+                    value="{{ $cari }}" placeholder="Nama, email, nomor WA, nomor pendaftaran, afiliasi, atau angkatan"
                     autocomplete="off" aria-controls="pdl-hasil">
                 {{-- Tombol hapus ketikan, type=button supaya tidak ikut
                      mengirim formulir, dan disembunyikan saat kotaknya kosong. --}}
@@ -971,7 +1000,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                             data-layanan="{{ $kunciLayanan }}">
                             @foreach ($daftar as $a)
                                 <option value="{{ $a['id'] }}" @selected($angkatan === $a['id'])>
-                                    {{ $a['ringkas'] }}@if ($a['mulai']) &middot; {{ \Illuminate\Support\Carbon::parse($a['mulai'])->translatedFormat('M Y') }}@endif
+                                    {{ $a['ringkas'] }}@if ($a['nomor']) &middot; angkatan ke-{{ $a['nomor'] }}@endif@if ($a['mulai']) &middot; {{ \Illuminate\Support\Carbon::parse($a['mulai'])->translatedFormat('M Y') }}@endif
                                 </option>
                             @endforeach
                         </optgroup>
