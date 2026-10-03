@@ -93,19 +93,22 @@
                 @endif
             </p>
 
-            {{-- Tautan, bukan teks. Kolom ini gunanya menghubungi orangnya;
-                 sebagai teks, nomornya harus disalin dulu ke aplikasi lain.
+            {{-- HANYA nomor WhatsApp di sini.
+
+                 Email dan afiliasi sengaja tidak ikut: keduanya sudah ada di
+                 halaman rincian, dan di daftar keduanya menambah dua baris
+                 pada SETIAP baris tabel tanpa dipakai memindai. Yang dipakai
+                 memindai cuma tiga — nomor pendaftaran, nama, dan nomor yang
+                 bisa dihubungi.
+
+                 Tautan, bukan teks: kolom ini gunanya menghubungi orangnya,
+                 dan sebagai teks nomornya harus disalin dulu ke aplikasi lain.
                  wa.me menuntut nomor berformat internasional tanpa tanda baca,
                  dan itulah yang dikerjakan nomorWa(). --}}
             <div class="pdl-kontak">
-                @if ($b->email)
-                    <a href="mailto:{{ $b->email }}" title="Kirim email ke {{ $b->email }}">
-                        <i class="fas fa-envelope mis-ikon-biru" aria-hidden="true"></i> {{ $b->email }}
-                    </a>
-                @endif
                 @if ($wa)
                     <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
-                        title="Hubungi lewat WhatsApp">
+                        title="Hubungi {{ $b->nama_orang }} lewat WhatsApp">
                         <i class="fab fa-whatsapp mis-ikon-hijau" aria-hidden="true"></i> {{ $b->telp }}
                     </a>
                 @elseif ($b->telp)
@@ -115,13 +118,10 @@
                     <span title="Nomor ini tidak bisa dipakai menghubungi lewat WhatsApp.">
                         <i class="fas fa-phone-slash mis-ikon-kuning" aria-hidden="true"></i> {{ $b->telp }}
                     </span>
+                @else
+                    <span class="pdl-kontak-kosong">nomor belum diisi</span>
                 @endif
             </div>
-
-            @if ($b->affiliasi)
-                {{-- title: afiliasinya dipotong satu baris lewat CSS. --}}
-                <p class="pdl-afiliasi" title="{{ $b->affiliasi }}">{{ $b->affiliasi }}</p>
-            @endif
         </div>
     </td>
 
