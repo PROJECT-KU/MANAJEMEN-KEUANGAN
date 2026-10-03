@@ -142,14 +142,41 @@ class PendaftaranLayananController extends Controller
                 $q->whereNull('mulai')->orWhere('mulai', '>=', now()->subDay()->toDateString());
             })
             ->orderBy('mulai')
-            ->get(['id', 'layanan', 'nama', 'mulai', 'biaya', 'total_biaya', 'total_kuota', 'sisa_kuota'])
+            ->get(['id', 'layanan', 'varian', 'nama', 'mulai', 'biaya', 'total_biaya', 'total_kuota', 'sisa_kuota'])
             ->groupBy('layanan');
 
         return view('account.pendaftaran_layanan.baru', [
             'katalog' => $katalog,
             'terpilih' => $terpilih,
             'angkatan' => $angkatan,
+            'alumni' => $this->persenAlumni(array_keys($katalog)),
         ]);
+    }
+
+    /**
+     * Potongan alumni tiap tarif aktif, berkunci "layanan|varian".
+     *
+     * Satu kueri untuk seluruh layanan, bukan satu per layanan — dan
+     * dikunci varian pula, sebab satu layanan bisa punya beberapa tarif
+     * dengan harga berbeda: Scopus Camp punya jawa dan luar_jawa. Memakai
+     * tarif mana pun yang kebetulan ketemu duluan berarti menjanjikan
+     * potongan milik varian lain.
+     *
+     * @param  array<int, string>  $layanan
+     * @return array<string, int>
+     */
+    private function persenAlumni(array $layanan): array
+    {
+        return \App\ClinikScopusBiayaPersesi::query()
+            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+            ->whereIn('layanan', $layanan)
+            ->whereNotNull('diskon_alumni_persen')
+            ->where('diskon_alumni_persen', '>', 0)
+            ->get(['layanan', 'varian', 'diskon_alumni_persen'])
+            ->mapWithKeys(fn ($t) => [
+                $t->layanan . '|' . ($t->varian ?? '') => (int) $t->diskon_alumni_persen,
+            ])
+            ->all();
     }
 
     /** Menyimpan pendaftaran yang dibuat panitia. */
@@ -174,6 +201,7 @@ class PendaftaranLayananController extends Controller
             'note' => ['nullable', 'string', 'max:1000'],
             'potongan' => ['nullable', 'string', 'max:20'],
             'kode_potongan' => ['nullable', 'string', 'max:40'],
+            'alumni' => ['nullable', 'boolean'],
         ];
 
         $layanan = (string) $request->input('layanan');
