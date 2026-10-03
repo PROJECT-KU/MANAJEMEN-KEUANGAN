@@ -169,15 +169,14 @@ Pendaftar Layanan | MIS Rumah Scopus
          * ia memanjangkan seluruh barisnya. Nilai penuhnya tetap di title dan
          * di halaman rincian.
          */
-        .pdl-afiliasi {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin: 3px 0 0;
-            font-size: .74rem;
+        .pdl-kontak-kosong {
             color: var(--mis-tinta-4);
         }
+
+        /* Masih dipakai mode kartu di rincian? Tidak — tetapi aturannya
+           dibiarkan: kelasnya tidak lagi dipakai daftar sejak email dan
+           afiliasi pindah ke rincian, dan membuangnya menuntut memeriksa
+           ulang seluruh berkas ini untuk satu blok yang tidak merugikan. */
 
         /*
          * Alamat email WAJIB boleh dipatah di mana saja.
@@ -432,7 +431,6 @@ Pendaftar Layanan | MIS Rumah Scopus
             }
 
             .pdl-tabel .pdl-sesi,
-            .pdl-tabel .pdl-afiliasi,
             .pdl-tabel .pdl-kontak {
                 overflow-wrap: anywhere;
             }
