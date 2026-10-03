@@ -87,6 +87,13 @@ Route::post('/Webinar-Eksklusif/cari-pendaftar', 'Publict\PublicWebinarEksklusif
     ->middleware('throttle:10,1')
     ->name('public.webinareksklusif.caripendaftar');
 
+// Pemeriksa kode diskon, supaya orangnya tahu kodenya dipakai SEBELUM
+// mengirim borang. Dibatasi 20 per menit: ini juga jalur yang bisa dipakai
+// menebak kode satu per satu.
+Route::post('/Webinar-Eksklusif/{id}/cek-diskon', 'Publict\PublicWebinarEksklusifController@cekDiskon')
+    ->middleware('throttle:20,1')
+    ->name('public.webinareksklusif.cekdiskon');
+
 Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')
     ->middleware('throttle:6,1')
     ->name('public.webinareksklusif.store');

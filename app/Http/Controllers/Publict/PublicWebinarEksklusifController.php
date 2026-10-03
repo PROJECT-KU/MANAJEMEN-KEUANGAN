@@ -230,6 +230,47 @@ class PublicWebinarEksklusifController extends Controller
         ];
     }
 
+    /**
+     * Memeriksa kode diskon tanpa mengirim borangnya.
+     *
+     * Tanpa ini, orang yang mengetik kode tidak mendapat tanda apa pun:
+     * totalnya di layar tetap harga penuh, tidak ada kabar kodenya benar atau
+     * salah, dan baru ketahuan sesudah mengirim. Yang salah ketik membayar
+     * penuh tanpa tahu kenapa.
+     *
+     * Potongannya tetap dihitung ULANG saat menyimpan — jawaban di sini hanya
+     * untuk ditampilkan, dan apa pun yang dikirim balik peramban tidak pernah
+     * dipercaya.
+     */
+    public function cekDiskon(Request $request, string $id)
+    {
+        $sesi = $this->kueriAktif()->whereKey($id)->first();
+
+        if ($sesi === null) {
+            return response()->json(['cocok' => false, 'pesan' => 'Sesi itu sudah tidak dibuka.']);
+        }
+
+        $kode = trim((string) $request->input('kode'));
+        $jumlah = max(1, min(self::MAKS_ROMBONGAN, (int) $request->input('jumlah', 1)));
+
+        $total = (int) $sesi->biaya * $jumlah;
+        $potongan = $this->hitungPotongan($sesi, $kode, $total);
+
+        if ($potongan <= 0) {
+            return response()->json([
+                'cocok' => false,
+                'pesan' => $kode === '' ? '' : 'Kode itu tidak cocok untuk sesi ini.',
+            ]);
+        }
+
+        return response()->json([
+            'cocok' => true,
+            'potongan' => $potongan,
+            'total' => max(0, $total - $potongan),
+            'pesan' => 'Kode dipakai, potongan Rp ' . number_format($potongan, 0, ',', '.') . '.',
+        ]);
+    }
+
     // ------------------------------------------------------------- daftar
 
     /** Semua sesi yang sedang dibuka. */

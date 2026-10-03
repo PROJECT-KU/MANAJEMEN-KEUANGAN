@@ -182,7 +182,12 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     @php($penuh = $sisa !== null && $sisa < 1)
 
                     <h2 class="ses-kartu-judul">Amankan kursi Anda</h2>
-                    <p class="ses-kartu-sub">Isinya lima, tidak sampai satu menit.</p>
+                    {{-- "Isinya lima" sudah tidak benar sejak isian persetujuan
+                         ditambah — sekarang enam. Angkanya dibuang, bukan
+                         dibetulkan: yang menenangkan orang adalah lamanya,
+                         bukan jumlah kotaknya. Sekaligus memangkas 41 px dari
+                         kartu yang sudah lebih tinggi daripada layar. --}}
+                    <p class="ses-kartu-sub">Tidak sampai satu menit.</p>
 
                     {{--
                         Ringkasan galat di KEPALA kartu, bukan hanya pesan per
@@ -237,9 +242,9 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                             inputmode="numeric"
                             aria-describedby="ses-telp-bantu @error('telp') ses-telp-salah @enderror"
                             @error('telp') aria-invalid="true" @enderror>
-                        <p class="ses-bantu" id="ses-telp-bantu">
-                            Isi nomornya dulu — kalau Anda pernah mendaftar, sisanya kami isikan.
-                        </p>
+                        {{-- Satu baris, bukan dua: maksudnya sama dan kartunya
+                             perlu dipendekkan. --}}
+                        <p class="ses-bantu" id="ses-telp-bantu">Pernah mendaftar? Sisanya kami isikan.</p>
 
                         {{-- Kabar hasil pencarian. aria-live supaya pembaca
                              layar ikut mendengar borangnya terisi sendiri —
@@ -290,7 +295,14 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     </div>
 
                     <div class="ses-isian">
-                        <label for="ses-jumlah">Jumlah peserta</label>
+                        <label for="ses-jumlah" class="ses-label-sisa">
+                            Jumlah peserta
+                            @if ($sisa !== null && $sisa > 0)
+                                {{-- Sisa kursi naik ke baris label. Sebagai baris
+                                     sendiri ia memakan 20 px untuk empat kata. --}}
+                                <span>Tersisa {{ $sisa }} kursi</span>
+                            @endif
+                        </label>
                         {{-- Tombol tambah-kurang, bukan hanya kotak angka: di
                              ponsel papan ketik angka menutupi separuh layar
                              hanya untuk mengubah 1 jadi 2. --}}
@@ -306,17 +318,19 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                             <button type="button" class="ses-hitung-tombol" data-ubah="1"
                                 aria-label="Tambah jumlah peserta">+</button>
                         </div>
-                        @if ($sisa !== null && $sisa > 0)
-                            <p class="ses-bantu">Tersisa {{ $sisa }} kursi.</p>
-                        @endif
                         {{-- Disebut sebelum angkanya dinaikkan, bukan sesudah:
                              orang yang mendaftar rombongan perlu tahu di muka
                              bahwa nama tiap peserta akan diminta. --}}
-                        <p class="ses-bantu">
-                            Lebih dari satu? Nama tiap peserta diminta di bawah.
-                            Lebih dari {{ \App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN }} orang,
+                        {{-- Hanya ditampilkan saat jumlahnya memang lebih dari
+                             satu; skrip yang membukanya. Dua baris keterangan
+                             rombongan di borang yang 9 dari 10 pengisinya
+                             sendirian hanya mendorong tombol daftar ke bawah
+                             lipatan layar. --}}
+                        <p class="ses-bantu" id="ses-bantu-rombongan" hidden>
+                            Nama tiap peserta diminta di bawah. Lebih dari
+                            {{ \App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN }} orang,
                             <a href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya mau mendaftarkan rombongan untuk sesi "' . $sesi->nama . '".') }}"
-                                target="_blank" rel="noopener">hubungi panitia</a> — dibantu daftarkan sekaligus.
+                                target="_blank" rel="noopener">hubungi panitia</a>.
                         </p>
                         @error('jumlah_pendaftar') <p class="ses-salah">{{ $message }}</p> @enderror
                     </div>
@@ -325,6 +339,15 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                          dan tanpa ini pembaca layar tidak mengumumkan apa pun —
                          orangnya menambah peserta tanpa tahu harganya ikut
                          naik. "polite" supaya tidak memotong bacaan berjalan. --}}
+                    {{-- Baris potongan, muncul hanya kalau kodenya memang
+                         dipakai. Tanpa ini, total di layar tetap harga penuh
+                         walau kodenya benar — dan orang tidak punya alasan
+                         percaya potongannya akan diberikan. --}}
+                    <div class="ses-potongan" id="ses-potongan" hidden>
+                        <span>Potongan</span>
+                        <strong id="ses-potongan-nilai"></strong>
+                    </div>
+
                     <div class="ses-total" aria-live="polite" aria-atomic="true">
                         <span>Total bayar</span>
                         {{-- Nilai awalnya dirender peladen, bukan dihitung
@@ -333,7 +356,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         <strong id="ses-total-nilai"
                             data-harga="{{ $harga }}">Rp {{ number_format($harga, 0, ',', '.') }}</strong>
                     </div>
-                    <p class="ses-total-rincian" id="ses-total-rincian">
+                    <p class="ses-total-rincian" id="ses-total-rincian" hidden>
                         Rp {{ number_format($harga, 0, ',', '.') }} × 1 peserta
                     </p>
 
@@ -354,6 +377,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                                 autocomplete="off"
                                 @error('kode_diskon') aria-invalid="true" @enderror>
                             @error('kode_diskon') <p class="ses-salah">{{ $message }}</p> @enderror
+                            <p class="ses-kabar-kode" id="ses-kabar-kode" role="status" aria-live="polite" hidden></p>
                         </div>
                     @endif
 
@@ -372,7 +396,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         peladen lebih dulu, supaya isiannya tidak hilang pada
                         peramban tanpa JavaScript.
                     --}}
-                    <div class="ses-peserta" id="ses-peserta"
+                    <div class="ses-peserta" id="ses-peserta" hidden
                         data-lama="{{ json_encode(old('peserta', [])) }}">
                         <p class="ses-peserta-judul">
                             Nama peserta lainnya
@@ -397,9 +421,12 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         <input type="checkbox" id="ses-setuju" name="setuju" value="1"
                             {{ old('setuju') ? 'checked' : '' }}
                             @error('setuju') aria-invalid="true" aria-describedby="ses-setuju-salah" @enderror>
+                        {{-- Dipendekkan dari tiga baris jadi dua. Isinya tetap
+                             menyebut APA yang dipakai dan UNTUK APA — yang
+                             dibuang hanya pengulangannya. --}}
                         <label for="ses-setuju">
-                            Saya setuju nama, email, dan nomor WhatsApp saya dipakai untuk
-                            mengirim tautan masuk, sertifikat, dan menambahkan saya ke grup peserta.
+                            Data saya boleh dipakai untuk mengirim bukti, sertifikat,
+                            dan memasukkan saya ke grup peserta.
                         </label>
                     </div>
                     @error('setuju') <p class="ses-salah" id="ses-setuju-salah">{{ $message }}</p> @enderror
@@ -735,7 +762,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     /* ---------------------------------------------------------- isian */
 
     .ses-kartu {
-        padding: 26px 24px;
+        /* 22px, bukan 26px. Tiap piksel di sini berarti, sebab kartunya sempat
+           992 px sementara layar 900 px — tombol daftarnya jatuh di bawah
+           lipatan tepat di halaman yang seluruh tujuannya mendaftar. */
+        padding: 22px 24px;
         border-radius: 22px;
         border: 1px solid var(--garis);
         background: #fff;
@@ -745,7 +775,43 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-kartu-judul { margin: 0 0 4px; font-size: 1.22rem; font-weight: 800; color: var(--navy); }
     .ses-kartu-sub { margin: 0 0 20px; font-size: .86rem; color: var(--tinta-2); }
 
-    .ses-isian { margin-bottom: 16px; }
+    /* 12px, bukan 16px. Lima isian berarti 20 px yang didapat kembali —
+       cukup untuk menarik tombol daftar naik ke atas lipatan layar. */
+    .ses-isian { margin-bottom: 12px; }
+
+    .ses-kabar-kode {
+        margin: 6px 0 0;
+        font-size: .78rem;
+        font-weight: 700;
+        color: #0f9b74;
+    }
+
+    .ses-kabar-kode[data-cocok="tidak"] { color: #b91c1c; }
+
+    .ses-potongan {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 10px;
+        font-size: .88rem;
+        color: #0f9b74;
+    }
+
+    .ses-potongan strong { font-weight: 800; }
+
+    .ses-label-sisa {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .ses-label-sisa span {
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--tinta-2);
+    }
 
     .ses-isian label {
         display: block;
@@ -1690,7 +1756,11 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
             nilai.textContent = baru;
             if (tempelNilai) tempelNilai.textContent = baru;
-            if (rincian) rincian.textContent = rupiah(harga) + ' × ' + n + ' peserta';
+            if (rincian) {
+                rincian.textContent = rupiah(harga) + ' × ' + n + ' peserta';
+                // Hanya berguna kalau pesertanya lebih dari satu.
+                rincian.hidden = n <= 1;
+            }
 
             if (berubah) {
                 [nilai, tempelNilai].forEach(function (e) {
@@ -1747,6 +1817,11 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                 }
 
                 wadah.hidden = perlu === 0;
+
+                // Keterangan rombongan ikut muncul-hilang bersamanya.
+                var bantu = document.getElementById('ses-bantu-rombongan');
+                if (bantu) bantu.hidden = perlu === 0;
+
                 baris.innerHTML = '';
 
                 for (var i = 0; i < perlu; i++) {
@@ -1845,6 +1920,92 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
             });
 
             rakit();
+        })();
+
+        /*
+         * KODE DISKON DIPERIKSA SEBELUM BORANGNYA DIKIRIM.
+         *
+         * Sebelum ini orang yang mengetik kode tidak mendapat tanda apa pun:
+         * totalnya tetap harga penuh, tidak ada kabar benar atau salah, dan
+         * baru ketahuan sesudah mengirim. Yang salah ketik membayar penuh
+         * tanpa tahu kenapa.
+         *
+         * Potongannya tetap dihitung ulang di peladen saat menyimpan — yang di
+         * sini hanya tampilan, dan jawaban peramban tidak pernah dipercaya
+         * sebagai dasar menagih.
+         */
+        (function () {
+            var kode = document.getElementById('ses-kode');
+            var kabar = document.getElementById('ses-kabar-kode');
+            var baris = document.getElementById('ses-potongan');
+            var nilaiPotongan = document.getElementById('ses-potongan-nilai');
+
+            // Isian kodenya hanya ada kalau angkatannya memang punya kode.
+            if (!kode || !kabar || !window.fetch) return;
+
+            var ALAMAT = @json(route('public.webinareksklusif.cekdiskon', $sesi->id));
+            var CSRF = document.querySelector('meta[name=csrf-token]');
+            var jadwalKode = null;
+            var terakhir = null;
+
+            function bersih() {
+                kabar.hidden = true;
+                kabar.textContent = '';
+                if (baris) baris.hidden = true;
+                hitung();
+            }
+
+            function periksa() {
+                var k = kode.value.trim();
+
+                if (k === '') { terakhir = null; bersih(); return; }
+
+                var kunci = k + '|' + jumlah.value;
+                if (kunci === terakhir) return;
+                terakhir = kunci;
+
+                fetch(ALAMAT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF ? CSRF.getAttribute('content') : ''
+                    },
+                    body: JSON.stringify({ kode: k, jumlah: jumlah.value })
+                })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) {
+                        if (!d) return;
+
+                        kabar.textContent = d.pesan || '';
+                        kabar.hidden = !d.pesan;
+                        kabar.dataset.cocok = d.cocok ? 'ya' : 'tidak';
+
+                        if (d.cocok && baris && nilaiPotongan) {
+                            nilaiPotongan.textContent = '− ' + rupiah(d.potongan);
+                            baris.hidden = false;
+                            nilai.textContent = rupiah(d.total);
+                        } else if (baris) {
+                            baris.hidden = true;
+                            hitung();
+                        }
+                    })
+                    .catch(function () {
+                        /* Didiamkan: ini kemudahan, bukan syarat. Potongannya
+                           tetap dihitung peladen saat borangnya dikirim. */
+                    });
+            }
+
+            kode.addEventListener('input', function () {
+                clearTimeout(jadwalKode);
+                jadwalKode = setTimeout(periksa, 600);
+            });
+
+            kode.addEventListener('change', periksa);
+
+            // Jumlah peserta berubah -> potongannya diperiksa ulang, sebab
+            // nilainya bisa bergantung total.
+            jumlah.addEventListener('change', function () { terakhir = null; periksa(); });
         })();
 
         jumlah.addEventListener('input', hitung);
