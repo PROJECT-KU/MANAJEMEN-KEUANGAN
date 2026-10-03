@@ -29,6 +29,14 @@
 
     $buktiBaris = Pendaftaran::buktiBaris($b);
     $sesiBaris = Pendaftaran::sesiBaris($b);
+    $angkatanBaris = Pendaftaran::angkatanBaris($b);
+
+    // Kursinya habis: dipakai menandai angkatan yang tidak bisa menerima
+    // pendaftaran baru lagi. Angkatan tanpa batas kuota tidak pernah penuh.
+    $angkatanPenuh = $angkatanBaris !== null
+        && $angkatanBaris['total_kuota'] !== null
+        && $angkatanBaris['sisa_kuota'] !== null
+        && $angkatanBaris['sisa_kuota'] <= 0;
     $waktuBaris = Pendaftaran::waktuBaris($b);
     $tautanBaris = Pendaftaran::tautanBaris($b);
 
@@ -118,10 +126,31 @@
     </td>
 
     <td data-judul="Sesi">
-        {{-- Dipotong dua baris lewat CSS, bukan di markah: dipotong di sini,
-             teks penuhnya ikut hilang dari cetakan, pembaca layar, dan
-             penyalinan. title menyimpan yang utuh. --}}
-        <span class="pdl-sesi" @if ($sesiBaris) title="{{ $sesiBaris }}" @endif>{{ $sesiBaris ?: '—' }}</span>
+        @if ($angkatanBaris)
+            {{-- Nama angkatan TANPA awalan nama layanannya: terukur 56 dari 59
+                 angkatan namanya memuat nama layanannya sendiri, jadi kolom
+                 Layanan di sebelah kiri dan kolom ini menulis hal yang sama
+                 dua kali. Nama penuhnya tetap di title. --}}
+            <span class="pdl-sesi" title="{{ $angkatanBaris['nama'] }}">{{ $angkatanBaris['ringkas'] }}</span>
+
+            <span class="pdl-sesi-ket">
+                @if ($angkatanBaris['mulai'])
+                    {{-- Tanggalnya disebut: tanpa itu tidak ada cara tahu
+                         angkatan ini bulan depan atau sudah lewat. --}}
+                    {{ \Illuminate\Support\Carbon::parse($angkatanBaris['mulai'])->translatedFormat('d M Y') }}
+                @endif
+                @if ($angkatanPenuh)
+                    <span class="pdl-penuh" title="Kursinya habis; angkatan ini tidak bisa menerima pendaftaran baru.">penuh</span>
+                @elseif ($angkatanBaris['sisa_kuota'] !== null)
+                    <span class="pdl-sisa">sisa {{ $angkatanBaris['sisa_kuota'] }}</span>
+                @endif
+            </span>
+        @else
+            {{-- Dua layanan tidak berangkatan; sesinya teks bebas di barisnya
+                 sendiri. Dipotong dua baris lewat CSS, bukan di markah: teks
+                 penuhnya tetap sampai ke cetakan dan pembaca layar. --}}
+            <span class="pdl-sesi" @if ($sesiBaris) title="{{ $sesiBaris }}" @endif>{{ $sesiBaris ?: '—' }}</span>
+        @endif
     </td>
 
     <td data-judul="Total bayar" class="text-right">

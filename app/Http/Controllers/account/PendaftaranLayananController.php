@@ -495,7 +495,58 @@ class PendaftaranLayananController extends Controller
             'ringkasan' => $ringkasan,
             'katalog' => Pendaftaran::katalog(),
             'keadaan' => Pendaftaran::KEADAAN,
+            'pilihanAngkatan' => $this->pilihanAngkatan(),
         ] + $pilihan);
+    }
+
+    /**
+     * Angkatan yang bisa dipilih di kartu saringan, dikelompokkan per layanan.
+     *
+     * HANYA yang benar-benar punya pendaftar — terukur 39 dari 59. Menawarkan
+     * angkatan yang kosong berarti menyediakan pilihan yang pasti
+     * mengembalikan nol baris, dan orang yang menekannya menyimpulkan
+     * saringannya rusak.
+     *
+     * Satu kueri untuk id yang terpakai, lalu dipetakan dari keterangan
+     * angkatan yang sudah dibaca sekali per permintaan — bukan satu kueri per
+     * angkatan.
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    private function pilihanAngkatan(): array
+    {
+        $terpakai = Pendaftaran::kueri()
+            ->whereNotNull('angkatan_id')
+            ->distinct()
+            ->pluck('angkatan_id')
+            ->all();
+
+        $lengkap = Pendaftaran::angkatanLengkap();
+        $katalog = Pendaftaran::katalog();
+        $keluar = [];
+
+        foreach ($terpakai as $id) {
+            $a = $lengkap[$id] ?? null;
+
+            if ($a === null || ! isset($katalog[$a['layanan']])) {
+                continue;
+            }
+
+            $keluar[$a['layanan']][] = [
+                'id' => $id,
+                'ringkas' => $a['ringkas'],
+                'mulai' => $a['mulai'],
+            ];
+        }
+
+        // Terbaru di atas: angkatan yang sedang berjalan jauh lebih sering
+        // dicari daripada yang sudah lewat bertahun-tahun.
+        foreach ($keluar as $layanan => $daftar) {
+            usort($daftar, fn ($x, $y) => strcmp((string) $y['mulai'], (string) $x['mulai']));
+            $keluar[$layanan] = $daftar;
+        }
+
+        return $keluar;
     }
 
     /**

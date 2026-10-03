@@ -357,7 +357,7 @@ class PendaftaranSemuaLayanan
         'status' => 'status',
     ];
 
-    /** @var array<string, string>|null */
+    /** @var array<string, array<string, mixed>>|null */
     private static ?array $angkatan = null;
 
     /** Dibuang uji yang mengubah angkatannya di tengah jalan. */
@@ -766,22 +766,91 @@ class PendaftaranSemuaLayanan
     }
 
     /**
-     * Nama angkatan untuk seluruh id yang dipakai, satu kueri untuk semuanya.
+     * Keterangan angkatan untuk seluruh id yang dipakai, satu kueri untuk
+     * semuanya.
      *
      * Dicari sekali per permintaan, bukan per baris: dua puluh baris yang
      * masing-masing memanggil KategoriLayanan::find() adalah dua puluh kueri
      * untuk tabel yang isinya 59 baris.
      *
-     * @return array<string, string>
+     * Bukan cuma namanya: tanggal mulai dan sisa kursinya ikut, sebab daftar
+     * pendaftar yang menyebut "Scopus Camp Jakarta" tanpa keduanya tidak
+     * memberi tahu apakah itu angkatan bulan depan atau yang sudah lewat, dan
+     * apakah kursinya masih ada.
+     *
+     * @return array<string, array<string, mixed>>
      */
-    public static function namaAngkatan(): array
+    public static function angkatanLengkap(): array
     {
         if (self::$angkatan !== null) {
             return self::$angkatan;
         }
 
         return self::$angkatan = KategoriLayanan::query()
-            ->pluck('nama', 'id')->all();
+            ->get(['id', 'layanan', 'nama', 'mulai', 'total_kuota', 'sisa_kuota'])
+            ->mapWithKeys(fn ($a) => [$a->id => [
+                'layanan' => (string) $a->layanan,
+                'nama' => (string) $a->nama,
+                'ringkas' => self::namaRingkas((string) $a->layanan, (string) $a->nama),
+                'mulai' => $a->mulai,
+                'total_kuota' => $a->total_kuota === null ? null : (int) $a->total_kuota,
+                'sisa_kuota' => $a->sisa_kuota === null ? null : (int) $a->sisa_kuota,
+            ]])
+            ->all();
+    }
+
+    /**
+     * Nama angkatan saja — bentuk lama, dipakai kedua berkas unduhan.
+     *
+     * @return array<string, string>
+     */
+    public static function namaAngkatan(): array
+    {
+        return array_map(fn ($a) => $a['nama'], self::angkatanLengkap());
+    }
+
+    /**
+     * Nama angkatan TANPA awalan nama layanannya.
+     *
+     * Terukur: 56 dari 59 angkatan namanya memuat nama layanannya sendiri,
+     * sehingga tiap baris daftar menulis hal yang sama dua kali — kolom
+     * Layanan berbunyi "Scopus Camp" dan kolom Sesi "Scopus Camp Jakarta".
+     * Yang sebenarnya ingin dibaca cuma satu kata: Jakarta.
+     *
+     * Kalau sesudah dipangkas tidak tersisa apa-apa — angkatan Bibliometrik
+     * bernama persis "Analisis Bibliometrik" — nama penuhnya dikembalikan.
+     * Sel kosong lebih buruk daripada sel yang mengulang.
+     */
+    public static function namaRingkas(string $layanan, string $nama): string
+    {
+        $namaLayanan = self::SUMBER[$layanan]['nama'] ?? null;
+
+        if ($namaLayanan === null) {
+            return $nama;
+        }
+
+        // Dipangkas dari DEPAN saja: "Webinar Eksklusif Batch 2" jadi
+        // "Batch 2", tetapi "Kelas Webinar Eksklusif" dibiarkan utuh — kata
+        // yang berada di tengah bukan awalan yang mubazir.
+        $pola = '/^' . preg_quote($namaLayanan, '/') . '\s*[-:\x{2013}\x{2014}]?\s*/iu';
+        $ringkas = trim((string) preg_replace($pola, '', $nama));
+
+        return $ringkas === '' ? $nama : $ringkas;
+    }
+
+    /**
+     * Keterangan angkatan satu baris, atau null kalau barisnya tidak
+     * berangkatan.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function angkatanBaris(object $baris): ?array
+    {
+        if (empty($baris->angkatan_id)) {
+            return null;
+        }
+
+        return self::angkatanLengkap()[$baris->angkatan_id] ?? null;
     }
 
     /**
@@ -793,12 +862,13 @@ class PendaftaranSemuaLayanan
      */
     public static function sesiBaris(object $baris): ?string
     {
-        if (! empty($baris->angkatan_id)) {
-            $nama = self::namaAngkatan()[$baris->angkatan_id] ?? null;
+        $angkatan = self::angkatanBaris($baris);
 
-            if ($nama !== null) {
-                return $nama;
-            }
+        if ($angkatan !== null) {
+            // Nama PENUH di sini: metode ini dipakai kedua berkas unduhan,
+            // dan di sana tidak ada kolom layanan di sebelahnya yang membuat
+            // awalannya mubazir.
+            return $angkatan['nama'];
         }
 
         $sesi = trim((string) ($baris->sesi ?? ''));
