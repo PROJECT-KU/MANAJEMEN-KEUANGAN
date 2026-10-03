@@ -886,4 +886,85 @@ class WebinarEksklusifTest extends TestCase
             fn ($surat) => $surat->hasTo('gita@contoh.test') && ! $surat->hasTo('penyerang@contoh.test')
         );
     }
+
+    // ----------------------------------------------------- rupa surat keluar
+
+    /**
+     * Surat yang sampai ke peserta sempat tertulis pengirimnya "Laravel".
+     *
+     * Sebabnya Mailable-nya memakai config('app.name'), sedangkan APP_NAME di
+     * .env memang masih bawaan. Yang benar MAIL_FROM_NAME, dan itu sudah
+     * terisi sejak dulu. Surat dari "Laravel" terbaca seperti nyasar atau
+     * penipuan — di situlah orang berhenti membacanya, dan tidak ada galat
+     * apa pun yang menandainya.
+     */
+    #[Test]
+    public function pengirim_suratnya_bukan_nama_bawaan_laravel(): void
+    {
+        config(['app.name' => 'Laravel']);
+
+        $sesi = $this->sesi();
+        $p = $this->pendaftaranUji($sesi);
+
+        foreach ([
+            new \App\Mail\WebinarEksklusifPendaftaranMail($p, $sesi),
+            new \App\Mail\WebinarEksklusifPengingatMail($p, $sesi),
+        ] as $surat) {
+            $pesan = $surat->build()->toMail ?? null;
+
+            $dibangun = $surat->build();
+            $dari = collect($dibangun->from)->first();
+
+            $this->assertSame(config('mail.from.name'), $dari['name']);
+            $this->assertNotSame('Laravel', $dari['name']);
+        }
+    }
+
+    /**
+     * Logonya DISISIPKAN sebagai lampiran, bukan ditautkan ke peladen: Gmail
+     * dan Outlook memblokir gambar jauh secara bawaan, jadi logo bertautan
+     * muncul sebagai kotak kosong sampai orangnya menekan "tampilkan gambar".
+     */
+    #[Test]
+    public function logo_rumah_scopus_disisipkan_di_surat(): void
+    {
+        $sesi = $this->sesi();
+        $p = $this->pendaftaranUji($sesi);
+
+        $html = (new \App\Mail\WebinarEksklusifPendaftaranMail($p, $sesi))->render();
+
+        $this->assertStringContainsString('alt="Rumah Scopus Foundation"', $html);
+
+        // Berkasnya memang ada; tanpa ini ujinya tetap hijau walau logonya
+        // terhapus dan yang tersisa lampiran kosong.
+        $this->assertFileExists(public_path('assets/img/logo-rsc-email.png'));
+    }
+
+    /**
+     * Judul sesinya 68 huruf. "Pendaftaran <judul> tersimpan" terpotong di
+     * tengah jalan pada daftar surat, dan yang terbaca tinggal judul sesi
+     * tanpa petunjuk bahwa itu bukti pendaftaran.
+     */
+    #[Test]
+    public function subjek_suratnya_pendek_dan_memuat_nomor_pendaftaran(): void
+    {
+        $sesi = $this->sesi(['nama' => str_repeat('Judul Sesi Yang Sangat Panjang ', 3)]);
+        $p = $this->pendaftaranUji($sesi);
+
+        $subjek = (new \App\Mail\WebinarEksklusifPendaftaranMail($p, $sesi))->build()->subject;
+
+        $this->assertStringContainsString($p->id_transaksi, $subjek);
+        $this->assertLessThan(60, mb_strlen($subjek),
+            'subjek panjang terpotong di daftar surat sebelum sampai ke bagian yang penting');
+    }
+
+    private function pendaftaranUji(KategoriLayanan $sesi): WebinarEksklusifPendaftaran
+    {
+        return WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Peserta Uji', 'email' => 'surat@contoh.test',
+            'telp' => '628123456789', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'pending',
+            'kedaluwarsa_pada' => now()->addMinutes(30),
+        ]);
+    }
 }
