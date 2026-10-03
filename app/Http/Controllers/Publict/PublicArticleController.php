@@ -67,7 +67,7 @@ class PublicArticleController extends Controller
     }
 
     // MENAMPILKAN ARTIKEL BERDASARKAN KATEGORI
-    public function publickategori(Request $request, $categories_artikel_id, $token)
+    public function publickategori(Request $request, $categories_artikel_id)
     {
         $user = Auth::user();
         $startDate = $request->input('tanggal_awal');
@@ -105,7 +105,7 @@ class PublicArticleController extends Controller
     }
 
     // MENAMPILKAN DATA ARTIKEL 
-    public function blogsingle($id, $token)
+    public function blogsingle($id)
     {
         $user = Auth::user();
         $artikel = Artikel::findOrFail($id);

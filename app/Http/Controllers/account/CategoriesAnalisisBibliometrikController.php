@@ -161,7 +161,7 @@ class CategoriesAnalisisBibliometrikController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE DATA ==================-->
-    public function edit($id, $token)
+    public function edit($id)
     {
         $user = Auth::user();
         $categories = CategoriesAnalisisBibliometrik::findOrFail($id);

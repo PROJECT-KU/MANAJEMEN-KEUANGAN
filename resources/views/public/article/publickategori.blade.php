@@ -236,7 +236,7 @@ Kategori Blog | Rumah Scopus
                                     <p>{{ $article->full_name }}</p>
                                 </div>
                             </div>
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}" class="readmore stretched-link" style="text-align: right;  background: linear-gradient(to right, #ff3131, #ff914d);
+                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="readmore stretched-link" style="text-align: right;  background: linear-gradient(to right, #ff3131, #ff914d);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;">
                                 <span>Baca</span>

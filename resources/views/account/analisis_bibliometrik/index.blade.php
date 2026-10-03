@@ -129,7 +129,7 @@ Data Pendaftaran Analisis Bibliometrik | MIS
 
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center" style="gap: 6px;">
-                                                <a href="{{ route('account.analisisbibliometrik.edit', ['id' => $data->id, 'token' => $data->token]) }}" class="btn btn-sm btn-warning">
+                                                <a href="{{ route('account.analisisbibliometrik.edit', ['id' => $data->id]) }}" class="btn btn-sm btn-warning">
                                                     <i class="fa fa-pencil-alt"></i>
                                                 </a>
                                                 <button onclick="Delete('{{ $data->id }}')" class="btn btn-sm btn-danger">

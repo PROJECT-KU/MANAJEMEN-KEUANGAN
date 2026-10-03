@@ -706,7 +706,7 @@
                 @foreach ($this->artikel as $a)
                     {{-- Kartunya dibuat bertaut: sebelumnya hanya pajangan yang
                          tidak bisa diklik. --}}
-                    <a href="{{ route('blog.topic.blog-single', ['id' => $a->id, 'token' => $a->token]) }}"
+                    <a href="{{ route('blog.topic.blog-single', ['id' => $a->id]) }}"
                         class="dsb-artikel-kartu" title="{{ $a->judul }}">
                         <div class="dsb-artikel-gambar">
                             @if ($a->gambar_depan)

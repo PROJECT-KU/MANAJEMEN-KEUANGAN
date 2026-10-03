@@ -111,7 +111,7 @@ class WebinarEksklusifTest extends TestCase
 
         // Alamat borangnya ikut dikirim supaya halaman landing cukup
         // memasangnya ke tombol tanpa tahu bagaimana ia dirakit.
-        $this->assertStringContainsString($sesi->token, $jawab->json('sesi.daftar_url'));
+        $this->assertStringContainsString($sesi->id, $jawab->json('sesi.daftar_url'));
     }
 
     #[Test]
@@ -172,23 +172,45 @@ class WebinarEksklusifTest extends TestCase
     // ---------------------------------------------------------- pendaftaran
 
     #[Test]
-    public function borang_pendaftaran_terbuka_dengan_token_yang_benar(): void
+    public function borang_pendaftaran_terbuka_dari_uuid_angkatannya(): void
     {
         $sesi = $this->sesi();
 
-        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))
+        $this->get(route('public.webinareksklusif.daftar', $sesi->id))
             ->assertOk()
             ->assertSee($sesi->nama)
             ->assertSee('Rp 129.000');
     }
 
+    /**
+     * Tokennya dibuang 3 Okt 2026, jadi yang menutup pintu tinggal satu:
+     * UUID yang tidak dikenali. Kalau pencariannya dilonggarkan — misalnya
+     * jatuh ke sesi pertama saat id-nya tidak ketemu — pendaftar bisa
+     * mendarat di angkatan yang salah tanpa gejala apa pun.
+     */
     #[Test]
-    public function borang_menolak_token_yang_salah(): void
+    public function borang_menolak_uuid_yang_tidak_dikenal(): void
+    {
+        $this->sesi();
+
+        $this->get(route('public.webinareksklusif.daftar', (string) \Illuminate\Support\Str::uuid()))
+            ->assertRedirect(route('public.webinareksklusif.index'));
+    }
+
+    /**
+     * Alamatnya TIDAK boleh memuat token lagi. Tanpa uji ini, token yang
+     * dipasang kembali di suatu tempat tidak akan menampakkan diri — kedua
+     * bentuk alamat sama-sama terbuka selama rutenya masih menerimanya.
+     */
+    #[Test]
+    public function alamat_borang_tidak_memuat_token(): void
     {
         $sesi = $this->sesi();
 
-        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, 'token-karangan']))
-            ->assertRedirect(route('public.webinareksklusif.index'));
+        $alamat = route('public.webinareksklusif.daftar', $sesi->id);
+
+        $this->assertStringContainsString($sesi->id, $alamat);
+        $this->assertStringNotContainsString($sesi->token, $alamat);
     }
 
     #[Test]
@@ -273,7 +295,7 @@ class WebinarEksklusifTest extends TestCase
 
         $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->first();
 
-        $this->get(route('public.webinareksklusif.status', $p->token))
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
             ->assertSee($p->id_transaksi)
             ->assertSee('Rp 129.000');
@@ -672,7 +694,7 @@ class WebinarEksklusifTest extends TestCase
             'kedaluwarsa_pada' => now()->subHour(),
         ]);
 
-        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))
+        $this->get(route('public.webinareksklusif.daftar', $sesi->id))
             ->assertOk();
 
         $this->assertSame('10', (string) $sesi->fresh()->sisa_kuota,
@@ -694,7 +716,7 @@ class WebinarEksklusifTest extends TestCase
             'kedaluwarsa_pada' => now()->addMinutes(20),
         ]);
 
-        $this->get(route('public.webinareksklusif.daftar', [$sesi->id, $sesi->token]))->assertOk();
+        $this->get(route('public.webinareksklusif.daftar', $sesi->id))->assertOk();
 
         $this->assertSame('4', (string) $sesi->fresh()->sisa_kuota,
             'yang masih dalam batas waktu kursinya TIDAK boleh dilepas');
@@ -848,7 +870,7 @@ class WebinarEksklusifTest extends TestCase
             'kedaluwarsa_pada' => now()->addMinutes(20),
         ]);
 
-        $this->post(route('public.webinareksklusif.kirimulang', $p->token))
+        $this->post(route('public.webinareksklusif.kirimulang', $p->getKey()))
             ->assertRedirect()
             ->assertSessionHas('sukses');
 
@@ -877,7 +899,7 @@ class WebinarEksklusifTest extends TestCase
             'kedaluwarsa_pada' => now()->addMinutes(20),
         ]);
 
-        $this->post(route('public.webinareksklusif.kirimulang', $p->token), [
+        $this->post(route('public.webinareksklusif.kirimulang', $p->getKey()), [
             'email' => 'penyerang@contoh.test',
         ]);
 

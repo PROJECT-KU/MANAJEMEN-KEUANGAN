@@ -42,16 +42,17 @@ class PublicWebinarEksklusifController extends Controller
     }
 
     /**
-     * Borang pendaftaran satu sesi.
+     * Borang pendaftaran satu sesi, dicari dari UUID angkatannya.
      *
-     * Token ikut diperiksa, bukan id saja. Id-nya UUID jadi tidak bisa
-     * ditebak, tetapi alamat borang beredar lewat iklan dan grup WhatsApp —
-     * token memberi jalan menutup satu tautan yang bocor tanpa menyentuh yang
-     * lain.
+     * Tokennya dibuang 3 Okt 2026. Alasan lamanya "bisa menutup satu tautan
+     * yang bocor" tidak pernah terpakai: tidak ada layar mana pun yang bisa
+     * memutar tokennya, jadi yang tersisa hanya alamat dua kali lebih panjang
+     * dan dua nilai yang harus dijaga tetap cocok. Yang menutup pendaftaran
+     * adalah status angkatannya, dan itu memang sudah diperiksa kueriAktif().
      */
-    public function daftar(string $id, string $token)
+    public function daftar(string $id)
     {
-        $sesi = $this->temukan($id, $token);
+        $sesi = $this->temukan($id);
 
         if ($sesi === null) {
             return $this->kembaliKeDaftar('Sesi itu sudah tidak dibuka lagi.');
@@ -177,7 +178,7 @@ class PublicWebinarEksklusifController extends Controller
             ->first();
 
         if ($sudahAda !== null) {
-            return redirect()->route('public.webinareksklusif.status', $sudahAda->token)
+            return redirect()->route('public.webinareksklusif.status', $sudahAda->getKey())
                 ->with('error', $sudahAda->status === 'paid'
                     ? 'Email itu sudah terdaftar di sesi ini. Ini rincian pendaftaran Anda.'
                     : 'Email itu sudah punya pendaftaran yang belum dibayar di sesi ini. '
@@ -248,7 +249,7 @@ class PublicWebinarEksklusifController extends Controller
     private function mulaiBayar(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi)
     {
         if (! $this->doku->siap()) {
-            return redirect()->route('public.webinareksklusif.status', $pendaftaran->token);
+            return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey());
         }
 
         $hasil = $this->doku->buatTagihan([
@@ -260,7 +261,7 @@ class PublicWebinarEksklusifController extends Controller
             'nama' => $pendaftaran->nama,
             'email' => $pendaftaran->email,
             'telp' => $pendaftaran->telp,
-            'kembali' => route('public.webinareksklusif.status', $pendaftaran->token),
+            'kembali' => route('public.webinareksklusif.status', $pendaftaran->getKey()),
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {
@@ -269,7 +270,7 @@ class PublicWebinarEksklusifController extends Controller
                 'note' => 'Pembayaran daring gagal dibuat: ' . ($hasil['pesan'] ?? 'tidak diketahui'),
             ])->save();
 
-            return redirect()->route('public.webinareksklusif.status', $pendaftaran->token)
+            return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey())
                 ->with('error', 'Pembayaran daring sedang bermasalah. '
                     . 'Pendaftaran Anda sudah tersimpan — silakan bayar lewat transfer.');
         }
@@ -285,9 +286,9 @@ class PublicWebinarEksklusifController extends Controller
     // ------------------------------------------------------------ status
 
     /** Halaman status satu pendaftaran; tautannya dikirim ke email peserta. */
-    public function status(string $token)
+    public function status(string $id)
     {
-        $pendaftaran = WebinarEksklusifPendaftaran::where('token', $token)->first();
+        $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
 
         if ($pendaftaran === null) {
             return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
@@ -409,9 +410,16 @@ class PublicWebinarEksklusifController extends Controller
             ->orderBy('mulai');
     }
 
-    private function temukan(string $id, string $token): ?KategoriLayanan
+    /**
+     * Angkatan yang sedang dibuka, dicari dari UUID-nya saja.
+     *
+     * Tokennya dibuang: kuncinya Str::uuid() acak — 122 bit — jadi tebakannya
+     * sudah mustahil tanpa nilai kedua, dan dua nilai yang harus cocok berarti
+     * dua tempat yang bisa salah sinkron.
+     */
+    private function temukan(string $id): ?KategoriLayanan
     {
-        return $this->kueriAktif()->whereKey($id)->where('token', $token)->first();
+        return $this->kueriAktif()->whereKey($id)->first();
     }
 
     private function kembaliKeDaftar(string $pesan)
@@ -423,7 +431,7 @@ class PublicWebinarEksklusifController extends Controller
     /**
      * Mengirim ULANG bukti pendaftaran ke email yang sama.
      *
-     * Satu-satunya jalan kembali ke halaman ini adalah tautan bertoken. Kalau
+     * Satu-satunya jalan kembali ke halaman ini adalah tautan ber-UUID. Kalau
      * emailnya terhapus atau masuk folder sampah, orangnya kehilangan nomor
      * pendaftaran dan cara bayarnya sekaligus — dan yang menanggung adalah
      * panitia lewat WhatsApp.
@@ -432,9 +440,9 @@ class PublicWebinarEksklusifController extends Controller
      * borang: kalau penerimanya bisa ditentukan dari luar, siapa pun yang
      * memegang tautan ini bisa memakainya untuk mengirimi orang lain.
      */
-    public function kirimUlang(string $token)
+    public function kirimUlang(string $id)
     {
-        $pendaftaran = WebinarEksklusifPendaftaran::where('token', $token)->first();
+        $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
 
         if ($pendaftaran === null) {
             return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');

@@ -349,7 +349,7 @@ Detail Scopus Camp | Rumah Scopus
                             @endphp
 
                             <div class="mt-5">
-                            <a href="{{ $kuotaHabis ? '#' : route('public.scopuscamp.formpendaftaran', ['id' => $item->id, 'token' => $item->token]) }}" style="text-decoration: none;">
+                            <a href="{{ $kuotaHabis ? '#' : route('public.scopuscamp.formpendaftaran', ['id' => $item->id]) }}" style="text-decoration: none;">
                                 <button class="btn-glossy {{ $kuotaHabis ? 'disabled' : 'active' }}" {{ $kuotaHabis ? 'disabled' : '' }}>
                                     <i class="fa {{ $kuotaHabis ? 'fa-lock' : 'fa-paper-plane' }}"></i>
                                     {{ $kuotaHabis ? 'Pendaftaran Ditutup' : 'Daftar Sekarang' }}
@@ -366,7 +366,7 @@ Detail Scopus Camp | Rumah Scopus
                     <div class="sidebar-list mt-4">
                         @foreach($terbaru as $data)
                         @if($data->status === 'active')
-                        <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $data->id, 'token' => $data->token]) }}" class="sidebar-item-glass">
+                        <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $data->id]) }}" class="sidebar-item-glass">
                             <img src="{{ \App\Support\AlamatGambar::url($data->gambar ?? null, 'ScopusCamp') ?: asset('ScopusCamp/no-image.jpg') }}" alt="Gambar" class="sidebar-img">
 
                             <div class="sidebar-info">

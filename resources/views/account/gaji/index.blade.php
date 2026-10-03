@@ -588,22 +588,22 @@ Data Gaji Karyawan | MIS
 
                   @if(Auth::user()->adalahKaryawan())
 
-                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoaration: none;" title="Detail">
+                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoaration: none;" title="Detail">
                     <i class="fa fa-eye"></i>
                   </a>
-                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoaration: none;">
+                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoaration: none;">
                     <i class="fa fa-file-invoice mr-1"></i> Slip
                   </a>
 
                   @else
 
                   @if($hasil->status == 'pending' && now()->month == \Carbon\Carbon::parse($hasil->tanggal)->month)
-                  <a href="{{ route('account.gaji.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #fffbeb; color: #d97706; text-decoration: none;" title="Edit">
+                  <a href="{{ route('account.gaji.edit', ['id' => $hasil->id]) }}" class="action-btn" style="background: #fffbeb; color: #d97706; text-decoration: none;" title="Edit">
                     <i class="fa fa-pencil-alt"></i>
                   </a>
                   @endif
 
-                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoration: none;" title="Detail">
+                  <a href="{{ route('account.gaji.detail', ['id' => $hasil->id]) }}" class="action-btn" style="background: #eef2ff; color: #6366f1; text-decoration: none;" title="Detail">
                     <i class="fa fa-eye"></i>
                   </a>
 
@@ -611,7 +611,7 @@ Data Gaji Karyawan | MIS
                     <i class="fa fa-trash"></i>
                   </button>
 
-                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoration: none;">
+                  <a href="{{ route('account.laporan_gaji.Slip-Gaji', ['id' => $hasil->id]) }}" class="action-btn-slip" style="background: #e0f2fe; color: #0284c7; text-decoration: none;">
                     <i class="fa fa-file-invoice mr-1"></i> Slip
                   </a>
 

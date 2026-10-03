@@ -120,12 +120,12 @@ Data Laporan Peserta | MIS
                                         <td class="column-width" style="text-align: center;">{{ $hasil->jurnal }}</td>
                                         <td class="column-width" style="text-align: center;">{{ $hasil->submit }}</td>
                                         @if ( Auth::user()->adalahAdministrator())
-                                        <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
+                                        <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id]) }}" class="btn btn-sm btn-warning">
                                                 <i class="fa fa-eye"></i>
                                             </a>
                                         </td>
                                         @else
-                                        <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
+                                        <td> <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.peserta.detail', ['id' => $hasil->id]) }}" class="btn btn-sm btn-warning">
                                                 <i class="fa fa-eye"></i>
                                             </a>
                                             <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">

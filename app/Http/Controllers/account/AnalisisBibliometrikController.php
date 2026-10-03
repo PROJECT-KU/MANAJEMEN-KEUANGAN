@@ -76,7 +76,7 @@ class AnalisisBibliometrikController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE DATA ==================-->
-    public function edit($id, $token)
+    public function edit($id)
     {
         $data = AnalisisBibliometrik::findOrFail($id);
         $category = CategoriesAnalisisBibliometrik::find($data->kategori_id);

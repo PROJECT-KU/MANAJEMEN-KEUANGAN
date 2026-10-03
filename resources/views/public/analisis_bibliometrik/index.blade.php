@@ -147,7 +147,7 @@
                                 <i class="fa fa-lock"></i> Pendaftaran Ditutup
                             </button>
                             @else
-                            <a href="{{ route('public.analisisbibliometrik.Selengkapnya', ['id' => $item->id, 'token' => $item->token]) }}" class="text-decoration-none">
+                            <a href="{{ route('public.analisisbibliometrik.Selengkapnya', ['id' => $item->id]) }}" class="text-decoration-none">
                                 <button class="btn-register btn-active">
                                     <i class="fa fa-paper-plane"></i> Daftar Sekarang
                                 </button>
