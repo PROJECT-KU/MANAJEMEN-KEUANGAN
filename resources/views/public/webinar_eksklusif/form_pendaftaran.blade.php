@@ -464,18 +464,6 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         </button>
                     @endif
 
-                    {{-- Kode uniknya disebut SEBELUM mengirim, walau angkanya
-                         baru ada sesudahnya. Tanpa ini, total yang berubah di
-                         halaman berikutnya terbaca seperti salah hitung. --}}
-                    @unless ($bayarDaring)
-                        <p class="ses-tenang ses-tenang-unik">
-                            <i class="fas fa-receipt" aria-hidden="true"></i>
-                            Totalnya nanti ditambah kode unik
-                            Rp {{ number_format(\App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MIN, 0, ',', '.') }}–{{ number_format(\App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MAKS, 0, ',', '.') }}
-                            supaya pembayaran Anda bisa kami cocokkan.
-                        </p>
-                    @endunless
-
                     <p class="ses-tenang">
                         <i class="fas fa-lock" aria-hidden="true"></i>
                         @if ($bayarDaring)
@@ -1256,15 +1244,71 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         border-top: 1px dashed var(--garis);
     }
 
+    /*
+     * Kotak centangnya digambar sendiri, bukan rupa bawaan peramban.
+     *
+     * appearance:none dipakai pada <input> ASLINYA, bukan disembunyikan lalu
+     * diganti <span>: ia tetap unsur borang sungguhan, jadi tetap bisa
+     * dijangkau papan ketik, tetap terbaca pembaca layar, tetap ikut
+     * terkirim, dan tetap tersorot oleh :focus-visible — hal-hal yang semuanya
+     * harus dibuat ulang kalau diganti unsur palsu.
+     */
     .ses-setuju input {
         flex: 0 0 auto;
-        /* 20px, dan padding sentuhnya diperlebar lewat label di sebelahnya:
-           kotak centang bawaan terlalu kecil untuk jempol di ponsel. */
-        width: 20px;
-        height: 20px;
-        margin-top: 1px;
-        accent-color: var(--jingga);
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 22px;
+        height: 22px;
+        margin: 0;
+        border: 2px solid #cbd5e1;
+        border-radius: 7px;
+        background: #fff;
         cursor: pointer;
+        transition: background .18s ease, border-color .18s ease, transform .12s ease;
+    }
+
+    .ses-setuju input:hover { border-color: var(--jingga); }
+
+    .ses-setuju input:checked {
+        background: linear-gradient(135deg, #ff8c00, #e65c00);
+        border-color: #e65c00;
+    }
+
+    /* Centangnya digambar dari dua sisi kotak yang dimiringkan — tidak
+       bergantung ikon apa pun, jadi tidak bisa gagal muncul seperti glif yang
+       fontnya tidak termuat. */
+    .ses-setuju input::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 6px;
+        width: 5px;
+        height: 10px;
+        border: solid #fff;
+        border-width: 0 2.5px 2.5px 0;
+        transform: rotate(45deg) scale(0);
+        transform-origin: center;
+        transition: transform .18s cubic-bezier(.3, 1.4, .5, 1);
+    }
+
+    .ses-setuju input:checked::after { transform: rotate(45deg) scale(1); }
+
+    .ses-setuju input:active { transform: scale(.92); }
+
+    .ses-setuju input:focus-visible {
+        outline: 3px solid rgba(255, 106, 0, .45);
+        outline-offset: 2px;
+    }
+
+    /* Yang belum dicentang padahal wajib diberi tepi merah, bukan hanya
+       kalimat galat di bawahnya. */
+    .ses-setuju input[aria-invalid="true"] { border-color: #dc2626; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ses-setuju input,
+        .ses-setuju input::after { transition: none !important; }
+        .ses-setuju input:active { transform: none !important; }
     }
 
     .ses-setuju label {

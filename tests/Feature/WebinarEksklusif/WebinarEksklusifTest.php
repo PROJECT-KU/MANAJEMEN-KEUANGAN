@@ -2038,4 +2038,49 @@ class WebinarEksklusifTest extends TestCase
             // hitung, lalu membulatkannya.
             ->assertSee('tidak bisa kami cocokkan', false);
     }
+
+    /**
+     * Kotak centangnya digambar sendiri, tetapi HARUS tetap <input> asli.
+     *
+     * Godaannya menyembunyikan input lalu menggambar <span> sebagai
+     * penggantinya. Begitu itu dilakukan, semua yang gratis dari unsur borang
+     * sungguhan hilang sekaligus: jangkauan papan ketik, pembacaan oleh
+     * pembaca layar, keikutsertaan saat borang dikirim, dan sorotan fokus —
+     * dan tidak satu pun dari itu menampakkan diri saat diklik tetikus.
+     */
+    #[Test]
+    public function kotak_centang_tetap_unsur_borang_sungguhan(): void
+    {
+        $sesi = $this->sesi();
+
+        $isi = $this->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<input[^>]*type="checkbox"[^>]*id="ses-setuju"|<input[^>]*id="ses-setuju"[^>]*type="checkbox"/',
+            $isi,
+            'persetujuannya harus tetap <input type="checkbox">, bukan unsur palsu');
+
+        $this->assertStringContainsString('name="setuju"', $isi,
+            'tanpa name, centangnya tidak ikut terkirim dan validasinya selalu gagal');
+
+        $this->assertStringContainsString('<label for="ses-setuju">', $isi,
+            'label ber-for yang membuat kalimat panjangnya ikut bisa diketuk');
+    }
+
+    /**
+     * Kalimat "Totalnya nanti ditambah kode unik ..." dibuang atas permintaan.
+     * Kode uniknya tetap jalan — yang dibuang hanya penyebutannya di borang;
+     * halaman status dan surat buktinya tetap menjelaskannya.
+     */
+    #[Test]
+    public function borang_tidak_lagi_menyebut_kode_unik(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->assertDontSee('ditambah kode unik', false);
+    }
 }
