@@ -28,6 +28,10 @@ class TarifAuditDuaTest extends TestCase
     {
         parent::setUp();
         Layanan::lupakanKatalog();
+
+        // Uji di berkas ini ditulis dengan andaian Scopus Kafe BELUM
+        // bervarian — lihat tanpaVarian() di Tests\TestCase.
+        $this->tanpaVarian('scopus_kafe');
         // Penanda "jadwal sudah diperiksa" berumur satu permintaan di produksi,
         // tetapi satu PROSES di uji — tanpa dibuang, uji berikutnya tidak
         // pernah menaikkan tarif terjadwalnya.

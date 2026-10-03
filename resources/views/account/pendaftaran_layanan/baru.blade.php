@@ -133,6 +133,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             max-width: 780px;
         }
 
+        /*
+         * Centang "uang sudah diterima" berdiri di luar kisi isian, jadi tanpa
+         * batas ia melar selebar kartu langkahnya sementara dua kartu cara
+         * bayar di atasnya berhenti di 780px — terbaca seperti dua unsur yang
+         * tidak sepadan.
+         */
+        #bar-bungkus-terima {
+            max-width: 780px;
+        }
+
         .bar-pilihan input {
             position: absolute;
             width: 1px;
@@ -209,31 +219,75 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         /* Pilihan alumni: kotak centang berkartu, bukan centang telanjang di
            antara isian teks. Seluruh kartunya bisa ditekan, jadi sasaran
            sentuhnya jauh lebih besar daripada kotak 16px-nya sendiri. */
+        /*
+         * Bentuknya SAMA dengan kartu pilihan di langkah 1 dan 3 — medali
+         * ikon di kiri, keterangan di tengah, penanda centang di kanan.
+         *
+         * Sebelumnya berupa kotak centang bawaan peramban di dalam bingkai
+         * polos: di antara kartu-kartu berwarna di langkah sebelum dan
+         * sesudahnya, ia terbaca seperti unsur yang belum selesai digarap.
+         */
         .bar-centang {
-            display: flex;
-            align-items: flex-start;
-            gap: 11px;
+            /* Setinggi isian di sebelahnya, bukan setinggi isinya sendiri:
+               kartu yang lebih pendek meninggalkan celah di bawahnya. */
+            height: 100%;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
             margin: 0;
             padding: 13px 15px;
             border: 1.5px solid var(--mis-garis);
             border-radius: var(--mis-radius-kecil);
             background: #fff;
             cursor: pointer;
-            transition: border-color .18s ease, background .18s ease;
+            transition: border-color .18s ease, background .18s ease,
+                box-shadow .18s ease;
         }
 
         .bar-centang:hover {
             border-color: #c7d2fe;
         }
 
+        .bar-centang:has(input:focus-visible) {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
         .bar-centang:has(input:checked) {
             border-color: #10b981;
             background: #ecfdf5;
+            box-shadow: 0 8px 20px -14px rgba(16, 185, 129, .9);
         }
 
+        /*
+         * Kotak bawaannya disembunyikan, BUKAN dibuang: ia tetap unsur borang
+         * sungguhan yang terkirim, tetap bisa dicapai papan tik, dan tetap
+         * dibacakan pembaca layar. Yang diganti hanya rupanya.
+         */
         .bar-centang input {
-            flex: 0 0 auto;
-            margin-top: 2px;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .bar-centang-tanda {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            background: #eef2ff;
+            color: #6366f1;
+            font-size: .92rem;
+            transition: background .18s ease, color .18s ease;
+        }
+
+        .bar-centang:has(input:checked) .bar-centang-tanda {
+            background: #d1fae5;
+            color: #059669;
         }
 
         .bar-centang-judul {
@@ -247,7 +301,88 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             display: block;
             margin-top: 2px;
             font-size: .76rem;
+            line-height: 1.45;
             color: var(--mis-tinta-3);
+        }
+
+        /*
+         * Penanda centang di kanan. Selalu ada tempatnya — disembunyikan
+         * dengan opacity, bukan display — supaya menyalakannya tidak
+         * menggeser teks di sebelahnya.
+         */
+        .bar-centang-pilih {
+            font-size: 1.06rem;
+            color: #10b981;
+            opacity: .22;
+            transition: opacity .18s ease;
+        }
+
+        .bar-centang:has(input:checked) .bar-centang-pilih {
+            opacity: 1;
+        }
+
+        /*
+         * Ringkas angkatan terpilih.
+         *
+         * Baris pertama langkah 2 menyisakan satu jalur kosong di layar lebar
+         * — menu angkatan memakai dua jalur, jumlah orang satu. Jalur itu
+         * diisi keterangan yang memang dicari saat mendaftarkan orang, bukan
+         * kotak hiasan.
+         */
+        .bar-sekilas {
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            padding: 12px 14px;
+            border: 1px solid #e0e7ff;
+            border-radius: var(--mis-radius-kecil);
+            background: linear-gradient(135deg, #faf5ff 0%, #eef2ff 100%);
+        }
+
+        .bar-sekilas[hidden] {
+            display: none;
+        }
+
+        .bar-sekilas-kepala {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #4338ca;
+        }
+
+        .bar-sekilas-isi {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 0;
+        }
+
+        .bar-sekilas-isi > div {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .bar-sekilas-isi dt {
+            margin: 0;
+            font-size: .74rem;
+            font-weight: 500;
+            color: var(--mis-tinta-3);
+        }
+
+        .bar-sekilas-isi dd {
+            margin: 0;
+            font-size: .8rem;
+            font-weight: 700;
+            text-align: right;
+            color: var(--mis-tinta);
         }
 
         /* Isian yang dimatikan karena potongan alumni dipakai: terlihat
@@ -642,6 +777,32 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <p class="mis-bantuan">Untuk pendaftaran rombongan.</p>
                     </div>
 
+                    {{-- Mengisi jalur yang sebelumnya menganggur di baris ini,
+                         dan isinya bukan sekadar pengisi: ketiga angka inilah
+                         yang ditanyakan pendaftar lewat WhatsApp — tanggal
+                         mulai, sisa kursi, dan harganya. Sebelumnya panitia
+                         harus membuka layar Angkatan Layanan untuk menjawab. --}}
+                    <div class="bar-sekilas" id="bar-sekilas" hidden>
+                        <p class="bar-sekilas-kepala">
+                            <i class="fas fa-layer-group" aria-hidden="true"></i>
+                            <span id="bar-sekilas-judul">Angkatan terpilih</span>
+                        </p>
+                        <dl class="bar-sekilas-isi">
+                            <div>
+                                <dt>Mulai</dt>
+                                <dd id="bar-sekilas-tanggal">—</dd>
+                            </div>
+                            <div>
+                                <dt>Sisa kursi</dt>
+                                <dd id="bar-sekilas-sisa">—</dd>
+                            </div>
+                            <div>
+                                <dt>Harga per orang</dt>
+                                <dd id="bar-sekilas-harga">—</dd>
+                            </div>
+                        </dl>
+                    </div>
+
                     <div class="mis-isian" id="bar-bungkus-total" hidden>
                         <label class="mis-label" for="bar-total">Total bayar</label>
                         <input type="text" class="form-control-modern" id="bar-total" name="total"
@@ -656,15 +817,21 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                          akhirnya tidak bisa dijelaskan dari salah satunya, dan
                          panitia yang memberi potongan khusus kepada seorang
                          alumni hampir selalu bermaksud menggantikannya. --}}
-                    <div class="mis-isian bar-penuh" id="bar-bungkus-alumni" hidden>
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-alumni" hidden>
                         <label class="bar-centang" for="bar-alumni">
-                            <input type="checkbox" class="mis-centang" id="bar-alumni"
+                            <input type="checkbox" id="bar-alumni"
                                 name="alumni" value="1" @checked(old('alumni'))>
+                            <span class="bar-centang-tanda" aria-hidden="true">
+                                <i class="fas fa-user-graduate"></i>
+                            </span>
                             <span>
                                 <span class="bar-centang-judul">Pendaftar ini alumni</span>
                                 <span class="bar-centang-ket" id="bar-alumni-ket">
                                     Potongannya ikut aturan di Tarif Layanan.
                                 </span>
+                            </span>
+                            <span class="bar-centang-pilih" aria-hidden="true">
+                                <i class="fas fa-check-circle"></i>
                             </span>
                         </label>
                     </div>
@@ -737,14 +904,20 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                      dengan mutasi rekening. --}}
                 <div class="mis-isian bar-penuh" id="bar-bungkus-terima" hidden>
                     <label class="bar-centang" for="bar-terima">
-                        <input type="checkbox" class="mis-centang" id="bar-terima"
+                        <input type="checkbox" id="bar-terima"
                             name="uang_diterima" value="1" @checked(old('uang_diterima'))>
+                        <span class="bar-centang-tanda" aria-hidden="true">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </span>
                         <span>
                             <span class="bar-centang-judul">Uangnya sudah saya terima</span>
                             <span class="bar-centang-ket">
                                 Pendaftarannya langsung dicatat lunas. Biarkan kosong kalau
                                 orangnya baru akan membayar saat datang.
                             </span>
+                        </span>
+                        <span class="bar-centang-pilih" aria-hidden="true">
+                            <i class="fas fa-check-circle"></i>
                         </span>
                     </label>
                 </div>
@@ -917,6 +1090,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var sekilas = el('bar-sekilas');
+        var sekilasJudul = el('bar-sekilas-judul');
+        var sekilasTanggal = el('bar-sekilas-tanggal');
+        var sekilasSisa = el('bar-sekilas-sisa');
+        var sekilasHarga = el('bar-sekilas-harga');
         var bungkusTerima = el('bar-bungkus-terima');
         var centangTerima = el('bar-terima');
         var notaBukti = el('bar-nota-bukti');
@@ -1086,6 +1264,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
             if (!a) {
                 ket.textContent = 'Hanya angkatan yang belum lewat yang ditawarkan.';
+                tampil(sekilas, false);
                 return;
             }
 
@@ -1100,6 +1279,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
 
             ket.textContent = kata.join(', ') + '.';
+
+            sekilasJudul.textContent = a.nomor ? ('Angkatan ke-' + a.nomor) : a.nama;
+            sekilasTanggal.textContent = a.tanggal || 'belum dijadwalkan';
+            sekilasSisa.textContent = a.sisa_kuota === null
+                ? 'tanpa batas'
+                : (a.sisa_kuota + ' kursi');
+            sekilasHarga.textContent = rupiah(a.harga);
+
+            tampil(sekilas, true);
         };
 
         var tampil = function (unsur, tampak) {
@@ -1226,6 +1414,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 tampil(bungkusAngkatan, false);
                 tampil(bungkusJumlah, false);
                 tampil(bungkusTotal, false);
+                tampil(sekilas, false);
                 tampil(bungkusPotongan, false);
                 tampil(bungkusKode, false);
                 hitung();
@@ -1235,6 +1424,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(bungkusAngkatan, pilih.berangkatan);
             tampil(bungkusJumlah, pilih.berangkatan);
             tampil(bungkusTotal, !pilih.berangkatan);
+
+            // Layanan tanpa angkatan tidak punya apa pun untuk diringkas;
+            // tegaskanAngkatan() yang menyalakannya kembali kalau ada.
+            tampil(sekilas, false);
             tampil(bungkusPotongan, pilih.bisaPotongan);
             tampil(bungkusKode, pilih.bisaPotongan);
 

@@ -27,6 +27,15 @@ class BiayaPersesiTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Uji di berkas ini ditulis dengan andaian Scopus Kafe BELUM
+        // bervarian — lihat tanpaVarian() di Tests\TestCase.
+        $this->tanpaVarian('scopus_kafe');
+    }
+
     private function akun(string $peran): User
     {
         $u = User::create([
