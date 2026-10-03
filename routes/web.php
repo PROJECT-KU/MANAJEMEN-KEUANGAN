@@ -15,7 +15,6 @@ use App\Http\Middleware\CheckTestimoniToken;
 use Illuminate\Support\Facades\Broadcast;
 
 
-
 Route::get('/page-maintenance', 'account\MaintenanceController@page')->name('account.page-maintenance.blank');
 
 // HOME PUBLIC
@@ -315,14 +314,6 @@ Route::prefix('account')
             Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
             Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 
-            // Pendaftaran Analisis Bibliometrik
-            Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
-            Route::get('/Analisis-Bibliometrik/Edit/{id}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
-            Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
-            Route::delete('Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
-            Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
-            Route::get('/Analisis-Bibliometrik/filter', 'account\AnalisisBibliometrikController@filter')->name('account.analisisbibliometrik.filter');
-            Route::get('/Analisis-Bibliometrik/download-excel', 'account\AnalisisBibliometrikController@downloadExcel')->name('account.analisisbibliometrik-excel');
 
             // Kategori Analisis Bibliometrik
             Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');
@@ -396,12 +387,6 @@ Route::prefix('account')
             Route::delete('/paperisasi/data/delete/{id}', 'account\PaperisasiController@destroy')->name('account.paperisasi.delete');
 
             // pendaftaran scopuS kafe
-            Route::get('/pendaftaran-scopus-kafe/data', 'account\PendaftaranScopusKafeController@index')->name('account.pendaftaran-scopus-kafe.index');
-            Route::get('/pendaftaran-scopus-kafe/data/filter', 'account\PendaftaranScopusKafeController@filter')->name('account.pendaftaran-scopus-kafe.filter');
-            Route::get('/pendaftaran-scopus-kafe/data/search', 'account\PendaftaranScopusKafeController@search')->name('account.pendaftaran-scopus-kafe.search');
-            Route::get('/pendaftaran-scopus-kafe/data/edit/{id}', 'account\PendaftaranScopusKafeController@edit')->name('account.pendaftaran-scopus-kafe.edit');
-            Route::post('/pendaftaran-scopus-kafe/data/update-data/{id}', 'account\PendaftaranScopusKafeController@update')->name('account.pendaftaran-scopus-kafe.update');
-            Route::delete('/pendaftaran-scopus-kafe/data/delete/{id}', 'account\PendaftaranScopusKafeController@destroy')->name('account.pendaftaran-scopus-kafe.delete');
 
             // refrensi paper
             Route::get('/refrensi-paper/data', 'account\RefrensiPaperController@index')->name('account.refrensi-paper.index');
@@ -465,20 +450,20 @@ Route::prefix('account')
             Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
             Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
 
-            // pendaftaran scopus camp
-            Route::get('PendaftaranScopusCamp', 'account\PendaftaranScopusCampController@index')->name('account.pendaftaranscopuscamp.index');
-            Route::get('PendaftaranScopusCamp/edit/{id}', 'account\PendaftaranScopusCampController@edit')->name('account.pendaftaranscopuscamp.edit');
-            Route::put('PendaftaranScopusCamp/update/{id}', 'account\PendaftaranScopusCampController@update')->name('account.pendaftaranscopuscamp.update');
-            Route::delete('PendaftaranScopusCamp/delete/{id}', 'account\PendaftaranScopusCampController@destroy')->name('account.pendaftaranscopuscamp.destroy');
-            Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
 
             /*
-             * Pendaftar SELURUH layanan dalam satu daftar.
+             * Pendaftar SELURUH layanan dalam satu daftar, beserta rincian dan
+             * tindakannya.
              *
-             * Bukan pengganti kelima layar pendaftar yang sudah ada, melainkan
-             * satu tempat untuk menjawab pertanyaan yang tidak bisa dijawab di
-             * satu pun dari kelimanya: siapa saja yang belum bayar, dan orang
-             * ini mendaftar apa saja. Tindakannya tetap di layar layanannya.
+             * MENGGANTIKAN empat layar pendaftaran per layanan yang dibuang
+             * 3 Okt 2026: Scopus Camp, Analisis Bibliometrik, Scopus Kafe, dan
+             * Webinar Eksklusif. Seluruh kemampuannya pindah ke sini —
+             * rincian, suntingan, perpindahan status beserta email
+             * pemberitahuannya, dan penghapusan beserta pengembalian kuota.
+             *
+             * Riwayat Pemesanan Clinik Scopus TIDAK ikut dibuang: layar itu
+             * dipakai PELANGGAN untuk melihat pesanannya sendiri, dan
+             * membuangnya mencabut sesuatu yang bukan milik panitia.
              */
             Route::get('Pendaftaran-Layanan', 'account\\PendaftaranLayananController@index')
                 ->name('account.pendaftaran-layanan.index');
@@ -488,19 +473,23 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.excel');
 
             /*
-             * Pendaftaran Webinar Eksklusif.
+             * Rincian satu pendaftaran, dan ketiga tindakannya.
              *
-             * Layar ini yang menutup lubang terbesar fiturnya: sebelum ada,
-             * satu-satunya yang bisa menandai lunas adalah pemberitahuan DOKU,
-             * dan selama kredensialnya belum diisi SEMUA pembayaran transfer
-             * manual tidak punya jalur apa pun untuk dilunasi.
+             * {layanan} ditaruh di alamatnya supaya satu rute melayani kelima
+             * layanan; nilainya dicocokkan ke katalog tertutup di pengendalinya
+             * sebelum dipakai, sebab ia menentukan model mana yang dipanggil.
+             * Ditaruh SESUDAH rute unduhan supaya 'unduh-pdf' tidak terbaca
+             * sebagai nama layanan.
              */
-            Route::get('WebinarEksklusifPendaftar', 'account\WebinarEksklusifPendaftarController@index')
-                ->name('account.webinarpendaftar.index');
-            Route::post('WebinarEksklusifPendaftar/{id}/lunasi', 'account\WebinarEksklusifPendaftarController@lunasi')
-                ->name('account.webinarpendaftar.lunasi');
-            Route::post('WebinarEksklusifPendaftar/{id}/batalkan', 'account\WebinarEksklusifPendaftarController@batalkan')
-                ->name('account.webinarpendaftar.batalkan');
+            Route::get('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@rincian')
+                ->name('account.pendaftaran-layanan.rincian');
+            Route::put('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@ubahData')
+                ->name('account.pendaftaran-layanan.ubah');
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/status', 'account\\PendaftaranLayananController@ubahStatus')
+                ->name('account.pendaftaran-layanan.status');
+            Route::delete('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@hapus')
+                ->name('account.pendaftaran-layanan.hapus');
+
 
             //clinik scopus promo
             Route::get('/Clinik-Scopus-Promo/data', 'account\ClinikScopusPromoController@index')->name('account.Clinik-Scopus-Promo.index');

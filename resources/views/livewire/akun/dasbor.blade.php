@@ -522,7 +522,9 @@
                             {{ $this->pengelolaTim ? 'Seluruh pemesanan' : 'Sesi yang Anda dampingi' }}
                         </p>
                     </div>
-                    <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="dsb-tautan">Buka</a>
+                    {{-- Kartu ini hanya tampil untuk panitia dan trainer, jadi
+                         tujuannya layar Pendaftar Layanan yang tersaring. --}}
+                    <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'clinik_scopus']) }}" class="dsb-tautan">Buka</a>
                 </div>
 
                 <div class="dsb-mini">

@@ -696,6 +696,62 @@ salahnya.
 Periksa keadaan yang PERSIS dimaksud — kelas penanda yang spesifik, atau
 seluruh pernyataan sampai titik komanya — bukan kemiripan tekstual.
 
+## Sebelum membuang layar, periksa EMPAT hal — bukan tampilannya
+
+Aturan "menyatukan dua layar tidak boleh mencabut kemampuannya" di bawah
+ternyata belum cukup. Saat lima layar pendaftaran per layanan dibuang
+3 Okt 2026, inventarisnya menyingkap empat hal berbeda, dan hanya yang
+pertama kelihatan dari layarnya:
+
+1. **Rutenya.** `route:list | grep` — bukan melihat tombol di layar.
+   Terkumpul 26 rute untuk lima layar: rincian, suntingan, hapus, cari,
+   saring, dan satu unduhan Excel yang tidak punya tombol di mana pun.
+2. **Efek sampingnya.** Tiga dari lima layar **mengirim email ke pelanggan**
+   saat statusnya diubah. Itu tidak terlihat di layar, tidak terlihat di
+   `route:list`, dan kalau hilang tidak ada galat apa pun — pelanggan sekadar
+   berhenti diberi tahu. Cari `Mail::` di pengendalinya.
+3. **Penjaga aksesnya.** Terukur: **tiga dari lima tidak punya penjaga sama
+   sekali**. Pengguna berperan `user` mendapat 200 di Scopus Camp, Scopus
+   Kafe, dan daftar Clinik Scopus, lalu bisa menyunting dan menghapus
+   pendaftaran orang lain. Membuangnya menutup lubang; tetapi kalau yang
+   dibuang justru yang BERPENJAGA dan yang terbuka dibiarkan, hasilnya
+   kebalikannya.
+4. **Siapa penerimanya.** Yang paling mudah salah. Satu dari lima layar itu —
+   Riwayat Pemesanan Clinik Scopus — ternyata **halaman pelanggan**, bukan
+   layar panitia: pengendalinya menyaring ke `customer_id` miliknya, dan
+   dasbor pelanggan menautkannya sebagai "Pemesanan saya". Membuangnya akan
+   mencabut sesuatu yang bukan milik panitia. Ia dipertahankan, entri menunya
+   dijadikan khusus pelanggan, dan sisi panitianya pindah.
+
+Dan satu kejutan: **satu layar sudah mati sejak lama.** Analisis Bibliometrik
+galat 500 untuk SEMUA orang, termasuk administrator — `compact('datas',
+'startDate', 'endDate', 'kategori')` memanggil `$kategori` yang tidak pernah
+didefinisikan di `index()`. Tidak ada uji yang menyentuhnya, dan tidak ada
+yang melaporkannya. Periksa tiap layar yang akan dibuang memang MASIH HIDUP
+sebelum menyimpulkan apa yang hilang kalau ia dibuang.
+
+## Dua tabel yang "sama" bisa beda satu kolom
+
+Tindakan bersama untuk lima layanan menulis jejak perubahan ke kolom `note`.
+Terukur: hanya **tiga dari lima** tabel pendaftaran punya kolom itu. Scopus
+Kafe dan Clinik Scopus tidak — dan menulisnya ke sana melempar
+`Unknown column 'note'`, sehingga SELURUH perubahan statusnya gagal dengan
+galat 500.
+
+Kolom yang tidak dimiliki semua sumber jadi **bagian katalog**
+(`'kolom_catatan' => 'note' | null`), bukan diandaikan ada. `Schema::hasColumn`
+di jalur permintaan juga bisa, tetapi ia menyembunyikan ketimpangannya
+alih-alih menuliskannya.
+
+## Pemisah ribuan: jangan buang satu tanda, buang yang bukan angka
+
+Pengendali lama membuang **titik** untuk Scopus Camp dan **koma** untuk Scopus
+Kafe. Jadi nominal "4.275.028" yang diketik di layar Kafe tersimpan sebagai
+**nol** — tanpa galat, dan total bayarnya hilang.
+
+`preg_replace('/\D+/', '', $nilai)` menerima keduanya, plus spasi dan awalan
+"Rp". Ujinya menyebut keempat bentuk itu satu per satu.
+
 ## Menyatukan dua layar tidak boleh mencabut kemampuannya
 
 Layar kategori Bibliometrik punya unduhan PDF dan Excel; layar Angkatan

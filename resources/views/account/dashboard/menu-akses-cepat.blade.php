@@ -147,7 +147,7 @@
                 <span class="menu-label">Clinik Scopus</span>
             </a>
 
-           <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="menu-item">
+           <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'clinik_scopus']) }}" class="menu-item">
     <div class="icon-circle bg-dark">
         <i class="fas fa-file-medical"></i>
         
@@ -236,11 +236,11 @@
                 <div class="icon-circle bg-dark"><i class="fas fa-file-alt"></i></div>
                 <span class="menu-label">Artikel</span>
             </a>
-            <a href="{{ route('account.analisisbibliometrik.index') }}" class="menu-item hidden">
+            <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'bibliometrik']) }}" class="menu-item hidden">
                 <div class="icon-circle bg-dark"><i class="fas fa-file-signature"></i></div>
                 <span class="menu-label">Bibliometrik</span>
             </a>
-            <a href="{{ route('account.pendaftaranscopuscamp.index') }}" class="menu-item hidden">
+            <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'scopus_camp']) }}" class="menu-item hidden">
                 <div class="icon-circle bg-dark"><i class="fas fa-campground"></i></div>
                 <span class="menu-label">Scopus Camp</span>
             </a>

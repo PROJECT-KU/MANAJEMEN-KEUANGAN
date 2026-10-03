@@ -1,0 +1,228 @@
+<?php
+
+namespace App\Actions\Pendaftaran;
+
+use App\KategoriLayanan;
+use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
+/**
+ * Mengubah status satu pendaftaran, layanan apa pun.
+ *
+ * Dipindahkan ke sini dari lima pengendali terpisah saat layar pendaftaran
+ * per layanan dibuang. Yang paling mudah hilang dalam pemindahan semacam itu
+ * BUKAN tampilannya melainkan efek sampingnya:
+ *
+ *   Scopus Camp & Bibliometrik  status 'Pendaftaran Diterima' dan
+ *                               'Pendaftaran Reschedule' MENGIRIM EMAIL
+ *                               ke pendaftarnya
+ *   Scopus Kafe                 status 'pembayaran diterima' mengirim email
+ *   Webinar Eksklusif           kursinya diambil/dikembalikan dari kuota
+ *   Clinik Scopus               tidak ada efek samping
+ *
+ * Dihilangkan, pelanggan berhenti diberi tahu dan tidak ada galat apa pun
+ * yang memberitahukannya.
+ */
+class UbahStatusPendaftaran
+{
+    /**
+     * @return array{berhasil:bool, pesan:string, surat:bool}
+     */
+    public function jalankan(string $layanan, string $id, string $status, ?string $olehSiapa = null): array
+    {
+        $sumber = Pendaftaran::sumber($layanan);
+
+        if ($sumber === null) {
+            return ['berhasil' => false, 'pesan' => 'Layanan itu tidak dikenali.', 'surat' => false];
+        }
+
+        if (! array_key_exists($status, Pendaftaran::pilihanStatus($layanan))) {
+            return [
+                'berhasil' => false,
+                'surat' => false,
+                'pesan' => 'Status itu tidak berlaku untuk ' . $sumber['nama'] . '.',
+            ];
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            return ['berhasil' => false, 'pesan' => 'Pendaftarannya tidak ditemukan.', 'surat' => false];
+        }
+
+        $statusLama = (string) $pendaftaran->status;
+
+        if ($statusLama === $status) {
+            return [
+                'berhasil' => false,
+                'surat' => false,
+                'pesan' => 'Statusnya memang sudah "' . Pendaftaran::pilihanStatus($layanan)[$status] . '".',
+            ];
+        }
+
+        DB::transaction(function () use ($layanan, $pendaftaran, $status, $statusLama, $olehSiapa) {
+            /*
+             * Kuota HANYA disentuh untuk Webinar Eksklusif.
+             *
+             * Bukan kelalaian: keempat layanan lain memang tidak pernah
+             * memindahkan kuota saat statusnya berubah, bahkan saat jadi
+             * dibatalkan. Menyeragamkannya dari sini akan menggeser angka
+             * `sisa_kuota` pada 48 angkatan yang sudah ada — perubahan yang
+             * tidak diminta dan tidak bisa dibedakan dari kekeliruan nanti.
+             * Kuotanya tetap berpindah saat barisnya DIHAPUS, seperti dulu.
+             */
+            if ($layanan === 'webinar_eksklusif') {
+                $this->geserKuotaWebinar($pendaftaran, $statusLama, $status);
+            }
+
+            $isi = ['status' => $status];
+
+            /*
+             * Jejak SIAPA yang mengubah: kalau belakangan ada selisih uang,
+             * yang bisa ditanya orangnya, bukan sistemnya.
+             *
+             * Hanya ke tabel yang memang punya kolomnya. Scopus Kafe dan
+             * Clinik Scopus tidak punya `note`, dan menulisnya ke sana
+             * melempar "Unknown column" sehingga SELURUH perubahan statusnya
+             * gagal — terukur galat 500 di kedua layanan itu.
+             */
+            $kolomCatatan = Pendaftaran::kolomCatatan($layanan);
+
+            if ($olehSiapa !== null && $kolomCatatan !== null) {
+                $catatan = trim((string) $pendaftaran->{$kolomCatatan});
+                $isi[$kolomCatatan] = trim(($catatan !== '' ? $catatan . ' | ' : '')
+                    . 'Status "' . $statusLama . '" → "' . $status . '" oleh '
+                    . $olehSiapa . ' pada ' . now()->format('d M Y H:i'));
+            }
+
+            if ($layanan === 'webinar_eksklusif' && $status === 'paid') {
+                $isi['bayar_status'] = 'manual';
+                $isi['bayar_pada'] = now();
+            }
+
+            $pendaftaran->forceFill($isi)->save();
+        });
+
+        $surat = $this->kirimSurat($layanan, $pendaftaran->refresh());
+
+        return [
+            'berhasil' => true,
+            'surat' => $surat,
+            'pesan' => 'Status ' . ($pendaftaran->id_transaksi ?? $pendaftaran->id_pemesanan ?? '')
+                . ' jadi "' . Pendaftaran::pilihanStatus($layanan)[$status] . '".',
+        ];
+    }
+
+    /**
+     * Kursi webinar diambil atau dikembalikan mengikuti perpindahan statusnya.
+     *
+     * Kursinya sudah dipotong saat orangnya menekan "Daftar", jadi yang
+     * dikerjakan di sini hanya selisihnya: dikembalikan saat pendaftarannya
+     * berhenti aktif, dan diambil lagi saat ia aktif kembali. Memotongnya
+     * sekali lagi tanpa memeriksa status lamanya akan menghilangkan kursi
+     * yang sebenarnya masih ada.
+     */
+    private function geserKuotaWebinar($pendaftaran, string $statusLama, string $statusBaru): void
+    {
+        $tidakAktif = ['cancel', 'expired'];
+
+        $duluAktif = ! in_array($statusLama, $tidakAktif, true);
+        $kiniAktif = ! in_array($statusBaru, $tidakAktif, true);
+
+        if ($duluAktif === $kiniAktif) {
+            return;
+        }
+
+        $angkatan = KategoriLayanan::whereKey($pendaftaran->kategori_id)->lockForUpdate()->first();
+
+        if ($angkatan === null || $angkatan->total_kuota === null) {
+            return;
+        }
+
+        $jumlah = (int) $pendaftaran->jumlah_pendaftar;
+        $sisa = (int) $angkatan->sisa_kuota;
+
+        $angkatan->forceFill([
+            'sisa_kuota' => (string) ($kiniAktif
+                // Aktif kembali: kursinya diambil lagi, tidak boleh di bawah nol.
+                ? max(0, $sisa - $jumlah)
+                // Berhenti aktif: kursinya dikembalikan, tidak boleh di atas totalnya.
+                : min((int) $angkatan->total_kuota, $sisa + $jumlah)),
+        ])->save();
+    }
+
+    /**
+     * Surat pemberitahuan ke pendaftarnya, kalau statusnya memang memicu satu.
+     *
+     * Dibungkus try/catch: peladen surat yang bermasalah TIDAK boleh
+     * menggagalkan perubahan status yang sudah tersimpan — panitia akan
+     * mengulang, dan statusnya berpindah dua kali. Konsekuensinya kegagalannya
+     * hanya muncul di log, jadi pemanggilnya diberi tahu lewat nilai kembali
+     * supaya layarnya bisa mengatakan suratnya tidak terkirim.
+     */
+    private function kirimSurat(string $layanan, $pendaftaran): bool
+    {
+        $kelas = Pendaftaran::suratUntuk($layanan, (string) $pendaftaran->status);
+
+        if ($kelas === null) {
+            return false;
+        }
+
+        $alamat = trim((string) ($pendaftaran->email ?? $pendaftaran->email_pemesan ?? ''));
+
+        if ($alamat === '' || ! filter_var($alamat, FILTER_VALIDATE_EMAIL)) {
+            Log::warning('Surat status pendaftaran tidak dikirim: alamatnya tidak sah.', [
+                'layanan' => $layanan, 'id' => $pendaftaran->getKey(), 'alamat' => $alamat,
+            ]);
+
+            return false;
+        }
+
+        try {
+            Mail::to($alamat)->send($this->rakitSurat($kelas, $layanan, $pendaftaran));
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Surat status pendaftaran gagal dikirim.', [
+                'layanan' => $layanan, 'id' => $pendaftaran->getKey(), 'galat' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Merakit surat sesuai tanda tangan masing-masing.
+     *
+     * Ketiga surat menuntut argumen yang berbeda, dan dua di antaranya
+     * BERTIPE subkelas angkatannya (`CategoriesScopusCamp`,
+     * `CategoriesAnalisisBibliometrik`) — menyerahkan `KategoriLayanan` apa
+     * adanya melempar TypeError saat suratnya dirakit, bukan saat dikirim.
+     */
+    private function rakitSurat(string $kelas, string $layanan, $pendaftaran)
+    {
+        $namaAplikasi = 'Rumah Scopus Foundation';
+
+        if ($layanan === 'scopus_kafe') {
+            // Dua argumen pertama memang model yang sama; begitu pula di
+            // pengendali lamanya.
+            return new $kelas($pendaftaran, $pendaftaran, $namaAplikasi, true);
+        }
+
+        $angkatanModel = Pendaftaran::angkatanModel($layanan);
+        $angkatan = $angkatanModel === null
+            ? null
+            : $angkatanModel::find($pendaftaran->kategori_id);
+
+        if ($angkatan === null) {
+            throw new \RuntimeException(
+                'Angkatan pendaftaran ' . $pendaftaran->getKey() . ' tidak ditemukan, '
+                . 'jadi suratnya tidak bisa dirakit.'
+            );
+        }
+
+        return new $kelas($pendaftaran, $angkatan, $namaAplikasi);
+    }
+}

@@ -36,10 +36,27 @@ class ClinikScopusRiwayatPemesananController extends Controller
 
         $query = ClinikScopusPemesanan::with(['customer', 'trainer']);
 
-        // ===============================
-        // USER - PERORANGAN
-        // ===============================
-        if ($user->adalahPelanggan() && $user->jenis === 'perorangan') {
+        /*
+         * PELANGGAN: hanya pesanannya sendiri.
+         *
+         * Syarat `jenis === 'perorangan'` DIBUANG dari cabang ini, dan itu
+         * bukan kerapian. Pelanggan yang jenisnya bukan 'perorangan' —
+         * 'perusahaan', atau nilai baru apa pun — jatuh ke luar KETIGA cabang
+         * di bawah, sehingga kuerinya tidak tersaring sama sekali dan ia
+         * melihat pesanan seluruh orang beserta nama, email, nomor telepon,
+         * dan nominal pembayarannya.
+         *
+         * Terukur 3 Okt 2026: nol dari 101 akun pelanggan jatuh ke celah itu —
+         * kolomnya NOT NULL berbawaan 'perorangan' — jadi ia laten dan bukan
+         * kebocoran yang sedang terjadi. Tetapi satu akun berjenis
+         * 'perusahaan' sudah cukup membukanya, dan tidak ada galat apa pun
+         * yang akan memberitahukannya.
+         *
+         * Layar ini satu-satunya tempat pelanggan bisa melihat pesanannya,
+         * jadi ia dipertahankan saat empat layar pendaftaran per layanan
+         * dibuang 3 Okt 2026 — sisi panitianya pindah ke Pendaftar Layanan.
+         */
+        if ($user->adalahPelanggan()) {
             $query->where('customer_id', $user->id);
         }
 

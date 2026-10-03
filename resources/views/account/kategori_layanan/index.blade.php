@@ -272,22 +272,26 @@ Angkatan Layanan | MIS
 @section('content')
 @php
     /*
-     * Tautan ke daftar pendaftar tiap angkatan. Hanya dua layanan yang
-     * pendaftarannya tercatat di sistem ini; sisanya belum punya layar
-     * pendaftar, jadi tautannya tidak dibuat daripada menunjuk halaman yang
-     * tidak menjawab apa-apa.
+     * Tautan ke pendaftar satu angkatan, di layar Pendaftar Layanan.
+     *
+     * Dulu menunjuk layar pendaftar per layanan dan mengirim `kategori` —
+     * yang TIDAK PERNAH dibaca layar itu. Jadi menekan tautannya menampilkan
+     * seluruh pendaftar layanan tersebut, bukan angkatan yang ditekan, dan
+     * tidak ada yang tahu saringannya tidak bekerja. Layar terpadu memang
+     * membaca `angkatan`.
+     *
+     * Dan kini berlaku untuk KETIGA layanan berangkatan, bukan dua: Webinar
+     * Eksklusif dulu tidak punya tautan sama sekali di sini.
      */
     $tautanPendaftar = function ($a) {
-        $rute = [
-            'scopus_camp' => 'account.pendaftaranscopuscamp.index',
-            'bibliometrik' => 'account.analisisbibliometrik.index',
-        ];
-
-        if (! isset($rute[$a->layanan]) || ! \Illuminate\Support\Facades\Route::has($rute[$a->layanan])) {
+        if (! \App\Support\PendaftaranSemuaLayanan::berangkatan((string) $a->layanan)) {
             return null;
         }
 
-        return route($rute[$a->layanan], ['kategori' => $a->id]);
+        return route('account.pendaftaran-layanan.index', [
+            'layanan' => $a->layanan,
+            'angkatan' => $a->id,
+        ]);
     };
 @endphp
 <div class="main-content mis-badan">
