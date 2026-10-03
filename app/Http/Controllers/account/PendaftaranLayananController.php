@@ -171,7 +171,6 @@ class PendaftaranLayananController extends Controller
              * yang hendak dihemat tombol itu.
              */
             'terpilihAngkatan' => (string) $request->input('kategori', ''),
-            'baruSaja' => $this->baruSaja(),
             /*
              * Pesanan lembaga yang masih terbuka. Yang sudah selesai ditagih
              * tidak ditawarkan: menambahkan kursi ke pesanan yang fakturnya
@@ -283,33 +282,6 @@ class PendaftaranLayananController extends Controller
             . (($sumber['berangkatan'] ?? false) ? ' di angkatan yang sama' : '')
             . '. Periksa dulu di daftar; kalau memang orang yang berbeda, '
             . 'ubah salah satu email atau nomornya.';
-    }
-
-    /**
-     * Pendaftar yang BARU SAJA dimasukkan panitia ini, hari ini.
-     *
-     * Sesudah "simpan & tambah lagi", panitia tidak bisa melihat siapa saja
-     * yang sudah ia masukkan tanpa meninggalkan borang — dan meninggalkan
-     * borang berarti kehilangan layanan serta angkatan yang sudah terpilih.
-     * Delapan terakhir sudah cukup: yang dicari "tadi saya sudah masukkan
-     * siapa saja", bukan riwayat lengkap.
-     *
-     * Dicocokkan lewat jejak catatannya, bukan kolom pembuat — tidak satu pun
-     * dari kelima tabel punya kolom itu.
-     *
-     * @return \Illuminate\Support\Collection<int, object>
-     */
-    private function baruSaja(): \Illuminate\Support\Collection
-    {
-        return Pendaftaran::kueri()
-            ->where('waktu', '>=', now()->startOfDay()->toDateTimeString())
-            ->where('catatan', 'like', '%Didaftarkan panitia oleh ' . $this->siapa() . '%')
-            ->orderByDesc('waktu')
-            ->limit(8)
-            // 'id' WAJIB ikut: tiap baris jadi tautan ke halaman rinciannya,
-            // dan tanpa kolomnya halaman borang mati dengan "Undefined
-            // property: stdClass::$id" begitu daftar ini berisi.
-            ->get(['id', 'layanan', 'nomor', 'nama_orang', 'total', 'waktu']);
     }
 
     /**

@@ -566,69 +566,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             pointer-events: none;
         }
 
-        /* Yang baru saja dimasukkan: daftar ringkas di kolom samping. */
-        .bar-baru {
-            margin-top: 13px;
-            padding: 13px 15px;
-            border: 1px solid var(--mis-garis);
-            border-radius: var(--mis-radius-kecil);
-            background: #fff;
-        }
-
-        .bar-baru-judul {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            margin: 0 0 9px;
-            font-size: .7rem;
-            font-weight: 700;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            color: var(--mis-tinta-3);
-        }
-
-        .bar-baru-daftar {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .bar-baru-daftar li + li {
-            margin-top: 3px;
-            padding-top: 3px;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .bar-baru-daftar a {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 4px 0;
-            font-size: .8rem;
-            color: var(--mis-tinta);
-            text-decoration: none;
-        }
-
-        .bar-baru-daftar a:hover .bar-baru-nama {
-            text-decoration: underline;
-        }
-
-        .bar-baru-nama {
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .bar-baru-nomor {
-            flex: 0 0 auto;
-            font-size: .72rem;
-            font-weight: 700;
-            letter-spacing: .04em;
-            color: var(--mis-tinta-4);
-        }
-
         /*
          * Panel potongan.
          *
@@ -1764,31 +1701,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 <span id="bar-pola-nomor">nomornya mengikuti pola layanan yang dipilih</span>.
                 Kode unik itu yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
             </p>
-            {{-- Yang baru saja dimasukkan panitia ini hari ini.
-
-                 Sesudah "simpan & tambah lagi", panitia tidak bisa melihat
-                 siapa saja yang sudah ia masukkan tanpa meninggalkan borang —
-                 dan meninggalkan borang berarti kehilangan layanan serta
-                 angkatan yang sudah terpilih. --}}
-            @if ($baruSaja->isNotEmpty())
-                <div class="bar-baru">
-                    <p class="bar-baru-judul">
-                        <i class="fas fa-clock" aria-hidden="true"></i>
-                        Baru saja Anda masukkan hari ini
-                    </p>
-                    <ul class="bar-baru-daftar">
-                        @foreach ($baruSaja as $r)
-                            <li>
-                                <a href="{{ route('account.pendaftaran-layanan.rincian', [$r->layanan, $r->id]) }}">
-                                    <span class="bar-baru-nama">{{ $r->nama_orang }}</span>
-                                    <span class="bar-baru-nomor">{{ $r->nomor }}</span>
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             </aside>
             </div>{{-- /bar-kerja --}}
 
