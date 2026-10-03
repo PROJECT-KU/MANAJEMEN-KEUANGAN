@@ -464,6 +464,18 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         </button>
                     @endif
 
+                    {{-- Kode uniknya disebut SEBELUM mengirim, walau angkanya
+                         baru ada sesudahnya. Tanpa ini, total yang berubah di
+                         halaman berikutnya terbaca seperti salah hitung. --}}
+                    @unless ($bayarDaring)
+                        <p class="ses-tenang ses-tenang-unik">
+                            <i class="fas fa-receipt" aria-hidden="true"></i>
+                            Totalnya nanti ditambah kode unik
+                            Rp {{ number_format(\App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MIN, 0, ',', '.') }}–{{ number_format(\App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MAKS, 0, ',', '.') }}
+                            supaya pembayaran Anda bisa kami cocokkan.
+                        </p>
+                    @endunless
+
                     <p class="ses-tenang">
                         <i class="fas fa-lock" aria-hidden="true"></i>
                         @if ($bayarDaring)

@@ -126,6 +126,17 @@
                                 </tr>
                             @endif
 
+                            @if ((int) $pendaftaran->kode_unik > 0)
+                                <tr>
+                                    <td style="padding:9px 0;color:#64748b;border-bottom:1px solid #f1f5f9;">
+                                        Kode unik
+                                    </td>
+                                    <td align="right" style="padding:9px 0;font-weight:bold;color:#ff6a00;border-bottom:1px solid #f1f5f9;">
+                                        + Rp {{ number_format((int) $pendaftaran->kode_unik, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endif
+
                             <tr>
                                 <td style="padding:14px 0 0;color:#0f2b5b;font-weight:bold;font-size:15px;">Total bayar</td>
                                 <td align="right" style="padding:14px 0 0;font-weight:bold;color:#ff6a00;font-size:19px;">
@@ -185,7 +196,13 @@
                                             </tr>
                                             <tr>
                                                 <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">2.</td>
-                                                <td style="padding:3px 0;">Transfer sesuai nominal dan rekening yang tertera di sana.</td>
+                                                <td style="padding:3px 0;">
+                                                    Transfer <strong>tepat sampai angka terakhir</strong> sesuai nominal di sana.
+                                                    @if ((int) $pendaftaran->kode_unik > 0)
+                                                        Angka terakhirnya kode unik Anda — kalau dibulatkan,
+                                                        pembayarannya tidak bisa kami cocokkan.
+                                                    @endif
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">3.</td>
