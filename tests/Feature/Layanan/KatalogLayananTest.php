@@ -28,6 +28,10 @@ class KatalogLayananTest extends TestCase
     {
         parent::setUp();
         Layanan::lupakanKatalog();
+
+        // Uji di berkas ini ditulis dengan andaian Scopus Kafe BELUM
+        // bervarian — lihat tanpaVarian() di Tests\TestCase.
+        $this->tanpaVarian('scopus_kafe');
     }
 
     private function akun(string $peran): User
