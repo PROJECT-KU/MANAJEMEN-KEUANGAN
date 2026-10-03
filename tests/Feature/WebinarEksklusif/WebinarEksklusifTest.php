@@ -1079,6 +1079,68 @@ class WebinarEksklusifTest extends TestCase
             ->assertJson(['ditemukan' => false]);
     }
 
+    /**
+     * Punya akun tetapi BELUM masuk — jalur yang paling sering terjadi:
+     * orang membuka tautan iklan langsung dari WhatsApp, tanpa pernah masuk
+     * ke akunnya.
+     *
+     * Jalur ini sempat tidak terjaga uji apa pun walau justru yang paling
+     * ditanyakan.
+     */
+    #[Test]
+    public function punya_akun_tetapi_belum_masuk_borangnya_tetap_terisi(): void
+    {
+        \App\User::create([
+            'full_name' => 'Rina Punya Akun',
+            'username' => 'rina-' . \Illuminate\Support\Str::random(6),
+            'email' => 'rina-' . \Illuminate\Support\Str::random(5) . '@contoh.test',
+            'password' => bcrypt('rahasia-uji'),
+            'telp' => '628177766551',
+            'company' => 'Universitas Rina',
+        ]);
+
+        foreach (['628177766551', '08177766551', '+62 817-7766-551'] as $bentuk) {
+            $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $bentuk])
+                ->assertOk()
+                ->assertJson([
+                    'ditemukan' => true,
+                    'nama' => 'Rina Punya Akun',
+                    'affiliasi' => 'Universitas Rina',
+                ]);
+        }
+    }
+
+    /**
+     * Pendaftaran sebelumnya DIDAHULUKAN daripada akun: isinya sebentuk
+     * dengan borang ini (nama beserta gelar, asal instansi), sedangkan nama
+     * di akun sering sekadar "admin" atau "staff".
+     */
+    #[Test]
+    public function pendaftaran_sebelumnya_didahulukan_daripada_akun(): void
+    {
+        $sesi = $this->sesi();
+        $nomor = '628166655544';
+
+        \App\User::create([
+            'full_name' => 'staff',
+            'username' => 'staff-' . \Illuminate\Support\Str::random(6),
+            'email' => 'staff-' . \Illuminate\Support\Str::random(5) . '@contoh.test',
+            'password' => bcrypt('rahasia-uji'),
+            'telp' => $nomor,
+        ]);
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Dr. Sari Lengkap, M.Si',
+            'email' => 'sari@contoh.test', 'telp' => $nomor, 'affiliasi' => 'Kampus Sari',
+            'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $nomor])
+            ->assertOk()
+            ->assertJson(['ditemukan' => true, 'nama' => 'Dr. Sari Lengkap, M.Si']);
+    }
+
     #[Test]
     public function nomor_yang_belum_pernah_dipakai_tidak_ditemukan(): void
     {
