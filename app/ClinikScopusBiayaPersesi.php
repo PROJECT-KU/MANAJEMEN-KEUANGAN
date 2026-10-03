@@ -42,6 +42,8 @@ class ClinikScopusBiayaPersesi extends Model
         'biaya_persesi',
         'ppn',
         'diskon_alumni_persen',
+        'diskon_rombongan_min',
+        'diskon_rombongan_persen',
         'fasilitas',
         'template_deskripsi',
         'kegiatan',

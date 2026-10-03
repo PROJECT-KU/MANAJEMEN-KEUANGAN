@@ -835,6 +835,8 @@ Tarif Layanan | MIS
                                     'biaya' => $t ? (int) $t->biaya_persesi : null,
                                     'ppn' => $t && $t->ppn !== null ? $t->ppn_persen : null,
                                     'alumni' => $t ? $t->diskon_alumni_persen : null,
+                                    'rombonganMin' => $t ? $t->diskon_rombongan_min : null,
+                                    'rombongan' => $t ? $t->diskon_rombongan_persen : null,
                                     'fasilitas' => implode("\n", $fasilitas),
                                     'kegiatan' => $t ? implode("\n", $t->daftar_kegiatan) : '',
                                     'kontak' => $t?->kontak ?? '',
@@ -1260,6 +1262,29 @@ Tarif Layanan | MIS
                             name="diskon_alumni_persen" min="1" max="90" inputmode="numeric"
                             placeholder="kosongkan kalau tidak ada">
                     </div>
+
+                    {{-- Diskon rombongan. Sebelum ini satu-satunya cara memberi
+                         harga rombongan adalah potongan khusus berupa rupiah —
+                         panitia menghitung sendiri diskon 30 orangnya lalu
+                         mengetik hasilnya, dan besarannya bergantung ingatan
+                         orang.
+
+                         Dua isian karena diskonnya bersyarat: tanpa ambangnya,
+                         "diskon rombongan" berlaku juga untuk satu orang. --}}
+                    <div class="mis-isian">
+                        <label class="mis-label" for="tar-f-rombongan-min">Diskon rombongan mulai</label>
+                        <input type="number" class="form-control-modern" id="tar-f-rombongan-min"
+                            name="diskon_rombongan_min" min="2" max="999" inputmode="numeric"
+                            placeholder="mis. 10 orang">
+                    </div>
+
+                    <div class="mis-isian tar-isian persen">
+                        <label class="mis-label" for="tar-f-rombongan">Potongan rombongan</label>
+                        <span class="tar-tanda kanan" aria-hidden="true">%</span>
+                        <input type="number" class="form-control-modern" id="tar-f-rombongan"
+                            name="diskon_rombongan_persen" min="1" max="90" inputmode="numeric"
+                            placeholder="kosongkan kalau tidak ada">
+                    </div>
                 </div>
 
                 <div class="tar-pratinjau" aria-live="polite">
@@ -1659,6 +1684,8 @@ Tarif Layanan | MIS
             // MENGOSONGKAN potongan alumni yang sudah disetel — isiannya
             // kosong, dan menyimpan menuliskan kosong itu ke basis data.
             el('tar-f-alumni').value = d.alumni === null || d.alumni === undefined ? '' : d.alumni;
+            el('tar-f-rombongan-min').value = d.rombonganMin === null || d.rombonganMin === undefined ? '' : d.rombonganMin;
+            el('tar-f-rombongan').value = d.rombongan === null || d.rombongan === undefined ? '' : d.rombongan;
             el('tar-f-fasilitas').value = d.fasilitas;
             el('tar-f-kegiatan').value = d.kegiatan;
             el('tar-f-kontak').value = d.kontak;
