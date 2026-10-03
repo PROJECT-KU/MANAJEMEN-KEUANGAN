@@ -37,9 +37,17 @@
     $diskon = (int) $b->nominal_diskon;
     $kodeUnik = (int) $b->kode_unik;
 
-    // Status aslinya hanya ditampilkan kalau ia memang berbeda dari labelnya;
-    // mengulang kata yang sama dua kali cuma menambah ramai.
-    $statusBeda = strtolower(trim((string) $b->status)) !== strtolower($rupa['label']);
+    /*
+     * Status aslinya hanya ditampilkan di daftar kalau ia BELUM DIKENALI.
+     *
+     * Syarat sebelumnya "berbeda dari labelnya", dan itu hampir selalu benar —
+     * 'Pendaftaran Diterima' vs label 'Lunas', 'expired' vs 'Tidak jadi' —
+     * sehingga kepingnya muncul di hampir setiap baris dan menambah ~20px
+     * pada semuanya tanpa memberi tahu apa pun yang baru. Untuk nilai yang
+     * sudah dikenali, lencana keadaannya sudah menyebutkan artinya; nilai
+     * mentahnya tetap terbaca di halaman rincian.
+     */
+    $statusAsing = $keadaanBaris === 'lain';
 @endphp
 <tr class="pdl-baris {{ $layananBaris['warna'] }}">
     <td class="mis-td-utama">
@@ -48,20 +56,24 @@
                 <i class="fas {{ $layananBaris['ikon'] }}"></i>
             </span>
             <div style="min-width: 0;">
-                <p class="pdl-layanan-nama">{{ $layananBaris['nama'] }}</p>
-                {{-- Nomor pendaftarannya di sini, bukan di kolom sendiri:
-                     inilah yang disebut orang saat menghubungi panitia lewat
-                     WhatsApp, tetapi ia tidak pernah dibaca sebagai kolom
-                     berdiri sendiri — selalu bersama layanannya. --}}
-                <span class="pdl-nomor">{{ $b->nomor ?: '—' }}</span>
+                <p class="pdl-layanan-nama" title="{{ $layananBaris['nama'] }}">{{ $layananBaris['nama'] }}</p>
             </div>
         </div>
     </td>
 
     <td data-judul="Pendaftar">
         <div class="pdl-orang">
+            {{-- Nomor pendaftaran ditaruh di kolom INI, bukan di kolom
+                 layanan: di sana lebarnya cuma 158px dan nomornya pecah jadi
+                 tiga baris di tanda hubungnya. Di sini 229px, dan ia memang
+                 keterangan tentang orangnya — itu yang disebut saat
+                 menghubungi panitia lewat WhatsApp. --}}
+            <span class="pdl-nomor">{{ $b->nomor ?: 'Tanpa nomor' }}</span>
+
             <p class="pdl-nama">
-                {{ $b->nama_orang ?: 'Tanpa nama' }}
+                {{-- title: namanya dipotong dua baris lewat CSS, jadi yang
+                     panjang tetap harus bisa dibaca utuh. --}}
+                <span class="pdl-nama-teks" title="{{ $b->nama_orang ?: 'Tanpa nama' }}">{{ $b->nama_orang ?: 'Tanpa nama' }}</span>
                 @if ($jumlahOrang > 1)
                     {{-- Rombongan ditandai di sebelah namanya, bukan di kolom
                          angka sendiri: yang penting bukan angkanya melainkan
@@ -99,13 +111,17 @@
             </div>
 
             @if ($b->affiliasi)
-                <p class="pdl-afiliasi">{{ $b->affiliasi }}</p>
+                {{-- title: afiliasinya dipotong satu baris lewat CSS. --}}
+                <p class="pdl-afiliasi" title="{{ $b->affiliasi }}">{{ $b->affiliasi }}</p>
             @endif
         </div>
     </td>
 
     <td data-judul="Sesi">
-        <span class="pdl-sesi">{{ $sesiBaris ?: '—' }}</span>
+        {{-- Dipotong dua baris lewat CSS, bukan di markah: dipotong di sini,
+             teks penuhnya ikut hilang dari cetakan, pembaca layar, dan
+             penyalinan. title menyimpan yang utuh. --}}
+        <span class="pdl-sesi" @if ($sesiBaris) title="{{ $sesiBaris }}" @endif>{{ $sesiBaris ?: '—' }}</span>
     </td>
 
     <td data-judul="Total bayar" class="text-right">
@@ -180,12 +196,12 @@
                 @endif
             </span>
 
-            @if ($keadaanBaris === 'lain' || $statusBeda)
-                {{-- Status aslinya tetap bisa dilihat. Terjemahannya menyatukan
-                     sembilan nilai jadi lima keadaan, jadi selisih antar layanan
-                     — 'expired' di webinar vs 'Pendaftaran Dibatalkan' di camp —
-                     hilang dari layar kalau nilainya tidak bisa dijangkau. --}}
-                <span class="pdl-status-asli" title="Status asli yang tersimpan di basis data">{{ $b->status }}</span>
+            @if ($statusAsing)
+                {{-- Nilai yang belum punya keadaan WAJIB terbaca apa adanya:
+                     lencananya cuma berbunyi "Belum dikenali", dan tanpa nilai
+                     mentahnya tidak ada yang tahu apa yang harus ditambahkan
+                     ke katalog. --}}
+                <span class="pdl-status-asli" title="Status asli yang tersimpan di basis data, belum punya keadaan di katalog">{{ $b->status }}</span>
             @endif
         </span>
     </td>

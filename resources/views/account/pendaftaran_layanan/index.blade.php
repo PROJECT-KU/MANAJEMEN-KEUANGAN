@@ -23,6 +23,10 @@ Pendaftar Layanan | MIS Rumah Scopus
         }
 
         .pdl-layanan-nama {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             margin: 0;
             font-size: .82rem;
             font-weight: 600;
@@ -52,18 +56,99 @@ Pendaftar Layanan | MIS Rumah Scopus
             overflow-wrap: anywhere;
         }
 
+        /*
+         * Namanya DIPOTONG dua baris.
+         *
+         * Ia datang dari isian bebas tanpa batas atas, dan satu nama
+         * sepanjang 95 aksara membuat selnya 395px — barisnya 424px, lebih
+         * dari sepertiga layar untuk satu pendaftaran. Dipotong lewat CSS,
+         * jadi nilai penuhnya tetap ada di markah, di title, dan di halaman
+         * rincian.
+         *
+         * Pemotongnya di <span> sendiri, bukan di .pdl-nama: pembungkusnya
+         * flex supaya pil rombongan bisa turun ke baris berikutnya, dan
+         * -webkit-line-clamp tidak berlaku pada wadah flex.
+         */
+        .pdl-nama-teks {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-width: 0;
+        }
+
         /* Sudah jadi anak flex, jadi margin kirinya tidak perlu lagi. */
         .pdl-pil-orang {
             margin-left: 0;
         }
 
+        /*
+         * DI DALAM SEL TABEL, pemotongan memakai -webkit-line-clamp — BUKAN
+         * `white-space: nowrap` + `text-overflow: ellipsis`.
+         *
+         * Keduanya sama-sama memotong di layar, tetapi `nowrap` membuat lebar
+         * MIN-CONTENT sel itu sama dengan panjang teks penuhnya, dan
+         * `overflow: hidden` tidak menguranginya. Algoritma tabel memakai
+         * min-content untuk menentukan lebar kolom, jadi selnya memaksa
+         * tabelnya melebar — terukur: kolom Pendaftar membengkak 227px jadi
+         * 866px dan tabelnya terklip 617px di 1440px, 782px di 768px. Tidak
+         * ada galat apa pun; kolom paling kanan sekadar hilang.
+         *
+         * `line-clamp` membiarkan teksnya tetap boleh membungkus — jadi
+         * min-content tetap selebar kata terpanjang — lalu menyembunyikan
+         * baris di atas batasnya.
+         */
+        /*
+         * Email dan WhatsApp BERTUMPUK, bukan berdampingan.
+         *
+         * Berdampingan memang menghemat 19px per baris, tetapi menuntut
+         * `nowrap` pada keduanya supaya tidak saling berdesakan — dan itu
+         * yang meledakkan lebar kolomnya sampai tabelnya terklip di semua
+         * lebar. Dicoba dan dibatalkan; 19px tidak sebanding.
+         */
         .pdl-kontak {
             display: flex;
             flex-direction: column;
             gap: 2px;
             margin-top: 3px;
+            min-width: 0;
             font-size: .76rem;
             color: var(--mis-tinta-3);
+        }
+
+        /*
+         * TIDAK dipotong, dan itu disengaja.
+         *
+         * Dua percobaan gagal di sini, keduanya karena `-webkit-box`:
+         * `-webkit-box-orient: vertical` memperlakukan tiap anak sebaris
+         * sebagai anak kotak tersendiri, jadi ikon amplopnya terdorong ke
+         * BARIS SENDIRI di atas alamatnya. Dan dengan clamp satu baris,
+         * alamat email yang satu kata panjang tampil sebagai ikon plus titik
+         * tiga saja — sama sekali tidak ada gunanya untuk kolom yang gunanya
+         * menghubungi orangnya.
+         *
+         * Dibiarkan membungkus biasa, tingginya tetap terbatas: alamat
+         * terpanjang di data yang ada muat dalam dua baris pada kolom 229px.
+         */
+        /*
+         * Ikon mendapat KOLOMNYA SENDIRI, teks di kolom kedua.
+         *
+         * Sebagai elemen sebaris, ikon amplop berbagi baris dengan alamatnya —
+         * dan alamat email itu satu kata panjang yang tidak muat di sisa baris
+         * pertama, jadi ia turun seluruhnya dan ikonnya tertinggal sendirian
+         * di atas. Dengan kisi dua kolom, ikonnya tetap sebaris dengan baris
+         * pertama alamatnya berapa pun panjangnya.
+         */
+        .pdl-kontak > * {
+            display: grid;
+            grid-template-columns: 14px minmax(0, 1fr);
+            gap: 0 5px;
+            align-items: start;
+            min-width: 0;
+        }
+
+        .pdl-kontak > * > i {
+            margin-top: 3px;
         }
 
         .pdl-kontak a {
@@ -76,11 +161,22 @@ Pendaftar Layanan | MIS Rumah Scopus
             text-decoration: underline;
         }
 
+        /*
+         * Afiliasi SATU baris.
+         *
+         * Isian bebas tanpa batas atas: terukur satu baris afiliasi setinggi
+         * 196px — sembilan baris teks untuk satu keterangan pendamping, dan
+         * ia memanjangkan seluruh barisnya. Nilai penuhnya tetap di title dan
+         * di halaman rincian.
+         */
         .pdl-afiliasi {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             margin: 3px 0 0;
             font-size: .74rem;
             color: var(--mis-tinta-4);
-            overflow-wrap: anywhere;
         }
 
         /*
@@ -100,9 +196,28 @@ Pendaftar Layanan | MIS Rumah Scopus
             overflow-wrap: anywhere;
         }
 
+        /* Nomor pendaftaran TIDAK boleh terpatah.
+
+           Tanda hubung di dalamnya adalah titik patah yang sah bagi peramban,
+           jadi "WE-20261003-0001" pecah jadi tiga baris di kolom sempit dan
+           terbaca seperti rusak. Dipotong dengan elipsis kalau memang tidak
+           muat, dan nilai penuhnya tetap ada di atribut title. */
+        /*
+         * Nomor pendaftaran TIDAK dipotong sama sekali.
+         *
+         * Inilah yang disebut orang saat menghubungi panitia lewat WhatsApp.
+         * Dipotong satu baris ia tampil "WE-..." dan tidak ada gunanya;
+         * dipotong dengan elipsis pun sama saja. Dibiarkan membungkus, ia
+         * paling banyak dua baris — tanda hubung di dalamnya titik patah yang
+         * sah, dan itu memang tempat yang wajar untuk patah.
+         */
         .pdl-nomor {
+            display: block;
+            margin-bottom: 2px;
+            max-width: 100%;
             font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             font-size: .74rem;
+            line-height: 1.35;
             color: var(--mis-tinta-3);
         }
 
@@ -137,7 +252,25 @@ Pendaftar Layanan | MIS Rumah Scopus
             min-width: 0;
         }
 
+        /*
+         * Nama angkatan DIPOTONG dua baris.
+         *
+         * Penyumbang tinggi baris terbesar: "Scopus Detective: Trik Cepat
+         * Membongkar Kedok Jurnal Palsu dan Predator" terpakai utuh dan
+         * memanjangkan SELURUH baris jadi 312px. Terukur sebelum dipotong,
+         * tinggi baris rata-rata 154px dan hanya 6,5 baris terlihat sekali
+         * layar — sementara layar acuan Data Pelanggan 67px dan 14,9 baris.
+         *
+         * Teks penuhnya tetap ada di atribut title, dan selengkapnya di
+         * halaman rincian. Memotong di MARKAH akan menghilangkannya juga dari
+         * cetakan dan penyalinan teks; dipotong lewat CSS, yang hilang cuma
+         * tampilannya.
+         */
         .pdl-sesi {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             font-size: .8rem;
             color: var(--mis-tinta-2);
             line-height: 1.35;
@@ -271,10 +404,21 @@ Pendaftar Layanan | MIS Rumah Scopus
             }
         }
 
-        /* Garis bawah bertitik, bukan warna: keterangan status aslinya ada di
-           title, dan tanpa penanda apa pun tidak ada yang tahu bisa ditunjuk. */
+        /* Keping redup, BUKAN teks bergaris titik.
+
+           Dengan garis titik, nilai seperti "pending" dan "expired" terbaca
+           seperti salah ketik yang digarisbawahi pemeriksa ejaan, bukan
+           seperti keterangan. Sebagai keping kecil berlatar ia jelas sebuah
+           nilai — dan keterangannya tetap di title. */
         .pdl-status-asli {
-            border-bottom: 1px dotted var(--mis-tinta-4);
+            display: inline-block;
+            margin-top: 3px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .68rem;
+            color: var(--mis-tinta-4);
             cursor: help;
         }
 
@@ -352,6 +496,82 @@ Pendaftar Layanan | MIS Rumah Scopus
                 margin-left: 6px;
             }
 
+            /*
+             * Sel Pendaftar: label di ATAS, nilai selebar kartu.
+             *
+             * Pola bersama mode kartu menaruh label di kiri dan nilai di
+             * kanan, dan itu pas untuk nilai sebaris seperti di Data
+             * Pelanggan. Sel ini memuat empat baris — nama, email, nomor,
+             * afiliasi — jadi labelnya menggantung sendirian di kiri dengan
+             * ruang kosong lebar, dan afiliasinya terdampar rata kanan.
+             * Terukur: selnya 109px tinggi sementara sel lain 19-52px.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Pendaftar"] {
+                display: block;
+                text-align: left;
+                /* Anak flex TIDAK pernah menyusut di bawah min-content-nya,
+                   dan alamat email adalah satu kata panjang. Tanpa ini selnya
+                   pernah terukur 344px di dalam kartu selebar 246px. */
+                min-width: 0;
+            }
+
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Pendaftar"]::before {
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            /* Sesi boleh tiga baris di kartu: ruangnya selebar kartu, dan
+               memotongnya di dua baris di sini justru membuang keterangan
+               yang masih muat. */
+            .pdl-sesi {
+                -webkit-line-clamp: 3;
+            }
+
+            /* Kontak kembali bertumpuk di kartu: lebarnya memang cukup untuk
+               satu alamat per baris, dan berdampingan di 390px membuat
+               keduanya terpotong elipsis padahal ruangnya ada. */
+            .pdl-kontak {
+                flex-direction: column;
+                gap: 3px;
+            }
+
+            /* Di kartu ruangnya selebar kartu, jadi kontak boleh dua baris
+               penuh — alamat email panjang terbaca utuh di sini. */
+            .pdl-kontak > * {
+                -webkit-line-clamp: 2;
+                overflow-wrap: anywhere;
+            }
+
+            /* Sesi dua baris di kartu juga, bukan tiga: tiga baris menambah
+               17px pada tiap kartu untuk keterangan yang sudah terbaca dari
+               dua baris pertamanya. */
+            .pdl-sesi {
+                -webkit-line-clamp: 2;
+            }
+
+            /*
+             * Label "Layanan" dan "Pendaftar" DISEMBUNYIKAN di kartu.
+             *
+             * Keduanya tidak memberi tahu apa pun: medali berwarna beserta
+             * nama layanannya sudah menyebutkan dirinya, dan blok nama +
+             * email + nomor jelas seorang pendaftar. Tiap label menyumbang
+             * satu baris penuh pada kartunya — terukur 21px masing-masing,
+             * pada 20 kartu per halaman.
+             *
+             * Label sel LAIN tetap ada: "Rp 129.000" tanpa label tidak
+             * menyebutkan dirinya total bayar, dan "03 Okt 2026" tidak
+             * menyebutkan dirinya tanggal mendaftar.
+             *
+             * CATATAN percobaan yang GAGAL: memasangkan sel pendek
+             * berdampingan lewat `order` + `flex: 1 1 0` justru menaikkan
+             * maksimum kartu dari 480px jadi 890px dan mengembalikan luberan
+             * 86px — sel yang menyempit membuat isinya membungkus lebih
+             * banyak daripada yang dihemat. Jangan diulang tanpa mengukur.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Pendaftar"]::before {
+                display: none;
+            }
+
             /* Keterangan status aslinya ikut boleh terpatah; di 320px
                "Pendaftaran Dibatalkan" menuntut 78px dalam sel yang
                tersisa 46px. */
@@ -410,8 +630,10 @@ Pendaftar Layanan | MIS Rumah Scopus
      * memproses blok lebih dulu, dan penanda sebaris di atas sebuah blok ikut
      * dianggap pembukanya sehingga seluruh markah di antaranya tertelan.
      */
-    $bawa = request()->only('cari', 'layanan', 'keadaan', 'bukti', 'angkatan');
-    $lingkup = array_filter(request()->only('cari', 'layanan', 'angkatan'));
+    $bawa = request()->only('cari', 'layanan', 'keadaan', 'bukti', 'angkatan', 'dari', 'sampai', 'lama');
+    /* Lingkup = saringan yang BUKAN keadaan. Dipakai ubin ringkasan supaya
+       menekan satu keadaan tidak melepaskan pilihan layanan dan tanggalnya. */
+    $lingkup = array_filter(request()->only('cari', 'layanan', 'angkatan', 'dari', 'sampai'));
     $namaAngkatan = $angkatan !== ''
         ? (\App\Support\PendaftaranSemuaLayanan::namaAngkatan()[$angkatan] ?? null)
         : null;
@@ -551,6 +773,23 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <i class="fas fa-wallet mis-ikon-hijau" aria-hidden="true"></i>
                 Uang masuk dari yang lunas <strong>Rp {{ number_format($ringkasan['uang_lunas'], 0, ',', '.') }}</strong>
             </span>
+            @if ($ringkasan['menggantung'] > 0)
+                {{-- Pendaftaran yang menunggu terlalu lama. Ditaruh di baris
+                     ini, bukan jadi ubin keenam: ubinnya sudah lima dan
+                     kisinya dipatok lima kolom — tetapi angkanya tetap harus
+                     bisa DITEKAN, sebab "ada 5 yang menggantung" tanpa cara
+                     melihat yang mana tidak menjawab apa pun.
+
+                     Empat dari lima layanan tidak punya kedaluwarsa sama
+                     sekali, jadi pendaftaran yang transfernya tidak pernah
+                     datang menunggu selamanya tanpa ada yang menengok. --}}
+                <a href="{{ route($rute, $lingkup + ['lama' => '1']) }}"
+                    title="Saring: menunggu bayar lebih dari {{ $ringkasan['hari_menggantung'] }} hari">
+                    <i class="fas fa-hourglass-half mis-ikon-merah" aria-hidden="true"></i>
+                    {{ $ringkasan['menggantung'] }} menunggu lebih dari {{ $ringkasan['hari_menggantung'] }} hari
+                </a>
+            @endif
+
             @if ($ringkasan['lain'] > 0)
                 {{-- Hanya muncul kalau memang ada. Status di kelima tabel
                      berupa varchar bebas, jadi nilai baru bisa muncul kapan
@@ -563,15 +802,31 @@ Pendaftar Layanan | MIS Rumah Scopus
             @endif
         </p>
 
-        @if ($angkatan !== '')
+        {{-- Saringan yang dipasang lewat TAUTAN, bukan lewat borang, wajib
+             terlihat dan bisa dilepas di sini — saringan yang bekerja tanpa
+             terlihat membuat orang menyimpulkan datanya yang kurang. --}}
+        @if ($angkatan !== '' || $menggantung)
             <p class="pdl-uang-total">
-                <span>
-                    <i class="fas fa-layer-group mis-ikon-ungu" aria-hidden="true"></i>
-                    Disaring ke angkatan <strong>{{ $namaAngkatan ?? $angkatan }}</strong>
-                </span>
-                <a href="{{ route($rute, array_filter(request()->only('cari', 'layanan', 'keadaan', 'bukti'))) }}">
-                    <i class="fas fa-times" aria-hidden="true"></i> Tampilkan semua angkatan
-                </a>
+                @if ($angkatan !== '')
+                    <span>
+                        <i class="fas fa-layer-group mis-ikon-ungu" aria-hidden="true"></i>
+                        Disaring ke angkatan <strong>{{ $namaAngkatan ?? $angkatan }}</strong>
+                    </span>
+                    <a href="{{ route($rute, array_filter(request()->only('cari', 'layanan', 'keadaan', 'bukti', 'dari', 'sampai', 'lama'))) }}">
+                        <i class="fas fa-times" aria-hidden="true"></i> Tampilkan semua angkatan
+                    </a>
+                @endif
+
+                @if ($menggantung)
+                    <span>
+                        <i class="fas fa-hourglass-half mis-ikon-merah" aria-hidden="true"></i>
+                        Hanya yang menunggu lebih dari
+                        <strong>{{ $ringkasan['hari_menggantung'] }} hari</strong>
+                    </span>
+                    <a href="{{ route($rute, array_filter(request()->only('cari', 'layanan', 'keadaan', 'bukti', 'angkatan', 'dari', 'sampai'))) }}">
+                        <i class="fas fa-times" aria-hidden="true"></i> Lepaskan saringan ini
+                    </a>
+                @endif
             </p>
         @endif
 
@@ -642,6 +897,31 @@ Pendaftar Layanan | MIS Rumah Scopus
                     <option value="belum" @selected($bukti === 'belum')>Belum diunggah</option>
                 </select>
             </div>
+
+            {{-- Rentang tanggal pendaftaran.
+
+                 DIKEMBALIKAN, bukan fitur baru: ketiga layar pendaftaran yang
+                 dibuang punya kendali ini dan benar-benar dipakai. type=date
+                 memakai pemilih tanggal bawaan peramban, jadi orang yang tidak
+                 terbiasa mengetik format tanggal tidak perlu menebaknya. --}}
+            <div class="mis-isian mis-saring-pilih">
+                <label class="mis-label" for="pdl-dari">Mendaftar sejak</label>
+                <input type="date" class="form-control-modern" id="pdl-dari" name="dari"
+                    value="{{ $dari }}" max="{{ $sampai ?: now()->toDateString() }}">
+            </div>
+
+            <div class="mis-isian mis-saring-pilih">
+                <label class="mis-label" for="pdl-sampai">Sampai</label>
+                <input type="date" class="form-control-modern" id="pdl-sampai" name="sampai"
+                    value="{{ $sampai }}" min="{{ $dari }}" max="{{ now()->toDateString() }}">
+            </div>
+
+            {{-- Saringan "menggantung lama" dibawa sebagai isian tersembunyi:
+                 ia dipasang lewat tautan di baris ringkasan, bukan dari borang
+                 ini, dan tanpa ini ia hilang begitu penyaring lain diterapkan. --}}
+            @if ($menggantung)
+                <input type="hidden" name="lama" value="1">
+            @endif
 
             {{-- Saringan angkatan tidak punya menunya sendiri: ia datang dari
                  tautan di layar Angkatan Layanan, bukan dari borang ini.

@@ -673,6 +673,224 @@ class TindakanPendaftaranTest extends TestCase
             'Testimoninya harus ikut terhapus, bukan tinggal yatim.');
     }
 
+    // ------------------------------------------------ saringan tanggal
+
+    #[Test]
+    public function saringan_tanggal_memasukkan_hari_batasnya_sendiri(): void
+    {
+        /*
+         * Perkara batas yang paling mudah salah: kolom waktunya bertimestamp,
+         * jadi `<= '2026-10-03'` berarti `<= 2026-10-03 00:00:00` dan
+         * MEMBUANG seluruh pendaftaran yang terjadi pada hari itu. Orangnya
+         * menyaring "sampai hari ini" lalu mendapati pendaftaran hari ini
+         * hilang — tanpa galat apa pun.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+        $angkatan = $this->angkatan('scopus_camp');
+
+        $sore = PendaftaranScopusCamp::create([
+            'id_transaksi' => 'SORE-' . $tanda,
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Daftar Sore ' . $tanda,
+            'email' => $tanda . '@contoh.test',
+            'telp' => '0811-0000-0011',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        // Jam 17.30 pada hari yang jadi batas akhirnya.
+        $hari = now()->subDays(3)->startOfDay();
+        $sore->forceFill(['created_at' => $hari->copy()->setTime(17, 30)])->save();
+
+        $halaman = $this->actingAs($orang)->get(route('account.pendaftaran-layanan.index', [
+            'cari' => $tanda,
+            'dari' => $hari->toDateString(),
+            'sampai' => $hari->toDateString(),
+        ]));
+
+        $halaman->assertOk();
+        $halaman->assertSee('SORE-' . $tanda);
+    }
+
+    #[Test]
+    public function saringan_tanggal_membuang_yang_di_luar_rentang(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+        $angkatan = $this->angkatan('scopus_camp');
+
+        $dibuat = [];
+
+        foreach ([['LAMA', 40], ['TENGAH', 10], ['BARU', 1]] as [$nama, $hariLalu]) {
+            $b = PendaftaranScopusCamp::create([
+                'id_transaksi' => $nama . '-' . $tanda,
+                'kategori_id' => $angkatan->id,
+                'nama' => $nama . ' ' . $tanda,
+                'email' => strtolower($nama) . $tanda . '@contoh.test',
+                'telp' => '0811-0000-0012',
+                'jumlah_pendaftar' => '1',
+                'total_pembayaran' => '10000',
+                'status' => 'diproses',
+            ]);
+
+            $b->forceFill(['created_at' => now()->subDays($hariLalu)])->save();
+            $dibuat[$nama] = $b;
+        }
+
+        $halaman = $this->actingAs($orang)->get(route('account.pendaftaran-layanan.index', [
+            'cari' => $tanda,
+            'dari' => now()->subDays(20)->toDateString(),
+            'sampai' => now()->subDays(5)->toDateString(),
+        ]));
+
+        $halaman->assertOk();
+        $halaman->assertSee('TENGAH-' . $tanda);
+        $halaman->assertDontSee('LAMA-' . $tanda);
+        $halaman->assertDontSee('BARU-' . $tanda);
+    }
+
+    #[Test]
+    public function tanggal_yang_tidak_masuk_akal_diabaikan_bukan_mengosongkan_daftar(): void
+    {
+        /*
+         * "2026-13-45" diterima SQL sebagai untaian dan kuerinya mengembalikan
+         * nol baris TANPA galat — jadi orangnya menyimpulkan datanya yang
+         * tidak ada. Diabaikan, daftarnya tetap utuh.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$camp] = $this->buat('scopus_camp');
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', [
+                'cari' => $camp->id_transaksi,
+                'dari' => '2026-13-45',
+                'sampai' => 'bukan tanggal',
+            ]))
+            ->assertOk()
+            ->assertSee($camp->id_transaksi);
+    }
+
+    #[Test]
+    public function berkas_unduhan_menyebut_rentang_tanggalnya(): void
+    {
+        // Berkas berisi pendaftaran satu bulan yang tidak menyebut bulannya
+        // terbaca persis seperti daftar yang lengkap.
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.pdf', [
+                'dari' => '2026-09-01', 'sampai' => '2026-09-30',
+            ]))
+            ->assertOk();
+
+        $html = view('account.pendaftaran_layanan.ekspor-pdf', [
+            'baris' => collect(),
+            'saringan' => ['Tanggal daftar' => '01 Sep 2026 sampai 30 Sep 2026'],
+            'katalog' => Pendaftaran::katalog(),
+        ])->render();
+
+        $this->assertStringContainsString('01 Sep 2026 sampai 30 Sep 2026', $html);
+    }
+
+    // --------------------------------------------- menunggu terlalu lama
+
+    #[Test]
+    public function saringan_menggantung_hanya_menyisakan_yang_menunggu_lama(): void
+    {
+        /*
+         * Empat dari lima layanan TIDAK punya kedaluwarsa sama sekali, jadi
+         * pendaftaran yang transfernya tidak pernah datang menunggu selamanya
+         * tanpa ada yang menengok. Terukur di basis data: 5 menunggu lebih
+         * dari 7 hari, 2 di antaranya lebih dari 90 hari.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+        $angkatan = $this->angkatan('scopus_camp');
+
+        $buat = function (string $nama, int $hariLalu, string $status) use ($tanda, $angkatan) {
+            $b = PendaftaranScopusCamp::create([
+                'id_transaksi' => $nama . '-' . $tanda,
+                'kategori_id' => $angkatan->id,
+                'nama' => $nama . ' ' . $tanda,
+                'email' => strtolower($nama) . $tanda . '@contoh.test',
+                'telp' => '0811-0000-0013',
+                'jumlah_pendaftar' => '1',
+                'total_pembayaran' => '10000',
+                'status' => $status,
+            ]);
+
+            $b->forceFill(['created_at' => now()->subDays($hariLalu)])->save();
+
+            return $b;
+        };
+
+        $buat('LAMAMENUNGGU', 30, 'diproses');
+        $buat('BARUMENUNGGU', 2, 'diproses');
+        // Sudah lunas: lamanya tidak jadi soal, ia tidak menggantung.
+        $buat('LAMALUNAS', 30, 'Pendaftaran Diterima');
+
+        $halaman = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda, 'lama' => '1']));
+
+        $halaman->assertOk();
+        $halaman->assertSee('LAMAMENUNGGU-' . $tanda);
+        $halaman->assertDontSee('BARUMENUNGGU-' . $tanda);
+        $halaman->assertDontSee('LAMALUNAS-' . $tanda);
+    }
+
+    // ------------------------------------------------ jejak kelima layanan
+
+    #[Test]
+    public function kelima_layanan_mencatat_jejak_perubahan_statusnya(): void
+    {
+        /*
+         * Scopus Kafe dan Clinik Scopus dulu TIDAK punya kolom `note`, jadi
+         * siapa pun yang memindahkan statusnya tidak meninggalkan jejak apa
+         * pun — terukur 11 dari 187 baris tidak terlacak. Kolomnya
+         * ditambahkan migrasi 2026_10_03_160000.
+         *
+         * Diperiksa untuk KELIMA layanan sekaligus, bukan dua yang baru:
+         * layanan berikutnya yang datang tanpa kolom itu harus ketahuan di
+         * sini, bukan saat ada selisih uang yang tidak bisa ditelusuri.
+         */
+        Mail::fake();
+
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $sasaran = [
+            'scopus_camp' => 'Pendaftaran Dibatalkan',
+            'bibliometrik' => 'Pendaftaran Dibatalkan',
+            'webinar_eksklusif' => 'cancel',
+            'scopus_kafe' => 'pembayaran ditolak',
+            'clinik_scopus' => 'canceled',
+        ];
+
+        foreach ($sasaran as $layanan => $status) {
+            [$b] = $this->buat($layanan);
+            $statusLama = $b->status;
+
+            $this->actingAs($orang)->post(
+                route('account.pendaftaran-layanan.status', [$layanan, $b->getKey()]),
+                ['status' => $status]
+            )->assertRedirect();
+
+            $kolom = Pendaftaran::kolomCatatan($layanan);
+
+            $this->assertNotNull($kolom, "Layanan {$layanan} tidak punya kolom catatan.");
+            $this->assertStringContainsString(
+                '"' . $statusLama . '" → "' . $status . '"',
+                (string) $b->refresh()->{$kolom},
+                "Jejak perubahan {$layanan} tidak tercatat."
+            );
+            $this->assertStringContainsString('Uji administrator', (string) $b->{$kolom},
+                "Jejak {$layanan} tidak menyebut siapa yang mengubahnya.");
+
+            $this->flushSession();
+        }
+    }
+
     // ------------------------------------------- layar yang dipertahankan
 
     #[Test]
