@@ -1,5 +1,8 @@
-{{-- Gayanya sebaris dan susunannya tabel, alasannya sama dengan
-     email_pendaftaran: banyak klien surat membuang blok <style>. --}}
+{{-- Gayanya sebaris, susunannya tabel, dan perataannya berganti-ganti —
+     alasan ketiganya sama dengan email_pendaftaran. --}}
+@php
+    $logo = $message->embed(public_path('assets/img/logo-rsc-email.png'));
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -15,10 +18,26 @@
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
                 style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
 
+                {{-- Kepala putih berlogo, sama dengan bukti pendaftaran:
+                     tulisan di logonya hitam dan hilang di atas latar pekat. --}}
                 <tr>
-                    <td style="background:#ff6a00;padding:22px 26px;">
-                        <div style="color:#ffffff;font-size:18px;font-weight:bold;">Sesinya besok</div>
-                        <div style="color:#ffe8d6;font-size:13px;margin-top:4px;">{{ $sesi->nama }}</div>
+                    <td align="center" style="padding:28px 26px 20px;border-bottom:1px solid #eef2f7;">
+                        <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="220"
+                            style="display:block;width:220px;max-width:70%;height:auto;border:0;">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding:26px 26px 6px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px;">
+                            <tr>
+                                <td style="padding:6px 14px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;">
+                                    <span style="font-size:12px;font-weight:bold;letter-spacing:.6px;color:#9a3412;">BESOK</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="font-size:21px;font-weight:bold;color:#0f2b5b;line-height:1.35;">{{ $sesi->nama }}</div>
                     </td>
                 </tr>
 
@@ -44,8 +63,8 @@
 
                             @foreach ($baris as $judul => $isi)
                                 <tr>
-                                    <td style="padding:7px 0;color:#64748b;width:42%;">{{ $judul }}</td>
-                                    <td style="padding:7px 0;font-weight:bold;color:#0f2b5b;">{{ $isi }}</td>
+                                    <td style="padding:9px 0;color:#64748b;border-bottom:1px solid #f1f5f9;">{{ $judul }}</td>
+                                    <td align="right" style="padding:9px 0;font-weight:bold;color:#0f2b5b;border-bottom:1px solid #f1f5f9;">{{ $isi }}</td>
                                 </tr>
                             @endforeach
                         </table>
@@ -60,7 +79,7 @@
                             </p>
                         @endif
 
-                        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 8px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 8px;">
                             <tr>
                                 <td style="background:#0f2b5b;border-radius:10px;">
                                     <a href="{{ $tautanStatus }}"
@@ -71,9 +90,17 @@
                             </tr>
                         </table>
 
-                        <p style="margin:12px 0 0;font-size:12px;color:#64748b;line-height:1.6;">
-                            Tautan masuk sesinya dibagikan panitia lewat grup peserta di WhatsApp.
-                        </p>
+                    </td>
+                </tr>
+
+                {{-- Kaki surat disamakan dengan bukti pendaftaran: dua surat
+                     dari pengirim yang sama yang kakinya berbeda terbaca
+                     seperti datang dari dua tempat. --}}
+                <tr>
+                    <td align="center" style="padding:16px 26px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.7;">
+                        <strong style="color:#475569;">{{ config('mail.from.name') }}</strong><br>
+                        Tautan masuk sesinya dibagikan panitia lewat grup peserta di WhatsApp.<br>
+                        <span style="color:#94a3b8;">Email ini dikirim otomatis karena Anda terdaftar di sesi ini.</span>
                     </td>
                 </tr>
             </table>
