@@ -115,6 +115,17 @@
                                 </tr>
                             @endforeach
 
+                            @if ((int) $pendaftaran->nominal_diskon > 0)
+                                <tr>
+                                    <td style="padding:9px 0;color:#64748b;border-bottom:1px solid #f1f5f9;">
+                                        Potongan ({{ $pendaftaran->kode_diskon }})
+                                    </td>
+                                    <td align="right" style="padding:9px 0;font-weight:bold;color:#0f9b74;border-bottom:1px solid #f1f5f9;">
+                                        &minus; Rp {{ number_format((int) $pendaftaran->nominal_diskon, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endif
+
                             <tr>
                                 <td style="padding:14px 0 0;color:#0f2b5b;font-weight:bold;font-size:15px;">Total bayar</td>
                                 <td align="right" style="padding:14px 0 0;font-weight:bold;color:#ff6a00;font-size:19px;">
@@ -122,6 +133,35 @@
                                 </td>
                             </tr>
                         </table>
+
+                        {{-- Daftar peserta ikut dikirim: inilah yang dipakai
+                             pendaftar memeriksa ejaan namanya sebelum
+                             sertifikat diterbitkan. Salah ejaan baru ketahuan
+                             saat sertifikatnya jadi adalah pekerjaan ulang
+                             yang bisa dicegah di sini. --}}
+                        @php($semuaPeserta = $pendaftaran->semuaPeserta())
+
+                        @if (count($semuaPeserta) > 1)
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                                style="margin-top:20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+                                <tr>
+                                    <td style="padding:14px 16px;">
+                                        <div style="font-size:12px;font-weight:bold;color:#0f2b5b;margin-bottom:8px;">
+                                            Nama peserta ({{ count($semuaPeserta) }} orang)
+                                        </div>
+                                        @foreach ($semuaPeserta as $i => $orang)
+                                            <div style="font-size:13px;color:#334155;padding:3px 0;">
+                                                {{ $i + 1 }}. {{ $orang['nama'] }}{{ $orang['utama'] ? ' (pendaftar)' : '' }}
+                                            </div>
+                                        @endforeach
+                                        <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.5;">
+                                            Sertifikat diterbitkan atas nama ini. Kalau ada yang salah eja,
+                                            kabari panitia sebelum hari pelaksanaan.
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        @endif
                     </td>
                 </tr>
 

@@ -39,6 +39,31 @@ class PublicWebinarEksklusifController extends Controller
      *
      * @return array<string,string>
      */
+    /**
+     * Potongan harga dari kode diskon angkatannya.
+     *
+     * Polanya mengikuti Scopus Camp: kodenya disimpan di angkatan, bukan di
+     * tabel promo tersendiri. Nol kalau angkatannya memang tidak punya kode,
+     * kodenya tidak cocok, atau nominalnya tidak masuk akal.
+     *
+     * Tidak pernah melebihi totalnya: potongan yang lebih besar daripada
+     * tagihan akan membuat total negatif, dan gerbang pembayaran menolak
+     * angka seperti itu dengan galat yang tidak menyebut sebabnya.
+     */
+    private function hitungPotongan(KategoriLayanan $sesi, ?string $kode, int $total): int
+    {
+        $kodeSesi = trim((string) $sesi->kode_diskon);
+        $kode = trim((string) $kode);
+
+        if ($kodeSesi === '' || $kode === '' || ! hash_equals($kodeSesi, $kode)) {
+            return 0;
+        }
+
+        $nominal = (int) preg_replace('/\\D+/', '', (string) $sesi->nominal_diskon);
+
+        return max(0, min($nominal, $total));
+    }
+
     private function isiAwalDariAkun(): array
     {
         $akun = auth()->user();
@@ -262,12 +287,28 @@ class PublicWebinarEksklusifController extends Controller
             // dicentang lalu dilupakan — kalau ditanya, harus bisa dijawab
             // kapan orangnya menyetujui.
             'setuju' => ['accepted'],
+
+            /*
+             * Nama peserta KEDUA DAN SETERUSNYA.
+             *
+             * Wajib sebanyak peserta yang dipesan dikurangi satu: yang
+             * pertama sudah terisi di medan nama. Tanpa ini, pendaftaran 37
+             * orang hanya menyisakan satu nama — dan 36 sertifikat tidak bisa
+             * diterbitkan atas nama siapa pun.
+             */
+            'peserta' => ['array', 'max:49'],
+            'peserta.*.nama' => ['required', 'string', 'max:120'],
+            'peserta.*.email' => ['nullable', 'email:rfc', 'max:120'],
+
+            'kode_diskon' => ['nullable', 'string', 'max:40'],
         ], [
             'nama.required' => 'Nama lengkapnya diisi dulu, ya.',
             'email.required' => 'Emailnya diisi dulu — tautan Zoom dikirim ke sana.',
             'email.email' => 'Alamat emailnya belum benar.',
             'telp.required' => 'Nomor WhatsApp-nya diisi dulu, ya.',
             'setuju.accepted' => 'Centang persetujuannya dulu, ya.',
+            'peserta.*.nama.required' => 'Nama tiap peserta diisi dulu, ya — sertifikatnya atas nama mereka.',
+            'peserta.*.email.email' => 'Ada alamat email peserta yang belum benar.',
             'jumlah_pendaftar.min' => 'Minimal satu peserta.',
             'jumlah_pendaftar.max' => 'Lebih dari 50 peserta, hubungi panitia dulu ya.',
         ]);
@@ -280,6 +321,26 @@ class PublicWebinarEksklusifController extends Controller
          * dari pemeriksaan manual.
          */
         $data['affiliasi'] = $data['affiliasi'] ?? null;
+        $data['peserta'] = array_values($data['peserta'] ?? []);
+
+        /*
+         * Jumlah nama diperiksa TERPISAH dari aturan di atas, sebab yang
+         * diperiksa hubungan antar-medan: sebanyak peserta yang dipesan,
+         * dikurangi pendaftar utamanya.
+         *
+         * Diperiksa di peladen, bukan hanya di peramban: borang yang dikirim
+         * tanpa JavaScript akan lolos begitu saja, dan yang tersimpan
+         * pendaftaran 10 orang dengan satu nama.
+         */
+        $perluNama = max(0, (int) $data['jumlah_pendaftar'] - 1);
+
+        if (count($data['peserta']) !== $perluNama) {
+            return back()->withInput()->withErrors([
+                'peserta' => $perluNama === 0
+                    ? 'Jumlah pesertanya satu, jadi tidak perlu nama tambahan.'
+                    : 'Isi nama ' . $perluNama . ' peserta lainnya — sertifikatnya atas nama mereka.',
+            ]);
+        }
 
         $sesi = $this->kueriAktif()->whereKey($data['kategori_id'])->first();
 
@@ -344,6 +405,14 @@ class PublicWebinarEksklusifController extends Controller
                 $harga = (int) $terkunci->biaya;
                 $total = $harga * $data['jumlah_pendaftar'];
 
+                /*
+                 * Potongan dihitung ULANG DI SINI dari angkatannya, bukan
+                 * dipercaya dari borang. Nominal yang dikirim peramban bisa
+                 * disunting siapa saja sebelum dikirim.
+                 */
+                $potongan = $this->hitungPotongan($terkunci, $data['kode_diskon'] ?? null, $total);
+                $total = max(0, $total - $potongan);
+
                 $pendaftaran = WebinarEksklusifPendaftaran::create([
                     'kategori_id' => $terkunci->getKey(),
                     'nama' => trim($data['nama']),
@@ -353,6 +422,9 @@ class PublicWebinarEksklusifController extends Controller
                     'disetujui_pada' => now(),
                     'jumlah_pendaftar' => $data['jumlah_pendaftar'],
                     'total_pembayaran' => (string) $total,
+                    'user_id' => auth()->id(),
+                    'kode_diskon' => $potongan > 0 ? trim((string) $data['kode_diskon']) : null,
+                    'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
                     'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
                     'status' => 'pending',
                     'kedaluwarsa_pada' => now()->addMinutes(Doku::MENIT_KEDALUWARSA),
@@ -367,6 +439,16 @@ class PublicWebinarEksklusifController extends Controller
                  * Yang pendaftarannya kedaluwarsa dikembalikan kuotanya oleh
                  * perintah terjadwal.
                  */
+                foreach ($data['peserta'] as $urutan => $orang) {
+                    $pendaftaran->pesertaLain()->create([
+                        'urutan' => $urutan,
+                        'nama' => trim($orang['nama']),
+                        'email' => isset($orang['email']) && $orang['email'] !== ''
+                            ? mb_strtolower(trim($orang['email']))
+                            : null,
+                    ]);
+                }
+
                 if ($sisa !== null) {
                     $terkunci->forceFill([
                         'sisa_kuota' => (string) max(0, $sisa - $data['jumlah_pendaftar']),

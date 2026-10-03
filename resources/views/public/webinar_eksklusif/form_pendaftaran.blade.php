@@ -179,6 +179,8 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     @csrf
                     <input type="hidden" name="kategori_id" value="{{ $sesi->id }}">
 
+                    @php($penuh = $sisa !== null && $sisa < 1)
+
                     <h2 class="ses-kartu-judul">Amankan kursi Anda</h2>
                     <p class="ses-kartu-sub">Isinya lima, tidak sampai satu menit.</p>
 
@@ -217,6 +219,11 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         Dengan nomornya di muka, sisanya terisi sebelum ia
                         menyentuh isian mana pun.
                     --}}
+                    {{-- fieldset, bukan menonaktifkan tiap isian satu per satu:
+                         satu atribut menutup semuanya sekaligus, termasuk isian
+                         peserta yang dirakit skrip belakangan. --}}
+                    <fieldset class="ses-gugus" @if ($penuh) disabled @endif>
+
                     <div class="ses-isian">
                         <label for="ses-telp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
                         <input type="tel" id="ses-telp" name="telp" required maxlength="30"
@@ -300,6 +307,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         @if ($sisa !== null && $sisa > 0)
                             <p class="ses-bantu">Tersisa {{ $sisa }} kursi.</p>
                         @endif
+                        {{-- Disebut sebelum angkanya dinaikkan, bukan sesudah:
+                             orang yang mendaftar rombongan perlu tahu di muka
+                             bahwa nama tiap peserta akan diminta. --}}
+                        <p class="ses-bantu">Lebih dari satu? Nama tiap peserta diminta di bawah.</p>
                         @error('jumlah_pendaftar') <p class="ses-salah">{{ $message }}</p> @enderror
                     </div>
 
@@ -320,6 +331,52 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     </p>
 
                     {{--
+                        Kode diskon hanya ditampilkan kalau angkatannya memang
+                        punya. Isian kode yang selalu ada membuat orang mengira
+                        ia kehilangan sesuatu, lalu mencari-cari kode yang tidak
+                        pernah diterbitkan.
+
+                        Potongannya dihitung ULANG di peladen dari angkatannya;
+                        yang di sini hanya kotak ketik.
+                    --}}
+                    @if (trim((string) $sesi->kode_diskon) !== '')
+                        <div class="ses-isian">
+                            <label for="ses-kode">Kode diskon <span class="ses-opsional">opsional</span></label>
+                            <input type="text" id="ses-kode" name="kode_diskon" maxlength="40"
+                                value="{{ old('kode_diskon') }}" placeholder="Punya kode? Tulis di sini"
+                                autocomplete="off"
+                                @error('kode_diskon') aria-invalid="true" @enderror>
+                            @error('kode_diskon') <p class="ses-salah">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
+
+                    {{--
+                        NAMA PESERTA KEDUA DAN SETERUSNYA.
+
+                        Borangnya dulu menerima sampai 50 peserta tetapi hanya
+                        meminta satu nama. Di basis data sudah ada pendaftaran
+                        berisi 13 dan 37 orang dengan satu nama masing-masing —
+                        padahal yang dijanjikan "E-sertifikat resmi atas nama
+                        peserta". Tanpa namanya, sertifikatnya tidak bisa
+                        diterbitkan atas siapa pun.
+
+                        Barisnya dirakit skrip mengikuti jumlah yang dipilih.
+                        Yang dikirim ulang sesudah validasi gagal dirender
+                        peladen lebih dulu, supaya isiannya tidak hilang pada
+                        peramban tanpa JavaScript.
+                    --}}
+                    <div class="ses-peserta" id="ses-peserta"
+                        data-lama="{{ json_encode(old('peserta', [])) }}">
+                        <p class="ses-peserta-judul">
+                            Nama peserta lainnya
+                            <span>Sertifikat diterbitkan atas nama ini</span>
+                        </p>
+                        <div id="ses-peserta-baris"></div>
+                    </div>
+
+                    @error('peserta') <p class="ses-salah">{{ $message }}</p> @enderror
+
+                    {{--
                         Persetujuan diminta DI SINI, tepat sebelum tombolnya —
                         bukan di bawah tombol, tempat orang tidak lagi membaca.
                         Kalimatnya menyebut untuk apa datanya dipakai, sebab
@@ -337,9 +394,29 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     </div>
                     @error('setuju') <p class="ses-salah" id="ses-setuju-salah">{{ $message }}</p> @enderror
 
+                    </fieldset>
+
                     @if ($sisa !== null && $sisa < 1)
+                        {{--
+                            Isiannya dinonaktifkan lewat <fieldset disabled> di
+                            atas, bukan hanya tombolnya yang dihilangkan.
+                            Sebelumnya orang masih bisa mengetik nama, email,
+                            nomor, dan mencentang persetujuan — lalu baru sadar
+                            tidak ada tombolnya sama sekali.
+
+                            Dan pesannya diberi JALAN KELUAR: "hubungi panitia"
+                            tanpa tautan adalah jalan buntu, padahal nomornya
+                            sudah ada di config.
+                        --}}
                         <p class="ses-penuh"><i class="fas fa-times-circle" aria-hidden="true"></i>
-                            Kuotanya sudah penuh. Hubungi panitia untuk sesi berikutnya.</p>
+                            Kuotanya sudah penuh untuk sesi ini.</p>
+
+                        <a class="ses-tombol ses-tombol-kabari"
+                            href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya mau ikut sesi "' . $sesi->nama . '" tetapi kuotanya sudah penuh. Tolong kabari saya kalau ada sesi berikutnya.') }}"
+                            target="_blank" rel="noopener">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            <span>Kabari saya kalau ada sesi berikutnya</span>
+                        </a>
                     @else
                         <button type="submit" class="ses-tombol" id="ses-kirim">
                             {{-- "dan", bukan "&": di dalam {{ }} entitas HTML
@@ -843,6 +920,97 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         .ses-latar { padding-bottom: 110px; }
     }
 
+    /* fieldset dipakai hanya untuk menonaktifkan serentak; rupa bawaannya
+       (bingkai dan jarak) dibuang supaya tata letaknya tidak berubah. */
+    .ses-gugus { margin: 0; padding: 0; border: 0; min-width: 0; }
+
+    .ses-opsional {
+        margin-left: 5px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--tinta-2);
+    }
+
+    .ses-gugus[disabled] { opacity: .55; }
+
+    .ses-tombol-kabari {
+        margin-top: 14px;
+        background: #25d366;
+        box-shadow: 0 16px 30px -14px rgba(37, 211, 102, .7);
+        text-decoration: none;
+    }
+
+    .ses-tombol-kabari:hover { box-shadow: 0 20px 36px -14px rgba(37, 211, 102, .8); }
+
+    /* --------------------------------------------- peserta tambahan */
+
+    .ses-peserta {
+        margin-bottom: 16px;
+        padding: 14px 15px;
+        border-radius: 14px;
+        border: 1px dashed var(--garis);
+        background: #f8fafc;
+    }
+
+    /* Disembunyikan sampai jumlah pesertanya lebih dari satu — wadah kosong
+       berbingkai putus-putus terbaca seperti ada yang gagal dimuat. */
+    .ses-peserta[hidden] { display: none !important; }
+
+    .ses-peserta-judul {
+        margin: 0 0 12px;
+        font-size: .82rem;
+        font-weight: 800;
+        color: var(--navy);
+    }
+
+    .ses-peserta-judul span {
+        display: block;
+        margin-top: 2px;
+        font-size: .74rem;
+        font-weight: 500;
+        color: var(--tinta-2);
+    }
+
+    .ses-peserta-baris { margin-bottom: 10px; }
+    .ses-peserta-baris:last-child { margin-bottom: 0; }
+
+    .ses-peserta-nomor {
+        display: block;
+        margin-bottom: 5px;
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--tinta-2);
+    }
+
+    .ses-peserta-baris input {
+        width: 100%;
+        height: 44px;
+        margin-bottom: 7px;
+        padding: 0 13px;
+        border: 1px solid var(--garis);
+        border-radius: 11px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .92rem;
+        color: var(--tinta);
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .ses-peserta-baris input:last-child { margin-bottom: 0; }
+
+    .ses-peserta-baris input:focus {
+        outline: none;
+        border-color: var(--jingga);
+        box-shadow: 0 0 0 3px rgba(255, 106, 0, .13);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ses-peserta-baris input { transition: none !important; }
+    }
+
     /* ------------------------------------------------- isi otomatis */
 
     .ses-isi-otomatis {
@@ -864,7 +1032,11 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-isi-otomatis button {
         flex: 0 0 auto;
         margin-left: auto;
-        padding: 0;
+        /* Terukur 73x19 px sebelum ini — terlalu kecil untuk jempol.
+           Padding-nya yang diperbesar, bukan hurufnya, supaya tidak
+           bersaing dengan kalimat di sebelahnya. */
+        padding: 8px 4px;
+        min-height: 36px;
         border: 0;
         background: none;
         font-family: inherit;
@@ -1454,6 +1626,94 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                 });
             }
         }
+
+        /*
+         * BARIS NAMA PESERTA, mengikuti jumlah yang dipilih.
+         *
+         * Dirakit skrip, bukan dirender peladen semuanya lalu disembunyikan:
+         * batasnya 50 peserta, dan 49 pasang isian tersembunyi di tiap
+         * halaman borang adalah 98 unsur yang hampir selalu sia-sia.
+         *
+         * Yang sudah diketik TIDAK hilang saat jumlahnya diubah: nilainya
+         * disalin dulu sebelum barisnya dirakit ulang. Orang sering menaikkan
+         * jumlahnya setelah mengisi beberapa nama.
+         */
+        (function () {
+            var wadah = document.getElementById('ses-peserta');
+            var baris = document.getElementById('ses-peserta-baris');
+
+            if (!wadah || !baris) return;
+
+            var lama = [];
+
+            try {
+                lama = JSON.parse(wadah.dataset.lama || '[]') || [];
+            } catch (e) {
+                lama = [];
+            }
+
+            function rakit() {
+                var perlu = Math.max(0, (parseInt(jumlah.value, 10) || 1) - 1);
+
+                // Yang sudah diketik diselamatkan sebelum dirakit ulang.
+                var tersimpan = [].slice.call(baris.querySelectorAll('.ses-peserta-baris')).map(function (b) {
+                    var i = b.querySelectorAll('input');
+
+                    return { nama: i[0] ? i[0].value : '', email: i[1] ? i[1].value : '' };
+                });
+
+                if (tersimpan.length === 0 && lama.length) {
+                    tersimpan = lama.map(function (o) {
+                        return { nama: (o && o.nama) || '', email: (o && o.email) || '' };
+                    });
+                }
+
+                wadah.hidden = perlu === 0;
+                baris.innerHTML = '';
+
+                for (var i = 0; i < perlu; i++) {
+                    var isi = tersimpan[i] || { nama: '', email: '' };
+
+                    var kotak = document.createElement('div');
+                    kotak.className = 'ses-peserta-baris';
+
+                    var nomor = document.createElement('span');
+                    nomor.className = 'ses-peserta-nomor';
+                    nomor.textContent = 'Peserta ' + (i + 2);
+
+                    var nama = document.createElement('input');
+                    nama.type = 'text';
+                    nama.name = 'peserta[' + i + '][nama]';
+                    nama.required = true;
+                    nama.maxLength = 120;
+                    nama.placeholder = 'Nama lengkap beserta gelar';
+                    nama.value = isi.nama;
+                    nama.setAttribute('aria-label', 'Nama peserta ' + (i + 2));
+
+                    var surel = document.createElement('input');
+                    surel.type = 'email';
+                    surel.name = 'peserta[' + i + '][email]';
+                    surel.maxLength = 120;
+                    surel.placeholder = 'Email (boleh dikosongkan)';
+                    surel.value = isi.email;
+                    surel.setAttribute('aria-label', 'Email peserta ' + (i + 2));
+
+                    kotak.appendChild(nomor);
+                    kotak.appendChild(nama);
+                    kotak.appendChild(surel);
+                    baris.appendChild(kotak);
+                }
+            }
+
+            jumlah.addEventListener('input', rakit);
+            jumlah.addEventListener('change', rakit);
+
+            Array.prototype.forEach.call(document.querySelectorAll('[data-ubah]'), function (t) {
+                t.addEventListener('click', function () { setTimeout(rakit, 0); });
+            });
+
+            rakit();
+        })();
 
         jumlah.addEventListener('input', hitung);
         jumlah.addEventListener('change', hitung);
