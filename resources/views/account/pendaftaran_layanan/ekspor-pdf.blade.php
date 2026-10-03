@@ -329,7 +329,11 @@
                                 <br>{{ $b->email }}
                             @endif
                         </td>
-                        <td class="samar">{{ Pendaftaran::sesiBaris($b) ?? '—' }}</td>
+                        {{-- Nomor angkatannya ikut: berkas ini yang dipakai
+                             merekap, dan rekap yang menyebut "Scopus Camp
+                             Yogyakarta" tanpa nomornya menggabungkan dua ratus
+                             angkatan jadi satu baris. --}}
+                        <td class="samar">{{ Pendaftaran::sesiUntukBerkas($b) ?? '—' }}</td>
                         <td class="tengah">{{ (int) $b->jumlah }}</td>
                         <td class="kanan nowrap">
                             <span class="tebal">Rp {{ number_format((int) $b->total, 0, ',', '.') }}</span>

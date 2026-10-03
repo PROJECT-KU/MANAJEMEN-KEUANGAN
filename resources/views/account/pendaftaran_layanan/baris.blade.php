@@ -133,6 +133,15 @@
                  dua kali. Nama penuhnya tetap di title. --}}
             <span class="pdl-sesi" title="{{ $angkatanBaris['nama'] }}">{{ $angkatanBaris['ringkas'] }}</span>
 
+            @if ($angkatanBaris['nomor'])
+                {{-- Nomor angkatannya — "batch ke berapa". Tanpa ini nama
+                     tempat saja tidak menunjuk satu angkatan: Scopus Camp
+                     Yogyakarta sudah angkatan ke-202 sementara Jakarta baru
+                     ke-9, dan merekap tanpa nomornya menggabungkan dua ratus
+                     angkatan jadi satu baris. --}}
+                <span class="pdl-angkatan-no" title="Angkatan ke-{{ $angkatanBaris['nomor'] }}">#{{ $angkatanBaris['nomor'] }}</span>
+            @endif
+
             <span class="pdl-sesi-ket">
                 @if ($angkatanBaris['mulai'])
                     {{-- Tanggalnya disebut: tanpa itu tidak ada cara tahu

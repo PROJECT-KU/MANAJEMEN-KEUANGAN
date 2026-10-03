@@ -46,6 +46,7 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
             'Telepon',
             'Afiliasi',
             'Sesi / angkatan',
+            'Angkatan ke-',
             'Jumlah orang',
             'Total bayar',
             'Kode unik',
@@ -83,6 +84,17 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
                 $b->telp ? "'" . $b->telp : '',
                 $b->affiliasi ?? '',
                 Pendaftaran::sesiBaris($b) ?? '',
+                /*
+                 * Nomor angkatan jadi KOLOM TERSENDIRI, bukan disambung ke
+                 * nama sesinya.
+                 *
+                 * Lembar kerja ini diunduh untuk direkap — disaring,
+                 * dikelompokkan, dan dijumlahkan. Nomor yang menempel di
+                 * dalam untaian nama tidak bisa dipakai mengelompokkan;
+                 * sebagai kolom sendiri ia bisa. Dan tetap untaian, bukan
+                 * bilangan: nomornya penanda, bukan angka yang dijumlahkan.
+                 */
+                Pendaftaran::nomorAngkatanBaris($b) ?? '',
                 (int) $b->jumlah,
                 // Angka, bukan untaian berformat: lembar kerja memang diunduh
                 // supaya kolom ini bisa dijumlahkan sendiri oleh penerimanya.
@@ -163,7 +175,7 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
 
                 $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(13);
                 $lembar->getStyle('A2:A3')->getFont()->setSize(10);
-                $lembar->getStyle('A4:P4')->getFont()->setBold(true);
+                $lembar->getStyle('A4:Q4')->getFont()->setBold(true);
 
                 // Dibekukan di bawah kepala kolom supaya ia tetap terlihat saat
                 // digulung — 187 baris tidak bisa dibaca tanpa itu.

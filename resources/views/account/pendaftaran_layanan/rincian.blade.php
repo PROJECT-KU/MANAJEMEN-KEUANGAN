@@ -372,6 +372,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
     $bukti = $baris ? Pendaftaran::buktiBaris($baris) : ['url' => null, 'ada' => false, 'nilai' => false];
     $sesiBaris = $baris ? Pendaftaran::sesiBaris($baris) : null;
+    $nomorAngkatan = $baris ? Pendaftaran::nomorAngkatanBaris($baris) : null;
     $waktuBaris = $baris ? Pendaftaran::waktuBaris($baris) : null;
 
     $nomor = $pendaftaran->id_transaksi ?: ($pendaftaran->id_pemesanan ?: $pendaftaran->getKey());
@@ -635,6 +636,12 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         {{ $sesiBaris ?: '' }}
                         @if (! $sesiBaris)
                             <span class="rin-samar">tidak tercatat</span>
+                        @endif
+                        @if ($nomorAngkatan)
+                            {{-- Nomor angkatannya disebut: nama tempat saja tidak
+                                 menunjuk satu angkatan — Yogyakarta sudah ke-202
+                                 sementara Jakarta baru ke-9. --}}
+                            <span class="rin-samar">&middot; angkatan ke-{{ $nomorAngkatan }}</span>
                         @endif
                     </p>
                 </div>
