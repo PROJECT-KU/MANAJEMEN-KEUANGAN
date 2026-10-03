@@ -29,7 +29,7 @@ class PublicScopusCampController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== NAMPILIN DETAIL KATEGORI ==================-->
-    public function selengkapnya($id, $token)
+    public function selengkapnya($id)
     {
         $item = CategoriesScopusCamp::findOrFail($id);
         $terbaru = CategoriesScopusCamp::orderBy('created_at', 'desc')->take(6)->get();
@@ -39,7 +39,7 @@ class PublicScopusCampController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== NAMPILIN FORM PENDAFTARAN ==================-->
-    public function FormPendaftaran($id, $token)
+    public function FormPendaftaran($id)
     {
         $item = CategoriesScopusCamp::findOrFail($id);
         return view('public.scopus_camp.form_pendaftaran', compact('item'));

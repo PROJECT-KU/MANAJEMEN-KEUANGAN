@@ -64,7 +64,7 @@ class KarirController extends Controller
     // <!--====== END ======-->
 
     // <!--====== DETAIL DATA ======-->
-    public function detail(Request $request, $id, $token)
+    public function detail(Request $request, $id)
     {
         $karir = DB::table('karir')
             ->select('karir.id', 'karir.token',  'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')
@@ -76,7 +76,7 @@ class KarirController extends Controller
     // <!--====== END ======-->
 
     // <!--====== UPDATE DATA ======-->
-    public function edit(Request $request, $id, $token)
+    public function edit(Request $request, $id)
     {
         $karir = DB::table('karir')
             ->select('karir.id', 'karir.token',  'karir.nama', 'karir.telp', 'karir.email', 'karir.cv', 'karir.lamaran', 'karir.lainnya', 'karir.pendidikan', 'karir.posisi', 'karir.desc', 'karir.status', 'karir.tanggal_interview', 'karir.lokasi_interview', 'karir.created_at', 'karir.updated_at')

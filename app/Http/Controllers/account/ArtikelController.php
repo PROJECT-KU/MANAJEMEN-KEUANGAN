@@ -126,7 +126,7 @@ class ArtikelController extends Controller
         }
     }
 
-    public function edit($id, $token)
+    public function edit($id)
     {
         $user = Auth::user();
         $artikel = Artikel::findOrFail($id);

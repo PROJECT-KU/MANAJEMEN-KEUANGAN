@@ -111,7 +111,7 @@ Kategori Artikel | MIS
                                         @if ( Auth::user()->adalahAdministrator())
                                         @else
                                         <td style="text-align: center;">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.Kategori-Artikel.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
+                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.Kategori-Artikel.edit', ['id' => $hasil->id]) }}" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
                                             <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">

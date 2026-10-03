@@ -23,8 +23,8 @@ Route::get('/', 'Publict\PublicHomeController@home')->name('home');
 
 // ARTIKEL PUBLIC
 Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
-Route::get('/blog/topic/{categories_artikel_id}{token}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
-Route::get('/blog/topic/blog-single/{id}{token}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
+Route::get('/blog/topic/{categories_artikel_id}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
+Route::get('/blog/topic/blog-single/{id}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
 Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');
 Route::get('/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
 
@@ -49,15 +49,15 @@ Route::get('/Refrensi-Paper/Search', 'Publict\PublicRefrensiPaperController@sear
 
 // ANALASIS BIBLIOMETRIK PUBLIC
 Route::get('/Analisis-Bibliometrik', 'Publict\PublicAnalisisBibliometrikController@public')->name('public.analisisbibliometrik.index');
-Route::get('/Analisis-Bibliometrik/selengkapnya/{id}/{token}', 'Publict\PublicAnalisisBibliometrikController@Selengkapnya')->name('public.analisisbibliometrik.Selengkapnya');
-Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}/{token}', 'Publict\PublicAnalisisBibliometrikController@FormPendaftaran')->name('public.analisisbibliometrik.formpendaftaran');
+Route::get('/Analisis-Bibliometrik/selengkapnya/{id}', 'Publict\PublicAnalisisBibliometrikController@Selengkapnya')->name('public.analisisbibliometrik.Selengkapnya');
+Route::get('/Analisis-Bibliometrik/Form-Pendaftaran/{id}', 'Publict\PublicAnalisisBibliometrikController@FormPendaftaran')->name('public.analisisbibliometrik.formpendaftaran');
 Route::get('/cek-kode-diskon/{id}', 'Publict\PublicAnalisisBibliometrikController@cekKodeDiskon')->name('public.cekkodediskon.formpendaftaran');
 Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikController@store')->name('public.analisisbibliometrik.store');
 
 // SCOPUS CAMP PUBLIC
 Route::get('/Scopus-Camp', 'Publict\PublicScopusCampController@public')->name('public.scopuscamp.index');
-Route::get('/Scopus-Camp/selengkapnya/{id}/{token}', 'Publict\PublicScopusCampController@Selengkapnya')->name('public.scopuscamp.Selengkapnya');
-Route::get('/Scopus-Camp/Form-Pendaftaran/{id}/{token}', 'Publict\PublicScopusCampController@FormPendaftaran')->name('public.scopuscamp.formpendaftaran');
+Route::get('/Scopus-Camp/selengkapnya/{id}', 'Publict\PublicScopusCampController@Selengkapnya')->name('public.scopuscamp.Selengkapnya');
+Route::get('/Scopus-Camp/Form-Pendaftaran/{id}', 'Publict\PublicScopusCampController@FormPendaftaran')->name('public.scopuscamp.formpendaftaran');
 Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
 Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
 
@@ -110,9 +110,9 @@ Route::prefix('account')
             // karir
             Route::get('/karir', 'account\KarirController@index')->name('karir.index');
             Route::get('/karir/list', 'account\KarirController@list')->name('karir.list');
-            Route::get('/karir/detail/{id}{token}', 'account\KarirController@detail')->name('karir.detail');
+            Route::get('/karir/detail/{id}', 'account\KarirController@detail')->name('karir.detail');
             Route::post('/karir/terkirim', 'account\KarirController@store')->name('karir.store');
-            Route::get('/karir/edit/{id}{token}', 'account\KarirController@edit')->name('karir.edit');
+            Route::get('/karir/edit/{id}', 'account\KarirController@edit')->name('karir.edit');
             Route::post('/karir/update/{id}', 'account\KarirController@update')->name('karir.update');
             Route::get('/karir/search', 'account\KarirController@search')->name('karir.search');
             Route::get('/karir/filter', 'account\KarirController@filter')->name('karir.filter');
@@ -217,8 +217,8 @@ Route::prefix('account')
             Route::get('/gaji/create', 'account\GajiController@create')->name('account.gaji.create');
             Route::post('/gaji/store', 'account\GajiController@store')->name('account.gaji.store');
             Route::delete('/gaji/delete/{id}', 'account\GajiController@destroy')->name('account.gaji.destroy');
-            Route::get('/gaji/edit/{id}{token}', 'account\GajiController@edit')->name('account.gaji.edit');
-            Route::get('/gaji/detail/{id}{token}', 'account\GajiController@detail')->name('account.gaji.detail');
+            Route::get('/gaji/edit/{id}', 'account\GajiController@edit')->name('account.gaji.edit');
+            Route::get('/gaji/detail/{id}', 'account\GajiController@detail')->name('account.gaji.detail');
             Route::post('account/gaji/{id}', 'account\GajiController@update')->name('account.gaji.update');
             Route::get('/gaji/search', 'account\GajiController@searchGaji')->name('account.gaji.search');
             Route::get('/gaji/filter', 'account\GajiController@filterGaji')->name('account.gaji.filter');
@@ -270,9 +270,9 @@ Route::prefix('account')
             Route::post('/camp/store', 'account\CampController@store')->name('account.camp.store');
             Route::get('/camp/search', 'account\CampController@search')->name('account.camp.search');
             Route::get('/camp/filter', 'account\CampController@filter')->name('account.camp.filter');
-            Route::get('/camp/detail/{id}{token}', 'account\CampController@detail')->name('account.camp.detail');
+            Route::get('/camp/detail/{id}', 'account\CampController@detail')->name('account.camp.detail');
             Route::delete('/camp/{id}', 'account\CampController@destroy')->name('account.camp.destroy');
-            Route::get('/camp/edit/{id}{token}', 'account\CampController@edit')->name('account.camp.edit');
+            Route::get('/camp/edit/{id}', 'account\CampController@edit')->name('account.camp.edit');
             Route::post('/camp/{id}', 'account\CampController@update')->name('account.camp.update');
             Route::get('/laporan_camp/download-pdf', 'account\CampController@downloadPdf')->name('account.laporan_camp.download-pdf');
             Route::get('/laporan_camp/download-excel', 'account\CampController@downloadExcel')->name('account.laporan_camp.download-excel');
@@ -280,19 +280,28 @@ Route::prefix('account')
 
             // Laporan peserta
             Route::get('/Laporan-Peserta/list', 'account\PesertaController@list')->name('account.peserta.list');
-            Route::get('/Laporan-Peserta/detail/{id}{token}', 'account\PesertaController@detail')->name('account.peserta.detail');
+            Route::get('/Laporan-Peserta/detail/{id}', 'account\PesertaController@detail')->name('account.peserta.detail');
             Route::delete('/Laporan-Peserta/{id}', 'account\PesertaController@destroy')->name('account.peserta.destroy');
             Route::get('/Laporan-Peserta/search', 'account\PesertaController@search')->name('account.peserta.search');
             Route::get('/Laporan-Peserta/filter', 'account\PesertaController@filter')->name('account.peserta.filter');
             Route::get('/Laporan-Peserta', 'account\PesertaController@index')->name('account.peserta.form');
-            // Route::get('/Laporan-Peserta/testimoni/{id}/{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni')->middleware('checkToken');
-            Route::get('/Laporan-Peserta/testimoni/{id}{token}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
+            /*
+             * SATU-SATUNYA rute di sini yang ruas keduanya benar-benar
+             * dipakai: testimoni() mencarinya ke basis data lewat kolom
+             * token_update, bukan sekadar menerimanya lalu mengabaikannya
+             * seperti rute-rute lain yang tokennya dibuang 3 Okt 2026.
+             *
+             * Namanya ditulis token_update supaya cocok dengan nama
+             * parameter metodenya — sebelumnya {token}, dan Laravel
+             * mengisinya hanya karena kebetulan urutannya sama.
+             */
+            Route::get('/Laporan-Peserta/testimoni/{id}/{token_update}', 'account\PesertaController@testimoni')->name('account.peserta.testimoni');
             Route::post('/Laporan-Peserta/simpan', 'account\PesertaController@store')->name('account.peserta.store');
             Route::post('/Laporan-Peserta/selesai/{id}', 'account\PesertaController@update')->name('account.peserta.update');
 
             // Pendaftaran Analisis Bibliometrik
             Route::get('/Analisis-Bibliometrik', 'account\AnalisisBibliometrikController@index')->name('account.analisisbibliometrik.index');
-            Route::get('/Analisis-Bibliometrik/Edit/{id}/{token}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
+            Route::get('/Analisis-Bibliometrik/Edit/{id}', 'account\AnalisisBibliometrikController@edit')->name('account.analisisbibliometrik.edit');
             Route::post('/Analisis-Bibliometrik/update/{id}', 'account\AnalisisBibliometrikController@update')->name('account.analisisbibliometrik.update');
             Route::delete('Analisis-Bibliometrik/delete/{id}', 'account\AnalisisBibliometrikController@destroy')->name('account.analisisbibliometrik.delete');
             Route::get('/Analisis-Bibliometrik/search', 'account\AnalisisBibliometrikController@search')->name('account.analisisbibliometrik.search');
@@ -303,7 +312,7 @@ Route::prefix('account')
             Route::get('/kategori/analisis-bibliometrik', 'account\CategoriesAnalisisBibliometrikController@index')->name('account.kategori.index');
             Route::get('/kategori/analisis-bibliometrik/create', 'account\CategoriesAnalisisBibliometrikController@create')->name('account.kategori.create');
             Route::post('/kategori/analisis-bibliometrik/store', 'account\CategoriesAnalisisBibliometrikController@store')->name('account.kategori.store');
-            Route::get('/kategori/analisis-bibliometrik/edit/{id}/{token}', 'account\CategoriesAnalisisBibliometrikController@edit')->name('account.kategori.edit');
+            Route::get('/kategori/analisis-bibliometrik/edit/{id}', 'account\CategoriesAnalisisBibliometrikController@edit')->name('account.kategori.edit');
             Route::post('/kategori/analisis-bibliometrik/update/{id}', 'account\CategoriesAnalisisBibliometrikController@update')->name('account.kategori.update');
             Route::delete('/kategori/analisis-bibliometrik/delete/{id}', 'account\CategoriesAnalisisBibliometrikController@destroy')->name('account.kategori.destroy');
             Route::get('/kategori/analisis-bibliometrik/search', 'account\CategoriesAnalisisBibliometrikController@search')->name('account.ketegori.search');
@@ -315,7 +324,7 @@ Route::prefix('account')
             Route::get('/artikel-kategori', 'account\CategoriesArtikelController@index')->name('account.Kategori-Artikel.index');
             Route::get('/artikel-kategori/create', 'account\CategoriesArtikelController@create')->name('account.Kategori-Artikel.create');
             Route::post('/artikel-kategori/store', 'account\CategoriesArtikelController@store')->name('account.Kategori-Artikel.store');
-            Route::get('/artikel-kategori/edit/{id}{token}', 'account\CategoriesArtikelController@edit')->name('account.Kategori-Artikel.edit');
+            Route::get('/artikel-kategori/edit/{id}', 'account\CategoriesArtikelController@edit')->name('account.Kategori-Artikel.edit');
             Route::post('/artikel-kategori/update/{id}', 'account\CategoriesArtikelController@update')->name('account.Kategori-Artikel.update');
             Route::delete('/artikel-kategori/delete/{id}', 'account\CategoriesArtikelController@destroy')->name('account.Kategori-Artikel.destroy');
             Route::get('/artikel-kategori/search', 'account\CategoriesArtikelController@search')->name('account.Kategori-Artikel.search');
@@ -325,7 +334,7 @@ Route::prefix('account')
             Route::get('/article', 'account\ArtikelController@index')->name('account.Artikel.index');
             Route::get('/article/create', 'account\ArtikelController@create')->name('account.Artikel.create');
             Route::post('/article/store', 'account\ArtikelController@store')->name('account.Artikel.store');
-            Route::get('/article/edit/{id}{token}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
+            Route::get('/article/edit/{id}', 'account\ArtikelController@edit')->name('account.Artikel.edit');
             Route::put('/article/update/{id}', 'account\ArtikelController@update')->name('account.Artikel.update');
             Route::post('/article/upload/', 'account\ArtikelController@upload')->name('account.Artikel.upload');
             Route::delete('/article/delete/{id}', 'account\ArtikelController@destroy')->name('account.Artikel.destroy');
@@ -434,7 +443,7 @@ Route::prefix('account')
             Route::get('scopus-camp/kategori/', 'account\CategoriesScopusCampController@index')->name('account.kategoriscopuscamp.index');
             Route::get('scopus-camp/kategori/create', 'account\CategoriesScopusCampController@create')->name('account.kategoriscopuscamp.create');
             Route::post('scopus-camp/kategori/store', 'account\CategoriesScopusCampController@store')->name('account.kategoriscopuscamp.store');
-            Route::get('scopus-camp/kategori/edit/{id}/{token}', 'account\CategoriesScopusCampController@edit')->name('account.kategoriscopuscamp.edit');
+            Route::get('scopus-camp/kategori/edit/{id}', 'account\CategoriesScopusCampController@edit')->name('account.kategoriscopuscamp.edit');
             Route::post('scopus-camp/kategori/update/{id}', 'account\CategoriesScopusCampController@update')->name('account.kategoriscopuscamp.update');
             Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
             Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');

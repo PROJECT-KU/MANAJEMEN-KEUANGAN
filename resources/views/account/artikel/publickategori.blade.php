@@ -106,7 +106,7 @@ Blog-Kategori | Rumah Scopus
                                     <p>{{ $article->full_name }}</p>
                                 </div>
                             </div>
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}" class="readmore stretched-link" style="text-align: right;">
+                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="readmore stretched-link" style="text-align: right;">
                                 <span>Read More</span>
                                 <i class="bi bi-arrow-right"></i>
                             </a>

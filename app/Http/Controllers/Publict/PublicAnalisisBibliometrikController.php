@@ -29,7 +29,7 @@ class PublicAnalisisBibliometrikController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== NAMPILIN DETAIL KATEGORI ==================-->
-    public function selengkapnya($id, $token)
+    public function selengkapnya($id)
     {
         $item = CategoriesAnalisisBibliometrik::findOrFail($id);
         $terbaru = CategoriesAnalisisBibliometrik::orderBy('created_at', 'desc')->take(6)->get();
@@ -39,7 +39,7 @@ class PublicAnalisisBibliometrikController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== NAMPILIN FORM PENDAFTARAN ==================-->
-    public function FormPendaftaran($id, $token)
+    public function FormPendaftaran($id)
     {
         $item = CategoriesAnalisisBibliometrik::findOrFail($id);
         return view('public.analisis_bibliometrik.form_pendaftaran', compact('item'));

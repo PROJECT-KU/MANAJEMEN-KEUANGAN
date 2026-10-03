@@ -151,7 +151,7 @@ Data Karir | MIS
                                         </td>
 
                                         <td class="text-center">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-primary">
+                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('karir.edit', ['id' => $hasil->id]) }}" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
                                             <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger">
