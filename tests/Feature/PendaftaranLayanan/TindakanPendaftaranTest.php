@@ -1131,6 +1131,103 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
+    public function potongan_khusus_mengurangi_total_dan_tercatat(): void
+    {
+        /*
+         * Potongan KHUSUS, di atas potongan bawaan angkatannya.
+         *
+         * Angkatan sudah punya diskonnya sendiri dan itu sudah terhitung di
+         * `total_biaya`; yang ini untuk hal yang tidak bisa diketahui
+         * angkatan — peserta yang disponsori, harga mitra, atau kesepakatan
+         * di tempat.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '900000'])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Disponsori',
+            'email' => 'sponsor' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0001',
+            'jumlah' => 2,
+            // Ditulis berpemisah, seperti yang diketik orang.
+            'potongan' => '300.000',
+            'kode_potongan' => 'SPONSOR',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Peserta Disponsori')->first();
+
+        $this->assertNotNull($b);
+        // 900.000 x 2 = 1.800.000, dipotong 300.000.
+        $this->assertSame(1500000, (int) $b->total_pembayaran);
+        $this->assertSame(300000, (int) $b->nominal_diskon);
+        $this->assertSame('SPONSOR', $b->kode_diskon);
+        // Potongan yang tidak bisa dijelaskan enam bulan kemudian sama saja
+        // dengan selisih uang yang tidak ada keterangannya.
+        $this->assertStringContainsString('potongan khusus Rp 300.000', (string) $b->note);
+        $this->assertStringContainsString('SPONSOR', (string) $b->note);
+    }
+
+    #[Test]
+    public function potongan_tidak_boleh_melebihi_tagihannya(): void
+    {
+        // Total negatif tidak berarti apa-apa sebagai nominal transfer, dan
+        // kode uniknya akan dicari atas angka yang mustahil dicocokkan.
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '500000', 'total_biaya' => '500000'])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Potongan Kebablasan',
+            'email' => 'lebih' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0002',
+            'jumlah' => 1,
+            'potongan' => '9999999',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Potongan Kebablasan')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame(0, (int) $b->total_pembayaran, 'Totalnya nol, bukan negatif.');
+        $this->assertSame(500000, (int) $b->nominal_diskon, 'Potongannya dibatasi tagihannya.');
+    }
+
+    #[Test]
+    public function layanan_tanpa_kolom_diskon_tidak_menyimpan_potongan(): void
+    {
+        /*
+         * Scopus Kafe tidak punya kolom nominal_diskon — dan di sana
+         * nominalnya memang diketik langsung, jadi potongannya sudah termasuk
+         * di dalamnya. Menuliskannya ke sana akan melempar "Unknown column"
+         * dan menggagalkan seluruh pendaftarannya.
+         */
+        $this->assertFalse(Pendaftaran::katalogBisaDibuat()['scopus_kafe']['bisa_potongan']);
+
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Kafe Dengan Potongan',
+            'email' => 'kafe' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0003',
+            'total' => '200000',
+            'potongan' => '50000',
+            'kode_potongan' => 'ABAIKAN',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusKafe::where('nama', 'Kafe Dengan Potongan')->first();
+
+        $this->assertNotNull($b, 'Pendaftarannya tetap tersimpan, tidak gagal.');
+        // Potongannya tetap mengurangi totalnya — yang tidak bisa cuma
+        // mencatatnya di kolom tersendiri.
+        $this->assertSame(150000, (int) $b->total_keseluruhan_pembayaran);
+    }
+
+    #[Test]
     public function layanan_tanpa_angkatan_memakai_nominal_yang_diketik(): void
     {
         // Scopus Kafe tidak berangkatan — tarifnya per sesi dan berbeda-beda,
