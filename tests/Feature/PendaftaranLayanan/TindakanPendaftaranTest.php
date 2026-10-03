@@ -415,6 +415,252 @@ class TindakanPendaftaranTest extends TestCase
         \App\Layanan::lupakanKatalog();
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * Pendaftar ganda, bukti, kabar, dan simpan-lagi
+     * ------------------------------------------------------------------
+     */
+
+    #[Test]
+    public function orang_yang_sudah_terdaftar_ditahan_dengan_keterangan(): void
+    {
+        /*
+         * Sebelumnya tidak ada pemeriksaan sama sekali: orang yang sama bisa
+         * didaftarkan dua kali ke angkatan yang sama tanpa peringatan, dan
+         * kuotanya ikut berkurang dua kali.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $email = 'ganda' . Str::random(6) . '@contoh.test';
+
+        $kirim = fn () => $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Kembar',
+            'email' => $email,
+            'telp' => '0816-0000-0030',
+        ]);
+
+        $kirim()->assertRedirect();
+        $sisa = (int) $angkatan->refresh()->sisa_kuota;
+
+        $kirim()->assertSessionHasErrors('email');
+
+        $this->assertSame(
+            1,
+            PendaftaranScopusCamp::where('email', $email)->count(),
+            'Kirim kedua tidak boleh membuat baris kedua.'
+        );
+        $this->assertSame(
+            $sisa,
+            (int) $angkatan->refresh()->sisa_kuota,
+            'Kuota tidak boleh berkurang untuk kiriman yang ditahan.'
+        );
+    }
+
+    #[Test]
+    public function nomor_yang_sama_dengan_pemisah_berbeda_tetap_terdeteksi(): void
+    {
+        /*
+         * "0816-0000-0031" dan "+62 816 0000 0031" orang yang sama. Dibanding
+         * sebagai untaian mentah keduanya tidak pernah cocok, jadi
+         * pemeriksaannya mengadu ANGKA SAJA.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Nomor Sama',
+            'email' => 'satu' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0031',
+        ])->assertRedirect();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Nomor Sama Lagi',
+            'email' => 'dua' . Str::random(6) . '@contoh.test',
+            'telp' => '0816 0000 0031',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertNull(
+            PendaftaranScopusCamp::where('nama', 'Peserta Nomor Sama Lagi')->first()
+        );
+    }
+
+    #[Test]
+    public function panitia_bisa_melanjutkan_kalau_memang_orang_berbeda(): void
+    {
+        /*
+         * Bukan larangan keras: dua orang berbeda bisa berbagi satu nomor
+         * WhatsApp keluarga, dan panitia yang tahu itu harus tetap bisa
+         * melanjutkan.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Kakak',
+            'email' => 'kakak' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0032',
+        ])->assertRedirect();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Adik',
+            'email' => 'adik' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0032',
+            'abaikan_ganda' => '1',
+        ])->assertRedirect();
+
+        $this->assertNotNull(PendaftaranScopusCamp::where('nama', 'Adik')->first());
+    }
+
+    #[Test]
+    public function angkatan_berbeda_bukan_pendaftar_ganda(): void
+    {
+        // Orang yang sama memang boleh ikut angkatan Oktober dan November.
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $satu = $this->angkatan('scopus_camp', 20, 20);
+        $dua = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Angkatan Kedua ' . Str::random(5),
+            'mulai' => now()->addMonths(2)->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+        $email = 'duakali' . Str::random(6) . '@contoh.test';
+
+        foreach ([$satu, $dua] as $a) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $a->id,
+                'nama' => 'Peserta Dua Angkatan',
+                'email' => $email,
+                'telp' => '0816-0000-0033',
+            ])->assertRedirect();
+        }
+
+        $this->assertSame(2, PendaftaranScopusCamp::where('email', $email)->count());
+    }
+
+    #[Test]
+    public function simpan_dan_tambah_lagi_kembali_ke_borang_dengan_angkatannya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $jawab = $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Rombongan Satu',
+            'email' => 'rombong' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0034',
+            'lagi' => '1',
+        ]);
+
+        $jawab->assertRedirect(route('account.pendaftaran-layanan.baru', [
+            'layanan' => 'scopus_camp',
+            'kategori' => $angkatan->id,
+        ]));
+
+        $this->assertNotNull(PendaftaranScopusCamp::where('nama', 'Rombongan Satu')->first());
+    }
+
+    #[Test]
+    public function bukti_bayar_bisa_diunggah_saat_mendaftarkan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $jawab = $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pembawa Struk',
+            'email' => 'struk' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0035',
+            'bukti' => \Illuminate\Http\UploadedFile::fake()->image('struk.jpg', 40, 40),
+        ]);
+
+        $jawab->assertRedirect();
+        $b = PendaftaranScopusCamp::where('nama', 'Pembawa Struk')->first();
+
+        $this->assertNotNull($b);
+        $this->assertNotEmpty($b->gambar);
+
+        /*
+         * Berkasnya ditulis ke cakram SUNGGUHAN; DatabaseTransactions tidak
+         * mengembalikan berkas. Dibuang di sini, dan keberadaannya dibuktikan
+         * dulu supaya ujinya tidak lulus hanya karena tidak ada yang ditulis.
+         */
+        $jalur = public_path('ScopusCamp/' . $b->gambar);
+
+        $this->assertFileExists($jalur);
+        @unlink($jalur);
+        $this->assertFileDoesNotExist($jalur);
+    }
+
+    #[Test]
+    public function pendaftar_dikabari_hanya_kalau_dicentang(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Tanpa Kabar',
+            'email' => 'sepi' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0036',
+        ])->assertRedirect();
+
+        \Illuminate\Support\Facades\Mail::assertNothingSent();
+
+        $alamat = 'kabar' . Str::random(6) . '@contoh.test';
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Dapat Kabar',
+            'email' => $alamat,
+            'telp' => '0816-0000-0037',
+            'kabari' => '1',
+        ])->assertRedirect();
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\PendaftaranDicatatMail::class,
+            fn ($m) => $m->hasTo($alamat)
+        );
+    }
+
+    #[Test]
+    public function sesi_scopus_kafe_tersimpan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Peserta Bersesi',
+            'email' => 'sesi' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0038',
+            'total' => '750.000',
+            'sesi' => 'Sesi 1 — Menyusun pendahuluan',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusKafe::where('nama', 'Peserta Bersesi')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('Sesi 1 — Menyusun pendahuluan', $b->sesi);
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User

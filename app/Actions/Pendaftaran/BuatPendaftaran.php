@@ -131,6 +131,8 @@ class BuatPendaftaran
             $model = $sumber['model'];
             $dibuat = $model::create($baris);
 
+            $this->simpanBukti($layanan, $sumber, $dibuat, $isian['bukti'] ?? null);
+
             if ($angkatan !== null && $angkatan->total_kuota !== null) {
                 $angkatan->forceFill([
                     'sisa_kuota' => (string) max(0, (int) $angkatan->sisa_kuota - $jumlah),
@@ -142,12 +144,125 @@ class BuatPendaftaran
             return ['berhasil' => false, 'pesan' => $galat, 'model' => null];
         }
 
+        $this->kabariPendaftar($layanan, $dibuat, $isian);
+
         return [
             'berhasil' => true,
             'model' => $dibuat,
             'pesan' => 'Pendaftaran ' . $dibuat->{Pendaftaran::kolomNomor($layanan)}
                 . ' atas nama ' . ($isian['nama'] ?? '-') . ' tersimpan.',
         ];
+    }
+
+    /**
+     * Menyimpan bukti bayar yang ikut diunggah, kalau ada.
+     *
+     * Ditaruh di `public/<folder>/`, bukan di cakram 'unggahan': di situlah
+     * seluruh bukti lama berada, dan layar yang menampilkannya serta
+     * penghapusnya sama-sama merakit alamatnya dari sana. Menaruh yang baru
+     * di tempat lain berarti dua konvensi yang harus diingat selamanya.
+     *
+     * Kegagalan menyimpan berkas TIDAK menggagalkan pendaftarannya: barisnya
+     * sudah benar, dan bukti yang bisa diunggah ulang kapan saja dari halaman
+     * rincian tidak sepadan dengan membatalkan pendaftaran orang.
+     */
+    private function simpanBukti(string $layanan, array $sumber, $model, $berkas): void
+    {
+        $folder = $sumber['bukti_folder'] ?? null;
+
+        if ($folder === null || ! isset($sumber['kolom']['bukti']) || $berkas === null) {
+            return;
+        }
+
+        if (! $berkas instanceof \Illuminate\Http\UploadedFile || ! $berkas->isValid()) {
+            return;
+        }
+
+        try {
+            $tujuan = public_path($folder);
+
+            if (! is_dir($tujuan)) {
+                mkdir($tujuan, 0755, true);
+            }
+
+            /*
+             * Namanya dirakit sistem, bukan memakai nama asli kiriman.
+             *
+             * Nama berkas dari ponsel sering memuat spasi dan tanda kutip, dan
+             * firewall hosting menolak alamat berapostrof dengan 403 sebelum
+             * PHP sempat jalan — buktinya tersimpan tetapi tidak pernah bisa
+             * dibuka.
+             */
+            $nama = $layanan . '-' . now()->format('Ymd-His') . '-'
+                . \Illuminate\Support\Str::random(6) . '.'
+                . strtolower($berkas->getClientOriginalExtension() ?: 'jpg');
+
+            $berkas->move($tujuan, $nama);
+
+            $model->forceFill([$sumber['kolom']['bukti'] => $nama])->save();
+        } catch (\Throwable $e) {
+            \Log::error('Bukti bayar gagal disimpan', [
+                'layanan' => $layanan,
+                'sebab' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Mengirim nomor pendaftaran dan kode uniknya ke orang yang didaftarkan.
+     *
+     * Keduanya baru dibuat saat barisnya disimpan, dan justru itu yang harus
+     * sampai ke orangnya — kode uniknya yang membuat nominal transfernya bisa
+     * dicocokkan dengan mutasi rekening. Sebelum ini tidak ada surat sama
+     * sekali dari jalur panitia, jadi keduanya disalin manual ke WhatsApp.
+     *
+     * Gagal kirim TIDAK menggagalkan pendaftarannya: barisnya sudah tersimpan
+     * dan benar, sedangkan surat bisa diulang dari halaman rincian. Melempar
+     * galat di sini berarti panitia melihat halaman galat untuk pendaftaran
+     * yang sebenarnya berhasil, lalu mendaftarkannya lagi.
+     */
+    private function kabariPendaftar(string $layanan, $model, array $isian): void
+    {
+        $email = trim((string) ($isian['email'] ?? ''));
+
+        if ($email === '' || empty($isian['kabari'])) {
+            return;
+        }
+
+        try {
+            $sumber = Pendaftaran::sumber($layanan);
+            $kolom = $sumber['kolom'];
+            $angkatan = null;
+            $tanggal = null;
+
+            if (! empty($isian['kategori_id'])) {
+                $a = KategoriLayanan::find($isian['kategori_id']);
+
+                if ($a !== null) {
+                    $angkatan = trim($a->nama . ($a->nama_ke ? ' (angkatan ke-' . $a->nama_ke . ')' : ''));
+                    $tanggal = $a->mulai
+                        ? \Illuminate\Support\Carbon::parse($a->mulai)->locale('id')->translatedFormat('j F Y')
+                        : null;
+                }
+            }
+
+            \Mail::to($email)->send(new \App\Mail\PendaftaranDicatatMail(
+                nama: (string) ($isian['nama'] ?? '-'),
+                layanan: $sumber['nama'],
+                nomor: (string) $model->{$sumber['kolom_nomor']},
+                total: (int) $model->{$kolom['total']},
+                kodeUnik: isset($kolom['kode_unik']) ? (int) $model->{$kolom['kode_unik']} : 0,
+                angkatan: $angkatan,
+                tanggal: $tanggal,
+                caraBayar: (string) ($isian['cara_bayar'] ?? 'transfer'),
+                sudahLunas: Pendaftaran::keadaanDari((string) $model->status) === 'lunas',
+            ));
+        } catch (\Throwable $e) {
+            \Log::error('Surat pendaftaran gagal dikirim', [
+                'layanan' => $layanan,
+                'sebab' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -315,6 +430,22 @@ class BuatPendaftaran
          * daftarnya hidup di kolom JSON `layanan.varian`, dan nilai di luar
          * daftar berarti baris yang tarifnya tidak akan pernah ketemu.
          */
+        /*
+         * Nama sesi, untuk tabel yang memang punya kolomnya (Scopus Kafe).
+         *
+         * Tabelnya menyimpan sampai tiga sesi beserta biaya masing-masing;
+         * borang panitia mengisi yang PERTAMA saja, dan itu yang selalu
+         * terisi di baris mana pun. Tanpa ini, pendaftaran Scopus Kafe lewat
+         * jalur panitia tidak pernah menyebut sesi apa yang diambil.
+         */
+        if (isset($kolom['sesi']) && $kolom['sesi'] === 'sesi') {
+            $sesi = trim((string) ($isian['sesi'] ?? ''));
+
+            if ($sesi !== '') {
+                $baris['sesi'] = $sesi;
+            }
+        }
+
         if (isset($kolom['varian'])) {
             $pilihan = \App\Layanan::katalog()[$layanan]['varian'] ?? [];
             $varian = (string) ($isian['varian'] ?? '');

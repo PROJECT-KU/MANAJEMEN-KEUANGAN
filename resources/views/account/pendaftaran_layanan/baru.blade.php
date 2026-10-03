@@ -130,8 +130,12 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         .bar-langkah {
             position: relative;
-            margin-bottom: 15px;
+            margin-bottom: 13px;
             margin-left: 46px;
+            /* Bantalannya 18px, bukan 22px bawaan .mis-kartu. Borang ini
+               punya empat kartu bertumpuk, jadi tiap 4px bantalan berlipat
+               delapan kali ke tinggi halamannya. */
+            padding: 18px;
         }
 
         @media (max-width: 575.98px) {
@@ -144,8 +148,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             display: flex;
             align-items: center;
             gap: 11px;
-            margin-bottom: 14px;
-            padding-bottom: 12px;
+            margin-bottom: 13px;
+            padding-bottom: 11px;
             /* Garis tipis memisahkan pertanyaan dari isiannya; tanpa itu judul
                dan isian pertama terbaca sebagai satu gumpalan. */
             border-bottom: 1px solid var(--mis-garis);
@@ -160,7 +164,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         .bar-nomor {
             position: absolute;
             left: -46px;
-            top: 15px;
+            top: 11px;
             display: grid;
             place-items: center;
             width: 36px;
@@ -427,6 +431,130 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         .bar-centang:has(input:checked) .bar-centang-pilih {
             opacity: 1;
+        }
+
+        /*
+         * Penanda isian wajib.
+         *
+         * Tujuh isian memakai `required` tetapi tidak satu pun ditandai di
+         * labelnya, jadi orang baru tidak bisa tahu mana yang boleh dilewati
+         * sebelum mencoba mengirim. Hanya dipasang pada yang validatornya
+         * memang menuntutnya — bintang pada isian opsional lebih menyesatkan
+         * daripada tidak ada bintang.
+         */
+        .bar-wajib {
+            margin-left: 3px;
+            color: #e11d48;
+            font-weight: 700;
+        }
+
+        /*
+         * Galat per isian.
+         *
+         * Sebelumnya galat validasi HANYA muncul sebagai toast berisi pesan
+         * pertama, tanpa satu pun penanda di isian yang salah — terukur: nol
+         * isian bertepi merah, nol penanda sebaris. Membetulkan satu galat
+         * lalu mengirim ulang baru memunculkan galat berikutnya, satu
+         * bolak-balik per kesalahan.
+         */
+        .bar-salah {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin: 5px 0 0;
+            font-size: .76rem;
+            line-height: 1.45;
+            color: #be123c;
+        }
+
+        .bar-salah i {
+            margin-top: 2px;
+        }
+
+        /* Ringkasan galat di kepala borang: SELURUH kesalahan sekaligus, dan
+           ia tidak hilang sendiri seperti toast. */
+        .bar-galat-ringkas {
+            margin-bottom: var(--mis-jarak);
+            padding: 14px 16px;
+            border: 1px solid #fecdd3;
+            border-radius: var(--mis-radius-kecil);
+            background: #fff1f2;
+        }
+
+        .bar-galat-ringkas-judul {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 7px;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #be123c;
+        }
+
+        .bar-galat-ringkas ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: .8rem;
+            line-height: 1.6;
+            color: #9f1239;
+        }
+
+        /* Berkas bukti: kotak unggah yang terbaca sebagai tempat menjatuhkan
+           berkas, bukan tombol "Choose file" bawaan peramban. */
+        .bar-berkas {
+            /*
+             * min-width: 0 di SINI juga, bukan hanya di nama berkasnya.
+             *
+             * .mis-isian ternyata `display: grid`, dan lebar jalurnya
+             * mengikuti min-content anaknya. Anak grid berbawaan
+             * min-width:auto, jadi kotak ini memaksa jalurnya selebar teks
+             * nowrap di dalamnya — 388px di dalam kolom selebar 254px.
+             */
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 13px;
+            border: 1.5px dashed var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .bar-berkas:hover {
+            border-color: #c7d2fe;
+        }
+
+        .bar-berkas input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        /*
+         * min-width: 0 WAJIB di sini, dan bukan sekadar kerapian.
+         *
+         * `white-space: nowrap` membuat lebar terkecil unsurnya sama dengan
+         * lebar penuh teksnya, dan `overflow: hidden` TIDAK menguranginya.
+         * Anak flex berbawaan min-width:auto, jadi ia menolak menyusut di
+         * bawah itu dan mendorong seluruh kartunya keluar layar — terukur
+         * luberan 108px di 320px dan 39px di 390px.
+         */
+        .bar-berkas-nama {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: .8rem;
+            color: var(--mis-tinta-3);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Tombol yang sedang mengirim: terkunci dan terlihat terkunci. */
+        .mis-tombol[aria-busy="true"] {
+            opacity: .65;
+            pointer-events: none;
         }
 
         /*
@@ -853,7 +981,48 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         @include('account.pendaftaran_layanan.partials.pesan')
 
-        <form method="POST" action="{{ route('account.pendaftaran-layanan.simpan') }}" id="bar-borang">
+        {{-- SELURUH kesalahan sekaligus, dan tidak hilang sendiri seperti
+             toast. Sebelumnya hanya pesan pertama yang muncul, jadi kesalahan
+             kedua baru ketahuan sesudah yang pertama dibetulkan dan
+             dikirim ulang. --}}
+        @if ($errors->any())
+            <div class="bar-galat-ringkas" role="alert" tabindex="-1" id="bar-galat">
+                <p class="bar-galat-ringkas-judul">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    {{ $errors->count() === 1 ? 'Ada satu isian yang perlu diperbaiki' : 'Ada ' . $errors->count() . ' isian yang perlu diperbaiki' }}
+                </p>
+                <ul>
+                    @foreach ($errors->all() as $pesan)
+                        <li>{{ $pesan }}</li>
+                    @endforeach
+                </ul>
+
+                {{-- Pemeriksaan ganda bukan larangan keras: dua orang berbeda
+                     bisa berbagi satu nomor WhatsApp keluarga. Panitia yang
+                     tahu itu harus tetap bisa melanjutkan. --}}
+                @if (session('ganda'))
+                    <label class="bar-centang" for="bar-abaikan" style="margin-top: 11px;">
+                        <input type="checkbox" id="bar-abaikan" name="abaikan_ganda" value="1"
+                            form="bar-borang">
+                        <span class="bar-centang-tanda" aria-hidden="true">
+                            <i class="fas fa-user-check"></i>
+                        </span>
+                        <span>
+                            <span class="bar-centang-judul">Ini memang orang yang berbeda</span>
+                            <span class="bar-centang-ket">
+                                Centang lalu simpan lagi kalau Anda sudah memeriksanya.
+                            </span>
+                        </span>
+                        <span class="bar-centang-pilih" aria-hidden="true">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </label>
+                @endif
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('account.pendaftaran-layanan.simpan') }}" id="bar-borang"
+            enctype="multipart/form-data">
             @csrf
 
             <div class="bar-kerja">
@@ -876,6 +1045,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                 data-berangkatan="{{ $l['berangkatan'] ? '1' : '0' }}"
                                 data-potongan="{{ $l['bisa_potongan'] ? '1' : '0' }}"
                                 data-varian="{{ $l['varian_sendiri'] && $varian[$kunci] !== [] ? '1' : '0' }}"
+                                data-sesi="{{ $l['pakai_sesi'] ? '1' : '0' }}"
+                                data-pola="{{ $l['pola_nomor_kata'] }}"
                                 @checked(old('layanan', $terpilih) === $kunci) required>
                             <span class="bar-kartu">
                                 <span class="mis-medali {{ $l['warna'] }}" aria-hidden="true">
@@ -925,10 +1096,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
                 <div class="bar-isian-kisi">
                     <div class="mis-isian bar-lebar" id="bar-bungkus-angkatan">
-                        <label class="mis-label" for="bar-angkatan">Angkatan</label>
-                        <select class="form-control-modern" id="bar-angkatan" name="kategori_id">
+                        <label class="mis-label" for="bar-angkatan">Angkatan<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <select class="form-control-modern @error('kategori_id') is-invalid @enderror" id="bar-angkatan" @error('kategori_id') aria-invalid="true" @enderror name="kategori_id">
                             <option value="">Pilih layanan dulu</option>
                         </select>
+                        @error('kategori_id')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                         <p class="mis-bantuan" id="bar-angkatan-ket">
                             Hanya angkatan yang belum lewat yang ditawarkan.
                         </p>
@@ -936,8 +1113,14 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
                     <div class="mis-isian" id="bar-bungkus-jumlah">
                         <label class="mis-label" for="bar-jumlah">Jumlah orang</label>
-                        <input type="number" class="form-control-modern" id="bar-jumlah" name="jumlah"
+                        <input type="number" class="form-control-modern @error('jumlah') is-invalid @enderror" id="bar-jumlah" @error('jumlah') aria-invalid="true" @enderror name="jumlah"
                             value="{{ old('jumlah', 1) }}" min="1" max="99">
+                        @error('jumlah')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                         <p class="mis-bantuan">Untuk pendaftaran rombongan.</p>
                     </div>
 
@@ -957,10 +1140,34 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </div>
 
                     <div class="mis-isian" id="bar-bungkus-total" hidden>
-                        <label class="mis-label" for="bar-total">Total bayar</label>
-                        <input type="text" class="form-control-modern" id="bar-total" name="total"
+                        <label class="mis-label" for="bar-total">Total bayar<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control-modern @error('total') is-invalid @enderror" id="bar-total" @error('total') aria-invalid="true" @enderror name="total"
                             value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
+                        @error('total')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                         <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
+                    </div>
+
+                    {{-- Nama sesi, hanya untuk layanan yang tabelnya punya
+                         kolomnya (Scopus Kafe). Tanpa ini, pendaftaran Scopus
+                         Kafe lewat jalur panitia tidak pernah menyebut sesi
+                         apa yang diambil. --}}
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-sesi" hidden>
+                        <label class="mis-label" for="bar-sesi">Sesi yang diambil</label>
+                        <input type="text" class="form-control-modern @error('sesi') is-invalid @enderror" id="bar-sesi" name="sesi"
+                            value="{{ old('sesi') }}" maxlength="120"
+                            placeholder="mis. Sesi 1 — Menyusun pendahuluan">
+                        @error('sesi')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
+                        <p class="mis-bantuan">Supaya jadwalnya bisa ditelusuri nanti.</p>
                     </div>
 
                     {{-- Mengisi jalur yang sebelumnya menganggur di baris ini,
@@ -1030,16 +1237,28 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                          harga mitra, atau kesepakatan di tempat. --}}
                     <div class="mis-isian" id="bar-bungkus-potongan">
                         <label class="mis-label" for="bar-potongan">Potongan khusus</label>
-                        <input type="text" class="form-control-modern" id="bar-potongan" name="potongan"
+                        <input type="text" class="form-control-modern @error('potongan') is-invalid @enderror" id="bar-potongan" @error('potongan') aria-invalid="true" @enderror name="potongan"
                             value="{{ old('potongan') }}" inputmode="numeric" placeholder="boleh dikosongkan">
+                        @error('potongan')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                         <p class="mis-bantuan">Rupiah, di luar diskon angkatannya.</p>
                     </div>
 
                     <div class="mis-isian" id="bar-bungkus-kode">
                         <label class="mis-label" for="bar-kode-potongan">Alasan potongan</label>
-                        <input type="text" class="form-control-modern" id="bar-kode-potongan"
+                        <input type="text" class="form-control-modern @error('kode_potongan') is-invalid @enderror" id="bar-kode-potongan" @error('kode_potongan') aria-invalid="true" @enderror
                             name="kode_potongan" value="{{ old('kode_potongan') }}" maxlength="40"
                             placeholder="mis. SPONSOR, MITRA">
+                        @error('kode_potongan')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                         {{-- Tanpa keterangan, potongan Rp 500.000 pada satu
                              pendaftaran tidak bisa dijelaskan siapa pun enam
                              bulan kemudian. --}}
@@ -1114,6 +1333,30 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </label>
                 </div>
 
+                {{-- Bukti boleh langsung diunggah dari sini. Sebelumnya tidak
+                     bisa sama sekali: pendaftar yang datang membawa struk
+                     harus disimpan dulu, lalu buktinya diunggah dari halaman
+                     rincian. --}}
+                <div class="mis-isian" id="bar-bungkus-bukti" hidden>
+                    <label class="mis-label" for="bar-bukti">Bukti transfer <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh menyusul)</span></label>
+                    <label class="bar-berkas" for="bar-bukti">
+                        <input type="file" id="bar-bukti" name="bukti"
+                            accept="image/jpeg,image/png,image/webp">
+                        <span class="mis-medali kecil mis-biru" aria-hidden="true">
+                            <i class="fas fa-paperclip"></i>
+                        </span>
+                        <span class="bar-berkas-nama" id="bar-berkas-nama">
+                            Pilih gambar — JPG, PNG, atau WebP, maksimal 4 MB
+                        </span>
+                    </label>
+                    @error('bukti')
+                        <p class="bar-salah">
+                            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                            <span>{{ $message }}</span>
+                        </p>
+                    @enderror
+                </div>
+
                 <p class="bar-nota" id="bar-nota-bukti">
                     <i class="fas fa-info-circle" aria-hidden="true"></i>
                     <span>
@@ -1148,35 +1391,86 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
                 <div class="bar-isian-kisi">
                     <div class="mis-isian">
-                        <label class="mis-label" for="bar-nama">Nama lengkap</label>
-                        <input type="text" class="form-control-modern" id="bar-nama" name="nama"
+                        <label class="mis-label" for="bar-nama">Nama lengkap<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control-modern @error('nama') is-invalid @enderror" id="bar-nama" @error('nama') aria-invalid="true" @enderror name="nama"
                             value="{{ old('nama') }}" required maxlength="255" autocomplete="off">
+                        @error('nama')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                     </div>
 
                     <div class="mis-isian">
-                        <label class="mis-label" for="bar-email">Email</label>
-                        <input type="email" class="form-control-modern" id="bar-email" name="email"
+                        <label class="mis-label" for="bar-email">Email<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <input type="email" class="form-control-modern @error('email') is-invalid @enderror" id="bar-email" @error('email') aria-invalid="true" @enderror name="email"
                             value="{{ old('email') }}" required maxlength="255" autocomplete="off">
+                        @error('email')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                     </div>
 
                     <div class="mis-isian">
-                        <label class="mis-label" for="bar-telp">Nomor WhatsApp</label>
-                        <input type="text" class="form-control-modern" id="bar-telp" name="telp"
+                        <label class="mis-label" for="bar-telp">Nomor WhatsApp<span class="bar-wajib" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control-modern @error('telp') is-invalid @enderror" id="bar-telp" @error('telp') aria-invalid="true" @enderror name="telp"
                             value="{{ old('telp') }}" required maxlength="30" autocomplete="off"
                             inputmode="tel" placeholder="08xx atau 62xx">
+                        @error('telp')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                     </div>
 
                     <div class="mis-isian">
                         <label class="mis-label" for="bar-affiliasi">Afiliasi / instansi</label>
-                        <input type="text" class="form-control-modern" id="bar-affiliasi" name="affiliasi"
+                        <input type="text" class="form-control-modern @error('affiliasi') is-invalid @enderror" id="bar-affiliasi" @error('affiliasi') aria-invalid="true" @enderror name="affiliasi"
                             value="{{ old('affiliasi') }}" maxlength="255" autocomplete="off"
                             placeholder="boleh dikosongkan">
+                        @error('affiliasi')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                     </div>
 
-                    <div class="mis-isian bar-penuh">
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-kabari">
+                        <span class="mis-label">Kabar ke pendaftar</span>
+                        <label class="bar-centang" for="bar-kabari">
+                            <input type="checkbox" id="bar-kabari" name="kabari" value="1"
+                                @checked(old('kabari', true))>
+                            <span class="bar-centang-tanda" aria-hidden="true">
+                                <i class="fas fa-paper-plane"></i>
+                            </span>
+                            <span>
+                                <span class="bar-centang-judul">Kirimkan nomor pendaftarannya lewat email</span>
+                                <span class="bar-centang-ket">
+                                    Berisi nomor, total bayar, dan kode uniknya. Lepas centangnya
+                                    kalau emailnya tidak yakin benar.
+                                </span>
+                            </span>
+                            <span class="bar-centang-pilih" aria-hidden="true">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="mis-isian bar-lebar">
                         <label class="mis-label" for="bar-note">Catatan panitia</label>
-                        <textarea class="form-control-modern" id="bar-note" name="note" rows="2"
+                        <textarea class="form-control-modern @error('note') is-invalid @enderror" id="bar-note" @error('note') aria-invalid="true" @enderror name="note" rows="2"
                             maxlength="1000" placeholder="boleh dikosongkan">{{ old('note') }}</textarea>
+                        @error('note')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -1215,7 +1509,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     <a class="mis-tombol mis-tombol-halus" href="{{ route('account.pendaftaran-layanan.index') }}">
                         Batal
                     </a>
-                    <button type="submit" class="mis-tombol mis-tombol-ungu">
+                    {{-- Dua tombol kirim, dibedakan oleh satu penanda.
+
+                         Mendaftarkan rombongan satu per satu sebelumnya
+                         berarti sepuluh kali kembali ke borang dan sepuluh
+                         kali memilih ulang layanan serta angkatannya. --}}
+                    <button type="submit" class="mis-tombol mis-tombol-halus" id="bar-simpan-lagi"
+                        name="lagi" value="1">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i> Simpan &amp; tambah lagi
+                    </button>
+                    <button type="submit" class="mis-tombol mis-tombol-ungu" id="bar-simpan">
                         <i class="fas fa-save" aria-hidden="true"></i> Simpan pendaftaran
                     </button>
                 </div>
@@ -1227,7 +1530,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                  isiannya berubah. --}}
             <p class="bar-catatan-bawah">
                 <i class="fas fa-info-circle" aria-hidden="true"></i>
-                Nomor pendaftaran, status, dan kode unik dibuat sistem sesudah disimpan.
+                Nomor pendaftaran, status, dan kode unik dibuat sistem sesudah disimpan —
+                <span id="bar-pola-nomor">nomornya mengikuti pola layanan yang dipilih</span>.
                 Kode unik itu yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
             </p>
             </aside>
@@ -1256,7 +1560,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var VARIAN = @json($varian);
         var TARIF = @json($tarif);
         var LAMA_VARIAN = @json(old('varian'));
-        var LAMA_ANGKATAN = @json(old('kategori_id'));
+        var LAMA_ANGKATAN = @json(old('kategori_id') ?: ($terpilihAngkatan ?: null));
 
         /*
          * Potongan alumni tiap tarif aktif, berkunci "layanan|varian".
@@ -1288,6 +1592,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var bungkusSesi = el('bar-bungkus-sesi');
+        var bungkusBukti = el('bar-bungkus-bukti');
+        var isianBukti = el('bar-bukti');
+        var namaBerkas = el('bar-berkas-nama');
+        var polaNomor = el('bar-pola-nomor');
         var bungkusVarian = el('bar-bungkus-varian');
         var kartuVarian = el('bar-varian-kartu');
         var ketVarian = el('bar-varian-ket');
@@ -1345,6 +1654,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 berangkatan: r.dataset.berangkatan === '1',
                 bisaPotongan: r.dataset.potongan === '1',
                 punyaVarian: r.dataset.varian === '1',
+                pakaiSesi: r.dataset.sesi === '1',
+                pola: r.dataset.pola || '',
             } : null;
         };
 
@@ -1513,7 +1824,19 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             var tunai = !!pilih && pilih.value === 'tunai';
 
             tampil(bungkusTerima, tunai);
+            tampil(bungkusBukti, !tunai);
             tampil(notaBukti, !tunai);
+
+            /*
+             * Berkas yang sudah dipilih DILEPAS saat pindah ke tunai: isian
+             * berkas yang tersembunyi tetap terkirim, dan bukti transfer pada
+             * pendaftaran yang ditandai bayar tunai tidak bisa dijelaskan
+             * siapa pun.
+             */
+            if (tunai && isianBukti) {
+                isianBukti.value = '';
+                namaBerkas.textContent = 'Pilih gambar — JPG, PNG, atau WebP, maksimal 4 MB';
+            }
 
             if (!tunai && centangTerima) {
                 centangTerima.checked = false;
@@ -1600,7 +1923,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
             if (persen > 0) {
                 ketAlumni.textContent = 'Potongan ' + persen
-                    + '% dari Tarif Layanan. Tidak bisa digabung dengan potongan khusus.';
+                    + '% dari Tarif Layanan — menggantikan potongan khusus.';
             } else {
                 // Tersembunyi berarti juga tidak ikut terkirim; centangnya
                 // dilepas supaya nilai lama tidak menempel saat berganti
@@ -1734,6 +2057,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 tampil(bungkusTotal, false);
                 tampil(sekilas, false);
                 tampil(bungkusVarian, false);
+                tampil(bungkusSesi, false);
                 tampil(panelPotongan, false);
                 tampil(bungkusPotongan, false);
                 tampil(bungkusKode, false);
@@ -1749,6 +2073,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             // tegaskanAngkatan() yang menyalakannya kembali kalau ada.
             tampil(sekilas, false);
             tampil(bungkusVarian, pilih.punyaVarian);
+            tampil(bungkusSesi, pilih.pakaiSesi);
+
+            if (polaNomor && pilih.pola) {
+                polaNomor.textContent = pilih.pola;
+            }
             tampil(bungkusPotongan, pilih.bisaPotongan);
             tampil(bungkusKode, pilih.bisaPotongan);
 
@@ -1791,6 +2120,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
              */
             tampil(panelPotongan, pilih.bisaPotongan || !bungkusAlumni.hidden);
 
+            batasiJumlah();
             hitung();
         };
 
@@ -1828,6 +2158,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     tegaskanAngkatan(pilihLayanan.nilai);
                 }
 
+                batasiJumlah();
                 hitung();
             } else {
                 hitung();
@@ -1838,8 +2169,87 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             n.addEventListener('input', hitung);
         });
 
+        /*
+         * Jumlah orang DIBATASI sisa kursi angkatannya, bukan 99.
+         *
+         * Peladen memang menolak yang melebihi — dan penolakannya terkunci
+         * dengan aman — tetapi orangnya baru tahu sesudah mengisi seluruh
+         * borang dan menekan simpan. Batas di sini membuatnya ketahuan saat
+         * angkanya diketik.
+         */
+        var batasiJumlah = function () {
+            var pilih = layananTerpilih();
+
+            if (!pilih || !pilih.berangkatan) {
+                isianJumlah.removeAttribute('max');
+                return;
+            }
+
+            var o = menuAngkatan.options[menuAngkatan.selectedIndex];
+            var daftar = ANGKATAN[pilih.nilai] || [];
+            var a = null;
+
+            for (var i = 0; i < daftar.length; i++) {
+                if (o && daftar[i].id === o.value) {
+                    a = daftar[i];
+                    break;
+                }
+            }
+
+            if (!a || a.sisa_kuota === null) {
+                isianJumlah.removeAttribute('max');
+                return;
+            }
+
+            isianJumlah.max = Math.max(1, a.sisa_kuota);
+
+            if (parseInt(isianJumlah.value || '1', 10) > a.sisa_kuota) {
+                isianJumlah.value = a.sisa_kuota;
+            }
+        };
+
+        if (isianBukti) {
+            isianBukti.addEventListener('change', function () {
+                var f = isianBukti.files && isianBukti.files[0];
+                namaBerkas.textContent = f
+                    ? f.name + ' · ' + Math.round(f.size / 1024) + ' KB'
+                    : 'Pilih gambar — JPG, PNG, atau WebP, maksimal 4 MB';
+            });
+        }
+
+        /*
+         * Tombol dikunci begitu borangnya dikirim.
+         *
+         * Tanpa itu tombolnya tetap bisa ditekan selagi permintaannya
+         * berjalan, dan tekan dua kali berarti dua baris pendaftaran untuk
+         * satu orang — beserta dua kursi yang terpakai.
+         */
+        borang.addEventListener('submit', function () {
+            [el('bar-simpan'), el('bar-simpan-lagi')].forEach(function (b) {
+                if (b) {
+                    b.setAttribute('aria-busy', 'true');
+                }
+            });
+
+            var utama = el('bar-simpan');
+
+            if (utama) {
+                utama.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Menyimpan…';
+            }
+        });
+
+        // Ringkasan galat dibawa ke layar dan diberi fokus: pesan yang tidak
+        // terlihat sama saja dengan pesan yang tidak ada.
+        var ringkasGalat = el('bar-galat');
+
+        if (ringkasGalat) {
+            ringkasGalat.scrollIntoView({ block: 'center' });
+            ringkasGalat.focus();
+        }
+
         segarkan();
         segarkanBayar();
+        batasiJumlah();
     })();
 </script>
 @endpush
