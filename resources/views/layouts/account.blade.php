@@ -365,6 +365,20 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
+                        {{-- Pendaftar Webinar Eksklusif. Ditaruh tepat di bawah
+                             Angkatan Layanan sebab dari sanalah sesinya dibuat,
+                             dan ke sinilah panitia menandai pembayarannya lunas.
+
+                             Tanpa entri menu ini, layarnya hanya bisa dibuka
+                             dengan mengetik alamatnya — dan satu-satunya cara
+                             menandai transfer manual jadi lunas praktis tidak
+                             bisa ditemukan siapa pun. --}}
+                        <li class="{{ setActive('account/WebinarEksklusifPendaftar') }}">
+                            <a class="nav-link" href="{{ route('account.webinarpendaftar.index') }}">
+                                <i class="fas fa-user-check"></i> <span>Pendaftar Webinar</span>
+                            </a>
+                        </li>
+
                         <li class="{{ setActive('account/galeri') }}">
                             <a class="nav-link" href="{{ route('account.galeri.index') }}">
                                 <i class="fas fa-images"></i> <span>Galeri Foto</span>

@@ -23,8 +23,35 @@ use Illuminate\Support\Facades\DB;
  */
 class WebinarEksklusifPendaftarController extends Controller
 {
+    /**
+     * Hanya orang dalam.
+     *
+     * Grup rute account/ hanya bermiddleware auth + terverifikasi, jadi TANPA
+     * penjagaan ini layar ini terbuka untuk pelanggan mana pun yang punya akun
+     * — terukur: pengguna berperan 'user' mendapat 200 di sini. Dan layar ini
+     * bukan layar baca saja: ia menandai pembayaran lunas dan membatalkan
+     * pendaftaran orang lain.
+     *
+     * Polanya mengikuti GaleriController, yang sudah menjaganya dengan cara
+     * yang sama.
+     */
+    private function boleh(): bool
+    {
+        return (bool) auth()->user()?->adalahOrangDalam();
+    }
+
+    private function tolak()
+    {
+        return redirect()->route('account.dashboard.index')
+            ->with('error', 'Anda tidak punya akses ke data pendaftar webinar.');
+    }
+
     public function index(Request $request)
     {
+        if (! $this->boleh()) {
+            return $this->tolak();
+        }
+
         $sesi = KategoriLayanan::where('layanan', 'webinar_eksklusif')
             ->orderByDesc('mulai')
             ->get(['id', 'nama', 'mulai', 'total_kuota', 'sisa_kuota']);
@@ -75,6 +102,10 @@ class WebinarEksklusifPendaftarController extends Controller
      */
     public function lunasi(Request $request, string $id)
     {
+        if (! $this->boleh()) {
+            return $this->tolak();
+        }
+
         $pendaftaran = WebinarEksklusifPendaftaran::findOrFail($id);
 
         if ($pendaftaran->status === 'paid') {
@@ -123,6 +154,10 @@ class WebinarEksklusifPendaftarController extends Controller
     /** Membatalkan pendaftaran dan mengembalikan kursinya. */
     public function batalkan(Request $request, string $id)
     {
+        if (! $this->boleh()) {
+            return $this->tolak();
+        }
+
         $pendaftaran = WebinarEksklusifPendaftaran::findOrFail($id);
 
         if (in_array($pendaftaran->status, ['cancel', 'expired'], true)) {
