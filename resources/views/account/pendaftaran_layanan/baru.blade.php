@@ -957,6 +957,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             color: #1d4ed8;
         }
 
+        /* Nota yang memperingatkan, bukan sekadar memberi tahu. */
+        .bar-nota-awas {
+            border-color: #fed7aa;
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
         .bar-nota i {
             flex: 0 0 auto;
             margin-top: 2px;
@@ -1259,6 +1266,14 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                          akhirnya tidak bisa dijelaskan dari salah satunya, dan
                          panitia yang memberi potongan khusus kepada seorang
                          alumni hampir selalu bermaksud menggantikannya. --}}
+                    {{-- Peringatan kelebihan kuota. Diperbolehkan bukan berarti
+                         tidak perlu disebut: yang menyiapkan ruangan dan
+                         konsumsinya harus tahu angkatannya kelebihan berapa. --}}
+                    <p class="bar-nota bar-nota-awas bar-penuh" id="bar-nota-kuota" hidden>
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        <span></span>
+                    </p>
+
                     <div class="bar-potongan-panel bar-penuh" id="bar-panel-potongan" hidden>
                     <p class="bar-potongan-judul">
                         <i class="fas fa-tags" aria-hidden="true"></i> Potongan <span>opsional</span>
@@ -1931,11 +1946,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                  */
                 var penuh = a.sisa_kuota !== null && a.sisa_kuota <= 0;
 
-                o.disabled = penuh;
+                // Dikunci HANYA untuk pendaftar perorangan; pesanan lembaga
+                // memang boleh melebihi kuotanya.
+                o.disabled = penuh && !lembagaDipakai();
 
-                var sisa = penuh
-                    ? 'PENUH'
-                    : (a.sisa_kuota === null ? 'tanpa batas kuota' : ('sisa ' + a.sisa_kuota + ' kursi'));
+                var sisa = a.sisa_kuota === null
+                    ? 'tanpa batas kuota'
+                    : (a.sisa_kuota > 0
+                        ? 'sisa ' + a.sisa_kuota + ' kursi'
+                        : (a.sisa_kuota === 0 ? 'PENUH' : 'KELEBIHAN ' + (-a.sisa_kuota) + ' kursi'));
 
                 var bagian = [];
 
@@ -2426,7 +2445,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var batasiJumlah = function () {
             var pilih = layananTerpilih();
 
-            if (!pilih || !pilih.berangkatan) {
+            /*
+             * Pesanan LEMBAGA boleh melebihi kuota angkatannya, jadi batasnya
+             * dilepas. Kuota 20 kursi sedangkan lembaga rutin memesan lebih,
+             * dan memaksa pesanan 30 orang dipecah berarti memecah satu
+             * rombongan yang seharusnya berangkat bersama.
+             */
+            if (!pilih || !pilih.berangkatan || menuPemesanan.value !== '' || namaLembaga.value.trim() !== '') {
                 isianJumlah.removeAttribute('max');
                 return;
             }
@@ -2485,6 +2510,58 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var bungkusNamaLembaga = el('bar-bungkus-lembaga-nama');
         var bungkusLembaga = el('bar-bungkus-lembaga');
         var ketPemesanan = el('bar-pemesanan-ket');
+        var notaKuota = el('bar-nota-kuota');
+
+        /** Benar kalau pendaftaran ini bagian dari pesanan lembaga. */
+        var lembagaDipakai = function () {
+            return menuPemesanan.value !== '' || namaLembaga.value.trim() !== '';
+        };
+
+        /*
+         * Memberi tahu saat jumlahnya MELEBIHI sisa kursi.
+         *
+         * Diperbolehkan bukan berarti tidak perlu disebut: panitia yang
+         * menyiapkan ruangan dan konsumsinya harus tahu angkatannya kelebihan
+         * berapa, dan mengetahuinya sesudah tersimpan terlambat.
+         */
+        var ingatkanKuota = function () {
+            var pilih = layananTerpilih();
+
+            if (!pilih || !pilih.berangkatan) {
+                tampil(notaKuota, false);
+                return;
+            }
+
+            var o = menuAngkatan.options[menuAngkatan.selectedIndex];
+            var daftar = ANGKATAN[pilih.nilai] || [];
+            var a = null;
+
+            for (var i = 0; i < daftar.length; i++) {
+                if (o && daftar[i].id === o.value) { a = daftar[i]; break; }
+            }
+
+            var jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
+            var lebih = (a && a.sisa_kuota !== null) ? jml - a.sisa_kuota : 0;
+
+            tampil(notaKuota, lebih > 0);
+
+            if (lebih > 0) {
+                /*
+                 * Kalimatnya BERBEDA tergantung ada pesanan lembaganya atau
+                 * tidak. Satu kalimat "diperbolehkan" untuk keduanya menyesatkan
+                 * pendaftar perorangan: kirimannya justru akan ditolak peladen,
+                 * dan ia baru tahu sesudah seluruh borang terisi.
+                 */
+                notaKuota.querySelector('span').innerHTML = lembagaDipakai()
+                    ? '<strong>Melebihi kuota angkatan ' + lebih + ' kursi.</strong> '
+                        + 'Diperbolehkan untuk pesanan lembaga — tetapi ruangan dan '
+                        + 'konsumsinya perlu disiapkan untuk jumlah itu.'
+                    : '<strong>Kursinya tidak cukup, kurang ' + lebih + '.</strong> '
+                        + 'Kirimannya akan ditolak. Melebihi kuota hanya boleh untuk '
+                        + 'pesanan lembaga — isi nama lembaganya di langkah 5, atau '
+                        + 'kurangi jumlahnya.';
+            }
+        };
 
         var segarkanLembaga = function () {
             var adaPesanan = menuPemesanan.value !== '';
@@ -2505,8 +2582,37 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         };
 
-        menuPemesanan.addEventListener('change', segarkanLembaga);
-        namaLembaga.addEventListener('input', segarkanLembaga);
+        /*
+         * Keduanya menentukan hal yang sama — apakah pendaftaran ini pesanan
+         * lembaga — jadi keduanya harus mengerjakan hal yang sama.
+         *
+         * Versi sebelumnya hanya merakit ulang pilihan angkatan saat pesanan
+         * LAMA dipilih, jadi mengetik nama lembaga baru tidak membuka kunci
+         * angkatan yang penuh: jalan yang justru paling sering dipakai
+         * — pesanan lembaga pertama kali — adalah yang tidak bekerja.
+         */
+        var lembagaBerubah = function () {
+            segarkanLembaga();
+
+            var pl = layananTerpilih();
+
+            if (pl && pl.berangkatan) {
+                // Angkatan penuh berubah bisa/tidak bisa dipilih, jadi
+                // daftarnya dirakit ulang — pilihannya dikembalikan sesudahnya.
+                var terpilih = menuAngkatan.value;
+                isiAngkatan(pl.nilai, cariAngkatan.value);
+                menuAngkatan.value = terpilih;
+                tegaskanAngkatan(pl.nilai);
+            }
+
+            batasiJumlah();
+            ingatkanKuota();
+        };
+
+        menuPemesanan.addEventListener('change', lembagaBerubah);
+        namaLembaga.addEventListener('input', lembagaBerubah);
+
+        isianJumlah.addEventListener('input', ingatkanKuota);
 
         cariAngkatan.addEventListener('input', function () {
             var pilih = layananTerpilih();
@@ -2563,6 +2669,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         batasiJumlah();
         segarkanPeserta();
         segarkanLembaga();
+        ingatkanKuota();
     })();
 </script>
 @endpush
