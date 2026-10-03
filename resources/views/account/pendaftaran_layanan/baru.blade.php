@@ -64,14 +64,80 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             top: 96px;
         }
 
+        /*
+         * Di bawah 1500px kolom ringkasannya turun ke bawah — dan di sana ia
+         * MENEMPEL DI DASAR layar, bukan diam di ujung halaman.
+         *
+         * Terukur di jendela 1470x900: batang biayanya duduk di y=1520
+         * sedangkan tingginya halaman 1706px, jadi total bayarnya tidak pernah
+         * terlihat tanpa menggulir sampai habis. Angka yang berubah tiap kali
+         * isiannya disentuh tetapi tidak pernah terlihat sama saja dengan
+         * tidak ada.
+         */
         @media (max-width: 1499.98px) {
             .bar-samping {
-                position: static;
+                position: sticky;
+                bottom: 12px;
+                top: auto;
+                z-index: 3;
+            }
+
+            .bar-samping .bar-biaya {
+                box-shadow: 0 -8px 24px -16px rgba(15, 23, 42, .55);
+            }
+
+            /* Keterangan "nomor dibuat sistem" tidak ikut menempel: ia dibaca
+               sekali lalu tidak dilihat lagi, dan menempel berarti ia menutupi
+               isian setiap saat. */
+            .bar-samping .bar-catatan-bawah {
+                display: none;
+            }
+        }
+
+        /*
+         * Rel langkah: empat kartu dirangkai jadi SATU alur.
+         *
+         * Sebelumnya empat kartu putih bertumpuk dengan jarak 16px dan nomor
+         * kecil di dalam masing-masing — terbaca seperti empat kotak yang
+         * kebetulan bersebelahan, bukan satu borang berurutan. Garisnya
+         * menyambungkan nomor satu ke nomor berikutnya.
+         */
+        .bar-utama {
+            position: relative;
+        }
+
+        .bar-utama::before {
+            content: '';
+            position: absolute;
+            left: 18px;
+            /* Dari tengah nomor pertama sampai tengah nomor terakhir, bukan
+               dari tepi atas: garis yang melewati nomornya terlihat seperti
+               garis yang kelebihan. */
+            top: 41px;
+            bottom: 41px;
+            width: 2px;
+            background: linear-gradient(180deg, #c7d2fe 0%, #e0e7ff 55%, transparent 100%);
+        }
+
+        @media (max-width: 575.98px) {
+            /* Di ponsel kartunya sudah mepet tepi layar; rel menggeser seluruh
+               isinya 22px dan menyisakan lebar yang tidak sepadan dengan apa
+               yang didapat. */
+            .bar-utama::before {
+                display: none;
             }
         }
 
         .bar-langkah {
-            margin-bottom: var(--mis-jarak);
+            position: relative;
+            margin-bottom: 15px;
+            margin-left: 46px;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-langkah {
+                margin-left: 0;
+            }
         }
 
         .bar-langkah-kepala {
@@ -79,26 +145,47 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             align-items: center;
             gap: 11px;
             margin-bottom: 14px;
+            padding-bottom: 12px;
+            /* Garis tipis memisahkan pertanyaan dari isiannya; tanpa itu judul
+               dan isian pertama terbaca sebagai satu gumpalan. */
+            border-bottom: 1px solid var(--mis-garis);
         }
 
         /* Nomor langkah sebagai ubin bergradien — sama bahasanya dengan
            medali ikon, jadi tidak ada bentuk baru yang harus dipelajari. */
+        /*
+         * Nomornya keluar dari kartu dan duduk di rel. Dilingkari putih supaya
+         * relnya terputus tepat di belakangnya, bukan menembusnya.
+         */
         .bar-nomor {
+            position: absolute;
+            left: -46px;
+            top: 15px;
             display: grid;
             place-items: center;
-            flex: 0 0 auto;
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
-            background: var(--mis-ungu);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 5px #f4f7ff, 0 6px 14px -8px rgba(79, 70, 229, .85);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: #fff;
-            font-size: .82rem;
+            font-size: .85rem;
             font-weight: 800;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-nomor {
+                position: static;
+                width: 30px;
+                height: 30px;
+                border-radius: 9px;
+                box-shadow: none;
+            }
         }
 
         .bar-langkah-judul {
             margin: 0;
-            font-size: .95rem;
+            font-size: 1.02rem;
             font-weight: 700;
             color: var(--mis-tinta);
         }
@@ -125,22 +212,38 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         /*
-         * Cara bayarnya hanya dua kartu. Tanpa batas, keduanya memakai separuh
-         * lajur kiri masing-masing — kartu selebar ~590px untuk dua baris teks
-         * terbaca seperti ada yang hilang di dalamnya.
+         * Cara bayarnya hanya dua kartu. Dulu dibatasi 780px lalu
+         * keterangannya ditaruh di bawahnya, sehingga separuh kanan kartu
+         * langkah 3 menganggur sepenuhnya. Sekarang keterangannya naik ke
+         * sebelahnya: kartu di kiri, penjelasan di kanan.
          */
-        .bar-pilihan-bayar {
-            max-width: 780px;
+        .bar-bayar-kisi {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
         }
 
-        /*
-         * Centang "uang sudah diterima" berdiri di luar kisi isian, jadi tanpa
-         * batas ia melar selebar kartu langkahnya sementara dua kartu cara
-         * bayar di atasnya berhenti di 780px — terbaca seperti dua unsur yang
-         * tidak sepadan.
-         */
-        #bar-bungkus-terima {
-            max-width: 780px;
+        @media (max-width: 900px) {
+            .bar-bayar-kisi {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .bar-bayar-ket {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        /* Nota pertama di kolom kanan tidak perlu jarak atas lagi — kolomnya
+           sudah merapatkannya sendiri. */
+        .bar-bayar-ket > .bar-nota {
+            margin-top: 0;
+        }
+
+        .bar-bayar-ket > .mis-isian {
+            margin: 0;
         }
 
         .bar-pilihan input {
@@ -153,6 +256,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         /* Radio-nya unsur borang SUNGGUHAN yang disembunyikan, bukan dihapus:
            papan ketik, pembaca layar, dan pengiriman borang tetap bekerja. */
         .bar-kartu {
+            /* Setinggi kartu tertinggi di barisnya. Terukur tanpa ini: tiga
+               kartu 86px bersanding dengan satu kartu 68px, sebab
+               keterangannya cuma sebaris — tepi bawah barisnya jadi
+               bergerigi. */
+            height: 100%;
             display: flex;
             align-items: center;
             gap: 11px;
@@ -442,16 +550,21 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         /*
-         * Lebar terkecil jalurnya 260px, bukan 215px.
+         * Lebar terkecil jalurnya 240px, dan angkanya dihitung bukan ditebak.
          *
-         * Dengan lajur kiri ~1.200px, 215px membuka LIMA lajur: empat isian
-         * langkah "siapa yang mendaftar" jadi satu baris plus satu jalur
-         * kosong menggantung di ujungnya. 260px menutupnya di empat, dan
-         * keempat isiannya pas satu baris penuh.
+         * 215px membuka LIMA jalur — empat isian "siapa yang mendaftar" jadi
+         * satu baris plus satu jalur kosong menggantung. 260px menutupnya di
+         * empat, TETAPI rel langkah kemudian memakan 46px dari lebar kartunya
+         * dan empatnya jatuh jadi tiga: terukur, isian angkatan dan jumlah
+         * orang memenuhi satu baris sendiri sementara kartu ringkasnya turun
+         * ke baris berikutnya.
+         *
+         * Ruang kisi di 1470px = 1114 - 46 (rel) - 44 (bantalan kartu) = 1024.
+         * Empat jalur menuntut lebar terkecil <= (1024 - 3x14) / 4 = 245.
          */
         .bar-isian-kisi {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
             gap: 14px;
             align-content: start;
         }
@@ -955,7 +1068,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </div>
                 </div>
 
-                <div class="bar-pilihan bar-pilihan-bayar">
+                <div class="bar-bayar-kisi">
+                <div class="bar-pilihan">
                     @foreach ($caraBayar as $kunci => $c)
                         <label>
                             <input type="radio" name="cara_bayar" value="{{ $kunci }}"
@@ -974,6 +1088,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </label>
                     @endforeach
                 </div>
+
+                <div class="bar-bayar-ket">
 
                 {{-- Hanya muncul untuk tunai: melunaskan transfer dari borang
                      ini berarti melunaskan sebelum ada yang mencocokkannya
@@ -1006,6 +1122,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         supaya pendaftarnya bisa dicatat lebih dulu.
                     </span>
                 </p>
+
+                </div>{{-- /kolom kanan --}}
+                </div>{{-- /bar-bayar-kisi --}}
 
                 <p class="bar-nota" id="bar-nota-doku" hidden>
                     <i class="fas fa-credit-card" aria-hidden="true"></i>
