@@ -408,6 +408,8 @@ class PendaftaranLayananController extends Controller
             'bukti' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             // Nama sesi Scopus Kafe; tabelnya memang punya kolomnya.
             'sesi' => ['nullable', 'string', 'max:120'],
+            // Satu nama per baris; batas atasnya jumlah yang dibayar.
+            'peserta' => ['nullable', 'string', 'max:4000'],
             'lagi' => ['nullable', 'boolean'],
             // Kabar ke pendaftarnya: dipilih, bukan selalu. Orang yang
             // mendaftar lewat WhatsApp sering memberi email asal-asalan, dan
@@ -503,6 +505,50 @@ class PendaftaranLayananController extends Controller
      * tertutup lebih dulu: `$layanan` datang dari alamat halaman, dan
      * memakainya mentah berarti membiarkan nama kelas mana pun dipanggil.
      */
+    /**
+     * Slip pendaftaran, untuk dicetak dan diberikan ke orangnya.
+     *
+     * Pendaftar yang datang langsung dan membayar tunai sebelumnya pulang
+     * tanpa pegangan apa pun: nomor dan kode uniknya hanya ada di layar
+     * panitia dan di email — dan sebagian dari mereka tidak punya email.
+     *
+     * Halaman biasa dengan gaya cetak, bukan PDF: panitia menekan Ctrl+P di
+     * depan orangnya, dan membuat PDF di peladen menambah satu kemungkinan
+     * gagal pada pekerjaan yang harus selesai dalam hitungan detik.
+     */
+    public function slip(string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        $baris = Pendaftaran::kueri()->where('layanan', $layanan)->where('id', $id)->first();
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        return view('account.pendaftaran_layanan.slip', [
+            'layanan' => $layanan,
+            'nama' => Pendaftaran::katalog()[$layanan]['nama'],
+            'baris' => $baris,
+            'angkatan' => Pendaftaran::angkatanBaris($baris),
+            'caraBayar' => Pendaftaran::caraBayar($baris->cara_bayar ?? null),
+            'keadaan' => Pendaftaran::KEADAAN[Pendaftaran::keadaanDari($baris->status)] ?? null,
+            'peserta' => \App\PendaftaranPeserta::milik($layanan, $id)->terurut()->get(['nama']),
+        ]);
+    }
+
     public function rincian(string $layanan, string $id)
     {
         if (! $this->bolehMelihat()) {

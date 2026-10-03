@@ -172,7 +172,10 @@
                                     Pembayarannya diserahkan langsung ke panitia saat Anda datang.
                                     Simpan nomor pendaftaran di atas untuk ditunjukkan.
                                 </p>
-                            @elseif ($kodeUnik > 0)
+                            {{-- Hanya kalau nominalnya memang berakhir
+                                 dengan kodenya; baris lama dari sebelum
+                                 kodenya dimasukkan ke total berakhir 000. --}}
+                            @elseif ($kodeUnik > 0 && $total % 1000 === $kodeUnik)
                                 {{-- Alasannya disebut. Tanpa itu, angka ganjil di ujung nominal
                                      terbaca seperti salah hitung, dan sebagian orang
                                      membulatkannya — lalu pembayarannya tidak bisa dicocokkan. --}}
