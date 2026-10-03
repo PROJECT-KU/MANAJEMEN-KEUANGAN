@@ -376,7 +376,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         data-lama="{{ json_encode(old('peserta', [])) }}">
                         <p class="ses-peserta-judul">
                             Nama peserta lainnya
-                            <span>Sertifikat diterbitkan atas nama ini</span>
+                            <span class="ses-peserta-hitung" id="ses-peserta-hitung"></span>
+                        </p>
+                        <p class="ses-peserta-petunjuk">
+                            Sertifikat diterbitkan atas nama ini, jadi tulis lengkap beserta gelarnya.
                         </p>
                         <div id="ses-peserta-baris"></div>
                     </div>
@@ -953,69 +956,137 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
     .ses-tombol-kabari:hover { box-shadow: 0 20px 36px -14px rgba(37, 211, 102, .8); }
 
     /* --------------------------------------------- peserta tambahan */
+    /*
+     * TIAP PESERTA SATU KARTU, BUKAN SEDERET KOTAK.
+     *
+     * Rupa lamanya: dua kotak isian beruntun per orang, dipisahkan hanya oleh
+     * label kecil abu-abu. Untuk 10 peserta itu 18 kotak yang nyaris identik
+     * dalam satu kolom datar — tidak ada tanda di mana satu orang berakhir dan
+     * yang berikutnya mulai, jadi membacanya membingungkan dan mudah salah
+     * mengisi email orang ke baris orang lain.
+     *
+     * Sekarang tiap orang punya kartunya sendiri dengan keping nomor bulat —
+     * bahasa rupa yang sudah dipakai daftar "Yang dibahas" di halaman yang
+     * sama, jadi tidak ada yang baru untuk dipelajari.
+     */
 
     .ses-peserta {
         margin-bottom: 16px;
-        padding: 14px 15px;
-        border-radius: 14px;
-        border: 1px dashed var(--garis);
+        padding: 16px 15px;
+        border-radius: 16px;
+        border: 1px solid var(--garis);
         background: #f8fafc;
     }
 
     /* Disembunyikan sampai jumlah pesertanya lebih dari satu — wadah kosong
-       berbingkai putus-putus terbaca seperti ada yang gagal dimuat. */
+       berbingkai terbaca seperti ada yang gagal dimuat. */
     .ses-peserta[hidden] { display: none !important; }
 
     .ses-peserta-judul {
-        margin: 0 0 12px;
-        font-size: .82rem;
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0 0 4px;
+        font-size: .88rem;
         font-weight: 800;
         color: var(--navy);
     }
 
-    .ses-peserta-judul span {
-        display: block;
-        margin-top: 2px;
-        font-size: .74rem;
-        font-weight: 500;
-        color: var(--tinta-2);
-    }
-
-    .ses-peserta-baris { margin-bottom: 10px; }
-    .ses-peserta-baris:last-child { margin-bottom: 0; }
-
-    .ses-peserta-nomor {
-        display: block;
-        margin-bottom: 5px;
-        font-size: .74rem;
+    /* Penghitung "2 dari 9 terisi": tanpa ini, satu-satunya cara tahu masih
+       ada yang kosong adalah menggulir memeriksanya satu per satu. */
+    .ses-peserta-hitung {
+        margin-left: auto;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        font-size: .7rem;
         font-weight: 700;
         color: var(--tinta-2);
     }
 
-    .ses-peserta-baris input {
-        width: 100%;
-        height: 44px;
-        margin-bottom: 7px;
-        padding: 0 13px;
+    .ses-peserta-hitung[data-penuh="ya"] {
+        background: rgba(16, 185, 129, .15);
+        color: #0f9b74;
+    }
+
+    .ses-peserta-petunjuk {
+        margin: 0 0 14px;
+        font-size: .76rem;
+        line-height: 1.55;
+        color: var(--tinta-2);
+    }
+
+    /* --- satu kartu per orang --- */
+
+    .ses-peserta-baris {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 12px 13px;
+        border-radius: 13px;
         border: 1px solid var(--garis);
-        border-radius: 11px;
+        background: #fff;
+    }
+
+    .ses-peserta-baris:last-child { margin-bottom: 0; }
+
+    /* Kartu yang sudah terisi diberi tepi hijau tipis — mata bisa menyapu
+       daftarnya dan langsung melihat mana yang belum. */
+    .ses-peserta-baris[data-terisi="ya"] { border-color: #a7f3d0; }
+
+    .ses-peserta-nomor {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff8c00, #e65c00);
+        color: #fff;
+        font-size: .76rem;
+        font-weight: 800;
+        box-shadow: 0 5px 12px -6px rgba(230, 92, 0, .9);
+    }
+
+    .ses-peserta-baris[data-terisi="ya"] .ses-peserta-nomor {
+        background: linear-gradient(135deg, #10b981, #0f9b74);
+        box-shadow: 0 5px 12px -6px rgba(16, 185, 129, .9);
+    }
+
+    .ses-peserta-isian { min-width: 0; }
+
+    .ses-peserta-isian input {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid var(--garis);
+        border-radius: 10px;
         background: #fff;
         font-family: inherit;
-        font-size: .92rem;
+        font-size: .9rem;
         color: var(--tinta);
         transition: border-color .2s ease, box-shadow .2s ease;
     }
 
-    .ses-peserta-baris input:last-child { margin-bottom: 0; }
+    /* Email dibuat jelas SEKUNDER: lebih kecil, latar redup, dan berlabel
+       "opsional". Dua kotak sepadan membuat orang mengira keduanya wajib. */
+    .ses-peserta-isian input + input {
+        margin-top: 7px;
+        height: 38px;
+        background: #f8fafc;
+        font-size: .83rem;
+    }
 
-    .ses-peserta-baris input:focus {
+    .ses-peserta-isian input:focus {
         outline: none;
         border-color: var(--jingga);
         box-shadow: 0 0 0 3px rgba(255, 106, 0, .13);
+        background: #fff;
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .ses-peserta-baris input { transition: none !important; }
+        .ses-peserta-isian input { transition: none !important; }
     }
 
     /* ------------------------------------------------- isi otomatis */
@@ -1679,37 +1750,91 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                 baris.innerHTML = '';
 
                 for (var i = 0; i < perlu; i++) {
-                    var isi = tersimpan[i] || { nama: '', email: '' };
-
-                    var kotak = document.createElement('div');
-                    kotak.className = 'ses-peserta-baris';
-
-                    var nomor = document.createElement('span');
-                    nomor.className = 'ses-peserta-nomor';
-                    nomor.textContent = 'Peserta ' + (i + 2);
-
-                    var nama = document.createElement('input');
-                    nama.type = 'text';
-                    nama.name = 'peserta[' + i + '][nama]';
-                    nama.required = true;
-                    nama.maxLength = 120;
-                    nama.placeholder = 'Nama lengkap beserta gelar';
-                    nama.value = isi.nama;
-                    nama.setAttribute('aria-label', 'Nama peserta ' + (i + 2));
-
-                    var surel = document.createElement('input');
-                    surel.type = 'email';
-                    surel.name = 'peserta[' + i + '][email]';
-                    surel.maxLength = 120;
-                    surel.placeholder = 'Email (boleh dikosongkan)';
-                    surel.value = isi.email;
-                    surel.setAttribute('aria-label', 'Email peserta ' + (i + 2));
-
-                    kotak.appendChild(nomor);
-                    kotak.appendChild(nama);
-                    kotak.appendChild(surel);
-                    baris.appendChild(kotak);
+                    baris.appendChild(buatKartu(i, tersimpan[i] || { nama: '', email: '' }));
                 }
+
+                perbaruiHitung();
+            }
+
+            /*
+             * Satu kartu per orang: keping nomor di kiri, isiannya di kanan.
+             *
+             * Nomornya dimulai dari 2 — pendaftar utama adalah peserta 1, dan
+             * namanya sudah diisi di atas. Menomori dari 1 di sini membuat
+             * orang mengira ia harus menulis namanya sendiri sekali lagi.
+             */
+            function buatKartu(i, isi) {
+                var kotak = document.createElement('div');
+                kotak.className = 'ses-peserta-baris';
+
+                var nomor = document.createElement('span');
+                nomor.className = 'ses-peserta-nomor';
+                nomor.setAttribute('aria-hidden', 'true');
+                nomor.textContent = String(i + 2);
+
+                var isian = document.createElement('div');
+                isian.className = 'ses-peserta-isian';
+
+                var nama = document.createElement('input');
+                nama.type = 'text';
+                nama.name = 'peserta[' + i + '][nama]';
+                nama.required = true;
+                nama.maxLength = 120;
+                /*
+                 * Placeholder-nya PENDEK. Nomornya sudah ada di keping di
+                 * sebelah kiri, jadi mengulangnya di sini cuma memakan ruang —
+                 * terukur di layar 390 px, "Nama peserta ke-3, beserta gelar"
+                 * terpotong jadi "Nama peserta ke-3, besert" dan petunjuk
+                 * "beserta gelar"-nya justru yang hilang.
+                 */
+                nama.placeholder = 'Nama lengkap';
+                nama.value = isi.nama;
+                nama.setAttribute('aria-label', 'Nama peserta ke-' + (i + 2));
+
+                var surel = document.createElement('input');
+                surel.type = 'email';
+                surel.name = 'peserta[' + i + '][email]';
+                surel.maxLength = 120;
+                surel.placeholder = 'Email (opsional)';
+                surel.value = isi.email;
+                surel.setAttribute('aria-label', 'Email peserta ke-' + (i + 2) + ', opsional');
+
+                // Tanda terisi diperbarui saat diketik, bukan hanya saat dirakit.
+                nama.addEventListener('input', function () {
+                    tandai(kotak, nama);
+                    perbaruiHitung();
+                });
+
+                isian.appendChild(nama);
+                isian.appendChild(surel);
+                kotak.appendChild(nomor);
+                kotak.appendChild(isian);
+
+                tandai(kotak, nama);
+
+                return kotak;
+            }
+
+            function tandai(kotak, nama) {
+                kotak.dataset.terisi = nama.value.trim() === '' ? 'tidak' : 'ya';
+            }
+
+            /*
+             * "3 dari 9 terisi". Tanpa penghitung ini, satu-satunya cara tahu
+             * masih ada yang kosong adalah menggulir memeriksa satu per satu —
+             * dan di rombongan 10 orang itu sembilan kartu yang harus disapu
+             * mata berulang kali.
+             */
+            function perbaruiHitung() {
+                var hitung = document.getElementById('ses-peserta-hitung');
+
+                if (!hitung) return;
+
+                var semua = baris.querySelectorAll('.ses-peserta-baris');
+                var terisi = baris.querySelectorAll('.ses-peserta-baris[data-terisi="ya"]');
+
+                hitung.textContent = terisi.length + ' dari ' + semua.length + ' terisi';
+                hitung.dataset.penuh = (semua.length > 0 && terisi.length === semua.length) ? 'ya' : 'tidak';
             }
 
             jumlah.addEventListener('input', rakit);
