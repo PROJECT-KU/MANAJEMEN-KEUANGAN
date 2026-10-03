@@ -65,7 +65,15 @@ Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->n
 // Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
 // lewat /api/webinar-eksklusif; yang di sini bagian yang menulis ke basis data.
 Route::get('/Webinar-Eksklusif', 'Publict\PublicWebinarEksklusifController@index')->name('public.webinareksklusif.index');
-Route::get('/Webinar-Eksklusif/Daftar/{id}/{token}', 'Publict\PublicWebinarEksklusifController@daftar')->name('public.webinareksklusif.daftar');
+/*
+ * UUID saja, tanpa token.
+ *
+ * Angkatan dan pendaftaran sama-sama berkunci Str::uuid() acak — 122 bit yang
+ * tidak bisa ditebak — jadi token di belakangnya tidak menambah apa pun selain
+ * alamat yang dua kali lebih panjang dan dua nilai yang harus dijaga tetap
+ * cocok.
+ */
+Route::get('/Webinar-Eksklusif/Daftar/{id}', 'Publict\PublicWebinarEksklusifController@daftar')->name('public.webinareksklusif.daftar');
 // Dibatasi 6 kiriman per menit per alamat IP. Borang ini publik, diiklankan,
 // dan TIAP kiriman yang berhasil langsung memotong kuota — satu skrip
 // sederhana bisa menghabiskan seluruh kursi sebelum ada yang sadar. Enam
@@ -73,10 +81,10 @@ Route::get('/Webinar-Eksklusif/Daftar/{id}/{token}', 'Publict\PublicWebinarEkskl
 Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')
     ->middleware('throttle:6,1')
     ->name('public.webinareksklusif.store');
-Route::get('/Webinar-Eksklusif/Status/{token}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
+Route::get('/Webinar-Eksklusif/Status/{id}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
 // Dibatasi 3 per menit: mengirim surat itu pekerjaan yang memakan waktu, dan
 // tombolnya bisa ditekan berkali-kali oleh orang yang tidak sabar menunggu.
-Route::post('/Webinar-Eksklusif/Status/{token}/kirim-ulang', 'Publict\PublicWebinarEksklusifController@kirimUlang')
+Route::post('/Webinar-Eksklusif/Status/{id}/kirim-ulang', 'Publict\PublicWebinarEksklusifController@kirimUlang')
     ->middleware('throttle:3,1')
     ->name('public.webinareksklusif.kirimulang');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —

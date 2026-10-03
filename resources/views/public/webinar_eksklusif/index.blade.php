@@ -84,7 +84,7 @@ Webinar Eksklusif | Rumah Scopus
                                 @if ($sisa !== null && $sisa < 1)
                                     <span class="sel-tombol sel-tombol-mati">Kuota penuh</span>
                                 @else
-                                    <a href="{{ route('public.webinareksklusif.daftar', [$s->id, $s->token]) }}"
+                                    <a href="{{ route('public.webinareksklusif.daftar', $s->id) }}"
                                         class="sel-tombol">
                                         Daftar <i class="fas fa-arrow-right" aria-hidden="true"></i>
                                     </a>

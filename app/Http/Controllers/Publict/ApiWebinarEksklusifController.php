@@ -219,7 +219,7 @@ class ApiWebinarEksklusifController extends Controller
 
             // Alamat borang pendaftaran di aplikasi; halaman landing cukup
             // memasangnya ke tombolnya tanpa tahu bagaimana ia dirakit.
-            'daftar_url' => route('public.webinareksklusif.daftar', [$a->getKey(), $a->token]),
+            'daftar_url' => route('public.webinareksklusif.daftar', $a->getKey()),
         ];
     }
 

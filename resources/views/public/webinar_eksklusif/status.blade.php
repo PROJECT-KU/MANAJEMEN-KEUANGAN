@@ -164,7 +164,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 Kirim ulang bukti pendaftaran.
 
                 Satu-satunya jalan kembali ke halaman ini adalah tautan
-                bertoken di email. Kalau emailnya terhapus atau masuk folder
+                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
                 sampah, orangnya kehilangan nomor pendaftaran dan cara
                 bayarnya sekaligus — dan yang menanggung panitia lewat
                 WhatsApp.
@@ -173,7 +173,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 di sana tidak ada lagi yang perlu disimpan.
             --}}
             @if (! $batal && ! $habis)
-                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->token) }}"
+                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
                     class="sta-kirim-ulang">
                     @csrf
                     <button type="submit">
