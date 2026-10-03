@@ -547,10 +547,21 @@ class LayarPendaftaranLayananTest extends TestCase
 
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
 
-        $this->actingAs($orang)
-            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]))
-            ->assertOk()
-            ->assertSee('Berkas hilang');
+        /*
+         * Diperiksa dari KELAS PENANDANYA dan dari tulisannya sekaligus.
+         *
+         * Kelasnya yang menjamin keping itu memang keadaan "berkas hilang" dan
+         * bukan salah satu dari dua keadaan bukti lainnya; tulisannya yang
+         * menjamin panitia benar-benar bisa membacanya. Memeriksa tulisan saja
+         * membuat ujinya merah tiap kali kalimatnya dirapikan — sudah terjadi
+         * saat kepingnya diubah dari lencana jadi teks berikon.
+         */
+        $halaman = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]));
+
+        $halaman->assertOk();
+        $halaman->assertSee('pdl-bukti-hilang', false);
+        $halaman->assertSee('berkas hilang');
     }
 
     // ------------------------------------------------------------- urutan

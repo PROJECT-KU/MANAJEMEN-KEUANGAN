@@ -34,12 +34,27 @@ Pendaftar Layanan | MIS Rumah Scopus
             min-width: 0;
         }
 
+        /* display: flex + wrap, bukan teks biasa: pil rombongan di ujung nama
+           ber-nowrap, dan pada nama panjang ia mendorong barisnya melewati
+           tepi kartu — terukur 41px di 390px. Dengan wrap, pilnya turun ke
+           baris berikutnya. align-items: baseline supaya pil dan nama tetap
+           sejajar dasarnya saat keduanya sebaris. */
         .pdl-nama {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 5px;
             margin: 0;
             font-size: .86rem;
             font-weight: 600;
             color: var(--mis-tinta);
             line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        /* Sudah jadi anak flex, jadi margin kirinya tidak perlu lagi. */
+        .pdl-pil-orang {
+            margin-left: 0;
         }
 
         .pdl-kontak {
@@ -128,12 +143,132 @@ Pendaftar Layanan | MIS Rumah Scopus
             line-height: 1.35;
         }
 
-        /* Jumlah orang: angka tunggal, dipusatkan, dan rombongan ditandai
-           supaya terbaca sekali lihat. Terukur ada baris berisi 5, 6, dan 13
-           orang di antara 187 baris. */
-        .pdl-jumlah {
-            font-variant-numeric: tabular-nums;
-            font-weight: 600;
+        /* Rombongan ditandai di sebelah nama, bukan di kolom angka sendiri.
+           Terukur ada baris berisi 5, 6, dan 13 orang di antara 187 baris. */
+        .pdl-pil-orang {
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        /* Keping bukti bayar: teks berikon, bukan lencana. mis-tabel-kartu
+           menandai sel status lewat :has(.mis-pil) dan menaikkannya ke baris
+           kaki kartu — dua sel berpil berarti keduanya berbagi satu baris
+           sempit, dan di 320px masing-masing tinggal 46px. */
+        .pdl-bukti-baris {
+            display: block;
+            margin-top: 4px;
+        }
+
+        .pdl-bukti-ada {
+            color: #047857;
+        }
+
+        .pdl-bukti-nihil {
+            color: var(--mis-tinta-4);
+        }
+
+        .pdl-bukti-hilang {
+            color: #92400e;
+            cursor: help;
+        }
+
+        .pdl-tanggal {
+            display: block;
+            font-size: .8rem;
+            white-space: nowrap;
+            color: var(--mis-tinta-2);
+        }
+
+        .pdl-jam {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .72rem;
+            color: var(--mis-tinta-4);
+        }
+
+        /*
+         * Garis aksen berwarna layanannya di tepi kiri baris.
+         *
+         * Lewat box-shadow inset, bukan border-left: border mengubah lebar
+         * kotak selnya dan menggeser seluruh kolom 3px; inset shadow digambar
+         * di dalam kotak yang sudah ada. Warnanya diambil dari `--warna` yang
+         * sudah disetel kelas layanannya, jadi tidak ada daftar warna kedua
+         * yang harus dijaga tetap cocok.
+         */
+        @media (min-width: 768px) {
+            .mis-tabel .pdl-baris > td:first-child {
+                box-shadow: inset 3px 0 0 0 var(--warna-aksen, #e2e8f0);
+            }
+        }
+
+        .pdl-baris.mis-ungu { --warna-aksen: #6366f1; }
+        .pdl-baris.mis-hijau { --warna-aksen: #10b981; }
+        .pdl-baris.mis-biru { --warna-aksen: #0ea5e9; }
+        .pdl-baris.mis-kuning { --warna-aksen: #f59e0b; }
+        .pdl-baris.mis-jingga { --warna-aksen: #f97316; }
+        .pdl-baris.mis-merah { --warna-aksen: #f43f5e; }
+        .pdl-baris.mis-abu { --warna-aksen: #94a3b8; }
+
+        /*
+         * TABLET (768-1199px): kolomnya dirapatkan supaya tabelnya tidak
+         * terklip.
+         *
+         * Pembungkus tabel ber-`overflow-x: hidden`, jadi tabel yang lebih
+         * lebar darinya TIDAK menggulung — ia terpotong, dan kolom paling
+         * kanan hilang dari pandangan tanpa gejala apa pun. Terukur: lebar
+         * min-content tabel ini 868px sementara pembungkusnya 706px di 768px
+         * dan 758px di 820px, jadi kolom Aksi terpotong 161px dan 109px.
+         *
+         * Dibandingkan layar acuan Data Pelanggan yang 0px di semua lebar,
+         * selisihnya ada di dua hal yang tidak bisa menyusut: tombol beteks
+         * dan lencana keadaan ber-`white-space: nowrap`. Keduanya dilonggarkan
+         * di sini, bukan kolomnya yang disembunyikan — kolom yang hilang
+         * berarti keterangan yang tidak bisa dijangkau siapa pun.
+         */
+        @media (min-width: 768px) and (max-width: 1199.98px) {
+            /* Tombolnya jadi ikon saja. Tulisannya disembunyikan untuk MATA,
+               bukan dibuang: aria-label dan title tetap ada di markahnya, jadi
+               pembaca layar dan tooltip tetap menyebut tujuannya. */
+            .pdl-tombol-teks {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                white-space: nowrap;
+            }
+
+            .pdl-tombol-buka {
+                padding: 0 11px;
+            }
+
+            /* Lencana keadaan boleh terpatah: "Menunggu bayar" menuntut
+               sekitar 135px dalam satu baris, dan itu sendiri hampir
+               seperlima lebar tabel yang tersedia. */
+            .pdl-tabel .mis-pil {
+                white-space: normal;
+                text-align: left;
+            }
+
+            .pdl-tabel .pdl-sesi,
+            .pdl-tabel .pdl-afiliasi,
+            .pdl-tabel .pdl-kontak {
+                overflow-wrap: anywhere;
+            }
+
+            /* Tanggalnya boleh terpatah di sini. Di layar lebar ia `nowrap`
+               supaya "03 Okt 2026" tidak terbelah tanpa alasan, tetapi di
+               tablet ~40px itu yang menyisakan selisih 1-3px terakhir. */
+            .pdl-tabel .pdl-tanggal {
+                white-space: normal;
+            }
+        }
+
+        /* Di mode kartu, garisnya pindah ke tepi kartunya sendiri. */
+        @media (max-width: 767.98px) {
+            .mis-tabel.mis-tabel-kartu tbody tr.pdl-baris {
+                box-shadow: inset 3px 0 0 0 var(--warna-aksen, #e2e8f0);
+            }
         }
 
         /* Garis bawah bertitik, bukan warna: keterangan status aslinya ada di
@@ -194,7 +329,7 @@ Pendaftar Layanan | MIS Rumah Scopus
            .fas { font-size: 20px } untuk seluruh halaman, dan aturan itu
            menang atas pewarisan — jadi mengecilkan pembungkusnya saja tidak
            pernah mengubah ikonnya. */
-        .pdl-layanan .mis-medali i,
+        .pdl-tabel .mis-medali i,
         .pdl-bukti i,
         .pdl-kontak i {
             font-size: inherit;
@@ -238,11 +373,22 @@ Pendaftar Layanan | MIS Rumah Scopus
          * Ambang 359.98px memang disediakan panduan untuk penyesuaian terakhir
          * semacam ini, jadi bukan titik putus baru.
          */
-        @media (max-width: 359.98px) {
-            /* Pemilihnya menyebut .mis-tabel.mis-tabel-kartu juga, bukan
-               .pdl-tabel saja: aturan di mis-ui.css berbobot (0,3,2) dan
-               pemilih (0,2,2) kalah walau ditulis belakangan. Versi pertama
-               aturan ini tidak mengubah apa pun justru karena itu. */
+        /*
+         * Sel keadaan mendapat BARISNYA SENDIRI di seluruh mode kartu.
+         *
+         * mis-tabel-kartu menaikkan sel berpil ke baris kaki kartu bersama sel
+         * aksinya, dan keduanya berbagi lebar lewat `flex: 1 1 0`. Sel ini
+         * memuat tiga hal bertumpuk — lencana keadaan, keping bukti, dan
+         * status aslinya — jadi separuh baris kaki tidak cukup: terukur
+         * meluber 38px di 390px dan lebih lagi di 320px. Aturan ini sempat
+         * dibatasi 359.98px dan itu keliru; keluhannya ada sejak 767.98px.
+         *
+         * Pemilihnya menyebut .mis-tabel.mis-tabel-kartu juga, bukan
+         * .pdl-tabel saja: aturan di mis-ui.css berbobot (0,3,2) dan pemilih
+         * (0,2,2) kalah walau ditulis belakangan. Versi pertama aturan ini
+         * tidak mengubah apa pun justru karena itu.
+         */
+        @media (max-width: 767.98px) {
             .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td:has(.mis-pil) {
                 flex: 1 1 100%;
             }
@@ -291,6 +437,13 @@ Pendaftar Layanan | MIS Rumah Scopus
 @endphp
 <div class="main-content mis-badan">
     <section class="section">
+
+        {{-- Pemberitahuan lewat misToast(), bukan alert Bootstrap.
+
+             Sempat TERLEWAT di berkas ini: menghapus pendaftaran mengalihkan
+             ke halaman ini dengan pesan sukses, dan tanpa partial ini pesannya
+             tidak pernah muncul — barisnya hilang tanpa satu kata pun. --}}
+        @include('account.pendaftaran_layanan.partials.pesan')
 
         {{-- ------------------------------------------------ kepala --}}
         <div class="mis-kepala">
@@ -585,11 +738,9 @@ Pendaftar Layanan | MIS Rumah Scopus
                                 @include('partials.urut-kolom', ['rute' => $rute, 'bawa' => $bawa, 'kolom' => 'nama', 'label' => 'Pendaftar'])
                             </th>
                             <th>Sesi</th>
-                            <th class="text-center">Orang</th>
                             <th class="text-right" aria-sort="{{ $ariaUrut('total') }}">
                                 @include('partials.urut-kolom', ['rute' => $rute, 'bawa' => $bawa, 'kolom' => 'total', 'label' => 'Total bayar'])
                             </th>
-                            <th>Bukti</th>
                             <th aria-sort="{{ $ariaUrut('status') }}">
                                 @include('partials.urut-kolom', ['rute' => $rute, 'bawa' => $bawa, 'kolom' => 'status', 'label' => 'Keadaan'])
                             </th>
