@@ -465,6 +465,21 @@ Route::prefix('account')
             Route::delete('PendaftaranScopusCamp/delete/{id}', 'account\PendaftaranScopusCampController@destroy')->name('account.pendaftaranscopuscamp.destroy');
             Route::get('PendaftaranScopusCamp/search', 'account\PendaftaranScopusCampController@search')->name('account.pendaftaranscopuscamp.search');
 
+            /*
+             * Pendaftaran Webinar Eksklusif.
+             *
+             * Layar ini yang menutup lubang terbesar fiturnya: sebelum ada,
+             * satu-satunya yang bisa menandai lunas adalah pemberitahuan DOKU,
+             * dan selama kredensialnya belum diisi SEMUA pembayaran transfer
+             * manual tidak punya jalur apa pun untuk dilunasi.
+             */
+            Route::get('WebinarEksklusifPendaftar', 'account\WebinarEksklusifPendaftarController@index')
+                ->name('account.webinarpendaftar.index');
+            Route::post('WebinarEksklusifPendaftar/{id}/lunasi', 'account\WebinarEksklusifPendaftarController@lunasi')
+                ->name('account.webinarpendaftar.lunasi');
+            Route::post('WebinarEksklusifPendaftar/{id}/batalkan', 'account\WebinarEksklusifPendaftarController@batalkan')
+                ->name('account.webinarpendaftar.batalkan');
+
             //clinik scopus promo
             Route::get('/Clinik-Scopus-Promo/data', 'account\ClinikScopusPromoController@index')->name('account.Clinik-Scopus-Promo.index');
             Route::get('/Clinik-Scopus-Promo/data/create', 'account\ClinikScopusPromoController@create')->name('account.Clinik-Scopus-Promo.create');
