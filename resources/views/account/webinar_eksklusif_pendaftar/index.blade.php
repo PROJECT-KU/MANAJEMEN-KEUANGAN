@@ -134,6 +134,14 @@ Pendaftar Webinar Eksklusif | MIS
                                                 potongan {{ $p->kode_diskon }}
                                             </div>
                                         @endif
+                                        @if ((int) $p->kode_unik > 0)
+                                            {{-- Kode uniknya ditampilkan: inilah yang
+                                                 dicocokkan panitia dengan mutasi
+                                                 rekening. --}}
+                                            <div class="text-small text-warning">
+                                                kode unik {{ number_format((int) $p->kode_unik, 0, ',', '.') }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="text-center">
                                         @php($rupa = ['pending' => 'warning', 'paid' => 'success', 'expired' => 'danger', 'cancel' => 'secondary'])

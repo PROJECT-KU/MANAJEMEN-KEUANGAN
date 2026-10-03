@@ -64,6 +64,54 @@ class PublicWebinarEksklusifController extends Controller
         return max(0, min($nominal, $total));
     }
 
+    /** Batas kode unik, sesuai permintaan: 500 sampai 1.500 rupiah. */
+    public const KODE_UNIK_MIN = 500;
+
+    public const KODE_UNIK_MAKS = 1500;
+
+    /**
+     * Kode unik yang BELUM dipakai pendaftaran lain yang masih hidup.
+     *
+     * Acak saja tidak cukup. Seluruh gunanya adalah membuat nominal transfer
+     * berbeda antar-orang; kalau dua pendaftaran di angkatan yang sama
+     * kebetulan bertotal sama persis, satu mutasi rekening menunjuk dua
+     * pendaftaran dan panitia kembali menebak — justru keadaan yang hendak
+     * dihindari, dan tidak ada gejala apa pun yang menandainya.
+     *
+     * Yang dibandingkan TOTALNYA, bukan kodenya: dua pendaftaran berjumlah
+     * peserta berbeda boleh berkode sama, sebab totalnya tetap berbeda.
+     *
+     * Kalau 1.001 kemungkinan itu benar-benar habis — butuh lebih dari seribu
+     * pendaftaran bertotal dasar sama yang semuanya belum lunas — yang
+     * dipulangkan nol. Lebih baik dua nominal kembar daripada pendaftarannya
+     * gagal tersimpan.
+     */
+    private function kodeUnikBebas(KategoriLayanan $sesi, int $totalDasar): int
+    {
+        $terpakai = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
+            ->whereIn('status', ['pending', 'paid'])
+            ->pluck('total_pembayaran')
+            ->map(fn ($t) => (int) $t)
+            ->flip();
+
+        for ($coba = 0; $coba < 40; $coba++) {
+            $kode = random_int(self::KODE_UNIK_MIN, self::KODE_UNIK_MAKS);
+
+            if (! $terpakai->has($totalDasar + $kode)) {
+                return $kode;
+            }
+        }
+
+        // Sudah 40 kali meleset; disisir berurutan supaya yang tersisa ketemu.
+        for ($kode = self::KODE_UNIK_MIN; $kode <= self::KODE_UNIK_MAKS; $kode++) {
+            if (! $terpakai->has($totalDasar + $kode)) {
+                return $kode;
+            }
+        }
+
+        return 0;
+    }
+
     private function isiAwalDariAkun(): array
     {
         $akun = auth()->user();
@@ -512,6 +560,22 @@ class PublicWebinarEksklusifController extends Controller
                 $potongan = $this->hitungPotongan($terkunci, $data['kode_diskon'] ?? null, $total);
                 $total = max(0, $total - $potongan);
 
+                /*
+                 * Kode unik DITAMBAHKAN ke tagihan, bukan dikurangkan.
+                 *
+                 * Gunanya mencocokkan transfer: dua orang yang mendaftar paket
+                 * sama akan mengirim nominal yang persis sama, dan panitia
+                 * tidak punya cara tahu uang masuk itu dari siapa. Dengan tiga
+                 * digit terakhir yang berbeda, satu mutasi rekening langsung
+                 * menunjuk satu pendaftaran.
+                 *
+                 * Hanya untuk transfer manual. Lewat gerbang pembayaran,
+                 * pencocokannya memakai nomor rujukan dan menambah angka receh
+                 * di sana justru membingungkan.
+                 */
+                $kodeUnik = $this->doku->siap() ? 0 : $this->kodeUnikBebas($terkunci, $total);
+                $total += $kodeUnik;
+
                 $pendaftaran = WebinarEksklusifPendaftaran::create([
                     'kategori_id' => $terkunci->getKey(),
                     'nama' => trim($data['nama']),
@@ -522,6 +586,7 @@ class PublicWebinarEksklusifController extends Controller
                     'jumlah_pendaftar' => $data['jumlah_pendaftar'],
                     'total_pembayaran' => (string) $total,
                     'user_id' => auth()->id(),
+                    'kode_unik' => $kodeUnik > 0 ? (string) $kodeUnik : null,
                     'kode_diskon' => $potongan > 0 ? trim((string) $data['kode_diskon']) : null,
                     'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
                     'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
