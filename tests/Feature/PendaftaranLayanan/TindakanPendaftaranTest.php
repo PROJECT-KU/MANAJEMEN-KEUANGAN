@@ -898,6 +898,49 @@ class TindakanPendaftaranTest extends TestCase
             ->assertRedirect();
     }
 
+    #[Test]
+    public function borang_tetap_terbuka_sesudah_satu_pendaftaran_dibuat(): void
+    {
+        /*
+         * Daftar "baru saja Anda masukkan" menautkan tiap barisnya ke halaman
+         * rinciannya. Kueri yang tidak ikut mengambil kolom `id` membuat
+         * seluruh halaman BORANG mati dengan "Undefined property:
+         * stdClass::$id" — dan matinya baru terjadi sesudah ada satu
+         * pendaftaran, jadi borang yang kosong tetap terlihat baik-baik saja.
+         *
+         * Ujinya membuka borang DUA KALI: sekali sebelum ada isinya, sekali
+         * sesudah. Yang kedua itu yang dulu mati.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->get(route('account.pendaftaran-layanan.baru'))->assertOk();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pendaftar Sebelum Borang Dibuka',
+            'telp' => '0816-0000-0070',
+            'lagi' => '1',
+        ])->assertRedirect();
+
+        $jawab = $this->actingAs($orang)->get(route('account.pendaftaran-layanan.baru', [
+            'layanan' => 'scopus_camp',
+            'kategori' => $angkatan->id,
+        ]));
+
+        $jawab->assertOk();
+        $jawab->assertSee('Baru saja Anda masukkan hari ini');
+        $jawab->assertSee('Pendaftar Sebelum Borang Dibuka');
+
+        // Tautannya memang menunjuk rinciannya, bukan sekadar teks.
+        $b = PendaftaranScopusCamp::where('nama', 'Pendaftar Sebelum Borang Dibuka')->first();
+        $jawab->assertSee(
+            route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->id]),
+            false
+        );
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User
