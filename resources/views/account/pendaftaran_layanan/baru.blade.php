@@ -74,7 +74,42 @@ Daftarkan Pendaftar | MIS Rumah Scopus
          * isiannya disentuh tetapi tidak pernah terlihat sama saja dengan
          * tidak ada.
          */
-        @media (max-width: 1499.98px) {
+        /*
+         * Di LAYAR SEMPIT ringkasannya tidak menempel sama sekali.
+         *
+         * Terukur di 390x844 pada tata letak ponsel: kartunya setinggi 247px —
+         * hampir sepertiga layar — dan menempel di dasar berarti sepertiga
+         * layar itu tertutup selamanya. Ia bahkan menimpa bilah menu bawah
+         * yang tingginya 75px, sehingga tombol Simpan tertutup separuh.
+         *
+         * Menempel baru berguna kalau yang tertutupinya sedikit. Di layar
+         * sempit ia merugi, jadi di sana ia duduk di ujung borang seperti
+         * biasa.
+         */
+        @media (max-width: 767.98px) {
+            .bar-samping {
+                position: static;
+            }
+
+            .bar-samping .bar-biaya {
+                box-shadow: none;
+            }
+
+            .bar-samping .bar-catatan-bawah {
+                display: block;
+            }
+        }
+
+        /*
+         * Bilah menu bawah ponsel melayang (position: fixed, bottom 20px,
+         * tinggi 75px), dan halamannya tidak punya bantalan bawah sama sekali
+         * — jadi isian terakhir berakhir di bawahnya dan tidak bisa dicapai.
+         */
+        body.is-mobile .mis-badan {
+            padding-bottom: 110px;
+        }
+
+        @media (min-width: 768px) and (max-width: 1499.98px) {
             .bar-samping {
                 position: sticky;
                 bottom: 12px;
