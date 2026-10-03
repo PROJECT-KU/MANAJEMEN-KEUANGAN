@@ -1614,4 +1614,111 @@ class WebinarEksklusifTest extends TestCase
             ->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertDontSee('Buat akun pakai email ini', false);
     }
+
+    // ------------------------------------------------------- batas waktu
+
+    /**
+     * Transfer manual diberi 24 jam, bukan 60 menit milik gerbang.
+     *
+     * Enam puluh menit masuk akal untuk virtual account — ia kedaluwarsa
+     * sendiri di sisi gerbang. Untuk transfer manual tidak: orangnya harus
+     * membuka m-banking atau ke ATM, mengirim bukti ke WhatsApp, lalu
+     * MENUNGGU panitia mengonfirmasi dengan tangan. Dengan 60 menit, tiap
+     * pendaftaran transfer pasti kedaluwarsa walau uangnya sudah dikirim.
+     */
+    #[Test]
+    public function transfer_manual_diberi_waktu_jauh_lebih_panjang(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Transfer', 'email' => 'transfer@contoh.test',
+            'telp' => '08123457777', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'transfer@contoh.test')->first();
+
+        $this->assertSame('transfer', $p->cara_bayar, 'prasyarat: DOKU belum disetel');
+
+        $jam = now()->diffInHours($p->kedaluwarsa_pada, false);
+
+        $this->assertGreaterThan(12, $jam,
+            'batas transfer manual tidak boleh sependek batas gerbang pembayaran');
+    }
+
+    // --------------------------------------------- batas rombongan & email
+
+    #[Test]
+    public function rombongan_lebih_dari_batas_ditolak(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '100', 'sisa_kuota' => '100']);
+
+        $batas = \App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN;
+
+        $orang = [];
+        for ($i = 0; $i < $batas; $i++) {
+            $orang[] = ['nama' => 'Peserta ' . ($i + 2)];
+        }
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Terlalu Banyak', 'email' => 'banyak@contoh.test',
+            'telp' => '08123457778', 'jumlah_pendaftar' => $batas + 1, 'setuju' => '1',
+            'peserta' => $orang,
+        ])->assertSessionHasErrors('jumlah_pendaftar');
+
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+    }
+
+    /**
+     * Dua orang beremail sama berarti satu di antaranya tidak akan pernah
+     * menerima apa pun, dan yang ketahuan belakangan hanyalah "sertifikat
+     * saya tidak sampai".
+     */
+    #[Test]
+    public function email_peserta_yang_kembar_ditolak(): void
+    {
+        $sesi = $this->sesi();
+
+        // Kembar sesama peserta.
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Ketua', 'email' => 'ketua@contoh.test',
+            'telp' => '08123457779', 'jumlah_pendaftar' => 3, 'setuju' => '1',
+            'peserta' => [
+                ['nama' => 'Dua', 'email' => 'sama@contoh.test'],
+                ['nama' => 'Tiga', 'email' => 'Sama@Contoh.Test'],
+            ],
+        ])->assertSessionHasErrors('peserta');
+
+        // Kembar dengan pendaftar utamanya.
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Ketua', 'email' => 'ketua@contoh.test',
+            'telp' => '08123457779', 'jumlah_pendaftar' => 2, 'setuju' => '1',
+            'peserta' => [['nama' => 'Dua', 'email' => 'ketua@contoh.test']],
+        ])->assertSessionHasErrors('peserta');
+
+        $this->assertSame(0, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+    }
+
+    #[Test]
+    public function peserta_tambahan_yang_beremail_ikut_dikirimi_bukti(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Ketua Kirim', 'email' => 'ketua.kirim@contoh.test',
+            'telp' => '08123457780', 'jumlah_pendaftar' => 3, 'setuju' => '1',
+            'peserta' => [
+                ['nama' => 'Dua', 'email' => 'dua.kirim@contoh.test'],
+                ['nama' => 'Tiga'],
+            ],
+        ]);
+
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\WebinarEksklusifPendaftaranMail::class,
+            fn ($surat) => $surat->hasTo('ketua.kirim@contoh.test')
+                && $surat->hasTo('dua.kirim@contoh.test')
+        );
+    }
 }
