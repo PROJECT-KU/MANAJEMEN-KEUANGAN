@@ -142,7 +142,10 @@ class PendaftaranLayananController extends Controller
                 $q->whereNull('mulai')->orWhere('mulai', '>=', now()->subDay()->toDateString());
             })
             ->orderBy('mulai')
-            ->get(['id', 'layanan', 'varian', 'nama', 'mulai', 'biaya', 'total_biaya', 'total_kuota', 'sisa_kuota'])
+            // nama_ke ikut dibaca: lima angkatan Scopus Camp yang akan datang
+            // bernama SAMA PERSIS, jadi tanpa nomor dan tanggalnya pilihan
+            // di borang tidak bisa dibedakan satu pun.
+            ->get(['id', 'layanan', 'varian', 'nama', 'nama_ke', 'mulai', 'biaya', 'total_biaya', 'total_kuota', 'sisa_kuota'])
             ->groupBy('layanan');
 
         return view('account.pendaftaran_layanan.baru', [

@@ -729,6 +729,10 @@ class LayarPendaftaranLayananTest extends TestCase
      * Tawaran alumni dibaca dari varian angkatan yang terpilih, jadi hanya
      * benar kalau pilihan angkatannya sudah diisi lebih dulu.
      *
+     * Yang diperiksa urutan PEMANGGILANNYA di segarkan(), bukan letak
+     * markahnya: tawarannya kini tinggal di fungsi tawarkanAlumni() sendiri,
+     * yang juga dipanggil saat angkatannya berganti.
+     *
      * Terbalik, lookup-nya memakai varian kosong dan tawarannya tidak pernah
      * muncul — tanpa galat apa pun di peramban. Terukur: tarif menyetel 15%,
      * kotak centangnya tetap tersembunyi. Penjaga ini membaca urutan di
@@ -744,7 +748,7 @@ class LayarPendaftaranLayananTest extends TestCase
         $this->assertNotFalse($segarkan, 'Fungsi segarkan() tidak ditemukan.');
 
         $isiAngkatan = strpos($sumber, 'isiAngkatan(pilih.nilai)', $segarkan);
-        $tawaran = strpos($sumber, 'tampil(bungkusAlumni', $segarkan);
+        $tawaran = strpos($sumber, 'tawarkanAlumni(pilih)', $segarkan);
 
         $this->assertNotFalse($isiAngkatan, 'segarkan() tidak mengisi pilihan angkatan.');
         $this->assertNotFalse($tawaran, 'segarkan() tidak menawarkan pilihan alumni.');
@@ -799,6 +803,83 @@ class LayarPendaftaranLayananTest extends TestCase
                     . 'berhenti lebih awal jadi satu-satunya yang tidak penuh.'
             );
         }
+    }
+
+    /**
+     * Berganti angkatan tidak boleh merakit ulang pilihannya.
+     *
+     * isiAngkatan() mengosongkan menunya lalu mengisinya lagi, dan merakit
+     * ulang berarti pilihannya kembali ke angkatan PERTAMA. Terukur di
+     * peramban: memilih "Angkatan ke-202 · 30 Okt 2026" langsung melompat
+     * kembali ke ke-198.
+     *
+     * Yang membuatnya berbahaya, harga kelima angkatan itu sama persis — jadi
+     * tidak ada satu pun angka di layar yang berubah, dan pendaftarnya masuk
+     * angkatan serta tanggal yang salah tanpa tanda apa pun.
+     */
+    #[Test]
+    public function berganti_angkatan_tidak_merakit_ulang_pilihannya(): void
+    {
+        $sumber = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baru.blade.php')
+        );
+
+        $awal = strpos($sumber, "e.target === menuAngkatan");
+        $this->assertNotFalse($awal, 'Cabang penangan ganti angkatan tidak ditemukan.');
+
+        // Sampai cabang berikutnya; cabang lain memang boleh memanggil segarkan().
+        $akhir = strpos($sumber, '} else {', $awal);
+        $this->assertNotFalse($akhir, 'Ujung cabangnya tidak ditemukan.');
+
+        $cabang = substr($sumber, $awal, $akhir - $awal);
+        $cabang = preg_replace('#/\*.*?\*/|//[^\n]*#s', '', $cabang);
+
+        $this->assertStringNotContainsString(
+            'segarkan()',
+            (string) $cabang,
+            'Cabang ganti angkatan memanggil segarkan(), yang merakit ulang '
+                . 'pilihannya — pilihan panitia melompat kembali ke angkatan pertama.'
+        );
+    }
+
+    /**
+     * Pilihan angkatan membawa nomor dan tanggalnya.
+     *
+     * Terukur di basis data: lima angkatan Scopus Camp yang akan datang
+     * bernama "Scopus Camp Yogyakarta" SEMUA. Tanpa nomor dan tanggal, kelima
+     * pilihannya identik huruf per huruf dan panitia memilih secara
+     * untung-untungan — padahal tanggal pelaksanaannya berbeda-beda.
+     */
+    #[Test]
+    public function pilihan_angkatan_membawa_nomor_dan_tanggalnya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Uji Nomor ' . Str::random(5),
+            'nama_ke' => '202',
+            'mulai' => '2026-12-30',
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        $jawab = $this->actingAs($orang)->get(route('account.pendaftaran-layanan.baru'));
+
+        $jawab->assertOk();
+
+        /*
+         * Muatannya @json, jadi yang diperiksa isi muatannya — bukan tulisan
+         * di layar, yang dirakit JS dari muatan ini.
+         */
+        $jawab->assertSee('"nomor":"202"', false);
+
+        // Nama bulan Indonesia, bukan "Dec": APP_LOCALE=en, jadi ini hanya
+        // keluar kalau tanggalnya memang dilewatkan Carbon ->locale('id').
+        $jawab->assertSee('"tanggal":"30 Des 2026"', false);
+
+        $angkatan->forceFill(['status' => 'nonactive'])->save();
     }
 
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */

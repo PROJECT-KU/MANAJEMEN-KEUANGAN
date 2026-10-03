@@ -519,6 +519,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             'id' => $a->id,
             'varian' => $a->varian ?? '',
             'nama' => $a->nama,
+            // Nomor angkatannya WAJIB ikut: tiap angkatan punya tanggal
+            // pelaksanaan sendiri, dan lima angkatan Scopus Camp yang akan
+            // datang bernama sama persis.
+            'nomor' => ($a->nama_ke === null || $a->nama_ke === '') ? null : (string) $a->nama_ke,
+            // Tanggalnya dirangkai di PHP, bukan di JS: APP_LOCALE=en, jadi
+            // nama bulan Indonesia hanya keluar lewat Carbon ->locale('id').
+            'tanggal' => $a->mulai
+                ? \Illuminate\Support\Carbon::parse($a->mulai)->locale('id')->translatedFormat('j M Y')
+                : null,
             'mulai' => $a->mulai,
             'harga' => (int) ($a->total_biaya ?: $a->biaya),
             'total_kuota' => $a->total_kuota === null ? null : (int) $a->total_kuota,
@@ -972,6 +981,18 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 return;
             }
 
+            /*
+             * Dikelompokkan per NAMA angkatan, dan itu bukan hiasan.
+             *
+             * Terukur: lima angkatan Scopus Camp yang akan datang bernama
+             * "Scopus Camp Yogyakarta" semua. Ditulis namanya saja, kelima
+             * pilihannya identik huruf per huruf dan panitia memilih secara
+             * untung-untungan. Nama pindah ke kepala kelompok, dan yang
+             * membedakan — nomor angkatan dan TANGGAL PELAKSANAANNYA — yang
+             * ditulis di tiap barisnya.
+             */
+            var kelompok = {};
+
             daftar.forEach(function (a) {
                 var o = document.createElement('option');
                 o.value = a.id;
@@ -989,8 +1010,40 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     ? 'tanpa batas kuota'
                     : ('sisa ' + a.sisa_kuota + ' kursi');
 
-                o.textContent = a.nama + ' — ' + rupiah(a.harga) + ' · ' + sisa;
-                menuAngkatan.appendChild(o);
+                var bagian = [];
+
+                // "Angkatan ke-", bukan "#": penggunanya bukan orang teknis,
+                // dan tanda pagar tidak terbaca sebagai nomor urut.
+                if (a.nomor) {
+                    bagian.push('Angkatan ke-' + a.nomor);
+                }
+
+                if (a.tanggal) {
+                    bagian.push(a.tanggal);
+                }
+
+                bagian.push(rupiah(a.harga));
+                bagian.push(sisa);
+
+                o.textContent = bagian.join(' · ');
+
+                /*
+                 * Angkatan tanpa nomor DAN tanpa tanggal tidak punya apa pun
+                 * yang membedakannya; namanya tetap ditulis di barisnya supaya
+                 * ia tidak jadi baris yang hanya berisi harga.
+                 */
+                if (!a.nomor && !a.tanggal) {
+                    o.textContent = a.nama + ' · ' + o.textContent;
+                }
+
+                if (!kelompok[a.nama]) {
+                    var g = document.createElement('optgroup');
+                    g.label = a.nama;
+                    kelompok[a.nama] = g;
+                    menuAngkatan.appendChild(g);
+                }
+
+                kelompok[a.nama].appendChild(o);
             });
 
             ket.textContent = 'Hanya angkatan yang belum lewat yang ditawarkan.';
@@ -999,6 +1052,54 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 menuAngkatan.value = LAMA_ANGKATAN;
                 LAMA_ANGKATAN = null;
             }
+        };
+
+        /**
+         * Menegaskan angkatan yang sedang terpilih di bawah menunya.
+         *
+         * Menu tertutup MEMOTONG teksnya di layar sempit: terukur di 320px,
+         * ruang teksnya 209px sedangkan "Angkatan ke-202 · 30 Okt 2026"
+         * menuntut 210px — tanggalnya terpotong tepat di huruf terakhir.
+         * Padahal justru nomor dan tanggal itu yang membedakan kelima
+         * angkatan Scopus Camp yang bernama sama.
+         *
+         * Baris ini membungkus, jadi ia tidak pernah terpotong di lebar mana
+         * pun.
+         */
+        var tegaskanAngkatan = function (layanan) {
+            var daftar = ANGKATAN[layanan] || [];
+
+            if (!daftar.length) {
+                ket.textContent = 'Buat angkatannya dulu di layar Angkatan Layanan.';
+                return;
+            }
+
+            var id = menuAngkatan.value;
+            var a = null;
+
+            for (var i = 0; i < daftar.length; i++) {
+                if (daftar[i].id === id) {
+                    a = daftar[i];
+                    break;
+                }
+            }
+
+            if (!a) {
+                ket.textContent = 'Hanya angkatan yang belum lewat yang ditawarkan.';
+                return;
+            }
+
+            var kata = ['Terpilih: ' + a.nama];
+
+            if (a.nomor) {
+                kata.push('angkatan ke-' + a.nomor);
+            }
+
+            if (a.tanggal) {
+                kata.push('mulai ' + a.tanggal);
+            }
+
+            ket.textContent = kata.join(', ') + '.';
         };
 
         var tampil = function (unsur, tampak) {
@@ -1092,6 +1193,31 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(rinci, (pilih.berangkatan && satuan > 0 && (jml > 1 || potongan > 0)) || potongan > 0);
         };
 
+        /**
+         * Menawarkan potongan alumni, kalau tarifnya memang menyetelnya.
+         *
+         * Dipanggil SESUDAH pilihan angkatannya ada. Potongannya disetel per
+         * VARIAN, dan variannya dibaca dari pilihan angkatan yang sedang
+         * terpilih — dihitung sebelum pilihannya ada, variannya masih kosong
+         * dan tawarannya tidak pernah muncul. Terukur: pilihan alumni tidak
+         * tampil sama sekali padahal tarifnya menyetel 15%.
+         */
+        var tawarkanAlumni = function (pilih) {
+            var persen = persenAlumni(pilih);
+
+            tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0);
+
+            if (persen > 0) {
+                ketAlumni.textContent = 'Potongan ' + persen
+                    + '% dari Tarif Layanan. Tidak bisa digabung dengan potongan khusus.';
+            } else {
+                // Tersembunyi berarti juga tidak ikut terkirim; centangnya
+                // dilepas supaya nilai lama tidak menempel saat berganti
+                // layanan.
+                centangAlumni.checked = false;
+            }
+        };
+
         var segarkan = function () {
             var pilih = layananTerpilih();
 
@@ -1122,34 +1248,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
             if (pilih.berangkatan) {
                 isiAngkatan(pilih.nilai);
+                tegaskanAngkatan(pilih.nilai);
             }
 
-            /*
-             * Tawaran alumni dihitung SESUDAH pilihan angkatannya diisi.
-             *
-             * Potongannya disetel per VARIAN, dan variannya dibaca dari
-             * pilihan angkatan yang sedang terpilih — dihitung sebelum
-             * pilihannya ada, variannya masih kosong dan tawarannya tidak
-             * pernah muncul. Terukur: pilihan alumni tidak tampil sama sekali
-             * padahal tarifnya menyetel 15%.
-             *
-             * Hanya ditawarkan kalau tarifnya MEMANG menyetelnya; kotak
-             * centang yang tidak mengubah apa pun saat ditekan lebih buruk
-             * daripada tidak ada kotaknya.
-             */
-            var persen = persenAlumni(pilih);
-
-            tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0);
-
-            if (persen > 0) {
-                ketAlumni.textContent = 'Potongan ' + persen
-                    + '% dari Tarif Layanan. Tidak bisa digabung dengan potongan khusus.';
-            } else {
-                // Tersembunyi berarti juga tidak ikut terkirim; centangnya
-                // dilepas supaya nilai lama tidak menempel saat berganti
-                // layanan.
-                centangAlumni.checked = false;
-            }
+            tawarkanAlumni(pilih);
 
             hitung();
         };
@@ -1160,10 +1262,29 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             } else if (e.target.name === 'cara_bayar') {
                 segarkanBayar();
             } else if (e.target === menuAngkatan) {
-                // Berganti angkatan bisa berganti VARIAN, dan potongan
-                // alumninya disetel per varian — jadi tawarannya ikut dihitung
-                // ulang, bukan cuma harganya.
-                segarkan();
+                /*
+                 * TIDAK memanggil segarkan(): fungsi itu merakit ulang seluruh
+                 * pilihan angkatan, dan merakit ulang berarti pilihannya
+                 * kembali ke angkatan pertama.
+                 *
+                 * Terukur: memilih "Angkatan ke-202 · 30 Okt 2026" langsung
+                 * melompat kembali ke ke-198. Harga kelimanya sama persis,
+                 * jadi tidak ada satu pun angka di layar yang berubah —
+                 * pendaftarnya masuk angkatan dan tanggal yang salah tanpa
+                 * tanda apa pun.
+                 *
+                 * Yang memang perlu dihitung ulang hanya tiga: tawaran alumni
+                 * (disetel per varian angkatan), penegas di bawah menunya, dan
+                 * totalnya.
+                 */
+                var pilihLayanan = layananTerpilih();
+
+                if (pilihLayanan) {
+                    tawarkanAlumni(pilihLayanan);
+                    tegaskanAngkatan(pilihLayanan.nilai);
+                }
+
+                hitung();
             } else {
                 hitung();
             }
