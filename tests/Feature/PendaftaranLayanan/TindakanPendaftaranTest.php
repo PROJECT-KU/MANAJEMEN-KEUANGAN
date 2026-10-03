@@ -65,6 +65,258 @@ class TindakanPendaftaranTest extends TestCase
         parent::tearDown();
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * Cara bayar
+     * ------------------------------------------------------------------
+     *
+     * Sebelum ini satu-satunya cara bayar yang bisa dicatat adalah transfer,
+     * jadi pendaftar yang DIBANTU panitia dan menyerahkan uangnya di tempat
+     * tercatat "menunggu bayar" tanpa bukti — tidak bisa dibedakan dari yang
+     * memang belum membayar.
+     */
+
+    #[Test]
+    public function tunai_yang_uangnya_sudah_diterima_langsung_lunas(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pembayar Tunai',
+            'email' => 'tunai' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0010',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pembayar Tunai')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('tunai', $b->cara_bayar);
+
+        /*
+         * Nilai status lunasnya BERBEDA tiap layanan ('Pendaftaran Diterima',
+         * 'paid', 'pembayaran diterima'), jadi yang diperiksa adalah keadaan
+         * ringkasnya — bukan untaian mentah yang hanya benar untuk satu
+         * layanan.
+         */
+        $this->assertSame('lunas', Pendaftaran::keadaanDari($b->status));
+        $this->assertStringContainsString('uang sudah diterima', (string) $b->note);
+    }
+
+    #[Test]
+    public function tunai_yang_belum_dibayar_tetap_menunggu(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        // Centangnya TIDAK dikirim: orangnya baru akan membayar saat datang.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Bayar Nanti Di Tempat',
+            'email' => 'nanti' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0011',
+            'cara_bayar' => 'tunai',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Bayar Nanti Di Tempat')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('tunai', $b->cara_bayar);
+        $this->assertSame('menunggu', Pendaftaran::keadaanDari($b->status));
+        $this->assertStringNotContainsString('uang sudah diterima', (string) $b->note);
+    }
+
+    #[Test]
+    public function transfer_tidak_bisa_dilunaskan_dari_borang(): void
+    {
+        /*
+         * Centang "uang diterima" dikirim bersama transfer. Diabaikan dengan
+         * sengaja: transfer masih perlu dicocokkan dengan mutasi rekening, dan
+         * melunaskannya dari borang berarti melunaskan sebelum ada yang
+         * memeriksa buktinya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Transfer Dipaksa Lunas',
+            'email' => 'paksa' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0012',
+            'cara_bayar' => 'transfer',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Transfer Dipaksa Lunas')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('transfer', $b->cara_bayar);
+        $this->assertSame('menunggu', Pendaftaran::keadaanDari($b->status));
+    }
+
+    #[Test]
+    public function doku_tidak_bisa_dipilih_panitia(): void
+    {
+        /*
+         * 'doku' ditulis jalur pendaftaran umum saat tagihannya dibuat.
+         * Diterima dari borang ini, hasilnya baris bertanda sudah dibayar
+         * daring padahal tidak ada tagihan yang pernah dibuat — dan tidak ada
+         * yang bisa mencocokkannya ke mana pun.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Coba DOKU',
+            'email' => 'doku' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0013',
+            'cara_bayar' => 'doku',
+        ])->assertSessionHasErrors('cara_bayar');
+
+        $this->assertNull(PendaftaranScopusCamp::where('nama', 'Coba DOKU')->first());
+    }
+
+    #[Test]
+    public function cara_bayar_ngawur_jatuh_ke_transfer_bukan_tersimpan_apa_adanya(): void
+    {
+        /*
+         * Lapisan tindakannya tidak boleh bergantung pada validasi
+         * pengendalinya: ia juga dipanggil dari tempat lain, dan nilai di luar
+         * katalog berarti baris yang tidak punya label di layar mana pun.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $hasil = (new \App\Actions\Pendaftaran\BuatPendaftaran)->jalankan('scopus_camp', [
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Cara Bayar Ngawur',
+            'email' => 'ngawur' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0014',
+            'cara_bayar' => 'gopay',
+            'uang_diterima' => '1',
+        ], $orang->full_name);
+
+        $this->assertTrue($hasil['berhasil']);
+        $this->assertSame('transfer', $hasil['model']->cara_bayar);
+        // Jatuh ke transfer berarti centang "uang diterima" ikut tidak berlaku.
+        $this->assertSame('menunggu', Pendaftaran::keadaanDari($hasil['model']->status));
+    }
+
+    #[Test]
+    public function pembayar_tunai_tidak_ikut_tertandai_menggantung(): void
+    {
+        /*
+         * Penanda menggantung mencari pendaftar yang sudah lama menunggu tanpa
+         * kabar supaya DITAGIH. Pembayar tunai tidak sedang ditunggu
+         * transfernya, jadi memasukkannya berarti daftar tagihan yang isinya
+         * orang yang tidak perlu ditagih — dan daftar seperti itu berhenti
+         * dibaca.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $lama = now()->subDays(30);
+
+        $tunai = PendaftaranScopusCamp::create([
+            'id_transaksi' => 'UJI-TUNAI-' . Str::random(6),
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Menunggu Tapi Tunai',
+            'email' => 'lama1' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0015',
+            'total_pembayaran' => '1000000',
+            'status' => 'diproses',
+            'cara_bayar' => 'tunai',
+        ]);
+        $tunai->forceFill(['created_at' => $lama, 'updated_at' => $lama])->save();
+
+        $transfer = PendaftaranScopusCamp::create([
+            'id_transaksi' => 'UJI-TRF-' . Str::random(6),
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Menunggu Lewat Transfer',
+            'email' => 'lama2' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0016',
+            'total_pembayaran' => '1000000',
+            'status' => 'diproses',
+            'cara_bayar' => 'transfer',
+        ]);
+        $transfer->forceFill(['created_at' => $lama, 'updated_at' => $lama])->save();
+
+        $jawab = $this->actingAs($orang)->get(
+            route('account.pendaftaran-layanan.index', ['lama' => '1', 'layanan' => 'scopus_camp'])
+        );
+
+        $jawab->assertOk();
+        $jawab->assertSee('Menunggu Lewat Transfer');
+        $jawab->assertDontSee('Menunggu Tapi Tunai');
+    }
+
+    #[Test]
+    public function saringan_cara_bayar_memisahkan_keduanya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        foreach ([['Disaring Tunai', 'tunai'], ['Disaring Transfer', 'transfer']] as [$nama, $cara]) {
+            PendaftaranScopusCamp::create([
+                'id_transaksi' => 'UJI-SAR-' . Str::random(6),
+                'kategori_id' => $angkatan->id,
+                'nama' => $nama,
+                'email' => 'saring' . Str::random(6) . '@contoh.test',
+                'telp' => '0816-0000-0017',
+                'total_pembayaran' => '1000000',
+                'status' => 'diproses',
+                'cara_bayar' => $cara,
+            ]);
+        }
+
+        $jawab = $this->actingAs($orang)->get(
+            route('account.pendaftaran-layanan.index', ['bayar' => 'tunai', 'layanan' => 'scopus_camp'])
+        );
+
+        $jawab->assertOk();
+        $jawab->assertSee('Disaring Tunai');
+        $jawab->assertDontSee('Disaring Transfer');
+    }
+
+    #[Test]
+    public function baris_lama_tanpa_cara_bayar_disebut_transfer(): void
+    {
+        /*
+         * Baris dari sebelum kolomnya ada. Disebut transfer, bukan "belum
+         * dikenali": sebelum kolom itu ada, transfer satu-satunya jalur yang
+         * disediakan borangnya — jadi itu bukan terkaan.
+         */
+        $this->assertSame('transfer', Pendaftaran::caraBayar(null)['kunci']);
+        $this->assertSame('transfer', Pendaftaran::caraBayar('')['kunci']);
+
+        // Nilai tak dikenal tetap dapat label, dan warnanya netral — bukan
+        // hijau, yang akan terbaca seperti sudah dibayar.
+        $this->assertSame('mis-abu', Pendaftaran::caraBayar('gopay')['warna']);
+    }
+
+    #[Test]
+    public function status_lunas_ada_untuk_kelima_layanan(): void
+    {
+        /*
+         * Kelimanya memakai kosakata status yang berbeda. Satu saja yang tidak
+         * terpetakan, panitia yang menerima uang tunai di sana mencatatnya dan
+         * barisnya diam-diam tetap "menunggu bayar".
+         */
+        foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            $this->assertNotNull(
+                Pendaftaran::statusLunas($layanan),
+                "Layanan {$layanan} tidak punya nilai status lunas yang terpetakan."
+            );
+        }
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User

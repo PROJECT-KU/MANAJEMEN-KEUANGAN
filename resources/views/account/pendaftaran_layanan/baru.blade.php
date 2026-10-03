@@ -548,10 +548,83 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
             </div>
 
-            {{-- ------------------------------------- langkah 3: orangnya --}}
+            {{-- -------------------------------- langkah 3: cara bayarnya --}}
+            {{-- Ada demi pendaftar yang DIBANTU panitia.
+
+                 Sebelum ini satu-satunya cara bayar yang bisa dicatat adalah
+                 transfer, jadi yang menyerahkan uang di tempat tercatat
+                 "menunggu bayar" tanpa bukti — tidak bisa dibedakan dari yang
+                 memang belum membayar, dan ikut tertandai menggantung setelah
+                 7 hari. --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
                     <span class="bar-nomor" aria-hidden="true">3</span>
+                    <div>
+                        <p class="bar-langkah-judul">Bagaimana bayarnya?</p>
+                        <p class="bar-langkah-sub">Pilih yang sesuai; sisanya menyesuaikan sendiri.</p>
+                    </div>
+                </div>
+
+                <div class="bar-pilihan">
+                    @foreach ($caraBayar as $kunci => $c)
+                        <label>
+                            <input type="radio" name="cara_bayar" value="{{ $kunci }}"
+                                data-perlu-bukti="{{ $c['perlu_bukti'] ? '1' : '0' }}"
+                                @checked(old('cara_bayar', 'transfer') === $kunci) required>
+                            <span class="bar-kartu">
+                                <span class="mis-medali {{ $c['warna'] }}" aria-hidden="true">
+                                    <i class="fas {{ $c['ikon'] }}"></i>
+                                </span>
+                                <span style="min-width: 0;">
+                                    <span class="bar-kartu-nama">{{ $c['label'] }}</span>
+                                    <span class="bar-kartu-ket">{{ $c['ket'] }}</span>
+                                </span>
+                                <span class="bar-kartu-centang" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+
+                {{-- Hanya muncul untuk tunai: melunaskan transfer dari borang
+                     ini berarti melunaskan sebelum ada yang mencocokkannya
+                     dengan mutasi rekening. --}}
+                <div class="mis-isian bar-penuh" id="bar-bungkus-terima" hidden>
+                    <label class="bar-centang" for="bar-terima">
+                        <input type="checkbox" class="mis-centang" id="bar-terima"
+                            name="uang_diterima" value="1" @checked(old('uang_diterima'))>
+                        <span>
+                            <span class="bar-centang-judul">Uangnya sudah saya terima</span>
+                            <span class="bar-centang-ket">
+                                Pendaftarannya langsung dicatat lunas. Biarkan kosong kalau
+                                orangnya baru akan membayar saat datang.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <p class="bar-nota" id="bar-nota-bukti">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <span>
+                        <strong>Bukti transfernya diunggah nanti</strong> dari halaman rincian
+                        pendaftaran ini, setelah uangnya masuk — borang ini tidak memintanya
+                        supaya pendaftarnya bisa dicatat lebih dulu.
+                    </span>
+                </p>
+
+                <p class="bar-nota" id="bar-nota-doku" hidden>
+                    <i class="fas fa-credit-card" aria-hidden="true"></i>
+                    <span>
+                        <strong>Pembayaran daring (DOKU)</strong> tidak dipilih dari sini.
+                        Pendaftar yang membayar sendiri lewat halaman DOKU mendapat tandanya
+                        otomatis saat tagihannya dibuat.
+                    </span>
+                </p>
+            </div>
+
+            {{-- ------------------------------------- langkah 4: orangnya --}}
+            <div class="mis-kartu bar-langkah">
+                <div class="bar-langkah-kepala">
+                    <span class="bar-nomor" aria-hidden="true">4</span>
                     <div>
                         <p class="bar-langkah-judul">Siapa yang mendaftar?</p>
                         <p class="bar-langkah-sub">Empat isian; nomor, status, dan kode uniknya diisi sistem.</p>
@@ -692,6 +765,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var bungkusTerima = el('bar-bungkus-terima');
+        var centangTerima = el('bar-terima');
+        var notaBukti = el('bar-nota-bukti');
         var angka = el('bar-angka');
         var ket = el('bar-angkatan-ket');
         var subBiaya = el('bar-sub-biaya');
@@ -785,6 +861,27 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var tampil = function (unsur, tampak) {
             if (unsur) {
                 unsur.hidden = !tampak;
+            }
+        };
+
+        /**
+         * Menyesuaikan langkah cara bayar dengan pilihannya.
+         *
+         * "Uangnya sudah saya terima" HANYA untuk tunai: melunaskan transfer
+         * dari borang ini berarti melunaskan sebelum ada yang mencocokkannya
+         * dengan mutasi rekening. Centangnya ikut dilepas saat disembunyikan —
+         * yang tersembunyi tidak terkirim, dan nilai lama yang menempel
+         * membuat layar dan yang tersimpan berbeda.
+         */
+        var segarkanBayar = function () {
+            var pilih = borang.querySelector('input[name="cara_bayar"]:checked');
+            var tunai = !!pilih && pilih.value === 'tunai';
+
+            tampil(bungkusTerima, tunai);
+            tampil(notaBukti, !tunai);
+
+            if (!tunai && centangTerima) {
+                centangTerima.checked = false;
             }
         };
 
@@ -917,6 +1014,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         borang.addEventListener('change', function (e) {
             if (e.target.name === 'layanan') {
                 segarkan();
+            } else if (e.target.name === 'cara_bayar') {
+                segarkanBayar();
             } else if (e.target === menuAngkatan) {
                 // Berganti angkatan bisa berganti VARIAN, dan potongan
                 // alumninya disetel per varian — jadi tawarannya ikut dihitung
@@ -932,6 +1031,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         });
 
         segarkan();
+        segarkanBayar();
     })();
 </script>
 @endpush

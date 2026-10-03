@@ -93,6 +93,7 @@ class PendaftaranSemuaLayanan
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
                 'bukti' => 'gambar',
+                'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
             ],
         ],
@@ -137,6 +138,7 @@ class PendaftaranSemuaLayanan
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
                 'bukti' => 'gambar',
+                'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
             ],
         ],
@@ -181,6 +183,7 @@ class PendaftaranSemuaLayanan
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
                 'bukti' => 'gambar',
+                'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
             ],
         ],
@@ -221,6 +224,7 @@ class PendaftaranSemuaLayanan
                 'total' => 'total_keseluruhan_pembayaran',
                 'kode_unik' => 'kode_unik_pembayaran',
                 'bukti' => 'gambar',
+                'cara_bayar' => 'cara_bayar',
                 // Tiga sesi muat dalam satu baris, dan yang pertama itulah
                 // yang selalu terisi. Dipakai sebagai keterangan sesinya.
                 'sesi' => 'sesi',
@@ -264,11 +268,127 @@ class PendaftaranSemuaLayanan
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'diskon',
                 'bukti' => 'gambar',
+                'cara_bayar' => 'cara_bayar',
                 'sesi' => "CONCAT_WS(' · ', NULLIF(sesi, ''), NULLIF(jam_sesi, ''))",
                 'sesi_mentah' => true,
             ],
         ],
     ];
+
+    /**
+     * Cara bayar yang dikenali, beserta rupanya di layar.
+     *
+     * 'tunai' ada demi pendaftar yang dibantu panitia: sebelumnya satu-satunya
+     * jalur yang bisa dicatat adalah transfer, jadi yang menyerahkan uang di
+     * tempat tetap tercatat "menunggu bayar" TANPA bukti — tidak bisa
+     * dibedakan dari yang memang belum membayar.
+     *
+     * 'doku' tidak pernah dipilih panitia; nilainya ditulis jalur pendaftaran
+     * umum saat tagihannya dibuat. Didaftarkan di sini supaya barisnya tetap
+     * punya label di layar panitia, bukan supaya bisa dipilih.
+     *
+     * Nilai di luar daftar ini jatuh ke `caraBayar()` sebagai 'lain' dengan
+     * alasan yang sama seperti KEADAAN: kolomnya varchar, dan baris yang
+     * nilainya belum terdaftar harus tetap bisa ditemukan.
+     */
+    public const CARA_BAYAR = [
+        'tunai' => [
+            'label' => 'Bayar di tempat',
+            'ringkas' => 'Tunai',
+            'warna' => 'mis-hijau',
+            'ikon' => 'fa-money-bill-wave',
+            'ket' => 'Uangnya diserahkan langsung ke panitia. Tidak perlu unggah bukti.',
+            'boleh_dipilih' => true,
+            'perlu_bukti' => false,
+        ],
+        'transfer' => [
+            'label' => 'Transfer bank',
+            'ringkas' => 'Transfer',
+            'warna' => 'mis-biru',
+            'ikon' => 'fa-university',
+            'ket' => 'Pendaftar mengirim ke rekening, lalu buktinya diunggah.',
+            'boleh_dipilih' => true,
+            'perlu_bukti' => true,
+        ],
+        'doku' => [
+            'label' => 'Pembayaran daring (DOKU)',
+            'ringkas' => 'DOKU',
+            'warna' => 'mis-ungu',
+            'ikon' => 'fa-credit-card',
+            'ket' => 'Dibayar sendiri oleh pendaftar lewat halaman DOKU.',
+            'boleh_dipilih' => false,
+            'perlu_bukti' => false,
+        ],
+    ];
+
+    /**
+     * Rupa satu cara bayar; nilai tak dikenal tetap dapat barisnya sendiri.
+     *
+     * @return array<string, mixed>
+     */
+    public static function caraBayar(?string $nilai): array
+    {
+        $kunci = trim((string) $nilai);
+
+        if (isset(self::CARA_BAYAR[$kunci])) {
+            return self::CARA_BAYAR[$kunci] + ['kunci' => $kunci];
+        }
+
+        /*
+         * Kosong berarti baris lama dari sebelum kolomnya ada. Disebut
+         * transfer, bukan "lain": sebelum kolom itu ada, transfer satu-satunya
+         * jalur yang disediakan borangnya.
+         */
+        if ($kunci === '') {
+            return self::CARA_BAYAR['transfer'] + ['kunci' => 'transfer'];
+        }
+
+        return [
+            'kunci' => $kunci,
+            'label' => $kunci,
+            'ringkas' => $kunci,
+            'warna' => 'mis-abu',
+            'ikon' => 'fa-question-circle',
+            'ket' => 'Cara bayar ini belum dikenali layar panitia.',
+            'boleh_dipilih' => false,
+            'perlu_bukti' => false,
+        ];
+    }
+
+    /**
+     * Cara bayar yang boleh dipilih panitia saat mendaftarkan orang lain.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function caraBayarPilihan(): array
+    {
+        return array_filter(
+            self::CARA_BAYAR,
+            fn ($c) => ($c['boleh_dipilih'] ?? false) === true
+        );
+    }
+
+    /**
+     * Nilai status "sudah lunas" milik satu layanan, atau null kalau tak ada.
+     *
+     * Kelima layanan memakai kosakata status yang berbeda ('Pendaftaran
+     * Diterima', 'paid', 'pembayaran diterima', …), jadi panitia yang menerima
+     * uang tunai di tempat tidak bisa diberi satu nilai tetap. Dicocokkan
+     * lewat KEADAAN supaya daftarnya hanya ada di satu tempat.
+     */
+    public static function statusLunas(string $layanan): ?string
+    {
+        $status = array_keys(self::SUMBER[$layanan]['status'] ?? []);
+        $lunas = self::KEADAAN['lunas']['nilai'];
+
+        foreach ($status as $nilai) {
+            if (in_array($nilai, $lunas, true)) {
+                return $nilai;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Kolom hasil proyeksi; dipakai SEMUA cabang union.
@@ -288,7 +408,7 @@ class PendaftaranSemuaLayanan
     private const KOLOM = [
         'nomor', 'nama_orang', 'email', 'telp', 'affiliasi', 'angkatan_id',
         'jumlah', 'total', 'kode_unik', 'kode_diskon', 'nominal_diskon',
-        'bukti', 'catatan', 'sesi',
+        'bukti', 'catatan', 'sesi', 'cara_bayar',
     ];
 
     /**

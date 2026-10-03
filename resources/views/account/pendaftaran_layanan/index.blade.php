@@ -953,6 +953,19 @@ Pendaftar Layanan | MIS Rumah Scopus
                 </select>
             </div>
 
+            {{-- Seluruh katalog ditawarkan, bukan hanya yang boleh dipilih
+                 panitia: baris berbayar DOKU tidak bisa dibuat dari layar ini,
+                 tetapi tetap harus bisa DICARI dari sini. --}}
+            <div class="mis-isian mis-saring-pilih">
+                <label class="mis-label" for="pdl-bayar">Cara bayar</label>
+                <select class="form-control-modern" id="pdl-bayar" name="bayar">
+                    <option value="">Semua</option>
+                    @foreach (\App\Support\PendaftaranSemuaLayanan::CARA_BAYAR as $kb => $cb)
+                        <option value="{{ $kb }}" @selected($caraBayar === $kb)>{{ $cb['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             {{-- Rentang tanggal pendaftaran.
 
                  DIKEMBALIKAN, bukan fitur baru: ketiga layar pendaftaran yang

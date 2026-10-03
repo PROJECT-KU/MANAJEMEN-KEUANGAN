@@ -56,6 +56,7 @@ class PendaftaranScopusKafe extends Model
         'gambar',
         'created_at',
         'updated_at',
+        'cara_bayar',
     ];
 
     /**
