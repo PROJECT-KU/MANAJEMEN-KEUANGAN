@@ -98,7 +98,7 @@
                         <h4>Contact Us</h4>
                         <p>
                             Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman Regency, Special Region of Yogyakarta 55551 <br><br>
-                            <strong>Phone:</strong> <b>[Dinar]</b> +62 812-2688-3280<br>
+                            <strong>Phone:</strong> <b>Dinar</b> +62 812-2688-3280<br>
                             <strong>Email:</strong> info@rumahscopusfoundation.com<br>
                         </p>
 
