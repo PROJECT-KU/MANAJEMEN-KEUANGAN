@@ -673,6 +673,169 @@ class TindakanPendaftaranTest extends TestCase
             'Testimoninya harus ikut terhapus, bukan tinggal yatim.');
     }
 
+    // ----------------------------------------------------------- angkatan
+
+    #[Test]
+    public function nama_angkatan_tidak_mengulang_nama_layanannya(): void
+    {
+        /*
+         * Terukur: 56 dari 59 angkatan namanya memuat nama layanannya
+         * sendiri, jadi tiap baris daftar menulis hal yang sama dua kali —
+         * kolom Layanan berbunyi "Scopus Camp" dan kolom Sesi "Scopus Camp
+         * Jakarta". Yang ingin dibaca cuma satu kata.
+         */
+        $this->assertSame('Jakarta', Pendaftaran::namaRingkas('scopus_camp', 'Scopus Camp Jakarta'));
+        $this->assertSame('Batch 2', Pendaftaran::namaRingkas('webinar_eksklusif', 'Webinar Eksklusif - Batch 2'));
+
+        // Kalau sesudah dipangkas tidak tersisa apa-apa, nama penuhnya
+        // dikembalikan: sel kosong lebih buruk daripada sel yang mengulang.
+        $this->assertSame('Analisis Bibliometrik',
+            Pendaftaran::namaRingkas('bibliometrik', 'Analisis Bibliometrik'));
+
+        // Dipangkas dari DEPAN saja; kata yang berada di tengah bukan awalan
+        // yang mubazir.
+        $this->assertSame('Kelas Scopus Camp lanjutan',
+            Pendaftaran::namaRingkas('scopus_camp', 'Kelas Scopus Camp lanjutan'));
+    }
+
+    #[Test]
+    public function daftar_memajang_nama_ringkas_dan_menyimpan_yang_penuh(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Kota ' . $tanda,
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        PendaftaranScopusCamp::create([
+            'id_transaksi' => 'RINGKAS-' . $tanda,
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Ringkas ' . $tanda,
+            'email' => $tanda . '@contoh.test',
+            'telp' => '0811-0000-0021',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        $halaman = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]));
+
+        $halaman->assertOk();
+        // Yang terbaca di kolomnya nama ringkasnya...
+        $halaman->assertSee('Kota ' . $tanda);
+        // ...dan nama penuhnya tetap ada, di atribut title.
+        $halaman->assertSee('title="Scopus Camp Kota ' . $tanda . '"', false);
+    }
+
+    #[Test]
+    public function angkatan_yang_kursinya_habis_ditandai_penuh(): void
+    {
+        /*
+         * Tanpa penanda ini, daftar pendaftar tidak memberi tahu apakah
+         * angkatannya masih bisa menerima orang — dan itu baru ketahuan saat
+         * pendaftaran berikutnya ditolak.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Penuh ' . $tanda,
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '10',
+            'sisa_kuota' => '0',
+            'status' => 'active',
+        ]);
+
+        PendaftaranScopusCamp::create([
+            'id_transaksi' => 'PENUH-' . $tanda,
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Penuh ' . $tanda,
+            'email' => 'p' . $tanda . '@contoh.test',
+            'telp' => '0811-0000-0022',
+            'jumlah_pendaftar' => '1',
+            'total_pembayaran' => '10000',
+            'status' => 'diproses',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]))
+            ->assertOk()
+            ->assertSee('pdl-penuh', false)
+            ->assertSee('penuh');
+    }
+
+    #[Test]
+    public function menu_angkatan_hanya_memuat_yang_punya_pendaftar(): void
+    {
+        /*
+         * Menawarkan angkatan kosong berarti menyediakan pilihan yang pasti
+         * mengembalikan nol baris, dan orang yang menekannya menyimpulkan
+         * saringannya rusak. Terukur 39 dari 59 angkatan yang punya pendaftar.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $kosong = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Scopus Camp Sepi ' . $tanda,
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+        ]);
+
+        Pendaftaran::lupakan();
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index'))
+            ->assertOk()
+            // Angkatan tanpa satu pun pendaftar tidak ditawarkan.
+            ->assertDontSee('value="' . $kosong->id . '"', false);
+    }
+
+    #[Test]
+    public function menu_angkatan_benar_benar_menyaring(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $tanda = Str::random(8);
+
+        $satu = $this->angkatan('scopus_camp');
+        $dua = $this->angkatan('scopus_camp');
+
+        foreach ([['DIANGKATAN', $satu], ['DILUAR', $dua]] as [$nama, $a]) {
+            PendaftaranScopusCamp::create([
+                'id_transaksi' => $nama . '-' . $tanda,
+                'kategori_id' => $a->id,
+                'nama' => $nama . ' ' . $tanda,
+                'email' => strtolower($nama) . $tanda . '@contoh.test',
+                'telp' => '0811-0000-0023',
+                'jumlah_pendaftar' => '1',
+                'total_pembayaran' => '10000',
+                'status' => 'diproses',
+            ]);
+        }
+
+        Pendaftaran::lupakan();
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda, 'angkatan' => $satu->id]))
+            ->assertOk()
+            ->assertSee('DIANGKATAN-' . $tanda)
+            ->assertDontSee('DILUAR-' . $tanda);
+    }
+
     // ----------------------------------------- mendaftarkan dari panitia
 
     #[Test]
