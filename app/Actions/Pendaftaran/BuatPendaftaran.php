@@ -91,13 +91,41 @@ class BuatPendaftaran
              * melebihi tagihan menghasilkan total negatif, dan nominal
              * transfer negatif tidak berarti apa-apa.
              */
-            $potongan = min($subtotal, max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0))));
+            /*
+             * Potongan ALUMNI dan potongan khusus TIDAK BISA DIGABUNG.
+             *
+             * Diminta pemilik, dan memang begitu mestinya: dua potongan yang
+             * ditumpuk pada satu pendaftaran membuat harga akhirnya tidak bisa
+             * dijelaskan dari salah satunya, dan panitia yang memberi potongan
+             * khusus kepada seorang alumni hampir selalu bermaksud
+             * MENGGANTIKAN potongan alumninya, bukan menambahnya.
+             *
+             * Yang alumni menang, dan itu disengaja: ia datang dari aturan
+             * yang disetel sekali di Tarif Layanan, sementara potongan khusus
+             * diketik per pendaftaran. Aturan mengalahkan ketikan.
+             */
+            $alumni = ! empty($isian['alumni']);
+            $persenAlumni = $alumni ? $this->persenAlumni($layanan, $angkatan) : 0;
+
+            if ($persenAlumni > 0) {
+                $potongan = (int) round($subtotal * $persenAlumni / 100);
+                $kodePotongan = 'ALUMNI';
+            } else {
+                $potongan = max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0)));
+                $kodePotongan = trim((string) ($isian['kode_potongan'] ?? '')) ?: 'KHUSUS';
+            }
+
+            // Dibatasi subtotalnya: potongan yang melebihi tagihan
+            // menghasilkan total negatif, dan nominal transfer negatif tidak
+            // berarti apa-apa.
+            $potongan = min($subtotal, $potongan);
             $total = $subtotal - $potongan;
 
             $kodeUnik = $this->kodeUnikBebas($layanan, $isian['kategori_id'] ?? null, $total);
 
             $baris = $this->rakitKolom(
-                $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa, $potongan
+                $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa,
+                $potongan, $kodePotongan
             );
 
             $model = $sumber['model'];
@@ -142,6 +170,35 @@ class BuatPendaftaran
         $satuan = (int) ($angkatan->total_biaya ?: $angkatan->biaya);
 
         return $satuan * $jumlah;
+    }
+
+    /**
+     * Berapa persen potongan alumni untuk layanan dan angkatan ini.
+     *
+     * Dicari lewat VARIAN angkatannya, bukan layanannya saja: satu layanan
+     * bisa punya beberapa tarif dengan varian berbeda — Scopus Camp punya
+     * jawa dan luar_jawa dengan harga Rp 5,5jt dan Rp 6,5jt — dan potongan
+     * alumninya disetel per tarif. Memakai tarif mana pun yang kebetulan
+     * ketemu duluan berarti memberi potongan varian lain.
+     *
+     * Nol kalau tarifnya belum menyetel potongan alumni; borangnya memang
+     * tidak menawarkan pilihan alumni untuk layanan seperti itu, tetapi
+     * kiriman tetap diperiksa di sini — yang menentukan peladen, bukan
+     * markah yang bisa diubah dari peramban.
+     */
+    private function persenAlumni(string $layanan, ?KategoriLayanan $angkatan): int
+    {
+        $tarif = \App\ClinikScopusBiayaPersesi::query()
+            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+            ->where('layanan', $layanan)
+            ->when(
+                $angkatan !== null && $angkatan->varian !== null && $angkatan->varian !== '',
+                fn ($q) => $q->where('varian', $angkatan->varian),
+                fn ($q) => $q->whereNull('varian')
+            )
+            ->first(['diskon_alumni_persen']);
+
+        return (int) ($tarif->diskon_alumni_persen ?? 0);
     }
 
     /**
@@ -205,7 +262,8 @@ class BuatPendaftaran
         int $total,
         int $kodeUnik,
         ?string $olehSiapa,
-        int $potongan = 0
+        int $potongan = 0,
+        string $kodePotongan = 'KHUSUS'
     ): array {
         $kolom = $sumber['kolom'];
         $baris = [
@@ -250,7 +308,7 @@ class BuatPendaftaran
             $baris[$kolom['nominal_diskon']] = $potongan;
 
             if (isset($kolom['kode_diskon'])) {
-                $baris[$kolom['kode_diskon']] = trim((string) ($isian['kode_potongan'] ?? '')) ?: 'KHUSUS';
+                $baris[$kolom['kode_diskon']] = $kodePotongan;
             }
         }
 
@@ -264,8 +322,8 @@ class BuatPendaftaran
             $jejak = 'Didaftarkan panitia' . ($olehSiapa !== null ? ' oleh ' . $olehSiapa : '')
                 . ' pada ' . now()->format('d M Y H:i')
                 . ($potongan > 0
-                    ? ' dengan potongan khusus Rp ' . number_format($potongan, 0, ',', '.')
-                        . ' (' . (trim((string) ($isian['kode_potongan'] ?? '')) ?: 'tanpa keterangan') . ')'
+                    ? ' dengan potongan Rp ' . number_format($potongan, 0, ',', '.')
+                        . ' (' . $kodePotongan . ')'
                     : '');
 
             $baris[$kolomCatatan] = $catatan !== '' ? $catatan . ' | ' . $jejak : $jejak;

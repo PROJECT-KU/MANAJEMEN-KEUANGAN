@@ -267,6 +267,15 @@ class ClinikScopusBiayaPersesiController extends Controller
             'varian' => ['nullable', 'string', 'max:40'],
             'biaya_persesi' => ['required', 'string'],
             'ppn' => ['nullable', 'integer', 'min:0', 'max:100'],
+            /*
+             * Potongan alumni, dipakai borang Daftarkan Pendaftar.
+             *
+             * Dibatasi 90 persen, bukan 100: potongan penuh berarti harganya
+             * nol, dan pendaftaran bernilai nol lebih mungkin salah ketik
+             * daripada disengaja — kalau memang digratiskan, yang benar
+             * mencatatnya sebagai potongan khusus beserta alasannya.
+             */
+            'diskon_alumni_persen' => ['nullable', 'integer', 'min:1', 'max:90'],
             'fasilitas' => ['nullable', 'string', 'max:8000'],
             'kegiatan' => ['nullable', 'string', 'max:8000'],
             'kontak' => ['nullable', 'string', 'max:500'],
@@ -277,6 +286,8 @@ class ClinikScopusBiayaPersesiController extends Controller
             'layanan.required' => 'Layanannya tidak dikenali.',
             'biaya_persesi.required' => 'Isi dulu tarifnya.',
             'ppn.max' => 'PPN tidak masuk akal kalau lebih dari 100 persen.',
+            'diskon_alumni_persen.max' => 'Potongan alumni paling banyak 90 persen; '
+                . 'kalau memang digratiskan, catat sebagai potongan khusus beserta alasannya.',
             'berlaku_mulai.after' => 'Tanggal mulainya harus setelah hari ini. '
                 . 'Untuk berlaku sekarang juga, kosongkan saja.',
         ]);
@@ -303,6 +314,7 @@ class ClinikScopusBiayaPersesiController extends Controller
         }
 
         $ppn = $request->filled('ppn') ? (int) $data['ppn'] : null;
+        $diskonAlumni = $request->filled('diskon_alumni_persen') ? (int) $data['diskon_alumni_persen'] : null;
         $fasilitas = $this->uraikanDaftar($data['fasilitas'] ?? null, 'fasilitas');
         $kegiatan = $this->uraikanDaftar($data['kegiatan'] ?? null, 'kegiatan');
         $kontak = trim((string) ($data['kontak'] ?? '')) ?: null;
@@ -331,6 +343,7 @@ class ClinikScopusBiayaPersesiController extends Controller
                 $lama->update([
                     'biaya_persesi' => $tarif,
                     'ppn' => $ppn,
+                    'diskon_alumni_persen' => $diskonAlumni,
                     'fasilitas' => $fasilitas,
                     'kegiatan' => $kegiatan,
                     'kontak' => $kontak,
@@ -356,6 +369,7 @@ class ClinikScopusBiayaPersesiController extends Controller
             'varian' => $varian,
             'biaya_persesi' => $tarif,
             'ppn' => $ppn,
+            'diskon_alumni_persen' => $diskonAlumni,
             'fasilitas' => $fasilitas,
             'kegiatan' => $kegiatan,
             'kontak' => $kontak,

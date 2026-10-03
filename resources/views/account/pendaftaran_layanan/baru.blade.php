@@ -7,11 +7,18 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
 @push('gaya')
     <style>
-        /* Lebar isi dibatasi: borang selebar 1600px membuat mata menyapu
-           jauh untuk tiap barisnya, dan isian yang melar 700px tidak membantu
-           siapa pun. */
-        .bar-wadah {
-            max-width: 980px;
+        /*
+         * Lebar isi dibatasi.
+         *
+         * Pemilihnya menyebut .mis-badan juga, bukan .bar-wadah saja:
+         * mis-ui.css memasang `.mis-badan > .section { max-width: 1600px }`
+         * yang berbobot (0,1,1), dan pemilih (0,1,0) kalah walau ditulis
+         * belakangan. Versi pertama aturan ini tidak mengubah apa pun justru
+         * karena itu — borangnya tetap melar 1.540px, dan isian yang
+         * merentang sejauh itu membuat mata menyapu untuk tiap barisnya.
+         */
+        .mis-badan > .section.bar-wadah {
+            max-width: 1000px;
         }
 
         .bar-langkah {
@@ -139,6 +146,56 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         .bar-kartu-centang i {
             font-size: 17px;
+        }
+
+        /* Pilihan alumni: kotak centang berkartu, bukan centang telanjang di
+           antara isian teks. Seluruh kartunya bisa ditekan, jadi sasaran
+           sentuhnya jauh lebih besar daripada kotak 16px-nya sendiri. */
+        .bar-centang {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            margin: 0;
+            padding: 13px 15px;
+            border: 1.5px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+            cursor: pointer;
+            transition: border-color .18s ease, background .18s ease;
+        }
+
+        .bar-centang:hover {
+            border-color: #c7d2fe;
+        }
+
+        .bar-centang:has(input:checked) {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .bar-centang input {
+            flex: 0 0 auto;
+            margin-top: 2px;
+        }
+
+        .bar-centang-judul {
+            display: block;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--mis-tinta);
+        }
+
+        .bar-centang-ket {
+            display: block;
+            margin-top: 2px;
+            font-size: .76rem;
+            color: var(--mis-tinta-3);
+        }
+
+        /* Isian yang dimatikan karena potongan alumni dipakai: terlihat
+           nonaktif, bukan sekadar tidak bisa diketik tanpa penjelasan. */
+        .bar-isian-mati {
+            opacity: .45;
         }
 
         .bar-isian-kisi {
@@ -325,6 +382,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
     foreach ($angkatan as $kunciLayanan => $daftar) {
         $angkatanJson[$kunciLayanan] = $daftar->map(fn ($a) => [
             'id' => $a->id,
+            'varian' => $a->varian ?? '',
             'nama' => $a->nama,
             'mulai' => $a->mulai,
             'harga' => (int) ($a->total_biaya ?: $a->biaya),
@@ -442,6 +500,26 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <input type="text" class="form-control-modern" id="bar-total" name="total"
                             value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
                         <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
+                    </div>
+
+                    {{-- Potongan ALUMNI, disetel sekali di Tarif Layanan.
+
+                         Dicentang, ia MENGGANTIKAN potongan khusus — bukan
+                         menambahnya. Dua potongan yang ditumpuk membuat harga
+                         akhirnya tidak bisa dijelaskan dari salah satunya, dan
+                         panitia yang memberi potongan khusus kepada seorang
+                         alumni hampir selalu bermaksud menggantikannya. --}}
+                    <div class="mis-isian bar-penuh" id="bar-bungkus-alumni" hidden>
+                        <label class="bar-centang" for="bar-alumni">
+                            <input type="checkbox" class="mis-centang" id="bar-alumni"
+                                name="alumni" value="1" @checked(old('alumni'))>
+                            <span>
+                                <span class="bar-centang-judul">Pendaftar ini alumni</span>
+                                <span class="bar-centang-ket" id="bar-alumni-ket">
+                                    Potongannya ikut aturan di Tarif Layanan.
+                                </span>
+                            </span>
+                        </label>
                     </div>
 
                     {{-- Potongan KHUSUS, di atas potongan bawaan angkatannya.
@@ -584,6 +662,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var ANGKATAN = @json($angkatanJson);
         var LAMA_ANGKATAN = @json(old('kategori_id'));
 
+        /*
+         * Potongan alumni tiap tarif aktif, berkunci "layanan|varian".
+         *
+         * Dikunci varian pula, sebab satu layanan bisa punya beberapa tarif
+         * dengan harga berbeda — Scopus Camp punya jawa dan luar_jawa — dan
+         * potongan alumninya disetel per tarif.
+         */
+        var ALUMNI = @json($alumni);
+
         var borang = document.getElementById('bar-borang');
 
         if (!borang) {
@@ -601,6 +688,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var isianTotal = el('bar-total');
         var isianJumlah = el('bar-jumlah');
         var isianPotongan = el('bar-potongan');
+        var isianKode = el('bar-kode-potongan');
+        var centangAlumni = el('bar-alumni');
+        var bungkusAlumni = el('bar-bungkus-alumni');
+        var ketAlumni = el('bar-alumni-ket');
         var angka = el('bar-angka');
         var ket = el('bar-angkatan-ket');
         var subBiaya = el('bar-sub-biaya');
@@ -620,6 +711,22 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var angkaDari = function (teks) {
             var n = parseInt(String(teks || '').replace(/\D+/g, ''), 10);
             return isNaN(n) ? 0 : n;
+        };
+
+        /* Berapa persen potongan alumni untuk pilihan yang sedang dibuat. */
+        var persenAlumni = function (pilih) {
+            if (!pilih) {
+                return 0;
+            }
+
+            var varian = '';
+
+            if (pilih.berangkatan) {
+                var o = menuAngkatan.options[menuAngkatan.selectedIndex];
+                varian = o ? (o.dataset.varian || '') : '';
+            }
+
+            return ALUMNI[pilih.nilai + '|' + varian] || 0;
         };
 
         var layananTerpilih = function () {
@@ -650,6 +757,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 var o = document.createElement('option');
                 o.value = a.id;
                 o.dataset.harga = a.harga;
+                o.dataset.varian = a.varian || '';
 
                 /*
                  * Harga dan sisa kursi ikut tertulis di pilihannya.
@@ -704,15 +812,36 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
 
             var subtotal = satuan * jml;
-            // Potongan DIBATASI subtotalnya, sama dengan di peladen: total
-            // negatif tidak berarti apa-apa sebagai nominal transfer.
-            var potongan = pilih.bisaPotongan ? Math.min(subtotal, angkaDari(isianPotongan.value)) : 0;
+            var persen = persenAlumni(pilih);
+            var pakaiAlumni = centangAlumni.checked && persen > 0;
+
+            /*
+             * Alumni MENGGANTIKAN potongan khusus, tidak menambahnya — sama
+             * dengan aturan di peladen. Isian potongan khususnya dimatikan
+             * supaya tidak ada yang mengetik angka yang kemudian diabaikan
+             * diam-diam.
+             */
+            var potongan;
+
+            if (pakaiAlumni) {
+                potongan = Math.round(subtotal * persen / 100);
+            } else {
+                potongan = pilih.bisaPotongan ? angkaDari(isianPotongan.value) : 0;
+            }
+
+            potongan = Math.min(subtotal, potongan);
+
+            [isianPotongan, isianKode].forEach(function (n) {
+                n.disabled = pakaiAlumni;
+                n.closest('.mis-isian').classList.toggle('bar-isian-mati', pakaiAlumni);
+            });
 
             angka.textContent = rupiah(subtotal - potongan);
 
             nilaiSatuan.textContent = rupiah(satuan);
             nilaiJumlah.textContent = jml + ' orang';
-            nilaiPotongan.textContent = '− ' + rupiah(potongan);
+            nilaiPotongan.textContent = '− ' + rupiah(potongan)
+                + (pakaiAlumni ? ' (alumni ' + persen + '%)' : '');
 
             // Tiap baris rincian hanya muncul kalau memang ada isinya; baris
             // yang selalu nol cuma menambah yang harus dibaca.
@@ -743,6 +872,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(bungkusPotongan, pilih.bisaPotongan);
             tampil(bungkusKode, pilih.bisaPotongan);
 
+
             menuAngkatan.required = pilih.berangkatan;
             isianTotal.required = !pilih.berangkatan;
 
@@ -754,11 +884,43 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 isiAngkatan(pilih.nilai);
             }
 
+            /*
+             * Tawaran alumni dihitung SESUDAH pilihan angkatannya diisi.
+             *
+             * Potongannya disetel per VARIAN, dan variannya dibaca dari
+             * pilihan angkatan yang sedang terpilih — dihitung sebelum
+             * pilihannya ada, variannya masih kosong dan tawarannya tidak
+             * pernah muncul. Terukur: pilihan alumni tidak tampil sama sekali
+             * padahal tarifnya menyetel 15%.
+             *
+             * Hanya ditawarkan kalau tarifnya MEMANG menyetelnya; kotak
+             * centang yang tidak mengubah apa pun saat ditekan lebih buruk
+             * daripada tidak ada kotaknya.
+             */
+            var persen = persenAlumni(pilih);
+
+            tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0);
+
+            if (persen > 0) {
+                ketAlumni.textContent = 'Potongan ' + persen
+                    + '% dari Tarif Layanan. Tidak bisa digabung dengan potongan khusus.';
+            } else {
+                // Tersembunyi berarti juga tidak ikut terkirim; centangnya
+                // dilepas supaya nilai lama tidak menempel saat berganti
+                // layanan.
+                centangAlumni.checked = false;
+            }
+
             hitung();
         };
 
         borang.addEventListener('change', function (e) {
             if (e.target.name === 'layanan') {
+                segarkan();
+            } else if (e.target === menuAngkatan) {
+                // Berganti angkatan bisa berganti VARIAN, dan potongan
+                // alumninya disetel per varian — jadi tawarannya ikut dihitung
+                // ulang, bukan cuma harganya.
                 segarkan();
             } else {
                 hitung();
