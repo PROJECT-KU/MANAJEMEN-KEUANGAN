@@ -141,6 +141,14 @@ class PendaftaranLayananController extends Controller
             ->where(function ($q) {
                 $q->whereNull('mulai')->orWhere('mulai', '>=', now()->subDay()->toDateString());
             })
+            /*
+             * HANYA angkatan aktif. Kuerinya dulu hanya menyaring tanggal,
+             * jadi angkatan berstatus 'draft' atau 'nonactive' ikut ditawarkan
+             * ke panitia — angkatan yang sengaja belum dibuka sudah bisa diisi
+             * pendaftar. Belum terjadi (ketujuhnya kebetulan aktif), dan
+             * ditutup sebelum terjadi.
+             */
+            ->where('status', 'active')
             ->orderBy('mulai')
             // nama_ke ikut dibaca: lima angkatan Scopus Camp yang akan datang
             // bernama SAMA PERSIS, jadi tanpa nomor dan tanggalnya pilihan
@@ -163,6 +171,7 @@ class PendaftaranLayananController extends Controller
              * yang hendak dihemat tombol itu.
              */
             'terpilihAngkatan' => (string) $request->input('kategori', ''),
+            'baruSaja' => $this->baruSaja(),
         ]);
     }
 
@@ -203,18 +212,36 @@ class PendaftaranLayananController extends Controller
         }
 
         $email = trim((string) $request->input('email'));
-        $telp = $this->telpBersih((string) $request->input('telp'));
         $kategori = (string) $request->input('kategori_id');
+
+        /*
+         * DUA bentuk nomor diadu sekaligus.
+         *
+         * Baris baru disimpan dalam bentuk WhatsApp (62…), sedangkan ratusan
+         * baris lama tersimpan apa adanya (08…). Mengadu satu bentuk saja
+         * berarti separuh riwayatnya tidak pernah ketemu.
+         */
+        $bentuk = array_values(array_unique(array_filter([
+            $this->telpBersih((string) $request->input('telp')),
+            $this->telpWa((string) $request->input('telp')),
+        ])));
 
         $kueri = DB::table($sumber['tabel'])
             ->when(
                 ($sumber['berangkatan'] ?? false) && $kategori !== '' && isset($kolom['angkatan_id']),
                 fn ($q) => $q->where($kolom['angkatan_id'], $kategori)
             )
-            ->where(function ($q) use ($kolom, $email, $telp) {
-                $q->where($kolom['email'], $email);
+            ->where(function ($q) use ($kolom, $email, $bentuk) {
+                /*
+                 * Email kosong TIDAK diadu. Sejak email jadi tidak wajib,
+                 * mengadunya berarti setiap pendaftar tanpa email dianggap
+                 * kembaran pendaftar tanpa email sebelumnya.
+                 */
+                if ($email !== '') {
+                    $q->orWhere($kolom['email'], $email);
+                }
 
-                if ($telp !== '') {
+                foreach ($bentuk as $nomor) {
                     /*
                      * Pemisahnya dibuang di SISI SQL, bukan dengan LIKE:
                      * nomor tersimpan apa adanya dengan spasi, tanda hubung,
@@ -224,10 +251,14 @@ class PendaftaranLayananController extends Controller
                     $q->orWhereRaw(
                         "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" . $kolom['telp']
                             . ", ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '') = ?",
-                        [$telp]
+                        [$nomor]
                     );
                 }
             });
+
+        if ($email === '' && $bentuk === []) {
+            return null;
+        }
 
         $ada = $kueri->first([$kolom['nomor'] ?? 'id', $kolom['nama_orang']]);
 
@@ -242,6 +273,30 @@ class PendaftaranLayananController extends Controller
             . (($sumber['berangkatan'] ?? false) ? ' di angkatan yang sama' : '')
             . '. Periksa dulu di daftar; kalau memang orang yang berbeda, '
             . 'ubah salah satu email atau nomornya.';
+    }
+
+    /**
+     * Pendaftar yang BARU SAJA dimasukkan panitia ini, hari ini.
+     *
+     * Sesudah "simpan & tambah lagi", panitia tidak bisa melihat siapa saja
+     * yang sudah ia masukkan tanpa meninggalkan borang — dan meninggalkan
+     * borang berarti kehilangan layanan serta angkatan yang sudah terpilih.
+     * Delapan terakhir sudah cukup: yang dicari "tadi saya sudah masukkan
+     * siapa saja", bukan riwayat lengkap.
+     *
+     * Dicocokkan lewat jejak catatannya, bukan kolom pembuat — tidak satu pun
+     * dari kelima tabel punya kolom itu.
+     *
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    private function baruSaja(): \Illuminate\Support\Collection
+    {
+        return Pendaftaran::kueri()
+            ->where('waktu', '>=', now()->startOfDay()->toDateTimeString())
+            ->where('catatan', 'like', '%Didaftarkan panitia oleh ' . $this->siapa() . '%')
+            ->orderByDesc('waktu')
+            ->limit(8)
+            ->get(['layanan', 'nomor', 'nama_orang', 'total', 'waktu']);
     }
 
     /**
@@ -310,10 +365,19 @@ class PendaftaranLayananController extends Controller
         $aturan = [
             'layanan' => ['required', Rule::in(array_keys($katalog))],
             'nama' => ['required', 'string', 'min:3', 'max:255'],
-            // 'email' saja, bukan 'email:rfc,dns': sebagian domain pendaftar
-            // tidak bisa dicari dari peladen ini, dan menolaknya membuat orang
-            // yang sah tidak bisa didaftarkan sama sekali.
-            'email' => ['required', 'email', 'max:255'],
+            /*
+             * TIDAK wajib, dan itu disengaja.
+             *
+             * Yang datang langsung sering tidak punya email, dan mewajibkannya
+             * memaksa panitia mengarang alamat — lalu alamat karangan itu
+             * dikirimi surat. Nomor WhatsApp-nya yang tetap wajib; itu yang
+             * benar-benar dipakai menghubungi orangnya.
+             *
+             * 'email' saja, bukan 'email:rfc,dns': sebagian domain pendaftar
+             * tidak bisa dicari dari peladen ini, dan menolaknya membuat orang
+             * yang sah tidak bisa didaftarkan sama sekali.
+             */
+            'email' => ['nullable', 'email', 'max:255'],
             'telp' => ['required', 'string', 'max:30'],
             'affiliasi' => ['nullable', 'string', 'max:255'],
             'jumlah' => ['nullable', 'integer', 'min:1', 'max:99'],
@@ -388,7 +452,17 @@ class PendaftaranLayananController extends Controller
             }
         }
 
-        $hasil = (new BuatPendaftaran)->jalankan($layanan, $request->all(), $this->siapa());
+        /*
+         * Nomor teleponnya DINORMALKAN sebelum disimpan.
+         *
+         * Tanpa itu satu kolom berisi "0816-0000-1234", "+62 816 0000 1234",
+         * dan "0816 0000 1234" berdampingan — pencarian meleset, dan tautan
+         * WhatsApp yang dirakit dari nilai begitu gagal terbuka.
+         */
+        $isian = $request->all();
+        $isian['telp'] = $this->telpWa((string) $request->input('telp'));
+
+        $hasil = (new BuatPendaftaran)->jalankan($layanan, $isian, $this->siapa());
 
         if (! $hasil['berhasil']) {
             return back()->withInput()->with('error', $hasil['pesan']);
@@ -1038,6 +1112,33 @@ class PendaftaranLayananController extends Controller
      * Daftar tandanya disamakan dengan telpAngka() supaya kedua sisi
      * perbandingan membuang hal yang sama.
      */
+    /**
+     * Nomor dalam bentuk yang dipakai WhatsApp: 62xxxxxxxxxx.
+     *
+     * Hanya bentuknya yang dirapikan, bukan isinya — nomor yang tidak dikenali
+     * polanya dikembalikan apa adanya (sesudah pemisahnya dibuang), sebab
+     * menebak-nebak nomor orang lebih buruk daripada menyimpan apa yang
+     * diketik.
+     */
+    private function telpWa(string $telp): string
+    {
+        $angka = $this->telpBersih($telp);
+
+        if ($angka === '') {
+            return '';
+        }
+
+        if (str_starts_with($angka, '0')) {
+            return '62' . ltrim(substr($angka, 1), '0');
+        }
+
+        if (str_starts_with($angka, '8')) {
+            return '62' . $angka;
+        }
+
+        return $angka;
+    }
+
     private function telpBersih(string $telp): string
     {
         return str_replace(['-', ' ', '(', ')', '+', '.'], '', trim($telp));
