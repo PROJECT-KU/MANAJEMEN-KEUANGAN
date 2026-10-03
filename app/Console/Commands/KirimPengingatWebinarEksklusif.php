@@ -55,6 +55,7 @@ class KirimPengingatWebinarEksklusif extends Command
             $peserta = WebinarEksklusifPendaftaran::where('kategori_id', $s->getKey())
                 ->whereIn('status', ['pending', 'paid'])
                 ->whereNull('pengingat_pada')
+                ->with('pesertaLain')
                 ->get();
 
             $this->line(sprintf('  %s — %d peserta belum diingatkan', $s->nama, $peserta->count()));
@@ -67,7 +68,14 @@ class KirimPengingatWebinarEksklusif extends Command
                 }
 
                 try {
-                    Mail::to($p->email)->send(new WebinarEksklusifPengingatMail($p, $s));
+                    // Peserta tambahan yang beremail ikut diingatkan — mereka
+                    // yang hadir, bukan hanya yang mendaftarkan.
+                    $penerima = array_values(array_unique(array_filter(array_merge(
+                        [$p->email],
+                        $p->pesertaLain->pluck('email')->all()
+                    ))));
+
+                    Mail::to($penerima)->send(new WebinarEksklusifPengingatMail($p, $s));
 
                     /*
                      * Ditandai SESUDAH terkirim. Ditandai lebih dulu, surat

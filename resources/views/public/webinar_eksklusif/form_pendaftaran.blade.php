@@ -298,7 +298,9 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                             <button type="button" class="ses-hitung-tombol" data-ubah="-1"
                                 aria-label="Kurangi jumlah peserta">&minus;</button>
                             <input type="number" id="ses-jumlah" name="jumlah_pendaftar" min="1"
-                                max="{{ $sisa !== null && $sisa > 0 ? min(50, $sisa) : 50 }}"
+                                max="{{ $sisa !== null && $sisa > 0
+                                    ? min(\App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN, $sisa)
+                                    : \App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN }}"
                                 value="{{ old('jumlah_pendaftar', 1) }}" inputmode="numeric"
                                 data-harga="{{ $harga }}">
                             <button type="button" class="ses-hitung-tombol" data-ubah="1"
@@ -310,7 +312,12 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         {{-- Disebut sebelum angkanya dinaikkan, bukan sesudah:
                              orang yang mendaftar rombongan perlu tahu di muka
                              bahwa nama tiap peserta akan diminta. --}}
-                        <p class="ses-bantu">Lebih dari satu? Nama tiap peserta diminta di bawah.</p>
+                        <p class="ses-bantu">
+                            Lebih dari satu? Nama tiap peserta diminta di bawah.
+                            Lebih dari {{ \App\Http\Controllers\Publict\PublicWebinarEksklusifController::MAKS_ROMBONGAN }} orang,
+                            <a href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya mau mendaftarkan rombongan untuk sesi "' . $sesi->nama . '".') }}"
+                                target="_blank" rel="noopener">hubungi panitia</a> — dibantu daftarkan sekaligus.
+                        </p>
                         @error('jumlah_pendaftar') <p class="ses-salah">{{ $message }}</p> @enderror
                     </div>
 

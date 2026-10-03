@@ -80,6 +80,43 @@ class PublicWebinarEksklusifController extends Controller
         ], fn ($v) => $v !== '');
     }
 
+    /**
+     * BATAS WAKTU TRANSFER MANUAL JAUH LEBIH PANJANG DARIPADA GERBANG.
+     *
+     * Sebelumnya keduanya memakai Doku::MENIT_KEDALUWARSA (60 menit).
+     * Enam puluh menit masuk akal untuk virtual account — ia memang
+     * kedaluwarsa sendiri di sisi gerbang. Untuk transfer manual tidak:
+     * orangnya harus membuka m-banking atau pergi ke ATM, mengirim bukti ke
+     * WhatsApp, lalu MENUNGGU panitia mengonfirmasi dengan tangan.
+     *
+     * Dengan 60 menit, tiap pendaftaran transfer pasti kedaluwarsa dan
+     * kursinya dilepas walau uangnya sudah dikirim — terukur: dari 3
+     * pendaftaran yang pernah ada di basis data ini, ketiganya berstatus
+     * expired dan tidak satu pun pernah berstatus paid.
+     */
+    private const JAM_KEDALUWARSA_TRANSFER = 24;
+
+    /**
+     * Batas rombongan yang boleh didaftarkan sendiri lewat borang.
+     *
+     * Dulu 50. Terukur di layar 390 px: 50 peserta membuat kartu isiannya
+     * setinggi 7.362 px dengan 104 kotak isian — delapan layar penuh kotak
+     * nama kosong, dan tombol daftar beserta totalnya terkubur di paling
+     * bawah. Borang sepanjang itu lebih sering ditinggalkan daripada diisi.
+     *
+     * Sepuluh menyisakan kartu setinggi ~2.250 px, masih wajar. Yang lebih
+     * besar diarahkan ke panitia, yang memang sudah menanganinya lewat
+     * WhatsApp.
+     */
+    public const MAKS_ROMBONGAN = 10;
+
+    private static function menitKedaluwarsa(bool $lewatGerbang): int
+    {
+        return $lewatGerbang
+            ? Doku::MENIT_KEDALUWARSA
+            : self::JAM_KEDALUWARSA_TRANSFER * 60;
+    }
+
     // --------------------------------------------------- isi otomatis
 
     /**
@@ -282,7 +319,7 @@ class PublicWebinarEksklusifController extends Controller
                 }
             }],
             'affiliasi' => ['nullable', 'string', 'max:160'],
-            'jumlah_pendaftar' => ['required', 'integer', 'min:1', 'max:50'],
+            'jumlah_pendaftar' => ['required', 'integer', 'min:1', 'max:' . self::MAKS_ROMBONGAN],
             // Persetujuan dipakainya data. Disimpan waktunya, bukan cuma
             // dicentang lalu dilupakan — kalau ditanya, harus bisa dijawab
             // kapan orangnya menyetujui.
@@ -310,7 +347,8 @@ class PublicWebinarEksklusifController extends Controller
             'peserta.*.nama.required' => 'Nama tiap peserta diisi dulu, ya — sertifikatnya atas nama mereka.',
             'peserta.*.email.email' => 'Ada alamat email peserta yang belum benar.',
             'jumlah_pendaftar.min' => 'Minimal satu peserta.',
-            'jumlah_pendaftar.max' => 'Lebih dari 50 peserta, hubungi panitia dulu ya.',
+            'jumlah_pendaftar.max' => 'Lebih dari ' . self::MAKS_ROMBONGAN
+                . ' peserta, hubungi panitia dulu ya — kami bantu daftarkan sekaligus.',
         ]);
 
         /*
@@ -332,6 +370,26 @@ class PublicWebinarEksklusifController extends Controller
          * tanpa JavaScript akan lolos begitu saja, dan yang tersimpan
          * pendaftaran 10 orang dengan satu nama.
          */
+        /*
+         * Email peserta tidak boleh kembar — baik sesama peserta maupun
+         * dengan pendaftar utamanya. Dua orang beremail sama berarti satu di
+         * antaranya tidak akan pernah menerima apa pun, dan yang ketahuan
+         * belakangan hanyalah "sertifikat saya tidak sampai".
+         */
+        $surel = array_filter(array_map(
+            fn ($o) => mb_strtolower(trim((string) ($o['email'] ?? ''))),
+            $data['peserta']
+        ));
+
+        $surel[] = mb_strtolower(trim($data['email']));
+
+        if (count($surel) !== count(array_unique($surel))) {
+            return back()->withInput()->withErrors([
+                'peserta' => 'Ada email yang dipakai dua kali. Tiap peserta perlu email sendiri, '
+                    . 'atau kosongkan saja yang tidak punya.',
+            ]);
+        }
+
         $perluNama = max(0, (int) $data['jumlah_pendaftar'] - 1);
 
         if (count($data['peserta']) !== $perluNama) {
@@ -427,7 +485,7 @@ class PublicWebinarEksklusifController extends Controller
                     'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
                     'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
                     'status' => 'pending',
-                    'kedaluwarsa_pada' => now()->addMinutes(Doku::MENIT_KEDALUWARSA),
+                    'kedaluwarsa_pada' => now()->addMinutes(self::menitKedaluwarsa($this->doku->siap())),
                 ]);
 
                 /*
@@ -721,7 +779,20 @@ class PublicWebinarEksklusifController extends Controller
     private function kirimEmailPendaftaran(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi): void
     {
         try {
-            Mail::to($pendaftaran->email)->send(
+            /*
+             * Peserta tambahan yang mengisi email IKUT dikirimi.
+             *
+             * Emailnya sudah kita minta di borang; tidak mengirim apa pun ke
+             * sana berarti meminta data yang tidak dipakai, dan orangnya tidak
+             * punya bukti bahwa ia terdaftar. Yang tidak mengisi email tidak
+             * dikirimi apa-apa — itu memang boleh dikosongkan.
+             */
+            $penerima = array_values(array_unique(array_filter(array_merge(
+                [$pendaftaran->email],
+                $pendaftaran->pesertaLain->pluck('email')->all()
+            ))));
+
+            Mail::to($penerima)->send(
                 new WebinarEksklusifPendaftaranMail($pendaftaran, $sesi)
             );
         } catch (\Throwable $e) {
