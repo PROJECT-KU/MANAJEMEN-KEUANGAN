@@ -902,14 +902,15 @@ class TindakanPendaftaranTest extends TestCase
     public function borang_tetap_terbuka_sesudah_satu_pendaftaran_dibuat(): void
     {
         /*
-         * Daftar "baru saja Anda masukkan" menautkan tiap barisnya ke halaman
-         * rinciannya. Kueri yang tidak ikut mengambil kolom `id` membuat
-         * seluruh halaman BORANG mati dengan "Undefined property:
-         * stdClass::$id" — dan matinya baru terjadi sesudah ada satu
-         * pendaftaran, jadi borang yang kosong tetap terlihat baik-baik saja.
+         * Dulu menjaga daftar "baru saja Anda masukkan" di kolom samping, yang
+         * kuerinya tidak ikut mengambil kolom `id` dan membuat SELURUH halaman
+         * borang mati dengan "Undefined property: stdClass::$id". Daftar itu
+         * sudah dibuang atas permintaan pemilik produk, 4 Okt 2026.
          *
-         * Ujinya membuka borang DUA KALI: sekali sebelum ada isinya, sekali
-         * sesudah. Yang kedua itu yang dulu mati.
+         * Ujinya tetap ada dalam bentuk yang lebih kecil, dan bukan karena
+         * sayang membuangnya: cacat seperti itu hanya muncul SESUDAH ada satu
+         * pendaftaran, jadi seluruh uji lain — yang membuka borang dalam
+         * keadaan kosong — melewatkannya begitu saja.
          */
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
         $angkatan = $this->angkatan('scopus_camp', 20, 20);
@@ -930,14 +931,14 @@ class TindakanPendaftaranTest extends TestCase
         ]));
 
         $jawab->assertOk();
-        $jawab->assertSee('Baru saja Anda masukkan hari ini');
-        $jawab->assertSee('Pendaftar Sebelum Borang Dibuka');
 
-        // Tautannya memang menunjuk rinciannya, bukan sekadar teks.
-        $b = PendaftaranScopusCamp::where('nama', 'Pendaftar Sebelum Borang Dibuka')->first();
-        $jawab->assertSee(
-            route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->id]),
-            false
+        // Layanan dan angkatannya tetap terbawa sepulang "simpan & tambah
+        // lagi"; itulah yang membuat mendaftarkan rombongan tidak menuntut
+        // memilih ulang keduanya tiap orang.
+        $jawab->assertSee('Scopus Camp');
+
+        $this->assertNotNull(
+            PendaftaranScopusCamp::where('nama', 'Pendaftar Sebelum Borang Dibuka')->first()
         );
     }
 
