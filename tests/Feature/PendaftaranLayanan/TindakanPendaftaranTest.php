@@ -941,6 +941,172 @@ class TindakanPendaftaranTest extends TestCase
         );
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * Pesanan lembaga
+     * ------------------------------------------------------------------
+     *
+     * Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan lebih —
+     * rombongan terbesar yang pernah ada 37 orang. Pesanan sebesar itu
+     * terpaksa dipecah ke beberapa angkatan, dan tanpa pengikat ini hasil
+     * pecahannya tidak saling tahu bahwa mereka satu pesanan.
+     */
+
+    #[Test]
+    public function pesanan_lembaga_mengikat_pendaftaran_lintas_angkatan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $satu = $this->angkatan('scopus_camp', 20, 20);
+        $dua = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Angkatan Lembaga ' . Str::random(5),
+            'mulai' => now()->addMonths(2)->toDateString(),
+            'total_kuota' => '20', 'sisa_kuota' => '20', 'status' => 'active',
+        ]);
+
+        // Pesanan pertama membuat lembaganya sekalian.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $satu->id,
+            'nama' => 'PIC Lembaga',
+            'telp' => '0816-0000-0080',
+            'jumlah' => 20,
+            'lembaga_nama' => 'Universitas Uji ' . Str::random(4),
+            'lembaga_npwp' => '01.234.567.8-901.000',
+            'lembaga_po' => 'PO/2026/0099',
+        ])->assertRedirect();
+
+        $b1 = PendaftaranScopusCamp::where('nama', 'PIC Lembaga')->first();
+        $lembaga = \App\PemesananLembaga::untukPendaftaran('scopus_camp', (string) $b1->id);
+
+        $this->assertNotNull($lembaga, 'Pendaftarannya harus terikat ke pesanan yang baru dibuat.');
+        $this->assertStringStartsWith('PL-', $lembaga->kode);
+        $this->assertSame('01.234.567.8-901.000', $lembaga->npwp);
+
+        // Sisanya ke angkatan LAIN, diikat ke pesanan yang sama.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $dua->id,
+            'nama' => 'PIC Lembaga',
+            'telp' => '0816-0000-0080',
+            'jumlah' => 10,
+            'pemesanan_id' => $lembaga->id,
+        ])->assertRedirect();
+
+        $this->assertSame(
+            2,
+            $lembaga->baris()->count(),
+            'Kedua pendaftarannya harus terikat ke satu pesanan.'
+        );
+
+        $this->assertSame(30, $lembaga->pendaftaran()->sum(fn ($b) => (int) $b->jumlah));
+    }
+
+    #[Test]
+    public function faktur_menjumlahkan_seluruh_pendaftaran_pesanannya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '1000000'])->save();
+
+        $lembaga = \App\PemesananLembaga::create([
+            'nama_lembaga' => 'Lembaga Faktur',
+            'pic_nama' => 'Bendahara',
+            'dibuat_oleh' => 'uji',
+        ]);
+
+        foreach ([2, 3] as $ke => $jml) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Peserta Faktur ' . $ke,
+                'telp' => '0816-0000-009' . $ke,
+                'jumlah' => $jml,
+                'pemesanan_id' => $lembaga->id,
+                'abaikan_ganda' => '1',
+            ])->assertRedirect();
+        }
+
+        $jumlah = $lembaga->pendaftaran()->sum(fn ($b) => (int) $b->total);
+
+        $jawab = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.faktur', $lembaga->id));
+
+        $jawab->assertOk();
+        $jawab->assertSee($lembaga->kode);
+        $jawab->assertSee('Lembaga Faktur');
+        $jawab->assertSee(number_format($jumlah, 0, ',', '.'));
+        // Lima kursi: 2 + 3.
+        $jawab->assertSee('>5<', false);
+    }
+
+    #[Test]
+    public function diskon_rombongan_berlaku_mulai_ambangnya(): void
+    {
+        /*
+         * Sebelum ini satu-satunya cara memberi harga rombongan adalah
+         * potongan khusus berupa rupiah — panitia menghitung sendiri diskon
+         * 30 orangnya lalu mengetik hasilnya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 50, 50);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '1000000', 'varian' => null])->save();
+
+        $this->tarif('scopus_camp', null, ['diskon_rombongan_min' => 10, 'diskon_rombongan_persen' => 20]);
+
+        // Sembilan orang: BELUM mencapai ambangnya.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp', 'kategori_id' => $angkatan->id,
+            'nama' => 'Rombongan Kurang', 'telp' => '0816-0000-0100', 'jumlah' => 9,
+        ])->assertRedirect();
+
+        $kurang = PendaftaranScopusCamp::where('nama', 'Rombongan Kurang')->first();
+        $this->assertSame(9000000 + (int) $kurang->kode_unik, (int) $kurang->total_pembayaran);
+
+        // Sepuluh orang: tepat di ambangnya.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp', 'kategori_id' => $angkatan->id,
+            'nama' => 'Rombongan Cukup', 'telp' => '0816-0000-0101', 'jumlah' => 10,
+        ])->assertRedirect();
+
+        $cukup = PendaftaranScopusCamp::where('nama', 'Rombongan Cukup')->first();
+
+        // 10 x 1.000.000 dipotong 20% = 8.000.000.
+        $this->assertSame(8000000 + (int) $cukup->kode_unik, (int) $cukup->total_pembayaran);
+        $this->assertSame(2000000, (int) $cukup->nominal_diskon);
+        $this->assertSame('ROMBONGAN', $cukup->kode_diskon);
+    }
+
+    #[Test]
+    public function alumni_mengalahkan_diskon_rombongan(): void
+    {
+        /*
+         * Hanya SATU potongan yang berlaku. Alumni di depan sebab ia milik
+         * orangnya, bukan pesanannya — dan dua potongan yang ditumpuk membuat
+         * harga akhirnya tidak bisa dijelaskan dari salah satunya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 50, 50);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '1000000', 'varian' => null])->save();
+
+        $this->tarif('scopus_camp', null, [
+            'diskon_alumni_persen' => 50,
+            'diskon_rombongan_min' => 10,
+            'diskon_rombongan_persen' => 20,
+        ]);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp', 'kategori_id' => $angkatan->id,
+            'nama' => 'Alumni Rombongan', 'telp' => '0816-0000-0102',
+            'jumlah' => 10, 'alumni' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Alumni Rombongan')->first();
+
+        $this->assertSame('ALUMNI', $b->kode_diskon, 'Alumni yang berlaku, bukan rombongan.');
+        $this->assertSame(5000000, (int) $b->nominal_diskon);
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User
@@ -970,7 +1136,11 @@ class TindakanPendaftaranTest extends TestCase
      * pencariannya mengambil yang pertama ketemu, jadi dua baris aktif
      * membuat ujinya bergantung pada urutan yang tidak dijamin.
      */
-    private function tarif(string $layanan, ?string $varian, ?int $persenAlumni): \App\ClinikScopusBiayaPersesi
+    /**
+     * @param  int|array<string, int|null>|null  $persenAlumni  angka = potongan
+     *   alumni saja; larik = kolom potongan apa adanya (alumni, rombongan).
+     */
+    private function tarif(string $layanan, ?string $varian, $persenAlumni): \App\ClinikScopusBiayaPersesi
     {
         \App\ClinikScopusBiayaPersesi::where('layanan', $layanan)
             ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
@@ -981,9 +1151,10 @@ class TindakanPendaftaranTest extends TestCase
             'layanan' => $layanan,
             'varian' => $varian,
             'biaya_persesi' => '1000000',
-            'diskon_alumni_persen' => $persenAlumni,
             'status' => \App\ClinikScopusBiayaPersesi::AKTIF,
-        ]);
+        ] + (is_array($persenAlumni)
+            ? $persenAlumni
+            : ['diskon_alumni_persen' => $persenAlumni]));
     }
 
     /** Satu angkatan baru milik layanan tertentu, dengan kuota yang diketahui. */

@@ -1590,6 +1590,121 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
             </div>
 
+            {{-- ------------------------------- langkah 5: pesanan lembaga --}}
+            {{-- Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan
+                 lebih — rombongan terbesar yang pernah ada 37 orang. Pesanan
+                 sebesar itu TERPAKSA dipecah ke beberapa angkatan, dan tanpa
+                 pengikat ini hasil pecahannya tidak saling tahu bahwa mereka
+                 satu pesanan: merekap dan menagihnya berarti mengumpulkan
+                 barisnya satu per satu dari ingatan. --}}
+            <div class="mis-kartu bar-langkah">
+                <div class="bar-langkah-kepala">
+                    <span class="bar-nomor" aria-hidden="true">5</span>
+                    <div>
+                        <p class="bar-langkah-judul">Pesanan lembaga?</p>
+                        <p class="bar-langkah-sub">Boleh dilewati kalau yang mendaftar perorangan.</p>
+                    </div>
+                </div>
+
+                <div class="bar-isian-kisi">
+                    <div class="mis-isian bar-lebar">
+                        <label class="mis-label" for="bar-pemesanan">Bagian dari pesanan</label>
+                        <select class="form-control-modern" id="bar-pemesanan" name="pemesanan_id">
+                            <option value="">Bukan pesanan lembaga</option>
+                            @foreach ($pemesanan as $pm)
+                                <option value="{{ $pm->id }}"
+                                    @selected(old('pemesanan_id', $terpilihPemesanan) === $pm->id)>
+                                    {{ $pm->kode }} — {{ $pm->nama_lembaga }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('pemesanan_id')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
+                        <p class="mis-bantuan" id="bar-pemesanan-ket">
+                            Pilih yang sudah ada, atau isi nama lembaganya di bawah untuk membuat baru.
+                        </p>
+                    </div>
+
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-lembaga-nama">
+                        <label class="mis-label" for="bar-lembaga-nama">Nama lembaga</label>
+                        <input type="text" class="form-control-modern @error('lembaga_nama') is-invalid @enderror"
+                            id="bar-lembaga-nama" name="lembaga_nama" value="{{ old('lembaga_nama') }}"
+                            maxlength="255" placeholder="mis. Universitas Ahmad Dahlan">
+                        @error('lembaga_nama')
+                            <p class="bar-salah">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ $message }}</span>
+                            </p>
+                        @enderror
+                        <p class="mis-bantuan">Diisi hanya kalau pesanannya belum ada di daftar atas.</p>
+                    </div>
+
+                    {{-- Alamat, NPWP, dan nomor PO: tiganya yang dituntut
+                         lembaga untuk pencairan, dan tidak satu pun punya
+                         tempat sebelum ini. --}}
+                    <div class="mis-isian bar-penuh" id="bar-bungkus-lembaga" hidden>
+                        <div class="bar-isian-kisi">
+                            <div class="mis-isian bar-lebar">
+                                <label class="mis-label" for="bar-lembaga-alamat">Alamat lembaga</label>
+                                <input type="text" class="form-control-modern" id="bar-lembaga-alamat"
+                                    name="lembaga_alamat" value="{{ old('lembaga_alamat') }}" maxlength="1000"
+                                    placeholder="untuk dicantumkan di faktur">
+                            </div>
+                            <div class="mis-isian">
+                                <label class="mis-label" for="bar-lembaga-npwp">NPWP</label>
+                                <input type="text" class="form-control-modern" id="bar-lembaga-npwp"
+                                    name="lembaga_npwp" value="{{ old('lembaga_npwp') }}" maxlength="40"
+                                    placeholder="boleh dikosongkan">
+                            </div>
+                            <div class="mis-isian">
+                                <label class="mis-label" for="bar-lembaga-po">Nomor PO</label>
+                                <input type="text" class="form-control-modern" id="bar-lembaga-po"
+                                    name="lembaga_po" value="{{ old('lembaga_po') }}" maxlength="60"
+                                    placeholder="boleh dikosongkan">
+                            </div>
+                            <div class="mis-isian">
+                                <label class="mis-label" for="bar-lembaga-pic">PIC lembaga</label>
+                                <input type="text" class="form-control-modern" id="bar-lembaga-pic"
+                                    name="lembaga_pic" value="{{ old('lembaga_pic') }}" maxlength="255"
+                                    placeholder="kosong = sama dengan pendaftarnya">
+                            </div>
+                            <div class="mis-isian">
+                                <label class="mis-label" for="bar-lembaga-pic-email">Email PIC</label>
+                                <input type="email" class="form-control-modern @error('lembaga_pic_email') is-invalid @enderror"
+                                    id="bar-lembaga-pic-email" name="lembaga_pic_email"
+                                    value="{{ old('lembaga_pic_email') }}" maxlength="255"
+                                    placeholder="untuk mengirim fakturnya">
+                                @error('lembaga_pic_email')
+                                    <p class="bar-salah">
+                                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                                        <span>{{ $message }}</span>
+                                    </p>
+                                @enderror
+                            </div>
+                            <div class="mis-isian">
+                                <label class="mis-label" for="bar-lembaga-pic-telp">Nomor PIC</label>
+                                <input type="text" class="form-control-modern" id="bar-lembaga-pic-telp"
+                                    name="lembaga_pic_telp" value="{{ old('lembaga_pic_telp') }}" maxlength="40"
+                                    placeholder="kosong = sama dengan pendaftarnya">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="bar-nota">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <span>
+                        <strong>Kursinya tetap dihitung per angkatan.</strong> Pesanan yang
+                        melebihi kuota satu angkatan disimpan beberapa kali ke angkatan
+                        berbeda — pesanan ini yang mengikatnya jadi satu faktur.
+                    </span>
+                </p>
+            </div>
+
             </div>{{-- /bar-utama --}}
 
             {{-- ------------------------------- ringkasan biaya, menempel --}}
@@ -2411,6 +2526,41 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         isianJumlah.addEventListener('input', segarkanPeserta);
 
+        /*
+         * Isian lembaga hanya tampil saat memang dibutuhkan.
+         *
+         * Pesanan yang SUDAH ada tidak perlu diisi identitasnya lagi — ia
+         * sudah punya. Dan pendaftar perorangan tidak perlu melihat enam
+         * isian kosong yang tidak akan ia isi sama sekali.
+         */
+        var menuPemesanan = el('bar-pemesanan');
+        var namaLembaga = el('bar-lembaga-nama');
+        var bungkusNamaLembaga = el('bar-bungkus-lembaga-nama');
+        var bungkusLembaga = el('bar-bungkus-lembaga');
+        var ketPemesanan = el('bar-pemesanan-ket');
+
+        var segarkanLembaga = function () {
+            var adaPesanan = menuPemesanan.value !== '';
+
+            tampil(bungkusNamaLembaga, !adaPesanan);
+            tampil(bungkusLembaga, !adaPesanan && namaLembaga.value.trim() !== '');
+
+            if (adaPesanan) {
+                // Nilainya dikosongkan: isian tersembunyi tetap terkirim, dan
+                // nama lembaga yang terbawa akan membuat pesanan KEDUA untuk
+                // lembaga yang pesanannya sudah dipilih.
+                namaLembaga.value = '';
+                ketPemesanan.textContent = 'Pendaftaran ini akan diikat ke pesanan tersebut.';
+            } else {
+                ketPemesanan.textContent = namaLembaga.value.trim() === ''
+                    ? 'Pilih yang sudah ada, atau isi nama lembaganya di bawah untuk membuat baru.'
+                    : 'Pesanan baru akan dibuat atas nama lembaga itu.';
+            }
+        };
+
+        menuPemesanan.addEventListener('change', segarkanLembaga);
+        namaLembaga.addEventListener('input', segarkanLembaga);
+
         cariAngkatan.addEventListener('input', function () {
             var pilih = layananTerpilih();
 
@@ -2465,6 +2615,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         segarkanBayar();
         batasiJumlah();
         segarkanPeserta();
+        segarkanLembaga();
     })();
 </script>
 @endpush

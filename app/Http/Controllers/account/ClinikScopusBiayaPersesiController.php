@@ -276,6 +276,13 @@ class ClinikScopusBiayaPersesiController extends Controller
              * mencatatnya sebagai potongan khusus beserta alasannya.
              */
             'diskon_alumni_persen' => ['nullable', 'integer', 'min:1', 'max:90'],
+            /*
+             * Diskon rombongan bersyarat: berlaku mulai berapa orang, dan
+             * berapa persen. Tanpa ambangnya, "diskon rombongan" berlaku juga
+             * untuk satu orang.
+             */
+            'diskon_rombongan_min' => ['nullable', 'integer', 'min:2', 'max:999'],
+            'diskon_rombongan_persen' => ['nullable', 'integer', 'min:1', 'max:90'],
             'fasilitas' => ['nullable', 'string', 'max:8000'],
             'kegiatan' => ['nullable', 'string', 'max:8000'],
             'kontak' => ['nullable', 'string', 'max:500'],
@@ -315,6 +322,19 @@ class ClinikScopusBiayaPersesiController extends Controller
 
         $ppn = $request->filled('ppn') ? (int) $data['ppn'] : null;
         $diskonAlumni = $request->filled('diskon_alumni_persen') ? (int) $data['diskon_alumni_persen'] : null;
+
+        /*
+         * Keduanya disimpan bersama atau tidak sama sekali: persen tanpa
+         * ambang berlaku untuk satu orang, dan ambang tanpa persen adalah
+         * syarat yang tidak memotong apa pun.
+         */
+        $rombonganMin = $request->filled('diskon_rombongan_min') ? (int) $data['diskon_rombongan_min'] : null;
+        $rombonganPersen = $request->filled('diskon_rombongan_persen') ? (int) $data['diskon_rombongan_persen'] : null;
+
+        if ($rombonganMin === null || $rombonganPersen === null) {
+            $rombonganMin = null;
+            $rombonganPersen = null;
+        }
         $fasilitas = $this->uraikanDaftar($data['fasilitas'] ?? null, 'fasilitas');
         $kegiatan = $this->uraikanDaftar($data['kegiatan'] ?? null, 'kegiatan');
         $kontak = trim((string) ($data['kontak'] ?? '')) ?: null;
@@ -344,6 +364,10 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'biaya_persesi' => $tarif,
                     'ppn' => $ppn,
                     'diskon_alumni_persen' => $diskonAlumni,
+            'diskon_rombongan_min' => $rombonganMin,
+            'diskon_rombongan_persen' => $rombonganPersen,
+                    'diskon_rombongan_min' => $rombonganMin,
+                    'diskon_rombongan_persen' => $rombonganPersen,
                     'fasilitas' => $fasilitas,
                     'kegiatan' => $kegiatan,
                     'kontak' => $kontak,

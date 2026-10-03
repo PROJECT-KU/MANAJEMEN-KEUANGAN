@@ -496,6 +496,12 @@ Route::prefix('account')
              * Slip cetak. DI ATAS rute rincian: '{id}/slip' tidak boleh
              * terbaca sebagai id sebuah pendaftaran.
              */
+            /*
+             * Faktur pesanan lembaga. DI ATAS rute '{layanan}/{id}': 'faktur'
+             * tidak boleh terbaca sebagai nama layanan.
+             */
+            Route::get('Pendaftaran-Layanan/faktur/{pemesanan}', 'account\\PendaftaranLayananController@faktur')
+                ->name('account.pendaftaran-layanan.faktur');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}/slip', 'account\\PendaftaranLayananController@slip')
                 ->name('account.pendaftaran-layanan.slip');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@rincian')
