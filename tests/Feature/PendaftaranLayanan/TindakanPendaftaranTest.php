@@ -317,6 +317,104 @@ class TindakanPendaftaranTest extends TestCase
         }
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * Varian untuk layanan tanpa angkatan
+     * ------------------------------------------------------------------
+     *
+     * Empat layanan mewarisi variannya dari angkatan yang dipilih. Scopus
+     * Kafe tidak berangkatan — terukur nol baris angkatan — jadi sebelum ini
+     * varian Online/Offline yang disetel di layar Layanan tidak muncul di
+     * borang sama sekali, dan tidak punya tempat untuk disimpan.
+     */
+
+    #[Test]
+    public function scopus_kafe_menyimpan_varian_yang_dipilih(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $this->berivarian('scopus_kafe', ['online' => 'Online', 'offline' => 'Offline']);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Peserta Kafe Daring',
+            'email' => 'kafe' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0020',
+            'total' => '900.000',
+            'varian' => 'online',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusKafe::where('nama', 'Peserta Kafe Daring')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('online', $b->varian);
+        $this->assertSame(900000, (int) $b->total_keseluruhan_pembayaran);
+    }
+
+    #[Test]
+    public function varian_di_luar_daftar_layanannya_disimpan_kosong(): void
+    {
+        /*
+         * Daftar variannya hidup di kolom JSON `layanan.varian` yang disunting
+         * orang lewat aplikasi — bukan daftar tertutup di kode. Nilai karangan
+         * yang diterima apa adanya berarti baris yang tarifnya tidak akan
+         * pernah ketemu, dan tidak ada yang tahu sebabnya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $this->berivarian('scopus_kafe', ['online' => 'Online', 'offline' => 'Offline']);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Peserta Varian Karangan',
+            'email' => 'karang' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0021',
+            'total' => '500.000',
+            'varian' => 'hibrida',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusKafe::where('nama', 'Peserta Varian Karangan')->first();
+
+        $this->assertNotNull($b);
+        $this->assertNull($b->varian);
+    }
+
+    #[Test]
+    public function layanan_berangkatan_tidak_menyimpan_varian_dari_borang(): void
+    {
+        /*
+         * Variannya datang dari ANGKATAN, bukan dari kiriman borang. Tabelnya
+         * pun tidak punya kolomnya, jadi nilai yang terbawa harus diabaikan —
+         * bukan membuat kirimannya gagal.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Varian Terbawa',
+            'email' => 'bawa' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0022',
+            'varian' => 'offline',
+        ])->assertRedirect();
+
+        $this->assertNotNull(
+            PendaftaranScopusCamp::where('nama', 'Peserta Varian Terbawa')->first()
+        );
+    }
+
+    /** Menyetel daftar varian satu layanan, sebatas transaksi uji ini. */
+    private function berivarian(string $kode, array $varian): void
+    {
+        $isi = [];
+
+        foreach ($varian as $k => $nama) {
+            $isi[] = ['kode' => $k, 'nama' => $nama];
+        }
+
+        \App\Layanan::where('kode', $kode)->update(['varian' => json_encode($isi)]);
+        \App\Layanan::lupakanKatalog();
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User

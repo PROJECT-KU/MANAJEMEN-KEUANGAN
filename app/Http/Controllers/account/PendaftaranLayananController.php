@@ -154,6 +154,8 @@ class PendaftaranLayananController extends Controller
             'angkatan' => $angkatan,
             'alumni' => $this->persenAlumni(array_keys($katalog)),
             'caraBayar' => Pendaftaran::caraBayarPilihan(),
+            'varian' => $this->varianLayanan(array_keys($katalog)),
+            'tarif' => $this->tarifLayanan(array_keys($katalog)),
         ]);
     }
 
@@ -169,6 +171,46 @@ class PendaftaranLayananController extends Controller
      * @param  array<int, string>  $layanan
      * @return array<string, int>
      */
+    /**
+     * Daftar varian tiap layanan, untuk layanan yang memilihnya sendiri.
+     *
+     * @param  array<int, string>  $layanan
+     * @return array<string, array<string, string>>
+     */
+    private function varianLayanan(array $layanan): array
+    {
+        $katalog = \App\Layanan::katalog();
+        $keluar = [];
+
+        foreach ($layanan as $kode) {
+            $keluar[$kode] = $katalog[$kode]['varian'] ?: [];
+        }
+
+        return $keluar;
+    }
+
+    /**
+     * Harga tiap tarif aktif, berkunci "layanan|varian".
+     *
+     * Dipakai borang untuk mengisi sendiri nominal layanan TANPA angkatan:
+     * harganya sudah disetel di Tarif Layanan, dan menyuruh panitia
+     * mengetiknya lagi berarti dua tempat yang bisa berselisih.
+     *
+     * @param  array<int, string>  $layanan
+     * @return array<string, int>
+     */
+    private function tarifLayanan(array $layanan): array
+    {
+        return \App\ClinikScopusBiayaPersesi::query()
+            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+            ->whereIn('layanan', $layanan)
+            ->get(['layanan', 'varian', 'biaya_persesi'])
+            ->mapWithKeys(fn ($t) => [
+                $t->layanan . '|' . ($t->varian ?? '') => (int) $t->biaya_persesi,
+            ])
+            ->all();
+    }
+
     private function persenAlumni(array $layanan): array
     {
         return \App\ClinikScopusBiayaPersesi::query()
@@ -214,6 +256,9 @@ class PendaftaranLayananController extends Controller
              */
             'cara_bayar' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
             'uang_diterima' => ['nullable', 'boolean'],
+            // Daftar variannya hidup di `layanan.varian`, jadi nilainya
+            // dicocokkan di lapisan tindakan — di sini cukup bentuknya.
+            'varian' => ['nullable', 'string', 'max:40'],
         ];
 
         $layanan = (string) $request->input('layanan');
