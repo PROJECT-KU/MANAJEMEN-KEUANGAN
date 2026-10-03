@@ -758,6 +758,20 @@ class PendaftaranSemuaLayanan
                      */
                     'varian_sendiri' => ! ($s['berangkatan'] ?? false)
                         && isset($s['kolom']['varian']),
+                    // Nama sesi hanya dipunyai tabel Scopus Kafe.
+                    'pakai_sesi' => ($s['kolom']['sesi'] ?? null) === 'sesi',
+                    /*
+                     * Pola nomornya disebut dengan kata, bukan dibiarkan jadi
+                     * kejutan. Nomornya dibuat sistem sesudah disimpan, jadi
+                     * panitia yang ditanya "nomor saya berapa" tidak bisa
+                     * menjawab sebelum menyimpan — setidaknya bentuknya bisa
+                     * disebutkan lebih dulu.
+                     */
+                    'pola_nomor_kata' => match ($s['nomor_pola']) {
+                        'we_berurut' => 'nomornya berurut, seperti WE-0007',
+                        'booking' => 'nomornya seperti BOOK-03102026193045-AB12C',
+                        default => 'nomornya lima huruf-angka acak, seperti A7K2M',
+                    },
                 ];
             }
         }

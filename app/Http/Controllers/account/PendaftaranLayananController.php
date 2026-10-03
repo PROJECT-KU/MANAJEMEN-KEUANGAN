@@ -156,6 +156,13 @@ class PendaftaranLayananController extends Controller
             'caraBayar' => Pendaftaran::caraBayarPilihan(),
             'varian' => $this->varianLayanan(array_keys($katalog)),
             'tarif' => $this->tarifLayanan(array_keys($katalog)),
+            /*
+             * Angkatan yang sudah terpilih sepulang dari "simpan & tambah
+             * lagi". Tanpa ini, mendaftarkan rombongan ke satu angkatan tetap
+             * menuntut memilih angkatannya lagi tiap orang — persis pekerjaan
+             * yang hendak dihemat tombol itu.
+             */
+            'terpilihAngkatan' => (string) $request->input('kategori', ''),
         ]);
     }
 
@@ -171,6 +178,72 @@ class PendaftaranLayananController extends Controller
      * @param  array<int, string>  $layanan
      * @return array<string, int>
      */
+    /**
+     * Pesan kalau orang ini SUDAH terdaftar, atau null kalau belum.
+     *
+     * Sebelumnya tidak ada pemeriksaan sama sekali: orang yang sama bisa
+     * didaftarkan dua kali ke angkatan yang sama tanpa peringatan, dan
+     * kuotanya ikut berkurang dua kali.
+     *
+     * Dicocokkan lewat email ATAU nomor telepon, sebab satu orang sering
+     * memberi email berbeda saat ditanya dua kali, dan nomornya diadu dalam
+     * bentuk ANGKA SAJA — "0816-0000-1234" dan "+62 816 0000 1234" orang yang
+     * sama, dan hanya cocok sesudah pemisahnya dibuang.
+     *
+     * Dibatasi ke angkatan yang sama untuk layanan berangkatan: orang yang
+     * sama memang boleh ikut angkatan Oktober dan November sekaligus.
+     */
+    private function pendaftarGanda(string $layanan, Request $request): ?string
+    {
+        $sumber = Pendaftaran::sumber($layanan);
+        $kolom = $sumber['kolom'] ?? [];
+
+        if (! isset($kolom['email'], $kolom['telp'])) {
+            return null;
+        }
+
+        $email = trim((string) $request->input('email'));
+        $telp = $this->telpBersih((string) $request->input('telp'));
+        $kategori = (string) $request->input('kategori_id');
+
+        $kueri = DB::table($sumber['tabel'])
+            ->when(
+                ($sumber['berangkatan'] ?? false) && $kategori !== '' && isset($kolom['angkatan_id']),
+                fn ($q) => $q->where($kolom['angkatan_id'], $kategori)
+            )
+            ->where(function ($q) use ($kolom, $email, $telp) {
+                $q->where($kolom['email'], $email);
+
+                if ($telp !== '') {
+                    /*
+                     * Pemisahnya dibuang di SISI SQL, bukan dengan LIKE:
+                     * nomor tersimpan apa adanya dengan spasi, tanda hubung,
+                     * dan kurung yang berbeda-beda, jadi pembandingan
+                     * untaian mentah hampir selalu meleset.
+                     */
+                    $q->orWhereRaw(
+                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" . $kolom['telp']
+                            . ", ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '') = ?",
+                        [$telp]
+                    );
+                }
+            });
+
+        $ada = $kueri->first([$kolom['nomor'] ?? 'id', $kolom['nama_orang']]);
+
+        if ($ada === null) {
+            return null;
+        }
+
+        $nomor = $ada->{$kolom['nomor'] ?? 'id'} ?? '-';
+
+        return 'Orang ini sepertinya sudah terdaftar — ' . $ada->{$kolom['nama_orang']}
+            . ' (' . $nomor . ')'
+            . (($sumber['berangkatan'] ?? false) ? ' di angkatan yang sama' : '')
+            . '. Periksa dulu di daftar; kalau memang orang yang berbeda, '
+            . 'ubah salah satu email atau nomornya.';
+    }
+
     /**
      * Daftar varian tiap layanan, untuk layanan yang memilihnya sendiri.
      *
@@ -259,6 +332,24 @@ class PendaftaranLayananController extends Controller
             // Daftar variannya hidup di `layanan.varian`, jadi nilainya
             // dicocokkan di lapisan tindakan — di sini cukup bentuknya.
             'varian' => ['nullable', 'string', 'max:40'],
+            /*
+             * Bukti bayar boleh langsung diunggah dari sini. Sebelumnya tidak
+             * bisa sama sekali: pendaftar yang datang membawa struk harus
+             * disimpan dulu, lalu buktinya diunggah dari halaman rincian.
+             *
+             * 4 MB, dan batasnya disebut di layar: berkas dari kamera ponsel
+             * rutin melewatinya, dan penolakan tanpa angka tidak memberi tahu
+             * harus diapakan.
+             */
+            'bukti' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            // Nama sesi Scopus Kafe; tabelnya memang punya kolomnya.
+            'sesi' => ['nullable', 'string', 'max:120'],
+            'lagi' => ['nullable', 'boolean'],
+            // Kabar ke pendaftarnya: dipilih, bukan selalu. Orang yang
+            // mendaftar lewat WhatsApp sering memberi email asal-asalan, dan
+            // surat ke alamat karangan hanya menambah laporan gagal kirim.
+            'kabari' => ['nullable', 'boolean'],
+            'abaikan_ganda' => ['nullable', 'boolean'],
         ];
 
         $layanan = (string) $request->input('layanan');
@@ -276,7 +367,26 @@ class PendaftaranLayananController extends Controller
             'telp' => 'nomor WhatsApp',
             'total' => 'total bayar',
             'cara_bayar' => 'cara bayar',
+            'bukti' => 'bukti bayar',
         ]);
+
+        /*
+         * Pemeriksaan ganda SESUDAH validasi bentuk, dan bisa dilewati sekali.
+         *
+         * Bukan larangan keras: dua orang berbeda bisa saja berbagi satu
+         * nomor WhatsApp keluarga, dan panitia yang tahu itu harus tetap bisa
+         * melanjutkan. Jadi kirim pertama ditahan dengan keterangan, dan
+         * tombol "tetap simpan" mengirim ulang dengan penanda ini.
+         */
+        if (! $request->boolean('abaikan_ganda')) {
+            $ganda = $this->pendaftarGanda($layanan, $request);
+
+            if ($ganda !== null) {
+                return back()->withInput()
+                    ->withErrors(['email' => $ganda])
+                    ->with('ganda', true);
+            }
+        }
 
         $hasil = (new BuatPendaftaran)->jalankan($layanan, $request->all(), $this->siapa());
 
@@ -291,6 +401,21 @@ class PendaftaranLayananController extends Controller
          * memeriksa nomor dan kode uniknya untuk dikirim ke orangnya — dan
          * keduanya baru dibuat sistem, jadi panitia belum pernah melihatnya.
          */
+        /*
+         * "Simpan & tambah lagi" kembali ke borang dengan layanan dan
+         * angkatannya sudah terpilih. Mendaftarkan rombongan satu per satu
+         * sebelumnya berarti sepuluh kali kembali ke borang dan sepuluh kali
+         * memilih ulang layanan serta angkatannya.
+         */
+        if ($request->boolean('lagi')) {
+            return redirect()
+                ->route('account.pendaftaran-layanan.baru', array_filter([
+                    'layanan' => $layanan,
+                    'kategori' => $request->input('kategori_id'),
+                ]))
+                ->with('sukses', $hasil['pesan'] . ' Silakan isi pendaftar berikutnya.');
+        }
+
         return redirect()
             ->route('account.pendaftaran-layanan.rincian', [$layanan, $hasil['model']->getKey()])
             ->with('sukses', $hasil['pesan']);
@@ -902,6 +1027,22 @@ class PendaftaranLayananController extends Controller
      * Tanda yang dibuang sama dengan yang dipakai layar Data Pelanggan, supaya
      * dua layar tidak punya dua pengertian berbeda tentang "nomor yang sama".
      */
+    /**
+     * Nomor telepon tanpa pemisah, untuk diadu dengan yang tersimpan.
+     *
+     * Dipisahkan dari telpAngka(): yang itu TIDAK menerima argumen — ia
+     * merakit ungkapan SQL untuk kolomnya. Dipanggil dengan nomor sebagai
+     * argumen, PHP tidak mengeluh dan ia tetap mengembalikan ungkapan SQL-nya,
+     * sehingga pembandingan nomornya tidak pernah cocok sekali pun.
+     *
+     * Daftar tandanya disamakan dengan telpAngka() supaya kedua sisi
+     * perbandingan membuang hal yang sama.
+     */
+    private function telpBersih(string $telp): string
+    {
+        return str_replace(['-', ' ', '(', ')', '+', '.'], '', trim($telp));
+    }
+
     private function telpAngka(): string
     {
         $bersih = 'telp';
