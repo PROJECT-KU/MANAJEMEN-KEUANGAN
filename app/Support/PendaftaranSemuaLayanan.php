@@ -612,6 +612,11 @@ class PendaftaranSemuaLayanan
                     'ikon' => $s['ikon'],
                     'warna' => $s['warna'],
                     'berangkatan' => (bool) ($s['berangkatan'] ?? false),
+                    // Potongan khusus hanya bisa disimpan tabel yang punya
+                    // kolomnya. Scopus Kafe tidak punya — dan di sana
+                    // nominalnya memang diketik langsung, jadi potongannya
+                    // sudah termasuk di dalamnya.
+                    'bisa_potongan' => isset($s['kolom']['nominal_diskon']),
                 ];
             }
         }

@@ -79,10 +79,26 @@ class BuatPendaftaran
                 }
             }
 
-            $total = $this->hitungTotal($layanan, $angkatan, $jumlah, $isian);
+            $subtotal = $this->hitungTotal($layanan, $angkatan, $jumlah, $isian);
+
+            /*
+             * Potongan khusus, DI ATAS potongan bawaan angkatannya.
+             *
+             * Angkatan sudah punya diskonnya sendiri dan itu sudah terhitung
+             * di `total_biaya`; yang ini untuk hal yang tidak bisa diketahui
+             * angkatan — peserta yang disponsori, harga mitra, atau
+             * kesepakatan di tempat. Dibatasi subtotalnya: potongan yang
+             * melebihi tagihan menghasilkan total negatif, dan nominal
+             * transfer negatif tidak berarti apa-apa.
+             */
+            $potongan = min($subtotal, max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0))));
+            $total = $subtotal - $potongan;
+
             $kodeUnik = $this->kodeUnikBebas($layanan, $isian['kategori_id'] ?? null, $total);
 
-            $baris = $this->rakitKolom($layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa);
+            $baris = $this->rakitKolom(
+                $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa, $potongan
+            );
 
             $model = $sumber['model'];
             $dibuat = $model::create($baris);
@@ -188,7 +204,8 @@ class BuatPendaftaran
         int $jumlah,
         int $total,
         int $kodeUnik,
-        ?string $olehSiapa
+        ?string $olehSiapa,
+        int $potongan = 0
     ): array {
         $kolom = $sumber['kolom'];
         $baris = [
@@ -220,6 +237,23 @@ class BuatPendaftaran
             $baris[$kolom['kode_unik']] = $kodeUnik;
         }
 
+        /*
+         * Potongan khusus hanya ditulis ke tabel yang punya kolomnya —
+         * Scopus Kafe tidak punya, dan di sana nominalnya memang diketik
+         * langsung sehingga potongannya sudah termasuk di dalamnya.
+         *
+         * Kodenya ikut disimpan: tanpa keterangan, potongan Rp 500.000 pada
+         * satu pendaftaran tidak bisa dijelaskan siapa pun enam bulan
+         * kemudian.
+         */
+        if ($potongan > 0 && isset($kolom['nominal_diskon'])) {
+            $baris[$kolom['nominal_diskon']] = $potongan;
+
+            if (isset($kolom['kode_diskon'])) {
+                $baris[$kolom['kode_diskon']] = trim((string) ($isian['kode_potongan'] ?? '')) ?: 'KHUSUS';
+            }
+        }
+
         $catatan = trim((string) ($isian['note'] ?? ''));
         $kolomCatatan = Pendaftaran::kolomCatatan($layanan);
 
@@ -228,7 +262,11 @@ class BuatPendaftaran
             // punya alamat IP maupun jejak peramban seperti yang dari jalur
             // publik, jadi tanpa ini tidak ada keterangan asal-usulnya.
             $jejak = 'Didaftarkan panitia' . ($olehSiapa !== null ? ' oleh ' . $olehSiapa : '')
-                . ' pada ' . now()->format('d M Y H:i');
+                . ' pada ' . now()->format('d M Y H:i')
+                . ($potongan > 0
+                    ? ' dengan potongan khusus Rp ' . number_format($potongan, 0, ',', '.')
+                        . ' (' . (trim((string) ($isian['kode_potongan'] ?? '')) ?: 'tanpa keterangan') . ')'
+                    : '');
 
             $baris[$kolomCatatan] = $catatan !== '' ? $catatan . ' | ' . $jejak : $jejak;
         }
