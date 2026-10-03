@@ -725,6 +725,38 @@ class LayarPendaftaranLayananTest extends TestCase
         return (string) $ada;
     }
 
+    /**
+     * Tawaran alumni dibaca dari varian angkatan yang terpilih, jadi hanya
+     * benar kalau pilihan angkatannya sudah diisi lebih dulu.
+     *
+     * Terbalik, lookup-nya memakai varian kosong dan tawarannya tidak pernah
+     * muncul — tanpa galat apa pun di peramban. Terukur: tarif menyetel 15%,
+     * kotak centangnya tetap tersembunyi. Penjaga ini membaca urutan di
+     * sumbernya karena bug-nya hidup di JS, bukan di jawaban peladen.
+     */
+    public function test_tawaran_alumni_dihitung_sesudah_angkatan_diisi(): void
+    {
+        $sumber = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baru.blade.php')
+        );
+
+        $segarkan = strpos($sumber, 'var segarkan = function');
+        $this->assertNotFalse($segarkan, 'Fungsi segarkan() tidak ditemukan.');
+
+        $isiAngkatan = strpos($sumber, 'isiAngkatan(pilih.nilai)', $segarkan);
+        $tawaran = strpos($sumber, 'tampil(bungkusAlumni', $segarkan);
+
+        $this->assertNotFalse($isiAngkatan, 'segarkan() tidak mengisi pilihan angkatan.');
+        $this->assertNotFalse($tawaran, 'segarkan() tidak menawarkan pilihan alumni.');
+
+        $this->assertLessThan(
+            $tawaran,
+            $isiAngkatan,
+            'Tawaran alumni dihitung sebelum pilihan angkatan diisi, '
+                . 'jadi variannya masih kosong dan potongannya tidak pernah ditemukan.'
+        );
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {

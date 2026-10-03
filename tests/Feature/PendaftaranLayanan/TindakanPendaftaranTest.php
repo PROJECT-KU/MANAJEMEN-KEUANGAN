@@ -86,6 +86,30 @@ class TindakanPendaftaranTest extends TestCase
         return $u->refresh();
     }
 
+    /**
+     * Satu tarif AKTIF untuk layanan/varian tertentu, dengan potongan
+     * alumninya.
+     *
+     * Tarif aktif yang sudah ada untuk kombinasi itu dinonaktifkan dulu:
+     * pencariannya mengambil yang pertama ketemu, jadi dua baris aktif
+     * membuat ujinya bergantung pada urutan yang tidak dijamin.
+     */
+    private function tarif(string $layanan, ?string $varian, ?int $persenAlumni): \App\ClinikScopusBiayaPersesi
+    {
+        \App\ClinikScopusBiayaPersesi::where('layanan', $layanan)
+            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+            ->when($varian === null, fn ($q) => $q->whereNull('varian'), fn ($q) => $q->where('varian', $varian))
+            ->update(['status' => \App\ClinikScopusBiayaPersesi::NONAKTIF]);
+
+        return \App\ClinikScopusBiayaPersesi::create([
+            'layanan' => $layanan,
+            'varian' => $varian,
+            'biaya_persesi' => '1000000',
+            'diskon_alumni_persen' => $persenAlumni,
+            'status' => \App\ClinikScopusBiayaPersesi::AKTIF,
+        ]);
+    }
+
     /** Satu angkatan baru milik layanan tertentu, dengan kuota yang diketahui. */
     private function angkatan(string $layanan, int $total = 50, ?int $sisa = null): KategoriLayanan
     {
@@ -1166,8 +1190,149 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertSame('SPONSOR', $b->kode_diskon);
         // Potongan yang tidak bisa dijelaskan enam bulan kemudian sama saja
         // dengan selisih uang yang tidak ada keterangannya.
-        $this->assertStringContainsString('potongan khusus Rp 300.000', (string) $b->note);
-        $this->assertStringContainsString('SPONSOR', (string) $b->note);
+        // Kalimat jejaknya netral — "potongan", bukan "potongan khusus" —
+        // sebab potongannya kini bisa dua jenis, dan jenisnya sudah disebut
+        // oleh kodenya di dalam kurung.
+        $this->assertStringContainsString('potongan Rp 300.000 (SPONSOR)', (string) $b->note);
+    }
+
+    #[Test]
+    public function alumni_mendapat_potongan_dari_tarif_layanan(): void
+    {
+        /*
+         * Potongan alumni disetel SEKALI di Tarif Layanan, lalu diambil
+         * borang pendaftaran — bukan diketik ulang tiap kali, yang berarti
+         * angkanya bisa berbeda-beda antar petugas tanpa ada yang tahu mana
+         * yang benar.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill([
+            'varian' => null, 'biaya' => '1000000', 'total_biaya' => '1000000',
+        ])->save();
+
+        $this->tarif('scopus_camp', null, 10);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Peserta Alumni',
+            'email' => 'alumni' . Str::random(6) . '@contoh.test',
+            'telp' => '0817-0000-0001',
+            'jumlah' => 2,
+            'alumni' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Peserta Alumni')->first();
+
+        $this->assertNotNull($b);
+        // 1.000.000 x 2 = 2.000.000, potongan 10% = 200.000.
+        $this->assertSame(200000, (int) $b->nominal_diskon);
+        $this->assertSame(1800000, (int) $b->total_pembayaran);
+        $this->assertSame('ALUMNI', $b->kode_diskon);
+    }
+
+    #[Test]
+    public function potongan_alumni_tidak_bisa_digabung_dengan_potongan_khusus(): void
+    {
+        /*
+         * Diminta pemilik, dan memang begitu mestinya: dua potongan yang
+         * ditumpuk membuat harga akhirnya tidak bisa dijelaskan dari salah
+         * satunya. Yang alumni menang — ia datang dari aturan yang disetel
+         * sekali, sementara potongan khusus diketik per pendaftaran.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['varian' => null, 'biaya' => '1000000', 'total_biaya' => '1000000'])->save();
+
+        $this->tarif('scopus_camp', null, 10);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Alumni Dan Khusus',
+            'email' => 'dua' . Str::random(6) . '@contoh.test',
+            'telp' => '0817-0000-0002',
+            'jumlah' => 1,
+            'alumni' => '1',
+            // Dikirim juga, dan HARUS diabaikan — bukan ditambahkan.
+            'potongan' => '900000',
+            'kode_potongan' => 'SPONSOR',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Alumni Dan Khusus')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame(100000, (int) $b->nominal_diskon, 'Hanya potongan alumni yang berlaku.');
+        $this->assertSame(900000, (int) $b->total_pembayaran);
+        $this->assertSame('ALUMNI', $b->kode_diskon);
+    }
+
+    #[Test]
+    public function potongan_alumni_mengikuti_varian_angkatannya(): void
+    {
+        /*
+         * Satu layanan bisa punya beberapa tarif dengan varian berbeda —
+         * Scopus Camp punya jawa Rp 5,5jt dan luar_jawa Rp 6,5jt — dan
+         * potongan alumninya disetel per tarif. Memakai tarif mana pun yang
+         * kebetulan ketemu duluan berarti memberi potongan milik varian lain.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->tarif('scopus_camp', 'jawa', 10);
+        $this->tarif('scopus_camp', 'luar_jawa', 25);
+
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill([
+            'varian' => 'luar_jawa', 'biaya' => '1000000', 'total_biaya' => '1000000',
+        ])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Alumni Luar Jawa',
+            'email' => 'luar' . Str::random(6) . '@contoh.test',
+            'telp' => '0817-0000-0003',
+            'jumlah' => 1,
+            'alumni' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Alumni Luar Jawa')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame(250000, (int) $b->nominal_diskon,
+            'Yang berlaku 25% milik luar_jawa, bukan 10% milik jawa.');
+    }
+
+    #[Test]
+    public function alumni_tanpa_tarif_yang_menyetelnya_tidak_memotong_apa_pun(): void
+    {
+        /*
+         * Kiriman tetap diperiksa peladen walau borangnya tidak menawarkan
+         * pilihan alumni untuk layanan seperti itu — yang menentukan peladen,
+         * bukan markah yang bisa diubah dari peramban.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['varian' => null, 'biaya' => '1000000', 'total_biaya' => '1000000'])->save();
+
+        // Tarifnya ada, tetapi potongan alumninya tidak disetel.
+        $this->tarif('scopus_camp', null, null);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Alumni Tanpa Aturan',
+            'email' => 'tanpa' . Str::random(6) . '@contoh.test',
+            'telp' => '0817-0000-0004',
+            'jumlah' => 1,
+            'alumni' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Alumni Tanpa Aturan')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame(1000000, (int) $b->total_pembayaran, 'Tidak ada potongan sama sekali.');
     }
 
     #[Test]

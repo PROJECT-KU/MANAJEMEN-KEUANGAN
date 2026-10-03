@@ -834,6 +834,7 @@ Tarif Layanan | MIS
                                     'id' => $t?->getKey(),
                                     'biaya' => $t ? (int) $t->biaya_persesi : null,
                                     'ppn' => $t && $t->ppn !== null ? $t->ppn_persen : null,
+                                    'alumni' => $t ? $t->diskon_alumni_persen : null,
                                     'fasilitas' => implode("\n", $fasilitas),
                                     'kegiatan' => $t ? implode("\n", $t->daftar_kegiatan) : '',
                                     'kontak' => $t?->kontak ?? '',
@@ -1241,6 +1242,24 @@ Tarif Layanan | MIS
                         <input type="number" class="form-control-modern" id="tar-f-ppn" name="ppn"
                             min="0" max="100" inputmode="numeric" placeholder="0">
                     </div>
+
+                    {{-- Potongan alumni, disetel sekali di sini lalu dipakai
+                         borang Daftarkan Pendaftar.
+
+                         PERSENTASE, bukan rupiah: tarif disetel per LAYANAN
+                         sementara harganya berbeda-beda per angkatan —
+                         terukur Yogyakarta Rp 4,5jt dan Padang Rp 5,5jt —
+                         jadi potongan rupiah berarti persentase yang berbeda
+                         di tiap angkatan. "Alumni dapat 10%" adalah janji yang
+                         bisa dipegang; "alumni dapat Rp 450.000" berubah
+                         artinya tiap kali harganya naik. --}}
+                    <div class="mis-isian tar-isian persen">
+                        <label class="mis-label" for="tar-f-alumni">Potongan alumni</label>
+                        <span class="tar-tanda kanan" aria-hidden="true">%</span>
+                        <input type="number" class="form-control-modern" id="tar-f-alumni"
+                            name="diskon_alumni_persen" min="1" max="90" inputmode="numeric"
+                            placeholder="kosongkan kalau tidak ada">
+                    </div>
                 </div>
 
                 <div class="tar-pratinjau" aria-live="polite">
@@ -1636,6 +1655,10 @@ Tarif Layanan | MIS
 
             biaya.value = d.biaya === null ? '' : Number(d.biaya).toLocaleString('id-ID');
             ppn.value = d.ppn === null ? '' : d.ppn;
+            // Tanpa ini, membuka borang untuk memperbaiki tarif akan
+            // MENGOSONGKAN potongan alumni yang sudah disetel — isiannya
+            // kosong, dan menyimpan menuliskan kosong itu ke basis data.
+            el('tar-f-alumni').value = d.alumni === null || d.alumni === undefined ? '' : d.alumni;
             el('tar-f-fasilitas').value = d.fasilitas;
             el('tar-f-kegiatan').value = d.kegiatan;
             el('tar-f-kontak').value = d.kontak;
