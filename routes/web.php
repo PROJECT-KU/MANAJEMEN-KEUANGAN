@@ -78,6 +78,15 @@ Route::get('/Webinar-Eksklusif/Daftar/{id}', 'Publict\PublicWebinarEksklusifCont
 // dan TIAP kiriman yang berhasil langsung memotong kuota — satu skrip
 // sederhana bisa menghabiskan seluruh kursi sebelum ada yang sadar. Enam
 // masih longgar untuk orang yang salah ketik beberapa kali.
+/*
+ * Pencarian data pendaftar dari nomor WhatsApp, untuk mengisi borang
+ * otomatis. Dibatasi 10 per menit per IP: jalur ini menukar nomor jadi nama
+ * dan email, jadi yang perlu dihambat bukan salah ketik melainkan penyisiran.
+ */
+Route::post('/Webinar-Eksklusif/cari-pendaftar', 'Publict\PublicWebinarEksklusifController@cariPendaftar')
+    ->middleware('throttle:10,1')
+    ->name('public.webinareksklusif.caripendaftar');
+
 Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifController@store')
     ->middleware('throttle:6,1')
     ->name('public.webinareksklusif.store');

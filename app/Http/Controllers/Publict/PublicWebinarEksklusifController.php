@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Publict;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Services\Doku;
+use App\Support\NomorTelepon;
+use App\User;
 use App\WebinarEksklusifPendaftaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,6 +29,143 @@ class PublicWebinarEksklusifController extends Controller
 
     public function __construct(private Doku $doku)
     {
+    }
+
+    /**
+     * Data pengunjung yang sedang masuk, untuk mengisi borang di muka.
+     *
+     * Larik kosong kalau ia tamu — bukan null, supaya tampilannya cukup
+     * memanggil old('nama', $isiAwal['nama'] ?? '') tanpa bercabang.
+     *
+     * @return array<string,string>
+     */
+    private function isiAwalDariAkun(): array
+    {
+        $akun = auth()->user();
+
+        if ($akun === null) {
+            return [];
+        }
+
+        return array_filter([
+            'nama' => (string) ($akun->full_name ?? ''),
+            'email' => (string) ($akun->email ?? ''),
+            'telp' => NomorTelepon::rapikan($akun->telp ?? ''),
+            'affiliasi' => (string) ($akun->company ?? ''),
+        ], fn ($v) => $v !== '');
+    }
+
+    // --------------------------------------------------- isi otomatis
+
+    /**
+     * Mencari data pendaftar dari nomor WhatsApp-nya, untuk mengisi borang
+     * secara otomatis.
+     *
+     * INI MEMBUKA DATA, dan itu disengaja terbatas. Siapa pun yang tahu
+     * sebuah nomor bisa menukarnya jadi nama dan email lewat jalur ini, jadi
+     * yang dijaga:
+     *
+     * 1. Nomornya harus LENGKAP (9-15 angka). Potongan nomor tidak dicari,
+     *    sehingga tidak bisa disisir dari awalan.
+     * 2. Dibatasi 10 permintaan per menit per alamat IP (di berkas rute).
+     * 3. Hanya dijawab kalau cocoknya SATU ORANG. Di basis data ini ada satu
+     *    nomor yang dipakai empat akun sekaligus (manager, staff, rental,
+     *    karyawan) — menjawabnya berarti menyerahkan identitas orang yang
+     *    salah.
+     * 4. Emailnya dikembalikan utuh karena memang untuk diisikan ke borang,
+     *    tetapi tiap pencarian yang BERHASIL dicatat ke log, supaya
+     *    penyisiran meninggalkan jejak.
+     *
+     * Yang sudah masuk akun tidak lewat sini sama sekali: datanya sudah
+     * dirender peladen di borangnya.
+     */
+    public function cariPendaftar(Request $request)
+    {
+        $data = $request->validate([
+            'telp' => ['required', 'string', 'max:30'],
+        ]);
+
+        $nomor = NomorTelepon::rapikan($data['telp']);
+
+        if (! NomorTelepon::masukAkal($nomor)) {
+            return response()->json(['ditemukan' => false]);
+        }
+
+        $ketemu = $this->cariDariNomor($nomor);
+
+        if ($ketemu === null) {
+            return response()->json(['ditemukan' => false]);
+        }
+
+        Log::info('Isi otomatis borang Webinar Eksklusif', [
+            'nomor' => substr($nomor, 0, 5) . '***' . substr($nomor, -3),
+            'ip' => $request->ip(),
+            'sumber' => $ketemu['sumber'],
+        ]);
+
+        return response()->json([
+            'ditemukan' => true,
+            'nama' => $ketemu['nama'],
+            'email' => $ketemu['email'],
+            'affiliasi' => $ketemu['affiliasi'],
+        ]);
+    }
+
+    /**
+     * Satu orang yang nomornya cocok, atau null.
+     *
+     * Pendaftaran sebelumnya didahulukan daripada akun: isinya persis
+     * sebentuk dengan borang ini (nama beserta gelar, asal instansi),
+     * sedangkan nama di akun sering sekadar "admin" atau "staff".
+     *
+     * @return array{nama:string,email:string,affiliasi:?string,sumber:string}|null
+     */
+    private function cariDariNomor(string $nomor): ?array
+    {
+        /*
+         * Dicocokkan ke SEMUA bentuk yang mungkin tersimpan, bukan satu.
+         * Kolom telp diisi bertahun-tahun oleh layar yang berbeda: ada yang
+         * "6281...", ada "0812...", ada "+62 812-...". Mencari satu bentuk
+         * saja membuat sebagian orang tidak pernah ketemu, dan diamnya
+         * terbaca seperti ia memang belum pernah mendaftar.
+         */
+        $bentuk = NomorTelepon::semuaBentuk($nomor);
+        $bersih = "REPLACE(REPLACE(REPLACE(REPLACE(telp, '+', ''), '-', ''), ' ', ''), '.', '')";
+
+        $dari = WebinarEksklusifPendaftaran::query()
+            ->whereRaw("$bersih IN (" . implode(',', array_fill(0, count($bentuk), '?')) . ')', $bentuk)
+            ->latest()
+            ->first();
+
+        if ($dari !== null) {
+            return [
+                'nama' => (string) $dari->nama,
+                'email' => (string) $dari->email,
+                'affiliasi' => $dari->affiliasi,
+                'sumber' => 'pendaftaran',
+            ];
+        }
+
+        $akun = User::query()
+            ->whereRaw("$bersih IN (" . implode(',', array_fill(0, count($bentuk), '?')) . ')', $bentuk)
+            ->get(['full_name', 'email', 'company']);
+
+        /*
+         * Lebih dari satu akun berarti nomornya dipakai bersama — dan tidak
+         * ada cara memilih yang benar dari sini. Didiamkan, bukan ditebak.
+         */
+        if ($akun->count() !== 1) {
+            return null;
+        }
+
+        $u = $akun->first();
+
+        return [
+            'nama' => (string) $u->full_name,
+            'email' => (string) $u->email,
+            'affiliasi' => $u->company,
+            'sumber' => 'akun',
+        ];
     }
 
     // ------------------------------------------------------------- daftar
@@ -77,6 +216,15 @@ class PublicWebinarEksklusifController extends Controller
         return view('public.webinar_eksklusif.form_pendaftaran', [
             'sesi' => $sesi,
             'tarif' => $sesi->tarif(),
+            /*
+             * Isian awal untuk yang sudah masuk akun, dirender peladen.
+             *
+             * TIDAK lewat jalur pencarian nomor: datanya miliknya sendiri,
+             * jadi tidak ada yang dibuka ke siapa pun, dan borangnya sudah
+             * terisi begitu halaman terbuka — tanpa menunggu ia mengetik
+             * nomornya lebih dulu.
+             */
+            'isiAwal' => $this->isiAwalDariAkun(),
             // Dikirim ke tampilan supaya kalimat di layar menyesuaikan, bukan
             // supaya tampilannya memutuskan sendiri cara bayarnya.
             'bayarDaring' => $this->doku->siap(),
@@ -104,9 +252,7 @@ class PublicWebinarEksklusifController extends Controller
              * (08xx + 7), 15 batas E.164.
              */
             'telp' => ['required', 'string', 'max:30', function ($medan, $nilai, $gagal) {
-                $angka = preg_replace('/\\D+/', '', (string) $nilai);
-
-                if (strlen($angka) < 9 || strlen($angka) > 15) {
+                if (! NomorTelepon::masukAkal($nilai)) {
                     $gagal('Nomor WhatsApp-nya belum benar — tulis angkanya saja, contoh 0812 3456 7890.');
                 }
             }],
@@ -202,7 +348,7 @@ class PublicWebinarEksklusifController extends Controller
                     'kategori_id' => $terkunci->getKey(),
                     'nama' => trim($data['nama']),
                     'email' => mb_strtolower(trim($data['email'])),
-                    'telp' => $this->rapikanTelp($data['telp']),
+                    'telp' => NomorTelepon::rapikan($data['telp']),
                     'affiliasi' => $data['affiliasi'] ? trim($data['affiliasi']) : null,
                     'disetujui_pada' => now(),
                     'jumlah_pendaftar' => $data['jumlah_pendaftar'],
@@ -505,12 +651,6 @@ class PublicWebinarEksklusifController extends Controller
         }
     }
 
-    private function rapikanTelp(string $telp): string
-    {
-        $angka = preg_replace('/\D+/', '', $telp);
-
-        return preg_replace('/^0/', '62', (string) $angka);
-    }
 }
 
 /**

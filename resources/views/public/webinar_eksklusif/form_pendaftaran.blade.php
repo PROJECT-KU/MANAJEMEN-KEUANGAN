@@ -208,7 +208,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <div class="ses-isian">
                         <label for="ses-nama">Nama lengkap <span aria-hidden="true">*</span></label>
                         <input type="text" id="ses-nama" name="nama" required maxlength="120"
-                            value="{{ old('nama') }}" placeholder="Nama beserta gelar, untuk sertifikat"
+                            value="{{ old('nama', $isiAwal['nama'] ?? '') }}" placeholder="Nama beserta gelar, untuk sertifikat"
                             autocomplete="name"
                             @error('nama') aria-invalid="true" aria-describedby="ses-nama-salah" @enderror>
                         @error('nama') <p class="ses-salah" id="ses-nama-salah">{{ $message }}</p> @enderror
@@ -217,7 +217,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <div class="ses-isian">
                         <label for="ses-email">Email aktif <span aria-hidden="true">*</span></label>
                         <input type="email" id="ses-email" name="email" required maxlength="120"
-                            value="{{ old('email') }}" placeholder="nama@email.com" autocomplete="email"
+                            value="{{ old('email', $isiAwal['email'] ?? '') }}" placeholder="nama@email.com" autocomplete="email"
                             aria-describedby="ses-email-bantu @error('email') ses-email-salah @enderror"
                             @error('email') aria-invalid="true" @enderror>
                         {{--
@@ -239,18 +239,24 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                     <div class="ses-isian">
                         <label for="ses-telp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
                         <input type="tel" id="ses-telp" name="telp" required maxlength="30"
-                            value="{{ old('telp') }}" placeholder="0812 3456 7890" autocomplete="tel"
+                            value="{{ old('telp', $isiAwal['telp'] ?? '') }}" placeholder="0812 3456 7890" autocomplete="tel"
                             inputmode="numeric"
                             aria-describedby="ses-telp-bantu @error('telp') ses-telp-salah @enderror"
                             @error('telp') aria-invalid="true" @enderror>
                         <p class="ses-bantu" id="ses-telp-bantu">Dipakai menambahkan Anda ke grup peserta.</p>
+
+                        {{-- Kabar hasil pencarian. aria-live supaya pembaca
+                             layar ikut mendengar borangnya terisi sendiri —
+                             tanpa itu, isian yang berubah diam-diam justru
+                             membingungkan. --}}
+                        <p class="ses-isi-otomatis" id="ses-kabar-isi" role="status" aria-live="polite" hidden></p>
                         @error('telp') <p class="ses-salah" id="ses-telp-salah">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="ses-isian">
                         <label for="ses-affiliasi">Asal instansi</label>
                         <input type="text" id="ses-affiliasi" name="affiliasi" maxlength="160"
-                            value="{{ old('affiliasi') }}" placeholder="Universitas / lembaga — boleh dikosongkan"
+                            value="{{ old('affiliasi', $isiAwal['affiliasi'] ?? '') }}" placeholder="Universitas / lembaga — boleh dikosongkan"
                             autocomplete="organization"
                             @error('affiliasi') aria-invalid="true" aria-describedby="ses-affiliasi-salah" @enderror>
                         @error('affiliasi') <p class="ses-salah" id="ses-affiliasi-salah">{{ $message }}</p> @enderror
@@ -815,6 +821,50 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
          * footer yang tidak dipakai apa pun.
          */
         .ses-latar { padding-bottom: 110px; }
+    }
+
+    /* ------------------------------------------------- isi otomatis */
+
+    .ses-isi-otomatis {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 8px 0 0;
+        padding: 9px 11px;
+        border-radius: 10px;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        font-size: .78rem;
+        line-height: 1.55;
+        color: #065f46;
+    }
+
+    .ses-isi-otomatis > .fas { margin: 0 !important; margin-top: 2px !important; }
+
+    .ses-isi-otomatis button {
+        flex: 0 0 auto;
+        margin-left: auto;
+        padding: 0;
+        border: 0;
+        background: none;
+        font-family: inherit;
+        font-size: .78rem;
+        font-weight: 700;
+        color: #047857;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    /* Isian yang baru saja diisikan ditandai sebentar, supaya terlihat
+       MANA saja yang berubah — bukan cuma diberi tahu bahwa ada yang
+       berubah. */
+    .ses-isian input.ses-baru-diisi {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .ses-isian input { transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
     }
 
     /* ---------------------------------------------- ringkasan galat */
@@ -1396,6 +1446,152 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         });
 
         hitung();
+
+        /*
+         * ISI OTOMATIS DARI NOMOR WHATSAPP.
+         *
+         * Yang sudah masuk akun tidak lewat sini — borangnya sudah dirender
+         * terisi oleh peladen. Ini untuk tamu yang pernah mendaftar.
+         *
+         * Aturannya dijaga supaya tidak menyebalkan:
+         * - hanya saat nomornya LENGKAP (9-15 angka), bukan tiap ketukan
+         * - isian yang SUDAH diisi orangnya tidak pernah ditimpa
+         * - nomor yang sama tidak dicari dua kali
+         * - selalu bisa dibatalkan, dan pembatalan hanya mengosongkan yang
+         *   memang diisikan skrip, bukan yang diketik orangnya
+         */
+        (function () {
+            var telp = document.getElementById('ses-telp');
+            var kabar = document.getElementById('ses-kabar-isi');
+
+            if (!telp || !kabar || !window.fetch) return;
+
+            var ALAMAT = @json(route('public.webinareksklusif.caripendaftar'));
+            var CSRF = document.querySelector('meta[name=csrf-token]');
+
+            var medan = {
+                nama: document.getElementById('ses-nama'),
+                email: document.getElementById('ses-email'),
+                affiliasi: document.getElementById('ses-affiliasi')
+            };
+
+            var nomorTerakhir = '';
+            var diisiSkrip = [];
+
+            function angkaSaja(n) { return (n || '').replace(/\D+/g, ''); }
+
+            function bersihkanTanda() {
+                Object.keys(medan).forEach(function (k) {
+                    if (medan[k]) medan[k].classList.remove('ses-baru-diisi');
+                });
+            }
+
+            function batalkan() {
+                /*
+                 * HANYA yang diisikan skrip yang dikosongkan. Mengosongkan
+                 * semuanya akan membuang nama yang mungkin sudah diketik
+                 * orangnya sendiri sebelum nomornya diisi.
+                 */
+                diisiSkrip.forEach(function (k) {
+                    if (medan[k]) medan[k].value = '';
+                });
+
+                diisiSkrip = [];
+                bersihkanTanda();
+                kabar.hidden = true;
+                if (medan.nama) medan.nama.focus();
+            }
+
+            function tampilkanKabar(jumlah) {
+                kabar.innerHTML = '';
+
+                var ikon = document.createElement('i');
+                // fa-magic: padanannya di Font Awesome 6 TIDAK ada di FA 5
+                // yang dimuat aplikasi ini, dan ikon yang tidak ada tetap
+                // menyisakan kotak kosong. Dijaga IkonAdaGlifnyaTest.
+                ikon.className = 'fas fa-magic';
+                ikon.setAttribute('aria-hidden', 'true');
+
+                var teks = document.createElement('span');
+                teks.textContent = jumlah + ' isian kami isikan dari pendaftaran Anda sebelumnya. '
+                    + 'Periksa dulu, ubah kalau ada yang berbeda.';
+
+                var batal = document.createElement('button');
+                batal.type = 'button';
+                batal.textContent = 'Kosongkan';
+                batal.addEventListener('click', batalkan);
+
+                kabar.appendChild(ikon);
+                kabar.appendChild(teks);
+                kabar.appendChild(batal);
+                kabar.hidden = false;
+            }
+
+            function isikan(data) {
+                diisiSkrip = [];
+                bersihkanTanda();
+
+                Object.keys(medan).forEach(function (k) {
+                    var e = medan[k];
+
+                    // Yang sudah ada isinya DIBIARKAN: orangnya mungkin
+                    // sengaja memakai nama atau email yang berbeda kali ini.
+                    if (!e || !data[k] || e.value.trim() !== '') return;
+
+                    e.value = data[k];
+                    e.classList.add('ses-baru-diisi');
+                    diisiSkrip.push(k);
+                });
+
+                if (diisiSkrip.length === 0) {
+                    kabar.hidden = true;
+
+                    return;
+                }
+
+                tampilkanKabar(diisiSkrip.length);
+            }
+
+            function cari() {
+                var nomor = angkaSaja(telp.value);
+
+                if (nomor.length < 9 || nomor.length > 15) {
+                    nomorTerakhir = '';
+
+                    return;
+                }
+
+                // Nomor yang sama tidak dicari ulang: orang sering keluar
+                // masuk isian ini saat memeriksa kembali isiannya.
+                if (nomor === nomorTerakhir) return;
+
+                nomorTerakhir = nomor;
+
+                fetch(ALAMAT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF ? CSRF.getAttribute('content') : ''
+                    },
+                    body: JSON.stringify({ telp: telp.value })
+                })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) { if (d && d.ditemukan) isikan(d); })
+                    .catch(function () {
+                        /*
+                         * Didiamkan dengan sengaja. Ini kemudahan, bukan
+                         * syarat — jaringan yang bermasalah tidak boleh
+                         * memunculkan pesan galat di borang yang sebenarnya
+                         * masih bisa diisi tangan.
+                         */
+                    });
+            }
+
+            // Saat selesai mengisi, bukan tiap ketukan.
+            telp.addEventListener('change', cari);
+            telp.addEventListener('blur', cari);
+        })();
 
         /*
          * SESUDAH VALIDASI GAGAL, ORANGNYA DIANTAR KE GALATNYA.
