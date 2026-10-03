@@ -296,7 +296,10 @@ class PendaftaranLayananController extends Controller
             ->where('catatan', 'like', '%Didaftarkan panitia oleh ' . $this->siapa() . '%')
             ->orderByDesc('waktu')
             ->limit(8)
-            ->get(['layanan', 'nomor', 'nama_orang', 'total', 'waktu']);
+            // 'id' WAJIB ikut: tiap baris jadi tautan ke halaman rinciannya,
+            // dan tanpa kolomnya halaman borang mati dengan "Undefined
+            // property: stdClass::$id" begitu daftar ini berisi.
+            ->get(['id', 'layanan', 'nomor', 'nama_orang', 'total', 'waktu']);
     }
 
     /**
