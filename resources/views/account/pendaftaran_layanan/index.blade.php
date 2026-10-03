@@ -305,6 +305,37 @@ Pendaftar Layanan | MIS Rumah Scopus
             cursor: help;
         }
 
+        /* Keterangan angkatan: tanggal mulai dan sisa kursinya, di bawah
+           namanya. Satu baris kecil, bukan kolom sendiri — keduanya
+           keterangan TENTANG angkatan itu, bukan nilai yang dibaca sendiri. */
+        .pdl-sesi-ket {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 3px 7px;
+            margin-top: 3px;
+            font-size: .72rem;
+            color: var(--mis-tinta-4);
+        }
+
+        /* "penuh" merah, "sisa N" abu: yang pertama menghalangi pendaftaran
+           baru, yang kedua cuma keterangan. Warnanya membedakan keduanya
+           tanpa menuntut membaca kata-katanya. */
+        .pdl-penuh {
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: #fff1f2;
+            font-weight: 700;
+            color: #9f1239;
+            cursor: help;
+        }
+
+        .pdl-sisa {
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: #f1f5f9;
+        }
+
         .pdl-tanggal {
             display: block;
             font-size: .8rem;
@@ -634,9 +665,7 @@ Pendaftar Layanan | MIS Rumah Scopus
     /* Lingkup = saringan yang BUKAN keadaan. Dipakai ubin ringkasan supaya
        menekan satu keadaan tidak melepaskan pilihan layanan dan tanggalnya. */
     $lingkup = array_filter(request()->only('cari', 'layanan', 'angkatan', 'dari', 'sampai'));
-    $namaAngkatan = $angkatan !== ''
-        ? (\App\Support\PendaftaranSemuaLayanan::namaAngkatan()[$angkatan] ?? null)
-        : null;
+
     $rute = 'account.pendaftaran-layanan.index';
 
     $ariaUrut = function ($kolom) use ($urut, $arah) {
@@ -814,18 +843,8 @@ Pendaftar Layanan | MIS Rumah Scopus
         {{-- Saringan yang dipasang lewat TAUTAN, bukan lewat borang, wajib
              terlihat dan bisa dilepas di sini — saringan yang bekerja tanpa
              terlihat membuat orang menyimpulkan datanya yang kurang. --}}
-        @if ($angkatan !== '' || $menggantung)
+        @if ($menggantung)
             <p class="pdl-uang-total">
-                @if ($angkatan !== '')
-                    <span>
-                        <i class="fas fa-layer-group mis-ikon-ungu" aria-hidden="true"></i>
-                        Disaring ke angkatan <strong>{{ $namaAngkatan ?? $angkatan }}</strong>
-                    </span>
-                    <a href="{{ route($rute, array_filter(request()->only('cari', 'layanan', 'keadaan', 'bukti', 'dari', 'sampai', 'lama'))) }}">
-                        <i class="fas fa-times" aria-hidden="true"></i> Tampilkan semua angkatan
-                    </a>
-                @endif
-
                 @if ($menggantung)
                     <span>
                         <i class="fas fa-hourglass-half mis-ikon-merah" aria-hidden="true"></i>
@@ -932,15 +951,33 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <input type="hidden" name="lama" value="1">
             @endif
 
-            {{-- Saringan angkatan tidak punya menunya sendiri: ia datang dari
-                 tautan di layar Angkatan Layanan, bukan dari borang ini.
-                 Tetapi ia WAJIB terlihat dan bisa dilepas — saringan yang
-                 bekerja tanpa terlihat membuat orang menyimpulkan datanya
-                 yang kurang. Dibawa juga sebagai isian tersembunyi supaya
-                 tidak hilang saat penyaring lain diterapkan. --}}
-            @if ($angkatan !== '')
-                <input type="hidden" name="angkatan" value="{{ $angkatan }}">
-            @endif
+            {{-- Menu angkatan.
+
+                 Sebelumnya saringan ini hanya bisa dipasang lewat tautan dari
+                 layar Angkatan Layanan — bekerja, tetapi untuk melihat semua
+                 pendaftar satu angkatan orang harus memutar lewat layar lain.
+
+                 Dikelompokkan per layanan dengan <optgroup>, dan skrip di
+                 bawah menyembunyikan kelompok yang bukan layanan terpilih.
+                 TANPA JavaScript seluruh kelompoknya tetap terlihat dan
+                 menunya masih bisa dipakai — label kelompoknya yang
+                 memberitahu mana milik siapa. --}}
+            <div class="mis-isian mis-saring-pilih">
+                <label class="mis-label" for="pdl-angkatan">Angkatan</label>
+                <select class="form-control-modern" id="pdl-angkatan" name="angkatan">
+                    <option value="">Semua angkatan</option>
+                    @foreach ($pilihanAngkatan as $kunciLayanan => $daftar)
+                        <optgroup label="{{ $katalog[$kunciLayanan]['nama'] ?? $kunciLayanan }}"
+                            data-layanan="{{ $kunciLayanan }}">
+                            @foreach ($daftar as $a)
+                                <option value="{{ $a['id'] }}" @selected($angkatan === $a['id'])>
+                                    {{ $a['ringkas'] }}@if ($a['mulai']) &middot; {{ \Illuminate\Support\Carbon::parse($a['mulai'])->translatedFormat('M Y') }}@endif
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
 
             {{-- Pengurut KHUSUS ponsel. Kepala kolom yang bisa diurutkan ada di
                  dalam <thead>, dan di mode kartu <thead> disembunyikan untuk
@@ -1054,3 +1091,69 @@ Pendaftar Layanan | MIS Rumah Scopus
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        'use strict';
+
+        /*
+         * Kelompok angkatan disempitkan mengikuti layanan yang dipilih.
+         *
+         * Menunya memuat seluruh angkatan yang punya pendaftar — 39 dari 59 —
+         * dan menawarkan angkatan Bibliometrik saat yang disaring Scopus Camp
+         * cuma memberi pilihan yang pasti mengembalikan nol baris.
+         *
+         * Dikerjakan SESUDAH halaman terkirim, bukan sebagai syarat: tanpa
+         * JavaScript seluruh kelompoknya tetap terlihat, dan label
+         * <optgroup>-nya yang memberitahu mana milik layanan siapa.
+         */
+        var menuLayanan = document.getElementById('pdl-layanan');
+        var menuAngkatan = document.getElementById('pdl-angkatan');
+
+        if (!menuLayanan || !menuAngkatan) {
+            return;
+        }
+
+        var kelompok = Array.prototype.slice.call(menuAngkatan.querySelectorAll('optgroup'));
+
+        var sempitkan = function (bersihkanPilihan) {
+            var layanan = menuLayanan.value;
+
+            kelompok.forEach(function (g) {
+                // disabled, bukan display:none — Safari mengabaikan `display`
+                // pada <optgroup>, dan kelompok yang tetap terlihat di sana
+                // membuat aturan ini berlaku di sebagian peramban saja.
+                var cocok = !layanan || g.dataset.layanan === layanan;
+                g.hidden = !cocok;
+                g.disabled = !cocok;
+            });
+
+            /*
+             * Pilihan yang jadi tidak berlaku DIBUANG, bukan dibiarkan.
+             *
+             * Angkatan Scopus Camp yang masih terpilih saat layanannya
+             * ditukar ke Bibliometrik akan menyaring ke dua hal yang
+             * bertentangan, dan hasilnya nol baris tanpa ada yang keliru di
+             * layar. Tidak dijalankan saat halaman baru dibuka, supaya
+             * saringan yang datang dari alamat halaman tidak ikut terhapus.
+             */
+            if (bersihkanPilihan) {
+                var terpilih = menuAngkatan.options[menuAngkatan.selectedIndex];
+
+                if (terpilih && terpilih.parentElement
+                    && terpilih.parentElement.tagName === 'OPTGROUP'
+                    && terpilih.parentElement.disabled) {
+                    menuAngkatan.value = '';
+                }
+            }
+        };
+
+        menuLayanan.addEventListener('change', function () {
+            sempitkan(true);
+        });
+
+        sempitkan(false);
+    })();
+</script>
+@endpush
