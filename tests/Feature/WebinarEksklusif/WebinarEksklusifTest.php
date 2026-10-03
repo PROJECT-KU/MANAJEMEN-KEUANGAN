@@ -989,4 +989,167 @@ class WebinarEksklusifTest extends TestCase
             'kedaluwarsa_pada' => now()->addMinutes(30),
         ]);
     }
+
+    // ------------------------------------------------------ isi otomatis
+
+    /**
+     * Nomor yang pernah dipakai mendaftar mengisi borangnya sendiri.
+     *
+     * Dicocokkan ke SEMUA bentuk simpanan, bukan satu: kolom telp diisi
+     * bertahun-tahun oleh layar yang berbeda, jadi satu orang bisa tersimpan
+     * "6281...", "0812...", atau "+62 812-...".
+     */
+    #[Test]
+    public function nomor_yang_pernah_mendaftar_mengisi_borang_otomatis(): void
+    {
+        $sesi = $this->sesi();
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Hesti Lama', 'email' => 'hesti@contoh.test',
+            'telp' => '6281234509876', 'affiliasi' => 'Universitas Uji',
+            'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        foreach (['6281234509876', '081234509876', '+62 812-3450-9876'] as $bentuk) {
+            $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $bentuk])
+                ->assertOk()
+                ->assertJson([
+                    'ditemukan' => true,
+                    'nama' => 'Hesti Lama',
+                    'email' => 'hesti@contoh.test',
+                    'affiliasi' => 'Universitas Uji',
+                ]);
+        }
+    }
+
+    /**
+     * Arah SEBALIKNYA, dan ini yang sebenarnya terjadi di basis data: kolom
+     * users.telp menyimpan "0895421735441" berawalan nol, sedangkan yang
+     * diketik orang di borang biasanya diawali 62 atau +62.
+     *
+     * Tanpa pencocokan ke semua bentuk, orang-orang ini TIDAK PERNAH ketemu
+     * — dan diamnya pencarian terbaca seperti mereka memang belum pernah
+     * mendaftar, bukan seperti pencarian yang meleset.
+     */
+    #[Test]
+    public function nomor_tersimpan_berawalan_nol_tetap_ketemu_dari_bentuk_62(): void
+    {
+        $sesi = $this->sesi();
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Gita Nol', 'email' => 'gita.nol@contoh.test',
+            // Disimpan berawalan NOL, seperti sebagian baris nyata.
+            'telp' => '081299887766',
+            'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        foreach (['6281299887766', '+62 812-9988-7766', '081299887766'] as $bentuk) {
+            $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $bentuk])
+                ->assertOk()
+                ->assertJson(['ditemukan' => true, 'nama' => 'Gita Nol']);
+        }
+    }
+
+    /**
+     * Satu nomor yang dipakai BEBERAPA akun tidak boleh dijawab.
+     *
+     * Di basis data ini ada nomor yang dipakai lima akun sekaligus. Menjawab
+     * salah satunya berarti menyerahkan identitas orang yang salah kepada
+     * siapa pun yang mengetik nomor itu.
+     */
+    #[Test]
+    public function nomor_yang_dipakai_beberapa_akun_tidak_dijawab(): void
+    {
+        $nomor = '6288811112222';
+
+        foreach (['satu', 'dua'] as $i => $nama) {
+            \App\User::create([
+                'full_name' => 'Akun ' . $nama,
+                'username' => 'uji-' . $nama . '-' . \Illuminate\Support\Str::random(5),
+                'email' => 'uji-' . $nama . '-' . \Illuminate\Support\Str::random(5) . '@contoh.test',
+                'password' => bcrypt('rahasia-uji'),
+                'telp' => $nomor,
+            ]);
+        }
+
+        $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $nomor])
+            ->assertOk()
+            ->assertJson(['ditemukan' => false]);
+    }
+
+    #[Test]
+    public function nomor_yang_belum_pernah_dipakai_tidak_ditemukan(): void
+    {
+        $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => '6289900001111'])
+            ->assertOk()
+            ->assertJson(['ditemukan' => false]);
+    }
+
+    /**
+     * Potongan nomor TIDAK dicari. Kalau awalan saja dijawab, nomor bisa
+     * disisir dari depan dan jalur ini berubah jadi alat panen data.
+     */
+    #[Test]
+    public function potongan_nomor_tidak_dicari(): void
+    {
+        $sesi = $this->sesi();
+
+        WebinarEksklusifPendaftaran::create([
+            'kategori_id' => $sesi->id, 'nama' => 'Indra', 'email' => 'indra@contoh.test',
+            'telp' => '6281234509876', 'jumlah_pendaftar' => 1, 'total_pembayaran' => '129000',
+            'cara_bayar' => 'transfer', 'status' => 'paid',
+        ]);
+
+        foreach (['0812', '62812', 'abc', '08'] as $potongan) {
+            $this->postJson(route('public.webinareksklusif.caripendaftar'), ['telp' => $potongan])
+                ->assertOk()
+                ->assertJson(['ditemukan' => false]);
+        }
+    }
+
+    /**
+     * Pencariannya dibatasi per menit. Tanpa itu, satu skrip bisa menyisir
+     * seluruh rentang nomor dan memanen nama beserta emailnya.
+     */
+    #[Test]
+    public function pencarian_dibatasi_per_menit(): void
+    {
+        $jawaban = null;
+
+        for ($i = 0; $i < 13; $i++) {
+            $jawaban = $this->postJson(route('public.webinareksklusif.caripendaftar'),
+                ['telp' => '62888' . str_pad((string) $i, 8, '0', STR_PAD_LEFT)]);
+        }
+
+        $jawaban->assertStatus(429);
+    }
+
+    /**
+     * Yang sudah masuk akun tidak perlu mengetik nomornya lebih dulu —
+     * borangnya sudah terisi saat halaman terbuka, dan datanya miliknya
+     * sendiri jadi tidak ada yang dibuka ke siapa pun.
+     */
+    #[Test]
+    public function pengunjung_yang_sudah_masuk_akun_borangnya_sudah_terisi(): void
+    {
+        $sesi = $this->sesi();
+
+        $akun = \App\User::create([
+            'full_name' => 'Joko Pengguna',
+            'username' => 'joko-' . \Illuminate\Support\Str::random(5),
+            'email' => 'joko-' . \Illuminate\Support\Str::random(5) . '@contoh.test',
+            'password' => bcrypt('rahasia-uji'),
+            'telp' => '628129998887',
+            'company' => 'Kampus Joko',
+        ]);
+
+        $this->actingAs($akun)
+            ->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->assertSee('Joko Pengguna', false)
+            ->assertSee($akun->email, false)
+            ->assertSee('Kampus Joko', false);
+    }
 }
