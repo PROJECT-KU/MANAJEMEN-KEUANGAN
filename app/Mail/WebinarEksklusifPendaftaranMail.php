@@ -33,8 +33,25 @@ class WebinarEksklusifPendaftaranMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Pendaftaran ' . $this->sesi->nama . ' tersimpan')
-            ->from(config('mail.from.address'), config('app.name'))
+        /*
+         * Subjeknya PENDEK dan memuat nomor pendaftarannya.
+         *
+         * Judul sesi di sini panjangnya 68 huruf, dan "Pendaftaran <judul>
+         * tersimpan" terpotong di tengah jalan pada daftar surat — yang
+         * terbaca tinggal judul sesinya, tanpa petunjuk bahwa ini bukti
+         * pendaftaran. Nomornya ikut supaya suratnya bisa dicari belakangan
+         * dengan mengetik nomor yang disebut panitia.
+         */
+        return $this->subject('Pendaftaran tersimpan — ' . $this->pendaftaran->id_transaksi)
+            /*
+             * mail.from.name, BUKAN app.name.
+             *
+             * APP_NAME di .env masih "Laravel", jadi surat yang sampai ke
+             * peserta tertulis pengirimnya "Laravel" — terlihat seperti surat
+             * nyasar atau penipuan, dan di situlah orang berhenti membacanya.
+             * MAIL_FROM_NAME sudah terisi "Rumah Scopus Foundation".
+             */
+            ->from(config('mail.from.address'), config('mail.from.name'))
             ->view('public.webinar_eksklusif.email_pendaftaran', [
                 'pendaftaran' => $this->pendaftaran,
                 'sesi' => $this->sesi,
