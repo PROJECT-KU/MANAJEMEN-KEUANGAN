@@ -673,6 +673,208 @@ class TindakanPendaftaranTest extends TestCase
             'Testimoninya harus ikut terhapus, bukan tinggal yatim.');
     }
 
+    // ----------------------------------------- mendaftarkan dari panitia
+
+    #[Test]
+    public function borang_pendaftaran_hanya_untuk_orang_dalam(): void
+    {
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        $tujuan = route('account.dashboard.index');
+
+        $this->actingAs($pelanggan)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertRedirect($tujuan);
+
+        $this->flushSession();
+
+        $this->actingAs($pelanggan)
+            ->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp', 'nama' => 'Paksa Masuk',
+                'email' => 'paksa@contoh.test', 'telp' => '0811',
+            ])
+            ->assertRedirect($tujuan);
+    }
+
+    #[Test]
+    public function panitia_bisa_mendaftarkan_orang_dan_kuotanya_berkurang(): void
+    {
+        /*
+         * Sebelum ini TIDAK ADA jalurnya: yang mendaftar lewat WhatsApp atau
+         * datang langsung tidak bisa dimasukkan, sehingga daftar pendaftar
+         * tidak pernah lengkap dan kuota angkatan tidak mencerminkan kursi
+         * yang sebenarnya terpakai.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['biaya' => '1000000', 'total_biaya' => '900000'])->save();
+
+        $jawab = $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Didaftarkan Panitia',
+            'email' => 'panitia' . Str::random(6) . '@contoh.test',
+            'telp' => '0812-3456-7890',
+            'affiliasi' => 'Instansi Uji',
+            'jumlah' => 3,
+        ]);
+
+        $baris = PendaftaranScopusCamp::where('nama', 'Didaftarkan Panitia')->first();
+
+        $this->assertNotNull($baris, 'Barisnya harus tersimpan.');
+        // Diantar ke halaman rinciannya: nomor dan kode uniknya baru dibuat
+        // sistem, dan itu yang perlu dikirim panitia ke orangnya.
+        $jawab->assertRedirect(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->getKey()]));
+
+        $this->assertSame('diproses', $baris->status, 'Status awalnya milik layanan itu.');
+        $this->assertSame(2700000, (int) $baris->total_pembayaran, '900.000 x 3 orang.');
+        $this->assertNotEmpty($baris->id_transaksi, 'Nomornya dibuat sistem.');
+        $this->assertGreaterThan(0, (int) $baris->kode_unik, 'Kode uniknya dibuat sistem.');
+        $this->assertStringContainsString('Didaftarkan panitia', (string) $baris->note);
+        $this->assertStringContainsString('Uji administrator', (string) $baris->note);
+
+        $this->assertSame(17, (int) $angkatan->refresh()->sisa_kuota, 'Tiga kursinya terpakai.');
+    }
+
+    #[Test]
+    public function kursi_yang_tidak_cukup_ditolak_dan_kuotanya_tidak_bergeser(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 2);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Melebihi Kursi',
+            'email' => 'lebih' . Str::random(6) . '@contoh.test',
+            'telp' => '0812-0000-0000',
+            'jumlah' => 5,
+        ]);
+
+        $this->assertNull(PendaftaranScopusCamp::where('nama', 'Melebihi Kursi')->first());
+        $this->assertSame(2, (int) $angkatan->refresh()->sisa_kuota, 'Kuotanya tidak boleh bergeser.');
+    }
+
+    #[Test]
+    public function angkatan_milik_layanan_lain_ditolak(): void
+    {
+        /*
+         * Angkatan Bibliometrik dipasang ke pendaftaran Scopus Camp akan
+         * membuat kuota KEDUA layanan salah tanpa ada yang menolak — dan
+         * barisnya muncul di saringan layanan yang keliru.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $milikBiblio = $this->angkatan('bibliometrik', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $milikBiblio->id,
+            'nama' => 'Angkatan Silang',
+            'email' => 'silang' . Str::random(6) . '@contoh.test',
+            'telp' => '0812-0000-0001',
+            'jumlah' => 1,
+        ]);
+
+        $this->assertNull(PendaftaranScopusCamp::where('nama', 'Angkatan Silang')->first());
+        $this->assertSame(20, (int) $milikBiblio->refresh()->sisa_kuota);
+    }
+
+    #[Test]
+    public function layanan_tanpa_angkatan_memakai_nominal_yang_diketik(): void
+    {
+        // Scopus Kafe tidak berangkatan — tarifnya per sesi dan berbeda-beda,
+        // jadi nominalnya memang harus diketik.
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Pemesan Kafe Uji',
+            'email' => 'kafe' . Str::random(6) . '@contoh.test',
+            'telp' => '0813-0000-0000',
+            // Ditulis berpemisah: pengendali lama membuang titik di satu
+            // layanan dan koma di layanan lain, jadi "250.000" pernah
+            // tersimpan sebagai nol.
+            'total' => '250.000',
+        ])->assertRedirect();
+
+        $baris = PendaftaranScopusKafe::where('nama', 'Pemesan Kafe Uji')->first();
+
+        $this->assertNotNull($baris);
+        $this->assertSame(250000, (int) $baris->total_keseluruhan_pembayaran);
+        $this->assertSame('menunggu verifikasi', $baris->status);
+        $this->assertNotEmpty($baris->id_pemesanan);
+    }
+
+    #[Test]
+    public function clinik_scopus_tidak_bisa_didaftarkan_dari_layar_ini(): void
+    {
+        /*
+         * Disengaja, dan dijaga supaya tidak "dilengkapi" tanpa sadar:
+         * pemesanan Clinik Scopus mengikat sesi, trainer, dan akun pelanggan —
+         * ketiganya kolom NOT NULL yang menunjuk baris lain. Borang yang
+         * menebaknya akan membuat pemesanan yang menunjuk sesi atau trainer
+         * yang salah.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->assertArrayNotHasKey('clinik_scopus', Pendaftaran::katalogBisaDibuat());
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'clinik_scopus',
+            'nama' => 'Clinik Paksa',
+            'email' => 'clinik' . Str::random(6) . '@contoh.test',
+            'telp' => '0814-0000-0000',
+            'total' => '100000',
+        ])->assertSessionHasErrors('layanan');
+
+        $this->assertNull(ClinikScopusPemesanan::where('nama_pemesan', 'Clinik Paksa')->first());
+    }
+
+    #[Test]
+    public function nomor_pendaftaran_mengikuti_pola_layanannya(): void
+    {
+        // Baris yang dibuat panitia tidak boleh bisa dibedakan dari yang
+        // didaftarkan sendiri oleh orangnya — termasuk bentuk nomornya.
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('scopus_camp'));
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('scopus_kafe'));
+        $this->assertMatchesRegularExpression('/^WE-\d{8}-\d{4}$/', Pendaftaran::nomorBaru('webinar_eksklusif'));
+        $this->assertMatchesRegularExpression('/^BOOK-\d{14}-[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('clinik_scopus'));
+    }
+
+    #[Test]
+    public function kode_unik_membuat_totalnya_belum_terpakai(): void
+    {
+        /*
+         * Gunanya mencocokkan mutasi rekening: dua orang yang membayar nominal
+         * yang SAMA PERSIS tidak bisa dibedakan. Jadi yang harus unik bukan
+         * kodenya melainkan hasil penjumlahannya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 50, 50);
+        $angkatan->forceFill(['biaya' => '500000', 'total_biaya' => '500000'])->save();
+
+        $totalnya = [];
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Kode Unik ' . $i,
+                'email' => 'kode' . $i . Str::random(5) . '@contoh.test',
+                'telp' => '0815-0000-000' . $i,
+                'jumlah' => 1,
+            ])->assertRedirect();
+
+            $b = PendaftaranScopusCamp::where('nama', 'Kode Unik ' . $i)->first();
+            $this->assertNotNull($b);
+            $totalnya[] = (int) $b->total_pembayaran + (int) $b->kode_unik;
+
+            $this->flushSession();
+        }
+
+        $this->assertSame(count($totalnya), count(array_unique($totalnya)),
+            'Dua pendaftaran menghasilkan nominal transfer yang sama persis.');
+    }
+
     // ------------------------------------------------ saringan tanggal
 
     #[Test]

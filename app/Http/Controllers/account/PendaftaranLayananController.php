@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\account;
 
+use App\Actions\Pendaftaran\BuatPendaftaran;
 use App\Actions\Pendaftaran\HapusPendaftaran;
 use App\Actions\Pendaftaran\UbahDataPendaftaran;
 use App\Actions\Pendaftaran\UbahStatusPendaftaran;
@@ -105,6 +106,106 @@ class PendaftaranLayananController extends Controller
     private function siapa(): string
     {
         return Auth::user()->full_name ?: ('pengguna #' . Auth::id());
+    }
+
+    /**
+     * Borang mendaftarkan orang dari sisi panitia.
+     *
+     * Untuk yang mendaftar lewat WhatsApp, datang langsung, atau membayar di
+     * tempat — sebelum ini tidak ada jalurnya sama sekali, sehingga daftar
+     * pendaftar tidak pernah lengkap dan kuota angkatan tidak mencerminkan
+     * kursi yang sebenarnya terpakai.
+     */
+    public function baru(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $katalog = Pendaftaran::katalogBisaDibuat();
+
+        $terpilih = $request->input('layanan');
+        $terpilih = array_key_exists((string) $terpilih, $katalog) ? (string) $terpilih : null;
+
+        /*
+         * Angkatan SELURUH layanan diambil sekali, lalu dikelompokkan — bukan
+         * satu kueri per layanan saat orangnya berganti pilihan. Dengan empat
+         * layanan itu berarti empat kueri untuk tabel yang isinya 59 baris,
+         * dan jumlahnya tumbuh seiring katalognya bertambah.
+         *
+         * Yang sudah lewat tidak ditawarkan: mendaftarkan orang ke angkatan
+         * yang acaranya kemarin bukan sesuatu yang perlu dimudahkan.
+         */
+        $angkatan = \App\KategoriLayanan::query()
+            ->whereIn('layanan', array_keys($katalog))
+            ->where(function ($q) {
+                $q->whereNull('mulai')->orWhere('mulai', '>=', now()->subDay()->toDateString());
+            })
+            ->orderBy('mulai')
+            ->get(['id', 'layanan', 'nama', 'mulai', 'biaya', 'total_biaya', 'total_kuota', 'sisa_kuota'])
+            ->groupBy('layanan');
+
+        return view('account.pendaftaran_layanan.baru', [
+            'katalog' => $katalog,
+            'terpilih' => $terpilih,
+            'angkatan' => $angkatan,
+        ]);
+    }
+
+    /** Menyimpan pendaftaran yang dibuat panitia. */
+    public function simpan(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $katalog = Pendaftaran::katalogBisaDibuat();
+
+        $aturan = [
+            'layanan' => ['required', Rule::in(array_keys($katalog))],
+            'nama' => ['required', 'string', 'min:3', 'max:255'],
+            // 'email' saja, bukan 'email:rfc,dns': sebagian domain pendaftar
+            // tidak bisa dicari dari peladen ini, dan menolaknya membuat orang
+            // yang sah tidak bisa didaftarkan sama sekali.
+            'email' => ['required', 'email', 'max:255'],
+            'telp' => ['required', 'string', 'max:30'],
+            'affiliasi' => ['nullable', 'string', 'max:255'],
+            'jumlah' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ];
+
+        $layanan = (string) $request->input('layanan');
+
+        if (array_key_exists($layanan, $katalog) && $katalog[$layanan]['berangkatan']) {
+            $aturan['kategori_id'] = ['required', 'string', 'exists:kategori_layanan,id'];
+        } else {
+            // Layanan tanpa angkatan tidak punya harga yang bisa diambil
+            // sendiri; nominalnya memang harus diketik.
+            $aturan['total'] = ['required', 'string'];
+        }
+
+        $request->validate($aturan, [], [
+            'kategori_id' => 'angkatan',
+            'telp' => 'nomor WhatsApp',
+            'total' => 'total bayar',
+        ]);
+
+        $hasil = (new BuatPendaftaran)->jalankan($layanan, $request->all(), $this->siapa());
+
+        if (! $hasil['berhasil']) {
+            return back()->withInput()->with('error', $hasil['pesan']);
+        }
+
+        /*
+         * Diantar ke halaman RINCIAN barisnya, bukan kembali ke daftar.
+         *
+         * Yang hampir selalu dikerjakan sesudah mendaftarkan orang adalah
+         * memeriksa nomor dan kode uniknya untuk dikirim ke orangnya — dan
+         * keduanya baru dibuat sistem, jadi panitia belum pernah melihatnya.
+         */
+        return redirect()
+            ->route('account.pendaftaran-layanan.rincian', [$layanan, $hasil['model']->getKey()])
+            ->with('sukses', $hasil['pesan']);
     }
 
     /**
