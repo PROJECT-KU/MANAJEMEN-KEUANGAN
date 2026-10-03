@@ -172,6 +172,16 @@ class PendaftaranLayananController extends Controller
              */
             'terpilihAngkatan' => (string) $request->input('kategori', ''),
             'baruSaja' => $this->baruSaja(),
+            /*
+             * Pesanan lembaga yang masih terbuka. Yang sudah selesai ditagih
+             * tidak ditawarkan: menambahkan kursi ke pesanan yang fakturnya
+             * sudah keluar membuat fakturnya berbohong.
+             */
+            'pemesanan' => \App\PemesananLembaga::where('status', \App\PemesananLembaga::TERBUKA)
+                ->orderByDesc('created_at')
+                ->limit(50)
+                ->get(['id', 'kode', 'nama_lembaga']),
+            'terpilihPemesanan' => (string) $request->input('pemesanan', ''),
         ]);
     }
 
@@ -418,6 +428,19 @@ class PendaftaranLayananController extends Controller
             // mendaftar lewat WhatsApp sering memberi email asal-asalan, dan
             // surat ke alamat karangan hanya menambah laporan gagal kirim.
             'kabari' => ['nullable', 'boolean'],
+            /*
+             * Pesanan lembaga: boleh menunjuk yang sudah ada, atau membuat
+             * baru dengan mengisi namanya. Keduanya tidak wajib — pendaftar
+             * perorangan tetap jalur utamanya.
+             */
+            'pemesanan_id' => ['nullable', 'string', 'exists:pemesanan_lembaga,id'],
+            'lembaga_nama' => ['nullable', 'string', 'max:255'],
+            'lembaga_alamat' => ['nullable', 'string', 'max:1000'],
+            'lembaga_npwp' => ['nullable', 'string', 'max:40'],
+            'lembaga_po' => ['nullable', 'string', 'max:60'],
+            'lembaga_pic' => ['nullable', 'string', 'max:255'],
+            'lembaga_pic_email' => ['nullable', 'email', 'max:255'],
+            'lembaga_pic_telp' => ['nullable', 'string', 'max:40'],
             'abaikan_ganda' => ['nullable', 'boolean'],
         ];
 
@@ -467,6 +490,34 @@ class PendaftaranLayananController extends Controller
         $isian = $request->all();
         $isian['telp'] = $this->telpWa((string) $request->input('telp'));
 
+        /*
+         * Pesanan lembaga BARU dibuat lebih dulu, sebelum pendaftarannya,
+         * supaya idnya sudah ada saat barisnya diikat. Dibuat hanya kalau
+         * namanya diisi dan tidak ada pesanan lama yang dipilih.
+         */
+        $namaLembaga = trim((string) $request->input('lembaga_nama'));
+
+        // $request->all() tidak memuat kunci yang tidak dikirim sama sekali —
+        // dan kiriman tanpa bagian lembaga memang tidak mengirimnya.
+        $isian['pemesanan_id'] = trim((string) $request->input('pemesanan_id', '')) ?: null;
+
+        if ($isian['pemesanan_id'] === null && $namaLembaga !== '') {
+            $lembaga = \App\PemesananLembaga::create([
+                'nama_lembaga' => $namaLembaga,
+                'alamat' => $request->input('lembaga_alamat'),
+                'npwp' => $request->input('lembaga_npwp'),
+                'no_po' => $request->input('lembaga_po'),
+                // PIC-nya jatuh ke pendaftarnya kalau tidak disebut sendiri:
+                // untuk pesanan kecil keduanya memang orang yang sama.
+                'pic_nama' => trim((string) $request->input('lembaga_pic')) ?: (string) $request->input('nama'),
+                'pic_email' => $request->input('lembaga_pic_email') ?: $request->input('email'),
+                'pic_telp' => $this->telpWa((string) ($request->input('lembaga_pic_telp') ?: $request->input('telp'))),
+                'dibuat_oleh' => $this->siapa(),
+            ]);
+
+            $isian['pemesanan_id'] = $lembaga->getKey();
+        }
+
         $hasil = (new BuatPendaftaran)->jalankan($layanan, $isian, $this->siapa());
 
         if (! $hasil['berhasil']) {
@@ -491,6 +542,10 @@ class PendaftaranLayananController extends Controller
                 ->route('account.pendaftaran-layanan.baru', array_filter([
                     'layanan' => $layanan,
                     'kategori' => $request->input('kategori_id'),
+                    // Pesanan lembaganya ikut terbawa: memesan 30 kursi berarti
+                    // beberapa kali menyimpan, dan memilih ulang pesanannya tiap
+                    // kali persis pekerjaan yang hendak dihemat tombol ini.
+                    'pemesanan' => $isian['pemesanan_id'],
                 ]))
                 ->with('sukses', $hasil['pesan'] . ' Silakan isi pendaftar berikutnya.');
         }
@@ -508,6 +563,41 @@ class PendaftaranLayananController extends Controller
      * tertutup lebih dulu: `$layanan` datang dari alamat halaman, dan
      * memakainya mentah berarti membiarkan nama kelas mana pun dipanggil.
      */
+    /**
+     * Faktur satu pesanan lembaga.
+     *
+     * Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan lebih,
+     * jadi pesanannya terpaksa dipecah ke beberapa angkatan. Faktur inilah
+     * yang menyatukannya kembali: satu halaman, satu jumlah akhir, satu
+     * identitas lembaga beserta NPWP dan nomor PO-nya.
+     *
+     * Halaman bergaya cetak, bukan PDF — alasannya sama seperti slip:
+     * membuat PDF di peladen menambah satu kemungkinan gagal, dan Ctrl+P
+     * sudah menghasilkan berkas yang bisa dilampirkan ke email.
+     */
+    public function faktur(string $pemesanan)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $lembaga = \App\PemesananLembaga::find($pemesanan);
+
+        if ($lembaga === null) {
+            abort(404);
+        }
+
+        $baris = $lembaga->pendaftaran();
+
+        return view('account.pendaftaran_layanan.faktur', [
+            'lembaga' => $lembaga,
+            'baris' => $baris,
+            'katalog' => Pendaftaran::katalog(),
+            'jumlahKursi' => $baris->sum(fn ($b) => max(1, (int) $b->jumlah)),
+            'jumlahUang' => $baris->sum(fn ($b) => (int) $b->total),
+        ]);
+    }
+
     /**
      * Slip pendaftaran, untuk dicetak dan diberikan ke orangnya.
      *

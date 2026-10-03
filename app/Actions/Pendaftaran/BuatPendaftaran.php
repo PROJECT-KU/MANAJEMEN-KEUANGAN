@@ -107,9 +107,25 @@ class BuatPendaftaran
             $alumni = ! empty($isian['alumni']);
             $persenAlumni = $alumni ? $this->persenAlumni($layanan, $angkatan) : 0;
 
+            $persenRombongan = $this->persenRombongan($layanan, $angkatan, $jumlah);
+
+            /*
+             * Urutannya: alumni, lalu rombongan, lalu potongan khusus — dan
+             * hanya SATU yang berlaku.
+             *
+             * Alumni di depan sebab ia milik orangnya, bukan pesanannya.
+             * Rombongan sesudahnya sebab ia berlaku sendiri begitu jumlahnya
+             * mencapai ambang, tanpa panitia perlu mengingat besarannya.
+             * Potongan khusus terakhir: ia yang diketik tangan, dan sesuatu
+             * yang diketik tangan tidak boleh diam-diam ditumpuk di atas
+             * potongan yang dihitung sistem.
+             */
             if ($persenAlumni > 0) {
                 $potongan = (int) round($subtotal * $persenAlumni / 100);
                 $kodePotongan = 'ALUMNI';
+            } elseif ($persenRombongan > 0) {
+                $potongan = (int) round($subtotal * $persenRombongan / 100);
+                $kodePotongan = 'ROMBONGAN';
             } else {
                 $potongan = max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0)));
                 $kodePotongan = trim((string) ($isian['kode_potongan'] ?? '')) ?: 'KHUSUS';
@@ -148,6 +164,25 @@ class BuatPendaftaran
 
             $this->simpanBukti($layanan, $sumber, $dibuat, $isian['bukti'] ?? null);
             $this->simpanPeserta($layanan, $dibuat, $isian['peserta'] ?? null, $jumlah);
+
+            /*
+             * Diikat ke pesanan lembaganya, kalau ada.
+             *
+             * Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan
+             * lebih, jadi pesanannya terpaksa dipecah ke beberapa angkatan.
+             * Tanpa tali ini, hasil pecahannya tidak saling tahu bahwa mereka
+             * satu pesanan — merekap dan menagihnya berarti mengumpulkan
+             * barisnya satu per satu dari ingatan.
+             */
+            $pesanan = trim((string) ($isian['pemesanan_id'] ?? ''));
+
+            if ($pesanan !== '') {
+                $lembaga = \App\PemesananLembaga::find($pesanan);
+
+                if ($lembaga !== null) {
+                    $lembaga->ikat($layanan, (string) $dibuat->getKey());
+                }
+            }
 
             if ($angkatan !== null && $angkatan->total_kuota !== null) {
                 $angkatan->forceFill([
@@ -372,18 +407,59 @@ class BuatPendaftaran
      */
     private function persenAlumni(string $layanan, ?KategoriLayanan $angkatan): int
     {
-        $tarif = \App\ClinikScopusBiayaPersesi::query()
-            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
-            ->where('layanan', $layanan)
-            ->when(
-                $angkatan !== null && $angkatan->varian !== null && $angkatan->varian !== '',
-                fn ($q) => $q->where('varian', $angkatan->varian),
-                fn ($q) => $q->whereNull('varian')
-            )
-            ->first(['diskon_alumni_persen']);
-
-        return (int) ($tarif->diskon_alumni_persen ?? 0);
+        return (int) ($this->tarifBerlaku($layanan, $angkatan)->diskon_alumni_persen ?? 0);
     }
+
+    /**
+     * Potongan rombongan, atau 0 kalau jumlahnya belum mencapai ambangnya.
+     *
+     * Sebelum ini satu-satunya cara memberi harga rombongan adalah potongan
+     * khusus berupa rupiah — panitia menghitung sendiri diskon 30 orangnya
+     * lalu mengetik hasilnya, dan besarannya bergantung ingatan orang.
+     */
+    private function persenRombongan(string $layanan, ?KategoriLayanan $angkatan, int $jumlah): int
+    {
+        $tarif = $this->tarifBerlaku($layanan, $angkatan);
+
+        $min = (int) ($tarif->diskon_rombongan_min ?? 0);
+        $persen = (int) ($tarif->diskon_rombongan_persen ?? 0);
+
+        if ($min < 2 || $persen < 1 || $jumlah < $min) {
+            return 0;
+        }
+
+        return $persen;
+    }
+
+    /**
+     * Tarif aktif untuk satu layanan, menurut varian angkatannya.
+     *
+     * Dibaca sekali dan dipakai ulang: dua potongan berbeda membacanya, dan
+     * dua kueri untuk baris yang sama berarti dua kesempatan keduanya
+     * membaca tarif yang berbeda kalau ada yang menyuntingnya di antaranya.
+     */
+    private function tarifBerlaku(string $layanan, ?KategoriLayanan $angkatan): object
+    {
+        $kunci = $layanan . '|' . ($angkatan->varian ?? '');
+
+        if (! isset($this->tarifTersimpan[$kunci])) {
+            $this->tarifTersimpan[$kunci] = \App\ClinikScopusBiayaPersesi::query()
+                ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+                ->where('layanan', $layanan)
+                ->when(
+                    $angkatan !== null && $angkatan->varian !== null && $angkatan->varian !== '',
+                    fn ($q) => $q->where('varian', $angkatan->varian),
+                    fn ($q) => $q->whereNull('varian')
+                )
+                ->first(['diskon_alumni_persen', 'diskon_rombongan_min', 'diskon_rombongan_persen'])
+                ?? (object) [];
+        }
+
+        return $this->tarifTersimpan[$kunci];
+    }
+
+    /** @var array<string, object> */
+    private array $tarifTersimpan = [];
 
     /**
      * Kode unik yang membuat TOTAL-nya belum terpakai.

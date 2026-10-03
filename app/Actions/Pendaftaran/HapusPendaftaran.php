@@ -79,6 +79,13 @@ class HapusPendaftaran
                  */
                 \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())->delete();
 
+                // Pengikat pesanan lembaganya ikut dibuang; alasannya sama
+                // persis seperti pesertanya — tidak ada kunci asing yang bisa
+                // membersihkannya sendiri.
+                \App\PemesananLembagaBaris::where('layanan', $layanan)
+                    ->where('pendaftaran_id', (string) $pendaftaran->getKey())
+                    ->delete();
+
                 $pendaftaran->delete();
             });
         } catch (\Throwable $e) {

@@ -404,6 +404,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $kolomNama = Pendaftaran::sumber($layanan)['kolom']['nama_orang'];
     $kolomEmail = Pendaftaran::sumber($layanan)['kolom']['email'];
 
+    // Pesanan lembaganya, kalau pendaftaran ini bagian dari satu pesanan.
+    $lembaga = \App\PemesananLembaga::untukPendaftaran($layanan, (string) $pendaftaran->getKey());
+
     $pesertaLain = \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())
         ->terurut()
         ->get(['nama', 'email']);
@@ -601,6 +604,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                      pegangan apa pun: nomor dan kode uniknya hanya ada di
                      layar panitia dan di email — dan sebagian dari mereka
                      tidak punya email. --}}
+                @if ($lembaga)
+                    {{-- Pesanan lembaga biasanya terpecah ke beberapa angkatan
+                         karena kuotanya 20 kursi; fakturnya yang menyatukannya
+                         kembali. --}}
+                    <a class="mis-tombol mis-tombol-halus" target="_blank" rel="noopener"
+                        href="{{ route('account.pendaftaran-layanan.faktur', $lembaga->id) }}">
+                        <i class="fas fa-file-invoice" aria-hidden="true"></i> Faktur {{ $lembaga->kode }}
+                    </a>
+                @endif
                 <a class="mis-tombol mis-tombol-halus" target="_blank" rel="noopener"
                     href="{{ route('account.pendaftaran-layanan.slip', [$layanan, $pendaftaran->getKey()]) }}">
                     <i class="fas fa-print" aria-hidden="true"></i> Cetak slip
