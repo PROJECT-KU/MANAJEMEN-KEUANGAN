@@ -1214,4 +1214,61 @@ class WebinarEksklusifTest extends TestCase
             ->assertSee($akun->email, false)
             ->assertSee('Kampus Joko', false);
     }
+
+    /**
+     * Nomor WhatsApp HARUS jadi isian pertama.
+     *
+     * Semula ia isian ketiga, sesudah nama dan email. Akibatnya orang yang
+     * pernah mendaftar sudah terlanjur mengetik keduanya sebelum pencarian
+     * sempat jalan — pengisian otomatisnya menghemat satu isian, bukan tiga,
+     * dan tujuan "sesedikit mungkin mengetik" tidak tercapai.
+     *
+     * Kalau urutannya dikembalikan, tidak ada yang rusak dan tidak ada galat
+     * apa pun: fiturnya hanya diam-diam berhenti berguna. Itu sebabnya
+     * dijaga uji.
+     */
+    #[Test]
+    public function nomor_whatsapp_adalah_isian_pertama(): void
+    {
+        $sesi = $this->sesi();
+
+        $isi = $this->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->getContent();
+
+        $urutan = [];
+
+        foreach (['ses-telp', 'ses-nama', 'ses-email'] as $id) {
+            $pos = strpos($isi, 'id="' . $id . '"');
+            $this->assertNotFalse($pos, "isian $id tidak ada di borang");
+            $urutan[$id] = $pos;
+        }
+
+        $this->assertLessThan($urutan['ses-nama'], $urutan['ses-telp'],
+            'nomor WhatsApp harus muncul sebelum nama — kalau tidak, borangnya '
+            . 'sudah terlanjur diketik sebelum pengisian otomatis sempat jalan');
+
+        $this->assertLessThan($urutan['ses-email'], $urutan['ses-telp'],
+            'nomor WhatsApp harus muncul sebelum email');
+    }
+
+    /**
+     * autofocus TIDAK boleh dipasang di isian nomor.
+     *
+     * Terukur saat sempat dipasang: halaman terbuka sudah tergulir di
+     * 1340 px, jadi pengunjung mendarat langsung di borang dan melewati judul
+     * sesi, tanggal, pemateri, dan flyer — dan di ponsel papan ketiknya
+     * langsung menutup separuh layar.
+     */
+    #[Test]
+    public function isian_nomor_tidak_memakai_autofocus(): void
+    {
+        $sesi = $this->sesi();
+
+        $isi = $this->get(route('public.webinareksklusif.daftar', $sesi->id))->getContent();
+
+        $potongan = substr($isi, (int) strpos($isi, 'id="ses-telp"'), 400);
+
+        $this->assertStringNotContainsString('autofocus', $potongan);
+    }
 }
