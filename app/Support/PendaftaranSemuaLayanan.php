@@ -174,10 +174,10 @@ class PendaftaranSemuaLayanan
             'warna' => 'mis-jingga',
             'tabel' => 'pendaftaran_scopus_kafe',
             'bukti_folder' => 'pendaftaran_scopus_kafe',
-            // Tabelnya TIDAK punya kolom note — terukur, menulis jejaknya ke
-            // sana melempar 'Unknown column' dan seluruh perubahan statusnya
-            // gagal dengan galat 500.
-            'kolom_catatan' => null,
+            // Kolomnya ditambahkan migrasi 2026_10_03_160000; sebelum itu
+            // tabel ini tidak punya tempat mencatat jejak sama sekali, dan
+            // 11 dari 187 baris perubahannya tidak terlacak.
+            'kolom_catatan' => 'note',
             'model' => \App\PendaftaranScopusKafe::class,
             'angkatan_model' => null,
             'berangkatan' => false,
@@ -208,7 +208,7 @@ class PendaftaranSemuaLayanan
             'warna' => 'mis-biru',
             'tabel' => 'clinikscopus_pemesanan',
             'bukti_folder' => 'ClinikScopusPemesanan',
-            'kolom_catatan' => null,
+            'kolom_catatan' => 'note',
             'model' => \App\ClinikScopusPemesanan::class,
             'angkatan_model' => null,
             'berangkatan' => false,
@@ -374,9 +374,15 @@ class PendaftaranSemuaLayanan
     /**
      * Kolom tempat jejak perubahan ditulis, atau null kalau tabelnya tidak punya.
      *
-     * Hanya tiga dari lima tabel punya `note`: Scopus Kafe dan Clinik Scopus
-     * tidak. Menuliskannya ke sana melempar "Unknown column" dan menggagalkan
-     * seluruh perubahan statusnya — terukur, galat 500 di kedua layanan itu.
+     * Kelimanya kini punya `note`, tetapi dua di antaranya baru sejak migrasi
+     * 2026_10_03_160000 — sebelum itu menuliskannya ke sana melempar
+     * "Unknown column" dan menggagalkan SELURUH perubahan statusnya dengan
+     * galat 500.
+     *
+     * Tetap dibaca dari katalog, bukan diandaikan ada di semuanya: layanan
+     * berikutnya bisa saja datang dengan tabel yang tidak punya kolom itu,
+     * dan jejak yang gagal ditulis tidak boleh menggagalkan perubahan
+     * statusnya.
      */
     public static function kolomCatatan(string $layanan): ?string
     {

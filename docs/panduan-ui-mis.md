@@ -594,6 +594,60 @@ keluaran PDF, semua status, semua dialog di layar itu. Inventarisnya sendiri
 yang menemukan cacat: mendaftar keadaan kosong menyingkap riwayat tersaring
 yang berbunyi "Belum ada tarif lama" padahal riwayatnya ada.
 
+## `white-space: nowrap` di dalam sel tabel MELEBARKAN tabelnya
+
+Yang paling mahal dari seluruh putaran rupa ini, dan paling tidak terduga.
+
+`nowrap` + `overflow: hidden` + `text-overflow: ellipsis` memang memotong
+teksnya di layar — tetapi lebar **min-content** sel itu jadi sama dengan
+panjang teks penuhnya, dan `overflow: hidden` **tidak menguranginya**.
+Algoritma tabel memakai min-content untuk membagi lebar kolom, jadi satu sel
+ber-`nowrap` memaksa seluruh tabelnya melebar.
+
+Terukur saat alamat email dan afiliasi diberi `nowrap`: kolom Pendaftar
+membengkak **227px jadi 866px**, tabelnya jadi 1746px dalam pembungkus
+1128px, dan terklip **617px di 1440px** sampai **782px di 768px**. Kolom Sesi,
+Total, Keadaan, Daftar, dan Aksi hilang seluruhnya dari pandangan. Tidak ada
+galat, dan pemeriksaan "gulir mendatar halaman" tetap melaporkan 0px.
+
+**Yang benar `-webkit-line-clamp`**: teksnya tetap boleh membungkus — jadi
+min-content tetap selebar kata terpanjang — lalu baris di atas batasnya
+disembunyikan.
+
+Dua jebakan lanjutan pada `line-clamp`, keduanya sudah menggigit di sini:
+
+- **`display: -webkit-box` dengan `-webkit-box-orient: vertical` memperlakukan
+  tiap anak sebaris sebagai anak kotak tersendiri.** Ikon di dalam tautan
+  kontak terdorong ke BARIS SENDIRI di atas alamatnya. Beri ikon kolomnya
+  sendiri (`display: grid; grid-template-columns: 14px minmax(0, 1fr)`) alih-
+  alih mengklem pembungkus yang memuat ikon.
+- **Clamp satu baris pada satu kata panjang tidak menyisakan apa-apa.** Alamat
+  email di kolom 229px tampil sebagai ikon plus titik tiga saja. Nilai yang
+  gunanya DIBACA — nomor pendaftaran, alamat email — jangan diklem; yang
+  pendamping (afiliasi, nama angkatan) boleh.
+
+## Memadatkan baris: ukur ULANG klipnya, bukan cuma tingginya
+
+Empat percobaan pemadatan di layar Pendaftar Layanan, dan tiga di antaranya
+justru memburuk — semuanya karena yang diukur cuma satu sisi:
+
+| percobaan | tinggi | akibat lain |
+|---|---|---|
+| email & WA berdampingan | −19px/baris | tabel terklip 617-782px |
+| `order` + `flex: 1 1 0` pada sel pendek | **+86px** | luberan 86px kembali |
+| klem 1 baris pada kontak | −19px | alamatnya jadi titik tiga |
+| afiliasi & nama diklem, label kartu disembunyikan | −23px desktop, −52px kartu | tidak ada |
+
+Sesudah tiap perubahan tata letak tabel, jalankan **ketiganya**: tinggi baris,
+selisih tepi tabel terhadap pembungkusnya, dan luberan per unsur di 320/390px.
+Satu saja dilewati, perbaikan terlihat berhasil sambil merusak yang lain.
+
+Hasil akhirnya tinggi baris **154px → 156px rata-rata**, tetapi
+**maksimumnya 312px → 181px** — dan itu yang sebenarnya jadi keluhan: satu
+baris yang memakan sepertiga layar. Rata-rata yang tidak berubah dengan
+maksimum yang terkunci lebih baik daripada rata-rata yang turun dengan satu
+baris raksasa di tengahnya.
+
 ## Tabel terklip di LEBAR TABLET, dan pemeriksaan luberan biasa tidak melihatnya
 
 Celah paling berbahaya ada di **768-1199px**: di bawah 768px tabelnya jadi

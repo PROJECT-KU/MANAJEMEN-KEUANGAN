@@ -761,10 +761,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas fa-tag" aria-hidden="true"></i>
                                 <span>
-                                    Dapat potongan <strong>Rp {{ number_format($diskon, 0, ',', '.') }}</strong>
-                                    @if ($pendaftaran->kode_diskon)
-                                        dengan kode <strong>{{ $pendaftaran->kode_diskon }}</strong>
-                                    @endif.
+                                    Dapat potongan <strong>Rp {{ number_format($diskon, 0, ',', '.') }}</strong>@if ($pendaftaran->kode_diskon) dengan kode <strong>{{ $pendaftaran->kode_diskon }}</strong>@endif.
                                 </span>
                             </p>
                         @endif
@@ -778,7 +775,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 <span class="mis-medali kecil mis-{{ $rupa['warna'] === 'abu' ? 'ungu' : $rupa['warna'] }}" aria-hidden="true">
                                     <i class="fas fa-exchange-alt"></i>
                                 </span>
-                                <span class="teks">Pindahkan status</span>
+                                <span class="teks">Status pembayaran</span>
+                                <span class="mis-pil mis-pil-{{ $rupa['warna'] }}" style="margin-left: auto;">
+                                    <i class="fas {{ $rupa['ikon'] }}" aria-hidden="true"></i> {{ $rupa['label'] }}
+                                </span>
                             </p>
 
                             <form method="POST"
@@ -786,7 +786,13 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 @csrf
                                 <div class="rin-status-baris">
                                     <div class="mis-isian">
-                                        <label class="mis-label" for="rin-status">Status sekarang &mdash; {{ $rupa['label'] }}</label>
+                                        {{-- Label menyebut status ASLINYA, bukan keadaan
+                                             ringkasnya. Versi sebelumnya berbunyi
+                                             "Status sekarang — Lunas" sementara pilihan di
+                                             bawahnya berbunyi "Pendaftaran diterima": dua
+                                             kosakata untuk satu hal, dan orang yang membaca
+                                             sekilas mengira keduanya berbeda. --}}
+                                        <label class="mis-label" for="rin-status">Pindahkan status</label>
                                         <select class="form-control-modern" id="rin-status" name="status" required>
                                             @foreach ($pilihanStatus as $nilaiStatus => $tulisan)
                                                 <option value="{{ $nilaiStatus }}" @selected($pendaftaran->status === $nilaiStatus)>{{ $tulisan }}</option>

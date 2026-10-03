@@ -48,6 +48,20 @@ class PendaftaranLayananController extends Controller
 {
     private const PER_HALAMAN = 20;
 
+    /**
+     * Berapa hari sebuah pendaftaran boleh menunggu sebelum disebut
+     * menggantung.
+     *
+     * Tujuh hari, dan angkanya bukan selera: Webinar Eksklusif melepas
+     * kursinya sendiri sesudah 24 jam, tetapi empat layanan lain TIDAK punya
+     * kedaluwarsa sama sekali — pendaftaran yang transfernya tidak pernah
+     * datang akan menunggu selamanya tanpa ada yang menengok. Terukur di
+     * basis data: 5 pendaftaran menunggu lebih dari 7 hari, 3 lebih dari 30
+     * hari, dan 2 lebih dari 90 hari. Satu minggu batas yang masih masuk akal
+     * untuk "mestinya sudah ditagih".
+     */
+    private const HARI_MENGGANTUNG = 7;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -426,6 +440,28 @@ class PendaftaranLayananController extends Controller
             : '';
 
         /*
+         * Rentang tanggal pendaftaran.
+         *
+         * DIKEMBALIKAN, bukan fitur baru: ketiga layar pendaftaran yang
+         * dibuang punya kendali `tanggal_awal` dan `tanggal_akhir` yang
+         * benar-benar bekerja di markahnya — Scopus Kafe bahkan membuka pada
+         * bulan berjalan. Penyatuannya diam-diam mencabutnya, dan itu persis
+         * yang dilarang aturan "menyatukan dua layar tidak boleh mencabut
+         * kemampuannya".
+         *
+         * Dibaca lewat Carbon supaya "2026-13-45" tidak sampai ke SQL sebagai
+         * untaian yang membuat kuerinya sunyi tanpa hasil.
+         */
+        $dari = $this->tanggal($request->input('dari'));
+        $sampai = $this->tanggal($request->input('sampai'));
+
+        /*
+         * Pendaftaran yang menunggu terlalu lama. Nilainya cuma ada/tidak,
+         * jadi apa pun selain '1' dianggap tidak dipakai.
+         */
+        $menggantung = $request->input('lama') === '1';
+
+        /*
          * Saringan angkatan, dipakai tautan dari layar Angkatan Layanan.
          *
          * Tautan di sana dulu mengirim `kategori` ke layar pendaftar lama,
@@ -446,6 +482,9 @@ class PendaftaranLayananController extends Controller
             'cari' => $cari,
             'layanan' => $layanan,
             'angkatan' => $angkatan,
+            'dari' => $dari,
+            'sampai' => $sampai,
+            'menggantung' => $menggantung,
             'keadaanDipilih' => $keadaanDipilih,
             'bukti' => $bukti,
             'urut' => $urut,
@@ -457,8 +496,32 @@ class PendaftaranLayananController extends Controller
              * saringannya yang mengecualikan semuanya.
              */
             'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== ''
-                || $bukti !== '' || $angkatan !== '',
+                || $bukti !== '' || $angkatan !== '' || $dari !== '' || $sampai !== ''
+                || $menggantung,
         ];
+    }
+
+    /**
+     * Satu tanggal kiriman, dibakukan jadi Y-m-d — atau untaian kosong.
+     *
+     * Dibaca lewat Carbon, bukan diteruskan apa adanya: tanggal yang tidak
+     * masuk akal seperti "2026-13-45" diterima SQL sebagai untaian dan
+     * kuerinya mengembalikan nol baris tanpa galat, jadi orangnya menyimpulkan
+     * datanya yang tidak ada.
+     */
+    private function tanggal($nilai): string
+    {
+        $teks = trim((string) $nilai);
+
+        if ($teks === '') {
+            return '';
+        }
+
+        try {
+            return \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $teks)->toDateString();
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 
     /**
@@ -482,6 +545,19 @@ class PendaftaranLayananController extends Controller
 
                 return $q->whereIn('status', Pendaftaran::KEADAAN[$p['keadaanDipilih']]['nilai']);
             })
+            /*
+             * Batas akhirnya memakai `<` pada HARI BERIKUTNYA, bukan `<=` pada
+             * harinya: kolom waktunya bertimestamp, jadi `<= '2026-10-03'`
+             * berarti `<= 2026-10-03 00:00:00` dan membuang seluruh
+             * pendaftaran yang terjadi pada hari yang dipilih orangnya.
+             */
+            ->when($p['dari'] !== '', fn ($q) => $q->where('waktu', '>=', $p['dari'] . ' 00:00:00'))
+            ->when($p['sampai'] !== '', fn ($q) => $q->where(
+                'waktu', '<', \Illuminate\Support\Carbon::parse($p['sampai'])->addDay()->toDateString() . ' 00:00:00'
+            ))
+            ->when($p['menggantung'], fn ($q) => $q
+                ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
+                ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString()))
             ->when($p['bukti'] === 'ada', fn ($q) => $q->whereNotNull('bukti')->where('bukti', '<>', ''))
             ->when($p['bukti'] === 'belum', fn ($q) => $q->where(function ($sub) {
                 $sub->whereNull('bukti')->orWhere('bukti', '');
@@ -595,6 +671,23 @@ class PendaftaranLayananController extends Controller
             }
         }
 
+        /*
+         * Pendaftaran yang menunggu terlalu lama, dihitung terpisah.
+         *
+         * Tidak bisa ikut kueri berkelompok di atas: syaratnya menyangkut
+         * WAKTU tiap baris, bukan statusnya saja, jadi pengelompokan menurut
+         * status tidak bisa menjawabnya. Satu kueri tambahan — halamannya jadi
+         * empat kueri, dan jumlahnya tidak tumbuh seiring data.
+         */
+        $ringkasan['menggantung'] = (int) Pendaftaran::kueri()
+            ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
+            ->when($angkatan !== '', fn ($q) => $q->where('angkatan_id', $angkatan))
+            ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
+            ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString())
+            ->count();
+
+        $ringkasan['hari_menggantung'] = self::HARI_MENGGANTUNG;
+
         return $ringkasan + $hitung;
     }
 
@@ -627,8 +720,42 @@ class PendaftaranLayananController extends Controller
                 'belum' => 'Belum diunggah',
                 default => null,
             },
+            /*
+             * Rentang tanggalnya WAJIB tercetak di berkas unduhan. Berkas
+             * berisi pendaftaran satu bulan yang tidak menyebut bulannya
+             * terbaca persis seperti daftar yang lengkap — dan berkas unduhan
+             * justru yang paling sering diteruskan ke orang lain.
+             */
+            'Tanggal daftar' => $this->kalimatRentang($p['dari'], $p['sampai']),
+            'Menunggu lebih dari' => $p['menggantung'] ? self::HARI_MENGGANTUNG . ' hari' : null,
             'Urutan' => $p['urut'] . ' (' . ($p['arah'] === 'asc' ? 'menaik' : 'menurun') . ')',
         ]);
+    }
+
+    /**
+     * Rentang tanggal sebagai satu kalimat, atau null kalau tidak dipakai.
+     *
+     * Ketiga bentuknya disebut berbeda — hanya awal, hanya akhir, atau
+     * keduanya — sebab "Tanggal daftar: 2026-10-01" tidak memberi tahu apakah
+     * itu batas bawah atau batas atas.
+     */
+    private function kalimatRentang(string $dari, string $sampai): ?string
+    {
+        $rapi = fn (string $t) => \Illuminate\Support\Carbon::parse($t)->translatedFormat('d M Y');
+
+        if ($dari !== '' && $sampai !== '') {
+            return $rapi($dari) . ' sampai ' . $rapi($sampai);
+        }
+
+        if ($dari !== '') {
+            return 'sejak ' . $rapi($dari);
+        }
+
+        if ($sampai !== '') {
+            return 'sampai ' . $rapi($sampai);
+        }
+
+        return null;
     }
 
     /**
