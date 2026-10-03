@@ -76,7 +76,7 @@ class CategoriesArtikelController extends Controller
         }
     }
 
-    public function edit($id, $token)
+    public function edit($id)
     {
         $user = Auth::user();
         $categories_artikel = CategoriesArtikel::findOrFail($id);

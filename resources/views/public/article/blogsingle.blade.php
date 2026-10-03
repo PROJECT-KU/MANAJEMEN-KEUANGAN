@@ -59,7 +59,7 @@ Artikel | Rumah Scopus
                 <li><a href="">Blog</a></li>
                 @foreach($categories_artikel as $category)
                 @if($category->id == $artikel->categories_artikel_id)
-                <li><a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id, 'token' => $category->token]) }}">{{ $category->kategori }}</a></li>
+                <li><a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id]) }}">{{ $category->kategori }}</a></li>
                 @endif
                 @endforeach
             </ol>
@@ -134,8 +134,8 @@ Artikel | Rumah Scopus
                             <div class="author-social">
                                 <p style="margin-right: 10px;">Share</p>
                                 <div class="social-links" style="margin-top: -10px;">
-                                    <a href="https://twitter.com/share?url={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id, 'token' => $artikel->token])) }}" target="_blank"><i class="bi bi-twitter" style="color: gray;"></i></a>
-                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id, 'token' => $artikel->token])) }}" target="_blank"><i class="bi bi-facebook" style="color: gray;"></i></a>
+                                    <a href="https://twitter.com/share?url={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id])) }}" target="_blank"><i class="bi bi-twitter" style="color: gray;"></i></a>
+                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id])) }}" target="_blank"><i class="bi bi-facebook" style="color: gray;"></i></a>
                                     <a href="https://www.instagram.com/" target="_blank"><i class="biu bi-instagram" style="color: gray;"></i></a>
                                 </div>
                             </div>
@@ -472,7 +472,7 @@ Artikel | Rumah Scopus
                         <div class="sidebar-item categories">
                             <ul>
                                 @foreach($categories_artikel->take(6) as $category)
-                                <li><a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id, 'token' => $category->token]) }}">{{ $category->kategori }} <span>({{ strtoupper($category->jumlah_artikel) }})</span></a></li>
+                                <li><a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id]) }}">{{ $category->kategori }} <span>({{ strtoupper($category->jumlah_artikel) }})</span></a></li>
                                 @endforeach
                             </ul>
                         </div>
@@ -485,7 +485,7 @@ Artikel | Rumah Scopus
                             @if($article->status == 'publish')
                             <div class="post-item clearfix">
                                 <img src="{{ asset('images/' . $article->gambar_depan) }}" alt="">
-                                <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}">
+                                <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}">
                                     <h4>{{ $article->judul }}</h4>
                                 </a>
                                 <time datetime="{{ $article->created_at }}"> {{ strftime('%A, %d %B %Y', strtotime($article->created_at)) }}</time>

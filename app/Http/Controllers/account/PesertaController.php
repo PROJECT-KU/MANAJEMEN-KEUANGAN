@@ -52,7 +52,7 @@ class PesertaController extends Controller
         return view('account.peserta.index', compact('peserta', 'maintenances', 'startDate', 'endDate'));
     }
 
-    public function detail($id, $token)
+    public function detail($id)
     {
         $peserta = Peserta::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
 
@@ -189,7 +189,7 @@ class PesertaController extends Controller
         $pesertaId = $save->id;
         if ($save) {
             // Redirect to testimoni route with peserta ID
-            return redirect()->route('account.peserta.testimoni', ['id' => $pesertaId, 'token' => $token]);
+            return redirect()->route('account.peserta.testimoni', ['id' => $pesertaId, 'token_update' => $token]);
         } else {
             // Redirect with an error message if data creation fails
             return redirect()->route('account.peserta.form')->with('error', 'Lembar Kerja Scopus Camp Gagal Disimpan!');

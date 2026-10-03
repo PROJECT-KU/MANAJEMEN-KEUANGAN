@@ -71,7 +71,7 @@ Blog | Rumah Scopus
         @if ($articlesInCategory->isNotEmpty() && $articlesInCategory->contains('status', 'publish'))
         <header class="section-header">
             <p style="font-size: 30px;">{{ strtoupper($category->kategori) }}</p>
-            <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id, 'token' => $category->token]) }}" class="more-text">
+            <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id]) }}" class="more-text">
                 <h2>More <i class="fas fa-chevron-right"></i></h2>
             </a>
         </header>
@@ -102,7 +102,7 @@ Blog | Rumah Scopus
                                 <p>{{ $article->full_name }}</p>
                             </div>
                         </div>
-                        <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}" class="readmore stretched-link" style="text-align: right;">
+                        <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="readmore stretched-link" style="text-align: right;">
                             <span>Read More</span>
                             <i class="bi bi-arrow-right"></i>
                         </a>

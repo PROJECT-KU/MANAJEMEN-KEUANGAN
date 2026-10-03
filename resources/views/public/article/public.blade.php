@@ -214,7 +214,7 @@ $articlesInCategory = $artikel->where('categories_artikel_id', $category->id)
             <div>
                 <h2 class="fw-bold mb-0" style="letter-spacing: -1px;">{{ strtoupper($category->kategori) }}</h2>
             </div>
-            <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id, 'token' => $category->token]) }}" class="text-gradient text-decoration-none">
+            <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id]) }}" class="text-gradient text-decoration-none">
                 Selengkapnya <i class="bi bi-chevron-right"></i>
             </a>
         </header>
@@ -235,7 +235,7 @@ $articlesInCategory = $artikel->where('categories_artikel_id', $category->id)
                         </div>
 
                         <h3 class="post-title">
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}" class="text-decoration-none text-dark">
+                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="text-decoration-none text-dark">
                                 {{ $article->judul }}
                             </a>
                         </h3>
@@ -246,7 +246,7 @@ $articlesInCategory = $artikel->where('categories_artikel_id', $category->id)
                                     class="rounded-circle author-img me-2" alt="Author">
                                 <small class="fw-bold text-secondary">{{ Str::limit($article->full_name, 15) }}</small>
                             </div>
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id, 'token' => $article->token]) }}"
+                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}"
                                 class="text-gradient text-decoration-none fw-bold small">
                                 Baca <i class="bi bi-arrow-right"></i>
                             </a>

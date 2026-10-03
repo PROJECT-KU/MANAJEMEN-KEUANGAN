@@ -833,7 +833,7 @@ class GajiController extends Controller
   // <!--================== END ==================-->
 
   // <!--================== UPDATE DATA ==================-->
-  public function edit($id, $token)
+  public function edit($id)
   {
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -1231,7 +1231,7 @@ class GajiController extends Controller
   // <!--================== END ==================-->
 
   // <!--================== DETAIL DATA ==================-->
-  public function detail($id, $token)
+  public function detail($id)
   {
     $user = Auth::user();
     $gaji = Gaji::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital

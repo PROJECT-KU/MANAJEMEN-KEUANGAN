@@ -126,7 +126,7 @@ Kategori Analisis Bibliometrik | MIS
                                             @endif
                                         </td>
                                         <td style="text-align: center;">
-                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.kategori.edit', ['id' => $hasil->id, 'token' => $hasil->token]) }}" class="btn btn-sm btn-warning">
+                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.kategori.edit', ['id' => $hasil->id]) }}" class="btn btn-sm btn-warning">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
                                             <button style="margin-right: 5px; margin-bottom:5px;" onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mb-2">

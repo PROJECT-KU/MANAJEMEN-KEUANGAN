@@ -44,7 +44,7 @@ class WebinarEksklusifPengingatMail extends Mailable
             ->view('public.webinar_eksklusif.email_pengingat', [
                 'pendaftaran' => $this->pendaftaran,
                 'sesi' => $this->sesi,
-                'tautanStatus' => route('public.webinareksklusif.status', $this->pendaftaran->token),
+                'tautanStatus' => route('public.webinareksklusif.status', $this->pendaftaran->getKey()),
             ]);
     }
 }

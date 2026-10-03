@@ -527,7 +527,7 @@ class CampController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== DETAIL DATA ==================-->
-    public function detail($id, $token)
+    public function detail($id)
     {
         $user = Auth::user();
         $camp = Camp::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
@@ -560,7 +560,7 @@ class CampController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== UPDATE DATA ==================-->
-    public function edit($id, $token)
+    public function edit($id)
     {
         $user = Auth::user();
         $camp = Camp::findOrFail($id); // Pastikan 'Gaji' menggunakan huruf kapital
