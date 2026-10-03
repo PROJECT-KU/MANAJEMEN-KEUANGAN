@@ -116,6 +116,15 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </dd>
                     </div>
                 @endif
+                @if ((int) $pendaftaran->kode_unik > 0)
+                    <div>
+                        <dt>Kode unik</dt>
+                        <dd class="sta-kode-unik">
+                            + Rp {{ number_format((int) $pendaftaran->kode_unik, 0, ',', '.') }}
+                            <small>penanda pembayaran Anda</small>
+                        </dd>
+                    </div>
+                @endif
                 <div>
                     <dt>Total</dt>
                     <dd class="sta-total">Rp {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }}</dd>
@@ -124,10 +133,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
             @if (! $lunas && ! $batal && ! $habis)
                 @if ($pendaftaran->sisa_waktu)
+                    {{--
+                        Kalimatnya DIBUNGKUS <span>, dan itu bukan hiasan.
+
+                        .sta-waktu memakai display:flex, dan pada flex setiap
+                        unsur anak jadi item tersendiri — <strong> di tengah
+                        kalimat terlempar jadi kolomnya sendiri, sehingga
+                        terbaca "Selesaikan dalam | 23 jam 59 menit lagi |
+                        , setelah itu kursinya dilepas" dalam tiga kolom
+                        terpisah. Dengan satu pembungkus, flexnya tinggal dua
+                        item: ikon dan kalimat.
+                    --}}
                     <p class="sta-waktu">
                         <i class="fas fa-stopwatch" aria-hidden="true"></i>
-                        Selesaikan dalam <strong>{{ $pendaftaran->sisa_waktu }}</strong>,
-                        setelah itu kursinya dilepas untuk orang lain.
+                        <span>
+                            Selesaikan dalam <strong>{{ $pendaftaran->sisa_waktu }}</strong>,
+                            setelah itu kursinya dilepas untuk orang lain.
+                        </span>
                     </p>
                 @endif
 
@@ -140,8 +162,20 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <div class="sta-bayar">
                         <p class="sta-bayar-judul">Cara membayar</p>
                         <ol>
-                            <li>Transfer <strong>tepat</strong>
-                                Rp {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }} ke:</li>
+                            <li>
+                                Transfer <strong>tepat sampai angka terakhir</strong>
+                                Rp {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }} ke:
+                                @if ((int) $pendaftaran->kode_unik > 0)
+                                    {{-- Alasannya disebut. Tanpa itu orang mengira
+                                         angka ganjilnya salah hitung, lalu
+                                         membulatkannya — dan transfernya tidak
+                                         bisa dicocokkan lagi. --}}
+                                    <span class="sta-catatan-unik">
+                                        Angka terakhirnya kode unik Anda; kalau dibulatkan,
+                                        pembayarannya tidak bisa kami cocokkan.
+                                    </span>
+                                @endif
+                            </li>
                         </ol>
                         <div class="sta-rekening">
                             <span>BRI</span>
@@ -397,6 +431,21 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         color: #64748b;
     }
 
+    .sta-kode-unik { color: var(--jingga, #ff6a00) !important; }
+    .sta-kode-unik small { display: block; font-size: .7rem; color: #94a3b8; }
+
+    .sta-catatan-unik {
+        display: block;
+        margin-top: 5px;
+        padding: 8px 10px;
+        border-radius: 9px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        font-size: .78rem;
+        line-height: 1.55;
+        color: #9a3412;
+    }
+
     .sta-potongan { color: #0f9b74 !important; }
     .sta-potongan small { display: block; font-size: .7rem; color: #94a3b8; }
 
@@ -527,7 +576,8 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         font-size: .86rem;
     }
 
-    .sta-waktu > .fas { margin: 0 !important; }
+    .sta-waktu > .fas { margin: 0 !important; flex: 0 0 auto; }
+    .sta-waktu > span { line-height: 1.55; }
 
     .sta-bayar { text-align: left; }
 

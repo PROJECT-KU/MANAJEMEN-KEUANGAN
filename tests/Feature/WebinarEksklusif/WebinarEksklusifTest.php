@@ -233,7 +233,19 @@ class WebinarEksklusifTest extends TestCase
         $this->assertSame('budi@contoh.test', $p->email, 'Emailnya dikecilkan.');
         $this->assertSame('6281234567890', $p->telp, 'Nomornya dirapikan jadi 62.');
         $this->assertSame(3, $p->jumlah_pendaftar);
-        $this->assertSame(387000, (int) $p->total_pembayaran, '129.000 x 3.');
+        /*
+         * Totalnya kini DASAR + KODE UNIK. Kode uniknya sengaja tidak
+         * ditebak nilainya — yang dijaga hubungannya: totalnya persis
+         * dasar ditambah kode, dan kodenya di dalam rentang yang dijanjikan.
+         */
+        $kode = (int) $p->kode_unik;
+
+        $this->assertGreaterThanOrEqual(
+            \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MIN, $kode);
+        $this->assertLessThanOrEqual(
+            \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MAKS, $kode);
+
+        $this->assertSame(387000 + $kode, (int) $p->total_pembayaran, '129.000 x 3 + kode unik');
         $this->assertSame('pending', $p->status);
         $this->assertNotNull($p->kedaluwarsa_pada);
 
@@ -298,7 +310,8 @@ class WebinarEksklusifTest extends TestCase
         $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
             ->assertSee($p->id_transaksi)
-            ->assertSee('Rp 129.000');
+            // Nominal yang ditagihkan sudah termasuk kode unik.
+            ->assertSee(number_format((int) $p->fresh()->total_pembayaran, 0, ',', '.'));
     }
 
     // ------------------------------------------------------ pembayaran DOKU
@@ -1408,7 +1421,8 @@ class WebinarEksklusifTest extends TestCase
 
         $p = WebinarEksklusifPendaftaran::where('email', 'hemat@contoh.test')->first();
 
-        $this->assertSame('99000', (string) $p->total_pembayaran, '129.000 - 30.000');
+        $this->assertSame(99000 + (int) $p->kode_unik, (int) $p->total_pembayaran,
+            '129.000 - 30.000 + kode unik');
         $this->assertSame('HEMAT30', $p->kode_diskon);
         $this->assertSame('30000', (string) $p->nominal_diskon);
     }
@@ -1425,9 +1439,9 @@ class WebinarEksklusifTest extends TestCase
                 'jumlah_pendaftar' => 1, 'setuju' => '1', 'kode_diskon' => $kode,
             ]);
 
-            $this->assertSame('129000',
-                (string) WebinarEksklusifPendaftaran::where('email', 'coba' . $i . '@contoh.test')
-                    ->value('total_pembayaran'),
+            $baris = WebinarEksklusifPendaftaran::where('email', 'coba' . $i . '@contoh.test')->first();
+
+            $this->assertSame(129000 + (int) $baris->kode_unik, (int) $baris->total_pembayaran,
                 'kode "' . $kode . '" tidak boleh memotong');
         }
     }
@@ -1447,9 +1461,10 @@ class WebinarEksklusifTest extends TestCase
             'kode_diskon' => 'BORONG',
         ]);
 
-        $this->assertSame('0',
-            (string) WebinarEksklusifPendaftaran::where('email', 'borong@contoh.test')
-                ->value('total_pembayaran'));
+        $baris = WebinarEksklusifPendaftaran::where('email', 'borong@contoh.test')->first();
+
+        // Potongannya menghabiskan tagihan; yang tersisa tinggal kode uniknya.
+        $this->assertSame((int) $baris->kode_unik, (int) $baris->total_pembayaran);
     }
 
     // ----------------------------------------------------- rupa saat penuh
@@ -1802,9 +1817,9 @@ class WebinarEksklusifTest extends TestCase
             'total_pembayaran' => '0',
         ]);
 
-        $this->assertSame('99000',
-            (string) WebinarEksklusifPendaftaran::where('email', 'curang@contoh.test')
-                ->value('total_pembayaran'),
+        $baris = WebinarEksklusifPendaftaran::where('email', 'curang@contoh.test')->first();
+
+        $this->assertSame(99000 + (int) $baris->kode_unik, (int) $baris->total_pembayaran,
             'yang berlaku nominal dari angkatannya, bukan yang dikirim peramban');
     }
 
@@ -1839,5 +1854,188 @@ class WebinarEksklusifTest extends TestCase
                 $id . ' harus tersembunyi saat pesertanya baru satu'
             );
         }
+    }
+
+    // ------------------------------------------------------- kode unik
+
+    /**
+     * Kode unik 500–1.500 ditambahkan ke tagihan transfer manual.
+     *
+     * Gunanya mencocokkan pembayaran: dua orang yang mendaftar paket sama
+     * mengirim nominal yang persis sama, dan panitia tidak punya cara tahu
+     * uang masuk itu dari siapa. Dengan tiga digit terakhir yang berbeda,
+     * satu mutasi rekening langsung menunjuk satu pendaftaran.
+     */
+    #[Test]
+    public function kode_unik_ditambahkan_ke_tagihan(): void
+    {
+        $sesi = $this->sesi();
+        $min = \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MIN;
+        $maks = \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MAKS;
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Unik', 'email' => 'unik@contoh.test',
+            'telp' => '08123450900', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ])->assertRedirect();
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'unik@contoh.test')->first();
+        $kode = (int) $p->kode_unik;
+
+        $this->assertGreaterThanOrEqual($min, $kode);
+        $this->assertLessThanOrEqual($maks, $kode);
+
+        $this->assertSame(129000 + $kode, (int) $p->total_pembayaran,
+            'kode unik DITAMBAHKAN, bukan dikurangkan');
+    }
+
+    /**
+     * Tidak boleh ada dua pendaftaran hidup bertotal sama di satu angkatan.
+     *
+     * Acak saja tidak cukup: seluruh gunanya membuat nominal berbeda
+     * antar-orang, dan kalau dua total kebetulan sama persis, satu mutasi
+     * rekening menunjuk dua pendaftaran — panitia kembali menebak, dan tidak
+     * ada gejala apa pun yang menandainya.
+     */
+    /**
+     * Skenarionya dibuat MENENTUKAN: semua nilai kode unik sudah terpakai
+     * kecuali satu.
+     *
+     * Versi pertama uji ini hanya mendaftarkan dua belas orang, dan itu TIDAK
+     * membuktikan apa-apa — dua belas nilai di antara 1.001 kemungkinan jarang
+     * bertabrakan, jadi ia tetap hijau walau penjaganya dicabut dan kodenya
+     * acak murni. Sudah dicoba tiga kali, hijau ketiganya.
+     *
+     * Dengan hanya satu nilai tersisa, acak murni hampir pasti meleset dan
+     * penjaganyalah satu-satunya yang bisa menemukannya.
+     */
+    #[Test]
+    public function kode_unik_menghindari_total_yang_sudah_terpakai(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '2000', 'sisa_kuota' => '2000']);
+
+        $min = \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MIN;
+        $maks = \App\Http\Controllers\Publict\PublicWebinarEksklusifController::KODE_UNIK_MAKS;
+        $bebas = $maks;  // satu-satunya yang disisakan
+
+        $baris = [];
+
+        for ($kode = $min; $kode < $bebas; $kode++) {
+            $baris[] = [
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'token' => \Illuminate\Support\Str::random(40),
+                'id_transaksi' => 'WE-UJI-' . $kode,
+                'kategori_id' => $sesi->id,
+                'nama' => 'Penghuni ' . $kode,
+                'email' => 'huni' . $kode . '@contoh.test',
+                'telp' => '628123400000',
+                'jumlah_pendaftar' => 1,
+                'total_pembayaran' => (string) (129000 + $kode),
+                'cara_bayar' => 'transfer',
+                'status' => 'pending',
+                'kedaluwarsa_pada' => now()->addHours(5),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        \Illuminate\Support\Facades\DB::table('webinar_eksklusif_pendaftaran')->insert($baris);
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Penyelip', 'email' => 'selip@contoh.test',
+            'telp' => '08123450999', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ])->assertRedirect();
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'selip@contoh.test')->first();
+
+        $this->assertNotNull($p);
+        $this->assertSame($bebas, (int) $p->kode_unik,
+            'satu-satunya kode yang totalnya belum terpakai harus yang dipilih');
+        $this->assertSame(129000 + $bebas, (int) $p->total_pembayaran);
+    }
+
+    #[Test]
+    public function total_tidak_pernah_kembar_di_satu_angkatan(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '60', 'sisa_kuota' => '60']);
+
+        /*
+         * Pembatas 6 kiriman per menit dilewati DI SINI SAJA. Yang diuji
+         * keunikan totalnya, dan dua belas kiriman beruntun hanya mungkin
+         * tanpa pembatasnya — pembatasnya sendiri sudah punya ujinya sendiri.
+         */
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+
+        for ($i = 0; $i < 12; $i++) {
+            $this->post(route('public.webinareksklusif.store'), [
+                'kategori_id' => $sesi->id, 'nama' => 'Orang ' . $i,
+                'email' => 'orang' . $i . '@contoh.test',
+                'telp' => '0812345' . str_pad((string) $i, 4, '0', STR_PAD_LEFT),
+                'jumlah_pendaftar' => 1, 'setuju' => '1',
+            ]);
+        }
+
+        $total = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)
+            ->pluck('total_pembayaran')->map(fn ($t) => (int) $t)->all();
+
+        $this->assertCount(12, $total, 'prasyarat: dua belas pendaftaran tersimpan');
+        $this->assertSame(count($total), count(array_unique($total)),
+            'tiap pendaftaran harus bertotal berbeda supaya transfernya bisa dicocokkan');
+    }
+
+    /**
+     * Lewat gerbang pembayaran kode unik TIDAK dipakai: pencocokannya memakai
+     * nomor rujukan, dan menambah angka receh di sana justru membingungkan.
+     */
+    #[Test]
+    public function tanpa_kode_unik_kalau_lewat_gerbang_pembayaran(): void
+    {
+        $palsu = new class extends \App\Services\Doku
+        {
+            public function __construct() {}
+
+            public function siap(): bool
+            {
+                return true;
+            }
+
+            public function buatTagihan(array $data): array
+            {
+                return ['berhasil' => true, 'url' => 'https://contoh.test/bayar', 'rujukan' => 'UJI-1'];
+            }
+        };
+
+        $this->app->instance(\App\Services\Doku::class, $palsu);
+
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Gerbang', 'email' => 'gerbang@contoh.test',
+            'telp' => '08123450901', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'gerbang@contoh.test')->first();
+
+        $this->assertNull($p->kode_unik);
+        $this->assertSame(129000, (int) $p->total_pembayaran, 'nominalnya bulat, tanpa kode unik');
+    }
+
+    #[Test]
+    public function halaman_status_menyebut_kode_unik_dan_alasannya(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Unik Status', 'email' => 'unik.status@contoh.test',
+            'telp' => '08123450902', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'unik.status@contoh.test')->first();
+
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->assertSee('Kode unik', false)
+            // Alasannya disebut: tanpa itu orang mengira angka ganjilnya salah
+            // hitung, lalu membulatkannya.
+            ->assertSee('tidak bisa kami cocokkan', false);
     }
 }
