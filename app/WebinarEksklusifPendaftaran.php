@@ -27,6 +27,7 @@ class WebinarEksklusifPendaftaran extends Model
 
     protected $fillable = [
         'token', 'id_transaksi', 'kategori_id',
+        'user_id',
         'nama', 'email', 'telp', 'affiliasi', 'disetujui_pada', 'pengingat_pada', 'jumlah_pendaftar',
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status',
@@ -163,6 +164,47 @@ class WebinarEksklusifPendaftaran extends Model
         $urut = $terakhir ? ((int) substr($terakhir, -4)) + 1 : 1;
 
         return $awalan . str_pad((string) $urut, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Peserta kedua dan seterusnya.
+     *
+     * Peserta pertama TIDAK ada di sini — ia di kolom nama/email pendaftaran
+     * ini sendiri, sebab dialah yang dihubungi dan yang membayar.
+     */
+    public function pesertaLain(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        // Selalu terurut seperti yang diketik pendaftarnya — created_at
+        // tidak bisa dipakai, beberapa baris lahir di detik yang sama.
+        return $this->hasMany(WebinarEksklusifPeserta::class, 'pendaftaran_id')->orderBy('urutan');
+    }
+
+    /**
+     * Akun yang dipakai saat mendaftar, kalau memang sedang masuk.
+     */
+    public function akun(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Semua nama peserta, pendaftar utama lebih dulu.
+     *
+     * @return list<array{nama:string,email:?string,utama:bool}>
+     */
+    public function semuaPeserta(): array
+    {
+        $daftar = [[
+            'nama' => (string) $this->nama,
+            'email' => (string) $this->email,
+            'utama' => true,
+        ]];
+
+        foreach ($this->pesertaLain as $p) {
+            $daftar[] = ['nama' => (string) $p->nama, 'email' => $p->email, 'utama' => false];
+        }
+
+        return $daftar;
     }
 
     public function angkatan(): BelongsTo

@@ -107,6 +107,15 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <dt>Jumlah peserta</dt>
                     <dd>{{ $pendaftaran->jumlah_pendaftar }} orang</dd>
                 </div>
+                @if ((int) $pendaftaran->nominal_diskon > 0)
+                    <div>
+                        <dt>Potongan</dt>
+                        <dd class="sta-potongan">
+                            &minus; Rp {{ number_format((int) $pendaftaran->nominal_diskon, 0, ',', '.') }}
+                            <small>{{ $pendaftaran->kode_diskon }}</small>
+                        </dd>
+                    </div>
+                @endif
                 <div>
                     <dt>Total</dt>
                     <dd class="sta-total">Rp {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }}</dd>
@@ -161,6 +170,35 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             @endif
 
             {{--
+                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
+
+                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
+                akun hasil buatan sistem tidak punya sandi yang dipilih
+                orangnya, dan email yang salah ketik akan menciptakan akun
+                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
+                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
+
+                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
+                email dan namanya sudah dibawa ke borang pendaftaran akun.
+                Tidak ditampilkan kepada yang sudah masuk.
+            --}}
+            @guest
+                @if (! $batal && ! $habis)
+                    <div class="sta-tawar-akun">
+                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
+                        <p class="sta-tawar-isi">
+                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
+                            terisi sendiri di sesi berikutnya.
+                        </p>
+                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            Buat akun pakai email ini
+                        </a>
+                    </div>
+                @endif
+            @endguest
+
+            {{--
                 Kirim ulang bukti pendaftaran.
 
                 Satu-satunya jalan kembali ke halaman ini adalah tautan
@@ -181,6 +219,27 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         Kirim ulang bukti pendaftaran ke email saya
                     </button>
                 </form>
+            @endif
+
+            {{-- Daftar peserta ditampilkan supaya pendaftar bisa memeriksa
+                 ejaan namanya sebelum sertifikat diterbitkan. Salah eja yang
+                 baru ketahuan saat sertifikatnya jadi adalah pekerjaan ulang
+                 yang bisa dicegah di sini. --}}
+            @php($semuaPeserta = $pendaftaran->semuaPeserta())
+
+            @if (count($semuaPeserta) > 1)
+                <div class="sta-peserta">
+                    <p class="sta-peserta-judul">Nama peserta ({{ count($semuaPeserta) }} orang)</p>
+                    <ol>
+                        @foreach ($semuaPeserta as $orang)
+                            <li>{{ $orang['nama'] }}@if ($orang['utama'])<span>pendaftar</span>@endif</li>
+                        @endforeach
+                    </ol>
+                    <p class="sta-peserta-catatan">
+                        Sertifikat diterbitkan atas nama ini. Kalau ada yang salah eja,
+                        kabari panitia sebelum hari pelaksanaan.
+                    </p>
+                </div>
             @endif
 
             <div class="sta-aksi">
@@ -246,6 +305,100 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     .sta-galat > .fas,
     .sta-sukses > .fas { margin: 0 !important; margin-top: 2px !important; }
+
+    /* ---------------------------------------------- tawaran buat akun */
+
+    .sta-tawar-akun {
+        margin: 0 0 16px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+        text-align: center;
+    }
+
+    .sta-tawar-judul {
+        margin: 0 0 5px;
+        font-size: .9rem;
+        font-weight: 800;
+        color: #3730a3;
+    }
+
+    .sta-tawar-isi {
+        margin: 0 0 12px;
+        font-size: .82rem;
+        line-height: 1.6;
+        color: #4338ca;
+    }
+
+    .sta-tawar-akun a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 18px;
+        border-radius: 11px;
+        background: #4f46e5;
+        color: #fff;
+        font-size: .85rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .2s ease, transform .12s ease;
+    }
+
+    .sta-tawar-akun a:hover { background: #4338ca; }
+    .sta-tawar-akun a:active { transform: scale(.97); }
+    .sta-tawar-akun a > .fas { margin: 0 !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sta-tawar-akun a { transition: none !important; }
+        .sta-tawar-akun a:active { transform: none !important; }
+    }
+
+    /* ------------------------------------------------- daftar peserta */
+
+    .sta-peserta {
+        margin: 0 0 18px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid var(--garis, #e2e8f0);
+        background: #f8fafc;
+    }
+
+    .sta-peserta-judul {
+        margin: 0 0 10px;
+        font-size: .85rem;
+        font-weight: 800;
+        color: var(--navy, #0f2b5b);
+    }
+
+    .sta-peserta ol { margin: 0; padding-left: 20px; }
+
+    .sta-peserta li {
+        padding: 4px 0;
+        font-size: .9rem;
+        color: #334155;
+    }
+
+    .sta-peserta li span {
+        margin-left: 7px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: #e0e7ff;
+        font-size: .68rem;
+        font-weight: 700;
+        color: #3730a3;
+    }
+
+    .sta-peserta-catatan {
+        margin: 10px 0 0;
+        font-size: .76rem;
+        line-height: 1.55;
+        color: #64748b;
+    }
+
+    .sta-potongan { color: #0f9b74 !important; }
+    .sta-potongan small { display: block; font-size: .7rem; color: #94a3b8; }
 
     /* ---------------------------------------- kirim ulang bukti pendaftaran */
 
