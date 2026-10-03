@@ -882,6 +882,95 @@ class LayarPendaftaranLayananTest extends TestCase
         $angkatan->forceFill(['status' => 'nonactive'])->save();
     }
 
+    /**
+     * Borang menyisakan ruang untuk bilah menu bawah ponsel.
+     *
+     * Bilah itu melayang (`position: fixed`, 20px dari dasar, tinggi 75px) dan
+     * halamannya tidak punya bantalan bawah sama sekali — jadi isian terakhir
+     * berakhir DI BAWAHNYA dan tidak bisa disentuh. Terukur di 390x844 pada
+     * tata letak ponsel.
+     *
+     * Dijaga dari sumbernya sebab kegagalannya tidak terlihat dari layar lebar
+     * mana pun: di sana bilahnya tidak ada, jadi seluruh pengukuran meja
+     * melewatkannya begitu saja.
+     */
+    #[Test]
+    public function borang_menyisakan_ruang_untuk_bilah_menu_ponsel(): void
+    {
+        $sumber = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baru.blade.php')
+        );
+
+        preg_match('/<style>(.*?)<\/style>/s', $sumber, $m);
+        $this->assertNotEmpty($m, 'Blok gaya borangnya tidak ditemukan.');
+
+        $gaya = preg_replace('#/\*.*?\*/#s', '', $m[1]);
+
+        preg_match('/body\.is-mobile\s+\.mis-badan\s*\{([^}]*)\}/', (string) $gaya, $blok);
+
+        $this->assertNotEmpty(
+            $blok,
+            'Borang tidak menyisakan ruang untuk bilah menu bawah ponsel; '
+                . 'isian terakhirnya akan berakhir di bawahnya.'
+        );
+
+        preg_match('/padding-bottom\s*:\s*(\d+)px/', $blok[1], $angka);
+
+        $this->assertNotEmpty($angka, 'Ruangnya harus berupa padding-bottom.');
+
+        // Bilahnya 75px ditambah 20px jarak dari dasar; kurang dari itu tetap
+        // menutupi.
+        $this->assertGreaterThanOrEqual(
+            95,
+            (int) $angka[1],
+            'Ruangnya kurang dari tinggi bilah menu (75px) plus jaraknya (20px).'
+        );
+    }
+
+    /**
+     * Ringkasan biaya TIDAK menempel di layar sempit.
+     *
+     * Terukur di 390x844: kartunya setinggi 247px — hampir sepertiga layar —
+     * dan menempel di dasar berarti sepertiga layar itu tertutup selamanya.
+     * Ia bahkan menimpa bilah menu bawah, sehingga tombol Simpan tertutup
+     * separuh.
+     */
+    #[Test]
+    public function ringkasan_biaya_tidak_menempel_di_layar_sempit(): void
+    {
+        $sumber = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baru.blade.php')
+        );
+
+        preg_match('/<style>(.*?)<\/style>/s', $sumber, $m);
+        $gaya = preg_replace('#/\*.*?\*/#s', '', $m[1]);
+
+        /*
+         * Aturan menempelnya harus dipagari batas BAWAH, bukan hanya batas
+         * atas: tanpa min-width ia berlaku sampai layar tersempit.
+         */
+        preg_match_all(
+            '/@media\s*\(min-width:\s*(\d+)px\)[^{]*\{\s*\.bar-samping\s*\{([^}]*position:\s*sticky[^}]*)\}/s',
+            (string) $gaya,
+            $cocok,
+            PREG_SET_ORDER
+        );
+
+        $this->assertNotEmpty(
+            $cocok,
+            'Aturan "menempel" pada .bar-samping harus dipagari @media (min-width: …); '
+                . 'tanpa itu ia berlaku juga di ponsel dan menutupi sepertiga layar.'
+        );
+
+        foreach ($cocok as $c) {
+            $this->assertGreaterThanOrEqual(
+                768,
+                (int) $c[1],
+                'Batas bawahnya minimal 768px; di bawah itu layarnya terlalu sempit untuk ditutupi.'
+            );
+        }
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {
