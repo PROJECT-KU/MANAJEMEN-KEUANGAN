@@ -594,6 +594,91 @@ keluaran PDF, semua status, semua dialog di layar itu. Inventarisnya sendiri
 yang menemukan cacat: mendaftar keadaan kosong menyingkap riwayat tersaring
 yang berbunyi "Belum ada tarif lama" padahal riwayatnya ada.
 
+## Tabel terklip di LEBAR TABLET, dan pemeriksaan luberan biasa tidak melihatnya
+
+Celah paling berbahaya ada di **768-1199px**: di bawah 768px tabelnya jadi
+kartu, di atas ~1200px ia muat, tetapi di antaranya `.mis-tabel-bungkus`
+ber-`overflow-x: hidden` **memotong** kolom paling kanan tanpa gejala apa pun.
+Halamannya tetap melaporkan gulir mendatar 0px.
+
+Terukur di layar Pendaftar Layanan sebelum diperbaiki: lebar min-content
+tabelnya 868px sementara pembungkusnya 706px di 768px dan 758px di 820px —
+kolom Aksi terpotong **161px** dan **109px**, jadi tombolnya tidak bisa
+ditekan siapa pun di tablet.
+
+**Pemeriksaan "ada unsur yang meluber?" TIDAK menangkapnya**, sebab penyaring
+yang masuk akal mengecualikan unsur ber-`overflow-x` bukan `visible` — dan
+pembungkus itu justru `hidden`. Yang menangkapnya membandingkan tepi kanan
+tabel dengan tepi kanan pembungkusnya:
+
+```js
+Math.max(0, tabel.getBoundingClientRect().right - bungkus.getBoundingClientRect().right)
+```
+
+Ukur di **768, 820, 900, 1024, 1100, dan 1280** — bukan hanya di 1440 dan 390.
+Lebar 1100px perlu disebut tersendiri: di sana bilah sisi melebar, jadi
+pembungkusnya justru lebih sempit daripada di 1024.
+
+**Yang diperbaiki BUKAN kolomnya yang disembunyikan** — kolom yang hilang
+berarti keterangan yang tidak bisa dijangkau siapa pun. Yang dilonggarkan dua
+hal yang tidak bisa menyusut:
+
+1. **Tombol beteks jadi ikon saja** di rentang itu. Tulisannya disembunyikan
+   untuk MATA (`position: absolute; clip`), bukan dibuang, dan tombolnya
+   WAJIB diberi `aria-label` — tombol ikon tanpa nama tidak menyebut apa pun
+   ke pembaca layar. Hemat ~75px.
+2. **`.mis-pil` dibolehkan terpatah** (`white-space: normal`). Lencana
+   "Menunggu bayar" sendiri menuntut ~135px dalam satu baris, hampir
+   seperlima lebar tabel yang tersedia.
+
+Hasilnya 161px → 0px di seluruh rentang, menyamai layar acuan Data Pelanggan
+yang memang 0px di semua lebar. **Layar Angkatan Layanan masih terklip 9px di
+820px dan 61px di 768px** — perkara yang sama, belum diperbaiki.
+
+## Label tab satu kata, dan `flex: 1 1 0` membuatnya meluber tanpa suara
+
+`.mis-tab > li` memberi tiap tab `flex: 1 1 0` — lebar sama rata. Dengan lima
+tab di kolom kanan, bagian tiap tab tinggal seperlima, dan karena
+`.mis-tab .nav-link` ber-`white-space: nowrap` tulisan yang tidak muat **tidak
+membungkus melainkan meluber keluar kotaknya sendiri**, menumpuk ke tab
+sebelahnya. Terukur 11px di 1280px dan 10px di 1024px untuk label "Angkatan &
+bayar".
+
+Dua hal yang mengakhirinya:
+
+- **Label satu kata**, seperti layar acuan Data Pelanggan (Akun / Kontak /
+  Pesanan / Jejak). "Angkatan & bayar" jadi "Pembayaran", "Sesi & jadwal" jadi
+  "Jadwal".
+- **Timpaan terbatas** `#id-strip > li { flex: 0 1 auto }` di atas 768px, jadi
+  tiap tab selebar isinya dan barisnya membungkus kalau memang tidak cukup —
+  bukan terklip. Lewat id supaya layar lain tetap memakai bawaannya.
+
+Di bawah 768px aturan bersamanya mengubah strip jadi penggulung satu baris
+berpenanda tepi; timpaan itu tidak dipakai di sana. Dan penandanya memang
+harus **mati begitu mentok** — terukur: sebelum digeser `penandaKanan` menyala
+dan tab terakhir di luar layar, sesudah mentok `penandaKanan` mati,
+`penandaKiri` menyala, dan tab terakhir bisa disentuh.
+
+## Medali ikon: pakai `.mis-medali` + modifier, jangan kelas sendiri
+
+`.mis-medali` sudah memuat empat perbaikan yang semuanya perlu dan semuanya
+mudah terlewat kalau ditulis ulang: latar dari `var(--warna)` yang disetel
+kelas warnanya, `place-items: center` yang memusatkan glif tanpa bantalan
+kira-kira, `font-size: inherit` pada glifnya yang mengalahkan aturan global
+`.fas { font-size: 20px }`, dan `margin: 0 !important` yang membatalkan margin
+4px yang `style.css` pasang pada ikon di dalam `<a>`.
+
+Butuh ukuran lain? Tambah modifier di atasnya
+(`.mis-medali.rin-besar { width: 62px; … }`), bukan kelas baru. Melewatkan
+satu saja dari keempatnya membuat ikonnya meleset dari titik tengah — dan
+selisih 2px baru terlihat begitu lima medali berjajar dan semuanya meleset ke
+arah yang sama.
+
+**Mengukurnya:** bandingkan titik tengah glif dengan titik tengah ubinnya
+untuk SETIAP medali di halaman, bukan satu contoh. Terukur di layar Pendaftar
+Layanan: 26 medali di daftar dan 17 di rincian, selisih 0px di kedua sumbu
+pada keenam lebar.
+
 ## Di mode kartu, HANYA SATU sel per baris boleh berisi `.mis-pil`
 
 `mis-tabel-kartu` menandai sel status lewat `:has(.mis-pil)`, lalu
