@@ -987,7 +987,7 @@
                                             <p class="pel-pesanan-nilai">Rp {{ number_format($p['nilai'], 0, ',', '.') }}</p>
                                         @endif
                                         {{-- Warna, label, dan ikonnya datang dari
-                                             PesananPelanggan::rupaStatus(): empat layanan
+                                             PesananPelanggan::rupaStatus(): lima layanan
                                              memakai kosakata berbeda, jadi pemetaannya
                                              ditaruh satu tempat, bukan disebar di Blade. --}}
                                         <span class="mis-pil mis-pil-{{ $p['rupa']['warna'] }}">
@@ -999,7 +999,7 @@
                         </div>
 
                         {{-- Keterbatasannya disebutkan, tidak disembunyikan.
-                             Tiga dari empat layanan tidak menyimpan rujukan ke
+                             Tiga dari lima layanan tidak menyimpan rujukan ke
                              akun pemesannya sama sekali, jadi penautannya
                              menebak dari nomor telepon, email, lalu nama — dan
                              sengaja menahan diri kalau pengenalnya dipakai lebih

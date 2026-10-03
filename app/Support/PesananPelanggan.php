@@ -11,8 +11,9 @@ use Illuminate\Support\Str;
 /**
  * Menyatukan pesanan seorang pelanggan dari beberapa tabel layanan.
  *
- * Tidak satu pun dari keempat tabel layanan ini menyimpan rujukan ke akun
- * pemesannya — kecuali Clinik Scopus, yang punya customer_id. Sisanya hanya
+ * Hanya dua dari kelima tabel layanan ini menyimpan rujukan ke akun
+ * pemesannya: Clinik Scopus lewat customer_id dan Webinar Eksklusif lewat
+ * user_id. Sisanya hanya
  * mencatat nama, email, dan nomor telepon yang diketik sendiri oleh pemesan.
  * Jadi penautannya memang menebak, dan yang bisa dikerjakan adalah menebak
  * dengan urutan yang paling kecil kemungkinan salahnya:
@@ -100,6 +101,30 @@ class PesananPelanggan
             'customer_id' => null,
             'ikon' => 'fa-campground',
             'warna' => 'mis-hijau',
+        ],
+        [
+            /*
+             * Webinar Eksklusif, yang sebelumnya TIDAK ADA di daftar ini sama
+             * sekali — jadi pendaftaran webinar seseorang tidak pernah muncul
+             * di halaman pelanggannya, dan jumlah pesanannya terhitung kurang.
+             * Terlewat karena layanan ini lahir sesudah daftarnya dibuat untuk
+             * empat layanan.
+             *
+             * Satu-satunya sumber di sini yang punya rujukan akun SUNGGUHAN di
+             * samping Clinik Scopus: borang pendaftarannya mengisi user_id saat
+             * yang mendaftar sedang masuk. Jadi penautannya tidak perlu menebak
+             * dari nomor telepon untuk baris-baris itu.
+             */
+            'layanan' => 'Webinar Eksklusif',
+            'tabel' => 'webinar_eksklusif_pendaftaran',
+            'nomor' => 'id_transaksi',
+            'nilai' => 'total_pembayaran',
+            'telp' => 'telp',
+            'email' => 'email',
+            'nama' => 'nama',
+            'customer_id' => 'user_id',
+            'ikon' => 'fa-star',
+            'warna' => 'mis-kuning',
         ],
     ];
 
@@ -331,7 +356,7 @@ class PesananPelanggan
     /**
      * Warna, label Indonesia, dan ikon untuk satu nilai status.
      *
-     * Empat layanan mencatat statusnya dengan kosakata masing-masing, dan
+     * Lima layanan mencatat statusnya dengan kosakata masing-masing, dan
      * kolomnya varchar bebas — bukan enum — jadi tidak ada daftar tertutup
      * yang dijamin basis datanya. Yang sah menurut borang tiap layanan:
      *
@@ -381,6 +406,8 @@ class PesananPelanggan
             'pendaftaran reschedule' => ['Dijadwalkan ulang', 'biru', 'fa-calendar-alt'],
 
             // tidak jadi
+            'expired' => ['Kedaluwarsa', 'merah', 'fa-times-circle'],
+            'cancel' => ['Dibatalkan', 'merah', 'fa-times-circle'],
             'canceled' => ['Dibatalkan', 'merah', 'fa-times-circle'],
             'cancelled' => ['Dibatalkan', 'merah', 'fa-times-circle'],
             'pendaftaran dibatalkan' => ['Pendaftaran dibatalkan', 'merah', 'fa-times-circle'],
@@ -445,7 +472,7 @@ class PesananPelanggan
      * akun dilihat. Tiap baris diselesaikan tepat sekali, jadi tidak ada baris
      * yang terhitung dua kali karena cocok lewat dua kunci sekaligus.
      *
-     * Harganya: seluruh baris keempat tabel dibaca. Ratusan baris sekarang,
+     * Harganya: seluruh baris kelima tabel dibaca. Ratusan baris sekarang,
      * dan itu murah; kalau kelak mencapai puluhan ribu, penautannya perlu
      * dipindahkan ke SQL.
      *
