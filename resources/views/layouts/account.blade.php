@@ -282,7 +282,10 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         </li>
                     @endif
                     <li>
-                        <a href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}" class="mis-notif-tombol" title="Pemesanan Clinik Scopus">
+                        {{-- Lonceng ini menghitung pemesanan yang MENUNGGU, jadi
+                             penerimanya panitia — diarahkan ke layar Pendaftar
+                             Layanan yang sudah tersaring ke keadaan itu. --}}
+                        <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'clinik_scopus', 'keadaan' => 'menunggu']) }}" class="mis-notif-tombol" title="Pemesanan Clinik Scopus yang menunggu">
                             <i class="fas fa-file-invoice-dollar"></i>
                             @if (($countScopusPending ?? 0) > 0)
                                 <span class="mis-notif-angka">{{ $countScopusPending > 99 ? '99+' : $countScopusPending }}</span>
@@ -381,20 +384,6 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
-                        {{-- Pendaftar Webinar Eksklusif. Ditaruh tepat di bawah
-                             Angkatan Layanan sebab dari sanalah sesinya dibuat,
-                             dan ke sinilah panitia menandai pembayarannya lunas.
-
-                             Tanpa entri menu ini, layarnya hanya bisa dibuka
-                             dengan mengetik alamatnya — dan satu-satunya cara
-                             menandai transfer manual jadi lunas praktis tidak
-                             bisa ditemukan siapa pun. --}}
-                        <li class="{{ setActive('account/WebinarEksklusifPendaftar') }}">
-                            <a class="nav-link" href="{{ route('account.webinarpendaftar.index') }}">
-                                <i class="fas fa-user-check"></i> <span>Pendaftar Webinar</span>
-                            </a>
-                        </li>
-
                         <li class="{{ setActive('account/galeri') }}">
                             <a class="nav-link" href="{{ route('account.galeri.index') }}">
                                 <i class="fas fa-images"></i> <span>Galeri Foto</span>
@@ -418,6 +407,13 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         </li>
                         @endif
 
+                        {{-- Khusus PELANGGAN sejak layar pendaftaran per layanan
+                             dibuang. Layar ini memang halaman pesanan miliknya
+                             sendiri — pengendalinya menyaring ke customer_id-nya —
+                             jadi ia tidak boleh ikut dibuang. Panitia memakai
+                             entri "Pendaftar Layanan" di atas, yang memuat kelima
+                             layanan sekaligus. --}}
+                        @if ($pengguna->adalahPelanggan())
                         <li class="{{ setActive('account/Clinik-Scopus-Riwayat-Pemesanan') . setActive('account/pengguna/search') }}">
                             <a class="nav-link d-flex align-items-center justify-content-between" href="{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}">
                                 <div>
@@ -439,6 +435,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 </div>
                             </a>
                         </li>
+                        @endif
                         <!--================== END ==================-->
 
                         <!--================== REDIRECT TO BERANDA ==================-->
@@ -547,7 +544,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li class="{{ setActive('account/meme') . setActive('account/meme/edit-data') }}"><a class="nav-link" href="{{ route('account.meme.index') }}"><i class="fas fa-dice-d6"></i>Create Data</a></li>
-                                        <li class="{{ setActive('account/pendaftaran-scopus-kafe') }}"><a class="nav-link" href="{{ route('account.pendaftaran-scopus-kafe.index') }}"><i class="fas fa-users"></i>Data Pendaftaran</a></li>
+                                        <li><a class="nav-link" href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'scopus_kafe']) }}"><i class="fas fa-users"></i>Data Pendaftaran</a></li>
                                     </ul>
                                 </li>
 
@@ -601,8 +598,15 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                     </a>
                                 </li>
 
-                                <li class="{{ setActive('account/Analisis-Bibliometrik') }}">
-                                    <a class="nav-link" href="{{ route('account.analisisbibliometrik.index') }}">
+                                {{-- Menunjuk layar Pendaftar Layanan yang sudah
+                                     tersaring ke layanan ini. Layar pendaftar
+                                     Bibliometrik sendiri dibuang 3 Okt 2026 — ia
+                                     galat 500 untuk SEMUA orang, termasuk
+                                     administrator, sebab compact() di
+                                     pengendalinya memanggil variabel yang tidak
+                                     pernah didefinisikan. --}}
+                                <li>
+                                    <a class="nav-link" href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'bibliometrik']) }}">
                                         <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
                                     </a>
                                 </li>
@@ -619,8 +623,11 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                     </a>
                                 </li>
 
-                                <li class="{{ setActive('account/PendaftaranScopusCamp') }}">
-                                    <a class="nav-link" href="{{ route('account.pendaftaranscopuscamp.index') }}">
+                                {{-- Menunjuk layar Pendaftar Layanan yang sudah
+                                     tersaring ke layanan ini; layar pendaftar
+                                     Scopus Camp sendiri dibuang 3 Okt 2026. --}}
+                                <li>
+                                    <a class="nav-link" href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'scopus_camp']) }}">
                                         <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
                                     </a>
                                 </li>

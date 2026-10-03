@@ -290,6 +290,15 @@ class Dasbor extends Component
             [
                 'warna' => 'biru',
                 'ikon' => 'fa-clipboard-list',
+                /*
+                 * TETAP ke Riwayat Pemesanan, bukan ke Pendaftar Layanan.
+                 *
+                 * Ubin ini milik PELANGGAN, dan layar itu memang halaman
+                 * pesanannya sendiri — pengendalinya menyaring ke customer_id
+                 * miliknya. Layar Pendaftar Layanan hanya untuk orang dalam,
+                 * jadi mengarahkannya ke sana akan memantulkan pelanggannya
+                 * kembali ke dasbor dengan pesan tidak punya akses.
+                 */
                 'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index'),
                 'label' => 'Pemesanan saya',
                 'nilai' => $pesanan . ' pesanan',
@@ -595,7 +604,11 @@ class Dasbor extends Component
                     'ikon' => 'fa-file-invoice-dollar',
                     'judul' => $menunggu . ' pemesanan menunggu pembayaran',
                     'teks' => 'Periksa bukti transfer yang masuk.',
-                    'tautan' => route('account.Clinik-Scopus-Riwayat-Pemesanan.index'),
+                    // Panitia, bukan pelanggan: diarahkan ke layar Pendaftar
+                    // Layanan yang sudah tersaring ke keadaan yang dimaksud.
+                    'tautan' => route('account.pendaftaran-layanan.index', [
+                        'layanan' => 'clinik_scopus', 'keadaan' => 'menunggu',
+                    ]),
                 ];
             }
         }
