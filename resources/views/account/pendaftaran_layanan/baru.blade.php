@@ -322,6 +322,56 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         /*
+         * Panel potongan.
+         *
+         * Alumni dan dua isian potongan dulu berdiri sendiri-sendiri di kisi
+         * langkah 2. Kartu alumni hanya muncul kalau tarifnya menyetelnya,
+         * jadi saat ia tidak ada, baris itu tinggal dua isian di separuh kiri
+         * dan separuh kanannya menganggur — terbaca seperti ada yang belum
+         * selesai dimuat.
+         *
+         * Dikelompokkan jadi satu panel sebaris penuh, dan isinya auto-fit:
+         * dua isian memakai separuh-separuh, tiga memakai sepertiga-sepertiga.
+         * Berapa pun yang tampil, panelnya tetap terisi.
+         */
+        .bar-potongan-panel {
+            padding: 13px 15px 15px;
+            border: 1px dashed var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fcfcfe;
+        }
+
+        .bar-potongan-panel[hidden] {
+            display: none;
+        }
+
+        .bar-potongan-judul {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 11px;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-3);
+        }
+
+        .bar-potongan-judul span {
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--mis-tinta-4);
+        }
+
+        .bar-potongan-isi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+            gap: 14px;
+            align-items: start;
+        }
+
+        /*
          * Ringkas angkatan terpilih.
          *
          * Baris pertama langkah 2 menyisakan satu jalur kosong di layar lebar
@@ -712,6 +762,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                             <input type="radio" name="layanan" value="{{ $kunci }}"
                                 data-berangkatan="{{ $l['berangkatan'] ? '1' : '0' }}"
                                 data-potongan="{{ $l['bisa_potongan'] ? '1' : '0' }}"
+                                data-varian="{{ $l['varian_sendiri'] && $varian[$kunci] !== [] ? '1' : '0' }}"
                                 @checked(old('layanan', $terpilih) === $kunci) required>
                             <span class="bar-kartu">
                                 <span class="mis-medali {{ $l['warna'] }}" aria-hidden="true">
@@ -777,6 +828,28 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <p class="mis-bantuan">Untuk pendaftaran rombongan.</p>
                     </div>
 
+                    {{-- Pilihan varian untuk layanan TANPA angkatan.
+
+                         Empat layanan lain mewarisi variannya dari angkatan
+                         yang dipilih. Scopus Kafe tidak berangkatan, jadi
+                         sebelum ini varian Online/Offline yang disetel di
+                         layar Layanan tidak muncul di mana pun — borangnya
+                         hanya menyodorkan kotak nominal kosong. --}}
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-varian" hidden>
+                        <span class="mis-label">Pilih varian</span>
+                        <div class="bar-pilihan bar-pilihan-bayar" id="bar-varian-kartu"></div>
+                        <p class="mis-bantuan" id="bar-varian-ket">
+                            Harganya ikut tarif varian yang dipilih.
+                        </p>
+                    </div>
+
+                    <div class="mis-isian" id="bar-bungkus-total" hidden>
+                        <label class="mis-label" for="bar-total">Total bayar</label>
+                        <input type="text" class="form-control-modern" id="bar-total" name="total"
+                            value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
+                        <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
+                    </div>
+
                     {{-- Mengisi jalur yang sebelumnya menganggur di baris ini,
                          dan isinya bukan sekadar pengisi: ketiga angka inilah
                          yang ditanyakan pendaftar lewat WhatsApp — tanggal
@@ -803,12 +876,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </dl>
                     </div>
 
-                    <div class="mis-isian" id="bar-bungkus-total" hidden>
-                        <label class="mis-label" for="bar-total">Total bayar</label>
-                        <input type="text" class="form-control-modern" id="bar-total" name="total"
-                            value="{{ old('total') }}" inputmode="numeric" placeholder="contoh: 250000">
-                        <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
-                    </div>
 
                     {{-- Potongan ALUMNI, disetel sekali di Tarif Layanan.
 
@@ -817,7 +884,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                          akhirnya tidak bisa dijelaskan dari salah satunya, dan
                          panitia yang memberi potongan khusus kepada seorang
                          alumni hampir selalu bermaksud menggantikannya. --}}
-                    <div class="mis-isian bar-lebar" id="bar-bungkus-alumni" hidden>
+                    <div class="bar-potongan-panel bar-penuh" id="bar-panel-potongan" hidden>
+                    <p class="bar-potongan-judul">
+                        <i class="fas fa-tags" aria-hidden="true"></i> Potongan <span>opsional</span>
+                    </p>
+                    <div class="bar-potongan-isi">
+
+                    <div class="mis-isian" id="bar-bungkus-alumni" hidden>
                         <label class="bar-centang" for="bar-alumni">
                             <input type="checkbox" id="bar-alumni"
                                 name="alumni" value="1" @checked(old('alumni'))>
@@ -859,6 +932,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                              bulan kemudian. --}}
                         <p class="mis-bantuan">Supaya potongannya bisa dijelaskan nanti.</p>
                     </div>
+
+                    </div>{{-- /bar-potongan-isi --}}
+                    </div>{{-- /bar-panel-potongan --}}
                 </div>
             </div>
 
@@ -1058,6 +1134,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
          * tiap kali pilihannya berubah.
          */
         var ANGKATAN = @json($angkatanJson);
+        var VARIAN = @json($varian);
+        var TARIF = @json($tarif);
+        var LAMA_VARIAN = @json(old('varian'));
         var LAMA_ANGKATAN = @json(old('kategori_id'));
 
         /*
@@ -1090,6 +1169,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var bungkusVarian = el('bar-bungkus-varian');
+        var kartuVarian = el('bar-varian-kartu');
+        var ketVarian = el('bar-varian-ket');
+        var panelPotongan = el('bar-panel-potongan');
         var sekilas = el('bar-sekilas');
         var sekilasJudul = el('bar-sekilas-judul');
         var sekilasTanggal = el('bar-sekilas-tanggal');
@@ -1142,6 +1225,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 nilai: r.value,
                 berangkatan: r.dataset.berangkatan === '1',
                 bisaPotongan: r.dataset.potongan === '1',
+                punyaVarian: r.dataset.varian === '1',
             } : null;
         };
 
@@ -1406,6 +1490,121 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         };
 
+        /**
+         * Merakit kartu varian untuk layanan yang memilih variannya sendiri.
+         *
+         * Bentuknya sama dengan kartu cara bayar, bukan menu tarik: pilihannya
+         * cuma dua atau tiga, dan kartu menampung harganya sekaligus — yang
+         * justru paling dicari saat memilih.
+         */
+        var isiVarian = function (layanan) {
+            var daftar = VARIAN[layanan] || {};
+
+            kartuVarian.innerHTML = '';
+
+            var kunci = Object.keys(daftar);
+            var pertama = null;
+
+            kunci.forEach(function (kode) {
+                var id = 'bar-varian-' + kode;
+                var harga = TARIF[layanan + '|' + kode];
+
+                var label = document.createElement('label');
+                var radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'varian';
+                radio.value = kode;
+                radio.id = id;
+
+                var kartu = document.createElement('span');
+                kartu.className = 'bar-kartu';
+
+                var medali = document.createElement('span');
+                medali.className = 'mis-medali mis-biru';
+                medali.setAttribute('aria-hidden', 'true');
+                medali.innerHTML = '<i class="fas fa-tag"></i>';
+
+                var teks = document.createElement('span');
+                teks.style.minWidth = '0';
+
+                var nama = document.createElement('span');
+                nama.className = 'bar-kartu-nama';
+                nama.textContent = daftar[kode];
+
+                var ket = document.createElement('span');
+                ket.className = 'bar-kartu-ket';
+                /*
+                 * Varian tanpa tarif aktif disebut apa adanya. Dibiarkan
+                 * kosong, panitia menyangka harganya nol — padahal yang
+                 * sebenarnya terjadi tarifnya belum disetel.
+                 */
+                ket.textContent = harga ? rupiah(harga) : 'tarifnya belum disetel';
+
+                teks.appendChild(nama);
+                teks.appendChild(ket);
+
+                var tanda = document.createElement('span');
+                tanda.className = 'bar-kartu-centang';
+                tanda.setAttribute('aria-hidden', 'true');
+                tanda.innerHTML = '<i class="fas fa-check-circle"></i>';
+
+                kartu.appendChild(medali);
+                kartu.appendChild(teks);
+                kartu.appendChild(tanda);
+                label.appendChild(radio);
+                label.appendChild(kartu);
+                kartuVarian.appendChild(label);
+
+                if (pertama === null) {
+                    pertama = radio;
+                }
+
+                if (LAMA_VARIAN === kode) {
+                    radio.checked = true;
+                }
+            });
+
+            // Satu varian selalu terpilih: layanan yang punya varian TIDAK
+            // punya harga tanpa varian, jadi keadaan "belum memilih" berarti
+            // kotak nominal yang tidak bisa diisi sendiri.
+            if (pertama && !kartuVarian.querySelector('input:checked')) {
+                pertama.checked = true;
+            }
+
+            LAMA_VARIAN = null;
+            terapkanVarian(layanan);
+        };
+
+        /** Mengisi nominal dan ringkasnya dari tarif varian yang terpilih. */
+        var terapkanVarian = function (layanan) {
+            var r = kartuVarian.querySelector('input[name="varian"]:checked');
+
+            if (!r) {
+                tampil(sekilas, false);
+                return;
+            }
+
+            var daftar = VARIAN[layanan] || {};
+            var harga = TARIF[layanan + '|' + r.value];
+
+            if (harga) {
+                isianTotal.value = rupiah(harga).replace('Rp ', '');
+                ketVarian.textContent = 'Harganya ikut tarif ' + daftar[r.value]
+                    + '. Masih boleh diubah kalau sesinya lebih dari satu.';
+            } else {
+                ketVarian.textContent = 'Tarif ' + daftar[r.value]
+                    + ' belum disetel di Tarif Layanan, jadi nominalnya diketik sendiri.';
+            }
+
+            sekilasJudul.textContent = daftar[r.value] || 'Varian terpilih';
+            sekilasTanggal.textContent = 'menyesuaikan jadwal sesi';
+            sekilasSisa.textContent = 'tanpa batas';
+            sekilasHarga.textContent = harga ? rupiah(harga) : 'belum disetel';
+            tampil(sekilas, true);
+
+            hitung();
+        };
+
         var segarkan = function () {
             var pilih = layananTerpilih();
 
@@ -1415,6 +1614,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 tampil(bungkusJumlah, false);
                 tampil(bungkusTotal, false);
                 tampil(sekilas, false);
+                tampil(bungkusVarian, false);
+                tampil(panelPotongan, false);
                 tampil(bungkusPotongan, false);
                 tampil(bungkusKode, false);
                 hitung();
@@ -1428,6 +1629,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             // Layanan tanpa angkatan tidak punya apa pun untuk diringkas;
             // tegaskanAngkatan() yang menyalakannya kembali kalau ada.
             tampil(sekilas, false);
+            tampil(bungkusVarian, pilih.punyaVarian);
             tampil(bungkusPotongan, pilih.bisaPotongan);
             tampil(bungkusKode, pilih.bisaPotongan);
 
@@ -1442,9 +1644,33 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             if (pilih.berangkatan) {
                 isiAngkatan(pilih.nilai);
                 tegaskanAngkatan(pilih.nilai);
+            } else if (pilih.punyaVarian) {
+                isiVarian(pilih.nilai);
+            }
+
+            /*
+             * Kartunya DIBUANG untuk layanan yang tidak memakainya, bukan
+             * sekadar disembunyikan: radio tersembunyi TETAP terkirim, jadi
+             * berpindah dari Scopus Kafe ke layanan lain akan membawa serta
+             * varian yang tidak ada hubungannya dengan kiriman itu.
+             *
+             * Syaratnya bukan cabang `else` dari pengisian angkatan — layanan
+             * berangkatan masuk cabang pertama dan tidak akan pernah sampai ke
+             * sana. Terukur: dua kartu varian Scopus Kafe tetap tertinggal
+             * saat berpindah ke Analisis Bibliometrik.
+             */
+            if (!pilih.punyaVarian) {
+                kartuVarian.innerHTML = '';
             }
 
             tawarkanAlumni(pilih);
+
+            /*
+             * Panel potongan menyala hanya kalau ADA yang bisa ditampilkan di
+             * dalamnya. Panel kosong berbingkai lebih buruk daripada tidak ada
+             * panelnya: ia terbaca seperti isian yang gagal dimuat.
+             */
+            tampil(panelPotongan, pilih.bisaPotongan || !bungkusAlumni.hidden);
 
             hitung();
         };
@@ -1452,6 +1678,12 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         borang.addEventListener('change', function (e) {
             if (e.target.name === 'layanan') {
                 segarkan();
+            } else if (e.target.name === 'varian') {
+                var pl = layananTerpilih();
+
+                if (pl) {
+                    terapkanVarian(pl.nilai);
+                }
             } else if (e.target.name === 'cara_bayar') {
                 segarkanBayar();
             } else if (e.target === menuAngkatan) {

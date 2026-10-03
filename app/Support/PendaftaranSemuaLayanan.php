@@ -221,6 +221,16 @@ class PendaftaranSemuaLayanan
                 'nama_orang' => 'nama',
                 'email' => 'email',
                 'telp' => 'telp',
+                /*
+                 * SATU-SATUNYA layanan yang menyimpan variannya sendiri.
+                 *
+                 * Empat lainnya mewarisinya dari angkatan yang dipilih; Scopus
+                 * Kafe tidak berangkatan, jadi tanpa kolom ini varian
+                 * Online/Offline yang disetel di layar Layanan tidak punya
+                 * tempat sama sekali. Tidak masuk daftar KOLOM union — keempat
+                 * tabel lain tidak punya kolomnya.
+                 */
+                'varian' => 'varian',
                 'total' => 'total_keseluruhan_pembayaran',
                 'kode_unik' => 'kode_unik_pembayaran',
                 'bukti' => 'gambar',
@@ -737,6 +747,17 @@ class PendaftaranSemuaLayanan
                     // nominalnya memang diketik langsung, jadi potongannya
                     // sudah termasuk di dalamnya.
                     'bisa_potongan' => isset($s['kolom']['nominal_diskon']),
+                    /*
+                     * Varian yang DIPILIH SENDIRI di borang, bukan diwarisi
+                     * dari angkatan.
+                     *
+                     * Empat layanan lain mendapat variannya dari angkatan yang
+                     * dipilih. Scopus Kafe tidak berangkatan, jadi variannya
+                     * harus dipilih langsung — dan itu hanya mungkin kalau
+                     * tabelnya punya kolomnya.
+                     */
+                    'varian_sendiri' => ! ($s['berangkatan'] ?? false)
+                        && isset($s['kolom']['varian']),
                 ];
             }
         }

@@ -308,6 +308,20 @@ class BuatPendaftaran
             $baris[$kolom['cara_bayar']] = $caraBayar;
         }
 
+        /*
+         * Varian yang dipilih sendiri, hanya untuk layanan tanpa angkatan.
+         *
+         * Dicocokkan ke daftar varian layanannya, bukan diterima apa adanya:
+         * daftarnya hidup di kolom JSON `layanan.varian`, dan nilai di luar
+         * daftar berarti baris yang tarifnya tidak akan pernah ketemu.
+         */
+        if (isset($kolom['varian'])) {
+            $pilihan = \App\Layanan::katalog()[$layanan]['varian'] ?? [];
+            $varian = (string) ($isian['varian'] ?? '');
+
+            $baris[$kolom['varian']] = array_key_exists($varian, $pilihan) ? $varian : null;
+        }
+
         // Nama kolom berbeda di tiap tabel — nama vs nama_pemesan, telp vs
         // telp_pemesan — jadi dipetakan lewat katalog, bukan ditulis lima kali.
         foreach (['nama_orang' => 'nama', 'email' => 'email', 'telp' => 'telp', 'affiliasi' => 'affiliasi'] as $seragam => $dariIsian) {
