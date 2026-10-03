@@ -8,17 +8,66 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 @push('gaya')
     <style>
         /*
-         * Lebar isi dibatasi.
+         * TIDAK ada batas lebar sendiri di sini.
          *
-         * Pemilihnya menyebut .mis-badan juga, bukan .bar-wadah saja:
-         * mis-ui.css memasang `.mis-badan > .section { max-width: 1600px }`
-         * yang berbobot (0,1,1), dan pemilih (0,1,0) kalah walau ditulis
-         * belakangan. Versi pertama aturan ini tidak mengubah apa pun justru
-         * karena itu — borangnya tetap melar 1.540px, dan isian yang
-         * merentang sejauh itu membuat mata menyapu untuk tiap barisnya.
+         * Sempat dibatasi 1.000px untuk menahan isian yang merentang terlalu
+         * jauh. Itu salah sasaran: patokan rumahnya `.mis-badan > .section {
+         * max-width: 1600px }`, dan borang yang berhenti di 1.000px jadi
+         * satu-satunya layar yang tidak penuh — terlihat seperti layar yang
+         * belum jadi, bukan seperti layar yang rapi.
+         *
+         * Yang menahan sapuan mata bukan lebar halamannya melainkan lebar
+         * ISIANNYA (lihat .bar-penuh di bawah) dan kolom ringkasan di kanan
+         * yang memakai sisa lebarnya untuk sesuatu yang berguna.
          */
-        .mis-badan > .section.bar-wadah {
-            max-width: 1000px;
+
+        /*
+         * Ruang kerja: langkah di kiri, ringkasan biaya menempel di kanan.
+         *
+         * Di 1.600px, satu lajur berarti kartu selebar 1.560px berisi isian
+         * selebar 520px — sisanya kosong, dan total bayarnya terdorong jauh
+         * di bawah lipatan sehingga tidak terlihat saat isiannya diubah.
+         */
+        .bar-kerja {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: var(--mis-jarak);
+            align-items: start;
+        }
+
+        /*
+         * Kolom ringkasannya baru muncul di 1500px, dan angkanya diukur bukan
+         * ditebak.
+         *
+         * Titik potongnya menghitung LEBAR JENDELA, sementara yang menentukan
+         * adalah lebar isi — dan bilah samping aplikasi sudah memakan ~310px
+         * lebih dulu. Versi pertama memakai 1200px: terukur di jendela
+         * 1280px, lajur kirinya tinggal 615px dan kisi isiannya jatuh ke dua
+         * jalur. 1500px menyisakan ~830px untuk lajur kiri, cukup untuk empat
+         * kartu layanan sebaris.
+         *
+         * Di bawahnya borangnya satu lajur PENUH — tetap selebar layar,
+         * sebagaimana layar lain di aplikasi ini.
+         */
+        @media (max-width: 1499.98px) {
+            .bar-kerja {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /*
+         * Menempel saat digulir. Angka atasnya mengikuti tinggi batang kepala
+         * yang melayang di layout ini (.mis-badan padding-top 110px).
+         */
+        .bar-samping {
+            position: sticky;
+            top: 96px;
+        }
+
+        @media (max-width: 1499.98px) {
+            .bar-samping {
+                position: static;
+            }
         }
 
         .bar-langkah {
@@ -73,6 +122,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
             gap: 11px;
+        }
+
+        /*
+         * Cara bayarnya hanya dua kartu. Tanpa batas, keduanya memakai separuh
+         * lajur kiri masing-masing — kartu selebar ~590px untuk dua baris teks
+         * terbaca seperti ada yang hilang di dalamnya.
+         */
+        .bar-pilihan-bayar {
+            max-width: 780px;
         }
 
         .bar-pilihan input {
@@ -198,15 +256,40 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             opacity: .45;
         }
 
+        /*
+         * Lebar terkecil jalurnya 260px, bukan 215px.
+         *
+         * Dengan lajur kiri ~1.200px, 215px membuka LIMA lajur: empat isian
+         * langkah "siapa yang mendaftar" jadi satu baris plus satu jalur
+         * kosong menggantung di ujungnya. 260px menutupnya di empat, dan
+         * keempat isiannya pas satu baris penuh.
+         */
         .bar-isian-kisi {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
             gap: 14px;
             align-content: start;
         }
 
         .bar-penuh {
             grid-column: 1 / -1;
+        }
+
+        /*
+         * Dua jalur, bukan sebaris penuh. Dipakai menu angkatan: isinya
+         * terpanjang di borang ini ("Scopus Camp Yogyakarta — Rp 5.500.000 ·
+         * sisa 20 kursi"), jadi satu jalur memotongnya dengan elipsis,
+         * sedangkan sebaris penuh menyisakan jumlah orang sendirian di baris
+         * berikutnya.
+         */
+        .bar-lebar {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-lebar {
+                grid-column: 1 / -1;
+            }
         }
 
         /*
@@ -218,7 +301,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
          * kursinya — dan tetap menyusut sendiri di layar sempit.
          */
         .bar-penuh > select,
-        .bar-penuh > input {
+        .bar-penuh > input,
+        .bar-lebar > select {
             max-width: 520px;
         }
 
@@ -338,6 +422,57 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         }
 
+        /*
+         * Di kolom samping, batang biayanya berdiri jadi panel.
+         *
+         * Aturannya di bawah .bar-samping, bukan menimpa .bar-biaya langsung:
+         * di bawah 1500px kolomnya turun jadi selebar halaman, dan di sana
+         * bentuk mendatarnya yang benar — angka besar di kiri, tombol di
+         * kanan.
+         */
+        @media (min-width: 1500px) {
+            .bar-samping .bar-biaya {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px;
+            }
+
+            .bar-samping .bar-biaya-angka-blok {
+                padding-bottom: 13px;
+                border-bottom: 1px dashed var(--mis-garis);
+            }
+
+            .bar-samping .bar-rinci {
+                width: 100%;
+            }
+
+            .bar-samping .bar-biaya-aksi {
+                margin-left: 0;
+                /*
+                 * align-self WAJIB disebut: aturan dasarnya memasang
+                 * `align-self: center`, dan itu menang atas `align-items:
+                 * stretch` milik wadahnya. Terukur tanpa baris ini, blok
+                 * tombolnya menyusut ke 192px di panel selebar 340px dan
+                 * kedua tombolnya menggantung di tengah.
+                 */
+                align-self: stretch;
+                flex-direction: column-reverse;
+                gap: 9px;
+            }
+
+            /* Tombol simpannya di ATAS tombol batal — itu yang dituju, dan
+               urutan sumbernya tetap Batal lalu Simpan supaya runtun papan
+               tiknya tidak terbalik. */
+            .bar-samping .bar-biaya-aksi .mis-tombol {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .bar-samping .bar-catatan-bawah {
+                margin-top: 13px;
+            }
+        }
+
         .bar-nota {
             display: flex;
             align-items: flex-start;
@@ -414,6 +549,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         <form method="POST" action="{{ route('account.pendaftaran-layanan.simpan') }}" id="bar-borang">
             @csrf
 
+            <div class="bar-kerja">
+            <div class="bar-utama">
+
             {{-- ------------------------------------ langkah 1: layanan --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
@@ -478,7 +616,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
 
                 <div class="bar-isian-kisi">
-                    <div class="mis-isian bar-penuh" id="bar-bungkus-angkatan">
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-angkatan">
                         <label class="mis-label" for="bar-angkatan">Angkatan</label>
                         <select class="form-control-modern" id="bar-angkatan" name="kategori_id">
                             <option value="">Pilih layanan dulu</option>
@@ -565,7 +703,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     </div>
                 </div>
 
-                <div class="bar-pilihan">
+                <div class="bar-pilihan bar-pilihan-bayar">
                     @foreach ($caraBayar as $kunci => $c)
                         <label>
                             <input type="radio" name="cara_bayar" value="{{ $kunci }}"
@@ -666,7 +804,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
             </div>
 
-            {{-- -------------------------------------------- biaya --}}
+            </div>{{-- /bar-utama --}}
+
+            {{-- ------------------------------- ringkasan biaya, menempel --}}
+            <aside class="bar-samping">
             <div class="bar-biaya">
                 <div class="bar-biaya-angka-blok">
                     <p class="bar-biaya-angka" id="bar-angka">Rp 0</p>
@@ -712,6 +853,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 Nomor pendaftaran, status, dan kode unik dibuat sistem sesudah disimpan.
                 Kode unik itu yang membuat nominalnya bisa dicocokkan dengan mutasi rekening.
             </p>
+            </aside>
+            </div>{{-- /bar-kerja --}}
 
         </form>
 

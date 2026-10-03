@@ -757,6 +757,50 @@ class LayarPendaftaranLayananTest extends TestCase
         );
     }
 
+    /**
+     * Borang pendaftaran tidak membatasi lebarnya sendiri.
+     *
+     * Patokan rumahnya `.mis-badan > .section { max-width: 1600px }` di
+     * mis-ui.css, dan SEMUA layar memakainya. Borang ini sempat dibatasi
+     * 1.000px: hasilnya satu-satunya layar yang tidak penuh — terbaca seperti
+     * layar yang belum jadi, bukan seperti layar yang rapi.
+     *
+     * Yang menahan isian merentang terlalu jauh bukan lebar halamannya
+     * melainkan lebar ISIANNYA (.bar-penuh/.bar-lebar dibatasi 520px) dan
+     * kolom ringkasan di kanan yang memakai sisa lebarnya.
+     */
+    #[Test]
+    public function borang_pendaftaran_tidak_memangkas_lebarnya_sendiri(): void
+    {
+        $sumber = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baru.blade.php')
+        );
+
+        // Hanya bagian gayanya; kalimat penjelas di komentar Blade boleh
+        // menyebut angkanya.
+        preg_match('/<style>(.*?)<\/style>/s', $sumber, $m);
+        $this->assertNotEmpty($m, 'Blok gaya borangnya tidak ditemukan.');
+
+        $gaya = preg_replace('#/\*.*?\*/#s', '', $m[1]);
+
+        /*
+         * Yang dicari: aturan apa pun yang menyebut .bar-wadah DAN memasang
+         * max-width di badannya. Memeriksa per blok, bukan per berkas — kelas
+         * lain di borang ini memang boleh dan perlu punya max-width.
+         */
+        preg_match_all('/([^{}]*\.bar-wadah[^{}]*)\{([^}]*)\}/', (string) $gaya, $blok, PREG_SET_ORDER);
+
+        foreach ($blok as $b) {
+            $this->assertStringNotContainsString(
+                'max-width',
+                $b[2],
+                'Borang pendaftaran memangkas lebarnya sendiri lewat "' . trim($b[1])
+                    . '". Patokan rumahnya 1600px di mis-ui.css, dan layar yang '
+                    . 'berhenti lebih awal jadi satu-satunya yang tidak penuh.'
+            );
+        }
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {
