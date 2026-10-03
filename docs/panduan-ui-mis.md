@@ -594,6 +594,84 @@ keluaran PDF, semua status, semua dialog di layar itu. Inventarisnya sendiri
 yang menemukan cacat: mendaftar keadaan kosong menyingkap riwayat tersaring
 yang berbunyi "Belum ada tarif lama" padahal riwayatnya ada.
 
+## Di mode kartu, HANYA SATU sel per baris boleh berisi `.mis-pil`
+
+`mis-tabel-kartu` menandai sel status lewat `:has(.mis-pil)`, lalu
+menaikkannya ke baris kaki kartu bersama sel aksinya dengan `flex: 1 1 0`.
+Penanda itu menunjuk ISI, bukan posisi — jadi **setiap** sel yang kebetulan
+berisi lencana ikut naik ke sana dan ikut membagi lebar baris kaki.
+
+Terukur di layar Pendaftar Layanan pada 320px: tiga sel berpil (Bukti,
+Keadaan, Aksi) membuat masing-masing tinggal **46px**, sementara lencana
+"Berkas hilang" sendiri menuntut 92px. Kartunya meluber 234px dan terpotong
+tanpa gejala apa pun, sebab pembungkusnya `overflow-x: hidden` — halamannya
+sendiri melaporkan gulir mendatar 0px.
+
+Keadaan yang bukan status (bukti bayar, keterangan kosong) dipajang sebagai
+teks berikon, bukan pil.
+
+## Sel kartu yang isinya bertingkat harus dibungkus satu anak
+
+Di mode kartu selnya `display: flex` dengan label `::before` sebagai anak
+pertama. Jadi setiap `<span>` di dalam sel jadi anak flex tersendiri dan
+berbaris MENDATAR, bukan menumpuk — dan `display: inline` pun diblokkan jadi
+blok begitu induknya flex, sehingga menyetelnya tidak menolong.
+
+Terukur: label + nominal + kode unik + potongan diskon = empat anak sebaris
+menuntut 314px dalam sel selebar 285px. Dibungkus satu `<span>`, anaknya
+tinggal dua dan keterangannya kembali menumpuk di bawah nominalnya.
+
+## Alamat email memaksa lebar sel, dan tidak bisa menyusut
+
+Anak flex tidak pernah menyusut di bawah lebar **min-content**-nya, dan
+min-content sebuah alamat email sama dengan panjang penuhnya — ia satu kata
+tanpa spasi. Terukur di 320px: `trianggategarutama@gmail.com` menuntut 187px,
+dan bersama label kartunya membuat sel Pendaftar jadi **294px** sementara
+sembilan sel lain 232px.
+
+Setiap kolom yang memuat email, afiliasi, atau nama panjang diberi
+`overflow-wrap: anywhere`. `min-width: 0` pada pembungkusnya TIDAK cukup —
+ia melepas batas flex, bukan membuat katanya bisa dipatah.
+
+## Nominal tidak boleh terpatah, keterangannya harus boleh
+
+`white-space: nowrap` benar untuk angkanya — "Rp 4.275.028" yang berpindah
+baris di tengahnya terbaca sebagai dua angka. Ia **salah** untuk keterangan
+di bawahnya: "potongan Rp 225.000 · SalamQ1" itu kalimat, menuntut 175px, dan
+nowrap-nya meluberkan selnya 234px di 320px.
+
+Bedakan keduanya; jangan memberi satu kelas nowrap untuk seluruh isi selnya.
+
+## Menyatukan banyak tabel: `UNION ALL`, dan yang dijaga bukan urutannya
+
+Lima tabel pendaftaran disatukan di `App\Support\PendaftaranSemuaLayanan`.
+Tiga hal yang ternyata penting dan satu yang ternyata tidak:
+
+- **`UNION ALL`, bukan `UNION`.** `UNION` membuang baris kembar, jadi dua
+  pendaftaran yang isinya kebetulan sama persis akan hilang satu tanpa galat.
+  Dijaga uji yang membandingkan jumlah gabungan dengan jumlah kelima tabelnya.
+- **Literal untaian di-CAST ke panjang tetap.** Panjang literal yang
+  berbeda-beda antar cabang termasuk hal yang bisa memotong nilai di cabang
+  berikutnya. Sudah diukur di MySQL yang dipakai dan tidak terjadi, tetapi
+  CAST-nya murah dan membuat perkaranya tidak bisa muncul.
+- **Pengurut kedua yang pasti unik.** Diurutkan menurut kolom yang nilainya
+  berulang ratusan kali (91 baris berstatus sama), basis data boleh menyusunnya
+  berbeda tiap permintaan — dan baris yang sama bisa muncul di dua halaman
+  sekaligus. Gejalanya urutan yang BOLEH berbeda, bukan yang pasti berbeda,
+  jadi uji lewat HTTP bisa hijau berkali-kali di atas kode yang rusak.
+- **Urutan daftar kolomnya TIDAK perlu dijaga.** Sempat diberi komentar bahwa
+  menukarnya menukarkan nilai; dicoba, dan hasilnya identik — alias tiap kolom
+  dirakit dari butir daftar yang sama, jadi urutan dan nama tidak mungkin
+  berselisih. Yang benar-benar bisa salah PEMETAANNYA per layanan: lima tabel
+  menamai hal yang sama dengan lima nama berbeda, dan satu pemetaan yang salah
+  tunjuk cuma menampilkan afiliasi orang di kolom nama, tanpa galat.
+
+Dan **kolom yang tidak dipunyai sebuah tabel diisi NULL, bukan dilewati** —
+melewati satu kolom menggeser seluruh kolom sesudahnya. Kecuali yang punya
+arti bawaan: jumlah pendaftar yang tidak ada bukan NULL melainkan 1, sebab
+barisnya memang selalu satu orang; dibiarkan NULL, penjumlahan "berapa orang"
+melewatkan sebelas baris.
+
 ## Pencarian menjangkau isi, bukan cuma judul
 
 Orang mencari lewat apa yang mereka ingat. Di Tarif layanan, `data-cari`
