@@ -1721,4 +1721,28 @@ class WebinarEksklusifTest extends TestCase
                 && $surat->hasTo('dua.kirim@contoh.test')
         );
     }
+
+    /**
+     * Isian peserta memakai kartu bernomor, bukan sederet kotak datar.
+     *
+     * Rupa lamanya: dua kotak beruntun per orang dipisahkan label kecil
+     * abu-abu. Untuk 10 peserta itu 18 kotak nyaris identik dalam satu kolom —
+     * tidak ada tanda di mana satu orang berakhir, jadi mudah salah mengisi
+     * email orang ke baris orang lain.
+     *
+     * Yang dijaga di sini bagian yang dirender PELADEN; perilakunya
+     * (penghitung, penanda terisi) dirakit skrip dan diperiksa di peramban.
+     */
+    #[Test]
+    public function wadah_peserta_punya_penghitung_dan_petunjuk_gelar(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->get(route('public.webinareksklusif.daftar', $sesi->id))
+            ->assertOk()
+            ->assertSee('id="ses-peserta-hitung"', false)
+            // Petunjuk gelarnya dipindah ke kalimat ini sebab placeholder
+            // sepanjang "Nama lengkap + gelar" terpotong di layar 320 px.
+            ->assertSee('beserta gelarnya', false);
+    }
 }
