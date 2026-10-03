@@ -36,6 +36,7 @@ class AnalisisBibliometrik extends Model
         'note',
         'created_at',
         'updated_at',
+        'cara_bayar',
     ];
     protected static function boot()
     {

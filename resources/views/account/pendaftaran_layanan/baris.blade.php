@@ -27,6 +27,14 @@
     $rupa = Pendaftaran::KEADAAN[$keadaanBaris]
         ?? ['label' => 'Belum dikenali', 'warna' => 'abu', 'ikon' => 'fa-circle-notch'];
 
+    /*
+     * Dibaca lewat katalog, bukan dari kolomnya langsung: baris lama dari
+     * sebelum kolom `cara_bayar` ada bernilai kosong, dan `caraBayar()`
+     * menyebutnya transfer — sebelum kolom itu ada, transfer satu-satunya
+     * jalur yang disediakan borangnya.
+     */
+    $caraBayar = Pendaftaran::caraBayar($b->cara_bayar ?? null);
+
     $buktiBaris = Pendaftaran::buktiBaris($b);
     $sesiBaris = Pendaftaran::sesiBaris($b);
     $angkatanBaris = Pendaftaran::angkatanBaris($b);
@@ -183,6 +191,16 @@
                     potongan Rp {{ number_format($diskon, 0, ',', '.') }}{{ $b->kode_diskon ? ' · ' . $b->kode_diskon : '' }}
                 </span>
             @endif
+            {{-- Cara bayarnya dilipat ke kolom ini, BUKAN jadi kolom sendiri:
+                 daftarnya sudah tujuh kolom dan kolom kedelapan menggeser
+                 tabelnya melewati lebar layar di 768px. Tidak memakai
+                 .mis-pil — mis-tabel-kartu menandai sel status lewat
+                 `:has(.mis-pil)`, dan sel berpil kedua membuat keduanya
+                 berbagi satu baris sempit di mode kartu. --}}
+            <span class="pdl-uang-ket">
+                <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
+                {{ $caraBayar['ringkas'] }}
+            </span>
         </span>
     </td>
 
@@ -205,7 +223,13 @@
                 @if (! $buktiBaris['nilai'])
                     <span class="pdl-bukti pdl-bukti-nihil">
                         <i class="fas fa-minus-circle" aria-hidden="true"></i>
-                        @if ($b->layanan === 'webinar_eksklusif')
+                        @if ($caraBayar['kunci'] === 'tunai')
+                            {{-- Bayar di tempat memang TIDAK punya bukti untuk
+                                 diunggah. Ditulis "bukti belum ada", panitia
+                                 akan mengejar tangkapan layar yang tidak akan
+                                 pernah ada. --}}
+                            bayar di tempat
+                        @elseif ($b->layanan === 'webinar_eksklusif')
                             {{-- Webinar memang tidak pernah mengunggah bukti:
                                  pembayarannya dicocokkan lewat kode unik. Jadi
                                  kosong di sana bukan pekerjaan yang terlewat. --}}

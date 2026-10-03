@@ -266,10 +266,47 @@ class BuatPendaftaran
         string $kodePotongan = 'KHUSUS'
     ): array {
         $kolom = $sumber['kolom'];
+
+        /*
+         * Cara bayar dibatasi ke yang BOLEH dipilih panitia, bukan ke seluruh
+         * daftar: 'doku' ditulis jalur pendaftaran umum saat tagihannya
+         * dibuat, dan panitia yang memilihnya berarti baris bertanda sudah
+         * dibayar daring padahal tidak ada tagihan yang pernah dibuat.
+         */
+        $caraBayar = (string) ($isian['cara_bayar'] ?? 'transfer');
+
+        if (! isset(Pendaftaran::caraBayarPilihan()[$caraBayar])) {
+            $caraBayar = 'transfer';
+        }
+
+        $status = Pendaftaran::statusAwal($layanan);
+
+        /*
+         * Uang tunai yang SUDAH diterima panitia langsung dicatat lunas.
+         *
+         * Tanpa ini pendaftar yang membayar di tempat tetap duduk di
+         * "menunggu bayar" sampai ada yang ingat mengubahnya satu per satu —
+         * padahal uangnya sudah di tangan, dan panitia yang mencatatnya
+         * adalah orang yang sama yang menerimanya.
+         *
+         * Hanya untuk tunai: transfer masih perlu dicocokkan dengan mutasi
+         * rekening, dan melunaskannya dari borang berarti melunaskan sebelum
+         * ada yang memeriksa buktinya.
+         */
+        $lunasTunai = $caraBayar === 'tunai' && ! empty($isian['uang_diterima']);
+
+        if ($lunasTunai) {
+            $status = Pendaftaran::statusLunas($layanan) ?? $status;
+        }
+
         $baris = [
             $sumber['kolom_nomor'] => Pendaftaran::nomorBaru($layanan),
-            'status' => Pendaftaran::statusAwal($layanan),
+            'status' => $status,
         ];
+
+        if (isset($kolom['cara_bayar'])) {
+            $baris[$kolom['cara_bayar']] = $caraBayar;
+        }
 
         // Nama kolom berbeda di tiap tabel — nama vs nama_pemesan, telp vs
         // telp_pemesan — jadi dipetakan lewat katalog, bukan ditulis lima kali.
@@ -321,6 +358,8 @@ class BuatPendaftaran
             // publik, jadi tanpa ini tidak ada keterangan asal-usulnya.
             $jejak = 'Didaftarkan panitia' . ($olehSiapa !== null ? ' oleh ' . $olehSiapa : '')
                 . ' pada ' . now()->format('d M Y H:i')
+                . ', ' . Pendaftaran::caraBayar($caraBayar)['label']
+                . ($lunasTunai ? ' (uang sudah diterima)' : '')
                 . ($potongan > 0
                     ? ' dengan potongan Rp ' . number_format($potongan, 0, ',', '.')
                         . ' (' . $kodePotongan . ')'

@@ -385,9 +385,34 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $jumlahOrang = max(1, (int) $pendaftaran->jumlah_pendaftar);
     $totalBayar = (int) ($pendaftaran->total_pembayaran ?: $pendaftaran->total_keseluruhan_pembayaran);
     $kodeUnik = (int) ($pendaftaran->kode_unik ?: $pendaftaran->kode_unik_pembayaran);
+
+    /*
+     * Dibaca lewat katalog, bukan dari kolomnya langsung: baris lama dari
+     * sebelum kolom `cara_bayar` ada bernilai kosong, dan nilai tak dikenal
+     * tetap harus punya label — kolomnya varchar, jadi jalur pendaftaran mana
+     * pun bisa menulis nilai baru tanpa migrasi.
+     */
+    $caraBayar = Pendaftaran::caraBayar($pendaftaran->cara_bayar ?? null);
+
     $diskon = (int) ($pendaftaran->nominal_diskon ?: $pendaftaran->diskon);
 
     $berangkatan = Pendaftaran::berangkatan($layanan);
+    /*
+     * Tambahan kalimat peringatan hapus, dirakit di sini.
+     *
+     * Di markahnya, @if-nya harus menempel ke kata sebelumnya supaya tidak
+     * muncul spasi sebelum koma — dan direktif yang didahului huruf TIDAK
+     * dikompilasi Blade, jadi ia lolos ke halaman sebagai teks biasa.
+     */
+    $hapusTambahan = '';
+
+    if ($berangkatan) {
+        $hapusTambahan .= ', dan kursinya dikembalikan ke kuota angkatan';
+    }
+
+    if ($layanan === 'clinik_scopus') {
+        $hapusTambahan .= ', beserta testimoni yang menempel padanya';
+    }
 
     /*
      * Label dan pengelompokan medan — urusan tampilan, jadi di sini.
@@ -752,7 +777,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             </div>
                         </div>
 
-                        @if ($kodeUnik > 0)
+                        {{-- Cara bayarnya disebut lebih dulu, SEBELUM petunjuk
+                             mencocokkan mutasi rekening: petunjuk itu tidak
+                             berlaku untuk yang membayar tunai di tempat, dan
+                             panitia yang membacanya tanpa tahu cara bayarnya
+                             akan mencari mutasi yang tidak akan pernah ada. --}}
+                        <p class="rin-nota rin-nota-biru">
+                            <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
+                            <span>
+                                Dibayar lewat <strong>{{ $caraBayar['label'] }}</strong>.
+                                {{ $caraBayar['ket'] }}
+                            </span>
+                        </p>
+
+                        @if ($kodeUnik > 0 && $caraBayar['kunci'] !== 'tunai')
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas fa-info-circle" aria-hidden="true"></i>
                                 <span>
@@ -968,7 +1006,19 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             <p class="rin-nota rin-nota-bahaya">
                                 <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                                 <span>
-                                    Barisnya hilang permanen beserta berkas bukti bayarnya@if ($berangkatan), dan kursinya dikembalikan ke kuota angkatan@endif@if ($layanan === 'clinik_scopus'), beserta testimoni yang menempel padanya@endif.
+                                    {{-- Dirakit di PHP, BUKAN dengan @if menempel ke
+                                         kata sebelumnya.
+
+                                         Blade tidak mengompilasi direktif yang
+                                         didahului huruf: "bayarnya@if" lolos ke
+                                         halaman sebagai teks biasa, dan karena
+                                         yang pertama gagal, @endif dan @if
+                                         sesudahnya ikut gagal berentet. Terukur
+                                         di peramban: peringatan hapusnya terbaca
+                                         "...bukti bayarnya@if ($berangkatan), dan
+                                         kursinya...". Dijaga
+                                         DirektifBladeTerkompilasiTest. --}}
+                                    Barisnya hilang permanen beserta berkas bukti bayarnya{{ $hapusTambahan }}.
                                     Tidak bisa diurungkan, dan belum ada tong sampah.
                                 </span>
                             </p>

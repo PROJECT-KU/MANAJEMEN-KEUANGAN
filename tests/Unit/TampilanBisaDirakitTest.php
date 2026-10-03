@@ -25,6 +25,99 @@ use Tests\TestCase;
  */
 class TampilanBisaDirakitTest extends TestCase
 {
+    /**
+     * Tidak satu pun direktif Blade lolos ke keluaran sebagai teks biasa.
+     *
+     * Blade TIDAK mengompilasi direktif yang didahului huruf atau angka:
+     * polanya menuntut batas bukan-kata sebelum `@`. Jadi
+     * `...bukti bayarnya@if ($berangkatan), dan...` terkirim ke peramban apa
+     * adanya — lengkap dengan tanda kurung dan nama variabelnya — dan karena
+     * yang pertama gagal, @endif serta @if sesudahnya ikut gagal berentet.
+     *
+     * Terukur di halaman rincian pendaftaran: peringatan hapusnya terbaca
+     * "Barisnya hilang permanen beserta berkas bukti bayarnya@if
+     * ($berangkatan), dan kursinya dikembalikan ke kuota angkatan@endif@if
+     * ($layanan === 'clinik_scopus')...". Tidak ada galat, tidak ada entri
+     * log; halamannya tetap 200.
+     *
+     * Diperiksa dari hasil KOMPILASI, bukan dari pola di sumbernya. Yang
+     * menentukan bukan bagaimana markahnya ditulis melainkan apa yang
+     * benar-benar dikeluarkan Blade — dan itu membuat direktif di dalam
+     * komentar `{{-- --}}` tidak ikut tertuduh, sebab komentarnya memang
+     * dibuang saat kompilasi.
+     */
+    #[Test]
+    public function tidak_ada_direktif_blade_yang_lolos_jadi_teks(): void
+    {
+        /*
+         * @media, @keyframes, dan @import adalah CSS, dan @click milik
+         * Alpine — ketiganya memang harus utuh di keluaran, jadi tidak
+         * didaftarkan.
+         */
+
+        /*
+         * Penutup dan percabangan: SELALU dikompilasi apa adanya, tanpa
+         * tanda kurung. Ketemu di keluaran berarti pasti bocor.
+         */
+        $telanjang = [
+            'else', 'endif', 'endunless', 'endisset', 'endempty',
+            'endforeach', 'endforelse', 'endfor', 'endwhile', 'endswitch',
+            'endphp', 'endsection', 'endpush', 'empty', 'break', 'continue',
+        ];
+
+        /*
+         * Yang membawa tanda kurung. Pembedaan ini bukan kerewelan:
+         * `@include centered;` di dalam <style> adalah mixin Sass, dan Blade
+         * memang TIDAK mengompilasi @include tanpa tanda kurung — terukur 18
+         * kali di errors/500.blade.php. Menuduhnya bocor berarti uji yang
+         * menyuruh orang merusak CSS yang tidak bersalah.
+         */
+        $berkurung = [
+            'if', 'elseif', 'unless', 'isset', 'foreach', 'forelse', 'for',
+            'while', 'switch', 'case', 'php', 'checked', 'selected',
+            'disabled', 'json', 'include', 'each', 'section', 'push',
+        ];
+
+        $pola = '/@(?:(?:' . implode('|', $telanjang) . ')\b'
+            . '|(?:' . implode('|', $berkurung) . ')\s*\()/';
+        $temuan = [];
+
+        foreach ($this->berkasBlade() as $jalur => $isi) {
+            /*
+             * `@@if` adalah cara SAH menulis "@if" sebagai teks, dan
+             * kompilasinya memang menghasilkan `@if`. Tidak ada satu pun di
+             * proyek ini (terukur nol), jadi kalau suatu saat ada, uji ini
+             * harus diperbarui — bukan markahnya.
+             */
+            $this->assertStringNotContainsString(
+                '@@',
+                $isi,
+                basename($jalur) . ' memakai @@; aturan uji ini perlu diperbarui.'
+            );
+
+            $hasil = \Illuminate\Support\Facades\Blade::compileString($isi);
+
+            // Komentar PHP di hasil kompilasi boleh menyebut nama direktif —
+            // yang dicari adalah yang tergambar, bukan yang tertulis di
+            // komentar yang tidak pernah dikeluarkan.
+            $hasil = preg_replace('#/\*.*?\*/|//[^\n]*#s', '', $hasil);
+
+            if (preg_match_all($pola, (string) $hasil, $m)) {
+                $temuan[] = str_replace(resource_path('views') . '/', '', $jalur)
+                    . ': ' . implode(', ', array_unique($m[0]));
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $temuan,
+            "Direktif Blade ini tergambar sebagai teks biasa di halaman.\n"
+                . "Sebabnya hampir selalu direktif yang menempel ke huruf sebelumnya\n"
+                . "(\"bayarnya@if\"); rakit kalimatnya di blok @php lalu cetak hasilnya.\n"
+                . implode("\n", $temuan)
+        );
+    }
+
     /** @return array<string, string> jalur => isi */
     private function berkasBlade(): array
     {
