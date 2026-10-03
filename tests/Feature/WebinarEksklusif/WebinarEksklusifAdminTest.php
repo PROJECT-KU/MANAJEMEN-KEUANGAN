@@ -47,7 +47,15 @@ class WebinarEksklusifAdminTest extends TestCase
          * create() membuatnya hilang diam-diam — dan middleware
          * 'terverifikasi' mengalihkan tiap permintaannya. Disetel terpisah.
          */
-        $panitia->forceFill(['email_verified_at' => now()])->save();
+        /*
+         * Perannya disetel ORANG DALAM. Dengan peran bawaan 'user', ujinya
+         * tetap hijau padahal layarnya tidak terjaga sama sekali — persis
+         * yang sempat terjadi sebelum penjagaan ditambahkan.
+         */
+        $panitia->forceFill([
+            'email_verified_at' => now(),
+            'peran' => 'administrator',
+        ])->save();
 
         return $panitia;
     }
@@ -227,5 +235,71 @@ class WebinarEksklusifAdminTest extends TestCase
             ->get(route('account.webinarpendaftar.index'))
             ->assertSee('Anggota Dua', false)
             ->assertSee('Anggota Tiga', false);
+    }
+
+    /**
+     * Layarnya harus BISA DITEMUKAN dari menu.
+     *
+     * Tanpa entri menu, ia hanya bisa dibuka dengan mengetik alamatnya — dan
+     * satu-satunya cara menandai transfer manual jadi lunas praktis tidak
+     * bisa ditemukan siapa pun. Kerusakan yang tidak menampakkan diri:
+     * layarnya ada, ujinya hijau, tetapi tak seorang pun memakainya.
+     */
+    #[Test]
+    public function layarnya_ada_di_menu_samping(): void
+    {
+        /*
+         * Diperiksa dari HALAMAN LAIN, bukan dari layarnya sendiri.
+         *
+         * Layar pendaftar memuat alamatnya sendiri di form "Lunas" dan
+         * "Batalkan", jadi memeriksanya di sana tetap hijau walau entri
+         * menunya dicabut — sempat terjadi pada uji ini sebelum diperbaiki.
+         */
+        $this->actingAs($this->panitia())
+            ->get(route('account.galeri.index'))
+            ->assertOk()
+            ->assertSee(route('account.webinarpendaftar.index'), false)
+            ->assertSee('Pendaftar Webinar', false);
+    }
+
+    /**
+     * Pelanggan biasa TIDAK boleh membuka layar ini, apalagi menandai
+     * pembayaran orang lain lunas.
+     *
+     * Grup rute account/ hanya bermiddleware auth + terverifikasi, jadi tanpa
+     * penjagaan di pengendalinya layar ini terbuka untuk siapa pun yang punya
+     * akun — terukur 200 sebelum diperbaiki.
+     */
+    #[Test]
+    public function pelanggan_biasa_ditolak(): void
+    {
+        $sesi = $this->sesi();
+        $p = $this->pendaftaran($sesi);
+
+        $pelanggan = User::create([
+            'full_name' => 'Pelanggan Biasa',
+            'username' => 'pel-' . Str::random(6),
+            'email' => 'pel-' . Str::random(5) . '@contoh.test',
+            'password' => bcrypt('rahasia-uji'),
+            'peran' => 'user',
+        ]);
+        $pelanggan->forceFill(['email_verified_at' => now()])->save();
+
+        $this->actingAs($pelanggan)
+            ->get(route('account.webinarpendaftar.index'))
+            ->assertRedirect();
+
+        $this->actingAs($pelanggan)
+            ->post(route('account.webinarpendaftar.lunasi', $p->getKey()))
+            ->assertRedirect();
+
+        $this->assertSame('pending', $p->fresh()->status,
+            'pelanggan tidak boleh bisa menandai pembayaran lunas');
+
+        $this->actingAs($pelanggan)
+            ->post(route('account.webinarpendaftar.batalkan', $p->getKey()));
+
+        $this->assertSame('pending', $p->fresh()->status,
+            'pelanggan tidak boleh bisa membatalkan pendaftaran orang lain');
     }
 }
