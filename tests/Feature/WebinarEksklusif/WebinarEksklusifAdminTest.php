@@ -85,7 +85,7 @@ class WebinarEksklusifAdminTest extends TestCase
     #[Test]
     public function layarnya_tertutup_untuk_tamu(): void
     {
-        $this->get(route('account.webinarpendaftar.index'))->assertRedirect();
+        $this->get(route('account.pendaftaran-layanan.index', ['layanan' => 'webinar_eksklusif']))->assertRedirect();
     }
 
     #[Test]
@@ -95,7 +95,7 @@ class WebinarEksklusifAdminTest extends TestCase
         $p = $this->pendaftaran($sesi, ['nama' => 'Siti Pendaftar']);
 
         $this->actingAs($this->panitia())
-            ->get(route('account.webinarpendaftar.index'))
+            ->get(route('account.pendaftaran-layanan.index', ['layanan' => 'webinar_eksklusif']))
             ->assertOk()
             ->assertSee('Siti Pendaftar', false)
             ->assertSee($p->id_transaksi, false);
@@ -112,7 +112,7 @@ class WebinarEksklusifAdminTest extends TestCase
         $p = $this->pendaftaran($sesi);
 
         $this->actingAs($this->panitia())
-            ->post(route('account.webinarpendaftar.lunasi', $p->getKey()))
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid'])
             ->assertRedirect();
 
         $segar = $p->fresh();
@@ -121,6 +121,8 @@ class WebinarEksklusifAdminTest extends TestCase
         $this->assertNotNull($segar->bayar_pada);
         $this->assertStringContainsString('Panitia Uji', (string) $segar->note,
             'siapa yang menandai harus tercatat — kalau ada selisih uang, yang ditanya orangnya');
+        $this->assertStringContainsString('"pending" → "paid"', (string) $segar->note,
+            'perpindahan statusnya harus ikut tercatat, bukan hanya siapa yang mengubahnya');
     }
 
     /**
@@ -135,7 +137,7 @@ class WebinarEksklusifAdminTest extends TestCase
         $p = $this->pendaftaran($sesi);
 
         $this->actingAs($this->panitia())
-            ->post(route('account.webinarpendaftar.lunasi', $p->getKey()));
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
 
         $this->assertSame('18', (string) $sesi->fresh()->sisa_kuota);
     }
@@ -156,7 +158,7 @@ class WebinarEksklusifAdminTest extends TestCase
         ]);
 
         $this->actingAs($this->panitia())
-            ->post(route('account.webinarpendaftar.lunasi', $p->getKey()));
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
 
         $this->assertSame('paid', $p->fresh()->status);
         $this->assertSame('18', (string) $sesi->fresh()->sisa_kuota,
@@ -171,11 +173,14 @@ class WebinarEksklusifAdminTest extends TestCase
 
         $panitia = $this->panitia();
 
-        $this->actingAs($panitia)->post(route('account.webinarpendaftar.lunasi', $p->getKey()));
-        $this->actingAs($panitia)->post(route('account.webinarpendaftar.lunasi', $p->getKey()));
+        $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
+        $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
 
         $this->assertSame('18', (string) $sesi->fresh()->sisa_kuota);
-        $this->assertSame(1, substr_count((string) $p->fresh()->note, 'Dilunasi manual'));
+        // Jejaknya kini mencatat PERPINDAHAN status, bukan kata 'Dilunasi
+        // manual': tindakannya satu untuk kelima layanan. Dan perpindahan
+        // kedua ditolak sebab statusnya sudah sama, jadi jejaknya tetap satu.
+        $this->assertSame(1, substr_count((string) $p->fresh()->note, '"pending" → "paid"'));
     }
 
     #[Test]
@@ -185,7 +190,7 @@ class WebinarEksklusifAdminTest extends TestCase
         $p = $this->pendaftaran($sesi);
 
         $this->actingAs($this->panitia())
-            ->post(route('account.webinarpendaftar.batalkan', $p->getKey()))
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'cancel'])
             ->assertRedirect();
 
         $this->assertSame('cancel', $p->fresh()->status);
@@ -200,8 +205,8 @@ class WebinarEksklusifAdminTest extends TestCase
 
         $panitia = $this->panitia();
 
-        $this->actingAs($panitia)->post(route('account.webinarpendaftar.batalkan', $p->getKey()));
-        $this->actingAs($panitia)->post(route('account.webinarpendaftar.batalkan', $p->getKey()));
+        $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'cancel']);
+        $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'cancel']);
 
         $this->assertSame('20', (string) $sesi->fresh()->sisa_kuota,
             'tidak boleh melebihi yang dikembalikan sekali');
@@ -215,15 +220,23 @@ class WebinarEksklusifAdminTest extends TestCase
         $this->pendaftaran($sesi, ['nama' => 'Tidak Dicari']);
 
         $this->actingAs($this->panitia())
-            ->get(route('account.webinarpendaftar.index', ['cari' => $p->id_transaksi]))
+            ->get(route('account.pendaftaran-layanan.index', ['layanan' => 'webinar_eksklusif', 'cari' => $p->id_transaksi]))
             ->assertOk()
             ->assertSee('Khusus Dicari', false)
             ->assertDontSee('Tidak Dicari', false);
     }
 
-    /** Nama peserta rombongan tampil — itu yang dipakai menerbitkan sertifikat. */
+    /**
+     * Nama peserta rombongan tampil — itu yang dipakai menerbitkan sertifikat.
+     *
+     * Pindah dari daftar ke halaman RINCIAN sejak layar pendaftar webinar
+     * dibuang: daftar terpadu memuat lima layanan, dan menumpuk nama peserta
+     * di dalam selnya membuat barisnya setinggi rombongan terbesar. Yang
+     * dijaga di sini namanya masih bisa dilihat di suatu tempat — kalau tidak,
+     * sertifikat peserta kedua dan seterusnya tidak bisa diterbitkan.
+     */
     #[Test]
-    public function nama_peserta_rombongan_tampil_di_layar_panitia(): void
+    public function nama_peserta_rombongan_tampil_di_halaman_rincian(): void
     {
         $sesi = $this->sesi();
         $p = $this->pendaftaran($sesi, ['jumlah_pendaftar' => 3]);
@@ -232,9 +245,30 @@ class WebinarEksklusifAdminTest extends TestCase
         $p->pesertaLain()->create(['urutan' => 1, 'nama' => 'Anggota Tiga']);
 
         $this->actingAs($this->panitia())
-            ->get(route('account.webinarpendaftar.index'))
+            ->get(route('account.pendaftaran-layanan.rincian', ['webinar_eksklusif', $p->getKey()]))
+            ->assertOk()
             ->assertSee('Anggota Dua', false)
             ->assertSee('Anggota Tiga', false);
+    }
+
+    /**
+     * Jumlah nama yang kurang dari yang dibayar DISEBUT.
+     *
+     * Pendaftaran yang dibayar untuk tiga orang tetapi hanya memuat dua nama
+     * berarti satu sertifikat tidak bisa diterbitkan — dan tanpa kalimat itu
+     * hal ini baru ketahuan di hari acara.
+     */
+    #[Test]
+    public function selisih_jumlah_peserta_disebut_di_rincian(): void
+    {
+        $sesi = $this->sesi();
+        $p = $this->pendaftaran($sesi, ['jumlah_pendaftar' => 3]);
+        $p->pesertaLain()->create(['urutan' => 0, 'nama' => 'Anggota Dua']);
+
+        $this->actingAs($this->panitia())
+            ->get(route('account.pendaftaran-layanan.rincian', ['webinar_eksklusif', $p->getKey()]))
+            ->assertOk()
+            ->assertSee('nama yang tercatat', false);
     }
 
     /**
@@ -249,17 +283,22 @@ class WebinarEksklusifAdminTest extends TestCase
     public function layarnya_ada_di_menu_samping(): void
     {
         /*
-         * Diperiksa dari HALAMAN LAIN, bukan dari layarnya sendiri.
+         * Diperiksa dari HALAMAN LAIN, bukan dari layarnya sendiri: layar
+         * pendaftar memuat alamatnya sendiri di borang saringannya, jadi
+         * memeriksanya di sana tetap hijau walau entri menunya dicabut —
+         * sempat terjadi pada uji ini sebelum diperbaiki.
          *
-         * Layar pendaftar memuat alamatnya sendiri di form "Lunas" dan
-         * "Batalkan", jadi memeriksanya di sana tetap hijau walau entri
-         * menunya dicabut — sempat terjadi pada uji ini sebelum diperbaiki.
+         * Entri "Pendaftar Webinar" sendiri DIBUANG 3 Okt 2026: layar
+         * Pendaftar Layanan memuat kelima layanan sekaligus, jadi satu entri
+         * sudah mencakupnya. Yang dijaga di sini pendaftar webinar masih bisa
+         * DITEMUKAN dari menu — lewat entri terpadunya.
          */
         $this->actingAs($this->panitia())
             ->get(route('account.galeri.index'))
             ->assertOk()
-            ->assertSee(route('account.webinarpendaftar.index'), false)
-            ->assertSee('Pendaftar Webinar', false);
+            ->assertSee(route('account.pendaftaran-layanan.index'), false)
+            ->assertSee('Pendaftar Layanan', false)
+            ->assertDontSee('Pendaftar Webinar', false);
     }
 
     /**
@@ -286,18 +325,18 @@ class WebinarEksklusifAdminTest extends TestCase
         $pelanggan->forceFill(['email_verified_at' => now()])->save();
 
         $this->actingAs($pelanggan)
-            ->get(route('account.webinarpendaftar.index'))
+            ->get(route('account.pendaftaran-layanan.index', ['layanan' => 'webinar_eksklusif']))
             ->assertRedirect();
 
         $this->actingAs($pelanggan)
-            ->post(route('account.webinarpendaftar.lunasi', $p->getKey()))
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid'])
             ->assertRedirect();
 
         $this->assertSame('pending', $p->fresh()->status,
             'pelanggan tidak boleh bisa menandai pembayaran lunas');
 
         $this->actingAs($pelanggan)
-            ->post(route('account.webinarpendaftar.batalkan', $p->getKey()));
+            ->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'cancel']);
 
         $this->assertSame('pending', $p->fresh()->status,
             'pelanggan tidak boleh bisa membatalkan pendaftaran orang lain');

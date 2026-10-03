@@ -175,14 +175,12 @@
 
     <td data-judul="Aksi" class="text-right">
         @if ($tautanBaris)
-            {{-- Menautkan ke layar layanannya, tidak menyalin tindakannya ke
-                 sini. Aturan kuota berbeda di tiap layanan — webinar
-                 mengembalikan kursi saat dibatalkan, camp tidak punya kursi
-                 untuk dikembalikan — dan menuliskannya ulang dari satu layar
-                 berarti lima aturan yang harus dijaga di dua tempat. --}}
+            {{-- Satu halaman rincian untuk kelima layanan, dengan bagian
+                 borang yang berbeda per layanan. Di sanalah seluruh tindakan
+                 berada sejak layar pendaftaran per layanan dibuang. --}}
             <a class="mis-tombol mis-tombol-halus" href="{{ $tautanBaris }}"
-                title="Buka di layar {{ $layananBaris['nama'] }}">
-                <i class="fas fa-external-link-alt" aria-hidden="true"></i> Buka
+                title="Buka rincian pendaftaran {{ $b->nama_orang }}">
+                <i class="fas fa-eye" aria-hidden="true"></i> Rincian
             </a>
         @else
             {{-- Tanpa pil, sama alasannya dengan sel Bukti di atas. --}}

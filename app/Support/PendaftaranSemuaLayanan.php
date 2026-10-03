@@ -45,12 +45,11 @@ class PendaftaranSemuaLayanan
      * Menambah layanan berikutnya cukup menambah satu butir di sini — dan
      * `proyeksi()` akan mengisi sendiri kolom yang tidak dipunyai tabelnya.
      *
-     * `rute` menunjuk layar layanan itu sendiri. Layar ini TIDAK melunasi
-     * atau membatalkan apa pun: aturan kuotanya berbeda di tiap layanan
-     * (webinar mengembalikan kursi, camp tidak punya kursi untuk dikembalikan)
-     * dan menyeragamkannya dari sini berarti menuliskan ulang lima aturan
-     * yang sudah ada di tempatnya masing-masing. Yang dikerjakan layar ini
-     * mencari dan menghitung; tindakannya tetap di layar layanannya.
+     * Tiap sumber menyebut modelnya, aturan angkatannya, pilihan statusnya,
+     * dan surat mana yang terkirim saat statusnya berpindah. Keempatnya dulu
+     * tersebar di lima pengendali; disatukan di sini supaya menambah layanan
+     * berikutnya cukup satu butir, dan supaya tidak ada aturan yang hidup di
+     * dua tempat sekaligus.
      */
     private const SUMBER = [
         'scopus_camp' => [
@@ -58,8 +57,23 @@ class PendaftaranSemuaLayanan
             'tabel' => 'scopus_camp_pendaftaran',
             'ikon' => 'fa-campground',
             'warna' => 'mis-hijau',
-            'rute' => ['account.pendaftaranscopuscamp.edit', 'id'],
             'bukti_folder' => 'ScopusCamp',
+            'kolom_catatan' => 'note',
+            'model' => \App\PendaftaranScopusCamp::class,
+            'angkatan_model' => \App\CategoriesScopusCamp::class,
+            'berangkatan' => true,
+            'status' => [
+                'diproses' => 'Diproses',
+                'Pendaftaran Diterima' => 'Pendaftaran diterima',
+                'Pendaftaran Reschedule' => 'Dijadwalkan ulang',
+                'Pendaftaran Ditolak' => 'Pendaftaran ditolak',
+                'Pendaftaran Dibatalkan' => 'Pendaftaran dibatalkan',
+                'Pendaftaran Refund' => 'Dana dikembalikan',
+            ],
+            'surat' => [
+                'Pendaftaran Diterima' => \App\Mail\ScopusCampUpdateDiterimaMail::class,
+                'Pendaftaran Reschedule' => \App\Mail\ScopusCampUpdateResheduleMail::class,
+            ],
             'kolom' => [
                 'nomor' => 'id_transaksi',
                 'nama_orang' => 'nama',
@@ -81,8 +95,23 @@ class PendaftaranSemuaLayanan
             'tabel' => 'analisis_bibliometrik',
             'ikon' => 'fa-chart-line',
             'warna' => 'mis-ungu',
-            'rute' => ['account.analisisbibliometrik.edit', 'id'],
             'bukti_folder' => 'bibliometrik',
+            'kolom_catatan' => 'note',
+            'model' => \App\AnalisisBibliometrik::class,
+            'angkatan_model' => \App\CategoriesAnalisisBibliometrik::class,
+            'berangkatan' => true,
+            'status' => [
+                'diproses' => 'Diproses',
+                'Pendaftaran Diterima' => 'Pendaftaran diterima',
+                'Pendaftaran Reschedule' => 'Dijadwalkan ulang',
+                'Pendaftaran Ditolak' => 'Pendaftaran ditolak',
+                'Pendaftaran Dibatalkan' => 'Pendaftaran dibatalkan',
+                'Pendaftaran Refund' => 'Dana dikembalikan',
+            ],
+            'surat' => [
+                'Pendaftaran Diterima' => \App\Mail\AnalisisBibliometrikUpdateDiterimaMail::class,
+                'Pendaftaran Reschedule' => \App\Mail\AnalisisBibliometrikUpdateResheduleMail::class,
+            ],
             'kolom' => [
                 'nomor' => 'id_transaksi',
                 'nama_orang' => 'nama',
@@ -104,16 +133,23 @@ class PendaftaranSemuaLayanan
             'ikon' => 'fa-star',
             'warna' => 'mis-kuning',
             'tabel' => 'webinar_eksklusif_pendaftaran',
-            // Satu-satunya layanan yang layar pendaftarnya memang punya
-            // tindakan (lunasi/batalkan), tetapi tidak punya halaman per
-            // baris. Dibuka lewat pencarian nomornya, jadi orangnya mendarat
-            // tepat di baris itu beserta tombolnya.
-            'rute' => ['account.webinarpendaftar.index', 'cari'],
-            'rute_kunci' => 'nomor',
             // Webinar TIDAK pernah mengunggah bukti: pembayarannya dicocokkan
             // lewat kode unik Rp 500-1.500 terhadap mutasi rekening, bukan
             // lewat tangkapan layar. Terukur nol dari 4 baris berisi gambar.
             'bukti_folder' => null,
+            'kolom_catatan' => 'note',
+            'model' => \App\WebinarEksklusifPendaftaran::class,
+            'angkatan_model' => \App\KategoriLayanan::class,
+            'berangkatan' => true,
+            'status' => [
+                'pending' => 'Menunggu bayar',
+                'paid' => 'Lunas',
+                'expired' => 'Kedaluwarsa',
+                'cancel' => 'Dibatalkan',
+            ],
+            // Webinar tidak mengirim surat dari layar panitia: pemberitahuan
+            // lunasnya sudah dikirim jalur pendaftarannya sendiri.
+            'surat' => [],
             'kolom' => [
                 'nomor' => 'id_transaksi',
                 'nama_orang' => 'nama',
@@ -137,8 +173,22 @@ class PendaftaranSemuaLayanan
             'ikon' => 'fa-coffee',
             'warna' => 'mis-jingga',
             'tabel' => 'pendaftaran_scopus_kafe',
-            'rute' => ['account.pendaftaran-scopus-kafe.edit', 'id'],
             'bukti_folder' => 'pendaftaran_scopus_kafe',
+            // Tabelnya TIDAK punya kolom note — terukur, menulis jejaknya ke
+            // sana melempar 'Unknown column' dan seluruh perubahan statusnya
+            // gagal dengan galat 500.
+            'kolom_catatan' => null,
+            'model' => \App\PendaftaranScopusKafe::class,
+            'angkatan_model' => null,
+            'berangkatan' => false,
+            'status' => [
+                'menunggu verifikasi' => 'Menunggu verifikasi',
+                'pembayaran diterima' => 'Pembayaran diterima',
+                'pembayaran ditolak' => 'Pembayaran ditolak',
+            ],
+            'surat' => [
+                'pembayaran diterima' => \App\Mail\UpdatePublicPendaftaranScopusKafeMail::class,
+            ],
             'kolom' => [
                 'nomor' => 'id_pemesanan',
                 'nama_orang' => 'nama',
@@ -157,8 +207,18 @@ class PendaftaranSemuaLayanan
             'ikon' => 'fa-user-md',
             'warna' => 'mis-biru',
             'tabel' => 'clinikscopus_pemesanan',
-            'rute' => ['account.Clinik-Scopus-Riwayat-Pemesanan.detail', 'id'],
             'bukti_folder' => 'ClinikScopusPemesanan',
+            'kolom_catatan' => null,
+            'model' => \App\ClinikScopusPemesanan::class,
+            'angkatan_model' => null,
+            'berangkatan' => false,
+            'status' => [
+                'pending' => 'Menunggu bayar',
+                'paid' => 'Sudah dibayar',
+                'completed' => 'Selesai',
+                'canceled' => 'Dibatalkan',
+            ],
+            'surat' => [],
             'kolom' => [
                 // COALESCE: id_transaksi yang dipakai di tempat lain, tetapi
                 // nomor yang disebut pemesan saat menghubungi panitia adalah
@@ -294,6 +354,105 @@ class PendaftaranSemuaLayanan
         }
 
         return $katalog;
+    }
+
+    /**
+     * Keterangan satu layanan apa adanya, atau null kalau kuncinya tidak ada.
+     *
+     * Dipakai lapisan tindakan (ubah status, hapus) yang perlu tahu model,
+     * aturan angkatan, dan surat mana yang terkirim. Kuncinya SELALU dari
+     * daftar tertutup ini, bukan dari kiriman orang — menerima nilai mentah
+     * berarti menerima nama kelas mana pun untuk dipanggil.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function sumber(string $layanan): ?array
+    {
+        return self::SUMBER[$layanan] ?? null;
+    }
+
+    /**
+     * Kolom tempat jejak perubahan ditulis, atau null kalau tabelnya tidak punya.
+     *
+     * Hanya tiga dari lima tabel punya `note`: Scopus Kafe dan Clinik Scopus
+     * tidak. Menuliskannya ke sana melempar "Unknown column" dan menggagalkan
+     * seluruh perubahan statusnya — terukur, galat 500 di kedua layanan itu.
+     */
+    public static function kolomCatatan(string $layanan): ?string
+    {
+        return self::SUMBER[$layanan]['kolom_catatan'] ?? null;
+    }
+
+    /** Kelas model Eloquent satu layanan, atau null. */
+    public static function modelUntuk(string $layanan): ?string
+    {
+        return self::SUMBER[$layanan]['model'] ?? null;
+    }
+
+    /**
+     * Satu baris pendaftaran sebagai model Eloquent-nya sendiri.
+     *
+     * Dikembalikan modelnya, bukan baris mentah hasil union: tindakan apa pun
+     * yang mengubah atau menghapus harus lewat modelnya supaya hook,
+     * relasi, dan tipe kolomnya ikut berlaku.
+     */
+    public static function temukan(string $layanan, string $id)
+    {
+        $model = self::modelUntuk($layanan);
+
+        return $model === null ? null : $model::find($id);
+    }
+
+    /**
+     * Pilihan status yang boleh dipasang panitia untuk satu layanan.
+     *
+     * Diambil apa adanya dari borang lama tiap layanan supaya penyatuannya
+     * tidak diam-diam MENGURANGI pilihan — Scopus Camp dan Bibliometrik punya
+     * enam, Scopus Kafe tiga, Clinik Scopus empat, Webinar empat, dan tidak
+     * ada satu pun yang sama.
+     *
+     * @return array<string, string>
+     */
+    public static function pilihanStatus(string $layanan): array
+    {
+        return self::SUMBER[$layanan]['status'] ?? [];
+    }
+
+    /**
+     * Kelas surat yang harus dikirim saat status satu layanan jadi nilai ini.
+     *
+     * Ini bagian yang paling mudah hilang saat menyatukan layar: mengubah
+     * status di layar lama MENGIRIM EMAIL ke pelanggannya — pendaftaran
+     * diterima dan dijadwalkan ulang untuk Scopus Camp dan Bibliometrik,
+     * pembayaran diterima untuk Scopus Kafe. Dihilangkan, pelanggan berhenti
+     * diberi tahu dan tidak ada galat apa pun yang memberitahukannya.
+     */
+    public static function suratUntuk(string $layanan, ?string $status): ?string
+    {
+        if ($status === null) {
+            return null;
+        }
+
+        return self::SUMBER[$layanan]['surat'][$status] ?? null;
+    }
+
+    /** Apakah layanan ini memakai angkatan berkuota. */
+    public static function berangkatan(string $layanan): bool
+    {
+        return (bool) (self::SUMBER[$layanan]['berangkatan'] ?? false);
+    }
+
+    /**
+     * Kelas model angkatan satu layanan.
+     *
+     * Bukan selalu KategoriLayanan: surat Scopus Camp dan Bibliometrik
+     * bertipe `CategoriesScopusCamp` dan `CategoriesAnalisisBibliometrik`
+     * di tanda tangannya, jadi menyerahkan KategoriLayanan apa adanya
+     * melempar TypeError saat suratnya dirakit.
+     */
+    public static function angkatanModel(string $layanan): ?string
+    {
+        return self::SUMBER[$layanan]['angkatan_model'] ?? null;
     }
 
     /** Semua nilai status mentah yang sudah dikenali, dari seluruh keadaan. */
@@ -505,30 +664,26 @@ class PendaftaranSemuaLayanan
     }
 
     /**
-     * Ke mana satu baris dibuka: layar layanannya sendiri.
+     * Ke mana satu baris dibuka: halaman rinciannya.
      *
-     * Empat layanan punya halaman per baris; Webinar Eksklusif tidak, jadi ia
-     * dibuka lewat pencarian nomornya di layar pendaftar webinar — orangnya
-     * mendarat tepat di baris itu beserta tombol lunasi dan batalkannya.
+     * Dulu menunjuk layar layanan masing-masing. Sejak kelima layar
+     * pendaftaran per layanan dibuang, seluruh tindakan — melihat rincian,
+     * membetulkan data, memindahkan status, menghapus — ada di satu halaman
+     * yang sama, dengan bagian borang yang berbeda per layanan.
+     *
+     * Katalog `rute` per sumber TIDAK dipakai lagi untuk ini dan sudah
+     * dibuang; satu nama rute untuk semuanya.
      */
     public static function tautanBaris(object $baris): ?string
     {
-        $s = self::SUMBER[$baris->layanan] ?? null;
-
-        if ($s === null || empty($s['rute'])) {
+        if (! isset(self::SUMBER[$baris->layanan])) {
             return null;
         }
 
-        [$rute, $param] = $s['rute'];
-
-        if (! \Illuminate\Support\Facades\Route::has($rute)) {
-            return null;
-        }
-
-        $kunci = $s['rute_kunci'] ?? 'id';
-        $nilai = $baris->{$kunci} ?? null;
-
-        return $nilai === null ? null : route($rute, [$param => $nilai]);
+        return route('account.pendaftaran-layanan.rincian', [
+            $baris->layanan,
+            $baris->id,
+        ]);
     }
 
     /** Waktu pendaftaran sebagai Carbon, atau null kalau kolomnya kosong. */

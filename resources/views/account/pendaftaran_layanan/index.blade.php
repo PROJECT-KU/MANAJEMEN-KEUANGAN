@@ -264,8 +264,11 @@ Pendaftar Layanan | MIS Rumah Scopus
      * memproses blok lebih dulu, dan penanda sebaris di atas sebuah blok ikut
      * dianggap pembukanya sehingga seluruh markah di antaranya tertelan.
      */
-    $bawa = request()->only('cari', 'layanan', 'keadaan', 'bukti');
-    $lingkup = array_filter(request()->only('cari', 'layanan'));
+    $bawa = request()->only('cari', 'layanan', 'keadaan', 'bukti', 'angkatan');
+    $lingkup = array_filter(request()->only('cari', 'layanan', 'angkatan'));
+    $namaAngkatan = $angkatan !== ''
+        ? (\App\Support\PendaftaranSemuaLayanan::namaAngkatan()[$angkatan] ?? null)
+        : null;
     $rute = 'account.pendaftaran-layanan.index';
 
     $ariaUrut = function ($kolom) use ($urut, $arah) {
@@ -407,6 +410,18 @@ Pendaftar Layanan | MIS Rumah Scopus
             @endif
         </p>
 
+        @if ($angkatan !== '')
+            <p class="pdl-uang-total">
+                <span>
+                    <i class="fas fa-layer-group mis-ikon-ungu" aria-hidden="true"></i>
+                    Disaring ke angkatan <strong>{{ $namaAngkatan ?? $angkatan }}</strong>
+                </span>
+                <a href="{{ route($rute, array_filter(request()->only('cari', 'layanan', 'keadaan', 'bukti'))) }}">
+                    <i class="fas fa-times" aria-hidden="true"></i> Tampilkan semua angkatan
+                </a>
+            </p>
+        @endif
+
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkusnya: di ponsel empat kendali yang selalu
              terbuka memakan satu layar penuh sebelum baris pertama kelihatan.
@@ -474,6 +489,16 @@ Pendaftar Layanan | MIS Rumah Scopus
                     <option value="belum" @selected($bukti === 'belum')>Belum diunggah</option>
                 </select>
             </div>
+
+            {{-- Saringan angkatan tidak punya menunya sendiri: ia datang dari
+                 tautan di layar Angkatan Layanan, bukan dari borang ini.
+                 Tetapi ia WAJIB terlihat dan bisa dilepas — saringan yang
+                 bekerja tanpa terlihat membuat orang menyimpulkan datanya
+                 yang kurang. Dibawa juga sebagai isian tersembunyi supaya
+                 tidak hilang saat penyaring lain diterapkan. --}}
+            @if ($angkatan !== '')
+                <input type="hidden" name="angkatan" value="{{ $angkatan }}">
+            @endif
 
             {{-- Pengurut KHUSUS ponsel. Kepala kolom yang bisa diurutkan ada di
                  dalam <thead>, dan di mode kartu <thead> disembunyikan untuk

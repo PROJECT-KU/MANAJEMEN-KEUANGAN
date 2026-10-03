@@ -379,7 +379,7 @@ Clinik Scopus Chat Konsultasi | MIS
                 if (res.success) {
                     // redirect ke riwayat
                     window.location.href =
-                        "{{ route('account.Clinik-Scopus-Riwayat-Pemesanan.index') }}";
+                        "{{ route('account.pendaftaran-layanan.index', ['layanan' => 'clinik_scopus']) }}";
                 } else {
                     Swal.fire('Gagal', res.message, 'error');
                 }

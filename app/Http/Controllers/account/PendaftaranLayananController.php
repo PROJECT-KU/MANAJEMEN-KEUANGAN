@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\account;
 
+use App\Actions\Pendaftaran\HapusPendaftaran;
+use App\Actions\Pendaftaran\UbahDataPendaftaran;
+use App\Actions\Pendaftaran\UbahStatusPendaftaran;
 use App\Exports\PendaftaranLayananExport;
 use App\Http\Controllers\Controller;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
@@ -10,6 +13,7 @@ use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
@@ -22,12 +26,23 @@ use Maatwebsite\Excel\Facades\Excel;
  * "siapa saja yang belum bayar?" dan "orang ini mendaftar apa saja?" — tidak
  * bisa dijawab di satu pun dari kelimanya.
  *
- * Kelima layar lama TIDAK dibuang. Mereka punya kemampuan yang layar ini
- * sengaja tidak punya (menyunting, menghapus, menandai lunas, membalas
- * pemesanan), dan aturan kuotanya berbeda di tiap layanan. Layar ini mencari,
- * menghitung, dan mengekspor; tiap barisnya menautkan ke layar layanannya
- * untuk tindakan. Polanya sama dengan Angkatan Layanan, yang juga dibiarkan
- * berdampingan dengan dua layar kategori lamanya.
+ * Kelima layar lama DIBUANG, dan seluruh kemampuannya pindah ke sini:
+ * melihat rincian, membetulkan data, memindahkan angkatan, memindahkan
+ * status beserta email pemberitahuannya, dan menghapus beserta pengembalian
+ * kuota serta pembersihan berkasnya.
+ *
+ * Tiga dari kelima layar itu juga TIDAK punya penjaga akses sama sekali —
+ * terukur, pengguna berperan 'user' mendapat 200 di Scopus Camp, Scopus
+ * Kafe, dan daftar Clinik Scopus, lalu bisa menyunting dan menghapus
+ * pendaftaran orang lain. Satu lagi, Analisis Bibliometrik, galat 500 untuk
+ * SEMUA orang termasuk administrator: `compact()` di pengendalinya memanggil
+ * variabel yang tidak pernah didefinisikan. Jadi penyatuan ini sekaligus
+ * menutup tiga lubang akses dan menghidupkan kembali satu layar yang mati.
+ *
+ * Aturan yang berbeda per layanan — medan yang boleh disunting, kosakata
+ * status, surat yang terkirim, kuota — tinggal sebagai DATA di katalog
+ * PendaftaranSemuaLayanan dan dikerjakan tiga tindakan di
+ * App\Actions\Pendaftaran, bukan sebagai percabangan di pengendali ini.
  */
 class PendaftaranLayananController extends Controller
 {
@@ -57,6 +72,221 @@ class PendaftaranLayananController extends Controller
             ->with('error', 'Anda tidak punya akses ke data pendaftar layanan.');
     }
 
+    /**
+     * Menghapus pendaftaran: ADMINISTRATOR saja.
+     *
+     * Aturan terketat di antara kelima layar lama, dan disengaja dipakai
+     * untuk semuanya. Clinik Scopus memang sudah menuntut administrator;
+     * Scopus Camp, Bibliometrik, dan Scopus Kafe tidak menuntut apa pun —
+     * terukur, pengguna berperan 'user' mendapat 200 di ketiganya dan bisa
+     * menghapus pendaftaran orang lain. Penghapusannya tidak bisa diurungkan
+     * dan belum ada tong sampah, jadi yang dipakai aturan terketatnya.
+     */
+    private function bolehMenghapus(): bool
+    {
+        return (bool) Auth::user()?->adalahAdministrator();
+    }
+
+    /** Nama orang yang bertindak, untuk jejak di kolom catatan. */
+    private function siapa(): string
+    {
+        return Auth::user()->full_name ?: ('pengguna #' . Auth::id());
+    }
+
+    /**
+     * Halaman rincian satu pendaftaran.
+     *
+     * Satu halaman untuk kelima layanan, dengan bagian borang yang berbeda
+     * per layanan — bukan lima halaman. Kuncinya SELALU dicocokkan ke katalog
+     * tertutup lebih dulu: `$layanan` datang dari alamat halaman, dan
+     * memakainya mentah berarti membiarkan nama kelas mana pun dipanggil.
+     */
+    public function rincian(string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $katalog = Pendaftaran::katalog();
+
+        if (! array_key_exists($layanan, $katalog)) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        // Barisnya dibaca juga lewat kueri gabungan supaya rincian memakai
+        // keterangan yang SAMA dengan daftarnya — keadaan, bukti, sesi, dan
+        // tautannya dirakit sekali di satu tempat.
+        $baris = Pendaftaran::kueri()->where('layanan', $layanan)->where('id', $id)->first();
+
+        /*
+         * Angkatan yang boleh dipilih DIBATASI layanannya.
+         *
+         * Tanpa penyaring itu, borang Scopus Camp menawarkan angkatan
+         * Bibliometrik — dan memindahkan pendaftaran ke angkatan layanan lain
+         * membuat kuota keduanya salah tanpa ada yang menolak.
+         */
+        $angkatan = Pendaftaran::berangkatan($layanan)
+            ? \App\KategoriLayanan::where('layanan', $layanan)
+                ->orderByDesc('mulai')
+                ->get(['id', 'nama', 'mulai', 'total_kuota', 'sisa_kuota'])
+            : collect();
+
+        return view('account.pendaftaran_layanan.rincian', [
+            'layanan' => $layanan,
+            'info' => $katalog[$layanan],
+            'pendaftaran' => $pendaftaran,
+            'baris' => $baris,
+            'angkatan' => $angkatan,
+            'pilihanStatus' => Pendaftaran::pilihanStatus($layanan),
+            'medan' => UbahDataPendaftaran::medan($layanan),
+            'bolehMenghapus' => $this->bolehMenghapus(),
+        ]);
+    }
+
+    /** Menyimpan suntingan data satu pendaftaran. */
+    public function ubahData(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        /*
+         * Divalidasi di sini, bukan di dalam tindakannya: pesan galat harus
+         * kembali ke borangnya beserta isian yang sudah diketik, dan itu
+         * urusan lapisan HTTP.
+         */
+        $aturan = [];
+        $medan = UbahDataPendaftaran::medan($layanan);
+
+        foreach (['nama', 'nama_pemesan'] as $k) {
+            if (isset($medan[$k])) {
+                $aturan[$k] = ['required', 'string', 'max:255'];
+            }
+        }
+
+        foreach (['email', 'email_pemesan'] as $k) {
+            if (isset($medan[$k])) {
+                // 'email' saja, bukan 'email:rfc,dns': alamat pendaftar yang
+                // sudah ada memuat domain yang kadang tidak bisa dicari dari
+                // peladen ini, dan menolaknya membuat baris lama tidak bisa
+                // disunting sama sekali.
+                $aturan[$k] = ['required', 'email', 'max:255'];
+            }
+        }
+
+        foreach (['telp', 'telp_pemesan'] as $k) {
+            if (isset($medan[$k])) {
+                $aturan[$k] = ['required', 'string', 'max:30'];
+            }
+        }
+
+        if (isset($medan['kategori_id'])) {
+            $aturan['kategori_id'] = ['required', 'string', 'exists:kategori_layanan,id'];
+        }
+
+        if (isset($medan['jumlah_pendaftar'])) {
+            $aturan['jumlah_pendaftar'] = ['required', 'integer', 'min:1', 'max:99'];
+        }
+
+        $request->validate($aturan);
+
+        $hasil = (new UbahDataPendaftaran)->jalankan($layanan, $id, $request->all());
+
+        if (! $hasil['berhasil']) {
+            return back()->withInput()->with('error', $hasil['pesan']);
+        }
+
+        return redirect()
+            ->route('account.pendaftaran-layanan.rincian', [$layanan, $id])
+            ->with('sukses', $hasil['pesan']);
+    }
+
+    /** Memindahkan status satu pendaftaran. */
+    public function ubahStatus(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $request->validate([
+            'status' => ['required', 'string', Rule::in(array_keys(Pendaftaran::pilihanStatus($layanan)))],
+        ]);
+
+        $hasil = (new UbahStatusPendaftaran)->jalankan(
+            $layanan, $id, (string) $request->input('status'), $this->siapa()
+        );
+
+        if (! $hasil['berhasil']) {
+            return back()->with('info', $hasil['pesan']);
+        }
+
+        /*
+         * Layarnya mengatakan suratnya terkirim atau tidak.
+         *
+         * Pengirimannya sengaja dibungkus try/catch supaya peladen surat yang
+         * bermasalah tidak menggagalkan perubahan status yang sudah tersimpan
+         * — konsekuensinya kegagalannya hanya muncul di log, dan tanpa
+         * kalimat ini panitia akan mengira pendaftarnya sudah diberi tahu.
+         */
+        $adaSurat = Pendaftaran::suratUntuk($layanan, (string) $request->input('status')) !== null;
+
+        if (! $adaSurat) {
+            return back()->with('sukses', $hasil['pesan']);
+        }
+
+        if ($hasil['surat']) {
+            return back()->with('sukses', $hasil['pesan'] . ' Pemberitahuannya sudah dikirim ke emailnya.');
+        }
+
+        // Statusnya TETAP tersimpan; yang gagal cuma suratnya. Kalimatnya
+        // menyebut keduanya supaya panitia tidak mengulang perubahan status
+        // yang sudah berhasil, melainkan menghubungi pendaftarnya sendiri.
+        return back()->with('error', $hasil['pesan']
+            . ' Statusnya tersimpan, TETAPI emailnya gagal dikirim — beri tahu pendaftarnya sendiri.');
+    }
+
+    /** Menghapus satu pendaftaran beserta ekornya. */
+    public function hapus(string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! $this->bolehMenghapus()) {
+            return back()->with('error',
+                'Hanya administrator yang boleh menghapus pendaftaran. '
+                . 'Ubah statusnya jadi dibatalkan kalau yang Anda maksud membatalkannya.');
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $hasil = (new HapusPendaftaran)->jalankan($layanan, $id);
+
+        if (! $hasil['berhasil']) {
+            return back()->with('error', $hasil['pesan']);
+        }
+
+        return redirect()
+            ->route('account.pendaftaran-layanan.index')
+            ->with('sukses', $hasil['pesan']);
+    }
+
     public function index(Request $request)
     {
         if (! $this->bolehMelihat()) {
@@ -77,7 +307,7 @@ class PendaftaranLayananController extends Controller
          * bawahnya — dan itu jenis selisih yang membuat orang berhenti
          * mempercayai angkanya.
          */
-        $ringkasan = $this->ringkasan($pilihan['layanan']);
+        $ringkasan = $this->ringkasan($pilihan['layanan'], $pilihan['angkatan']);
 
         $kueri = $this->saring(Pendaftaran::kueri(), $pilihan);
 
@@ -143,6 +373,17 @@ class PendaftaranLayananController extends Controller
             ? (string) $request->input('bukti')
             : '';
 
+        /*
+         * Saringan angkatan, dipakai tautan dari layar Angkatan Layanan.
+         *
+         * Tautan di sana dulu mengirim `kategori` ke layar pendaftar lama,
+         * dan layar itu TIDAK PERNAH membacanya — jadi menekan "lihat
+         * pendaftar" pada satu angkatan menampilkan seluruh pendaftar
+         * layanan itu, dan tidak ada yang tahu saringannya tidak bekerja.
+         * Di sini ia benar-benar menyaring.
+         */
+        $angkatan = trim((string) $request->input('angkatan'));
+
         $urut = array_key_exists((string) $request->input('urut'), Pendaftaran::URUTAN)
             ? (string) $request->input('urut')
             : 'waktu';
@@ -152,6 +393,7 @@ class PendaftaranLayananController extends Controller
         return [
             'cari' => $cari,
             'layanan' => $layanan,
+            'angkatan' => $angkatan,
             'keadaanDipilih' => $keadaanDipilih,
             'bukti' => $bukti,
             'urut' => $urut,
@@ -162,7 +404,8 @@ class PendaftaranLayananController extends Controller
              * berbunyi "belum ada pendaftar" padahal ada 187 dan hanya
              * saringannya yang mengecualikan semuanya.
              */
-            'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== '' || $bukti !== '',
+            'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== ''
+                || $bukti !== '' || $angkatan !== '',
         ];
     }
 
@@ -175,6 +418,7 @@ class PendaftaranLayananController extends Controller
     {
         return $kueri
             ->when($p['layanan'] !== '', fn ($q) => $q->where('layanan', $p['layanan']))
+            ->when($p['angkatan'] !== '', fn ($q) => $q->where('angkatan_id', $p['angkatan']))
             ->when($p['keadaanDipilih'] !== '', function ($q) use ($p) {
                 if ($p['keadaanDipilih'] === 'lain') {
                     // Keranjang sisa, dan ia perlu ada: kolom statusnya varchar
@@ -258,10 +502,11 @@ class PendaftaranLayananController extends Controller
      *
      * @return array<string, int>
      */
-    private function ringkasan(string $layanan): array
+    private function ringkasan(string $layanan, string $angkatan = ''): array
     {
         $mentah = Pendaftaran::kueri()
             ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
+            ->when($angkatan !== '', fn ($q) => $q->where('angkatan_id', $angkatan))
             ->selectRaw('status, count(*) as baris')
             ->selectRaw('SUM(CAST(jumlah AS UNSIGNED)) as orang')
             ->selectRaw('SUM(CAST(total AS DECIMAL(15,2))) as uang')
@@ -317,6 +562,9 @@ class PendaftaranLayananController extends Controller
         return array_filter([
             'Kata kunci' => $p['cari'] !== '' ? $p['cari'] : null,
             'Layanan' => $p['layanan'] !== '' ? $katalog[$p['layanan']]['nama'] : null,
+            'Angkatan' => $p['angkatan'] !== ''
+                ? (Pendaftaran::namaAngkatan()[$p['angkatan']] ?? $p['angkatan'])
+                : null,
             'Keadaan' => $p['keadaanDipilih'] !== ''
                 ? ($p['keadaanDipilih'] === 'lain'
                     ? 'Status belum dikenali'

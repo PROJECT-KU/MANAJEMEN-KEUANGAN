@@ -112,7 +112,7 @@ Dashboard | MIS
                             <span style="font-size: 16px; display: inline-block; margin-bottom: -30px; margin-left:-5px;">Kategori</span>
                         </div>
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #D2B48C, #BC987E, #AF8E78, #EED5B7); text-align: center;">
-                            <a href="{{ route('account.pendaftaranscopuscamp.index') }}"><i class="fas fa-file-signature" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i></a>
+                            <a href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'scopus_camp']) }}"><i class="fas fa-file-signature" style="margin-top: 13px; margin-bottom: 8px; font-size: 24px; width: 24px;"></i></a>
                             <span style="font-size: 16px; display: inline-block; margin-bottom: -30px; margin-left:-18px;">Pendaftaran</span>
                         </div>
                         <div class="card-icon shadow-primary rounded-circle" style="background-image: linear-gradient(to bottom, #D2B48C, #CD853F, #BC8F8F, #8B6969); text-align: center;">

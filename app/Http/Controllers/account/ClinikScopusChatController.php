@@ -25,7 +25,16 @@ class ClinikScopusChatController extends Controller
 
         if (!in_array($user->id, [$pemesanan->customer_id, $pemesanan->trainer_id])) {
             return redirect()
-                ->route('account.Clinik-Scopus-Riwayat-Pemesanan.index') // sesuaikan tujuan
+                /*
+                 * TETAP ke Riwayat Pemesanan, bukan ke Pendaftar Layanan.
+                 *
+                 * Penolakan ini berlaku bagi siapa pun yang bukan pemesan
+                 * maupun trainer sesi itu — jadi yang terpantul bisa seorang
+                 * PELANGGAN. Layar Pendaftar Layanan hanya untuk orang dalam,
+                 * dan mengarahkannya ke sana membuat pelanggan terpantul dua
+                 * kali: ditolak dari chat, lalu ditolak lagi dari tujuannya.
+                 */
+                ->route('account.Clinik-Scopus-Riwayat-Pemesanan.index')
                 ->with('alert', [
                     'type' => 'error',
                     'title' => 'Akses Ditolak',
