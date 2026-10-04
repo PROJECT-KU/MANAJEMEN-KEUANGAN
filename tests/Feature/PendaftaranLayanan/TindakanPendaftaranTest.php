@@ -3102,14 +3102,84 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
-    public function nomor_pendaftaran_mengikuti_pola_layanannya(): void
+    public function nomor_pendaftaran_menyebut_layanan_dan_tanggalnya(): void
     {
-        // Baris yang dibuat panitia tidak boleh bisa dibedakan dari yang
-        // didaftarkan sendiri oleh orangnya — termasuk bentuk nomornya.
-        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('scopus_camp'));
-        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('scopus_kafe'));
-        $this->assertMatchesRegularExpression('/^WE-\d{8}-\d{4}$/', Pendaftaran::nomorBaru('webinar_eksklusif'));
-        $this->assertMatchesRegularExpression('/^BOOK-\d{14}-[A-Z0-9]{5}$/', Pendaftaran::nomorBaru('clinik_scopus'));
+        /*
+         * Pernyataan lama uji ini mengunci nomor LIMA AKSARA ACAK untuk tiga
+         * layanan — "NMMCG", "GNKMO", "HUQEZ". Aturannya memang diganti,
+         * bukan ujinya yang kebetulan rewel: nomor begitu tidak menyebutkan
+         * layanannya, tanggalnya, maupun urutannya, sehingga panitia yang
+         * menerima "nomor saya NMMCG" harus mencarinya dulu untuk tahu itu
+         * Scopus Camp atau Bibliometrik. Di telepon, lima aksara acak juga
+         * jauh lebih mudah salah didengar daripada tanggal plus nomor urut.
+         *
+         * Awalannya KATA, bukan singkatan dua huruf: "SC" dan "CS" untuk
+         * Scopus Camp dan Clinik Scopus hanya berbeda urutan hurufnya.
+         */
+        $hari = now()->format('Ymd');
+
+        foreach ([
+            'scopus_camp' => 'CAMP',
+            'bibliometrik' => 'BIB',
+            'webinar_eksklusif' => 'WE',
+            'scopus_kafe' => 'KAFE',
+            'clinik_scopus' => 'KLINIK',
+        ] as $layanan => $awalan) {
+            $this->assertMatchesRegularExpression(
+                '/^' . $awalan . '-' . $hari . '-\d{4}$/',
+                Pendaftaran::nomorBaru($layanan),
+                'Nomor ' . $layanan . ' harus menyebut layanan dan tanggalnya.'
+            );
+        }
+
+        // Tidak ada dua layanan yang berbagi awalan: nomor yang awalannya
+        // sama membuat seluruh gunanya hilang.
+        $semua = array_map(
+            fn ($l) => explode('-', Pendaftaran::nomorBaru($l))[0],
+            array_keys(Pendaftaran::katalog())
+        );
+
+        $this->assertSame(count($semua), count(array_unique($semua)));
+    }
+
+    #[Test]
+    public function nomor_berurut_dalam_satu_hari_dan_tidak_pernah_kembar(): void
+    {
+        /*
+         * Nomor urutnya dihitung dari yang TERBESAR hari itu, bukan dari
+         * jumlah barisnya: pendaftaran yang dihapus akan membuat hitungan
+         * baris memberi nomor yang sudah pernah dipakai — dan dua orang
+         * menyebut nomor yang sama saat menghubungi panitia.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $nomor = [];
+
+        for ($ke = 1; $ke <= 3; $ke++) {
+            $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+                'layanan' => 'scopus_camp',
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Berurut ' . $ke,
+                'email' => 'urut' . Str::random(6) . '@contoh.test',
+                'telp' => '0816-0000-01' . $ke . '0',
+            ])->assertRedirect();
+
+            $nomor[] = PendaftaranScopusCamp::where('nama', 'Berurut ' . $ke)->value('id_transaksi');
+        }
+
+        $this->assertSame($nomor, array_unique($nomor), 'Tidak boleh ada nomor kembar.');
+
+        $urut = array_map(fn ($n) => (int) substr((string) $n, -4), $nomor);
+
+        $this->assertSame([$urut[0], $urut[0] + 1, $urut[0] + 2], $urut);
+
+        // Nomor LAMA tetap apa adanya. Yang sudah beredar ada di email
+        // pendaftar dan percakapan WhatsApp; menulis ulangnya membuat nomor
+        // yang dipegang orang tidak cocok lagi dengan yang ada di sistem.
+        $lama = PendaftaranScopusCamp::where('id_transaksi', 'not like', 'CAMP-%')
+            ->whereNotNull('id_transaksi')->count();
+
+        $this->assertGreaterThan(0, $lama, 'Baris lama harus masih memakai nomor lamanya.');
     }
 
     #[Test]

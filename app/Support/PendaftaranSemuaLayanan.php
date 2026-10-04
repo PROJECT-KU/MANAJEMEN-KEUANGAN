@@ -60,7 +60,7 @@ class PendaftaranSemuaLayanan
             'bukti_folder' => 'ScopusCamp',
             'kolom_catatan' => 'note',
             'status_awal' => 'diproses',
-            'nomor_pola' => 'acak5',
+            'nomor_awalan' => 'CAMP',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -105,7 +105,7 @@ class PendaftaranSemuaLayanan
             'bukti_folder' => 'bibliometrik',
             'kolom_catatan' => 'note',
             'status_awal' => 'diproses',
-            'nomor_pola' => 'acak5',
+            'nomor_awalan' => 'BIB',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -153,7 +153,7 @@ class PendaftaranSemuaLayanan
             'bukti_folder' => null,
             'kolom_catatan' => 'note',
             'status_awal' => 'pending',
-            'nomor_pola' => 'we_berurut',
+            'nomor_awalan' => 'WE',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -200,7 +200,7 @@ class PendaftaranSemuaLayanan
             // 11 dari 187 baris perubahannya tidak terlacak.
             'kolom_catatan' => 'note',
             'status_awal' => 'menunggu verifikasi',
-            'nomor_pola' => 'acak5',
+            'nomor_awalan' => 'KAFE',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_pemesanan',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -248,7 +248,7 @@ class PendaftaranSemuaLayanan
             'bukti_folder' => 'ClinikScopusPemesanan',
             'kolom_catatan' => 'note',
             'status_awal' => 'pending',
-            'nomor_pola' => 'booking',
+            'nomor_awalan' => 'KLINIK',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -788,20 +788,41 @@ class PendaftaranSemuaLayanan
     }
 
     /**
-     * Nomor pendaftaran baru, mengikuti pola layanan yang bersangkutan.
+     * Nomor pendaftaran baru: AWALAN-YYYYMMDD-NNNN.
      *
-     * Tiga pola yang sudah dipakai jalur publik, dan ketiganya dipertahankan
-     * apa adanya supaya baris yang dibuat panitia tidak bisa dibedakan dari
-     * yang didaftarkan sendiri oleh orangnya:
+     * Dulu tiga pola yang berbeda-beda, dan dua di antaranya tidak memberi
+     * tahu apa pun:
      *
-     *   acak5       lima huruf/angka besar — Scopus Camp, Bibliometrik, Kafe
-     *   we_berurut  WE-YYYYMMDD-NNNN, berurut dalam satu hari
-     *   booking     BOOK-dmYHis-ACAK5 — Clinik Scopus
+     *   acak5       lima huruf/angka acak — "NMMCG", "GNKMO", "HUQEZ"
+     *   booking     BOOK-05072026111623-ZRWIJ — 25 aksara
+     *   we_berurut  WE-20261003-0001
      *
-     * Keunikannya DIPERIKSA ke basis data, bukan diandaikan: lima aksara acak
-     * dari 36 kemungkinan memberi 60 juta kombinasi, tetapi "jarang
-     * bertabrakan" bukan "tidak pernah", dan nomor kembar berarti dua orang
-     * menyebut nomor yang sama saat menghubungi panitia.
+     * "NMMCG" tidak menyebutkan layanannya, tanggalnya, maupun urutannya.
+     * Panitia yang menerima pertanyaan "nomor saya NMMCG, kapan acaranya?"
+     * harus mencarinya dulu untuk tahu itu Scopus Camp atau Bibliometrik — dan
+     * lima aksara acak jauh lebih mudah salah didengar di telepon daripada
+     * tanggal plus nomor urut. Pola ketiga, yang sudah dipakai Webinar
+     * Eksklusif, memang yang benar; dua lainnya disamakan dengannya.
+     *
+     * Alasan yang sama persis sudah ditulis di PemesananLembaga::kodeBaru()
+     * saat kode PL-YYYYMMDD-NNN dibuat. Bentuknya mengikuti Webinar, bukan
+     * PemesananLembaga, sebab empat digitnya sudah beredar di data nyata dan
+     * mencampur lebar nomor urut dalam satu hari membuat urutannya kacau.
+     *
+     * AWALANNYA KATA, bukan singkatan dua huruf. "SC" dan "CS" untuk Scopus
+     * Camp dan Clinik Scopus hanya berbeda urutan hurufnya — dan yang membaca
+     * layar ini memang bukan orang yang hafal singkatan.
+     *
+     * Baris lama tidak diubah. Nomor yang sudah beredar ada di email
+     * pendaftar, bukti transfer, dan percakapan WhatsApp; menulis ulang
+     * semuanya membuat nomor yang dipegang orang tidak cocok lagi dengan yang
+     * ada di sistem. Jadi keduanya hidup berdampingan, dan pencariannya
+     * menemukan keduanya.
+     *
+     * Keunikannya DIPERIKSA ke basis data, bukan diandaikan: nomor urutnya
+     * dihitung dari yang terbesar hari itu, tetapi dua permintaan yang tiba
+     * bersamaan bisa membaca angka yang sama — dan nomor kembar berarti dua
+     * orang menyebut nomor yang sama saat menghubungi panitia.
      */
     public static function nomorBaru(string $layanan): string
     {
@@ -819,13 +840,21 @@ class PendaftaranSemuaLayanan
          */
         $kolom = $sumber['kolom_nomor'];
         $model = $sumber['model'];
+        $awalan = $sumber['nomor_awalan'] . '-' . now()->format('Ymd') . '-';
 
-        for ($coba = 0; $coba < 40; $coba++) {
-            $nomor = match ($sumber['nomor_pola']) {
-                'we_berurut' => self::nomorWebinar(),
-                'booking' => 'BOOK-' . now()->format('dmYHis') . '-' . self::acak(5),
-                default => self::acak(5),
-            };
+        /*
+         * Urutannya dihitung dari nomor TERBESAR hari itu, bukan dari jumlah
+         * barisnya: pendaftaran yang dihapus akan membuat hitungan baris
+         * memberi nomor yang sudah pernah dipakai.
+         */
+        $terakhir = $model::where($kolom, 'like', $awalan . '%')
+            ->orderByDesc($kolom)
+            ->value($kolom);
+
+        $urutan = $terakhir === null ? 1 : ((int) substr((string) $terakhir, -4)) + 1;
+
+        for ($coba = 0; $coba < 40; $coba++, $urutan++) {
+            $nomor = $awalan . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
 
             if (! $model::where($kolom, $nomor)->exists()) {
                 return $nomor;
@@ -856,39 +885,6 @@ class PendaftaranSemuaLayanan
     public static function kolomNomor(string $layanan): ?string
     {
         return self::SUMBER[$layanan]['kolom_nomor'] ?? null;
-    }
-
-    /** Lima aksara dari abjad besar dan angka — pola jalur publik. */
-    private static function acak(int $panjang): string
-    {
-        $huruf = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $hasil = '';
-
-        for ($i = 0; $i < $panjang; $i++) {
-            $hasil .= $huruf[random_int(0, strlen($huruf) - 1)];
-        }
-
-        return $hasil;
-    }
-
-    /**
-     * WE-YYYYMMDD-NNNN, berurut dalam satu hari.
-     *
-     * Urutannya dihitung dari nomor TERBESAR hari itu, bukan dari jumlah
-     * barisnya: pendaftaran yang dihapus akan membuat hitungan baris memberi
-     * nomor yang sudah pernah dipakai.
-     */
-    private static function nomorWebinar(): string
-    {
-        $awalan = 'WE-' . now()->format('Ymd') . '-';
-
-        $terakhir = \App\WebinarEksklusifPendaftaran::where('id_transaksi', 'like', $awalan . '%')
-            ->orderByDesc('id_transaksi')
-            ->value('id_transaksi');
-
-        $urutan = $terakhir === null ? 1 : ((int) substr($terakhir, -4)) + 1;
-
-        return $awalan . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -945,11 +941,8 @@ class PendaftaranSemuaLayanan
                      * menjawab sebelum menyimpan — setidaknya bentuknya bisa
                      * disebutkan lebih dulu.
                      */
-                    'pola_nomor_kata' => match ($s['nomor_pola']) {
-                        'we_berurut' => 'nomornya berurut, seperti WE-0007',
-                        'booking' => 'nomornya seperti BOOK-03102026193045-AB12C',
-                        default => 'nomornya lima huruf-angka acak, seperti A7K2M',
-                    },
+                    'pola_nomor_kata' => 'nomornya seperti '
+                        . $s['nomor_awalan'] . '-' . now()->format('Ymd') . '-0001',
                 ];
             }
         }

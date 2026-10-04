@@ -302,7 +302,9 @@ class PublicClinikScopusController extends Controller
                     'clinikscopus_id'  => $clinik->id,
                     'trainer_id'       => $clinik->user_id,
                     'customer_id'      => auth()->id(),
-                    'id_transaksi'     => 'BOOK-' . now()->format('dmYHis') . '-' . strtoupper(Str::random(5)),
+                    // Nomornya dirakit di SATU tempat untuk kelima layanan;
+                    // lihat PendaftaranSemuaLayanan::nomorBaru().
+                    'id_transaksi'     => \App\Support\PendaftaranSemuaLayanan::nomorBaru('clinik_scopus'),
                     'kode_booking'     => $request->kode_booking,
                     'sesi'             => $request->sesi,
                     'jam_sesi'         => $request->jam_sesi,
