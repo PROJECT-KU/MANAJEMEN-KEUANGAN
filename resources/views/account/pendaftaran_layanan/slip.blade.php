@@ -11,7 +11,16 @@
 
     $kodeUnik = (int) ($baris->kode_unik ?: 0);
     $total = (int) $baris->total;
-    $tigaAkhir = str_pad((string) ($total % 1000), 3, '0', STR_PAD_LEFT);
+    /*
+     * Nominalnya memuat kode unik kalau selisihnya kelipatan seribu.
+     *
+     * Pemeriksaan lama membandingkan tiga angka terakhir dengan kodenya, dan
+     * itu rusak sejak rentangnya diseragamkan ke 500-1500: kode 1.188 tidak
+     * muat di tiga angka. Pemeriksaan ini berlaku untuk rentang mana pun, dan
+     * sengaja berhati-hati — nominal yang diketik tangan dengan ujung bukan
+     * nol membuatnya menahan catatannya, bukan menampilkan yang salah.
+     */
+    $kodeMasuk = $kodeUnik > 0 && $total > $kodeUnik && ($total - $kodeUnik) % 1000 === 0;
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -206,13 +215,17 @@
              berakhir 000, dan menyuruh orang "transfer persis sampai angka
              terakhirnya — 000" menyuruhnya mencocokkan sesuatu yang tidak
              ada. --}}
-        @if ($kodeUnik > 0 && $caraBayar['kunci'] !== 'tunai' && $total % 1000 === $kodeUnik)
+        @if ($kodeMasuk && $caraBayar['kunci'] !== 'tunai')
             {{-- Alasan angka ganjilnya disebut; tanpa itu sebagian orang
                  membulatkannya lalu pembayarannya tidak bisa dicocokkan. --}}
+            {{-- Kelebihannya disebut sebagai NOMINAL, bukan "tiga angka
+                 terakhir": sejak rentangnya 500-1500, kodenya bisa empat
+                 angka dan kalimat lama jadi salah. --}}
             <p class="slip-nota">
-                Mohon transfer <strong>persis sampai angka terakhirnya</strong>.
-                Tiga angka di ujungnya — <strong>{{ $tigaAkhir }}</strong> — adalah
-                penanda pendaftaran Anda, bukan kelebihan bayar.
+                Mohon transfer <strong>persis sampai rupiah terakhirnya</strong>.
+                Nominalnya sudah dilebihkan <strong>Rp {{ number_format($kodeUnik, 0, ',', '.') }}</strong>
+                sebagai penanda pendaftaran Anda — bukan kelebihan bayar, jadi
+                mohon jangan dibulatkan.
             </p>
         @endif
 

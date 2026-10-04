@@ -697,15 +697,17 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertSame(1000000 + $kode, $total);
 
         /*
-         * Tiga digit terakhir total HARUS sama dengan kode uniknya. Inilah
-         * yang dilihat panitia saat mencocokkan mutasi rekening, dan inilah
-         * yang dulu selalu 000.
+         * Selisih nominal dengan harga pokoknya HARUS persis kode uniknya —
+         * itulah yang dicocokkan panitia dengan mutasi rekening, dan itulah
+         * yang dulu selalu nol.
+         *
+         * Bukan "tiga angka terakhir": sejak rentangnya diseragamkan ke
+         * 500-1500, kode 1.188 tidak muat di tiga angka, dan pernyataan
+         * lamanya merah untuk kode yang justru sah.
          */
-        $this->assertSame(
-            $kode,
-            $total % 1000,
-            'Tiga angka terakhir nominalnya harus kode uniknya sendiri.'
-        );
+        $this->assertSame($kode, $total - 1000000, 'Selisihnya harus kode uniknya sendiri.');
+        $this->assertGreaterThanOrEqual(500, $kode);
+        $this->assertLessThanOrEqual(1500, $kode);
     }
 
     #[Test]
