@@ -30,10 +30,8 @@ class KedaluwarsakanPendaftaranWebinarEksklusif extends Command
     {
         $kering = (bool) $this->option('kering');
 
-        $lewat = WebinarEksklusifPendaftaran::where('status', 'pending')
-            ->whereNotNull('kedaluwarsa_pada')
-            ->where('kedaluwarsa_pada', '<', now())
-            ->get();
+        // Aturannya di model, bukan disalin ke sini: lihat scopeBisaDilepas().
+        $lewat = WebinarEksklusifPendaftaran::bisaDilepas()->get();
 
         if ($lewat->isEmpty()) {
             $this->info('Tidak ada pendaftaran yang batas bayarnya lewat.');
