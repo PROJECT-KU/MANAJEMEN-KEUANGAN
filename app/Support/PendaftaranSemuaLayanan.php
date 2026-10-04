@@ -1270,15 +1270,30 @@ class PendaftaranSemuaLayanan
         $nilai = trim((string) ($baris->bukti ?? ''));
         $folder = self::SUMBER[$baris->layanan]['bukti_folder'] ?? null;
 
-        if ($nilai === '' || $folder === null) {
-            return ['url' => null, 'ada' => false, 'nilai' => $nilai !== ''];
+        if ($nilai === '') {
+            return ['url' => null, 'ada' => false, 'nilai' => false];
         }
 
-        $jalur = $folder . '/' . basename($nilai);
+        /*
+         * Dialihkan ke AlamatGambar, tidak lagi merakit jalurnya sendiri.
+         *
+         * Dulu di sini hanya ada bentuk LAMA — nama berkas di dalam
+         * public/<folder>/ — dan baris yang bukti_folder-nya null langsung
+         * dianggap tidak punya bukti sama sekali. Sejak peserta Webinar
+         * Eksklusif bisa mengunggah sendiri dari halaman status, nilainya
+         * berbentuk jalur di cakram unggahan ("bukti/webinar_eksklusif/
+         * ....webp") dan layanan itu memang tidak punya folder lama. Dirakit
+         * dengan cara lama, buktinya terunggah tetapi panitia selamanya
+         * melihat "berkasnya tidak ada".
+         *
+         * AlamatGambar sudah melayani KEDUA bentuk sekaligus, jadi tidak ada
+         * aturan kedua yang harus ikut sepakat di sini.
+         */
+        $url = AlamatGambar::url($nilai, $folder);
 
         return [
-            'url' => asset($jalur),
-            'ada' => is_file(public_path($jalur)),
+            'url' => $url,
+            'ada' => $url !== null,
             'nilai' => true,
         ];
     }
