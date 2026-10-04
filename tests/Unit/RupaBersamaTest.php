@@ -294,31 +294,47 @@ class RupaBersamaTest extends TestCase
     }
 
     #[Test]
-    public function bantalan_tab_tidak_dikalahkan_aturan_global(): void
+    public function jarak_tab_sama_dengan_halaman_profil(): void
     {
         /*
-         * style.css memasang `.nav-pills .nav-item .nav-link { padding-left:
-         * 15px !important; padding-right: 15px !important }`. Nilai 10px yang
-         * tertulis di `.mis-tab .nav-link` karena itu TIDAK PERNAH berlaku.
+         * Deret tab layar Rincian Pendaftaran harus BERJARAK SAMA dengan
+         * halaman Profil — keputusan 4 Okt 2026, diminta dua kali.
          *
-         * Terukur akibatnya: ketujuh tab layar Rincian menuntut 839px
-         * sementara stripnya 812px, jadi "Hapus" terlempar sendirian ke baris
-         * kedua. Dengan 10px tuntutannya 769px dan ketujuhnya muat satu baris.
+         * Terukur di peramban, Profil: bantalan dalam tab 15px/15px, jarak
+         * antar tab 6px, bantalan strip 5px. Yang berbeda hanya bantalan
+         * dalamnya: layar Rincian sempat ditimpa jadi 10px supaya ketujuh
+         * tabnya muat sebaris di 1470px.
          *
-         * Timpaannya butuh bobot (0,4,0): percobaan dengan `.mis-tab
-         * .nav-link` (0,2,0) sama-sama `!important` dan tetap kalah — terukur
-         * bantalannya masih 15px sesudah aturannya terpasang.
+         * Timpaan itu dibuang, dan barisnya boleh membungkus. Uji ini
+         * menjaganya tidak dipasang lagi diam-diam oleh orang yang melihat
+         * "Hapus" turun ke baris kedua dan mengira itu kerusakan — padahal
+         * itu harga yang memang dipilih.
+         *
+         * 15px-nya sendiri datang dari style.css, jadi yang dijaga di sini
+         * KETIADAAN timpaan, bukan adanya aturan.
          */
         $bersih = $this->cssTanpaKomentar();
 
-        $this->assertStringContainsString('.mis-tab.nav-pills .nav-item .nav-link', $bersih,
-            'Timpaan bantalan tab harus cukup berbobot untuk mengalahkan .nav-pills .nav-item .nav-link');
-
-        $this->assertMatchesRegularExpression(
-            '/\.mis-tab\.nav-pills [^{]*\{ padding-left: 10px !important; padding-right: 10px !important; \}/',
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.mis-tab[^{]*\{[^}]*padding-left:\s*10px/',
             $bersih,
-            'Bantalan mendatar tab tidak dipaksa kembali ke 10px.'
+            'Bantalan tab ditimpa lagi jadi 10px. Jaraknya jadi berbeda dari halaman Profil; '
+                . 'kalau memang disengaja, tanyakan dulu sebab ini keputusan yang sudah diambil.'
         );
+
+        /*
+         * Dan jarak ANTAR tab-nya harus tetap 6px, menyamai .prof-tab.
+         * Dibaca dari kedua berkasnya supaya keduanya benar-benar diadu,
+         * bukan sekadar dituliskan angkanya di sini.
+         */
+        $this->assertMatchesRegularExpression('/\.mis-tab \{[^}]*gap: 6px;/', $bersih,
+            'Jarak antar tab .mis-tab bukan 6px lagi.');
+
+        $profil = preg_replace('/\s+/', ' ',
+            file_get_contents(resource_path('views/account/profil/gaya.blade.php'))) ?? '';
+
+        $this->assertMatchesRegularExpression('/\.prof-tab \{[^}]*gap: 6px;/', $profil,
+            'Jarak antar tab di halaman Profil berubah; keduanya harus tetap sama.');
     }
 
     #[Test]
