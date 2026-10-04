@@ -1341,36 +1341,23 @@ body.sidebar-show .main-footer {
 }
 
 /*
- * Bantalan mendatarnya DIPAKSA kembali ke 10px.
+ * Bantalan mendatarnya SENGAJA dibiarkan 15px, mengikuti halaman Profil.
  *
- * `.mis-tab .nav-link` di atas sudah menyebut `padding: 9px 10px`, tetapi
- * style.css memasang `.nav-pills .nav-item .nav-link { padding-left: 15px
- * !important; padding-right: 15px !important }` — dan `!important` menang
- * atas bobot pemilih apa pun. Jadi nilai yang benar-benar berlaku selama ini
- * 15px, bukan 10px yang tertulis di berkas ini.
+ * `.mis-tab .nav-link` di atas menyebut `padding: 9px 10px`, tetapi nilai itu
+ * TIDAK pernah berlaku: style.css memasang `.nav-pills .nav-item .nav-link {
+ * padding-left: 15px !important; padding-right: 15px !important }`, dan
+ * `!important` menang atas bobot pemilih apa pun. Deret tab Profil memakai
+ * 15px karena itu, dan terukur memang 15px di sana.
  *
- * Terukur akibatnya di layar Rincian Pendaftaran: ketujuh tabnya menuntut
- * 839px sementara stripnya 812px, jadi "Hapus" — satu-satunya tab yang
- * merusak — terlempar sendirian ke baris kedua. Dengan 10px, tuntutannya
- * 769px dan ketujuhnya muat satu baris.
+ * Sempat ditimpa jadi 10px di sini supaya ketujuh tab layar Rincian muat
+ * sebaris di 1470px — 839px yang dituntut melawan strip 812px. Timpaan itu
+ * DIBUANG atas keputusan 4 Okt 2026: jaraknya harus sama persis dengan
+ * Profil, dan barisnya boleh membungkus. Terukur sesudahnya: dua baris di
+ * 1024/1280/1470, satu baris di 1700/1920, nol huruf terpotong di semuanya.
  *
- * Timpaannya DIBATASI ke `.mis-tab`: `.nav-pills` lain di aplikasi ini tetap
- * memakai 15px bawaannya.
- *
- * Pemilihnya SENGAJA sepanjang ini. Percobaan pertama memakai
- * `.mis-tab .nav-link` (0,2,0) dan tetap kalah — saat kedua aturan sama-sama
- * `!important`, yang menentukan bobot pemilihnya, dan lawannya (0,3,0).
- * Terukur sesudah aturannya terpasang: bantalannya masih 15px dan "Hapus"
- * masih terlempar. `.mis-tab.nav-pills .nav-item .nav-link` (0,4,0) menang
- * tanpa bergantung pada urutan muat berkas.
- *
- * Pemilih keduanya untuk deret tab yang <li>-nya tidak berkelas .nav-item.
+ * Jadi JANGAN menimpanya lagi tanpa menanyakan dulu — yang dikorbankan
+ * keseragaman jarak dengan Profil, bukan sekadar selera.
  */
-.mis-tab.nav-pills .nav-item .nav-link,
-.mis-tab.nav-pills > li > .nav-link {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-}
 
 /* 12px, menyamai ukuran terukur ikon tab di halaman profil. !important perlu
    karena aturan global layout memaksa .fas jadi 20px. */
