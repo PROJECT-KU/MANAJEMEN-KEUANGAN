@@ -619,10 +619,44 @@ Rincian Pendaftaran | MIS Rumah Scopus
             border-top: 1px dashed var(--mis-garis);
         }
 
-        .rin-bagian + .rin-bagian {
-            margin-top: 19px;
-            padding-top: 17px;
-            border-top: 1px dashed var(--mis-garis);
+        /*
+         * Tiap bagian berupa KARTU PUTIH sendiri, bukan blok yang dipisah
+         * garis putus-putus.
+         *
+         * Badan tab ini memang berlatar lembut (#f4f6fb di .mis-tab-isi)
+         * justru supaya isinya bisa jadi kartu putih — itu yang tertulis di
+         * mis-ui.css dan itu yang dipakai halaman Profil lewat .prof-bagian.
+         * Layar ini satu-satunya yang belum memakainya, jadi bagiannya
+         * mengambang di atas latar tanpa batas yang jelas.
+         *
+         * Garis putus-putus menandai PEMISAH; kartu menandai SATUAN. Untuk
+         * yang membaca sekilas, satuan jauh lebih mudah ditangkap: matanya
+         * berhenti di tepi kartu tanpa harus mencari garisnya.
+         *
+         * Nilainya disamakan persis dengan .prof-bagian supaya kedua layar
+         * tidak punya dua pengertian tentang "kartu di dalam tab".
+         */
+        .rin-bagian {
+            padding: 15px 16px;
+            border: 1px solid #e7ecf5;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        }
+
+        /*
+         * Jarak antar kartu dipasang di SETIAP kartu, lalu dibatalkan pada
+         * yang pertama — bukan lewat `+` saja: di tab Ringkasan kartunya
+         * didahului nota, dan `.rin-bagian + .rin-bagian` tidak mengenali
+         * tetangga yang bukan sesama bagian. Terukur sebelumnya, celah nota
+         * ke bagian di bawahnya 0px.
+         */
+        .rin-bagian {
+            margin-top: 14px;
+        }
+
+        .rin-bagian:first-child {
+            margin-top: 0;
         }
 
         .rin-bagian-judul {
@@ -1622,7 +1656,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                          "Diproses" meluber 24px keluar
                                                          kotaknya dan tercetak menimpa
                                                          lencananya. --}}
-                                                    <span class="rin-status-kini">status sekarang</span>
+                                                    {{-- Satu kata, bukan "status sekarang":
+                                                         sesudah bagiannya jadi kartu, bantalan
+                                                         kartu memangkas lebar tombolnya dan dua
+                                                         kata itu terpatah jadi dua baris —
+                                                         terukur, barisnya jadi 68px sementara
+                                                         baris tombol di bawahnya 58px. Di dalam
+                                                         bagian berjudul "Pindahkan status",
+                                                         satu kata ini sudah tidak ambigu. --}}
+                                                    <span class="rin-status-kini">sekarang</span>
                                                 @endif
                                             </span>
                                             @if (! $iniSekarang && $kirimSurat)

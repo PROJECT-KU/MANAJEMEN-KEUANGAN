@@ -337,6 +337,60 @@ class RupaBersamaTest extends TestCase
             'Jarak antar tab di halaman Profil berubah; keduanya harus tetap sama.');
     }
 
+
+    #[Test]
+    public function bagian_di_dalam_tab_berupa_kartu_putih_di_kedua_layar(): void
+    {
+        /*
+         * Badan tab berlatar lembut (#f4f6fb pada .mis-tab-isi) JUSTRU supaya
+         * isinya bisa jadi kartu putih — itu yang tertulis di mis-ui.css dan
+         * itu yang dipakai halaman Profil lewat .prof-bagian.
+         *
+         * Layar Rincian Pendaftaran satu-satunya yang belum memakainya:
+         * bagiannya mengambang di atas latar, dipisah garis putus-putus saja.
+         * Garis menandai PEMISAH, kartu menandai SATUAN — dan untuk yang
+         * membaca sekilas, satuan jauh lebih mudah ditangkap sebab matanya
+         * berhenti di tepi kartu tanpa harus mencari garisnya.
+         *
+         * Diadu dengan .prof-bagian, bukan dengan angka yang ditulis ulang di
+         * sini: kalau kartunya di Profil berubah, keduanya harus berubah
+         * bersama atau penjaganya berbunyi.
+         */
+        $ambil = function (string $berkas, string $kelas): array {
+            $isi = preg_replace('#/\*.*?\*/#s', ' ', file_get_contents(resource_path($berkas))) ?? '';
+            $isi = preg_replace('/\s+/', ' ', $isi) ?? '';
+
+            $this->assertSame(1, preg_match(
+                '/' . preg_quote($kelas, '/') . ' \{(?<isi>[^}]*)\}/', $isi, $cocok
+            ), $kelas . ' tidak ketemu di ' . $berkas);
+
+            $nilai = [];
+
+            foreach (['background', 'border-radius', 'border'] as $sifat) {
+                if (preg_match('/(?<![a-z-])' . $sifat . ':\s*([^;]+);/', $cocok['isi'], $m)) {
+                    $nilai[$sifat] = trim($m[1]);
+                }
+            }
+
+            return $nilai;
+        };
+
+        $profil = $ambil('views/account/profil/gaya.blade.php', '.prof-bagian');
+        $rincian = $ambil('views/account/pendaftaran_layanan/rincian.blade.php', '.rin-bagian');
+
+        $this->assertNotEmpty($profil, 'Prasyarat ujinya hilang: .prof-bagian tidak punya sifat kartu.');
+
+        foreach ($profil as $sifat => $nilai) {
+            $this->assertArrayHasKey($sifat, $rincian,
+                'Bagian di layar Rincian tidak menyebut ' . $sifat . ', jadi ia tidak terbaca '
+                    . 'sebagai kartu seperti di halaman Profil.');
+
+            $this->assertSame($nilai, $rincian[$sifat],
+                'Kartu bagian di kedua layar berbeda pada ' . $sifat . '; keduanya harus '
+                    . 'punya satu pengertian tentang "kartu di dalam tab".');
+        }
+    }
+
     #[Test]
     public function penanda_versi_css_ikut_naik(): void
     {
