@@ -695,6 +695,51 @@
                     var baru = doc.getElementById(borang.dataset.misSaring);
                     if (baru) hasil.innerHTML = baru.innerHTML;
 
+                    /*
+                     * Bagian LAIN yang ikut berubah saat saringannya berubah.
+                     *
+                     * Menukar daftarnya saja TIDAK CUKUP, dan ini kerusakan
+                     * yang paling sunyi di seluruh perangkat ini: ubin
+                     * ringkasan dan tautan tombol unduh dirakit saat halaman
+                     * dirender, jadi sesudah penyaringan tanpa muat ulang
+                     * keduanya masih memegang keadaan LAMA.
+                     *
+                     * Terukur di layar Pendaftar Layanan: menyaring satu
+                     * angkatan menyisakan 3 baris di layar, sementara ubinnya
+                     * tetap berbunyi 189 dan tombol Unduh PDF masih menunjuk
+                     * alamat tanpa saringan — berkasnya berisi 189 pendaftaran
+                     * dari seluruh angkatan. Tidak ada galat, tidak ada tanda
+                     * apa pun; yang dilihat orang di layar dan yang ada di
+                     * berkasnya memang dua kumpulan berbeda.
+                     *
+                     * Idnya disebut borangnya lewat data-mis-saring-juga,
+                     * dipisah koma. Yang tidak menyebutnya berperilaku seperti
+                     * sebelumnya.
+                     */
+                    var jugaRaw = borang.dataset.misSaringJuga || '';
+
+                    jugaRaw.split(',').forEach(function (id) {
+                        id = id.trim();
+                        if (!id) return;
+
+                        var lamaEl = document.getElementById(id);
+                        var baruEl = doc.getElementById(id);
+
+                        // Keduanya harus ada. Id yang salah tulis dibiarkan
+                        // diam-diam TIDAK diperbarui akan memulangkan persis
+                        // bug yang hendak diperbaiki di sini, jadi ia
+                        // dikabarkan ke konsol.
+                        if (!lamaEl || !baruEl) {
+                            if (window.console) {
+                                console.warn('mis-saring: bagian "' + id + '" tidak ketemu, jadi ia tidak ikut diperbarui.');
+                            }
+
+                            return;
+                        }
+
+                        lamaEl.innerHTML = baruEl.innerHTML;
+                    });
+
                     history.replaceState(null, '', alamat);
 
                     /*

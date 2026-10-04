@@ -303,7 +303,7 @@ Angkatan Layanan | MIS
                 <h1 class="mis-judul">Angkatan layanan</h1>
                 <p class="mis-sub">Semua angkatan jasa dalam satu daftar — harga dan deskripsinya ikut tarif induk.</p>
             </div>
-            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="ang-aksi">
                 {{-- Layar kategori yang digantikan layar ini SUDAH punya unduhan
                      PDF dan Excel; menyatukannya tanpa keduanya berarti
                      diam-diam mencabut kemampuan yang sudah dipakai orang.
@@ -363,6 +363,7 @@ Angkatan Layanan | MIS
         @endphp
         {{-- Di ponsel ubinnya jadi barisan yang digeser; pembungkus ini yang
              memegang petunjuknya, sebab barisan itu sendiri yang menggeser. --}}
+        <div id="ang-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
         <div class="mis-ringkas {{ $totalPerlu > 0 ? 'mis-ringkas-5' : '' }}" aria-label="Ringkasan angkatan">
             @foreach ($ubin as [$nilaiStatus, $label, $angka, $warna, $glif])
@@ -402,6 +403,8 @@ Angkatan Layanan | MIS
             </p>
         </div>
 
+        </div>{{-- ang-ringkas --}}
+
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkus penyaringnya, sama seperti Data Pelanggan: di
              ponsel empat kendali yang selalu terbuka memakan satu layar penuh
@@ -419,7 +422,8 @@ Angkatan Layanan | MIS
 
         <div class="mis-saring-kartu">
             <form method="GET" action="{{ route('account.kategori-layanan.index') }}" class="mis-saring"
-                data-mis-saring="ang-hasil">
+                data-mis-saring="ang-hasil"
+                data-mis-saring-juga="ang-ringkas,ang-aksi">
                 {{-- Menu pengurut menulis ke dua isian ini, bukan mengirim
                      namanya sendiri: peladen hanya mengenal 'urut' dan 'arah'. --}}
                 <input type="hidden" name="urut" id="ang-urut-kolom" value="{{ $urut }}">
