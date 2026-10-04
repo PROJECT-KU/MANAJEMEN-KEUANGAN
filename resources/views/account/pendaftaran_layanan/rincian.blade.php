@@ -722,6 +722,25 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * Jumlah lajurnya dipatok sesuai jumlah status, lihat catatan di
+         * markahnya. Hanya sejak 680px: di bawah itu auto-fit di atas yang
+         * berlaku, dan tombolnya menumpuk satu per baris seperti seharusnya
+         * di ponsel.
+         *
+         * 680px, bukan 576px: tombol status menuntut sekitar 170px, jadi tiga
+         * lajur baru masuk akal pada kolom selebar itu.
+         */
+        @media (min-width: 680px) {
+            .rin-status-kolom-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .rin-status-kolom-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /*
          * Tiga lajur: ikon, blok teks, penanda amplop.
          *
          * Kisi, BUKAN flex. Dengan flex, anak yang ber-min-width:0 boleh
@@ -877,6 +896,53 @@ Rincian Pendaftaran | MIS Rumah Scopus
             border-color: #bfdbfe;
             background: #eff6ff;
             color: #1d4ed8;
+        }
+
+        /*
+         * Jejak & catatan: satu baris satu kejadian, berikon.
+         *
+         * Dulu seluruh catatannya dicetak sebagai satu paragraf. Kalau
+         * isinya lebih dari satu kejadian, keduanya menyatu jadi satu blok
+         * teks dan tidak ada yang menandai di mana satu berakhir.
+         *
+         * Garis penyambung di kiri dibuat dari ::before pada <li>, bukan
+         * border pada daftarnya: dengan border, garisnya menerus sampai ke
+         * bawah butir terakhir dan menggantung tanpa ujung.
+         */
+        .rin-jejak {
+            display: grid;
+            gap: 11px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .rin-jejak li {
+            position: relative;
+            display: grid;
+            grid-template-columns: 25px minmax(0, 1fr);
+            align-items: start;
+            gap: 10px;
+        }
+
+        .rin-jejak li:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 27px;
+            bottom: -11px;
+            width: 1px;
+            background: var(--mis-garis);
+        }
+
+        .rin-jejak-teks {
+            min-width: 0;
+            font-size: .84rem;
+            /* line-height disebut sendiri: lihat catatan di .rin-baris-label
+               soal 28px mutlak yang diwariskan style.css. */
+            line-height: 1.45;
+            color: var(--mis-tinta);
+            overflow-wrap: anywhere;
         }
 
         /* Daftar peserta rombongan. Bernomor, sebab urutannya berarti: itu
@@ -1667,7 +1733,28 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
                                 <p class="mis-label rin-status-label">Pindahkan status</p>
 
-                                <div class="rin-status-pilih" role="group" aria-label="Pindahkan status pendaftaran">
+                                @php
+                                    /*
+                                     * Lajurnya dihitung dari JUMLAH statusnya, bukan
+                                     * dipatok.
+                                     *
+                                     * Dengan auto-fit, enam status di kolom selebar ini
+                                     * jatuh 4 + 2 — dua petak kanan baris kedua kosong,
+                                     * dan itu yang terlihat sebagai "bagian kosong".
+                                     *
+                                     * Kelima layanan punya jumlah status berbeda:
+                                     * 6, 6, 4, 3, 4. Mengambil pembagi terbesar di
+                                     * antara 3 dan 2 membuat semuanya genap — 6 jadi
+                                     * 3+3, 4 jadi 2+2, 3 jadi satu baris penuh. Yang
+                                     * tidak habis dibagi (misal 5) jatuh ke 3 dan
+                                     * menyisakan satu petak, dan itu memang tidak bisa
+                                     * dihindari.
+                                     */
+                                    $jumlahStatus = count($pilihanStatus);
+                                    $kolomStatus = $jumlahStatus % 3 === 0 ? 3 : ($jumlahStatus % 2 === 0 ? 2 : 3);
+                                @endphp
+                                <div class="rin-status-pilih rin-status-kolom-{{ $kolomStatus }}"
+                                    role="group" aria-label="Pindahkan status pendaftaran">
                                     @foreach ($pilihanStatus as $nilaiStatus => $tulisan)
                                         @php
                                             // Warna dan ikonnya dibaca dari katalog keadaan
@@ -1746,7 +1833,66 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-history"></i></span>
                                     <span class="teks">Jejak &amp; catatan</span>
                                 </p>
-                                <p class="rin-baris-nilai">{{ $pendaftaran->note }}</p>
+                                @php
+                                    /*
+                                     * Catatannya teks bebas, dan panitia menulisnya
+                                     * satu kejadian per baris. Dipecah per baris, tiap
+                                     * baris jadi satu jejak berikon.
+                                     *
+                                     * Ikonnya ditebak dari kata kuncinya, dan tebakan
+                                     * yang MELESET tidak merugikan: jatuhnya ke ikon
+                                     * netral, tulisannya tetap utuh. Itu sebabnya ini
+                                     * boleh berupa tebakan — ia menambah petunjuk,
+                                     * bukan menggantikan isinya.
+                                     */
+                                    $petaJejak = [
+                                        'didaftarkan' => ['fa-user-plus', 'hijau'],
+                                        'dipindahkan' => ['fa-exchange-alt', 'biru'],
+                                        'status' => ['fa-exchange-alt', 'biru'],
+                                        'refund' => ['fa-undo', 'ungu'],
+                                        'dikembalikan' => ['fa-undo', 'ungu'],
+                                        'diskon' => ['fa-tag', 'kuning'],
+                                        'potongan' => ['fa-tag', 'kuning'],
+                                        'batal' => ['fa-times-circle', 'merah'],
+                                        'tolak' => ['fa-times-circle', 'merah'],
+                                        'reseat' => ['fa-calendar-alt', 'jingga'],
+                                        'reschedule' => ['fa-calendar-alt', 'jingga'],
+                                        'bayar' => ['fa-money-bill-wave', 'hijau'],
+                                        'transfer' => ['fa-university', 'biru'],
+                                    ];
+
+                                    $jejak = [];
+
+                                    foreach (preg_split('/\r\n|\r|\n/', (string) $pendaftaran->note) as $satu) {
+                                        $satu = trim($satu);
+
+                                        if ($satu === '') {
+                                            continue;
+                                        }
+
+                                        $rupaJejak = ['fa-sticky-note', 'abu'];
+
+                                        foreach ($petaJejak as $kata => $r) {
+                                            if (stripos($satu, $kata) !== false) {
+                                                $rupaJejak = $r;
+                                                break;
+                                            }
+                                        }
+
+                                        $jejak[] = ['teks' => $satu, 'ikon' => $rupaJejak[0], 'warna' => $rupaJejak[1]];
+                                    }
+                                @endphp
+
+                                <ul class="rin-jejak">
+                                    @foreach ($jejak as $satu)
+                                        <li>
+                                            <span class="mis-medali mini mis-{{ $satu['warna'] }}" aria-hidden="true">
+                                                <i class="fas {{ $satu['ikon'] }}"></i>
+                                            </span>
+                                            <span class="rin-jejak-teks">{{ $satu['teks'] }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
                         @endif
                     </div>
