@@ -302,6 +302,14 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         .bar-bayar-ket > .mis-isian {
             margin: 0;
+            /*
+             * align-self: stretch WAJIB disebut: mis-ui.css memasang
+             * `align-self: start` pada .mis-isian, dan di wadah flex berarah
+             * KOLOM itu sumbu mendatar — jadi isiannya menyusut selebar isinya
+             * alih-alih mengisi kolomnya. Terukur: kotak bukti 395px di kolom
+             * selebar 494px, menyisakan 99px kosong di sampingnya.
+             */
+            align-self: stretch;
         }
 
         .bar-pilihan input {
@@ -1551,6 +1559,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     @enderror
                 </div>
 
+
+
+                </div>{{-- /kolom kanan --}}
+                </div>{{-- /bar-bayar-kisi --}}
+
+                {{-- Notanya SEBARIS PENUH di bawah kedua kolom, bukan di
+                     kolom kanan. Kartu cara bayar lebih pendek daripada
+                     notanya, jadi di sebelah kiri nota tersisa ruang kosong
+                     selebar kolom kiri. --}}
                 <p class="bar-nota" id="bar-nota-bukti">
                     <i class="fas fa-info-circle" aria-hidden="true"></i>
                     <span>
@@ -1559,9 +1576,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         supaya pendaftarnya bisa dicatat lebih dulu.
                     </span>
                 </p>
-
-                </div>{{-- /kolom kanan --}}
-                </div>{{-- /bar-bayar-kisi --}}
 
                 <p class="bar-nota" id="bar-nota-doku" hidden>
                     <i class="fas fa-credit-card" aria-hidden="true"></i>
