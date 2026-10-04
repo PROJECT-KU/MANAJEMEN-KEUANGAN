@@ -3405,14 +3405,16 @@ class TindakanPendaftaranTest extends TestCase
     public function kelima_layanan_mencatat_jejak_perubahan_statusnya(): void
     {
         /*
-         * Scopus Kafe dan Clinik Scopus dulu TIDAK punya kolom `note`, jadi
-         * siapa pun yang memindahkan statusnya tidak meninggalkan jejak apa
-         * pun — terukur 11 dari 187 baris tidak terlacak. Kolomnya
-         * ditambahkan migrasi 2026_10_03_160000.
+         * Jejaknya kini di TABELNYA SENDIRI, bukan di kolom catatan panitia.
          *
-         * Diperiksa untuk KELIMA layanan sekaligus, bukan dua yang baru:
-         * layanan berikutnya yang datang tanpa kolom itu harus ketahuan di
-         * sini, bukan saat ada selisih uang yang tidak bisa ditelusuri.
+         * Dulu ia ditempelkan ke `note` — kolom yang sama yang dipakai
+         * panitia menulis catatannya. Dua hal rusak karenanya: catatan
+         * panitia bisa terhapus saat disunting, dan dua layanan yang tidak
+         * punya kolom itu tidak pernah terekam sama sekali.
+         *
+         * Diperiksa untuk KELIMA layanan sekaligus: layanan berikutnya yang
+         * datang harus ketahuan di sini, bukan saat ada selisih uang yang
+         * tidak bisa ditelusuri.
          */
         Mail::fake();
 
@@ -3435,16 +3437,30 @@ class TindakanPendaftaranTest extends TestCase
                 ['status' => $status]
             )->assertRedirect();
 
+            $jejak = \App\PendaftaranJejak::milik($layanan, (string) $b->getKey())
+                ->terurut()->get();
+
+            $this->assertCount(1, $jejak, "Jejak perubahan {$layanan} tidak tercatat.");
+            $this->assertSame($statusLama, $jejak[0]->dari, "Status asal {$layanan} tidak tercatat.");
+            $this->assertSame($status, $jejak[0]->ke, "Status tujuan {$layanan} tidak tercatat.");
+            $this->assertNotEmpty($jejak[0]->oleh_nama, "Jejak {$layanan} tidak menyebut siapa yang mengubah.");
+
+            /*
+             * Dan catatan panitianya TIDAK tersentuh. Inilah inti
+             * pemisahannya: jejak sistem tidak boleh menumpang di kolom yang
+             * disunting orang.
+             */
             $kolom = Pendaftaran::kolomCatatan($layanan);
 
-            $this->assertNotNull($kolom, "Layanan {$layanan} tidak punya kolom catatan.");
-            $this->assertStringContainsString(
-                '"' . $statusLama . '" → "' . $status . '"',
-                (string) $b->refresh()->{$kolom},
-                "Jejak perubahan {$layanan} tidak tercatat."
-            );
-            $this->assertStringContainsString('Uji administrator', (string) $b->{$kolom},
-                "Jejak {$layanan} tidak menyebut siapa yang mengubahnya.");
+            if ($kolom !== null) {
+                $this->assertStringNotContainsString('→', (string) $b->refresh()->{$kolom},
+                    "Jejak {$layanan} masih ikut ditulis ke catatan panitia.");
+            }
+            /*
+             * Namanya diperiksa di JEJAKNYA (lihat oleh_nama di atas), bukan
+             * di kolom catatan. Assertion lama yang menuntutnya ada di `note`
+             * justru menuntut hal yang sekarang dilarang.
+             */
 
             $this->flushSession();
         }

@@ -1001,6 +1001,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
             background: var(--mis-garis);
         }
 
+        /* Waktunya di baris sendiri dan samar: yang dicari mata adalah APA
+           yang berubah, bukan jamnya. */
+        .rin-jejak-waktu {
+            display: block;
+            margin-top: 1px;
+            font-size: .7rem;
+            color: var(--mis-tinta-4);
+        }
+
         .rin-jejak-teks {
             min-width: 0;
             font-size: .84rem;
@@ -1905,72 +1914,64 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             </form>
                         </div>
 
-                        @if ($pendaftaran->note)
+                        {{--
+                            Jejak sistem dan catatan panitia DIPISAH jadi dua
+                            kartu.
+
+                            Dulu keduanya satu: jejak perpindahan status
+                            ditempelkan ke kolom `note` yang sama yang dipakai
+                            panitia menulis catatannya sendiri. Panitia yang
+                            menyunting catatannya bisa menghapus riwayat audit
+                            tanpa sadar, dan kolomnya memanjang tanpa batas.
+                            Lihat migrasi jejak_pendaftaran.
+                        --}}
+                        @if ($jejak->isNotEmpty())
                             <div class="rin-bagian">
                                 <p class="rin-bagian-judul">
                                     <span class="mis-medali kecil mis-kuning" aria-hidden="true"><i class="fas fa-history"></i></span>
-                                    <span class="teks">Jejak &amp; catatan</span>
+                                    <span class="teks">Jejak perubahan</span>
                                 </p>
-                                @php
-                                    /*
-                                     * Catatannya teks bebas, dan panitia menulisnya
-                                     * satu kejadian per baris. Dipecah per baris, tiap
-                                     * baris jadi satu jejak berikon.
-                                     *
-                                     * Ikonnya ditebak dari kata kuncinya, dan tebakan
-                                     * yang MELESET tidak merugikan: jatuhnya ke ikon
-                                     * netral, tulisannya tetap utuh. Itu sebabnya ini
-                                     * boleh berupa tebakan — ia menambah petunjuk,
-                                     * bukan menggantikan isinya.
-                                     */
-                                    $petaJejak = [
-                                        'didaftarkan' => ['fa-user-plus', 'hijau'],
-                                        'dipindahkan' => ['fa-exchange-alt', 'biru'],
-                                        'status' => ['fa-exchange-alt', 'biru'],
-                                        'refund' => ['fa-undo', 'ungu'],
-                                        'dikembalikan' => ['fa-undo', 'ungu'],
-                                        'diskon' => ['fa-tag', 'kuning'],
-                                        'potongan' => ['fa-tag', 'kuning'],
-                                        'batal' => ['fa-times-circle', 'merah'],
-                                        'tolak' => ['fa-times-circle', 'merah'],
-                                        'reseat' => ['fa-calendar-alt', 'jingga'],
-                                        'reschedule' => ['fa-calendar-alt', 'jingga'],
-                                        'bayar' => ['fa-money-bill-wave', 'hijau'],
-                                        'transfer' => ['fa-university', 'biru'],
-                                    ];
-
-                                    $jejak = [];
-
-                                    foreach (preg_split('/\r\n|\r|\n/', (string) $pendaftaran->note) as $satu) {
-                                        $satu = trim($satu);
-
-                                        if ($satu === '') {
-                                            continue;
-                                        }
-
-                                        $rupaJejak = ['fa-sticky-note', 'abu'];
-
-                                        foreach ($petaJejak as $kata => $r) {
-                                            if (stripos($satu, $kata) !== false) {
-                                                $rupaJejak = $r;
-                                                break;
-                                            }
-                                        }
-
-                                        $jejak[] = ['teks' => $satu, 'ikon' => $rupaJejak[0], 'warna' => $rupaJejak[1]];
-                                    }
-                                @endphp
 
                                 <ul class="rin-jejak">
                                     @foreach ($jejak as $satu)
+                                        @php
+                                            /*
+                                             * Ikonnya mengikuti KEADAAN TUJUAN
+                                             * perpindahannya, bukan tebakan kata kunci
+                                             * seperti dulu: sekarang nilainya tersimpan
+                                             * utuh di kolomnya sendiri, jadi tidak perlu
+                                             * ditebak lagi.
+                                             */
+                                            $keadaanJejak = $satu->ke
+                                                ? Pendaftaran::keadaanDari($satu->ke)
+                                                : null;
+                                            $rupaJejak = $keadaanJejak
+                                                ? (Pendaftaran::KEADAAN[$keadaanJejak] ?? null)
+                                                : null;
+                                        @endphp
                                         <li>
-                                            <span class="mis-medali mini mis-{{ $satu['warna'] }}" aria-hidden="true">
-                                                <i class="fas {{ $satu['ikon'] }}"></i>
+                                            <span class="mis-medali mini mis-{{ $rupaJejak['warna'] ?? 'biru' }}" aria-hidden="true">
+                                                <i class="fas {{ $rupaJejak['ikon'] ?? 'fa-exchange-alt' }}"></i>
                                             </span>
-                                            <span class="rin-jejak-teks">{{ $satu['teks'] }}</span>
+                                            <span class="rin-jejak-teks">
+                                                {{ $satu->kalimat }}
+                                                <span class="rin-jejak-waktu">
+                                                    {{ optional($satu->created_at)->translatedFormat('d M Y, H:i') }}
+                                                </span>
+                                            </span>
                                         </li>
                                     @endforeach
                                 </ul>
+                            </div>
+                        @endif
+
+                        @if (trim((string) $pendaftaran->note) !== '')
+                            <div class="rin-bagian">
+                                <p class="rin-bagian-judul">
+                                    <span class="mis-medali kecil mis-jingga" aria-hidden="true"><i class="fas fa-sticky-note"></i></span>
+                                    <span class="teks">Catatan panitia</span>
+                                </p>
+                                <p class="rin-jejak-teks">{{ $pendaftaran->note }}</p>
                             </div>
                         @endif
                     </div>

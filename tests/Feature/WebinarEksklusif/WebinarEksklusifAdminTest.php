@@ -119,10 +119,18 @@ class WebinarEksklusifAdminTest extends TestCase
 
         $this->assertSame('paid', $segar->status);
         $this->assertNotNull($segar->bayar_pada);
-        $this->assertStringContainsString('Panitia Uji', (string) $segar->note,
+        /*
+         * Jejaknya di tabelnya sendiri, BUKAN di kolom catatan: jejak sistem
+         * tidak boleh menumpang di kolom yang disunting panitia.
+         */
+        $jejak = \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())
+            ->terurut()->get();
+
+        $this->assertCount(1, $jejak, 'perpindahan statusnya harus tercatat');
+        $this->assertSame('pending', $jejak[0]->dari);
+        $this->assertSame('paid', $jejak[0]->ke);
+        $this->assertSame('Panitia Uji', $jejak[0]->oleh_nama,
             'siapa yang menandai harus tercatat — kalau ada selisih uang, yang ditanya orangnya');
-        $this->assertStringContainsString('"pending" → "paid"', (string) $segar->note,
-            'perpindahan statusnya harus ikut tercatat, bukan hanya siapa yang mengubahnya');
     }
 
     /**
@@ -177,10 +185,9 @@ class WebinarEksklusifAdminTest extends TestCase
         $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
 
         $this->assertSame('18', (string) $sesi->fresh()->sisa_kuota);
-        // Jejaknya kini mencatat PERPINDAHAN status, bukan kata 'Dilunasi
-        // manual': tindakannya satu untuk kelima layanan. Dan perpindahan
-        // kedua ditolak sebab statusnya sudah sama, jadi jejaknya tetap satu.
-        $this->assertSame(1, substr_count((string) $p->fresh()->note, '"pending" → "paid"'));
+        // Perpindahan kedua ditolak sebab statusnya sudah sama, jadi jejaknya
+        // tetap SATU baris — bukan dua yang isinya sama.
+        $this->assertSame(1, \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())->count());
     }
 
     #[Test]

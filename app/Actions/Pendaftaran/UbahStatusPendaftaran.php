@@ -83,19 +83,30 @@ class UbahStatusPendaftaran
              * Jejak SIAPA yang mengubah: kalau belakangan ada selisih uang,
              * yang bisa ditanya orangnya, bukan sistemnya.
              *
-             * Hanya ke tabel yang memang punya kolomnya. Scopus Kafe dan
-             * Clinik Scopus tidak punya `note`, dan menulisnya ke sana
-             * melempar "Unknown column" sehingga SELURUH perubahan statusnya
-             * gagal — terukur galat 500 di kedua layanan itu.
+             * Ditulis ke tabel jejak tersendiri, BUKAN ke kolom catatan.
+             * Dulu ia ditempelkan ke `note` — kolom yang sama yang dipakai
+             * panitia menulis catatannya sendiri — dengan tiga akibat:
+             * catatan panitia bercampur jejak sistem dan bisa terhapus saat
+             * disunting, kolomnya memanjang tanpa batas, dan dua layanan yang
+             * TIDAK punya kolom `note` (Scopus Kafe, Clinik Scopus) tidak
+             * pernah terekam sama sekali.
+             *
+             * Jejaknya dicatat untuk kelima layanan tanpa kecuali, sebab
+             * tabelnya tidak bergantung pada kolom di tabel pendaftarannya.
              */
-            $kolomCatatan = Pendaftaran::kolomCatatan($layanan);
-
-            if ($olehSiapa !== null && $kolomCatatan !== null) {
-                $catatan = trim((string) $pendaftaran->{$kolomCatatan});
-                $isi[$kolomCatatan] = trim(($catatan !== '' ? $catatan . ' | ' : '')
-                    . 'Status "' . $statusLama . '" → "' . $status . '" oleh '
-                    . $olehSiapa . ' pada ' . now()->format('d M Y H:i'));
-            }
+            \App\PendaftaranJejak::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                'aksi' => 'status',
+                'dari' => $statusLama,
+                'ke' => $status,
+                // Dibaca dari sesi, bukan diminta lewat argumen: pemanggilnya
+                // sudah menyerahkan NAMANYA, dan menuntut id lagi berarti dua
+                // sumber untuk satu hal. Null saat dijalankan dari CLI, dan
+                // nama tetap tersimpan.
+                'oleh_id' => \Illuminate\Support\Facades\Auth::id(),
+                'oleh_nama' => $olehSiapa,
+            ]);
 
             if ($layanan === 'webinar_eksklusif' && $status === 'paid') {
                 $isi['bayar_status'] = 'manual';
