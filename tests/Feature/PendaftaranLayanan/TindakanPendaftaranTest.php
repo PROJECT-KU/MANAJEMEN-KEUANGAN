@@ -3949,4 +3949,45 @@ class TindakanPendaftaranTest extends TestCase
                 . 'tetangganya tidak lagi cocok dan jaraknya hilang diam-diam. Yang menyelip: '
                 . trim($celah));
     }
+
+    #[Test]
+    public function tiap_ubin_ringkasan_membawa_keterangannya_sendiri(): void
+    {
+        /*
+         * Ketiga ubin angka di tab Ringkasan nyaris kosong: terukur lebarnya
+         * 253px sementara isinya cuma 99px pada "Kode unik" dan 120px pada
+         * "Jumlah orang" — lebih dari separuh ubin jadi petak putih.
+         *
+         * Yang mengisinya bukan hiasan, melainkan jawaban atas pertanyaan
+         * yang memang menyusul angkanya: dibayar lewat apa, "22" itu apa, dan
+         * 15 orangnya sudah tercatat namanya atau belum.
+         *
+         * Yang ketiga paling berharga: "baru 1 dari 15 nama" menyebut selisih
+         * yang kalau tidak disebut baru ketahuan di hari acara, saat 14
+         * sertifikat tidak bisa diterbitkan.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $camp->forceFill(['jumlah_pendaftar' => 15])->save();
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        // Tiap ubin wajib punya barisnya; dihitung dari jumlah ubinnya sendiri
+        // supaya uji ini tetap benar kalau nanti ubinnya ditambah.
+        $jumlahUbin = preg_match_all('#class="mis-ubin"#', $isi);
+        $jumlahKet = preg_match_all('#class="rin-angka-ket#', $isi);
+
+        $this->assertGreaterThanOrEqual(3, $jumlahUbin, 'Prasyarat ujinya hilang: ubinnya kurang dari tiga.');
+
+        $this->assertSame($jumlahUbin, $jumlahKet,
+            'Ada ubin ringkasan tanpa baris keterangan, jadi lebih dari separuh lebarnya '
+                . 'kembali jadi petak kosong.');
+
+        // Selisih nama yang belum tercatat WAJIB disebut, bukan didiamkan.
+        $this->assertStringContainsString('dari 15 nama', $isi,
+            'Selisih antara jumlah orang yang dibayar dan nama yang tercatat tidak disebut.');
+    }
 }
