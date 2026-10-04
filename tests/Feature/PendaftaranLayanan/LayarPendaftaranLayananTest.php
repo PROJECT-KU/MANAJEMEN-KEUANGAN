@@ -1047,6 +1047,52 @@ class LayarPendaftaranLayananTest extends TestCase
     }
 
     /**
+     * Daftar peserta rombongan bisa diambil dari berkas, bukan hanya diketik.
+     *
+     * Lembaga mengirim daftar pesertanya sebagai lampiran Excel. Tanpa jalur
+     * berkas, rombongan 30 orang berarti 30 baris yang disalin satu per satu
+     * — pekerjaan yang paling mungkin dilewati panitia, dan begitu dilewati,
+     * 29 nomor pesertanya tidak pernah tercatat.
+     *
+     * Yang dijaga: tombolnya ada, ia menunjuk titik masuk yang benar, dan
+     * kalimat ajakannya menyebut BERKAS APA. "Unggah berkas" saja membuat
+     * panitia menebak-nebak dan akhirnya tidak memakainya sama sekali.
+     */
+    #[Test]
+    public function daftar_peserta_bisa_diambil_dari_berkas_excel(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('id="bar-peserta-berkas"', $isi);
+        $this->assertStringContainsString('Ambil dari Excel atau CSV', $isi);
+        $this->assertStringContainsString(route('account.pendaftaran-layanan.baca-peserta'), $isi);
+
+        /*
+         * Nomornya diminta, dan contohnya ditunjukkan di tempat ia diketik.
+         * Label "Nama peserta lain" tanpa contoh membuat panitia mengetik
+         * nama saja — persis keadaan yang hendak diperbaiki.
+         */
+        $this->assertStringContainsString('Nama &amp; nomor peserta lain', $isi);
+        $this->assertMatchesRegularExpression('/placeholder="[^"]*081234567890/', $isi);
+
+        /*
+         * Peringatan kelebihan nama ada, dan tertutup saat borang dibuka.
+         *
+         * Peladen memang memotong daftarnya sampai sebanyak kursi yang
+         * dibayar — tetapi memotong diam-diam berarti nama yang hilang baru
+         * ketahuan di hari acara, dan sejak daftarnya bisa datang dari berkas
+         * lembaga berisi puluhan baris, itu berhenti jadi kemungkinan yang
+         * jauh.
+         */
+        $this->assertMatchesRegularExpression('/id="bar-peserta-lebih"[^>]*\shidden/', $isi);
+    }
+
+    /**
      * Menu "gabung ke pesanan" tidak ditawarkan kalau belum ada pesanannya.
      *
      * Admin yang baru memilih jalur lembaga disuguhi menu berisi SATU pilihan

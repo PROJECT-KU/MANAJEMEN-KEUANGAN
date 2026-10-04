@@ -233,7 +233,10 @@
             <p style="margin:16px 0 0;font-size:12px;color:#64748b">Peserta lain:</p>
             <ol class="slip-peserta">
                 @foreach ($peserta as $p)
-                    <li>{{ $p->nama }}</li>
+                    {{-- Nomornya ikut dicetak: slip ini yang dipegang panitia
+                         di meja daftar ulang, dan peserta yang belum datang
+                         dihubungi dari situ juga. --}}
+                    <li>{{ $p->nama }}@if (! empty($p->telp)) · {{ \App\Support\DaftarPeserta::bentukLokal($p->telp) }}@endif</li>
                 @endforeach
             </ol>
         @endif

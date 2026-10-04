@@ -345,6 +345,22 @@ Rincian Pendaftaran | MIS Rumah Scopus
             color: var(--mis-tinta-4);
         }
 
+        /* Nomor peserta: hijau WhatsApp, sebab ia memang tautan ke sana. */
+        .rin-peserta-telp {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 2px;
+            font-size: .74rem;
+            font-weight: 600;
+            color: #15803d;
+            text-decoration: none;
+        }
+
+        .rin-peserta-telp:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 575.98px) {
             .mis-medali.rin-besar {
                 width: 54px;
@@ -403,13 +419,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
     // dari katalog — bukan ditulis lima kali.
     $kolomNama = Pendaftaran::sumber($layanan)['kolom']['nama_orang'];
     $kolomEmail = Pendaftaran::sumber($layanan)['kolom']['email'];
+    $kolomTelp = Pendaftaran::sumber($layanan)['kolom']['telp'];
 
     // Pesanan lembaganya, kalau pendaftaran ini bagian dari satu pesanan.
     $lembaga = \App\PemesananLembaga::untukPendaftaran($layanan, (string) $pendaftaran->getKey());
 
     $pesertaLain = \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())
         ->terurut()
-        ->get(['nama', 'email']);
+        ->get(['nama', 'email', 'telp']);
 
     $diskon = (int) ($pendaftaran->nominal_diskon ?: $pendaftaran->diskon);
 
@@ -1002,10 +1019,12 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 $semuaPeserta = collect([[
                                     'nama' => (string) $pendaftaran->{$kolomNama},
                                     'email' => (string) ($pendaftaran->{$kolomEmail} ?? ''),
+                                    'telp' => (string) ($pendaftaran->{$kolomTelp} ?? ''),
                                     'utama' => true,
                                 ]])->concat($pesertaLain->map(fn ($p) => [
                                     'nama' => (string) $p->nama,
                                     'email' => (string) ($p->email ?? ''),
+                                    'telp' => (string) ($p->telp ?? ''),
                                     'utama' => false,
                                 ]))->all();
 
@@ -1027,6 +1046,18 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             {{ $orangKe['nama'] ?: 'Tanpa nama' }}
                                             @if (! empty($orangKe['email']))
                                                 <span class="rin-peserta-surel">{{ $orangKe['email'] }}</span>
+                                            @endif
+                                            {{-- Nomornya jadi TAUTAN WhatsApp, bukan teks
+                                                 yang harus disalin: daftar ini dibuka justru
+                                                 saat panitia hendak menghubungi orangnya satu
+                                                 per satu. --}}
+                                            @if (! empty($orangKe['telp']))
+                                                <a class="rin-peserta-telp"
+                                                    href="https://wa.me/{{ \App\Support\NomorTelepon::rapikan($orangKe['telp']) }}"
+                                                    target="_blank" rel="noopener">
+                                                    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                                    {{ \App\Support\DaftarPeserta::bentukLokal(\App\Support\NomorTelepon::rapikan($orangKe['telp'])) }}
+                                                </a>
                                             @endif
                                         </span>
                                         @if ($orangKe['utama'])
