@@ -1484,6 +1484,20 @@ class PendaftaranLayananController extends Controller
             'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== ''
                 || $bukti !== '' || $angkatan !== '' || $dari !== '' || $sampai !== ''
                 || $caraBayar !== '' || $menggantung,
+            /*
+             * Berapa saringan LIPAT yang sedang terpasang.
+             *
+             * Kelimanya jarang dipakai dan dilipat di layar supaya yang
+             * tersisa cuma tiga kendali — tetapi saringan aktif yang
+             * tersembunyi membuat daftar terlihat kurang isinya tanpa ada yang
+             * bisa menjelaskan kenapa. Jumlahnya disebut di tuasnya, dan
+             * lipatannya terbuka sendiri kalau lebih dari nol.
+             */
+            'jumlahSaringanLain' => $jumlahLain = count(array_filter(
+                [$bukti, $caraBayar, $dari, $sampai, $angkatan],
+                fn ($n) => $n !== '' && $n !== null
+            )),
+            'adaSaringanLain' => $jumlahLain > 0,
         ];
     }
 
