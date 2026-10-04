@@ -665,10 +665,38 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         .bar-potongan-isi {
+            /*
+             * Jarak dari sakelar di atasnya. Sakelarnya anak langsung panel
+             * ini sedangkan kisinya blok tersendiri, jadi tanpa margin
+             * keduanya benar-benar bersentuhan — terukur 0px.
+             */
+            margin-top: 11px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
             gap: 14px;
             align-items: start;
+        }
+
+        /*
+         * Kartu ringkas melebar saat jumlah orang tidak diminta.
+         *
+         * Di jalur perorangan jumlahnya selalu satu, jadi isiannya
+         * disembunyikan — dan barisnya tinggal menu angkatan (dua jalur) plus
+         * kartu ringkas (satu jalur), menyisakan satu jalur menganggur di
+         * ujung kanan.
+         *
+         * Dipilih lewat :has() alih-alih kelas yang ditempel JS: keadaannya
+         * SUDAH tergambar oleh atribut hidden, dan kelas kedua yang menyatakan
+         * hal sama adalah kesempatan keduanya berselisih.
+         */
+        .bar-isian-kisi:has(> #bar-bungkus-jumlah[hidden]) > #bar-sekilas {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-isian-kisi:has(> #bar-bungkus-jumlah[hidden]) > #bar-sekilas {
+                grid-column: 1 / -1;
+            }
         }
 
         /*
