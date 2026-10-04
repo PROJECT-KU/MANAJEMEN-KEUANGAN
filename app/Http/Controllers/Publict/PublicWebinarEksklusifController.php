@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Publict;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
 use App\Services\Doku;
+use App\Services\Gambar;
+use App\Support\AlamatGambar;
 use App\Support\NomorTelepon;
 use App\User;
 use App\WebinarEksklusifPendaftaran;
@@ -14,6 +16,7 @@ use App\Mail\WebinarEksklusifPendaftaranMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Halaman publik Webinar Eksklusif: borang pendaftaran dan pembayarannya.
@@ -26,6 +29,16 @@ use Illuminate\Support\Facades\Mail;
 class PublicWebinarEksklusifController extends Controller
 {
     private const KODE = 'webinar_eksklusif';
+
+    /*
+     * Batas ukuran bukti transfer, dalam KB.
+     *
+     * 8 MB dipilih dari berkasnya, bukan ditebak: tangkapan layar m-banking
+     * di ponsel masa kini 200-600 KB, sementara FOTO layar memakai kamera
+     * 12 MP tembus 4 MB dan HEIC iPhone sekitar 2 MB. Dipatok 2 MB seperti
+     * layar lama, separuh peserta akan ditolak di percobaan pertama.
+     */
+    private const BUKTI_MAKS_KB = 8192;
 
     public function __construct(private Doku $doku)
     {
@@ -692,9 +705,21 @@ class PublicWebinarEksklusifController extends Controller
             return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
         }
 
+        /*
+         * Alamat buktinya dirakit lewat AlamatGambar, bukan asset() langsung:
+         * nilai kolomnya bisa jalur di cakram unggahan (unggahan baru) ATAU
+         * nama berkas peninggalan jalur lama, dan hanya AlamatGambar yang tahu
+         * keduanya. null kalau kolomnya terisi tetapi berkasnya sudah tidak
+         * ada — peserta lebih baik melihat borang unggah kosong daripada
+         * tautan yang membuka halaman galat.
+         */
+        $buktiUrl = AlamatGambar::url($pendaftaran->gambar);
+
         return view('public.webinar_eksklusif.status', [
             'pendaftaran' => $pendaftaran,
             'sesi' => $pendaftaran->angkatan,
+            'buktiUrl' => $buktiUrl,
+            'buktiAda' => $buktiUrl !== null,
         ]);
     }
 
@@ -857,6 +882,103 @@ class PublicWebinarEksklusifController extends Controller
         return back()->with('sukses',
             'Bukti pendaftaran dikirim ulang ke ' . $this->samarkanEmail($pendaftaran->email)
             . '. Kalau belum masuk dalam beberapa menit, periksa folder spam.');
+    }
+
+
+    /**
+     * Peserta mengunggah bukti transfernya sendiri dari halaman status.
+     *
+     * Ada selama gerbang pembayaran DOKU belum terverifikasi. Sebelum ini
+     * satu-satunya jalan mengirim bukti adalah WhatsApp panitia, dan bukti
+     * yang menumpuk di satu nomor pribadi tidak pernah sampai ke baris
+     * pendaftarannya — yang memeriksa harus mencocokkan tangkapan layar
+     * dengan daftar, satu per satu.
+     *
+     * Berkasnya SELALU keluar sebagai WebP lewat App\Services\Gambar:
+     * aslinya — JPG, PNG, atau HEIC dari iPhone — dibongkar, diperkecil, lalu
+     * dihapus. Yang tersimpan di cakram hanya WebP-nya.
+     */
+    public function unggahBukti(Request $request, string $id)
+    {
+        $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
+
+        if ($pendaftaran === null) {
+            return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
+        }
+
+        /*
+         * Diperiksa DI SINI, bukan cuma disembunyikan di tampilan.
+         *
+         * Borangnya memang tidak digambar untuk pendaftaran yang sudah lunas,
+         * batal, atau kedaluwarsa — tetapi alamatnya tetap bisa dikirimi
+         * permintaan oleh siapa pun yang pernah membuka halamannya, dan
+         * menerima bukti untuk kursi yang sudah dilepas berarti menjanjikan
+         * sesuatu yang tidak ada.
+         */
+        if ($pendaftaran->lunas) {
+            return back()->with('error', 'Pembayaran Anda sudah lunas; buktinya tidak perlu lagi.');
+        }
+
+        if ($pendaftaran->status === 'cancel') {
+            return back()->with('error', 'Pendaftaran ini sudah dibatalkan.');
+        }
+
+        if ($pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired') {
+            return back()->with('error',
+                'Batas waktunya sudah lewat dan kursinya dilepas. Hubungi panitia kalau masih ingin ikut.');
+        }
+
+        /*
+         * HEIC/HEIF ikut diterima — itu format BAWAAN kamera iPhone, dan
+         * peserta yang memotret bukti transfernya di situ tidak tahu berkasnya
+         * bukan JPG. Ditolak di sini, ia hanya melihat "format tidak
+         * didukung" tanpa tahu harus berbuat apa.
+         *
+         * Diperiksa lewat AKHIRAN namanya, bukan jenis MIME-nya: finfo di
+         * sebagian peladen memulangkan application/octet-stream untuk HEIC,
+         * dan aturan mimes: akan menolak berkas yang sebetulnya sah. Isinya
+         * sendiri tetap diperiksa — Gambar::simpan() memulangkan null kalau
+         * yang diunggah ternyata bukan gambar yang bisa dibaca.
+         */
+        $request->validate([
+            'bukti' => ['required', 'file', 'max:' . self::BUKTI_MAKS_KB,
+                'extensions:jpg,jpeg,png,heic,heif'],
+        ], [
+            'bukti.required' => 'Pilih dulu berkas bukti transfernya.',
+            'bukti.extensions' => 'Formatnya harus JPG, PNG, atau HEIC.',
+            'bukti.max' => 'Berkasnya terlalu besar; paling besar '
+                . (self::BUKTI_MAKS_KB / 1024) . ' MB.',
+        ]);
+
+        $lama = (string) $pendaftaran->gambar;
+
+        $jalur = (new Gambar())->simpan($request->file('bukti'), 'bukti/' . self::KODE);
+
+        if ($jalur === null) {
+            /*
+             * Yang paling mungkin: HEIC di peladen tanpa alat pembongkarnya.
+             * Pesannya menyebut jalan keluar yang bisa dikerjakan peserta
+             * sendiri, bukan "terjadi kesalahan".
+             */
+            return back()->with('error',
+                'Berkasnya tidak bisa kami baca sebagai gambar. Kalau itu foto dari iPhone,'
+                . ' coba kirim ulang sebagai JPG.');
+        }
+
+        $pendaftaran->forceFill(['gambar' => $jalur])->save();
+
+        /*
+         * Bukti yang DIGANTI ikut dibuang dari cakram. Tanpa ini tiap
+         * unggahan ulang meninggalkan satu WebP yatim yang tidak ditunjuk
+         * baris mana pun dan tidak pernah terhapus.
+         */
+        if ($lama !== '' && $lama !== $jalur && Storage::disk(Gambar::CAKRAM)->exists($lama)) {
+            Storage::disk(Gambar::CAKRAM)->delete($lama);
+        }
+
+        return back()->with('sukses',
+            'Bukti transfer Anda sudah kami terima. Panitia memeriksanya pada jam kerja;'
+            . ' statusnya berubah di halaman ini kalau sudah dicocokkan.');
     }
 
     /**
