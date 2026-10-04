@@ -701,18 +701,28 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
-         * Jarak antar kartu dipasang di SETIAP kartu, lalu dibatalkan pada
-         * yang pertama — bukan lewat `+` saja: di tab Ringkasan kartunya
-         * didahului nota, dan `.rin-bagian + .rin-bagian` tidak mengenali
-         * tetangga yang bukan sesama bagian. Terukur sebelumnya, celah nota
-         * ke bagian di bawahnya 0px.
+         * Jarak antar kartu lewat pemilih SAUDARA UMUM (~), bukan dipasang di
+         * setiap kartu lalu dibatalkan pada yang pertama.
+         *
+         * Versi `:first-child` TIDAK PERNAH mengenai kartu pertama di dalam
+         * borang: anak pertama <form> adalah dua <input type=hidden> yang
+         * dipasang direktif token CSRF dan direktif metode, jadi kartunya
+         * bukan anak pertama. Margin 14px
+         * itu lolos, lalu RUNTUH menembus <form> yang tidak berbantalan dan
+         * mendorong seluruh isinya ke bawah. Terukur: jarak badan tab ke
+         * kartu pertama 31px di tab Identitas melawan 17px di tab Ringkasan —
+         * beda 14px, persis satu margin.
+         *
+         * Diamnya sempurna: tidak ada galat, dan aturannya TERLIHAT benar
+         * saat dibaca. Sama persis dengan jebakan `:first-of-type` di kartu
+         * identitas kiri — pemilih berdasar posisi dikalahkan saudara yang
+         * tidak terlihat.
+         *
+         * `~` dipilih, bukan `+`: ia tetap benar walau ada nota atau apa pun
+         * menyelip di antara dua kartu.
          */
-        .rin-bagian {
+        .rin-bagian ~ .rin-bagian {
             margin-top: 14px;
-        }
-
-        .rin-bagian:first-child {
-            margin-top: 0;
         }
 
         .rin-bagian-judul {
