@@ -31,6 +31,22 @@
      */
     $tampil = $uang ? number_format((int) $nilai, 0, ',', '.') : $nilai;
 
+    /*
+     * Peran isian ini di dalam penjumlahan Total bayar.
+     *
+     * Rumusnya mengikuti BuatPendaftaran: total = subtotal - potongan + kode
+     * unik, dan PPN menambah. Yang ditulis di sini cuma TANDA-nya; subtotalnya
+     * sendiri tidak pernah ditebak di muka — skrip di layar rincian
+     * menurunkannya dari selisih nilai yang tersimpan, supaya membuka halaman
+     * tidak mengubah angka apa pun.
+     */
+    $peranHitung = [
+        'ppn' => 'tambah',
+        'kode_unik' => 'tambah',
+        'nominal_diskon' => 'kurang',
+        'total_pembayaran' => 'hasil',
+    ][$kolom] ?? null;
+
     $jenisKotak = match ($jenis) {
         'tanggal' => 'date',
         'waktu' => 'time',
@@ -140,8 +156,24 @@
                 <span class="rin-uang-awalan" aria-hidden="true">Rp</span>
                 <input type="{{ $jenisKotak }}" class="form-control-modern rin-uang-isian"
                     id="{{ $id }}" name="{{ $kolom }}" value="{{ $tampil }}"
-                    inputmode="numeric" data-mis-rupiah>
+                    inputmode="numeric" data-mis-rupiah
+                    @if ($peranHitung) data-mis-hitung="{{ $peranHitung }}" @endif>
             </span>
+            @if ($peranHitung === 'hasil')
+                {{-- SATU-SATUNYA nominal yang diberi kalimat bantuan.
+
+                     Angka yang berubah sendiri tanpa keterangan membuat orang
+                     ragu apakah ia sempat salah ketik; kalimat ini yang
+                     memberitahunya bahwa itu memang hitungan, dan tautannya
+                     jalan pulang kalau totalnya sempat diketik tangan. --}}
+                <p class="mis-bantuan rin-hitung-nota" data-mis-hitung-nota>
+                    <span data-mis-hitung-nota-otomatis>Dihitung sendiri dari PPN, kode unik, dan potongan di atas.</span>
+                    <span data-mis-hitung-nota-tangan hidden>Diisi tangan, tidak ikut berubah lagi.
+                        <button type="button" class="rin-hitung-ulang" data-mis-hitung-ulang>Hitung sendiri lagi</button>
+                    </span>
+                </p>
+            @endif
+
             {{-- Tidak ada kalimat bantuan di sini.
 
                  Dulu tertulis "Dalam rupiah, tanpa titik" — dan itu memang

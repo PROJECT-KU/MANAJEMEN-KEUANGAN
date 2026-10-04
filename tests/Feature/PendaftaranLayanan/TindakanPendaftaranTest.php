@@ -4321,4 +4321,77 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertStringNotContainsString('Dalam rupiah, tanpa titik.', $isi,
             'Kalimat bantuan lama bertentangan dengan tampilannya sekarang.');
     }
+
+    #[Test]
+    public function total_bayar_berubah_sendiri_saat_nominalnya_disunting(): void
+    {
+        /*
+         * Keempat kotak di kartu Nominal dulu berdiri sendiri: panitia yang
+         * memberi potongan Rp 500.000 harus menghitung sendiri totalnya lalu
+         * MENGETIK ULANG angka delapan digit. Satu digit meleset di situ tidak
+         * ditolak siapa pun — peladen menyimpan total apa adanya.
+         *
+         * Yang dijaga PENANDANYA, sebab di situlah skripnya berpegang: tanpa
+         * data-mis-hitung, hitungannya mati tanpa satu pun galat terbit.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $peran = [
+            'ppn' => 'tambah',
+            'kode_unik' => 'tambah',
+            'nominal_diskon' => 'kurang',
+            'total_pembayaran' => 'hasil',
+        ];
+
+        foreach ($peran as $kolom => $harusnya) {
+            $ada = preg_match('/<input[^>]*name="' . $kolom . '"[^>]*>/', $isi, $cocok);
+
+            $this->assertSame(1, $ada, "Kotak {$kolom} tidak tergambar sama sekali.");
+            $this->assertStringContainsString('data-mis-hitung="' . $harusnya . '"', $cocok[0],
+                "Kotak {$kolom} kehilangan penanda hitungnya; Total bayar akan diam saja saat disunting.");
+        }
+
+        /*
+         * Satu hasil saja per layar — dua kotak berperan 'hasil' membuat
+         * keduanya dihitung dari dasar yang sama dan salah satunya pasti salah.
+         *
+         * Dihitung HANYA di dalam tag <input>. Percobaan pertama menghitung
+         * seluruh halaman dan memulangkan dua pada markah yang benar: yang
+         * kedua adalah pemilih di dalam skripnya sendiri.
+         */
+        $this->assertSame(1, preg_match_all('/<input[^>]*data-mis-hitung="hasil"/', $isi),
+            'Kotak berperan hasil harus tepat satu.');
+
+        // Keterangannya ikut dijaga: angka yang berubah sendiri tanpa
+        // penjelasan membuat orang ragu apakah ia sempat salah ketik.
+        $this->assertStringContainsString('data-mis-hitung-nota', $isi);
+        $this->assertStringContainsString('Dihitung sendiri dari PPN, kode unik, dan potongan di atas.', $isi);
+        $this->assertStringContainsString('data-mis-hitung-ulang', $isi,
+            'Tanpa jalan pulang, total yang terlanjur diketik tangan tidak bisa dihitung ulang.');
+    }
+
+    #[Test]
+    public function tanda_hitung_di_layar_sejalan_dengan_rumus_peladen(): void
+    {
+        /*
+         * Tanda tambah/kurang di layar DISALIN dari BuatPendaftaran. Kalau
+         * rumus peladennya berubah — misalnya kode unik berhenti menambah —
+         * layar akan menampilkan total yang tidak pernah jadi angka
+         * tersimpan, dan tidak ada uji perilaku yang menangkapnya karena
+         * keduanya benar sendiri-sendiri.
+         *
+         * Maka dibandingkan di tingkat SUMBER, bukan hasil.
+         */
+        $sumber = file_get_contents(base_path('app/Actions/Pendaftaran/BuatPendaftaran.php'));
+
+        $this->assertMatchesRegularExpression('/\$total\s*=\s*\$subtotal\s*-\s*\$potongan\s*;/', $sumber,
+            'Potongan tidak lagi mengurangi subtotal; tanda "kurang" di layar jadi salah.');
+        $this->assertMatchesRegularExpression('/\$total\s*\+=\s*\$kodeUnik\s*;/', $sumber,
+            'Kode unik tidak lagi menambah total; tanda "tambah" di layar jadi salah.');
+    }
 }
