@@ -384,9 +384,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
          * sesudahnya, ia terbaca seperti unsur yang belum selesai digarap.
          */
         .bar-centang {
-            /* Setinggi isian di sebelahnya, bukan setinggi isinya sendiri:
-               kartu yang lebih pendek meninggalkan celah di bawahnya. */
-            height: 100%;
             display: grid;
             grid-template-columns: auto minmax(0, 1fr) auto;
             align-items: center;
@@ -399,6 +396,19 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             cursor: pointer;
             transition: border-color .18s ease, background .18s ease,
                 box-shadow .18s ease;
+        }
+
+        /*
+         * Setinggi isian di sebelahnya HANYA di dalam sel kisi.
+         *
+         * Semula berlaku untuk setiap .bar-centang. Sakelar yang berdiri
+         * langsung di dalam panel potongan lalu ikut meregang: terukur 175px
+         * untuk isi yang tingginya sekitar 60px, dan panelnya terdorong
+         * keluar kartu langkahnya — kartu alumni tergambar menimpa langkah
+         * berikutnya.
+         */
+        .mis-isian > .bar-centang {
+            height: 100%;
         }
 
         .bar-centang:hover {
@@ -1079,10 +1089,63 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             <div class="bar-kerja">
             <div class="bar-utama">
 
-            {{-- ------------------------------------ langkah 1: layanan --}}
+            {{-- ------------------------------- langkah 1: untuk siapa --}}
+            {{-- Pertanyaan ini DI DEPAN, dan itu perubahan pokoknya.
+
+                 Dulu "pesanan lembaga?" ada di langkah TERAKHIR, padahal
+                 jawabannya menentukan isi langkah-langkah sebelumnya: jumlah
+                 orang, nama peserta rombongan, potongan alumni, dan seluruh
+                 identitas lembaga. Admin mengisi semuanya dulu, baru diberi
+                 tahu bahwa sebagian tadi tidak relevan.
+
+                 Dengan ditanya lebih dulu, tiap jalur hanya menampilkan apa
+                 yang memang dibutuhkannya — terukur: 29 nama isian di borang
+                 ini, dan pendaftar perorangan sekarang menghadapi 5. --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
                     <span class="bar-nomor" aria-hidden="true">1</span>
+                    <div>
+                        <p class="bar-langkah-judul">Untuk siapa?</p>
+                        <p class="bar-langkah-sub">Menentukan isian berikutnya; pilih dulu yang ini.</p>
+                    </div>
+                </div>
+
+                <div class="bar-pilihan bar-pilihan-bayar">
+                    <label>
+                        <input type="radio" name="jenis" value="perorangan"
+                            @checked(old('jenis', 'perorangan') === 'perorangan') required>
+                        <span class="bar-kartu">
+                            <span class="mis-medali mis-biru" aria-hidden="true">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <span style="min-width: 0;">
+                                <span class="bar-kartu-nama">Satu orang</span>
+                                <span class="bar-kartu-ket">Mendaftar untuk dirinya sendiri.</span>
+                            </span>
+                            <span class="bar-kartu-centang" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+                        </span>
+                    </label>
+                    <label>
+                        <input type="radio" name="jenis" value="lembaga"
+                            @checked(old('jenis') === 'lembaga')>
+                        <span class="bar-kartu">
+                            <span class="mis-medali mis-ungu" aria-hidden="true">
+                                <i class="fas fa-building"></i>
+                            </span>
+                            <span style="min-width: 0;">
+                                <span class="bar-kartu-nama">Lembaga / rombongan</span>
+                                <span class="bar-kartu-ket">Satu penanggung jawab, beberapa peserta.</span>
+                            </span>
+                            <span class="bar-kartu-centang" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            {{-- ------------------------------------ langkah 2: layanan --}}
+            <div class="mis-kartu bar-langkah">
+                <div class="bar-langkah-kepala">
+                    <span class="bar-nomor" aria-hidden="true">2</span>
                     <div>
                         <p class="bar-langkah-judul">Layanan apa?</p>
                         <p class="bar-langkah-sub">Pilih satu; isian berikutnya menyesuaikan sendiri.</p>
@@ -1138,7 +1201,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                  tidak — keduanya sama-sama "berapa yang dibayar". --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
-                    <span class="bar-nomor" aria-hidden="true">2</span>
+                    <span class="bar-nomor" aria-hidden="true">3</span>
                     <div>
                         <p class="bar-langkah-judul">Berapa yang dibayar?</p>
                         <p class="bar-langkah-sub" id="bar-sub-biaya">Pilih layanannya dulu.</p>
@@ -1278,6 +1341,29 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     <p class="bar-potongan-judul">
                         <i class="fas fa-tags" aria-hidden="true"></i> Potongan <span>opsional</span>
                     </p>
+
+                    {{-- Isian potongannya DILIPAT di balik sakelar.
+
+                         Terukur: dari 29 nama isian di borang ini, sebagian
+                         besar tidak pernah diisi pada pendaftaran biasa.
+                         Isian yang jarang dipakai tetapi selalu terlihat
+                         menambah beban baca di setiap pendaftaran, bukan
+                         hanya di yang membutuhkannya. --}}
+                    <label class="bar-centang" for="bar-pakai-potongan" id="bar-sakelar-potongan">
+                        <input type="checkbox" id="bar-pakai-potongan">
+                        <span class="bar-centang-tanda" aria-hidden="true">
+                            <i class="fas fa-percent"></i>
+                        </span>
+                        <span>
+                            <span class="bar-centang-judul">Beri potongan khusus</span>
+                            <span class="bar-centang-ket">
+                                Untuk peserta yang disponsori, harga mitra, atau kesepakatan di tempat.
+                            </span>
+                        </span>
+                        <span class="bar-centang-pilih" aria-hidden="true">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </label>
                     <div class="bar-potongan-isi">
 
                     <div class="mis-isian" id="bar-bungkus-alumni" hidden>
@@ -1350,7 +1436,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                  7 hari. --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
-                    <span class="bar-nomor" aria-hidden="true">3</span>
+                    <span class="bar-nomor" aria-hidden="true">4</span>
                     <div>
                         <p class="bar-langkah-judul">Bagaimana bayarnya?</p>
                         <p class="bar-langkah-sub">Pilih yang sesuai; sisanya menyesuaikan sendiri.</p>
@@ -1452,7 +1538,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             {{-- ------------------------------------- langkah 4: orangnya --}}
             <div class="mis-kartu bar-langkah">
                 <div class="bar-langkah-kepala">
-                    <span class="bar-nomor" aria-hidden="true">4</span>
+                    <span class="bar-nomor" aria-hidden="true">5</span>
                     <div>
                         <p class="bar-langkah-judul">Siapa yang mendaftar?</p>
                         <p class="bar-langkah-sub">Empat isian; nomor, status, dan kode uniknya diisi sistem.</p>
@@ -1500,7 +1586,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         @enderror
                     </div>
 
-                    <div class="mis-isian">
+                    <div class="mis-isian" id="bar-bungkus-affiliasi">
                         <label class="mis-label" for="bar-affiliasi">Afiliasi / instansi</label>
                         <input type="text" class="form-control-modern @error('affiliasi') is-invalid @enderror" id="bar-affiliasi" @error('affiliasi') aria-invalid="true" @enderror name="affiliasi"
                             value="{{ old('affiliasi') }}" maxlength="255" autocomplete="off"
@@ -1542,6 +1628,24 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </p>
                     </div>
 
+                    <div class="mis-isian bar-lebar">
+                        <label class="bar-centang" for="bar-pakai-catatan">
+                            <input type="checkbox" id="bar-pakai-catatan">
+                            <span class="bar-centang-tanda" aria-hidden="true">
+                                <i class="fas fa-sticky-note"></i>
+                            </span>
+                            <span>
+                                <span class="bar-centang-judul">Tambah catatan panitia</span>
+                                <span class="bar-centang-ket">
+                                    Keterangan untuk rekan panitia; tidak dikirim ke pendaftarnya.
+                                </span>
+                            </span>
+                            <span class="bar-centang-pilih" aria-hidden="true">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                        </label>
+                    </div>
+
                     <div class="mis-isian bar-lebar" id="bar-bungkus-kabari">
                         <span class="mis-label">Kabar ke pendaftar</span>
                         <label class="bar-centang" for="bar-kabari">
@@ -1563,7 +1667,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </label>
                     </div>
 
-                    <div class="mis-isian bar-lebar">
+                    <div class="mis-isian bar-lebar" id="bar-bungkus-catatan" hidden>
                         <label class="mis-label" for="bar-note">Catatan panitia</label>
                         <textarea class="form-control-modern @error('note') is-invalid @enderror" id="bar-note" @error('note') aria-invalid="true" @enderror name="note" rows="2"
                             maxlength="1000" placeholder="boleh dikosongkan">{{ old('note') }}</textarea>
@@ -1574,26 +1678,20 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                             </p>
                         @enderror
                     </div>
-                </div>
-            </div>
 
-            {{-- ------------------------------- langkah 5: pesanan lembaga --}}
-            {{-- Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan
-                 lebih — rombongan terbesar yang pernah ada 37 orang. Pesanan
-                 sebesar itu TERPAKSA dipecah ke beberapa angkatan, dan tanpa
-                 pengikat ini hasil pecahannya tidak saling tahu bahwa mereka
-                 satu pesanan: merekap dan menagihnya berarti mengumpulkan
-                 barisnya satu per satu dari ingatan. --}}
-            <div class="mis-kartu bar-langkah">
-                <div class="bar-langkah-kepala">
-                    <span class="bar-nomor" aria-hidden="true">5</span>
-                    <div>
-                        <p class="bar-langkah-judul">Pesanan lembaga?</p>
-                        <p class="bar-langkah-sub">Boleh dilewati kalau yang mendaftar perorangan.</p>
-                    </div>
-                </div>
+                    {{-- Blok lembaga, hanya untuk pesanan lembaga.
 
-                <div class="bar-isian-kisi">
+                         Dulu kartu tersendiri di langkah terakhir. Dilebur ke
+                         sini sebab untuk pesanan lembaga, lembaganya MEMANG
+                         bagian dari "siapa yang mendaftar" — dan satu langkah
+                         lebih sedikit berarti satu kartu lebih sedikit yang
+                         harus dibaca. --}}
+                    <div class="bar-penuh" id="bar-blok-lembaga" hidden>
+                        <p class="bar-potongan-judul" style="margin-top: 4px;">
+                            <i class="fas fa-building" aria-hidden="true"></i> Lembaganya
+                        </p>
+                        <div class="bar-isian-kisi">
+
                     <div class="mis-isian bar-lebar">
                         <label class="mis-label" for="bar-pemesanan">Bagian dari pesanan</label>
                         <select class="form-control-modern" id="bar-pemesanan" name="pemesanan_id">
@@ -1635,31 +1733,69 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                          tempat sebelum ini. --}}
                     <div class="mis-isian bar-penuh" id="bar-bungkus-lembaga" hidden>
                         <div class="bar-isian-kisi">
-                            <div class="mis-isian bar-lebar">
+                            <div class="mis-isian bar-penuh">
+                                <label class="bar-centang" for="bar-perlu-faktur">
+                                    <input type="checkbox" id="bar-perlu-faktur">
+                                    <span class="bar-centang-tanda" aria-hidden="true">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </span>
+                                    <span>
+                                        <span class="bar-centang-judul">Lembaganya minta faktur resmi</span>
+                                        <span class="bar-centang-ket">
+                                            Alamat, NPWP, dan nomor PO — hanya perlu kalau fakturnya
+                                            dipakai untuk pencairan.
+                                        </span>
+                                    </span>
+                                    <span class="bar-centang-pilih" aria-hidden="true">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="mis-isian bar-lebar bar-faktur" hidden>
                                 <label class="mis-label" for="bar-lembaga-alamat">Alamat lembaga</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-alamat"
                                     name="lembaga_alamat" value="{{ old('lembaga_alamat') }}" maxlength="1000"
                                     placeholder="untuk dicantumkan di faktur">
                             </div>
-                            <div class="mis-isian">
+                            <div class="mis-isian bar-faktur" hidden>
                                 <label class="mis-label" for="bar-lembaga-npwp">NPWP</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-npwp"
                                     name="lembaga_npwp" value="{{ old('lembaga_npwp') }}" maxlength="40"
                                     placeholder="boleh dikosongkan">
                             </div>
-                            <div class="mis-isian">
+                            <div class="mis-isian bar-faktur" hidden>
                                 <label class="mis-label" for="bar-lembaga-po">Nomor PO</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-po"
                                     name="lembaga_po" value="{{ old('lembaga_po') }}" maxlength="60"
                                     placeholder="boleh dikosongkan">
                             </div>
-                            <div class="mis-isian">
+                            <div class="mis-isian bar-penuh">
+                                <label class="bar-centang" for="bar-pic-beda">
+                                    <input type="checkbox" id="bar-pic-beda">
+                                    <span class="bar-centang-tanda" aria-hidden="true">
+                                        <i class="fas fa-user-tie"></i>
+                                    </span>
+                                    <span>
+                                        <span class="bar-centang-judul">Penanggung jawabnya orang lain</span>
+                                        <span class="bar-centang-ket">
+                                            Biarkan kosong kalau yang mengurus administrasi sama dengan
+                                            pendaftarnya.
+                                        </span>
+                                    </span>
+                                    <span class="bar-centang-pilih" aria-hidden="true">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="mis-isian bar-pic" hidden>
                                 <label class="mis-label" for="bar-lembaga-pic">PIC lembaga</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-pic"
                                     name="lembaga_pic" value="{{ old('lembaga_pic') }}" maxlength="255"
                                     placeholder="kosong = sama dengan pendaftarnya">
                             </div>
-                            <div class="mis-isian">
+                            <div class="mis-isian bar-pic" hidden>
                                 <label class="mis-label" for="bar-lembaga-pic-email">Email PIC</label>
                                 <input type="email" class="form-control-modern @error('lembaga_pic_email') is-invalid @enderror"
                                     id="bar-lembaga-pic-email" name="lembaga_pic_email"
@@ -1672,7 +1808,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                     </p>
                                 @enderror
                             </div>
-                            <div class="mis-isian">
+                            <div class="mis-isian bar-pic" hidden>
                                 <label class="mis-label" for="bar-lembaga-pic-telp">Nomor PIC</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-pic-telp"
                                     name="lembaga_pic_telp" value="{{ old('lembaga_pic_telp') }}" maxlength="40"
@@ -1680,8 +1816,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                             </div>
                         </div>
                     </div>
-                </div>
-
+                                        </div>
                 <p class="bar-nota">
                     <i class="fas fa-info-circle" aria-hidden="true"></i>
                     <span>
@@ -1690,6 +1825,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         berbeda — pesanan ini yang mengikatnya jadi satu faktur.
                     </span>
                 </p>
+                                </div>
+                </div>
             </div>
 
             </div>{{-- /bar-utama --}}
@@ -1809,6 +1946,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var centangAlumni = el('bar-alumni');
         var bungkusAlumni = el('bar-bungkus-alumni');
         var ketAlumni = el('bar-alumni-ket');
+        var bungkusAffiliasi = el('bar-bungkus-affiliasi');
+        var bungkusCatatan = el('bar-bungkus-catatan');
+        var blokLembaga = el('bar-blok-lembaga');
+        var sakelarPotongan = el('bar-sakelar-potongan');
+        var pakaiPotongan = el('bar-pakai-potongan');
+        var pakaiCatatan = el('bar-pakai-catatan');
+        var perluFaktur = el('bar-perlu-faktur');
+        var picBeda = el('bar-pic-beda');
+        var isianAffiliasi = el('bar-affiliasi');
         var cariAngkatan = el('bar-cari-angkatan');
         var bungkusPeserta = el('bar-bungkus-peserta');
         var sisaPeserta = el('bar-peserta-sisa');
@@ -2175,7 +2321,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var tawarkanAlumni = function (pilih) {
             var persen = persenAlumni(pilih);
 
-            tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0);
+            tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0 && !lembagaDipakai());
 
             if (persen > 0) {
                 ketAlumni.textContent = 'Potongan ' + persen
@@ -2330,7 +2476,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
 
             tampil(bungkusAngkatan, pilih.berangkatan);
-            tampil(bungkusJumlah, pilih.berangkatan);
+
+            /*
+             * Syaratnya menyebut jenisnya juga, bukan hanya berangkatan.
+             *
+             * segarkanJenis() sempat menyembunyikannya, lalu fungsi ini
+             * menampilkannya lagi — dua fungsi mengatur satu unsur, dan yang
+             * terakhir menang. Terukur: isian "jumlah orang" tetap muncul di
+             * jalur perorangan walau selalu bernilai satu.
+             */
+            tampil(bungkusJumlah, pilih.berangkatan && lembagaDipakai());
             tampil(bungkusTotal, !pilih.berangkatan);
 
             // Layanan tanpa angkatan tidak punya apa pun untuk diringkas;
@@ -2342,8 +2497,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             if (polaNomor && pilih.pola) {
                 polaNomor.textContent = pilih.pola;
             }
-            tampil(bungkusPotongan, pilih.bisaPotongan);
-            tampil(bungkusKode, pilih.bisaPotongan);
+            /*
+             * Sakelarnya ikut jadi syarat; tanpa itu fungsi ini membuka lagi
+             * isian yang baru saja dilipat, dan sakelarnya tampak tidak
+             * bekerja.
+             */
+            tampil(bungkusPotongan, pilih.bisaPotongan && pakaiPotongan.checked);
+            tampil(bungkusKode, pilih.bisaPotongan && pakaiPotongan.checked);
 
 
             menuAngkatan.required = pilih.berangkatan;
@@ -2383,6 +2543,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
              * panelnya: ia terbaca seperti isian yang gagal dimuat.
              */
             tampil(panelPotongan, pilih.bisaPotongan || !bungkusAlumni.hidden);
+            tampil(sakelarPotongan, pilih.bisaPotongan);
 
             batasiJumlah();
             segarkanPeserta();
@@ -2487,7 +2648,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var segarkanPeserta = function () {
             var pilih = layananTerpilih();
             var jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
-            var perlu = (pilih && pilih.berangkatan) ? jml - 1 : 0;
+            var perlu = (lembagaDipakai() && pilih && pilih.berangkatan) ? jml - 1 : 0;
 
             tampil(bungkusPeserta, perlu > 0);
 
@@ -2497,6 +2658,62 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         };
 
         isianJumlah.addEventListener('input', segarkanPeserta);
+
+        /*
+         * Isian yang dilipat: nilainya DIKOSONGKAN saat sakelarnya dimatikan.
+         *
+         * Isian tersembunyi tetap terkirim, jadi angka potongan yang sempat
+         * diketik lalu dilipat akan tetap memotong tagihan — tanpa ada yang
+         * terlihat di layar.
+         */
+        var lipat = function (sakelar, pemilih, sesudah) {
+            if (!sakelar) {
+                return;
+            }
+
+            var kerjakan = function () {
+                var buka = sakelar.checked;
+
+                document.querySelectorAll(pemilih).forEach(function (n) {
+                    tampil(n, buka);
+
+                    if (!buka) {
+                        n.querySelectorAll('input, textarea').forEach(function (i) { i.value = ''; });
+                    }
+                });
+
+                if (sesudah) {
+                    sesudah();
+                }
+            };
+
+            sakelar.addEventListener('change', kerjakan);
+            kerjakan();
+        };
+
+        lipat(pakaiPotongan, '#bar-bungkus-potongan, #bar-bungkus-kode', function () {
+            var pilih = layananTerpilih();
+
+            if (pilih) {
+                tampil(bungkusPotongan, pilih.bisaPotongan && pakaiPotongan.checked);
+                tampil(bungkusKode, pilih.bisaPotongan && pakaiPotongan.checked);
+            }
+
+            hitung();
+        });
+        lipat(pakaiCatatan, '#bar-bungkus-catatan');
+        lipat(perluFaktur, '.bar-faktur');
+        lipat(picBeda, '.bar-pic');
+
+        borang.addEventListener('change', function (e) {
+            if (e.target.name === 'jenis') {
+                segarkanJenis();
+                segarkan();
+                segarkanPeserta();
+                batasiJumlah();
+                ingatkanKuota();
+            }
+        });
 
         /*
          * Isian lembaga hanya tampil saat memang dibutuhkan.
@@ -2512,9 +2729,55 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var ketPemesanan = el('bar-pemesanan-ket');
         var notaKuota = el('bar-nota-kuota');
 
+        /** 'perorangan' atau 'lembaga'; penentu seluruh isian berikutnya. */
+        var jenisTerpilih = function () {
+            var r = borang.querySelector('input[name="jenis"]:checked');
+
+            return r ? r.value : 'perorangan';
+        };
+
         /** Benar kalau pendaftaran ini bagian dari pesanan lembaga. */
         var lembagaDipakai = function () {
-            return menuPemesanan.value !== '' || namaLembaga.value.trim() !== '';
+            return jenisTerpilih() === 'lembaga';
+        };
+
+        /*
+         * Menyesuaikan SELURUH borang dengan jawaban "untuk siapa".
+         *
+         * Dulu pertanyaan ini ada di langkah terakhir, jadi admin mengisi
+         * jumlah orang, nama peserta rombongan, dan afiliasi lebih dulu — baru
+         * tahu belakangan bahwa sebagiannya tidak relevan. Sekarang jalur yang
+         * tidak dipakai tidak pernah muncul.
+         */
+        var segarkanJenis = function () {
+            var lembaga = lembagaDipakai();
+            var pilih = layananTerpilih();
+
+            tampil(blokLembaga, lembaga);
+
+            // Satu orang selalu berjumlah satu; isiannya tidak perlu ada.
+            tampil(bungkusJumlah, lembaga && !!pilih && pilih.berangkatan);
+
+            if (!lembaga) {
+                isianJumlah.value = 1;
+            }
+
+            /*
+             * Afiliasi disembunyikan untuk pesanan lembaga: nama lembaganya
+             * SUDAH afiliasinya, dan mengetiknya dua kali membuat keduanya
+             * bisa berselisih.
+             */
+            tampil(bungkusAffiliasi, !lembaga);
+
+            /*
+             * Potongan alumni milik ORANGNYA, bukan pesanannya — tidak ada
+             * artinya pada pesanan atas nama lembaga.
+             */
+            if (lembaga) {
+                centangAlumni.checked = false;
+            }
+
+            namaLembaga.required = lembaga && menuPemesanan.value === '';
         };
 
         /*
@@ -2664,6 +2927,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             ringkasGalat.focus();
         }
 
+        segarkanJenis();
         segarkan();
         segarkanBayar();
         batasiJumlah();

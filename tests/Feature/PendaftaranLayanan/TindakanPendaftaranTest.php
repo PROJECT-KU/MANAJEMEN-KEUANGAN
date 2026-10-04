@@ -972,6 +972,7 @@ class TindakanPendaftaranTest extends TestCase
             'nama' => 'PIC Lembaga',
             'telp' => '0816-0000-0080',
             'jumlah' => 20,
+            'jenis' => 'lembaga',
             'lembaga_nama' => 'Universitas Uji ' . Str::random(4),
             'lembaga_npwp' => '01.234.567.8-901.000',
             'lembaga_po' => 'PO/2026/0099',
@@ -1126,6 +1127,7 @@ class TindakanPendaftaranTest extends TestCase
             'nama' => 'PIC Lembaga Besar',
             'telp' => '0816-0000-0110',
             'jumlah' => 30,
+            'jenis' => 'lembaga',
             'lembaga_nama' => 'Universitas Besar ' . Str::random(4),
         ])->assertRedirect();
 
@@ -1208,6 +1210,83 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertSame(-10, (int) $angkatan->refresh()->sisa_kuota, '20 - 25 - 5 = -10.');
         $this->assertSame(2, $lembaga->baris()->count());
+    }
+
+    #[Test]
+    public function jalur_lembaga_tanpa_nama_ditolak_dengan_keterangan(): void
+    {
+        /*
+         * Tanpa jenisnya, peladen tidak bisa membedakan pesanan lembaga yang
+         * namanya lupa diisi dari pendaftar perorangan biasa — dan kirimannya
+         * akan tersimpan sebagai pendaftaran perorangan diam-diam, tanpa
+         * pesanan lembaga yang sebenarnya dimaksudkan.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Lupa Nama Lembaga',
+            'telp' => '0816-0000-0130',
+            'jenis' => 'lembaga',
+        ])->assertSessionHasErrors('lembaga_nama');
+
+        $this->assertNull(PendaftaranScopusCamp::where('nama', 'Lupa Nama Lembaga')->first());
+    }
+
+    #[Test]
+    public function jalur_perorangan_tidak_membuat_pesanan_walau_namanya_terbawa(): void
+    {
+        /*
+         * Isian tersembunyi tetap terkirim. Admin yang sempat memilih jalur
+         * lembaga lalu kembali ke perorangan membawa serta nama lembaganya —
+         * dan tanpa syarat jenisnya, pesanan yang tidak pernah dimaksudkan
+         * ikut terbuat.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $sebelum = \App\PemesananLembaga::count();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Perorangan Saja',
+            'telp' => '0816-0000-0131',
+            'jenis' => 'perorangan',
+            'lembaga_nama' => 'Nama Yang Tertinggal',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Perorangan Saja')->first();
+
+        $this->assertNotNull($b, 'Pendaftarannya tetap tersimpan.');
+        $this->assertSame($sebelum, \App\PemesananLembaga::count(), 'Tidak boleh ada pesanan baru.');
+        $this->assertNull(\App\PemesananLembaga::untukPendaftaran('scopus_camp', (string) $b->id));
+    }
+
+    #[Test]
+    public function jalur_perorangan_tidak_menuntut_isian_lembaga(): void
+    {
+        /*
+         * Inti "minim isian": pendaftar perorangan cukup layanan, angkatan,
+         * nama, dan nomornya. Sisanya tidak pernah diminta.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Empat Isian Saja',
+            'telp' => '0816-0000-0132',
+            'jenis' => 'perorangan',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Empat Isian Saja')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame(1, (int) $b->jumlah_pendaftar, 'Satu orang berarti satu kursi.');
+        $this->assertSame('', (string) $b->email);
     }
 
     // ------------------------------------------------------------- pembantu
@@ -2078,7 +2157,17 @@ class TindakanPendaftaranTest extends TestCase
          * sebenarnya memuat empat.
          */
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
-        $tanda = Str::random(8);
+
+        /*
+         * Tandanya HURUF SAJA, bukan Str::random().
+         *
+         * Str::random() memakai huruf DAN angka, jadi tandanya bisa memuat
+         * "7" — dan tanda itu ikut ke id_transaksi serta emailnya, sehingga
+         * pencarian "7" menemukan barisnya sendiri dan ujinya merah tanpa ada
+         * yang salah pada kodenya. Terukur 13,2% dari 2.000 percobaan, yang
+         * cocok dengan "merah sekali, lalu hijau beberapa putaran".
+         */
+        $tanda = collect(range('A', 'Z'))->shuffle()->take(8)->implode('');
 
         $a777 = KategoriLayanan::create([
             'layanan' => 'scopus_camp', 'nama' => 'Scopus Camp Tujuh' . $tanda,
