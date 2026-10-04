@@ -172,15 +172,25 @@ Tarif Layanan | MIS
         list-style: none;
     }
 
+    /*
+     * align-items: center, BUKAN flex-start seperti daftar fasilitas di
+     * atasnya.
+     *
+     * Pola fasilitas memang flex-start plus margin-top 3px pada ikonnya,
+     * sebab teks fasilitas kerap berbaris banyak dan ikonnya harus menempel
+     * di baris pertama. Satu sesi selalu SATU baris pendek, jadi pola itu
+     * justru mengangkat ikonnya: terukur pusat ikonnya 6px di atas pusat
+     * teksnya, sebab kotak baris teksnya 28px sementara ikonnya 10px.
+     */
     .tar-sesi li {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 7px;
         font-size: .78rem;
         color: var(--mis-tinta-3);
     }
 
-    .tar-sesi .fas { font-size: 10px !important; color: #7c3aed; margin-top: 3px; }
+    .tar-sesi .fas { font-size: 10px !important; color: #7c3aed; }
     .tar-fasilitas .tar-lebih { display: none; }
 
 
