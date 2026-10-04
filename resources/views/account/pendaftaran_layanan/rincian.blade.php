@@ -617,6 +617,43 @@ Rincian Pendaftaran | MIS Rumah Scopus
             font-variant-numeric: tabular-nums;
         }
 
+        /* Kalimat di bawah Total bayar. Dipepetkan ke kotaknya (6px) supaya
+           terbaca sebagai keterangan kotak itu, bukan sebagai isian baru. */
+        .rin-hitung-nota {
+            margin: 6px 0 0;
+            line-height: 1.45;
+        }
+
+        .rin-hitung-ulang {
+            border: 0;
+            background: none;
+            padding: 0;
+            font: inherit;
+            font-weight: 600;
+            color: var(--mis-ungu, #6d4aff);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* Kedipan sekali jalan saat angkanya berganti sendiri.
+
+           Tanpa penanda apa pun, satu-satunya yang bergerak di layar adalah
+           angka di kotak yang TIDAK sedang disentuh — dan mata yang sedang di
+           kotak potongan tidak akan menangkapnya. */
+        .rin-hitung-berubah {
+            animation: rin-hitung-kedip .45s ease-out 1;
+        }
+
+        @keyframes rin-hitung-kedip {
+            0% { background-color: #dcfce7; }
+            100% { background-color: transparent; }
+        }
+
+        /* Yang tidak mau gerakan tetap mendapat angkanya, tanpa kedipan. */
+        @media (prefers-reduced-motion: reduce) {
+            .rin-hitung-berubah { animation: none; }
+        }
+
         .rin-label {
             display: flex;
             align-items: center;
@@ -2781,6 +2818,103 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
                 kotak.setSelectionRange(pos, pos);
             });
+        });
+    });
+
+    /*
+     * Total bayar ikut berubah sambil nominalnya diketik.
+     *
+     * Dulu keempat kotak ini berdiri sendiri: panitia yang memberi potongan
+     * Rp 500.000 harus menghitung sendiri totalnya lalu MENGETIK ULANG angka
+     * delapan digit — dan satu digit yang meleset di situ tidak ditolak siapa
+     * pun, sebab peladen memang menyimpan total apa adanya.
+     *
+     * Subtotalnya TIDAK ditebak dari tarif angkatan dikali jumlah orang.
+     * Angka tersimpan bisa lahir dari potongan alumni, promo rombongan, atau
+     * harga yang dirundingkan, dan menghitung ulang dari tarif akan
+     * menimpanya diam-diam begitu halaman dibuka. Yang dipakai selisihnya:
+     *
+     *     dasar = total - (PPN + kode unik) + potongan
+     *
+     * diukur sekali dari nilai yang sudah tersimpan, sehingga membuka halaman
+     * menghasilkan angka yang sama persis dan hanya ketikan yang menggesernya.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var angka = function (kotak) {
+            return parseInt(String(kotak.value).replace(/\D+/g, ''), 10) || 0;
+        };
+
+        var pisah = function (n) {
+            return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        };
+
+        document.querySelectorAll('[data-mis-hitung="hasil"]').forEach(function (hasil) {
+            var borang = hasil.closest('form');
+
+            if (! borang) { return; }
+
+            var tambah = borang.querySelectorAll('[data-mis-hitung="tambah"]');
+            var kurang = borang.querySelectorAll('[data-mis-hitung="kurang"]');
+
+            if (! tambah.length && ! kurang.length) { return; }
+
+            var jumlahkan = function (daftar) {
+                var t = 0;
+                daftar.forEach(function (k) { t += angka(k); });
+                return t;
+            };
+
+            var dasar = angka(hasil) - jumlahkan(tambah) + jumlahkan(kurang);
+
+            var nota = borang.querySelector('[data-mis-hitung-nota]');
+            var notaOtomatis = nota && nota.querySelector('[data-mis-hitung-nota-otomatis]');
+            var notaTangan = nota && nota.querySelector('[data-mis-hitung-nota-tangan]');
+
+            // Begitu totalnya diketik tangan, hitungan berhenti menimpanya —
+            // ada harga yang dirundingkan dan tidak bisa dirumuskan.
+            var diketikTangan = false;
+
+            var gambarNota = function () {
+                if (notaOtomatis) { notaOtomatis.hidden = diketikTangan; }
+                if (notaTangan) { notaTangan.hidden = ! diketikTangan; }
+            };
+
+            var hitung = function () {
+                if (diketikTangan) { return; }
+
+                // Tidak pernah minus: potongan yang melebihi tagihan menahan
+                // totalnya di nol, bukan menampilkan angka negatif.
+                var total = Math.max(0, dasar + jumlahkan(tambah) - jumlahkan(kurang));
+
+                hasil.value = pisah(total);
+
+                // Penanda singkat supaya perubahannya tertangkap mata; tanpa
+                // ini angkanya berganti tanpa ada yang bergerak di layar.
+                hasil.classList.remove('rin-hitung-berubah');
+                void hasil.offsetWidth;
+                hasil.classList.add('rin-hitung-berubah');
+            };
+
+            tambah.forEach(function (k) { k.addEventListener('input', hitung); });
+            kurang.forEach(function (k) { k.addEventListener('input', hitung); });
+
+            hasil.addEventListener('input', function (e) {
+                // Hanya ketikan orang yang menghentikannya; nilai yang
+                // DIPASANG skrip ini tidak menerbitkan 'input'.
+                if (e.isTrusted) { diketikTangan = true; gambarNota(); }
+            });
+
+            var tombolUlang = nota && nota.querySelector('[data-mis-hitung-ulang]');
+
+            if (tombolUlang) {
+                tombolUlang.addEventListener('click', function () {
+                    diketikTangan = false;
+                    gambarNota();
+                    hitung();
+                });
+            }
+
+            gambarNota();
         });
     });
 
