@@ -146,8 +146,14 @@
                      tempat saja tidak menunjuk satu angkatan: Scopus Camp
                      Yogyakarta sudah angkatan ke-202 sementara Jakarta baru
                      ke-9, dan merekap tanpa nomornya menggabungkan dua ratus
-                     angkatan jadi satu baris. --}}
-                <span class="pdl-angkatan-no" title="Angkatan ke-{{ $angkatanBaris['nomor'] }}">#{{ $angkatanBaris['nomor'] }}</span>
+                     angkatan jadi satu baris.
+
+                     DITULIS DENGAN KATA, bukan "#199". Tanda pagar memang
+                     dipahami orang yang terbiasa dengan nomor urut, tetapi
+                     artinya hanya muncul di title — dan title cuma terbaca
+                     kalau kursornya ditahan di atasnya, yang tidak dilakukan
+                     orang yang sedang mencari satu nama. --}}
+                <span class="pdl-angkatan-no">Angkatan ke-{{ $angkatanBaris['nomor'] }}</span>
             @endif
 
             <span class="pdl-sesi-ket">

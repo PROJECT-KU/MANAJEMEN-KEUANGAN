@@ -2477,12 +2477,27 @@ class TindakanPendaftaranTest extends TestCase
 
         Pendaftaran::lupakan();
 
-        // 1. Di layar daftar.
-        $this->actingAs($orang)
+        /*
+         * 1. Di layar daftar — DENGAN KATA, bukan "#202".
+         *
+         * Pernyataan lama uji ini menuntut keduanya muncul: "#202" sebagai
+         * teks kepingnya, "Angkatan ke-202" sebagai title-nya. Tanda pagarnya
+         * sengaja dibuang: artinya hanya terbaca kalau kursornya ditahan di
+         * atas kepingnya, dan itu tidak dilakukan orang yang sedang mencari
+         * satu nama.
+         */
+        $isi = $this->actingAs($orang)
             ->get(route('account.pendaftaran-layanan.index', ['cari' => $tanda]))
             ->assertOk()
-            ->assertSee('#202')
-            ->assertSee('Angkatan ke-202');
+            ->assertSee('Angkatan ke-202')
+            ->getContent();
+
+        $this->assertStringNotContainsString(
+            '>#202<',
+            $isi,
+            'Nomor angkatan tidak boleh lagi muncul sebagai tanda pagar saja.'
+        );
+
 
         $baris = Pendaftaran::kueri()->where('id', $p->getKey())->first();
 

@@ -311,17 +311,52 @@ Pendaftar Layanan | MIS Rumah Scopus
            lain di bawahnya: ia PENANDA yang dipakai merekap, bukan catatan
            pendamping — dan di antara dua ratus angkatan Yogyakarta, nomornya
            satu-satunya yang membedakan. */
+        /*
+         * Judul kolom ini BOLEH membungkus, sendirian di antara ketujuhnya.
+         *
+         * .mis-tabel memasang white-space: nowrap pada seluruh <th>, jadi
+         * judulnya sendiri yang menentukan lebar terkecil kolomnya. Terukur di
+         * 768px: "Sesi" menahan kolomnya di 62px, sedangkan "Angkatan / sesi"
+         * menaikkannya jadi 130px — tabelnya jadi 774px di dalam bungkus
+         * 706px, terklip 68px, dan halamannya meluber 4px. Selisihnya persis
+         * pertambahan kolom ini.
+         *
+         * Yang dilonggarkan judulnya saja, bukan nowrap untuk semua <th>:
+         * keenam judul lain pendek dan memang tidak perlu membungkus, dan
+         * melonggarkan seluruhnya mengubah lebar kolom yang tidak ada
+         * hubungannya dengan perubahan ini.
+         */
+        /*
+         * Keping nomor angkatan. Berbunyi "Angkatan ke-199", bukan "#199".
+         *
+         * Hurufnya BUKAN monospace lagi: monospace masuk akal untuk angka
+         * yang dibandingkan sejajar, tetapi yang dibaca di sini kalimat.
+         *
+         * Dan ia boleh membungkus. Di 768px kolom ini cuma 62px — terukur —
+         * sedangkan "Angkatan ke-199" menuntut sekitar 100px dalam satu
+         * baris; dipaksa nowrap, ia mendorong tabelnya sampai terklip, persis
+         * seperti yang pernah terjadi saat keping ini masih menempel di
+         * samping nama angkatannya.
+         */
         .pdl-angkatan-no {
             display: inline-block;
             margin-left: 5px;
             padding: 1px 6px;
             border-radius: 6px;
             background: #eef2ff;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             font-size: .72rem;
             font-weight: 700;
+            line-height: 1.5;
             color: #4338ca;
-            cursor: help;
+            white-space: normal;
+            /*
+             * Boleh pindah baris di SPASINYA, tidak di tengah kata.
+             * `overflow-wrap: anywhere` memang membuat kolomnya bisa menyusut
+             * sampai 35px di 768px — tetapi terukur "Angkatan ke-199" pecah
+             * jadi lima baris setinggi 88px, tercabik di tengah kata. Dibatasi
+             * begini ia paling banyak dua baris: "Angkatan" lalu "ke-199".
+             */
+            overflow-wrap: normal;
         }
 
         .pdl-sesi-ket {
@@ -446,12 +481,23 @@ Pendaftar Layanan | MIS Rumah Scopus
                menempel di samping nama angkatannya. Terukur: di samping nama,
                ia menambah lebar min-content kolom Sesi secukupnya untuk
                membuat tabelnya terklip 4px di 768px. Nomornya tetap terbaca
-               utuh, cuma pindah baris. */
+               utuh, cuma pindah baris.
+
+               width: max-content DIBUANG sejak isinya berupa kalimat: dengan
+               itu kepingnya menolak menyusut, dan "Angkatan ke-199" memaksa
+               kolom selebar 62px menampung seratusan piksel. */
+            /*
+             * Kepingnya kehilangan kotaknya di lebar ini, bukan sekadar
+             * mengecil. Latar dan padding 10px-nya ikut menentukan lebar
+             * terkecil kolom — terukur 26px gulir mendatar di 768px — dan
+             * ruang itu lebih berharga daripada kotaknya. Warnanya tetap
+             * membedakannya dari nama angkatan di atasnya.
+             */
             .pdl-tabel .pdl-angkatan-no {
                 display: block;
-                width: max-content;
                 margin: 3px 0 0;
-                padding: 0 5px;
+                padding: 0;
+                background: none;
             }
         }
 
@@ -1234,6 +1280,22 @@ Pendaftar Layanan | MIS Rumah Scopus
                             <th aria-sort="{{ $ariaUrut('nama') }}">
                                 @include('partials.urut-kolom', ['rute' => $rute, 'bawa' => $bawa, 'kolom' => 'nama', 'label' => 'Pendaftar'])
                             </th>
+                            {{-- Judulnya tetap "Sesi", dan itu keputusan yang
+                                 diukur.
+
+                                 "Angkatan / sesi" memang lebih jujur — empat
+                                 dari lima layanan mengisi kolom ini dengan
+                                 angkatan — tetapi `.mis-tabel thead th`
+                                 memasang nowrap, jadi judulnya sendiri yang
+                                 menentukan lebar terkecil kolomnya. Terukur di
+                                 768px: "Sesi" menahannya di 62px, "Angkatan /
+                                 sesi" menaikkannya jadi 130px dan tabelnya
+                                 terklip 68px; dilonggarkan supaya membungkus
+                                 pun kata "Angkatan" sendiri masih menahan 93px
+                                 dan terklip 30px.
+
+                                 Isinya yang menjelaskan dirinya: selnya
+                                 berbunyi "Angkatan ke-199", bukan "#199". --}}
                             <th>Sesi</th>
                             <th class="text-right" aria-sort="{{ $ariaUrut('total') }}">
                                 @include('partials.urut-kolom', ['rute' => $rute, 'bawa' => $bawa, 'kolom' => 'total', 'label' => 'Total bayar'])
