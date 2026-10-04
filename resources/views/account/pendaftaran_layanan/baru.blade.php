@@ -1676,32 +1676,72 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         @enderror
                     </div>
 
-                    {{-- Nama peserta lain, hanya saat rombongan.
+                    {{-- Nama DAN nomor peserta lain, hanya saat rombongan.
 
-                         Kelima tabel pendaftaran hanya punya SATU nama,
-                         sementara jumlahnya bisa lebih dari satu — jadi nama
-                         peserta selain pemesannya tidak tercatat di mana pun,
-                         dan daftar hadir rombongan tidak bisa dibuat dari
-                         sistem. Satu kotak teks, bukan sederet isian:
-                         menempelkan daftar nama dari pesan WhatsApp jauh
-                         lebih cepat daripada mengetik ke lima kotak. --}}
+                         Kelima tabel pendaftaran hanya punya SATU nama dan
+                         satu nomor, sementara jumlahnya bisa lebih dari satu
+                         — jadi peserta selain pemesannya tidak tercatat di
+                         mana pun, dan daftar hadir rombongan tidak bisa
+                         dibuat dari sistem. Nomornya ikut diminta sebab
+                         tanpa itu undangan grup dan tautan sertifikat
+                         seluruh rombongan bergantung pada pemesannya mau
+                         meneruskan.
+
+                         Satu kotak teks, bukan sederet isian: yang mengisi
+                         panitia yang sedang menghadapi antrean, dan
+                         menempelkan daftar dari WhatsApp atau Excel jauh
+                         lebih cepat daripada mengetik ke sepuluh kotak. --}}
                     <div class="mis-isian bar-penuh" id="bar-bungkus-peserta" hidden>
                         <label class="mis-label" for="bar-peserta">
-                            Nama peserta lain <span id="bar-peserta-sisa"
+                            Nama &amp; nomor peserta lain <span id="bar-peserta-sisa"
                                 style="font-weight:500;text-transform:none;letter-spacing:0;"></span>
                         </label>
+
+                        {{-- Jalur berkas DI ATAS kotak teksnya, bukan di
+                             bawah: lembaga mengirim daftarnya sebagai
+                             lampiran Excel, dan panitia yang terlanjur
+                             melihat kotak kosong akan mulai mengetik sebelum
+                             sempat tahu ada jalan yang lebih cepat. --}}
+                        <label class="bar-berkas" for="bar-peserta-berkas">
+                            <input type="file" id="bar-peserta-berkas"
+                                accept=".xlsx,.xls,.csv,text/csv">
+                            <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                <i class="fas fa-file-excel"></i>
+                            </span>
+                            <span class="bar-berkas-nama" id="bar-peserta-berkas-nama">
+                                Ambil dari Excel atau CSV — nama dan nomornya terisi sendiri
+                            </span>
+                        </label>
+
+                        <p class="bar-nota" id="bar-peserta-kabar" hidden>
+                            <i class="fas fa-info-circle" aria-hidden="true"></i>
+                            <span id="bar-peserta-kabar-teks"></span>
+                        </p>
+
                         <textarea class="form-control-modern @error('peserta') is-invalid @enderror" id="bar-peserta"
-                            name="peserta" rows="3"
-                            placeholder="Satu nama per baris, misalnya:&#10;Budi Santoso&#10;Siti Rahma">{{ old('peserta') }}</textarea>
+                            name="peserta" rows="4"
+                            placeholder="Satu orang per baris — nama, lalu nomornya:&#10;Budi Santoso, 081234567890&#10;Siti Rahma, 085700011122">{{ old('peserta') }}</textarea>
                         @error('peserta')
                             <p class="bar-salah">
                                 <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
                                 <span>{{ $message }}</span>
                             </p>
                         @enderror
+                        {{-- Peringatan kelebihan nama. Peladen memang memotong
+                             daftarnya sampai sebanyak kursi yang dibayar, tetapi
+                             memotong DIAM-DIAM berarti nama yang hilang baru
+                             ketahuan di hari acara — dan sejak daftarnya bisa
+                             datang dari berkas lembaga berisi puluhan baris, itu
+                             berhenti jadi kemungkinan yang jauh. --}}
+                        <p class="bar-salah" id="bar-peserta-lebih" hidden>
+                            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                            <span id="bar-peserta-lebih-teks"></span>
+                        </p>
                         <p class="mis-bantuan">
                             Pemesannya sudah terisi di atas; kotak ini untuk sisanya.
-                            Boleh ditempel langsung dari WhatsApp — penomorannya dibuang sendiri.
+                            Boleh ditempel langsung dari WhatsApp atau Excel — penomoran
+                            dan judul kolomnya dibuang sendiri. Nomor yang belum ada boleh
+                            dikosongkan, cukup namanya saja.
                         </p>
                     </div>
 
@@ -2051,6 +2091,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var cariAngkatan = el('bar-cari-angkatan');
         var bungkusPeserta = el('bar-bungkus-peserta');
         var sisaPeserta = el('bar-peserta-sisa');
+        var isianPeserta = el('bar-peserta');
+        var berkasPeserta = el('bar-peserta-berkas');
+        var namaBerkasPeserta = el('bar-peserta-berkas-nama');
+        var kabarPeserta = el('bar-peserta-kabar');
+        var kabarPesertaTeks = el('bar-peserta-kabar-teks');
+        var lebihPeserta = el('bar-peserta-lebih');
+        var lebihPesertaTeks = el('bar-peserta-lebih-teks');
         var bungkusSesi = el('bar-bungkus-sesi');
         var bungkusBukti = el('bar-bungkus-bukti');
         var isianBukti = el('bar-bukti');
@@ -2772,9 +2819,125 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(bungkusPeserta, perlu > 0);
 
             if (perlu > 0) {
-                sisaPeserta.textContent = '(' + perlu + ' nama lagi, selain pemesannya)';
+                sisaPeserta.textContent = '(' + perlu + ' orang lagi, selain pemesannya)';
             }
+
+            periksaLebihPeserta(perlu);
         };
+
+        /*
+         * Nama yang melebihi kursi yang dibayar disebut SEKARANG.
+         *
+         * Peladen memotong daftarnya sampai sebanyak jumlah dikurangi satu —
+         * itu benar, sebab nama ke-enam pada rombongan berbayar lima adalah
+         * orang yang kursinya tidak pernah dibeli. Tetapi memotongnya tanpa
+         * bersuara berarti panitia mengira semua namanya masuk, dan yang
+         * hilang baru ketahuan di hari acara.
+         */
+        var periksaLebihPeserta = function (perlu) {
+            var terisi = isianPeserta.value.split(/\r\n|\r|\n/)
+                .filter(function (b) { return b.trim() !== ''; }).length;
+
+            if (perlu > 0 && terisi > perlu) {
+                lebihPesertaTeks.textContent = 'Ada ' + terisi + ' nama untuk ' + perlu
+                    + ' kursi. Yang disimpan hanya ' + perlu + ' nama teratas — tambah jumlah orangnya '
+                    + 'kalau memang sebanyak itu, atau hapus barisnya yang kelebihan.';
+                lebihPeserta.hidden = false;
+
+                return;
+            }
+
+            lebihPeserta.hidden = true;
+        };
+
+        isianPeserta.addEventListener('input', function () {
+            segarkanPeserta();
+        });
+
+        /*
+         * Kabar hasil baca berkasnya. Dipisah dari galat borang: yang ini
+         * bukan isian yang salah, melainkan laporan apa yang baru saja
+         * terbaca — dan panitia harus bisa membedakan "12 nama masuk" dari
+         * "isian ini ditolak".
+         */
+        var kabarkanPeserta = function (teks, salah) {
+            kabarPesertaTeks.textContent = teks;
+            kabarPeserta.className = salah ? 'bar-salah' : 'bar-nota';
+            kabarPeserta.hidden = false;
+        };
+
+        /*
+         * Membaca daftar peserta dari berkas Excel/CSV lembaga.
+         *
+         * Hasilnya ditaruh di kotak teksnya, TIDAK langsung disimpan: satu
+         * kolom yang salah terbaca harus ketahuan sekarang, bukan di hari
+         * acara. Kotak yang sudah terisi ditambahi di bawahnya, bukan
+         * ditimpa — daftar rombongan kerap datang dalam dua berkas, dan
+         * menimpa berarti berkas pertama hilang tanpa peringatan.
+         */
+        if (berkasPeserta) {
+            berkasPeserta.addEventListener('change', function () {
+                var berkas = berkasPeserta.files && berkasPeserta.files[0];
+
+                if (!berkas) {
+                    return;
+                }
+
+                namaBerkasPeserta.textContent = 'Membaca ' + berkas.name + '…';
+
+                var muatan = new FormData();
+                muatan.append('berkas', berkas);
+
+                // Alamatnya dicetak apa adanya. Dicetak lewat direktif JSON,
+                // garis miringnya ikut dilarikan jadi "http:\/\/" — sah untuk
+                // peramban tetapi tidak bisa dicari siapa pun yang membaca
+                // halamannya, dan penjaganya pun ikut tidak melihatnya.
+                fetch('{{ route('account.pendaftaran-layanan.baca-peserta') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: muatan
+                }).then(function (t) {
+                    return t.json().then(function (j) { return { ok: t.ok, isi: j }; });
+                }).then(function (h) {
+                    // Isian yang ditolak peladen datang sebagai 422 berisi
+                    // `errors`, bukan `pesan` — keduanya harus sampai ke
+                    // layar, sebab diam membuat panitia menekan tombolnya
+                    // berulang kali.
+                    if (!h.ok || !h.isi.ok) {
+                        var pesan = h.isi.pesan
+                            || (h.isi.errors && h.isi.errors.berkas && h.isi.errors.berkas[0])
+                            || 'Berkasnya tidak bisa dibaca.';
+
+                        kabarkanPeserta(pesan, true);
+                        namaBerkasPeserta.textContent = 'Ambil dari Excel atau CSV — nama dan nomornya terisi sendiri';
+
+                        return;
+                    }
+
+                    var ada = isianPeserta.value.replace(/\s+$/, '');
+                    isianPeserta.value = ada === '' ? h.isi.teks : ada + '\n' + h.isi.teks;
+
+                    namaBerkasPeserta.textContent = berkas.name;
+                    segarkanPeserta();
+                    kabarkanPeserta(
+                        h.isi.jumlah + ' orang terbaca, ' + h.isi.bernomor + ' di antaranya bernomor. '
+                            + 'Periksa dulu di kotak di bawah — yang kelebihan tinggal dihapus barisnya.',
+                        false
+                    );
+                }).catch(function () {
+                    kabarkanPeserta('Berkasnya gagal dikirim. Periksa sambungan, lalu coba lagi.', true);
+                    namaBerkasPeserta.textContent = 'Ambil dari Excel atau CSV — nama dan nomornya terisi sendiri';
+                }).then(function () {
+                    // Dikosongkan supaya berkas yang SAMA bisa dipilih lagi
+                    // sesudah dibetulkan; tanpa ini `change` tidak menyala
+                    // untuk berkas bernama sama dan tombolnya terasa mati.
+                    berkasPeserta.value = '';
+                });
+            });
+        }
 
         isianJumlah.addEventListener('input', function () {
             segarkanPeserta();

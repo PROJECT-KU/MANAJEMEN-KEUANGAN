@@ -16,6 +16,7 @@ use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use App\User;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -781,6 +782,177 @@ class TindakanPendaftaranTest extends TestCase
             ->assertSee('Budi Santoso')
             ->assertSee('Siti Rahma')
             ->assertSee('Pemesan Rombongan');
+    }
+
+    #[Test]
+    public function nomor_peserta_rombongan_ikut_tersimpan_dan_dinormalkan(): void
+    {
+        /*
+         * Namanya saja tidak cukup. Tanpa nomor tiap orang, rombongan tujuh
+         * orang hanya punya SATU nomor yang bisa dihubungi — nomor pemesannya
+         * — sehingga undangan grup, pengingat jadwal, dan tautan sertifikat
+         * enam orang lain bergantung pada ia mau meneruskan.
+         *
+         * Keempat bentuk yang benar-benar beredar diuji sekaligus: koma, tab
+         * (hasil tempelan langsung dari Excel), nomor menempel di ujung baris,
+         * dan nama tanpa nomor sama sekali. Satu bentuk saja yang diuji
+         * membuat tiga bentuk lain bisa rusak tanpa ketahuan.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemesan Bernomor',
+            'email' => 'bernomor' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0052',
+            'jumlah' => 5,
+            'peserta' => "1. Budi Santoso, 081234567890\n"
+                . "Siti Rahma\t0895-4217-3544\n"
+                . "Agus Nugroho 6281122334455\n"
+                . 'Rina Tanpa Nomor',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemesan Bernomor')->first();
+        $this->assertNotNull($b);
+
+        $peserta = \App\PendaftaranPeserta::milik('scopus_camp', (string) $b->id)
+            ->terurut()->get(['nama', 'telp'])
+            ->map(fn ($p) => [$p->nama, $p->telp])->all();
+
+        // Nomornya disimpan dalam SATU bentuk, 62xxx, sama seperti nomor
+        // pendaftar utama di kelima tabel — kalau tidak, dua nomor yang sama
+        // orangnya tersimpan dua bentuk dan pencarian hanya menemukan satu.
+        $this->assertSame([
+            ['Budi Santoso', '6281234567890'],
+            ['Siti Rahma', '6289542173544'],
+            ['Agus Nugroho', '6281122334455'],
+            ['Rina Tanpa Nomor', null],
+        ], $peserta);
+
+        // Di layar rincian nomornya jadi tautan WhatsApp: daftar ini dibuka
+        // justru saat panitia hendak menghubungi orangnya satu per satu.
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->id]))
+            ->assertOk()
+            ->assertSee('wa.me/6281234567890')
+            ->assertSee('081234567890');
+    }
+
+    #[Test]
+    public function baris_judul_kolom_tidak_jadi_peserta(): void
+    {
+        /*
+         * Menempelkan tabel Excel ke kotak teksnya ikut membawa baris
+         * judulnya. Tanpa penjaga ini, "Nama" tersimpan sebagai peserta
+         * pertama — dan nomor urut sertifikat SEMUA orang di rombongan itu
+         * meleset satu.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Pemesan Bertabel',
+            'email' => 'tabel' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0053',
+            'jumlah' => 3,
+            'peserta' => "Nama\tNo HP\nBudi Santoso\t081234567890\nSiti Rahma\t085700011122",
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Pemesan Bertabel')->first();
+
+        $this->assertSame(
+            ['Budi Santoso', 'Siti Rahma'],
+            \App\PendaftaranPeserta::milik('scopus_camp', (string) $b->id)->terurut()->pluck('nama')->all()
+        );
+    }
+
+    #[Test]
+    public function berkas_excel_peserta_dibaca_jadi_nama_dan_nomor(): void
+    {
+        /*
+         * Lembaga mengirim daftar pesertanya sebagai lampiran, bukan diketik
+         * di badan pesan. Tanpa jalur ini, rombongan 30 orang berarti 30
+         * baris yang disalin satu per satu — pekerjaan yang paling mungkin
+         * dilewati panitia, dan begitu dilewati, 29 nomor pesertanya hilang.
+         *
+         * Kolomnya dikenali dari ISINYA, bukan judulnya: berkas lembaga tidak
+         * pernah berjudul sama ("No HP", "No. WA", "Telepon", "Kontak"), dan
+         * mencocokkan judul berarti berkas di luar daftar itu kehilangan
+         * seluruh nomornya diam-diam.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = "No,Nama Peserta,Kontak\n"
+            . "1,Budi Santoso,081234567890\n"
+            . "2,Siti Rahma,0895-4217-3544\n"
+            . "3,Rina Tanpa Nomor,\n";
+
+        $jawab = $this->actingAs($orang)->post(route('account.pendaftaran-layanan.baca-peserta'), [
+            'berkas' => UploadedFile::fake()->createWithContent('peserta.csv', $isi),
+        ]);
+
+        $jawab->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'jumlah' => 3,
+                // Berapa yang BERNOMOR disebut terpisah: daftar yang terbaca
+                // namanya saja terlihat berhasil, padahal justru nomornya yang
+                // hendak dikumpulkan.
+                'bernomor' => 2,
+            ]);
+
+        /*
+         * Ditulis balik dalam bentuk 08xx, bukan 62xx yang disimpan. Panitia
+         * yang melihat nomor yang baru saja ia kirim berubah bentuk akan
+         * mengira berkasnya salah terbaca lalu membetulkannya kembali.
+         */
+        $this->assertSame(
+            "Budi Santoso, 081234567890\nSiti Rahma, 089542173544\nRina Tanpa Nomor",
+            $jawab->json('teks'),
+            'Kolom "No" tidak boleh jadi nama, dan baris judulnya tidak boleh jadi orang.'
+        );
+    }
+
+    #[Test]
+    public function berkas_peserta_yang_tidak_bisa_dibaca_ditolak_dengan_kalimat_biasa(): void
+    {
+        /*
+         * Penggunanya bukan orang yang paham jenis berkas. Ditolak tanpa
+         * kalimat yang menyebutkan HARUS APA, ia akan mencoba berkas yang sama
+         * berulang kali — jadi yang dijaga di sini bukan penolakannya,
+         * melainkan kalimatnya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.baca-peserta'), [
+            'berkas' => UploadedFile::fake()->create('daftar.pdf', 8),
+        ])->assertStatus(422)->assertJson([
+            'ok' => false,
+            'pesan' => 'Berkasnya harus Excel (.xlsx atau .xls) atau CSV.',
+        ]);
+
+        // Berkas yang jenisnya benar tetapi tidak memuat satu nama pun juga
+        // harus bersuara: diam membuat panitia mengira daftarnya sudah masuk.
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.baca-peserta'), [
+            'berkas' => UploadedFile::fake()->createWithContent('kosong.csv', "Nama,No HP\n"),
+        ])->assertStatus(422)->assertJson([
+            'ok' => false,
+            'pesan' => 'Tidak ada nama yang terbaca di berkas itu.',
+        ]);
+    }
+
+    #[Test]
+    public function berkas_peserta_hanya_boleh_dibaca_orang_dalam(): void
+    {
+        // Titik masuk yang menerima unggahan tanpa penjaga adalah tempat orang
+        // luar menaruh berkas di peladen ini.
+        $this->post(route('account.pendaftaran-layanan.baca-peserta'), [
+            'berkas' => UploadedFile::fake()->createWithContent('peserta.csv', "Budi,081234567890\n"),
+        ])->assertRedirect();
     }
 
     #[Test]

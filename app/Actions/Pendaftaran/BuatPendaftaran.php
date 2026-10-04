@@ -330,37 +330,32 @@ class BuatPendaftaran
     }
 
     /**
-     * Menyimpan nama peserta lain pada pendaftaran rombongan.
+     * Menyimpan nama DAN nomor peserta lain pada pendaftaran rombongan.
      *
-     * Kelima tabel pendaftaran hanya punya SATU nama, sementara jumlahnya
-     * bisa lebih dari satu — jadi sebelum ini nama peserta selain pemesannya
-     * tidak tercatat di mana pun, dan daftar hadir rombongan tidak bisa
-     * dibuat dari sistem.
+     * Kelima tabel pendaftaran hanya punya SATU nama dan SATU nomor,
+     * sementara jumlahnya bisa lebih dari satu — jadi sebelum ini peserta
+     * selain pemesannya tidak tercatat di mana pun, dan daftar hadir
+     * rombongan tidak bisa dibuat dari sistem.
      *
-     * Dibaca dari satu kotak teks, satu nama per baris. Bukan sederet isian
+     * Nomornya ikut dicatat, bukan namanya saja: tanpa itu rombongan tujuh
+     * orang hanya punya satu nomor yang bisa dihubungi, dan undangan grup,
+     * pengingat jadwal, serta tautan sertifikat semuanya bergantung pada
+     * pemesannya mau meneruskan.
+     *
+     * Dibaca dari satu kotak teks, satu orang per baris. Bukan sederet isian
      * terpisah: yang mengisinya panitia yang sedang menghadapi antrean, dan
-     * menempelkan daftar nama dari pesan WhatsApp jauh lebih cepat daripada
-     * mengetik ke lima kotak.
+     * menempelkan daftar dari pesan WhatsApp atau Excel jauh lebih cepat
+     * daripada mengetik ke sepuluh kotak. Pemisahan nama dari nomornya
+     * dikerjakan DaftarPeserta, yang juga dipakai jalur unggah berkas.
      *
      * Dibatasi jumlah yang dibayar: nama ke-enam pada rombongan berbayar lima
      * adalah orang yang kursinya tidak pernah dibeli.
      */
     private function simpanPeserta(string $layanan, $model, $teks, int $jumlah): void
     {
-        $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
-        $nama = [];
+        $orang = \App\Support\DaftarPeserta::dariTeks($teks);
 
-        foreach ($baris as $b) {
-            // Penomoran yang ikut tersalin dari WhatsApp ("1. Budi") dibuang;
-            // nama orang tidak berawalan angka dan titik.
-            $bersih = trim(preg_replace('/^\s*\d+\s*[.)-]\s*/', '', $b));
-
-            if ($bersih !== '') {
-                $nama[] = mb_substr($bersih, 0, 255);
-            }
-        }
-
-        if ($nama === []) {
+        if ($orang === []) {
             return;
         }
 
@@ -368,16 +363,20 @@ class BuatPendaftaran
          * Pemesannya sendiri sudah tercatat di baris pendaftarannya, jadi
          * kotak ini untuk SISANYA — paling banyak jumlah dikurangi satu.
          */
-        $nama = array_slice($nama, 0, max(0, $jumlah - 1));
+        $orang = array_slice($orang, 0, max(0, $jumlah - 1));
 
-        foreach ($nama as $ke => $n) {
+        foreach ($orang as $ke => $o) {
             \App\PendaftaranPeserta::create([
                 'layanan' => $layanan,
                 'pendaftaran_id' => (string) $model->getKey(),
                 // Mulai dari 1: urutan 0 disediakan untuk pemesannya, yang
                 // tersimpan di baris pendaftarannya sendiri.
                 'urutan' => $ke + 1,
-                'nama' => $n,
+                'nama' => $o['nama'],
+                // Kosong disimpan sebagai null, bukan string kosong: kolomnya
+                // nullable, dan dua penanda "tidak ada nomor" di satu kolom
+                // membuat setiap pembacanya harus memeriksa keduanya.
+                'telp' => $o['telp'] !== '' ? $o['telp'] : null,
             ]);
         }
     }
