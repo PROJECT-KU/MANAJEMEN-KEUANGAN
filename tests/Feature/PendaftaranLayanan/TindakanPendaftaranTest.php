@@ -3533,4 +3533,118 @@ class TindakanPendaftaranTest extends TestCase
         $admin->assertOk();
         $admin->assertSee('id="rin-tombol-hapus"', false);
     }
+
+    #[Test]
+    public function semua_status_ditawarkan_sebagai_tombol_sekali_tekan(): void
+    {
+        /*
+         * Menu tarik diganti deret tombol, dan penggantian seperti itu mudah
+         * diam-diam MENGURANGI pilihan: menu tarik memuat semuanya dengan satu
+         * perulangan, sedangkan tombol yang dirakit tangan gampang tertinggal
+         * satu. Scopus Camp punya enam status, Scopus Kafe tiga, Clinik empat
+         * — tidak ada yang sama.
+         *
+         * Jadi yang dituntut: SETIAP status yang boleh dipasang panitia punya
+         * tombolnya sendiri, berikut nilai yang benar di data-nilai.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $halaman = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]));
+
+        $halaman->assertOk();
+
+        $pilihan = Pendaftaran::pilihanStatus('scopus_camp');
+
+        $this->assertNotEmpty($pilihan, 'Prasyarat ujinya hilang: layanan ini tidak punya pilihan status.');
+
+        foreach ($pilihan as $nilai => $tulisan) {
+            $halaman->assertSee('data-nilai="' . e($nilai) . '"', false);
+            $halaman->assertSee('data-tulisan="' . e($tulisan) . '"', false);
+        }
+
+        // Nilainya tetap dikirim lewat medan bernama 'status', sama seperti
+        // sebelumnya — pengendalinya tidak ikut diubah.
+        $halaman->assertSee('name="status"', false);
+        $halaman->assertSee('id="rin-borang-status"', false);
+    }
+
+    #[Test]
+    public function status_yang_berlaku_ditandai_dan_tidak_bisa_ditekan_lagi(): void
+    {
+        /*
+         * Dimatikan, bukan disembunyikan: deret yang berubah panjang tiap kali
+         * statusnya pindah membuat orang kehilangan patokan letak. Dan
+         * menekan status yang sedang berlaku berarti mengirim perubahan yang
+         * tidak mengubah apa pun — pada status bersurat, itu mengirim email
+         * ulang ke pendaftarnya.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $halaman = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk();
+
+        $isi = $halaman->getContent();
+
+        $this->assertSame(1, preg_match_all('/class="rin-status-tombol[^"]*\bsekarang\b[^"]*"/', $isi),
+            'Harus ada TEPAT satu tombol yang ditandai sebagai status sekarang.');
+
+        // Tombol yang ditandai itu harus yang statusnya memang terpasang, dan
+        // harus benar-benar dimatikan.
+        $this->assertSame(1, preg_match(
+            '/<button[^>]*\bsekarang\b[^>]*>/s', $isi, $cocok
+        ));
+
+        $this->assertStringContainsString('disabled', $cocok[0],
+            'Tombol status yang sedang berlaku harus dimatikan.');
+
+        $this->assertStringContainsString('data-nilai="' . e($camp->status) . '"', $cocok[0],
+            'Yang ditandai "sekarang" bukan status yang sedang terpasang.');
+    }
+
+    #[Test]
+    public function status_yang_mengirim_email_ditandai_di_tombolnya_sendiri(): void
+    {
+        /*
+         * Penandanya di TOMBOLNYA, bukan hanya di catatan bawah.
+         *
+         * Catatan itu menyebut nama status dalam kalimat; orang yang sedang
+         * mengarahkan kursor ke sebuah tombol tidak sedang membacanya. Dan
+         * email yang sudah terkirim tidak bisa ditarik kembali, jadi
+         * peringatannya harus berada di tempat tangannya.
+         *
+         * data-surat juga yang dibaca skrip penegasannya untuk memilih
+         * kalimat mana yang ditampilkan, jadi ia bukan hiasan.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $adaYangBersurat = false;
+
+        foreach (Pendaftaran::pilihanStatus('scopus_camp') as $nilai => $tulisan) {
+            $bersurat = Pendaftaran::suratUntuk('scopus_camp', $nilai) !== null;
+
+            if (! $bersurat) {
+                continue;
+            }
+
+            $adaYangBersurat = true;
+
+            $this->assertSame(1, preg_match(
+                '/<button[^>]*data-nilai="' . preg_quote(e($nilai), '/') . '"[^>]*>/s', $isi, $cocok
+            ), 'Tombol untuk status "' . $tulisan . '" tidak ketemu.');
+
+            $this->assertStringContainsString('data-surat="1"', $cocok[0],
+                'Status "' . $tulisan . '" mengirim email tetapi tombolnya tidak menandainya, '
+                    . 'jadi penegasannya tidak akan menyebut email itu.');
+        }
+
+        $this->assertTrue($adaYangBersurat,
+            'Prasyarat ujinya hilang: tidak ada satu pun status Scopus Camp yang mengirim email.');
+    }
 }
