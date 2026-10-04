@@ -799,18 +799,23 @@ Pendaftar Layanan | MIS Rumah Scopus
     /*
      * Dirakit di sini sekali, bukan diulang di tiap tautan.
      *
-     * $bawa ikut dibawa oleh kepala kolom yang bisa diurutkan dan oleh
-     * penomoran halaman; tanpa itu, mengurutkan diam-diam menghapus
-     * saringannya. Dan $lingkup dipakai ubin ringkasan supaya menekan satu
-     * keadaan tidak melepaskan pilihan layanannya.
+     * $bawa TIDAK dirakit di sini lagi — ia datang dari pengendalinya.
+     *
+     * Dulu daftarnya ditulis ulang di baris ini, dan saat saringan cara bayar
+     * ditambahkan daftar itu tidak ikut diperbarui: tombol unduh dan kepala
+     * kolom pengurut diam-diam melepaskannya. Sekarang satu-satunya daftar
+     * ada di MEDAN_SARINGAN di pengendalinya, berdampingan dengan tempat yang
+     * membacanya. Lihat uji tombol_unduh_di_layar_membawa_SELURUH_saringannya.
+     *
+     * $lingkup SENGAJA daftar yang berbeda, bukan salah tulis: ia dipakai ubin
+     * ringkasan, yang justru harus melepaskan keadaannya supaya menekan satu
+     * ubin berarti berpindah keadaan — bukan menumpuknya. Jadi JANGAN
+     * diarahkan ke $bawa.
      *
      * Semuanya blok @php, tidak ada @php(...) sebaris di berkas ini: Blade
      * memproses blok lebih dulu, dan penanda sebaris di atas sebuah blok ikut
      * dianggap pembukanya sehingga seluruh markah di antaranya tertelan.
      */
-    $bawa = request()->only('cari', 'layanan', 'keadaan', 'bukti', 'angkatan', 'dari', 'sampai', 'lama');
-    /* Lingkup = saringan yang BUKAN keadaan. Dipakai ubin ringkasan supaya
-       menekan satu keadaan tidak melepaskan pilihan layanan dan tanggalnya. */
     $lingkup = array_filter(request()->only('cari', 'layanan', 'angkatan', 'dari', 'sampai'));
 
     $rute = 'account.pendaftaran-layanan.index';
