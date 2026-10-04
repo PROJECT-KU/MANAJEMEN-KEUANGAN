@@ -50,6 +50,15 @@ class PendaftaranLayananController extends Controller
     private const PER_HALAMAN = 20;
 
     /**
+     * Folder bukti transfer termin, di bawah public/.
+     *
+     * Folder tersendiri, bukan folder bukti salah satu layanan: satu termin
+     * milik PESANAN, bukan milik satu pendaftaran — dan pesanan lembaga bisa
+     * memuat dua layanan berbeda sekaligus.
+     */
+    public const FOLDER_BUKTI_TERMIN = 'bukti-termin';
+
+    /**
      * Berapa hari sebuah pendaftaran boleh menunggu sebelum disebut
      * menggantung.
      *
@@ -670,6 +679,253 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Induk pembayaran sebuah pendaftaran, beserta tagihannya — atau null.
+     *
+     * Dirakit di satu tempat dan dipakai bersama oleh pencatat, penghapus,
+     * dan layar rinciannya, supaya ketiganya tidak pernah berbeda pendapat
+     * tentang siapa yang menanggung tagihan.
+     *
+     * @return array{jenis: string, induk_id: string, layanan: string|null, tagihan: int}|null
+     */
+    private function indukBayar(string $layanan, string $id): ?array
+    {
+        $baris = Pendaftaran::kueri()->where('layanan', $layanan)->where('id', $id)->first();
+
+        if ($baris === null) {
+            return null;
+        }
+
+        return \App\PembayaranPendaftaran::indukUntuk(
+            $layanan,
+            $id,
+            \App\PemesananLembaga::untukPendaftaran($layanan, $id),
+            max(1, (int) $baris->jumlah),
+            (int) $baris->total
+        );
+    }
+
+    /**
+     * Mencatat satu kali uang masuk: DP, cicilan, atau pelunasan.
+     *
+     * Sebelum ini uang hanya punya dua keadaan — "Menunggu bayar" atau
+     * "Lunas" — sehingga lembaga yang sudah mentransfer DP 30% tercatat sama
+     * persis dengan yang belum bayar sepeser pun.
+     *
+     * Hanya untuk pesanan rombongan. Pendaftar satu kursi tetap membayar
+     * penuh di muka: membuka cicilan untuk satu orang berarti kursi yang
+     * ditahan berbulan-bulan oleh uang yang tidak seberapa.
+     */
+    public function catatPembayaran(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $induk = $this->indukBayar($layanan, $id);
+
+        if ($induk === null) {
+            return back()->with('info',
+                'Pembayaran bertermin hanya untuk pesanan rombongan atau lembaga. '
+                . 'Pendaftaran satu orang dicatat lunas lewat tombol statusnya.');
+        }
+
+        $data = $request->validate([
+            'nominal' => ['required', 'string', 'max:20'],
+            /*
+             * Tanggal uang MASUK, dan tidak boleh di masa depan: panitia rutin
+             * menyusulkan catatan beberapa hari kemudian, tetapi mencatat uang
+             * yang belum masuk berarti sisa tagihan yang salah sampai hari itu
+             * tiba.
+             */
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'cara_bayar' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'bukti' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'catatan' => ['nullable', 'string', 'max:255'],
+        ], [
+            'nominal.required' => 'Nominalnya belum diisi.',
+            'tanggal.required' => 'Tanggal uang masuknya belum diisi.',
+            'tanggal.before_or_equal' => 'Tanggalnya tidak boleh di masa depan — '
+                . 'yang dicatat di sini uang yang SUDAH masuk.',
+            'bukti.max' => 'Bukti transfernya lebih dari 4 MB.',
+        ]);
+
+        // Diketik berformat "1.500.000" oleh pemolesnya di layar.
+        $nominal = (int) preg_replace('/\D+/', '', $data['nominal']);
+
+        if ($nominal < 1) {
+            return back()->withErrors(['nominal' => 'Nominalnya harus lebih dari nol.'])->withInput();
+        }
+
+        $pembayaran = \App\PembayaranPendaftaran::create([
+            'jenis' => $induk['jenis'],
+            'induk_id' => $induk['induk_id'],
+            'layanan' => $induk['layanan'],
+            'urutan' => \App\PembayaranPendaftaran::urutanBerikut($induk['jenis'], $induk['induk_id']),
+            'nominal' => $nominal,
+            'tanggal' => $data['tanggal'],
+            'cara_bayar' => $data['cara_bayar'] ?? null,
+            'catatan' => trim((string) ($data['catatan'] ?? '')) ?: null,
+            'dicatat_oleh' => $this->siapa(),
+        ]);
+
+        $this->simpanBuktiTermin($pembayaran, $request->file('bukti'));
+
+        $ringkas = \App\PembayaranPendaftaran::ringkas(
+            $induk['jenis'], $induk['induk_id'], $induk['tagihan']
+        );
+
+        /*
+         * Sisanya disebut di kalimat suksesnya, bukan dibiarkan dicari
+         * sendiri. Pertanyaan berikutnya SELALU "jadi kurang berapa", dan
+         * jawabannya sudah ada di tangan saat kalimat ini dirakit.
+         */
+        $pesan = 'Pembayaran Rp ' . number_format($nominal, 0, ',', '.') . ' tercatat. ';
+
+        $pesan .= $ringkas['lunas']
+            ? 'Tagihannya sudah lunas.'
+            : 'Sisa tagihan Rp ' . number_format($ringkas['sisa'], 0, ',', '.') . '.';
+
+        return back()->with('sukses', $pesan);
+    }
+
+    /**
+     * Menghapus satu catatan pembayaran.
+     *
+     * Dihapus seutuhnya, bukan ditandai batal: yang dihapus adalah catatan
+     * yang salah ketik, dan baris "Rp 15.000.000 (dibatalkan)" yang menetap
+     * di kwitansi lembaga menimbulkan pertanyaan yang tidak punya jawaban.
+     */
+    public function hapusPembayaran(string $pembayaran)
+    {
+        if (! $this->bolehMenghapus()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PembayaranPendaftaran::find($pembayaran);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $nominal = (int) $baris->nominal;
+        $baris->delete();
+
+        return back()->with('sukses',
+            'Catatan pembayaran Rp ' . number_format($nominal, 0, ',', '.') . ' dihapus.');
+    }
+
+    /**
+     * Kwitansi cetak untuk satu pembayaran.
+     *
+     * Halaman bergaya cetak, bukan PDF — alasannya sama seperti slip dan
+     * faktur: membuat PDF di peladen menambah satu kemungkinan gagal,
+     * sedangkan Ctrl+P sudah menghasilkan berkas yang bisa dilampirkan ke
+     * email lembaganya.
+     */
+    public function kwitansi(string $pembayaran)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PembayaranPendaftaran::find($pembayaran);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $lembaga = null;
+        $tagihan = 0;
+        $untuk = '';
+
+        if ($baris->jenis === \App\PembayaranPendaftaran::LEMBAGA) {
+            $lembaga = \App\PemesananLembaga::find($baris->induk_id);
+
+            if ($lembaga === null) {
+                abort(404);
+            }
+
+            $tagihan = $lembaga->tagihan();
+            $untuk = $lembaga->nama_lembaga;
+        } else {
+            $induk = Pendaftaran::kueri()
+                ->where('layanan', (string) $baris->layanan)
+                ->where('id', (string) $baris->induk_id)
+                ->first();
+
+            if ($induk === null) {
+                abort(404);
+            }
+
+            $tagihan = (int) $induk->total;
+            $untuk = (string) $induk->nama_orang;
+        }
+
+        $semua = \App\PembayaranPendaftaran::milik($baris->jenis, (string) $baris->induk_id)
+            ->terurut()->get();
+
+        return view('account.pendaftaran_layanan.kwitansi', [
+            'bayar' => $baris,
+            'lembaga' => $lembaga,
+            'untuk' => $untuk,
+            'semua' => $semua,
+            'ringkas' => \App\PembayaranPendaftaran::ringkas(
+                $baris->jenis, (string) $baris->induk_id, $tagihan
+            ),
+        ]);
+    }
+
+    /**
+     * Menyimpan bukti transfer satu termin.
+     *
+     * Folder tersendiri, bukan folder bukti layanannya: satu termin milik
+     * PESANAN, bukan milik satu pendaftaran — dan menaruhnya di folder salah
+     * satu layanan membuat buktinya tidak bisa ditemukan lagi begitu pesanan
+     * itu memuat dua layanan berbeda.
+     */
+    private function simpanBuktiTermin(\App\PembayaranPendaftaran $bayar, $berkas): void
+    {
+        if (! $berkas instanceof \Illuminate\Http\UploadedFile || ! $berkas->isValid()) {
+            return;
+        }
+
+        try {
+            $tujuan = public_path(self::FOLDER_BUKTI_TERMIN);
+
+            if (! is_dir($tujuan)) {
+                mkdir($tujuan, 0755, true);
+            }
+
+            /*
+             * Namanya dirakit sistem, bukan memakai nama asli kiriman. Nama
+             * berkas dari ponsel sering memuat spasi dan tanda kutip, dan
+             * firewall hosting menolak alamat berapostrof dengan 403 sebelum
+             * PHP sempat jalan — buktinya tersimpan tetapi tidak pernah bisa
+             * dibuka.
+             */
+            $nama = 'termin-' . now()->format('Ymd-His') . '-'
+                . \Illuminate\Support\Str::random(6) . '.'
+                . strtolower($berkas->getClientOriginalExtension() ?: 'jpg');
+
+            $berkas->move($tujuan, $nama);
+
+            $bayar->forceFill(['bukti' => $nama])->save();
+        } catch (\Throwable $e) {
+            // Gagal simpan bukti TIDAK menggagalkan catatan pembayarannya:
+            // angkanya sudah benar dan itu yang dipakai menghitung sisa,
+            // sedangkan buktinya bisa diunggah ulang.
+            \Log::error('Bukti termin gagal disimpan', [
+                'pembayaran' => $bayar->getKey(),
+                'sebab' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Halaman rincian satu pendaftaran.
      *
      * Satu halaman untuk kelima layanan, dengan bagian borang yang berbeda
@@ -709,6 +965,11 @@ class PendaftaranLayananController extends Controller
             'katalog' => Pendaftaran::katalog(),
             'jumlahKursi' => $baris->sum(fn ($b) => max(1, (int) $b->jumlah)),
             'jumlahUang' => $baris->sum(fn ($b) => (int) $b->total),
+            // Termin yang sudah masuk. Faktur yang menyebut total tagihan saja
+            // sementara lembaganya sudah membayar DP terbaca seperti tagihan
+            // yang belum disentuh — dan itu yang dibawa ke rapat anggaran.
+            'pembayaran' => $lembaga->pembayaran(),
+            'ringkas' => $lembaga->ringkasBayar(),
         ]);
     }
 

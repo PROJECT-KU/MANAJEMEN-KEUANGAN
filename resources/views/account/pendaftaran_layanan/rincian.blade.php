@@ -219,6 +219,121 @@ Rincian Pendaftaran | MIS Rumah Scopus
             grid-column: 1 / -1;
         }
 
+        /* ------------------------------------------- termin & DP */
+
+        /* Ringkasan uang. Tiga baris, yang terakhir ditebalkan: pertanyaan
+           yang dibawa orang ke panel ini selalu "kurang berapa". */
+        .rin-uang {
+            padding: 14px 16px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+        }
+
+        .rin-uang-baris {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: .85rem;
+            color: var(--mis-tinta-3);
+        }
+
+        .rin-uang-baris + .rin-uang-baris { margin-top: 7px; }
+
+        .rin-uang-baris.akhir {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--mis-garis);
+            font-size: .95rem;
+            color: var(--mis-tinta);
+        }
+
+        .rin-uang-baris strong { overflow-wrap: anywhere; }
+        .rin-uang-baris .hijau { color: #15803d; }
+        .rin-uang-baris .merah { color: #be123c; }
+
+        /* Bilah terbayar. Seberapa jauh terbaca sekali lihat; "12 dari 30
+           juta" butuh dibaca dua kali. */
+        .rin-uang-bilah {
+            margin-top: 12px;
+            height: 7px;
+            border-radius: 99px;
+            background: #eef2ff;
+            overflow: hidden;
+        }
+
+        .rin-uang-bilah span {
+            display: block;
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #7c3aed 0%, #10b981 100%);
+        }
+
+        .rin-termin {
+            display: grid;
+            gap: 9px;
+            margin: 15px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .rin-termin li {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 11px;
+            padding: 11px 13px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+        }
+
+        .rin-termin-pil {
+            flex: 0 0 auto;
+            padding: 4px 10px;
+            border-radius: 99px;
+            background: #f1f5f9;
+            font-size: .7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: var(--mis-tinta-3);
+        }
+
+        /* min-width: 0 supaya nominal panjang menyusut, bukan mendorong
+           tombolnya keluar kartu. */
+        .rin-termin-isi {
+            flex: 1 1 170px;
+            min-width: 0;
+            font-size: .9rem;
+            color: var(--mis-tinta);
+        }
+
+        .rin-termin-ket {
+            display: block;
+            margin-top: 2px;
+            font-size: .74rem;
+            font-weight: 500;
+            color: var(--mis-tinta-4);
+            overflow-wrap: anywhere;
+        }
+
+        .rin-termin-alat {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-left: auto;
+        }
+
+        .rin-termin-hapus { margin: 0; }
+
+        .rin-termin-borang {
+            margin-top: 19px;
+            padding-top: 17px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
         .rin-bagian + .rin-bagian {
             margin-top: 19px;
             padding-top: 17px;
@@ -430,6 +545,29 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
     $diskon = (int) ($pendaftaran->nominal_diskon ?: $pendaftaran->diskon);
 
+    /*
+     * Pembayaran bertermin — DP, cicilan, pelunasan.
+     *
+     * Siapa yang menanggung tagihannya diputuskan SATU aturan di modelnya,
+     * bukan di sini: layar, penyimpan, dan ujinya harus sepakat, kalau tidak
+     * panelnya muncul sementara penyimpannya menolak dan panitia melihat
+     * tombol yang tidak bekerja tanpa penjelasan apa pun.
+     */
+    $kolomTotal = Pendaftaran::sumber($layanan)['kolom']['total'];
+    $totalTagihan = (int) $pendaftaran->{$kolomTotal};
+
+    $indukBayar = \App\PembayaranPendaftaran::indukUntuk(
+        $layanan, (string) $pendaftaran->getKey(), $lembaga, $jumlahOrang, $totalTagihan
+    );
+
+    $ringkasBayar = $indukBayar === null ? null : \App\PembayaranPendaftaran::ringkas(
+        $indukBayar['jenis'], $indukBayar['induk_id'], $indukBayar['tagihan']
+    );
+
+    $daftarBayar = $indukBayar === null ? collect() : \App\PembayaranPendaftaran::milik(
+        $indukBayar['jenis'], $indukBayar['induk_id']
+    )->terurut()->get();
+
     $berangkatan = Pendaftaran::berangkatan($layanan);
     /*
      * Tambahan kalimat peringatan hapus, dirakit di sini.
@@ -570,6 +708,16 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
     if ($bagianBayar !== []) {
         $tab[] = ['bayar', 'Pembayaran', 'fa-wallet'];
+    }
+
+    /*
+     * Tab tersendiri, bukan diselipkan ke tab "Pembayaran" di atasnya. Tab itu
+     * MENYUNTING medan milik barisnya sendiri dan isinya satu borang utuh;
+     * borang bersarang bukan markah yang sah, dan termin memang milik
+     * PESANAN, bukan milik satu baris.
+     */
+    if ($indukBayar !== null) {
+        $tab[] = ['termin', 'Termin & DP', 'fa-receipt'];
     }
 
     if ($bagianSesi !== []) {
@@ -1006,6 +1154,220 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         @endif
                     @endforeach
 
+                    {{-- ========================================= termin --}}
+                    @if ($indukBayar)
+                        <div class="tab-pane fade {{ $tabSekarang === 'termin' ? 'show active' : '' }}"
+                            id="rin-panel-termin" role="tabpanel" aria-labelledby="rin-tab-termin" tabindex="0">
+
+                            @php
+                                $sudahPersen = $ringkasBayar['tagihan'] > 0
+                                    ? min(100, (int) round($ringkasBayar['terbayar'] * 100 / $ringkasBayar['tagihan']))
+                                    : 0;
+                                $milikLembaga = $indukBayar['jenis'] === \App\PembayaranPendaftaran::LEMBAGA;
+                            @endphp
+
+                            {{-- Yang ditanggung SIAPA disebut lebih dulu.
+
+                                 Pesanan lembaga mengikat beberapa pendaftaran
+                                 di beberapa angkatan, jadi angka di panel ini
+                                 bukan tagihan baris yang sedang dibuka
+                                 melainkan tagihan seluruh pesanannya — dan
+                                 tanpa kalimat ini, panitia akan mengira
+                                 Rp 30.000.000 itu tagihan satu orang. --}}
+                            <p class="mis-kartu-sub" style="margin-bottom: 13px;">
+                                @if ($milikLembaga)
+                                    Angka di bawah untuk <strong>seluruh pesanan {{ $lembaga->kode }}</strong>
+                                    ({{ $lembaga->nama_lembaga }}), bukan untuk pendaftaran ini saja.
+                                @else
+                                    Rombongan {{ $jumlahOrang }} orang yang dibayar atas satu nama,
+                                    jadi tagihannya dihitung sekaligus.
+                                @endif
+                            </p>
+
+                            <div class="rin-uang">
+                                <div class="rin-uang-baris">
+                                    <span>Tagihan</span>
+                                    <strong>Rp {{ number_format($ringkasBayar['tagihan'], 0, ',', '.') }}</strong>
+                                </div>
+                                <div class="rin-uang-baris">
+                                    <span>Sudah masuk</span>
+                                    <strong class="hijau">Rp {{ number_format($ringkasBayar['terbayar'], 0, ',', '.') }}</strong>
+                                </div>
+                                <div class="rin-uang-baris akhir">
+                                    <span>Sisa tagihan</span>
+                                    <strong class="{{ $ringkasBayar['lunas'] ? 'hijau' : 'merah' }}">
+                                        @if ($ringkasBayar['lunas'])
+                                            Lunas
+                                        @else
+                                            Rp {{ number_format($ringkasBayar['sisa'], 0, ',', '.') }}
+                                        @endif
+                                    </strong>
+                                </div>
+
+                                {{-- Bilah, bukan hanya angka: "sudah masuk 12 dari
+                                     30 juta" butuh dibaca dua kali, sedangkan
+                                     seberapa jauh bilahnya terbaca sekali lihat. --}}
+                                <div class="rin-uang-bilah" role="img"
+                                    aria-label="Terbayar {{ $sudahPersen }} persen dari tagihan">
+                                    <span style="width: {{ $sudahPersen }}%"></span>
+                                </div>
+                            </div>
+
+                            @if ($ringkasBayar['lunas'])
+                                {{-- Lunas di sini TIDAK memindahkan status
+                                     pendaftarannya, dan itu disebut apa adanya.
+                                     Memindahkannya sendiri berarti surat
+                                     pemberitahuan ke pesertanya ikut terkirim
+                                     tanpa diminta — untuk pesanan lembaga, puluhan
+                                     sekaligus. --}}
+                                <p class="rin-nota">
+                                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                    <span>
+                                        Uangnya sudah penuh. Status pendaftarannya
+                                        <strong>belum</strong> ikut berpindah — tandai Lunas dari tab
+                                        Ringkasan supaya pemberitahuannya terkirim ke pesertanya.
+                                    </span>
+                                </p>
+                            @endif
+
+                            @if ($daftarBayar->isNotEmpty())
+                                <ul class="rin-termin">
+                                    @foreach ($daftarBayar as $bayar)
+                                        <li>
+                                            <span class="rin-termin-pil">
+                                                {{ $bayar->sebutan($ringkasBayar['lunas'], $daftarBayar->count()) }}
+                                            </span>
+                                            <span class="rin-termin-isi">
+                                                <strong>Rp {{ number_format((int) $bayar->nominal, 0, ',', '.') }}</strong>
+                                                <span class="rin-termin-ket">
+                                                    {{ $bayar->tanggal?->locale('id')->translatedFormat('j F Y') }}
+                                                    &middot; {{ $bayar->cara_bayar_terbaca }}
+                                                    @if ($bayar->dicatat_oleh)
+                                                        &middot; dicatat {{ $bayar->dicatat_oleh }}
+                                                    @endif
+                                                    @if ($bayar->catatan)
+                                                        <br>{{ $bayar->catatan }}
+                                                    @endif
+                                                </span>
+                                            </span>
+
+                                            <span class="rin-termin-alat">
+                                                @if ($bayar->bukti)
+                                                    <a class="mis-tombol mis-tombol-halus"
+                                                        href="{{ asset(\App\Http\Controllers\account\PendaftaranLayananController::FOLDER_BUKTI_TERMIN . '/' . basename($bayar->bukti)) }}"
+                                                        target="_blank" rel="noopener">
+                                                        <i class="fas fa-image" aria-hidden="true"></i> Bukti
+                                                    </a>
+                                                @endif
+                                                <a class="mis-tombol mis-tombol-halus"
+                                                    href="{{ route('account.pendaftaran-layanan.kwitansi', $bayar->getKey()) }}"
+                                                    target="_blank" rel="noopener">
+                                                    <i class="fas fa-receipt" aria-hidden="true"></i> Kwitansi
+                                                </a>
+                                                @if ($bolehMenghapus)
+                                                    <form method="POST" class="rin-termin-hapus"
+                                                        action="{{ route('account.pendaftaran-layanan.pembayaran.hapus', $bayar->getKey()) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="mis-tombol mis-tombol-bahaya"
+                                                            data-hapus-termin
+                                                            data-nominal="Rp {{ number_format((int) $bayar->nominal, 0, ',', '.') }}">
+                                                            <i class="fas fa-trash" aria-hidden="true"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="rin-nota">
+                                    <i class="fas fa-wallet" aria-hidden="true"></i>
+                                    <span>Belum ada uang yang tercatat masuk untuk pesanan ini.</span>
+                                </p>
+                            @endif
+
+                            <form method="POST" enctype="multipart/form-data" class="rin-termin-borang"
+                                action="{{ route('account.pendaftaran-layanan.pembayaran', [$layanan, $pendaftaran->getKey()]) }}">
+                                @csrf
+
+                                <p class="rin-bagian-judul">
+                                    <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                    <span class="teks">Catat uang masuk</span>
+                                </p>
+
+                                <div class="rin-isian-kisi">
+                                    <div class="mis-isian">
+                                        <label class="mis-label" for="rin-t-nominal">Nominal</label>
+                                        <input type="text" class="form-control-modern @error('nominal') is-invalid @enderror"
+                                            id="rin-t-nominal" name="nominal" inputmode="numeric"
+                                            value="{{ old('nominal') }}"
+                                            placeholder="mis. {{ number_format(max(1, $ringkasBayar['sisa']), 0, ',', '.') }}">
+                                        @error('nominal')
+                                            <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="mis-isian">
+                                        <label class="mis-label" for="rin-t-tanggal">Tanggal uang masuk</label>
+                                        <input type="date" class="form-control-modern @error('tanggal') is-invalid @enderror"
+                                            id="rin-t-tanggal" name="tanggal" max="{{ now()->toDateString() }}"
+                                            value="{{ old('tanggal', now()->toDateString()) }}">
+                                        @error('tanggal')
+                                            <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="mis-isian">
+                                        <label class="mis-label" for="rin-t-cara">Cara bayar</label>
+                                        <select class="form-control-modern" id="rin-t-cara" name="cara_bayar">
+                                            @foreach (Pendaftaran::caraBayarPilihan() as $kode => $cara)
+                                                <option value="{{ $kode }}" @selected(old('cara_bayar', 'transfer') === $kode)>
+                                                    {{ $cara['label'] }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="mis-isian">
+                                        <label class="mis-label" for="rin-t-bukti">
+                                            Bukti transfer <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh menyusul)</span>
+                                        </label>
+                                        <input type="file" class="form-control-modern @error('bukti') is-invalid @enderror"
+                                            id="rin-t-bukti" name="bukti" accept="image/jpeg,image/png,image/webp">
+                                        @error('bukti')
+                                            <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="mis-isian rin-isian-penuh">
+                                        <label class="mis-label" for="rin-t-catatan">
+                                            Catatan <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh dikosongkan)</span>
+                                        </label>
+                                        <input type="text" class="form-control-modern" id="rin-t-catatan"
+                                            name="catatan" maxlength="255" value="{{ old('catatan') }}"
+                                            placeholder="mis. transfer BNI a.n. Bendahara">
+                                    </div>
+                                </div>
+
+                                <div class="rin-kaki">
+                                    <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                        <i class="fas fa-save" aria-hidden="true"></i> Catat pembayaran
+                                    </button>
+                                    @if ($milikLembaga)
+                                        <a class="mis-tombol mis-tombol-halus"
+                                            href="{{ route('account.pendaftaran-layanan.faktur', $lembaga->id) }}">
+                                            <i class="fas fa-file-invoice" aria-hidden="true"></i>
+                                            Faktur {{ $lembaga->kode }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </form>
+                        </div>
+                    @endif
+
                     {{-- ======================================== peserta --}}
                     @if ($adaPeserta)
                         <div class="tab-pane fade {{ $tabSekarang === 'peserta' ? 'show active' : '' }}"
@@ -1248,6 +1610,34 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * Dialognya bukan pengaman. Peladennya tetap memeriksa peran penghapusnya,
      * jadi melewatinya lewat konsol tidak membuat apa pun bisa terhapus.
      */
+    /*
+     * Hapus satu catatan pembayaran. Lewat misKonfirmasi() juga — dialognya
+     * bukan pengaman, peladennya tetap memeriksa peran penghapusnya, tetapi
+     * angka yang dihapus tanpa ditanya adalah angka yang hilang tanpa ada
+     * yang sadar sampai tagihannya tidak cocok.
+     */
+    document.addEventListener('click', function (e) {
+        var tombolTermin = e.target.closest('[data-hapus-termin]');
+
+        if (!tombolTermin) {
+            return;
+        }
+
+        e.preventDefault();
+
+        window.misKonfirmasi({
+            judul: 'Hapus catatan pembayaran ini?',
+            pesan: 'Sisa tagihannya ikut berubah. Tidak bisa diurungkan.',
+            sorot: tombolTermin.dataset.nominal,
+            tombol: 'Ya, hapus',
+            jenis: 'bahaya',
+        }).then(function (setuju) {
+            if (setuju) {
+                tombolTermin.closest('form').submit();
+            }
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         var tombol = document.getElementById('rin-tombol-hapus');
 

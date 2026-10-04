@@ -511,6 +511,18 @@ Route::prefix('account')
              */
             Route::get('Pendaftaran-Layanan/faktur/{pemesanan}', 'account\\PendaftaranLayananController@faktur')
                 ->name('account.pendaftaran-layanan.faktur');
+
+            /*
+             * Pembayaran bertermin — DP, cicilan, pelunasan. Ketiganya DI ATAS
+             * rute '{layanan}/{id}': 'kwitansi' dan 'pembayaran' tidak boleh
+             * terbaca sebagai nama layanan.
+             */
+            Route::get('Pendaftaran-Layanan/kwitansi/{pembayaran}', 'account\\PendaftaranLayananController@kwitansi')
+                ->name('account.pendaftaran-layanan.kwitansi');
+            Route::delete('Pendaftaran-Layanan/pembayaran/{pembayaran}', 'account\\PendaftaranLayananController@hapusPembayaran')
+                ->name('account.pendaftaran-layanan.pembayaran.hapus');
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/pembayaran', 'account\\PendaftaranLayananController@catatPembayaran')
+                ->name('account.pendaftaran-layanan.pembayaran');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}/slip', 'account\\PendaftaranLayananController@slip')
                 ->name('account.pendaftaran-layanan.slip');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@rincian')

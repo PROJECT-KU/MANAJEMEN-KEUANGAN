@@ -197,15 +197,64 @@
             </table>
         </div>
 
-        {{-- Tiap pendaftaran punya kode uniknya sendiri, jadi menagihkan satu
-             angka gabungan justru membuat pembayarannya tidak bisa
-             dicocokkan. Disebut apa adanya supaya tidak ada yang mencoba. --}}
-        <p class="fak-nota">
-            Pembayarannya <strong>per pendaftaran</strong>, bukan satu transfer gabungan.
-            Tiap nomor di atas punya nominal sendiri sampai angka terakhirnya — angka
-            itulah yang membuat tiap pembayaran bisa kami kenali. Mohon ditransfer
-            terpisah sesuai nominal masing-masing.
-        </p>
+        {{-- Termin yang sudah masuk.
+
+             Faktur yang menyebut total tagihan saja sementara lembaganya sudah
+             membayar DP terbaca seperti tagihan yang belum disentuh — dan itu
+             yang dibawa ke rapat anggaran lembaganya. --}}
+        @if ($pembayaran->isNotEmpty())
+            <div class="fak-jumlah">
+                <table>
+                    @foreach ($pembayaran as $bayar)
+                        <tr>
+                            <td style="color:#64748b">
+                                {{ $bayar->sebutan($ringkas['lunas'], $pembayaran->count()) }}
+                                <span class="fak-sub">
+                                    {{ $bayar->tanggal?->locale('id')->translatedFormat('j M Y') }}
+                                </span>
+                            </td>
+                            <td>Rp {{ number_format((int) $bayar->nominal, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                    <tr class="akhir">
+                        <td>{{ $ringkas['lunas'] ? 'Lunas' : 'Sisa tagihan' }}</td>
+                        <td>
+                            @if ($ringkas['lunas'])
+                                &mdash;
+                            @else
+                                Rp {{ number_format($ringkas['sisa'], 0, ',', '.') }}
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        @endif
+
+        {{-- Dua kalimat yang bertentangan, jadi hanya satu yang boleh tampil.
+
+             Tanpa termin, pembayarannya memang PER PENDAFTARAN: tiap nomor
+             punya kode uniknya sendiri di ujung nominalnya, dan itulah yang
+             membuat tiap transfer bisa dikenali.
+
+             Begitu pesanannya dibayar bertermin, aturan itu berhenti berlaku —
+             satu transfer DP tidak mungkin cocok dengan kode unik siapa pun.
+             Dibiarkan keduanya tercetak, lembaganya diberi dua perintah yang
+             saling membatalkan. --}}
+        @if ($pembayaran->isNotEmpty())
+            <p class="fak-nota">
+                Pesanan ini dibayar <strong>bertermin</strong>. Nominal tiap termin
+                disepakati bersama panitia, dan kuitansinya diterbitkan setiap kali
+                uangnya masuk. Kursinya sudah ditahan sejak pendaftarannya dicatat,
+                jadi sisa tagihan tidak memengaruhi tempat peserta.
+            </p>
+        @else
+            <p class="fak-nota">
+                Pembayarannya <strong>per pendaftaran</strong>, bukan satu transfer gabungan.
+                Tiap nomor di atas punya nominal sendiri sampai angka terakhirnya — angka
+                itulah yang membuat tiap pembayaran bisa kami kenali. Mohon ditransfer
+                terpisah sesuai nominal masing-masing.
+            </p>
+        @endif
 
         <p class="fak-kaki">
             Dicetak {{ now()->locale('id')->translatedFormat('j F Y, H:i') }} ·
