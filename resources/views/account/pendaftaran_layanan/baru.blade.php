@@ -705,6 +705,30 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         /*
+         * Total bayar melebar saat variannya dipilih sendiri.
+         *
+         * Layanan tanpa angkatan menyembunyikan menu angkatan DAN isian
+         * jumlah orang sekaligus, jadi baris pertama langkah ini tinggal
+         * kartu varian (dua jalur) plus total bayar (satu jalur) —
+         * menyisakan satu jalur menganggur di ujung kanan. Terukur 273px
+         * kosong di 1.470px.
+         *
+         * Syaratnya kartu varian yang TAMPIL, bukan angkatan yang
+         * tersembunyi: layanan tanpa angkatan DAN tanpa varian akan
+         * menyodorkan kotak nominal selebar separuh kartu untuk satu angka,
+         * yang lebih buruk daripada jalur kosongnya.
+         */
+        .bar-isian-kisi:has(> #bar-bungkus-varian:not([hidden])) > #bar-bungkus-total {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-isian-kisi:has(> #bar-bungkus-varian:not([hidden])) > #bar-bungkus-total {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /*
          * Kartu ringkas melebar saat jumlah orang tidak diminta.
          *
          * Di jalur perorangan jumlahnya selalu satu, jadi isiannya
@@ -1346,22 +1370,29 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
                     </div>
 
-                    {{-- Nama sesi, hanya untuk layanan yang tabelnya punya
-                         kolomnya (Scopus Kafe). Tanpa ini, pendaftaran Scopus
-                         Kafe lewat jalur panitia tidak pernah menyebut sesi
-                         apa yang diambil. --}}
+                    {{-- Sesi, hanya untuk layanan yang tabelnya punya kolomnya
+                         (Scopus Kafe).
+
+                         Kartu pilihan, BUKAN kotak teks bebas seperti dulu.
+                         Scopus Kafe berjalan pada jam yang tetap dan jamnya
+                         berbeda menurut varian — offline dua sesi, online
+                         hanya sesi pagi — jadi mengetiknya sendiri berarti
+                         satu sesi yang sama tersimpan dalam beberapa ejaan,
+                         dan daftar hadir per sesi tidak bisa dikelompokkan.
+                         Jamnya ikut tercetak di kartunya supaya panitia tidak
+                         perlu menghafalnya. --}}
                     <div class="mis-isian bar-lebar" id="bar-bungkus-sesi" hidden>
-                        <label class="mis-label" for="bar-sesi">Sesi yang diambil</label>
-                        <input type="text" class="form-control-modern @error('sesi') is-invalid @enderror" id="bar-sesi" name="sesi"
-                            value="{{ old('sesi') }}" maxlength="120"
-                            placeholder="mis. Sesi 1 — Menyusun pendahuluan">
+                        <span class="mis-label">Sesi yang diambil<span class="bar-wajib" aria-hidden="true">*</span></span>
+                        <div class="bar-pilihan bar-pilihan-bayar" id="bar-sesi-kartu"></div>
                         @error('sesi')
                             <p class="bar-salah">
                                 <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
                                 <span>{{ $message }}</span>
                             </p>
                         @enderror
-                        <p class="mis-bantuan">Supaya jadwalnya bisa ditelusuri nanti.</p>
+                        <p class="mis-bantuan" id="bar-sesi-ket">
+                            Jam pelaksanaannya ikut sesi yang dipilih.
+                        </p>
                     </div>
 
                     {{-- Mengisi jalur yang sebelumnya menganggur di baris ini,
@@ -2047,6 +2078,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var VARIAN = @json($varian);
         var TARIF = @json($tarif);
         var LAMA_VARIAN = @json(old('varian'));
+        var SESI = @json(\App\Support\PendaftaranSemuaLayanan::SESI);
+        var LAMA_SESI = @json(old('sesi'));
         var LAMA_ANGKATAN = @json(old('kategori_id') ?: ($terpilihAngkatan ?: null));
 
         /*
@@ -2099,6 +2132,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var lebihPeserta = el('bar-peserta-lebih');
         var lebihPesertaTeks = el('bar-peserta-lebih-teks');
         var bungkusSesi = el('bar-bungkus-sesi');
+        var kartuSesi = el('bar-sesi-kartu');
+        var ketSesi = el('bar-sesi-ket');
         var bungkusBukti = el('bar-bungkus-bukti');
         var isianBukti = el('bar-bukti');
         var namaBerkas = el('bar-berkas-nama');
@@ -2609,7 +2644,111 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             sekilasHarga.textContent = harga ? rupiah(harga) : 'belum disetel';
             tampil(sekilas, true);
 
+            // Sesinya dirakit DI SINI, bukan di segarkan(): daftarnya
+            // bergantung pada varian, jadi ia harus ikut berubah saat
+            // variannya berganti — bukan hanya saat layanannya berganti.
+            isiSesi(layanan, r.value);
+
             hitung();
+        };
+
+        /**
+         * Merakit kartu sesi untuk varian yang sedang terpilih.
+         *
+         * Daftarnya berbeda per varian — Scopus Kafe offline punya dua sesi,
+         * online hanya sesi pagi — jadi ia dirakit ulang setiap variannya
+         * berganti, bukan sekali saat halaman dibuka.
+         *
+         * Fungsi ini SATU-SATUNYA yang mengatur tampil-tidaknya kotak sesi.
+         * Dua fungsi yang mengatur satu unsur berakhir dengan yang terakhir
+         * menang, dan itu sudah pernah terjadi di borang ini pada isian
+         * "jumlah orang".
+         */
+        var isiSesi = function (layanan, varian) {
+            var daftar = (SESI[layanan] || {})[varian] || [];
+
+            kartuSesi.innerHTML = '';
+            tampil(bungkusSesi, daftar.length > 0);
+
+            if (daftar.length === 0) {
+                return;
+            }
+
+            var pertama = null;
+
+            daftar.forEach(function (sesi) {
+                var label = document.createElement('label');
+                var radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'sesi';
+                radio.value = sesi.nilai;
+                radio.id = 'bar-sesi-' + sesi.nilai.replace(/\s+/g, '-');
+
+                var kartu = document.createElement('span');
+                kartu.className = 'bar-kartu';
+
+                var medali = document.createElement('span');
+                medali.className = 'mis-medali mis-kuning';
+                medali.setAttribute('aria-hidden', 'true');
+                medali.innerHTML = '<i class="fas fa-clock"></i>';
+
+                var teks = document.createElement('span');
+                teks.style.minWidth = '0';
+
+                var nama = document.createElement('span');
+                nama.className = 'bar-kartu-nama';
+                nama.textContent = sesi.nama;
+
+                var ket = document.createElement('span');
+                ket.className = 'bar-kartu-ket';
+                /*
+                 * Jamnya dicetak di kartunya, bukan hanya di keterangan di
+                 * bawah. "Sesi 1" saja menuntut panitia menghafal jamnya, dan
+                 * yang salah hafal baru ketahuan saat pendaftarnya datang di
+                 * jam yang keliru.
+                 */
+                ket.textContent = sesi.mulai.replace(':', '.') + ' – '
+                    + sesi.selesai.replace(':', '.') + ' WIB';
+
+                teks.appendChild(nama);
+                teks.appendChild(ket);
+
+                var tanda = document.createElement('span');
+                tanda.className = 'bar-kartu-centang';
+                tanda.setAttribute('aria-hidden', 'true');
+                tanda.innerHTML = '<i class="fas fa-check-circle"></i>';
+
+                kartu.appendChild(medali);
+                kartu.appendChild(teks);
+                kartu.appendChild(tanda);
+                label.appendChild(radio);
+                label.appendChild(kartu);
+                kartuSesi.appendChild(label);
+
+                if (pertama === null) {
+                    pertama = radio;
+                }
+
+                if (LAMA_SESI === sesi.nilai) {
+                    radio.checked = true;
+                }
+            });
+
+            /*
+             * Satu sesi selalu terpilih. Variannya sendiri sudah menentukan
+             * jam yang mungkin, dan keadaan "belum memilih" di varian online
+             * — yang sesinya cuma satu — hanya berarti satu klik yang tidak
+             * memberi pilihan apa pun.
+             */
+            if (pertama && !kartuSesi.querySelector('input:checked')) {
+                pertama.checked = true;
+            }
+
+            LAMA_SESI = null;
+
+            ketSesi.textContent = daftar.length > 1
+                ? 'Jam pelaksanaannya ikut sesi yang dipilih.'
+                : 'Varian ini hanya punya satu sesi, jadi sudah terpilih sendiri.';
         };
 
         var segarkan = function () {
@@ -2656,7 +2795,6 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             // tegaskanAngkatan() yang menyalakannya kembali kalau ada.
             tampil(sekilas, false);
             tampil(bungkusVarian, pilih.punyaVarian);
-            tampil(bungkusSesi, pilih.pakaiSesi);
 
             if (polaNomor && pilih.pola) {
                 polaNomor.textContent = pilih.pola;
@@ -2697,6 +2835,15 @@ Daftarkan Pendaftar | MIS Rumah Scopus
              */
             if (!pilih.punyaVarian) {
                 kartuVarian.innerHTML = '';
+            }
+
+            // Alasannya sama persis dengan kartu varian di atas: radio sesi
+            // yang tersembunyi TETAP terkirim, jadi berpindah dari Scopus
+            // Kafe ke layanan lain akan membawa serta sesi yang tidak ada
+            // hubungannya dengan kiriman itu.
+            if (!pilih.pakaiSesi) {
+                kartuSesi.innerHTML = '';
+                tampil(bungkusSesi, false);
             }
 
             tawarkanAlumni(pilih);

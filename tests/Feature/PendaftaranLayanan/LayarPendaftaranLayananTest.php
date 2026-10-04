@@ -1047,6 +1047,54 @@ class LayarPendaftaranLayananTest extends TestCase
     }
 
     /**
+     * Sesi Scopus Kafe dipilih dari daftar, bukan diketik sendiri.
+     *
+     * Scopus Kafe berjalan pada jam tetap dan jamnya berbeda menurut varian:
+     * offline dua sesi, online hanya sesi pagi. Kotak teks bebas membuat satu
+     * sesi yang sama tersimpan dalam beberapa ejaan — terukur 9 baris
+     * tersimpan dengan "sesi 1", "sesi 2", dan "sesi 3" — sehingga daftar
+     * hadir per sesi tidak bisa dikelompokkan sama sekali.
+     *
+     * Yang dijaga di sini bukan rupa kartunya, melainkan bahwa jamnya sampai
+     * ke halaman: dirakit di peramban dari daftar yang dikirim peladen, jadi
+     * daftar yang tidak terkirim berarti kotak sesi yang kosong selamanya.
+     */
+    #[Test]
+    public function sesi_scopus_kafe_dipilih_dari_daftar_bukan_diketik(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('id="bar-sesi-kartu"', $isi);
+
+        // Kotak teks bebasnya memang DIBUANG, bukan sekadar disembunyikan:
+        // isian tersembunyi tetap terkirim, dan nilainya akan menimpa pilihan
+        // kartunya.
+        $this->assertStringNotContainsString('id="bar-sesi"', $isi);
+
+        /*
+         * Jam kedua sesinya ada di halaman. Dicocokkan ke sumbernya, bukan
+         * ditulis ulang di sini — kalau tidak, ujinya tetap hijau justru saat
+         * jamnya diubah di satu tempat dan tidak di tempat lain.
+         */
+        foreach (Pendaftaran::SESI['scopus_kafe'] as $varian => $daftar) {
+            foreach ($daftar as $sesi) {
+                $this->assertStringContainsString($sesi['mulai'], $isi);
+                $this->assertStringContainsString($sesi['selesai'], $isi);
+            }
+        }
+
+        // Online memang hanya punya satu sesi; offline dua. Kalau ini
+        // terbalik, pendaftar online dijanjikan jam yang tidak dibuka.
+        $this->assertCount(1, Pendaftaran::sesiPilihan('scopus_kafe', 'online'));
+        $this->assertCount(2, Pendaftaran::sesiPilihan('scopus_kafe', 'offline'));
+    }
+
+    /**
      * Daftar peserta rombongan bisa diambil dari berkas, bukan hanya diketik.
      *
      * Lembaga mengirim daftar pesertanya sebagai lampiran Excel. Tanpa jalur

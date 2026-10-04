@@ -650,28 +650,52 @@ class BuatPendaftaran
          * Dicocokkan ke daftar varian layanannya, bukan diterima apa adanya:
          * daftarnya hidup di kolom JSON `layanan.varian`, dan nilai di luar
          * daftar berarti baris yang tarifnya tidak akan pernah ketemu.
-         */
-        /*
-         * Nama sesi, untuk tabel yang memang punya kolomnya (Scopus Kafe).
          *
-         * Tabelnya menyimpan sampai tiga sesi beserta biaya masing-masing;
-         * borang panitia mengisi yang PERTAMA saja, dan itu yang selalu
-         * terisi di baris mana pun. Tanpa ini, pendaftaran Scopus Kafe lewat
-         * jalur panitia tidak pernah menyebut sesi apa yang diambil.
+         * Diselesaikan SEBELUM sesi, sebab sesi yang boleh dipilih berbeda
+         * menurut variannya — offline dua sesi, online hanya sesi pagi.
          */
-        if (isset($kolom['sesi']) && $kolom['sesi'] === 'sesi') {
-            $sesi = trim((string) ($isian['sesi'] ?? ''));
-
-            if ($sesi !== '') {
-                $baris['sesi'] = $sesi;
-            }
-        }
+        $varianDipakai = null;
 
         if (isset($kolom['varian'])) {
             $pilihan = \App\Layanan::katalog()[$layanan]['varian'] ?? [];
             $varian = (string) ($isian['varian'] ?? '');
+            $varianDipakai = array_key_exists($varian, $pilihan) ? $varian : null;
 
-            $baris[$kolom['varian']] = array_key_exists($varian, $pilihan) ? $varian : null;
+            $baris[$kolom['varian']] = $varianDipakai;
+        }
+
+        /*
+         * Sesi beserta jamnya, untuk tabel yang memang punya kolomnya
+         * (Scopus Kafe).
+         *
+         * Tabelnya menyimpan sampai tiga sesi beserta biaya masing-masing;
+         * borang panitia mengisi yang PERTAMA saja, dan itu yang selalu
+         * terisi di baris mana pun.
+         *
+         * Nilainya dicocokkan ke daftar sesi variannya, bukan diterima apa
+         * adanya. Dulu kotak teks bebas, jadi satu sesi yang sama bisa
+         * tersimpan "Sesi 1", "sesi1", atau "pagi" — dan daftar hadir per
+         * sesi tidak bisa dikelompokkan dari data yang begitu. Yang di luar
+         * daftar dibuang, bukan disimpan apa adanya: "sesi 2" pada varian
+         * online adalah sesi yang memang tidak pernah ada.
+         *
+         * Jamnya ikut disalin dari daftarnya. Kolom `waktu_mulai` dan
+         * `waktu_selesai` sudah ada dan selalu diisi jalur pendaftaran umum,
+         * jadi membiarkannya kosong membuat pendaftaran buatan panitia
+         * terlihat belum berjadwal di layar yang sama.
+         */
+        if (isset($kolom['sesi']) && $kolom['sesi'] === 'sesi') {
+            $sesi = \App\Support\PendaftaranSemuaLayanan::sesiCocok(
+                $layanan,
+                $varianDipakai,
+                $isian['sesi'] ?? null
+            );
+
+            if ($sesi !== null) {
+                $baris['sesi'] = $sesi['nilai'];
+                $baris['waktu_mulai'] = $sesi['mulai'];
+                $baris['waktu_selesai'] = $sesi['selesai'];
+            }
         }
 
         // Nama kolom berbeda di tiap tabel — nama vs nama_pemesan, telp vs
