@@ -134,21 +134,52 @@ class BuatPendaftaran
             $persenRombongan = $this->persenRombongan($layanan, $angkatan, $jumlah);
 
             /*
-             * Urutannya: alumni, lalu rombongan, lalu potongan khusus — dan
-             * hanya SATU yang berlaku.
+             * Potongan alumni dihitung dari SATU KURSI, bukan dari seluruh
+             * rombongan.
              *
-             * Alumni di depan sebab ia milik orangnya, bukan pesanannya.
-             * Rombongan sesudahnya sebab ia berlaku sendiri begitu jumlahnya
-             * mencapai ambang, tanpa panitia perlu mengingat besarannya.
-             * Potongan khusus terakhir: ia yang diketik tangan, dan sesuatu
-             * yang diketik tangan tidak boleh diam-diam ditumpuk di atas
-             * potongan yang dihitung sistem.
+             * Status alumni milik satu orang — yang mendaftar — bukan milik
+             * teman-teman yang ia ajak. Dihitung dari subtotal, satu alumni
+             * yang mengajak enam teman memotong 10% dari tujuh kursi
+             * sekaligus: terukur pada Scopus Camp Rp 5.500.000, potongannya
+             * Rp 3.850.000 padahal seharusnya Rp 550.000 — selisih
+             * Rp 3.300.000 per pemesanan.
              */
-            if ($persenAlumni > 0) {
-                $potongan = (int) round($subtotal * $persenAlumni / 100);
+            /*
+             * Harga SATU kursi. Untuk layanan tanpa angkatan nominalnya
+             * diketik sendiri dan memang untuk satu baris pendaftaran, jadi
+             * subtotalnya sendiri yang jadi harga satuannya.
+             */
+            $satuanKursi = $jumlah > 0 ? intdiv($subtotal, $jumlah) : $subtotal;
+
+            $potonganAlumni = $persenAlumni > 0
+                ? (int) round($satuanKursi * $persenAlumni / 100)
+                : 0;
+
+            // Potongan rombongan memang milik PESANANNYA, jadi ia dihitung
+            // dari seluruh subtotal.
+            $potonganRombongan = $persenRombongan > 0
+                ? (int) round($subtotal * $persenRombongan / 100)
+                : 0;
+
+            /*
+             * Hanya SATU yang berlaku, dan yang dipakai yang paling
+             * menguntungkan pendaftarnya.
+             *
+             * Dulu alumni selalu menang. Sejak potongannya dihitung dari satu
+             * kursi saja, aturan itu merugikan: satu alumni yang mengajak enam
+             * teman akan diberi Rp 550.000 padahal potongan rombongannya
+             * Rp 7.700.000 — dan tidak ada yang akan menyadarinya, sebab
+             * keduanya sama-sama "potongan yang dihitung sistem".
+             *
+             * Potongan khusus tetap paling akhir: ia yang diketik tangan, dan
+             * sesuatu yang diketik tangan tidak boleh diam-diam ditumpuk di
+             * atas potongan yang dihitung sistem.
+             */
+            if ($potonganAlumni > 0 && $potonganAlumni >= $potonganRombongan) {
+                $potongan = $potonganAlumni;
                 $kodePotongan = 'ALUMNI';
-            } elseif ($persenRombongan > 0) {
-                $potongan = (int) round($subtotal * $persenRombongan / 100);
+            } elseif ($potonganRombongan > 0) {
+                $potongan = $potonganRombongan;
                 $kodePotongan = 'ROMBONGAN';
             } else {
                 $potongan = max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0)));
