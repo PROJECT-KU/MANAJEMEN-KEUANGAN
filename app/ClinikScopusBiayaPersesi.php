@@ -47,6 +47,7 @@ class ClinikScopusBiayaPersesi extends Model
         'fasilitas',
         'template_deskripsi',
         'kegiatan',
+        'sesi',
         'kontak',
         'status',
         'penginput_id',
@@ -56,6 +57,7 @@ class ClinikScopusBiayaPersesi extends Model
     protected $casts = [
         'fasilitas' => 'array',
         'kegiatan' => 'array',
+        'sesi' => 'array',
         'berlaku_mulai' => 'date',
     ];
 
@@ -103,6 +105,18 @@ class ClinikScopusBiayaPersesi extends Model
                 $model->penginput_id = auth()->id();
             }
         });
+
+        /*
+         * Daftar sesi yang disimpan di ingatan harus dibuang begitu tarifnya
+         * berubah. Tanpa ini, borang pendaftaran yang dibuka di permintaan
+         * yang sama dengan penyimpanan tarif masih menawarkan jam yang lama —
+         * dan jadwal yang baru saja diubah terlihat tidak tersimpan.
+         *
+         * Juga pada `deleted` dan `updated`: jadikanBerlaku() memindahkan
+         * status baris lain, dan daftar sesi dibaca dari yang berstatus aktif.
+         */
+        static::saved(fn () => \App\Support\PendaftaranSemuaLayanan::lupakanSesi());
+        static::deleted(fn () => \App\Support\PendaftaranSemuaLayanan::lupakanSesi());
     }
 
     public function clinikScopus()
@@ -335,6 +349,154 @@ class ClinikScopusBiayaPersesi extends Model
     public function getDaftarKegiatanAttribute(): array
     {
         return self::bersihkanDaftar($this->kegiatan);
+    }
+
+    /**
+     * Sesi beserta jamnya, sudah dibersihkan.
+     *
+     * Larik kosong berarti tarif ini tidak menyetel sesi sendiri — dan itu
+     * BUKAN berarti layanannya tidak punya sesi: pemanggilnya jatuh kembali
+     * ke daftar bawaan di PendaftaranSemuaLayanan::SESI. Tanpa itu, tarif baru
+     * yang dibuat saat harganya naik akan menghapus jadwal sesi tanpa ada yang
+     * meminta.
+     *
+     * @return list<array{nilai: string, nama: string, mulai: string, selesai: string}>
+     */
+    public function getDaftarSesiAttribute(): array
+    {
+        $keluar = [];
+
+        foreach ((array) ($this->sesi ?? []) as $sesi) {
+            if (! is_array($sesi)) {
+                continue;
+            }
+
+            $nama = trim((string) ($sesi['nama'] ?? ''));
+            $mulai = trim((string) ($sesi['mulai'] ?? ''));
+            $selesai = trim((string) ($sesi['selesai'] ?? ''));
+
+            if ($nama === '' || $mulai === '' || $selesai === '') {
+                continue;
+            }
+
+            $keluar[] = [
+                'nilai' => self::nilaiSesi($nama),
+                'nama' => $nama,
+                'mulai' => $mulai,
+                'selesai' => $selesai,
+            ];
+        }
+
+        return $keluar;
+    }
+
+    /**
+     * Sesinya dalam bentuk yang diketik di borang: satu baris satu sesi.
+     *
+     * Dipakai mengisi kotaknya kembali saat tarifnya dibuka untuk diubah.
+     */
+    public function getSesiTeksAttribute(): string
+    {
+        return self::sesiSebagaiTeks($this->daftar_sesi);
+    }
+
+    /**
+     * Daftar sesi mana pun dalam bentuk yang diketik di borang.
+     *
+     * Dipakai juga untuk daftar BAWAAN, bukan hanya milik barisnya: borang
+     * tarif mengisi kotaknya dengan jam yang SEDANG berlaku, supaya yang
+     * terbaca di kartu dan yang terbaca di kotak isiannya sama. Kotak kosong
+     * di sebelah kartu yang menyebut dua sesi terbaca seperti data yang gagal
+     * dimuat.
+     *
+     * @param  list<array{nama: string, mulai: string, selesai: string}>  $daftar
+     */
+    public static function sesiSebagaiTeks(array $daftar): string
+    {
+        return implode("\n", array_map(
+            fn ($s) => $s['nama'] . ', ' . $s['mulai'] . ' - ' . $s['selesai'],
+            $daftar
+        ));
+    }
+
+    /**
+     * Nilai yang TERSIMPAN di baris pendaftaran untuk sebuah nama sesi.
+     *
+     * Namanya sendiri, huruf kecil, spasinya dirapatkan — jadi "Sesi 1"
+     * tersimpan "sesi 1", sama persis dengan yang ditulis borang pendaftaran
+     * umum selama ini (terukur 9 baris, semuanya berbentuk itu).
+     *
+     * Bukan nomor urut, dan bukan id tersembunyi. Nomor urut berubah artinya
+     * begitu satu sesi dihapus — baris lama yang menunjuk "sesi 2" tiba-tiba
+     * menunjuk sesi yang berbeda. Id tersembunyi aman, tetapi membuat kolom
+     * `sesi` berisi sesuatu yang tidak bisa dibaca siapa pun saat menengok
+     * basis datanya.
+     *
+     * Akibatnya mengganti NAMA sesi berarti pendaftaran berikutnya memakai
+     * nilai baru sementara yang lama tetap memakai yang lama. Itu memang yang
+     * diinginkan: yang sudah terjadi tidak berubah namanya belakangan.
+     */
+    public static function nilaiSesi(string $nama): string
+    {
+        return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $nama)));
+    }
+
+    /**
+     * Membaca sesi dari kotak teksnya: satu baris satu sesi.
+     *
+     * Bentuk yang diterima "Nama, 08.00 - 13.00", dan juga "Nama, 08.00,
+     * 13.00" atau "Nama 08:00-13:00" — pemisahnya tidak dipaksa satu, sebab
+     * yang mengetiknya bukan orang yang hafal format. Yang dicari dua jam di
+     * barisnya; apa pun sebelum jam pertama jadi namanya.
+     *
+     * null kalau kotaknya memang kosong, supaya kolomnya bernilai NULL dan
+     * jatuh ke daftar bawaan — berbeda artinya dari larik kosong.
+     *
+     * @return list<array{nama: string, mulai: string, selesai: string}>|null
+     */
+    public static function uraikanSesi(?string $teks): ?array
+    {
+        $baris = preg_split('/\r\n|\r|\n/', (string) $teks) ?: [];
+        $keluar = [];
+
+        foreach ($baris as $b) {
+            // Penomoran yang ikut tersalin ("1. Sesi pagi") dibuang; yang
+            // dipakai sebagai penanda sesi adalah namanya, bukan nomornya.
+            $bersih = trim(preg_replace('/^\s*\d+\s*[.)]\s*/', '', (string) $b));
+
+            if ($bersih === '') {
+                continue;
+            }
+
+            if (! preg_match_all('/(\d{1,2})[.:](\d{2})/', $bersih, $jam, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            if (count($jam[0]) < 2) {
+                continue;
+            }
+
+            $nama = trim(rtrim(substr($bersih, 0, $jam[0][0][1]), " \t,;|-–—"));
+
+            if ($nama === '') {
+                continue;
+            }
+
+            $keluar[] = [
+                'nama' => mb_substr($nama, 0, 60),
+                // Disimpan "HH:MM", bentuk yang langsung bisa masuk kolom
+                // waktu_mulai/waktu_selesai di tabel pendaftarannya.
+                'mulai' => self::jamRapi($jam[1][0][0], $jam[2][0][0]),
+                'selesai' => self::jamRapi($jam[1][1][0], $jam[2][1][0]),
+            ];
+        }
+
+        return $keluar === [] ? null : $keluar;
+    }
+
+    private static function jamRapi(string $jam, string $menit): string
+    {
+        return str_pad($jam, 2, '0', STR_PAD_LEFT) . ':' . $menit;
     }
 
     /** Apakah layanan ini sudah punya cetakan deskripsi yang bisa dipakai. */

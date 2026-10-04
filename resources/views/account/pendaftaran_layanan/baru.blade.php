@@ -2078,7 +2078,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var VARIAN = @json($varian);
         var TARIF = @json($tarif);
         var LAMA_VARIAN = @json(old('varian'));
-        var SESI = @json(\App\Support\PendaftaranSemuaLayanan::SESI);
+        // Lewat sesiSemua(), bukan konstantanya: jamnya disetel di Tarif
+        // Layanan, dan konstantanya tinggal jaring pengaman untuk tarif
+        // yang belum menyetelnya sendiri.
+        var SESI = @json(\App\Support\PendaftaranSemuaLayanan::sesiSemua());
         var LAMA_SESI = @json(old('sesi'));
         var LAMA_ANGKATAN = @json(old('kategori_id') ?: ($terpilihAngkatan ?: null));
 

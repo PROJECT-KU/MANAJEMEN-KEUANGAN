@@ -352,6 +352,88 @@ class PendaftaranSemuaLayanan
         ],
     ];
 
+    /** @var array<string, array<string, list<array<string, string>>>>|null */
+    private static ?array $sesiTersimpan = null;
+
+    /**
+     * Seluruh sesi yang ditawarkan, berkunci layanan lalu varian.
+     *
+     * Bawaannya konstanta SESI di atas, DITIMPA oleh tarif aktif yang
+     * menyetel sesinya sendiri. Jam Scopus Kafe berubah sewaktu-waktu dan yang
+     * tahu perubahannya panitia, bukan yang memegang kodenya — jadi layar
+     * Tarif Layanan yang menentukan, dan konstanta ini tinggal jaring
+     * pengaman supaya tarif tanpa setelan tidak berarti "tidak ada sesi".
+     *
+     * SATU kueri untuk seluruh layanan, bukan satu per pemanggilan: borang
+     * pendaftaran membutuhkan seluruh pasangan layanan+varian sekaligus untuk
+     * dikirim ke peramban.
+     *
+     * Disimpan di ingatan selama satu permintaan saja, dengan alasan yang sama
+     * seperti katalog Layanan: tarif yang baru diubah harus langsung terlihat,
+     * dan cache antar permintaan membuatnya belum muncul tanpa ada yang tahu
+     * kenapa.
+     *
+     * @return array<string, array<string, list<array{nilai: string, nama: string, mulai: string, selesai: string}>>>
+     */
+    public static function sesiSemua(): array
+    {
+        if (self::$sesiTersimpan !== null) {
+            return self::$sesiTersimpan;
+        }
+
+        $hasil = self::SESI;
+
+        $tarif = \App\ClinikScopusBiayaPersesi::query()
+            ->where('status', \App\ClinikScopusBiayaPersesi::AKTIF)
+            ->whereNotNull('sesi')
+            ->get(['layanan', 'varian', 'sesi']);
+
+        foreach ($tarif as $t) {
+            $daftar = $t->daftar_sesi;
+
+            /*
+             * Tarif yang kolom sesinya terisi tetapi tak satu pun barisnya
+             * utuh dilewati, bukan dipakai menimpa dengan larik kosong —
+             * menimpanya berarti menghapus jadwal karena data yang rusak.
+             */
+            if ($daftar === []) {
+                continue;
+            }
+
+            $hasil[$t->layanan][(string) ($t->varian ?? '')] = $daftar;
+        }
+
+        return self::$sesiTersimpan = $hasil;
+    }
+
+    /**
+     * Layanan yang baris pendaftarannya PUNYA tempat menyimpan sesi.
+     *
+     * Dipakai layar Tarif Layanan untuk memutuskan kapan kotak sesinya
+     * ditawarkan. Syaratnya kolomnya, bukan "sudah punya sesi": layanan yang
+     * sesinya belum disetel justru yang paling butuh kotak itu muncul.
+     *
+     * @return list<string>
+     */
+    public static function layananBersesi(): array
+    {
+        $keluar = [];
+
+        foreach (self::SUMBER as $kunci => $sumber) {
+            if (($sumber['kolom']['sesi'] ?? null) === 'sesi') {
+                $keluar[] = $kunci;
+            }
+        }
+
+        return $keluar;
+    }
+
+    /** Membuang yang disimpan di ingatan; dipakai uji dan saat tarif disimpan. */
+    public static function lupakanSesi(): void
+    {
+        self::$sesiTersimpan = null;
+    }
+
     /**
      * Sesi yang ditawarkan untuk satu layanan dan varian.
      *
@@ -363,7 +445,7 @@ class PendaftaranSemuaLayanan
      */
     public static function sesiPilihan(string $layanan, ?string $varian): array
     {
-        $daftar = self::SESI[$layanan] ?? [];
+        $daftar = self::sesiSemua()[$layanan] ?? [];
         $kunci = trim((string) $varian);
 
         return $daftar[$kunci] ?? [];
