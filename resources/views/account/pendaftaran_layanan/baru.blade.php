@@ -1746,7 +1746,11 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </label>
                     </div>
 
-                    <div class="mis-isian bar-lebar" id="bar-bungkus-catatan" hidden>
+                    {{-- Sebaris PENUH, bukan dua jalur: ia satu-satunya isian di
+                         barisnya, jadi dua jalur meninggalkan separuh kanan
+                         kosong. Teks bebas juga lebih enak diketik selebar
+                         kartunya. --}}
+                    <div class="mis-isian bar-penuh" id="bar-bungkus-catatan" hidden>
                         <label class="mis-label" for="bar-note">Catatan panitia</label>
                         <textarea class="form-control-modern @error('note') is-invalid @enderror" id="bar-note" @error('note') aria-invalid="true" @enderror name="note" rows="2"
                             maxlength="1000" placeholder="boleh dikosongkan">{{ old('note') }}</textarea>
