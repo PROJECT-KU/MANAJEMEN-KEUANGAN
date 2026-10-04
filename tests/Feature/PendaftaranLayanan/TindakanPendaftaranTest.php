@@ -3647,4 +3647,105 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertTrue($adaYangBersurat,
             'Prasyarat ujinya hilang: tidak ada satu pun status Scopus Camp yang mengirim email.');
     }
+
+    #[Test]
+    public function tiap_tab_punya_warna_ikonnya_sendiri_seperti_halaman_profil(): void
+    {
+        /*
+         * Mengikuti model tab halaman Profil, yang tiap ikonnya berwarna
+         * sendiri — terukur di sana: ungu, jingga, biru, hijau.
+         *
+         * Tanpa warna, ketujuh ikon tab di layar ini sewarna semua dan
+         * praktis cuma hiasan: yang membedakan satu tab dari tab lain hanya
+         * tulisannya, dan itu menuntut dibaca. Warna terbaca lebih dulu
+         * daripada huruf.
+         *
+         * Dijaga dari MARKAHNYA, bukan dari hasil rupanya: kelas warnanya
+         * yang menentukan, dan kelas yang tertinggal pada satu tab tidak
+         * menimbulkan galat apa pun.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match('#<ul[^>]*id="rin-tab"(?<isi>.*?)</ul>#s', $isi, $strip),
+            'Deret tab tidak ketemu.');
+
+        preg_match_all('/<i class="fas ([^"]*)"/', $strip['isi'], $ikon);
+
+        $this->assertGreaterThanOrEqual(3, count($ikon[1]),
+            'Prasyarat ujinya hilang: tab yang terbentuk terlalu sedikit.');
+
+        $warna = [];
+
+        foreach ($ikon[1] as $kelas) {
+            $this->assertSame(1, preg_match('/\bmis-ikon-[a-z]+\b/', $kelas, $cocok),
+                'Ada ikon tab tanpa kelas warna: "' . $kelas . '"');
+
+            $warna[] = $cocok[0];
+        }
+
+        // Bukan sekadar berwarna — harus BERBEDA-BEDA. Tujuh ikon yang
+        // semuanya ungu sama tidak menolongnya dengan yang semuanya kelabu.
+        $this->assertGreaterThanOrEqual(4, count(array_unique($warna)),
+            'Warna ikon tabnya kurang beragam: ' . implode(', ', $warna));
+
+        // Tab penghapus WAJIB merah, menyamai rupa bahayanya.
+        $this->assertSame(1, preg_match('/<a[^>]*mis-tab-bahaya[^>]*>.*?<i class="fas ([^"]*)"/s',
+            $strip['isi'], $hapus));
+
+        $this->assertStringContainsString('mis-ikon-merah', $hapus[1],
+            'Ikon tab Hapus harus merah, sewarna dengan rupa bahayanya.');
+    }
+
+    #[Test]
+    public function tulisan_tab_dibungkus_unsur_sendiri_bukan_teks_telanjang(): void
+    {
+        /*
+         * Di dalam flex, teks telanjang jadi "anonymous flex item" yang
+         * min-width-nya auto dan TIDAK bisa disetel oleh pemilih CSS mana pun
+         * — karena ia bukan unsur. Akibatnya ia menolak menyusut maupun
+         * membungkus, lalu meluber keluar tabnya tanpa galat, tanpa
+         * penggulung, dan tanpa satu tanda pun bahwa ada tulisan yang tidak
+         * terbaca.
+         *
+         * Terukur sebelum dibungkus: huruf meluber 12px di 1024px dan 1280px,
+         * 6px di 768px. Sesudah dibungkus <span>: nol di ketujuh lebar yang
+         * diukur.
+         *
+         * Dijaga karena pembungkus ini TAMPAK tidak berguna — ia tidak
+         * mengubah rupa apa pun saat ruangnya cukup, jadi ia persis jenis
+         * markah yang dibuang orang berikutnya saat merapikan.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match('#<ul[^>]*id="rin-tab"(?<isi>.*?)</ul>#s', $isi, $strip));
+
+        preg_match_all('#<a[^>]*class="nav-link[^"]*"[^>]*>(?<dalam>.*?)</a>#s', $strip['isi'], $tautan);
+
+        $this->assertNotEmpty($tautan['dalam'], 'Tidak ada tautan tab yang ketemu.');
+
+        foreach ($tautan['dalam'] as $dalam) {
+            $this->assertStringContainsString('rin-tab-teks', $dalam,
+                'Ada tulisan tab yang tidak dibungkus unsur sendiri, jadi ia tidak bisa '
+                    . 'dibuat menyusut dan akan meluber keluar tabnya.');
+
+            // Tidak boleh ada sisa teks di luar pembungkusnya: satu kata yang
+            // tertinggal di luar sudah cukup untuk meluber.
+            $sisa = trim(preg_replace('#<[^>]*>#', ' ', preg_replace(
+                '#<span class="rin-tab-teks">.*?</span>#s', ' ', $dalam
+            ) ?? '') ?? '');
+
+            $this->assertSame('', $sisa,
+                'Masih ada tulisan tab di luar pembungkusnya: "' . $sisa . '"');
+        }
+    }
 }
