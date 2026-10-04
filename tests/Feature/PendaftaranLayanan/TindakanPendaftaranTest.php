@@ -4161,4 +4161,74 @@ class TindakanPendaftaranTest extends TestCase
             'Labelnya disembunyikan tetapi tulisannya ikut hilang; pembaca layar jadi '
                 . 'menemui isian tanpa nama.');
     }
+
+    #[Test]
+    public function jarak_kartu_tidak_bersandar_pada_anak_pertama(): void
+    {
+        /*
+         * Jarak antar kartu dulu dipasang di SETIAP kartu lalu dibatalkan
+         * dengan `.rin-bagian:first-child`. Aturan itu tidak pernah mengenai
+         * kartu pertama DI DALAM BORANG: anak pertama <form> adalah dua
+         * <input type=hidden> yang dipasang direktif token CSRF dan direktif
+         * metode, jadi kartunya bukan anak pertama.
+         *
+         * Margin 14px itu lolos, lalu RUNTUH menembus <form> yang tidak
+         * berbantalan dan mendorong seluruh isinya. Terukur: jarak badan tab
+         * ke kartu pertama 31px di tab Identitas melawan 17px di tab
+         * Ringkasan — beda 14px, persis satu margin.
+         *
+         * Diamnya sempurna: tidak ada galat, dan aturannya TERLIHAT benar
+         * saat dibaca. Jebakan yang sama dengan `:first-of-type` di kartu
+         * identitas kiri — pemilih berdasar posisi dikalahkan saudara yang
+         * tidak terlihat.
+         */
+        $gaya = preg_replace('#/\*.*?\*/#s', ' ', file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        )) ?? '';
+
+        $this->assertSame(0, preg_match('/\.rin-bagian:first-child/', $gaya),
+            '.rin-bagian:first-child dipakai lagi. Ia tidak mengenai kartu pertama di dalam '
+                . 'borang, sebab isian tersembunyi CSRF mendahuluinya — jaraknya jadi 14px '
+                . 'lebih besar daripada tab lain.');
+
+        $this->assertSame(1, preg_match('/\.rin-bagian\s*~\s*\.rin-bagian\s*\{[^}]*margin-top:/', $gaya),
+            'Jarak antar kartu harus lewat pemilih saudara umum (~), supaya ia tetap benar '
+                . 'walau ada isian tersembunyi atau nota menyelip.');
+    }
+
+    #[Test]
+    public function komentar_di_gaya_tidak_menyebut_direktif_blade(): void
+    {
+        /*
+         * Nama direktif Blade yang ditulis di dalam komentar CSS TETAP
+         * dikompilasi: komentar `/* ... *\/` di dalam <style> bukan komentar
+         * bagi Blade, melainkan teks biasa.
+         *
+         * Terjadi 4 Okt 2026 di berkas ini: sebuah komentar menyebut dua
+         * direktif borang sebagai lambangnya, dan halamannya 500 dengan
+         * "Undefined constant method_field". Galatnya menunjuk nomor baris
+         * hasil kompilasi, bukan komentarnya.
+         *
+         * Yang aman hanya komentar Blade, sebab ia memang dibuang sebelum
+         * kompilasi. Di komentar CSS, sebut direktifnya DENGAN KATA.
+         */
+        $isi = file_get_contents(resource_path('views/account/pendaftaran_layanan/rincian.blade.php'));
+
+        $this->assertSame(1, preg_match('/<style>(?<gaya>.*?)<\/style>/s', $isi, $cocok),
+            'Blok gaya tidak ketemu.');
+
+        preg_match_all('#/\*(?<isi>.*?)\*/#s', $cocok['gaya'], $komentar);
+
+        $tersangka = [];
+
+        foreach ($komentar['isi'] as $k) {
+            if (preg_match_all('/@[a-z]+/', $k, $d)) {
+                $tersangka = array_merge($tersangka, $d[0]);
+            }
+        }
+
+        $this->assertSame([], array_values(array_unique($tersangka)),
+            'Ada nama direktif Blade di dalam komentar CSS; Blade tetap mengompilasinya dan '
+                . 'halamannya bisa 500. Sebut dengan kata: ' . implode(', ', array_unique($tersangka)));
+    }
 }
