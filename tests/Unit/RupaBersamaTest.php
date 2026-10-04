@@ -217,6 +217,110 @@ class RupaBersamaTest extends TestCase
         }
     }
 
+
+
+    /**
+     * Isi mis-ui.css TANPA komentar, dan dengan spasi dirapatkan.
+     *
+     * Komentarnya WAJIB dibuang lebih dulu. Penjaga bantalan tab di bawah
+     * sempat ditulis tanpa ini dan ia LULUS walau aturannya sudah dirusak:
+     * yang dicocokkannya ternyata kalimat di komentar yang menyebut pemilih
+     * itu, bukan pemilihnya sendiri. Lebih jauh lagi, karena komentar tidak
+     * memuat tanda `{`, pola `[^{]*` bisa merentang dari sebutan di komentar
+     * sampai ke kurung aturan yang SALAH beberapa baris di bawahnya.
+     */
+    private function cssTanpaKomentar(): string
+    {
+        $css = file_get_contents(public_path('assets/css/mis-ui.css'));
+
+        return trim(preg_replace('/\s+/', ' ', preg_replace('#/\*.*?\*/#s', ' ', $css) ?? '') ?? '');
+    }
+
+    #[Test]
+    public function panel_tab_yang_tidak_aktif_benar_benar_disembunyikan(): void
+    {
+        /*
+         * Bootstrap menyembunyikan panel lewat `.tab-content > .tab-pane`.
+         * Pembungkus tab di MIS bernama `.mis-tab-isi`, jadi aturan itu TIDAK
+         * cocok kecuali penulisnya ingat menyelipkan `<div class="tab-content">`
+         * di dalamnya. Layar Ubah Pelanggan ingat; layar Rincian Pendaftaran
+         * tidak.
+         *
+         * Akibatnya ketujuh panelnya ada di tata letak sekaligus, tak terlihat
+         * karena `.fade` membuatnya `opacity: 0`, tetapi utuh menempati
+         * ruangnya. Terukur di peramban sebelum perbaikan: halaman 3171px
+         * padahal panel yang terlihat 478px, kartu kanan 2883px, dan di
+         * sebelah kiri menganga 2176px kosong — dan mengganti tab tidak
+         * mengubah tingginya satu piksel pun.
+         *
+         * Yang lebih berbahaya daripada ruang terbuang: 38 kendali di panel
+         * tak terlihat tetap dirender, jadi tetap bisa difokus dengan Tab dan
+         * diklik — termasuk tombol "Hapus pendaftaran ini".
+         *
+         * Dijaga dari sumbernya karena tidak ada peramban di dalam uji; yang
+         * dituntut adalah ADANYA aturan yang membuat .mis-tab-isi berdiri
+         * sendiri, bukan ingatan penulis layar berikutnya.
+         */
+        $bersih = $this->cssTanpaKomentar();
+
+        $this->assertStringContainsString('.mis-tab-isi > .tab-pane { display: none; }', $bersih,
+            'Panel tab yang tidak aktif tidak disembunyikan: ketujuhnya akan menumpuk di satu halaman.');
+
+        $this->assertStringContainsString('.mis-tab-isi > .tab-pane.active { display: block; }', $bersih,
+            'Panel yang AKTIF harus dikembalikan jadi terlihat; tanpa ini seluruh tab jadi kosong.');
+    }
+
+    #[Test]
+    public function tab_yang_menghapus_diberi_rupa_bahaya(): void
+    {
+        /*
+         * Di antara enam tab yang sekadar berpindah tampilan, satu tab yang
+         * menghapus pendaftaran tampil persis sama — sewarna dengan "Peserta"
+         * tepat di sebelahnya. Yang membedakan hanya kata "Hapus".
+         *
+         * Penggunanya awam, dan tab bukan tempat yang orang baca dengan
+         * cermat. Merahnya harus ada TANPA hover.
+         *
+         * Ini penanda, bukan pengaman: membuka tabnya tidak menghapus apa pun,
+         * panel di baliknya masih meminta penegasan.
+         */
+        $this->assertStringContainsString('.mis-tab .nav-link.mis-tab-bahaya {', $this->cssTanpaKomentar(),
+            'Rupa bahaya untuk tab penghapus tidak didefinisikan di mis-ui.css');
+
+        $rincian = file_get_contents(resource_path('views/account/pendaftaran_layanan/rincian.blade.php'));
+
+        $this->assertStringContainsString("'mis-tab-bahaya'", $rincian,
+            'Tab Hapus di layar Rincian tidak memakai rupa bahaya.');
+    }
+
+    #[Test]
+    public function bantalan_tab_tidak_dikalahkan_aturan_global(): void
+    {
+        /*
+         * style.css memasang `.nav-pills .nav-item .nav-link { padding-left:
+         * 15px !important; padding-right: 15px !important }`. Nilai 10px yang
+         * tertulis di `.mis-tab .nav-link` karena itu TIDAK PERNAH berlaku.
+         *
+         * Terukur akibatnya: ketujuh tab layar Rincian menuntut 839px
+         * sementara stripnya 812px, jadi "Hapus" terlempar sendirian ke baris
+         * kedua. Dengan 10px tuntutannya 769px dan ketujuhnya muat satu baris.
+         *
+         * Timpaannya butuh bobot (0,4,0): percobaan dengan `.mis-tab
+         * .nav-link` (0,2,0) sama-sama `!important` dan tetap kalah — terukur
+         * bantalannya masih 15px sesudah aturannya terpasang.
+         */
+        $bersih = $this->cssTanpaKomentar();
+
+        $this->assertStringContainsString('.mis-tab.nav-pills .nav-item .nav-link', $bersih,
+            'Timpaan bantalan tab harus cukup berbobot untuk mengalahkan .nav-pills .nav-item .nav-link');
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tab\.nav-pills [^{]*\{ padding-left: 10px !important; padding-right: 10px !important; \}/',
+            $bersih,
+            'Bantalan mendatar tab tidak dipaksa kembali ke 10px.'
+        );
+    }
+
     #[Test]
     public function penanda_versi_css_ikut_naik(): void
     {
@@ -231,7 +335,7 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(87, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(89, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
 
         preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);

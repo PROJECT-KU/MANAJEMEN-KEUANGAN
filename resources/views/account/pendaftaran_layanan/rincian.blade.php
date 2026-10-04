@@ -67,11 +67,28 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         .rin-nomor {
-            margin: 4px 0 0;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: .76rem;
-            color: var(--mis-tinta-3);
+            display: grid;
+            gap: 2px;
+            margin: 6px 0 0;
             overflow-wrap: anywhere;
+        }
+
+        /* Keterangannya kecil dan samar, kodenya yang ditebalkan: yang dicari
+           mata orang adalah kodenya, kata "Nomor pendaftaran" hanya perlu ada
+           sekali supaya tahu itu kode apa. */
+        .rin-nomor-label {
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-3);
+        }
+
+        .rin-nomor-kode {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--mis-tinta);
         }
 
         .rin-pil-baris {
@@ -800,7 +817,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 </span>
 
                 <h2 class="rin-nama">{{ $namaOrang }}</h2>
-                <p class="rin-nomor">{{ $nomor }}</p>
+                {{-- Nomornya DISEBUT namanya, tidak berdiri sendiri.
+                     Sebelumnya kode seperti "NMMCG" tercetak tanpa satu kata
+                     pun yang menjelaskan ia apa — dan justru inilah yang
+                     dicocokkan panitia dengan berita transfer atau dibacakan
+                     lewat telepon. Kodenya sendiri tetap paling menonjol. --}}
+                <p class="rin-nomor">
+                    <span class="rin-nomor-label">Nomor pendaftaran</span>
+                    <span class="rin-nomor-kode">{{ $nomor }}</span>
+                </p>
 
                 <div class="rin-pil-baris">
                     <span class="mis-pil mis-pil-{{ $rupa['warna'] }}">
@@ -937,7 +962,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 <ul class="mis-tab nav nav-pills" id="rin-tab" role="tablist">
                     @foreach ($tab as [$kunci, $judul, $ikon])
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link {{ $tabSekarang === $kunci ? 'active' : '' }}"
+                            {{-- Tab penghapus diberi rupa bahaya: di antara enam tab
+                                 yang sekadar berpindah tampilan, satu tab yang
+                                 menghapus pendaftaran tampil persis sama. --}}
+                            <a class="nav-link {{ $tabSekarang === $kunci ? 'active' : '' }} {{ $kunci === 'hapus' ? 'mis-tab-bahaya' : '' }}"
                                 id="rin-tab-{{ $kunci }}" data-toggle="pill" href="#rin-panel-{{ $kunci }}"
                                 role="tab" aria-controls="rin-panel-{{ $kunci }}"
                                 aria-selected="{{ $tabSekarang === $kunci ? 'true' : 'false' }}">
