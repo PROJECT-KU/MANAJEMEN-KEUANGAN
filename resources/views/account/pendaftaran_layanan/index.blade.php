@@ -857,7 +857,11 @@ Pendaftar Layanan | MIS Rumah Scopus
                     Semua yang mendaftar layanan jasa Rumah Scopus, dari lima layanan sekaligus.
                 </p>
             </div>
-            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
+            {{-- Berid: tautan kedua tombol unduh dirakit saat halaman
+                 dirender, jadi sesudah penyaringan tanpa muat ulang ia masih
+                 memegang alamat LAMA. Idnya disebut data-mis-saring-juga di
+                 borang penyaring supaya ikut diperbarui. --}}
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="pdl-aksi">
                 {{-- Tombol UTAMA, diletakkan pertama dan berwarna penuh:
                      mendaftarkan orang itu tindakan, sementara kedua unduhan
                      adalah pelengkap. Sebelum ada ini, yang mendaftar lewat
@@ -891,6 +895,11 @@ Pendaftar Layanan | MIS Rumah Scopus
              tombol berskrip: alamatnya bisa disalin dan tetap bekerja tanpa
              JavaScript. Angka yang menarik perhatian selalu memancing "yang
              mana saja?", dan tanpa itu pertanyaannya tidak terjawab. --}}
+        {{-- Berid: angka ubin dihitung dari saringan yang sedang berlaku,
+             jadi ia WAJIB ikut diperbarui saat saringannya berubah tanpa muat
+             ulang. Tanpa itu, layarnya berbunyi 189 sementara daftar di
+             bawahnya cuma 3 baris — dan yang dipercaya orang angkanya. --}}
+        <div id="pdl-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
         <div class="mis-ringkas mis-ringkas-5" aria-label="Ringkasan pendaftar">
             <a class="mis-ubin {{ $keadaanDipilih === '' && $bukti === '' ? 'terpilih' : '' }}"
@@ -1028,6 +1037,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                 @endif
             </p>
         @endif
+        </div>{{-- pdl-ringkas --}}
 
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkusnya: di ponsel empat kendali yang selalu
@@ -1044,7 +1054,8 @@ Pendaftar Layanan | MIS Rumah Scopus
             </summary>
 
         <div class="mis-saring-kartu">
-        <form method="GET" action="{{ route($rute) }}" class="mis-saring" id="pdl-borang" data-mis-saring="pdl-hasil">
+        <form method="GET" action="{{ route($rute) }}" class="mis-saring" id="pdl-borang" data-mis-saring="pdl-hasil"
+            data-mis-saring-juga="pdl-ringkas,pdl-aksi">
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan tombol
                  terapkan diam-diam mengembalikan urutannya ke bawaan. --}}
             <input type="hidden" name="urut" value="{{ $urut }}">

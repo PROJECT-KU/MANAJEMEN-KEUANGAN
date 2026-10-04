@@ -767,7 +767,7 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
     <script src="{{ asset('assets/modules/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     {{-- Mengingat posisi gulir sidebar antar halaman. --}}
-    <script src="{{ asset('assets/js/mis-ui.js') }}?v=16"></script>
+    <script src="{{ asset('assets/js/mis-ui.js') }}?v=17"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
