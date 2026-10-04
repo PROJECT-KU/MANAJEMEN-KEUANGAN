@@ -342,6 +342,9 @@ class TindakanPendaftaranTest extends TestCase
             'telp' => '0816-0000-0020',
             'total' => '900.000',
             'varian' => 'online',
+            // Sesinya ikut dikirim sebab varian yang punya daftar sesi kini
+            // menuntutnya; yang diperiksa uji ini tetap variannya.
+            'sesi' => 'sesi 1',
         ])->assertRedirect();
 
         $b = PendaftaranScopusKafe::where('nama', 'Peserta Kafe Daring')->first();
@@ -643,8 +646,21 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
-    public function sesi_scopus_kafe_tersimpan(): void
+    public function sesi_scopus_kafe_tersimpan_beserta_jamnya(): void
     {
+        /*
+         * Pernyataan lama uji ini mengunci kotak teks BEBAS — ia menyimpan
+         * "Sesi 1 — Menyusun pendahuluan" dan menganggapnya benar. Aturannya
+         * memang diganti, bukan ujinya yang kebetulan rewel: Scopus Kafe
+         * berjalan pada jam tetap, dan teks bebas membuat satu sesi yang sama
+         * tersimpan "Sesi 1", "sesi1", atau "pagi" sehingga daftar hadir per
+         * sesi tidak bisa dikelompokkan sama sekali.
+         *
+         * Jamnya ikut diperiksa. Kolom `waktu_mulai`/`waktu_selesai` sudah
+         * ada dan selalu diisi jalur pendaftaran umum; dibiarkan kosong,
+         * pendaftaran buatan panitia terlihat belum berjadwal di layar yang
+         * membaca keduanya.
+         */
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
 
         $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
@@ -653,13 +669,60 @@ class TindakanPendaftaranTest extends TestCase
             'email' => 'sesi' . Str::random(6) . '@contoh.test',
             'telp' => '0816-0000-0038',
             'total' => '750.000',
-            'sesi' => 'Sesi 1 — Menyusun pendahuluan',
+            'varian' => 'offline',
+            'sesi' => 'sesi 2',
         ])->assertRedirect();
 
         $b = PendaftaranScopusKafe::where('nama', 'Peserta Bersesi')->first();
 
         $this->assertNotNull($b);
-        $this->assertSame('Sesi 1 — Menyusun pendahuluan', $b->sesi);
+        $this->assertSame('sesi 2', $b->sesi);
+        $this->assertSame('13:00:00', (string) $b->waktu_mulai);
+        $this->assertSame('18:00:00', (string) $b->waktu_selesai);
+    }
+
+    #[Test]
+    public function sesi_yang_tidak_ada_di_variannya_ditolak(): void
+    {
+        /*
+         * Online hanya punya sesi pagi. "Sesi 2" di sana adalah sesi yang
+         * memang tidak pernah ada — dan diterima diam-diam, pendaftarnya
+         * dijanjikan jam yang tidak akan dibuka.
+         *
+         * Ditolak, bukan dibuang diam-diam: pendaftaran yang tersimpan TANPA
+         * sesi padahal panitia merasa sudah memilihnya adalah kesalahan yang
+         * tidak terlihat sampai hari pelaksanaan.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Sesi Karangan',
+            'email' => 'karangan' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0039',
+            'total' => '750.000',
+            'varian' => 'online',
+            'sesi' => 'sesi 2',
+        ])->assertSessionHasErrors('sesi');
+
+        $this->assertNull(PendaftaranScopusKafe::where('nama', 'Sesi Karangan')->first());
+
+        // Dan sesi yang memang ada di variannya tetap lolos — supaya
+        // penolakannya tidak terbaca sebagai "semua ditolak".
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_kafe',
+            'nama' => 'Sesi Benar',
+            'email' => 'benar' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0040',
+            'total' => '750.000',
+            'varian' => 'online',
+            'sesi' => 'sesi 1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusKafe::where('nama', 'Sesi Benar')->first();
+
+        $this->assertNotNull($b);
+        $this->assertSame('08:00:00', (string) $b->waktu_mulai);
     }
 
     #[Test]

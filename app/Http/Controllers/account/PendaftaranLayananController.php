@@ -431,6 +431,29 @@ class PendaftaranLayananController extends Controller
 
         $layanan = (string) $request->input('layanan');
 
+        /*
+         * Sesi dicocokkan ke daftar milik VARIAN yang dipilih.
+         *
+         * Dulu kotak teks bebas, jadi satu sesi yang sama bisa tersimpan
+         * "Sesi 1", "sesi1", atau "pagi" — dan daftar hadir per sesi tidak
+         * bisa dikelompokkan dari data yang begitu. Scopus Kafe offline punya
+         * dua sesi, online hanya sesi pagi, jadi daftarnya memang bergantung
+         * pada variannya.
+         *
+         * Ditolak di sini, bukan dibuang diam-diam di lapisan tindakan:
+         * pendaftaran yang tersimpan TANPA sesi padahal panitia merasa sudah
+         * memilihnya adalah kesalahan yang tidak terlihat sampai hari
+         * pelaksanaan.
+         */
+        $sesiBoleh = array_column(
+            Pendaftaran::sesiPilihan($layanan, $request->input('varian')),
+            'nilai'
+        );
+
+        if ($sesiBoleh !== []) {
+            $aturan['sesi'] = ['required', Rule::in($sesiBoleh)];
+        }
+
         if (array_key_exists($layanan, $katalog) && $katalog[$layanan]['berangkatan']) {
             $aturan['kategori_id'] = ['required', 'string', 'exists:kategori_layanan,id'];
         } else {
@@ -439,7 +462,10 @@ class PendaftaranLayananController extends Controller
             $aturan['total'] = ['required', 'string'];
         }
 
-        $request->validate($aturan, [], [
+        $request->validate($aturan, [
+            'sesi.required' => 'Sesinya belum dipilih.',
+            'sesi.in' => 'Sesi itu tidak ada pada varian yang dipilih.',
+        ], [
             'kategori_id' => 'angkatan',
             'telp' => 'nomor WhatsApp',
             'total' => 'total bayar',
