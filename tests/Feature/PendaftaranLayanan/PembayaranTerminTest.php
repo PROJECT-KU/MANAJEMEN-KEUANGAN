@@ -425,4 +425,97 @@ class PembayaranTerminTest extends TestCase
 
         $this->assertSame(0, PembayaranPendaftaran::count());
     }
+
+    #[Test]
+    public function panel_termin_tidak_menyisakan_blok_mengambang(): void
+    {
+        /*
+         * Sebelum ini kalimat pengantar, kotak angka tagihan, dan notanya
+         * mengambang bertiga di atas latar badan tab sementara borang di
+         * bawahnya sudah berkartu — irama yang sama pecahnya dengan tab
+         * Ringkasan dulu.
+         *
+         * Yang dijaga: SELURUH anak langsung panel Termin berupa kartu.
+         */
+        $orang = $this->akun();
+
+        // Tab Termin & DP hanya muncul untuk pesanan lembaga, jadi pendaftarnya
+        // harus rombongan — bukan peserta perorangan.
+        $camp = $this->daftarkan($orang, 'Peserta Uji Kartu ' . Str::random(5), [
+            'jenis' => 'lembaga',
+            'lembaga_nama' => 'Universitas Uji Kartu',
+            'jumlah' => 10,
+        ]);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->id]))
+            ->assertOk()
+            ->getContent();
+
+        $dom = new \DOMDocument();
+        $sebelumnya = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $isi);
+        libxml_clear_errors();
+        libxml_use_internal_errors($sebelumnya);
+
+        $panel = (new \DOMXPath($dom))->query('//*[@id="rin-panel-termin"]')->item(0);
+
+        $this->assertNotNull($panel, 'Panel Termin & DP tidak ketemu.');
+
+        $lepas = [];
+
+        foreach ($panel->childNodes as $simpul) {
+            if ($simpul->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+
+            if (! str_contains($simpul->getAttribute('class'), 'rin-bagian')) {
+                $lepas[] = $simpul->nodeName . '.' . $simpul->getAttribute('class');
+            }
+        }
+
+        $this->assertSame([], $lepas,
+            'Ada isi tab Termin & DP yang tidak dibungkus kartu: ' . implode(' | ', $lepas));
+    }
+
+    #[Test]
+    public function unggah_bukti_termin_memakai_pola_halaman_profil(): void
+    {
+        /*
+         * Kotak berkas bawaan peramban ("Choose file / No file chosen") tidak
+         * bisa diberi gaya, berbahasa Inggris, dan rupanya berbeda di tiap
+         * peramban — di antara isian lain yang seragam ia terbaca seperti
+         * unsur asing.
+         *
+         * Polanya disalin dari halaman Profil: isian aslinya disembunyikan
+         * 1x1 TRANSPARAN (bukan display:none, supaya tetap bisa menerima
+         * fokus papan ketik) dan labelnya yang jadi sasaran ketukan.
+         */
+        $orang = $this->akun();
+
+        // Tab Termin & DP hanya muncul untuk pesanan lembaga, jadi pendaftarnya
+        // harus rombongan — bukan peserta perorangan.
+        $camp = $this->daftarkan($orang, 'Peserta Uji Kartu ' . Str::random(5), [
+            'jenis' => 'lembaga',
+            'lembaga_nama' => 'Universitas Uji Kartu',
+            'jumlah' => 10,
+        ]);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->id]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('class="rin-berkas', $isi,
+            'Isian berkas belum memakai kelas yang menyembunyikannya.');
+        $this->assertStringContainsString('class="rin-unggah"', $isi,
+            'Label pengunggah bergaya Profil tidak ada.');
+        $this->assertStringContainsString('data-mis-berkas=', $isi,
+            'Nama berkas yang dipilih tidak akan pernah ditulis di labelnya.');
+
+        // Dan isian aslinya TIDAK lagi memakai kelas kotak biasa, yang akan
+        // membuat kotak bawaannya tetap terlihat di samping pengunggahnya.
+        $this->assertSame(0, preg_match('/<input type="file"[^>]*class="form-control-modern/', $isi),
+            'Isian berkas masih memakai kelas kotak biasa; kotak bawaannya akan tetap terlihat.');
+    }
 }

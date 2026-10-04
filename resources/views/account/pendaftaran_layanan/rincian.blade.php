@@ -539,6 +539,66 @@ Rincian Pendaftaran | MIS Rumah Scopus
             display: block;
         }
 
+        /*
+         * Pengunggah berkas bergaya Profil.
+         *
+         * Isian aslinya disembunyikan dengan 1x1 TRANSPARAN, bukan
+         * display:none: unsur yang tidak dirender tidak bisa menerima fokus
+         * papan ketik, jadi pemakai yang menelusuri dengan Tab akan melewati
+         * pengunggahnya begitu saja. Nilainya disalin dari .prof-berkas di
+         * halaman Profil supaya keduanya tidak punya dua pengertian.
+         */
+        .rin-berkas {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .rin-unggah {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            column-gap: 12px;
+            align-items: center;
+            margin: 0;
+            padding: 9px 12px;
+            border: 1.5px dashed #c7d2fe;
+            border-radius: 13px;
+            background: #f8faff;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color .25s ease, background .25s ease;
+        }
+
+        .rin-unggah:hover,
+        .rin-berkas:focus-visible + .rin-unggah {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+
+        .rin-unggah-teks {
+            display: grid;
+            gap: 1px;
+            min-width: 0;
+        }
+
+        /* Nama berkas yang panjang dipotong, BUKAN dibiarkan melebarkan
+           kotaknya: kotak ini sebaris dengan isian lain di kisinya. */
+        .rin-unggah-nama {
+            font-size: .82rem;
+            line-height: 1.35;
+            font-weight: 700;
+            color: var(--mis-tinta);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rin-unggah .mis-bantuan {
+            margin: 0;
+        }
+
         .rin-uang-awalan {
             position: absolute;
             top: 50%;
@@ -2140,6 +2200,18 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                  melainkan tagihan seluruh pesanannya — dan
                                  tanpa kalimat ini, panitia akan mengira
                                  Rp 30.000.000 itu tagihan satu orang. --}}
+                            {{-- Ringkasan tagihan DIBUNGKUS kartu, sama seperti
+                                 bagian lain di tab Ringkasan: sebelumnya kalimat
+                                 pengantar, kotak angka, dan notanya mengambang
+                                 bertiga di atas latar tanpa satuan yang jelas. --}}
+                            <div class="rin-bagian">
+                            <p class="rin-bagian-judul">
+                                <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </span>
+                                <span class="teks">Ringkasan tagihan</span>
+                            </p>
+
                             <p class="mis-kartu-sub" style="margin-bottom: 13px;">
                                 @if ($milikLembaga)
                                     Angka di bawah untuk <strong>seluruh pesanan {{ $lembaga->kode }}</strong>
@@ -2253,7 +2325,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 </p>
                             @endif
 
-                            <form method="POST" enctype="multipart/form-data" class="rin-termin-borang"
+                            </div>{{-- kartu Ringkasan tagihan --}}
+
+                            <form method="POST" enctype="multipart/form-data" class="rin-termin-borang rin-bagian"
                                 action="{{ route('account.pendaftaran-layanan.pembayaran', [$layanan, $pendaftaran->getKey()]) }}">
                                 @csrf
 
@@ -2264,20 +2338,39 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <span class="teks">Catat uang masuk</span>
                                 </p>
 
-                                <div class="rin-isian-kisi">
+                                {{-- Dua lajur, bukan auto-fit: borang ini punya empat
+                                     isian biasa (nominal, tanggal, cara bayar, bukti)
+                                     dan satu yang merentang penuh. Dengan tiga lajur,
+                                     keempatnya jatuh 3 + 1 dan dua petak kanan baris
+                                     kedua menganga — aturan yang sama dipakai bagian
+                                     berborang lain lewat $lajurIsian. --}}
+                                <div class="rin-isian-kisi rin-isian-kolom-2">
                                     <div class="mis-isian">
-                                        <label class="mis-label" for="rin-t-nominal">Nominal</label>
-                                        <input type="text" class="form-control-modern @error('nominal') is-invalid @enderror"
-                                            id="rin-t-nominal" name="nominal" inputmode="numeric"
-                                            value="{{ old('nominal') }}"
-                                            placeholder="mis. {{ number_format(max(1, $ringkasBayar['sisa']), 0, ',', '.') }}">
+                                        <label class="mis-label rin-label" for="rin-t-nominal">
+                                            <span class="mis-medali mini mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
+                                            <span>Nominal</span>
+                                        </label>
+                                        {{-- Awalan Rp dan pemisah ribuannya sama dengan
+                                             kotak nominal di tab Pembayaran; peladen
+                                             membuang karakter bukan angka sebelum
+                                             menyimpan. --}}
+                                        <span class="rin-uang-kotak">
+                                            <span class="rin-uang-awalan" aria-hidden="true">Rp</span>
+                                            <input type="text" class="form-control-modern rin-uang-isian @error('nominal') is-invalid @enderror"
+                                                id="rin-t-nominal" name="nominal" inputmode="numeric" data-mis-rupiah
+                                                value="{{ old('nominal') }}"
+                                                placeholder="{{ number_format(max(1, $ringkasBayar['sisa']), 0, ',', '.') }}">
+                                        </span>
                                         @error('nominal')
                                             <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div class="mis-isian">
-                                        <label class="mis-label" for="rin-t-tanggal">Tanggal uang masuk</label>
+                                        <label class="mis-label rin-label" for="rin-t-tanggal">
+                                            <span class="mis-medali mini mis-jingga" aria-hidden="true"><i class="fas fa-calendar-alt"></i></span>
+                                            <span>Tanggal uang masuk</span>
+                                        </label>
                                         <input type="date" class="form-control-modern @error('tanggal') is-invalid @enderror"
                                             id="rin-t-tanggal" name="tanggal" max="{{ now()->toDateString() }}"
                                             value="{{ old('tanggal', now()->toDateString()) }}">
@@ -2287,7 +2380,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     </div>
 
                                     <div class="mis-isian">
-                                        <label class="mis-label" for="rin-t-cara">Cara bayar</label>
+                                        <label class="mis-label rin-label" for="rin-t-cara">
+                                            <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-university"></i></span>
+                                            <span>Cara bayar</span>
+                                        </label>
                                         <select class="form-control-modern" id="rin-t-cara" name="cara_bayar">
                                             @foreach (Pendaftaran::caraBayarPilihan() as $kode => $cara)
                                                 <option value="{{ $kode }}" @selected(old('cara_bayar', 'transfer') === $kode)>
@@ -2298,19 +2394,39 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     </div>
 
                                     <div class="mis-isian">
-                                        <label class="mis-label" for="rin-t-bukti">
-                                            Bukti transfer <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh menyusul)</span>
+                                        <label class="mis-label rin-label" for="rin-t-bukti">
+                                            <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-receipt"></i></span>
+                                            <span>Bukti transfer <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh menyusul)</span></span>
                                         </label>
-                                        <input type="file" class="form-control-modern @error('bukti') is-invalid @enderror"
-                                            id="rin-t-bukti" name="bukti" accept="image/jpeg,image/png,image/webp">
+                                        {{-- Pola yang sama dengan pengunggah foto di halaman
+                                             Profil: kotak bawaan peramban ("Choose file / No
+                                             file chosen") tidak bisa diberi gaya, berbahasa
+                                             Inggris, dan rupanya berbeda di tiap peramban —
+                                             di antara isian lain yang seragam ia terbaca
+                                             seperti unsur asing.
+
+                                             Isian aslinya DISEMBUNYIKAN, bukan dibuang: ia
+                                             tetap unsur borang yang mengirim berkasnya, dan
+                                             labelnya yang jadi sasaran ketukan. --}}
+                                        <input type="file" class="rin-berkas @error('bukti') is-invalid @enderror"
+                                            id="rin-t-bukti" name="bukti" accept="image/jpeg,image/png,image/webp"
+                                            data-mis-berkas="rin-t-bukti-nama">
+                                        <label for="rin-t-bukti" class="rin-unggah">
+                                            <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-cloud-upload-alt"></i></span>
+                                            <span class="rin-unggah-teks">
+                                                <span class="rin-unggah-nama" id="rin-t-bukti-nama">Pilih berkas bukti</span>
+                                                <span class="mis-bantuan">JPG, PNG, atau WebP</span>
+                                            </span>
+                                        </label>
                                         @error('bukti')
                                             <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div class="mis-isian rin-isian-penuh">
-                                        <label class="mis-label" for="rin-t-catatan">
-                                            Catatan <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh dikosongkan)</span>
+                                        <label class="mis-label rin-label" for="rin-t-catatan">
+                                            <span class="mis-medali mini mis-kuning" aria-hidden="true"><i class="fas fa-sticky-note"></i></span>
+                                            <span>Catatan <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh dikosongkan)</span></span>
                                         </label>
                                         <input type="text" class="form-control-modern" id="rin-t-catatan"
                                             name="catatan" maxlength="255" value="{{ old('catatan') }}"
@@ -2601,6 +2717,32 @@ Rincian Pendaftaran | MIS Rumah Scopus
             if (setuju) {
                 tombolTermin.closest('form').submit();
             }
+        });
+    });
+
+    /*
+     * Nama berkas yang dipilih ditulis di labelnya.
+     *
+     * Tanpa ini pengunggahnya tetap berbunyi "Pilih berkas bukti" walau
+     * berkasnya sudah dipilih — dan orang mengira ketukannya tidak kena, lalu
+     * memilih lagi. Isian berkas bawaan menunjukkannya sendiri; begitu ia
+     * disembunyikan, tugas itu berpindah ke sini.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[type=file][data-mis-berkas]').forEach(function (kotak) {
+            var sasaran = document.getElementById(kotak.dataset.misBerkas);
+
+            if (!sasaran) {
+                return;
+            }
+
+            var semula = sasaran.textContent;
+
+            kotak.addEventListener('change', function () {
+                sasaran.textContent = kotak.files && kotak.files.length
+                    ? kotak.files[0].name
+                    : semula;
+            });
         });
     });
 
