@@ -66,11 +66,42 @@ class WebinarEksklusifPendaftaran extends Model
      * @param  string|null  $kategoriId  batasi ke satu angkatan; null = semua
      * @return int  jumlah kursi yang dilepas
      */
+    /**
+     * Pendaftaran yang kursinya BOLEH dilepas kembali.
+     *
+     * Satu tempat saja. Aturan ini dipakai perintah penjadwal maupun
+     * pelepasan yang berjalan saat kuota dibaca; disalin jadi dua, keduanya
+     * akan berbeda perlahan dan yang satu melepas kursi yang satunya tahan.
+     *
+     * Yang BUKTINYA SUDAH MASUK dikecualikan. Peserta yang mengunggah bukti
+     * di jam ke-23 sudah membayar — yang tersisa cuma panitia mencocokkannya,
+     * dan itu pekerjaan jam kerja. Dilepas juga, uangnya sudah pindah tetapi
+     * kursinya hilang, dan halaman statusnya terlanjur menjanjikan "bukti
+     * sudah masuk, tunggu konfirmasi".
+     *
+     * Akibat yang diterima sadar: pendaftaran bermodal bukti palsu menahan
+     * kursinya sampai panitia menolaknya. Itu menukar kursi tertahan dengan
+     * uang yang hilang — dan yang kedua jauh lebih mahal.
+     */
+    public function scopeBisaDilepas($kueri)
+    {
+        return $kueri->where('status', 'pending')
+            ->whereNotNull('kedaluwarsa_pada')
+            ->where('kedaluwarsa_pada', '<', now())
+            ->where(function ($q) {
+                $q->whereNull('gambar')->orWhere('gambar', '');
+            });
+    }
+
+    /** Buktinya sudah diunggah peserta. */
+    public function getAdaBuktiAttribute(): bool
+    {
+        return trim((string) $this->gambar) !== '';
+    }
+
     public static function lepaskanYangKedaluwarsa(?string $kategoriId = null): int
     {
-        $kueri = static::where('status', 'pending')
-            ->whereNotNull('kedaluwarsa_pada')
-            ->where('kedaluwarsa_pada', '<', now());
+        $kueri = static::bisaDilepas();
 
         if ($kategoriId !== null) {
             $kueri->where('kategori_id', $kategoriId);
@@ -238,7 +269,15 @@ class WebinarEksklusifPendaftaran extends Model
     /** Batas bayarnya sudah lewat tetapi belum dibayar. */
     public function getSudahKedaluwarsaAttribute(): bool
     {
+        /*
+         * Yang buktinya sudah masuk TIDAK terbaca kedaluwarsa, sejalan dengan
+         * scopeBisaDilepas(): kursinya memang ditahan sampai panitia
+         * memeriksanya. Tanpa ini halaman statusnya akan berkata "batas
+         * waktunya lewat, kursinya dilepas" kepada orang yang kursinya justru
+         * sedang ditahan untuknya.
+         */
         return $this->status === 'pending'
+            && ! $this->ada_bukti
             && $this->kedaluwarsa_pada !== null
             && $this->kedaluwarsa_pada->isPast();
     }

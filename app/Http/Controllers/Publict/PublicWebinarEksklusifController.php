@@ -976,9 +976,13 @@ class PublicWebinarEksklusifController extends Controller
             Storage::disk(Gambar::CAKRAM)->delete($lama);
         }
 
-        return back()->with('sukses',
-            'Bukti transfer Anda sudah kami terima. Panitia memeriksanya pada jam kerja;'
-            . ' statusnya berubah di halaman ini kalau sudah dicocokkan.');
+        /*
+         * Kalimatnya PENDEK saja. Halaman yang ditujunya kini layar selesai
+         * yang sudah menjelaskan semuanya — "panitia memeriksa pada jam
+         * kerja", "tidak perlu mengirim apa pun lagi" — dan mengulanginya di
+         * pita hijau membuat tiga kalimat yang sama bertumpuk di satu layar.
+         */
+        return back()->with('sukses', 'Bukti transfer Anda sudah kami terima.');
     }
 
     /**
