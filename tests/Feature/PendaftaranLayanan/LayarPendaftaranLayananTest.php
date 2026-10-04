@@ -1081,7 +1081,7 @@ class LayarPendaftaranLayananTest extends TestCase
          * ditulis ulang di sini — kalau tidak, ujinya tetap hijau justru saat
          * jamnya diubah di satu tempat dan tidak di tempat lain.
          */
-        foreach (Pendaftaran::SESI['scopus_kafe'] as $varian => $daftar) {
+        foreach (Pendaftaran::sesiSemua()['scopus_kafe'] as $varian => $daftar) {
             foreach ($daftar as $sesi) {
                 $this->assertStringContainsString($sesi['mulai'], $isi);
                 $this->assertStringContainsString($sesi['selesai'], $isi);

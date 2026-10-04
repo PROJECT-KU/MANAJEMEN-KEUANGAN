@@ -285,6 +285,12 @@ class ClinikScopusBiayaPersesiController extends Controller
             'diskon_rombongan_persen' => ['nullable', 'integer', 'min:1', 'max:90'],
             'fasilitas' => ['nullable', 'string', 'max:8000'],
             'kegiatan' => ['nullable', 'string', 'max:8000'],
+            /*
+             * Sesi beserta jamnya, satu baris satu sesi. Dibatasi pendek:
+             * isinya dua-tiga baris, dan kotak yang menerima ribuan huruf
+             * mengundang teks pengumuman ditempel ke tempat yang salah.
+             */
+            'sesi' => ['nullable', 'string', 'max:1000'],
             'kontak' => ['nullable', 'string', 'max:500'],
             'template_deskripsi' => ['nullable', 'string', 'max:20000'],
             'berlaku_mulai' => ['nullable', 'date', 'after:today'],
@@ -337,6 +343,21 @@ class ClinikScopusBiayaPersesiController extends Controller
         }
         $fasilitas = $this->uraikanDaftar($data['fasilitas'] ?? null, 'fasilitas');
         $kegiatan = $this->uraikanDaftar($data['kegiatan'] ?? null, 'kegiatan');
+        $sesi = ClinikScopusBiayaPersesi::uraikanSesi($data['sesi'] ?? null);
+
+        /*
+         * Kotaknya terisi tetapi tak satu baris pun terbaca — hampir selalu
+         * jamnya yang lupa ditulis. Ditolak dengan menyebut bentuk yang
+         * diterima; disimpan diam-diam sebagai NULL, panitia menyangka
+         * jadwalnya sudah berubah padahal yang berlaku masih yang lama.
+         */
+        if ($sesi === null && trim((string) ($data['sesi'] ?? '')) !== '') {
+            return back()->withInput()->withErrors([
+                'sesi' => 'Sesinya tidak terbaca. Tulis satu sesi per baris '
+                    . 'beserta dua jamnya, misalnya: Sesi 1, 08.00 - 13.00',
+            ]);
+        }
+
         $kontak = trim((string) ($data['kontak'] ?? '')) ?: null;
         $cetakan = trim((string) ($data['template_deskripsi'] ?? '')) ?: null;
 
@@ -364,12 +385,11 @@ class ClinikScopusBiayaPersesiController extends Controller
                     'biaya_persesi' => $tarif,
                     'ppn' => $ppn,
                     'diskon_alumni_persen' => $diskonAlumni,
-            'diskon_rombongan_min' => $rombonganMin,
-            'diskon_rombongan_persen' => $rombonganPersen,
                     'diskon_rombongan_min' => $rombonganMin,
                     'diskon_rombongan_persen' => $rombonganPersen,
                     'fasilitas' => $fasilitas,
                     'kegiatan' => $kegiatan,
+                    'sesi' => $sesi,
                     'kontak' => $kontak,
                     'template_deskripsi' => $cetakan,
                     // Jejaknya menunjuk yang TERAKHIR mengubah, bukan yang
@@ -394,8 +414,19 @@ class ClinikScopusBiayaPersesiController extends Controller
             'biaya_persesi' => $tarif,
             'ppn' => $ppn,
             'diskon_alumni_persen' => $diskonAlumni,
+            /*
+             * Kedua potongan rombongan ikut DI SINI juga.
+             *
+             * Sebelumnya hanya cabang "perbaiki" yang menyimpannya, jadi
+             * menaikkan harga — yang selalu lewat cabang ini — menghapus
+             * diskon rombongan yang sudah disetel, diam-diam. Borangnya
+             * memang mengirim angkanya; yang hilang di perjalanan.
+             */
+            'diskon_rombongan_min' => $rombonganMin,
+            'diskon_rombongan_persen' => $rombonganPersen,
             'fasilitas' => $fasilitas,
             'kegiatan' => $kegiatan,
+            'sesi' => $sesi,
             'kontak' => $kontak,
             'template_deskripsi' => $cetakan,
             'berlaku_mulai' => $mulai,
