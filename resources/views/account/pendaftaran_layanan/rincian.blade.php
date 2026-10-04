@@ -751,7 +751,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
          */
         .rin-status-tombol {
             display: grid;
-            grid-template-columns: 30px minmax(0, 1fr) auto;
+            /* Dua lajur: ikon dan blok teks. Lajur ketiga dulu memuat amplop
+               di ujung kanan; penandanya sekarang bertingkat di dalam blok
+               teks, jadi lajurnya tidak diperlukan lagi. */
+            grid-template-columns: 30px minmax(0, 1fr);
             align-items: center;
             gap: 10px;
             width: 100%;
@@ -803,14 +806,26 @@ Rincian Pendaftaran | MIS Rumah Scopus
             overflow-wrap: break-word;
         }
 
-        /* Penanda amplop & penanda "sekarang" didorong ke ujung kanan supaya
-           sejajar di seluruh deret, berapa pun panjang tulisannya. */
+        /*
+         * Penanda "kirim email": bertingkat di bawah nama statusnya, sejajar
+         * dengan penanda "sekarang", jadi keduanya tidak pernah berebut
+         * tempat.
+         */
         .rin-status-surat {
-            color: var(--mis-tinta-4);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: .62rem;
+            line-height: 1.35;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #b45309;
         }
 
         .rin-status-surat i {
-            font-size: 11px !important;
+            flex: 0 0 auto;
+            font-size: 10px !important;
             margin: 0 !important;
         }
 
@@ -1780,6 +1795,27 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             </span>
                                             <span class="rin-status-isi">
                                                 <span class="rin-status-teks">{{ $tulisan }}</span>
+                                                @if (! $iniSekarang && $kirimSurat)
+                                                    {{-- Ditulis DENGAN KATA, bukan amplop kecil
+                                                         di ujung kanan.
+
+                                                         Versi sebelumnya cuma glif 11px berwarna
+                                                         abu dengan keterangan di atribut title —
+                                                         dan title hanya muncul kalau kursor
+                                                         ditahan di atasnya. Panitia yang hendak
+                                                         memindahkan status tidak sedang
+                                                         menunggui tooltip; ia menekan.
+
+                                                         Emailnya tidak bisa ditarik kembali,
+                                                         jadi tandanya harus terbaca SEBELUM
+                                                         ditekan, bukan sesudah. Kuning, sewarna
+                                                         penanda lain yang berarti "perhatikan
+                                                         dulu". --}}
+                                                    <span class="rin-status-surat">
+                                                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                                                        kirim email
+                                                    </span>
+                                                @endif
                                                 @if ($iniSekarang)
                                                     {{-- BERTINGKAT di bawah namanya, bukan di
                                                          sebelahnya. Sebaris, keduanya berebut
@@ -1799,16 +1835,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                     <span class="rin-status-kini">sekarang</span>
                                                 @endif
                                             </span>
-                                            @if (! $iniSekarang && $kirimSurat)
-                                                {{-- Penanda amplop di tombolnya sendiri, bukan
-                                                     hanya di catatan bawah: catatan itu
-                                                     menyebut nama status, dan orang yang
-                                                     sedang mengarahkan kursor ke tombol tidak
-                                                     sedang membacanya. --}}
-                                                <span class="rin-status-surat" title="Memindahkan ke status ini mengirim email ke pendaftarnya">
-                                                    <i class="fas fa-envelope" aria-hidden="true"></i>
-                                                </span>
-                                            @endif
+
                                         </button>
                                     @endforeach
                                 </div>
