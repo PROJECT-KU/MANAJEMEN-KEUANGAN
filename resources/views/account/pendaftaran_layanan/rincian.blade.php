@@ -446,6 +446,42 @@ Rincian Pendaftaran | MIS Rumah Scopus
             margin-bottom: var(--mis-jarak);
         }
 
+        /*
+         * Keterangan kecil di bawah label ubin.
+         *
+         * Dinamai mengikuti INDUKNYA `.rin-angka`, bukan `.mis-ubin` — nama
+         * seperti `rin-ubin-*` terbaca sebagai salinan ubin bersama, dan
+         * RupaBersamaTest memang menolaknya. Kelas ini bukan salinan: ia
+         * baris tambahan DI DALAM ubin bersama, yang rupanya tetap milik
+         * mis-ui.css.
+         *
+         * line-height disebut sendiri: style.css mewariskan 28px MUTLAK ke
+         * tiap <p>, dan pada huruf 11px itu menyisakan ruang mati yang
+         * membuat ubinnya tampak renggang. Lihat catatan di .rin-baris-label.
+         */
+        .rin-angka-ket {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 3px 0 0;
+            font-size: .69rem;
+            line-height: 1.35;
+            font-weight: 600;
+            color: var(--mis-tinta-4);
+        }
+
+        .rin-angka-ket i {
+            flex: 0 0 auto;
+            font-size: 10px !important;
+            margin: 0 !important;
+        }
+
+        /* Kuning, bukan abu: nama yang belum lengkap adalah pekerjaan yang
+           belum selesai, bukan sekadar keterangan. */
+        .rin-angka-ket-kurang {
+            color: #b45309;
+        }
+
         /* Dipatok tiga kolom sejak 576px, bukan 992px: di 820px kolom kanan
            sudah selebar ~758px, dan auto-fit di sana membuka jalur KEEMPAT
            yang kosong sehingga ketiga ubinnya menyusut tanpa alasan. */
@@ -1402,12 +1438,28 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         {{-- Tiga angka yang paling sering ditanyakan panitia saat
                              mencocokkan transfer, berdampingan supaya terbaca
                              sekali lihat. --}}
+                        {{--
+                            Tiap ubin membawa SATU baris keterangan di bawah
+                            labelnya.
+
+                            Tanpa itu ubinnya nyaris kosong: terukur, lebarnya
+                            253px sementara isinya cuma 99px pada "Kode unik"
+                            dan 120px pada "Jumlah orang" — lebih dari separuh
+                            ubin jadi petak putih. Dan yang ditaruh di situ
+                            bukan hiasan, melainkan jawaban atas pertanyaan
+                            yang memang menyusul angkanya: "dibayar lewat
+                            apa", "22 ini apa", "15 orangnya siapa saja".
+                        --}}
                         <div class="rin-angka">
                             <div class="mis-ubin">
                                 <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
                                 <div style="min-width: 0;">
                                     <p class="mis-ubin-angka">Rp {{ number_format($totalBayar, 0, ',', '.') }}</p>
                                     <p class="mis-ubin-label">Total bayar</p>
+                                    <p class="rin-angka-ket">
+                                        <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
+                                        {{ $caraBayar['ringkas'] ?? $caraBayar['label'] }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -1418,6 +1470,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                         {{ $kodeUnik > 0 ? number_format($kodeUnik, 0, ',', '.') : '—' }}
                                     </p>
                                     <p class="mis-ubin-label">Kode unik</p>
+                                    <p class="rin-angka-ket">
+                                        @if ($kodeUnik > 0)
+                                            <i class="fas fa-angle-double-right" aria-hidden="true"></i>
+                                            angka terakhir nominalnya
+                                        @else
+                                            <i class="fas fa-minus" aria-hidden="true"></i>
+                                            tidak memakai kode unik
+                                        @endif
+                                    </p>
                                 </div>
                             </div>
 
@@ -1426,6 +1487,27 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 <div style="min-width: 0;">
                                     <p class="mis-ubin-angka">{{ $jumlahOrang }}</p>
                                     <p class="mis-ubin-label">Jumlah orang</p>
+                                    @php
+                                        // Pendaftarnya sendiri ikut dihitung: ia memang
+                                        // salah satu peserta, dan panitia yang membaca
+                                        // "2 nama" untuk rombongan bertiga akan mengira
+                                        // ada satu yang hilang.
+                                        $namaTercatat = $pesertaLain->count() + 1;
+                                    @endphp
+                                    {{-- Disebut "x dari y", bukan "x nama tercatat":
+                                         selisihnya yang penting. Dibayar untuk 15
+                                         orang tetapi baru 1 nama tercatat berarti 14
+                                         sertifikat tidak bisa diterbitkan, dan itu
+                                         biasanya baru ketahuan di hari acara. --}}
+                                    <p class="rin-angka-ket {{ $namaTercatat >= $jumlahOrang ? '' : 'rin-angka-ket-kurang' }}">
+                                        <i class="fas {{ $namaTercatat >= $jumlahOrang ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"
+                                            aria-hidden="true"></i>
+                                        @if ($namaTercatat >= $jumlahOrang)
+                                            semua namanya tercatat
+                                        @else
+                                            baru {{ $namaTercatat }} dari {{ $jumlahOrang }} nama
+                                        @endif
+                                    </p>
                                 </div>
                             </div>
                         </div>
