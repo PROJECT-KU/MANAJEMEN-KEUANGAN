@@ -1082,6 +1082,26 @@ class LayarPendaftaranLayananTest extends TestCase
         $this->assertStringNotContainsString('Bukan pesanan lembaga', $isi);
     }
 
+    #[Test]
+    public function nomor_surat_pesanan_disebut_dalam_bahasa_yang_dipahami(): void
+    {
+        /*
+         * "PO" singkatan Inggris dari purchase order, dan penggunanya bukan
+         * orang pengadaan — ditanya "Nomor PO", mereka harus menebak apa yang
+         * diminta. Disebut "surat pesanan", yang memang istilah dipakai
+         * lembaga saat menerbitkannya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Nomor surat pesanan', $isi);
+        $this->assertStringNotContainsString('Nomor PO', $isi);
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {
