@@ -229,7 +229,11 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * dua lajur hal itu tidak terjadi karena isian kedua jatuh ke baris
          * berikutnya; menambah lajur ketiga diam-diam mengubahnya.
          */
+        /* Jaraknya diatur DI SINI, sesudah ruang mati warisan dibereskan:
+           3px yang benar-benar 3px, bukan 2px yang terlihat 16px. */
         .rin-baris-isi {
+            display: grid;
+            gap: 3px;
             min-width: 0;
         }
 
@@ -277,9 +281,21 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
 
+        /*
+         * line-height WAJIB disebut di sini.
+         *
+         * style.css mewariskan `line-height: 28px` MUTLAK — bukan rasio — ke
+         * seluruh badan halaman. Pada label berhuruf 10,2px itu berarti
+         * kotaknya 28px: sekitar 9px ruang kosong menggantung di bawah
+         * hurufnya, dan 7px lagi di atas nilainya. Terukur, jarak antar
+         * kotaknya 0 sementara jarak yang TERLIHAT antara "Email" dan
+         * alamatnya ±16px — jadi mengatur `gap` tidak pernah menolong, sebab
+         * ruang matinya ada DI DALAM kotak masing-masing.
+         */
         .rin-baris-label {
             margin: 0;
             font-size: .64rem;
+            line-height: 1.35;
             font-weight: 800;
             letter-spacing: .05em;
             text-transform: uppercase;
@@ -289,6 +305,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
         .rin-baris-nilai {
             margin: 0;
             font-size: .84rem;
+            /* Lihat catatan di .rin-baris-label: 28px warisan itu berlaku di
+               sini juga. 1.45 cukup lapang untuk nilai yang membungkus dua
+               baris tanpa menyisakan ruang mati saat isinya sebaris. */
+            line-height: 1.45;
             color: var(--mis-tinta);
             overflow-wrap: anywhere;
         }
