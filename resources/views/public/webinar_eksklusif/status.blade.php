@@ -147,7 +147,17 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <p class="sta-waktu">
                         <i class="fas fa-stopwatch" aria-hidden="true"></i>
                         <span>
-                            Selesaikan dalam <strong>{{ $pendaftaran->sisa_waktu }}</strong>,
+                            {{-- Batas waktunya ditulis sebagai ISO 8601 LENGKAP
+                                 DENGAN SELISIH ZONA (+07:00), bukan "2026-10-05
+                                 23:43". Tanpa selisihnya, peramban menafsirkan
+                                 angka itu memakai zona waktu PEMBACANYA — dan
+                                 peserta yang membuka dari luar Jakarta akan
+                                 melihat sisa waktu meleset berjam-jam.
+
+                                 Isi awalnya tetap dirender peladen: tanpa
+                                 skrip, yang terbaca kalimat yang sama seperti
+                                 dulu, bukan kotak kosong. --}}
+                            Selesaikan dalam <strong data-mis-mundur="{{ $pendaftaran->kedaluwarsa_pada->toIso8601String() }}">{{ $pendaftaran->sisa_waktu }}</strong>,
                             setelah itu kursinya dilepas untuk orang lain.
                         </span>
                     </p>
@@ -692,6 +702,19 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-wa > .fab { margin: 0 !important; font-size: 1.2rem; }
 
 
+    /* Angka hitung mundurnya TIDAK boleh patah antar-baris.
+
+       Terukur di 375px: tanpa ini "23 jam 58 menit 54 detik lagi" terpotong
+       di tengah, dan karena angkanya berganti tiap detik, titik patahnya ikut
+       berpindah — kalimatnya terlihat bergoyang sendiri.
+
+       tabular-nums menahan goyangan yang kedua: angka berlebar beda membuat
+       seluruh kalimat bergeser tiap kali 1 berganti jadi 8. */
+    .sta-waktu [data-mis-mundur] {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
     /* ---------------------------------------------- unggah bukti transfer */
 
     .sta-unggah {
@@ -852,6 +875,74 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-rincian dd { text-align: left; }
     }
 </style>
+
+<script>
+    /*
+     * Hitung mundur batas waktu membayar, berjalan tiap detik.
+     *
+     * Sebelumnya angkanya dirender peladen SEKALI lewat diffForHumans, jadi
+     * "23 jam 59 menit lagi" membeku di layar sampai halamannya dimuat ulang.
+     * Orang yang membuka tautan ini besok paginya tetap membaca 23 jam —
+     * padahal kursinya sudah dilepas.
+     *
+     * Detiknya SELALU ikut ditampilkan, bahkan saat sisanya masih 23 jam.
+     * Tanpa itu angkanya hanya berubah sekali semenit dan tidak ada tanda
+     * apa pun di layar bahwa batas waktunya memang sedang berjalan.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var kotak = document.querySelector('[data-mis-mundur]');
+
+        if (!kotak) { return; }
+
+        var batas = new Date(kotak.getAttribute('data-mis-mundur')).getTime();
+
+        // Tanggal yang tidak terbaca dibiarkan apa adanya: kalimat dari
+        // peladen masih benar, dan menggantinya dengan "NaN" jauh lebih buruk.
+        if (isNaN(batas)) { return; }
+
+        var sudahMuatUlang = false;
+
+        var sebut = function (angka, satuan) {
+            return angka + ' ' + satuan;
+        };
+
+        var gambar = function () {
+            var sisa = Math.floor((batas - Date.now()) / 1000);
+
+            if (sisa <= 0) {
+                kotak.textContent = 'waktunya sudah habis';
+
+                /*
+                 * Dimuat ulang SEKALI, bukan berulang: peladen yang menentukan
+                 * status sebenarnya, dan halaman yang terus memuat ulang
+                 * sendiri tidak bisa dibaca siapa pun.
+                 */
+                if (!sudahMuatUlang) {
+                    sudahMuatUlang = true;
+                    setTimeout(function () { location.reload(); }, 1500);
+                }
+
+                return;
+            }
+
+            var jam = Math.floor(sisa / 3600);
+            var menit = Math.floor((sisa % 3600) / 60);
+            var detik = sisa % 60;
+
+            var bagian = [];
+
+            if (jam > 0) { bagian.push(sebut(jam, 'jam')); }
+            if (jam > 0 || menit > 0) { bagian.push(sebut(menit, 'menit')); }
+
+            bagian.push(sebut(detik, 'detik'));
+
+            kotak.textContent = bagian.join(' ') + ' lagi';
+        };
+
+        gambar();
+        setInterval(gambar, 1000);
+    });
+</script>
 
 <script>
     /*
