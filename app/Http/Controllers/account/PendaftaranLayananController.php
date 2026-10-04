@@ -405,8 +405,21 @@ class PendaftaranLayananController extends Controller
              * baru dengan mengisi namanya. Keduanya tidak wajib — pendaftar
              * perorangan tetap jalur utamanya.
              */
+            /*
+             * Pertanyaan pertama borangnya, dan penentu sisanya. Dikirim juga
+             * ke peladen supaya aturan "nama lembaga wajib" bisa dinyatakan —
+             * tanpa jenisnya, peladen tidak bisa membedakan pesanan lembaga
+             * yang namanya lupa diisi dari pendaftar perorangan biasa.
+             */
+            'jenis' => ['nullable', Rule::in(['perorangan', 'lembaga'])],
             'pemesanan_id' => ['nullable', 'string', 'exists:pemesanan_lembaga,id'],
-            'lembaga_nama' => ['nullable', 'string', 'max:255'],
+            'lembaga_nama' => [
+                'nullable', 'string', 'max:255',
+                // Wajib hanya kalau jalurnya lembaga DAN tidak menunjuk
+                // pesanan yang sudah ada.
+                Rule::requiredIf(fn () => $request->input('jenis') === 'lembaga'
+                    && trim((string) $request->input('pemesanan_id')) === ''),
+            ],
             'lembaga_alamat' => ['nullable', 'string', 'max:1000'],
             'lembaga_npwp' => ['nullable', 'string', 'max:40'],
             'lembaga_po' => ['nullable', 'string', 'max:60'],
@@ -432,6 +445,7 @@ class PendaftaranLayananController extends Controller
             'total' => 'total bayar',
             'cara_bayar' => 'cara bayar',
             'bukti' => 'bukti bayar',
+            'lembaga_nama' => 'nama lembaga',
         ]);
 
         /*
@@ -473,7 +487,14 @@ class PendaftaranLayananController extends Controller
         // dan kiriman tanpa bagian lembaga memang tidak mengirimnya.
         $isian['pemesanan_id'] = trim((string) $request->input('pemesanan_id', '')) ?: null;
 
-        if ($isian['pemesanan_id'] === null && $namaLembaga !== '') {
+        /*
+         * Pesanan lembaga hanya dibuat kalau jalurnya memang lembaga.
+         *
+         * Tanpa syarat ini, nama lembaga yang tertinggal di isian tersembunyi
+         * — misalnya sesudah admin berpindah dari jalur lembaga ke
+         * perorangan — tetap membuat pesanan yang tidak pernah dimaksudkan.
+         */
+        if ($request->input('jenis') === 'lembaga' && $isian['pemesanan_id'] === null && $namaLembaga !== '') {
             $lembaga = \App\PemesananLembaga::create([
                 'nama_lembaga' => $namaLembaga,
                 'alamat' => $request->input('lembaga_alamat'),

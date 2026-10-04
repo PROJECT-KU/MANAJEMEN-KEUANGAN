@@ -971,6 +971,78 @@ class LayarPendaftaranLayananTest extends TestCase
         }
     }
 
+    /**
+     * Borang bercabang sejak pertanyaan PERTAMA.
+     *
+     * Dulu "pesanan lembaga?" ada di langkah terakhir, padahal jawabannya
+     * menentukan isi langkah-langkah sebelumnya — jumlah orang, nama peserta
+     * rombongan, potongan alumni, afiliasi, dan seluruh identitas lembaga.
+     * Admin mengisi semuanya dulu, baru diberi tahu sebagian tadi tidak
+     * relevan.
+     */
+    #[Test]
+    public function borang_menanyakan_untuk_siapa_di_langkah_pertama(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $jawab = $this->actingAs($orang)->get(route('account.pendaftaran-layanan.baru'));
+
+        $jawab->assertOk();
+        $jawab->assertSee('Untuk siapa?');
+        $jawab->assertSee('Satu orang');
+        $jawab->assertSee('Lembaga / rombongan');
+
+        $isi = $jawab->getContent();
+
+        // Pertanyaan itu harus datang SEBELUM pilihan layanannya.
+        $this->assertLessThan(
+            strpos($isi, 'Layanan apa?'),
+            strpos($isi, 'Untuk siapa?'),
+            '"Untuk siapa" harus ditanya lebih dulu; jawabannya menentukan sisanya.'
+        );
+
+        // Lima langkah, bukan enam: blok lembaganya dilebur ke langkah
+        // "siapa yang mendaftar", bukan jadi kartu tersendiri.
+        preg_match_all('/class="bar-nomor"[^>]*>(\d+)</', $isi, $nomor);
+        $this->assertSame(['1', '2', '3', '4', '5'], $nomor[1]);
+    }
+
+    /**
+     * Isian yang jarang dipakai dilipat, dan dilipat dalam keadaan TERTUTUP.
+     *
+     * Terukur: 29 nama isian di borang ini. Isian yang jarang diisi tetapi
+     * selalu terlihat menambah beban baca di setiap pendaftaran, bukan hanya
+     * di yang membutuhkannya.
+     */
+    #[Test]
+    public function isian_yang_jarang_dipakai_tertutup_saat_borang_dibuka(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()
+            ->getContent();
+
+        foreach ([
+            'bar-blok-lembaga' => 'blok lembaga',
+            'bar-bungkus-catatan' => 'catatan panitia',
+            'bar-bungkus-peserta' => 'nama peserta rombongan',
+        ] as $id => $sebutan) {
+            $this->assertMatchesRegularExpression(
+                '/id="' . $id . '"[^>]*\shidden/',
+                $isi,
+                'Isian ' . $sebutan . ' harus tertutup saat borang dibuka.'
+            );
+        }
+
+        // Sakelarnya sendiri harus ada — kalau tidak, isiannya tertutup
+        // selamanya dan tidak bisa dipakai siapa pun.
+        foreach (['bar-pakai-potongan', 'bar-pakai-catatan', 'bar-perlu-faktur', 'bar-pic-beda'] as $sakelar) {
+            $this->assertStringContainsString('id="' . $sakelar . '"', $isi);
+        }
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {
