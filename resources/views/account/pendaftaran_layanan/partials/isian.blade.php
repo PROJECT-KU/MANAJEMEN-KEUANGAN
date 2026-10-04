@@ -18,10 +18,18 @@
 @php
     $id = 'rin-' . $kolom;
 
-    // Nominal ditampilkan sebagai bilangan bulat tanpa pemisah: pemisahnya
-    // dibuang lagi saat disimpan, dan menampilkannya berpemisah membuat orang
-    // mengira formatnya yang disimpan.
-    $tampil = $uang ? (string) (int) $nilai : $nilai;
+    /*
+     * Nominal ditampilkan BERPEMISAH RIBUAN.
+     *
+     * Dulu polos — "82500022" — dan angka sepanjang itu praktis tidak bisa
+     * dibaca sekilas; panitia yang mencocokkannya dengan mutasi rekening
+     * harus menghitung digitnya satu per satu.
+     *
+     * Aman karena peladen MEMBUANG seluruh karakter bukan angka sebelum
+     * menyimpan (lihat baca() di UbahDataPendaftaran), jadi titik maupun
+     * awalan Rp tidak pernah ikut tersimpan.
+     */
+    $tampil = $uang ? number_format((int) $nilai, 0, ',', '.') : $nilai;
 
     $jenisKotak = match ($jenis) {
         'tanggal' => 'date',
@@ -122,13 +130,30 @@
         <textarea class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" rows="3"
             data-mis-tumbuh>{{ $tampil }}</textarea>
     @else
-        <input type="{{ $jenisKotak }}" class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}"
-            value="{{ $tampil }}"
-            @if ($jenis === 'angka') min="1" max="99" @endif
-            @if ($uang) inputmode="numeric" @endif
-            @if (in_array($kolom, ['nama', 'nama_pemesan', 'email', 'email_pemesan', 'telp', 'telp_pemesan'], true)) required @endif>
         @if ($uang)
-            <p class="mis-bantuan">Dalam rupiah, tanpa titik.</p>
+            {{-- "Rp" MENEMPEL di dalam kotaknya, bukan jadi label terpisah.
+                 Kepala berkas ini sudah menjanjikannya sejak lama, tetapi
+                 yang ada hanya kalimat bantuan "Dalam rupiah" di bawah kotak
+                 — dan kalimat di bawah kotak tidak terbaca saat mata sedang
+                 di dalam kotaknya. --}}
+            <span class="rin-uang-kotak">
+                <span class="rin-uang-awalan" aria-hidden="true">Rp</span>
+                <input type="{{ $jenisKotak }}" class="form-control-modern rin-uang-isian"
+                    id="{{ $id }}" name="{{ $kolom }}" value="{{ $tampil }}"
+                    inputmode="numeric" data-mis-rupiah>
+            </span>
+            {{-- Tidak ada kalimat bantuan di sini.
+
+                 Dulu tertulis "Dalam rupiah, tanpa titik" — dan itu memang
+                 perlu saat kotaknya polos. Sejak "Rp" menempel di dalamnya
+                 dan titiknya terlihat sambil diketik, kalimat itu tidak
+                 menjelaskan apa pun lagi; ia hanya terulang di bawah SETIAP
+                 nominal dan membungkus jadi dua baris. --}}
+        @else
+            <input type="{{ $jenisKotak }}" class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}"
+                value="{{ $tampil }}"
+                @if ($jenis === 'angka') min="1" max="99" @endif
+                @if (in_array($kolom, ['nama', 'nama_pemesan', 'email', 'email_pemesan', 'telp', 'telp_pemesan'], true)) required @endif>
         @endif
     @endif
 </div>
