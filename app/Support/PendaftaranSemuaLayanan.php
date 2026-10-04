@@ -317,6 +317,79 @@ class PendaftaranSemuaLayanan
      */
     public const KODE_UNIK = [500, 1500];
 
+    /**
+     * Sesi yang boleh dipilih, per layanan dan per varian.
+     *
+     * Scopus Kafe berjalan pada jam yang TETAP, dan jamnya berbeda menurut
+     * variannya: offline dua sesi (08.00–13.00 dan 13.00–18.00), online hanya
+     * sesi pagi. Sebelum ini borang panitia menyodorkan kotak teks bebas, jadi
+     * satu pendaftaran bisa tercatat "Sesi 1", yang lain "sesi1", yang lain
+     * lagi "pagi" — dan daftar hadir per sesi tidak bisa dikelompokkan dari
+     * data yang begitu.
+     *
+     * `nilai` sengaja huruf kecil "sesi 1"/"sesi 2", SAMA dengan yang ditulis
+     * borang pendaftaran umum selama ini (terukur: 9 baris tersimpan, semuanya
+     * berbentuk itu). Memakai bentuk lain di jalur panitia berarti satu sesi
+     * yang sama tersimpan dalam dua ejaan, dan pengelompokannya pecah.
+     *
+     * Jamnya ikut disalin ke kolom `waktu_mulai`/`waktu_selesai` saat
+     * disimpan — kolom itu sudah ada dan diisi jalur umum, jadi membiarkannya
+     * kosong membuat pendaftaran buatan panitia terlihat belum berjadwal.
+     *
+     * Ditaruh di sini, bukan di layar Layanan: jamnya bukan sesuatu yang
+     * disetel per layanan oleh admin, melainkan jam operasional yang tetap.
+     * Begitu ia mulai berubah-ubah, tempatnya memang pindah ke sana.
+     */
+    public const SESI = [
+        'scopus_kafe' => [
+            'offline' => [
+                ['nilai' => 'sesi 1', 'nama' => 'Sesi 1', 'mulai' => '08:00', 'selesai' => '13:00'],
+                ['nilai' => 'sesi 2', 'nama' => 'Sesi 2', 'mulai' => '13:00', 'selesai' => '18:00'],
+            ],
+            'online' => [
+                ['nilai' => 'sesi 1', 'nama' => 'Sesi 1', 'mulai' => '08:00', 'selesai' => '13:00'],
+            ],
+        ],
+    ];
+
+    /**
+     * Sesi yang ditawarkan untuk satu layanan dan varian.
+     *
+     * Larik kosong berarti sesinya memang tidak diatur — pemanggilnya yang
+     * memutuskan artinya: borang tidak menampilkan apa pun, penyimpan tidak
+     * memaksa pilihan.
+     *
+     * @return list<array{nilai: string, nama: string, mulai: string, selesai: string}>
+     */
+    public static function sesiPilihan(string $layanan, ?string $varian): array
+    {
+        $daftar = self::SESI[$layanan] ?? [];
+        $kunci = trim((string) $varian);
+
+        return $daftar[$kunci] ?? [];
+    }
+
+    /**
+     * Sesi yang cocok dengan nilai tersimpan, atau null.
+     *
+     * Dipakai penyimpan untuk mengambil jamnya, dan untuk menolak nilai yang
+     * tidak ada di daftarnya.
+     *
+     * @return array{nilai: string, nama: string, mulai: string, selesai: string}|null
+     */
+    public static function sesiCocok(string $layanan, ?string $varian, ?string $nilai): ?array
+    {
+        $cari = mb_strtolower(trim((string) $nilai));
+
+        foreach (self::sesiPilihan($layanan, $varian) as $sesi) {
+            if (mb_strtolower($sesi['nilai']) === $cari) {
+                return $sesi;
+            }
+        }
+
+        return null;
+    }
+
     public const CARA_BAYAR = [
         'tunai' => [
             'label' => 'Bayar di tempat',
@@ -776,6 +849,13 @@ class PendaftaranSemuaLayanan
                         && isset($s['kolom']['varian']),
                     // Nama sesi hanya dipunyai tabel Scopus Kafe.
                     'pakai_sesi' => ($s['kolom']['sesi'] ?? null) === 'sesi',
+                    /*
+                     * Sesi yang boleh dipilih, dikelompokkan per varian.
+                     * Dibawa serta supaya borangnya tidak menyimpan salinan
+                     * jam operasional sendiri — dua daftar yang harus diubah
+                     * bersamaan selamanya.
+                     */
+                    'sesi' => self::SESI[$kunci] ?? [],
                     /*
                      * Pola nomornya disebut dengan kata, bukan dibiarkan jadi
                      * kejutan. Nomornya dibuat sistem sesudah disimpan, jadi
