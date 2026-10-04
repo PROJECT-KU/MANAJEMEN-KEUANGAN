@@ -1043,6 +1043,45 @@ class LayarPendaftaranLayananTest extends TestCase
         }
     }
 
+    /**
+     * Menu "gabung ke pesanan" tidak ditawarkan kalau belum ada pesanannya.
+     *
+     * Admin yang baru memilih jalur lembaga disuguhi menu berisi SATU pilihan
+     * bertuliskan "Bukan pesanan lembaga" — menyangkal pilihan yang baru saja
+     * ia buat, dan tidak ada yang bisa dipilih di sana.
+     */
+    #[Test]
+    public function menu_gabung_pesanan_disembunyikan_kalau_belum_ada_pesanannya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        // Semua pesanan yang terbuka ditutup dulu, sebatas transaksi uji ini.
+        \App\PemesananLembaga::query()->update(['status' => \App\PemesananLembaga::SELESAI]);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()
+            ->getContent();
+
+        /*
+         * Diperiksa dari pembungkus TEPAT SEBELUM labelnya, bukan dengan pola
+         * tag utuh: Blade menyisipkan spasi di sekitar atribut bersyarat, jadi
+         * pola yang mengeja tagnya persis akan meleset tanpa ada yang salah
+         * pada markahnya.
+         */
+        $sebelum = substr($isi, 0, strpos($isi, 'for="bar-pemesanan"'));
+        $pembungkus = substr($sebelum, strrpos($sebelum, '<div'));
+
+        $this->assertStringContainsString(
+            'hidden',
+            $pembungkus,
+            'Menunya harus tertutup saat tidak ada pesanan yang bisa dipilih.'
+        );
+
+        // Dan kalimatnya tidak lagi menyangkal pilihan yang baru dibuat.
+        $this->assertStringNotContainsString('Bukan pesanan lembaga', $isi);
+    }
+
     /** Satu angkatan untuk ditunjuk baris uji; dipakai ulang kalau sudah ada. */
     private function angkatan(): KategoriLayanan
     {
