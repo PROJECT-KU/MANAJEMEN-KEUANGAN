@@ -1082,12 +1082,18 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
-    public function alumni_mengalahkan_diskon_rombongan(): void
+    public function yang_berlaku_potongan_yang_paling_menguntungkan(): void
     {
         /*
-         * Hanya SATU potongan yang berlaku. Alumni di depan sebab ia milik
-         * orangnya, bukan pesanannya — dan dua potongan yang ditumpuk membuat
-         * harga akhirnya tidak bisa dijelaskan dari salah satunya.
+         * Hanya SATU potongan yang berlaku, dan yang dipakai yang paling
+         * besar — dua potongan yang ditumpuk membuat harga akhirnya tidak
+         * bisa dijelaskan dari salah satunya.
+         *
+         * Dulu alumni selalu menang. Aturan itu merugikan sejak potongan
+         * alumni dihitung dari SATU kursi: di sini alumni 50% dari satu kursi
+         * = 500.000, sedangkan rombongan 20% dari sepuluh kursi = 2.000.000.
+         * Pendaftarnya akan diberi yang kecil, dan tidak ada yang menyadari
+         * sebab keduanya sama-sama "potongan yang dihitung sistem".
          */
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
         $angkatan = $this->angkatan('scopus_camp', 50, 50);
@@ -1107,8 +1113,10 @@ class TindakanPendaftaranTest extends TestCase
 
         $b = PendaftaranScopusCamp::where('nama', 'Alumni Rombongan')->first();
 
-        $this->assertSame('ALUMNI', $b->kode_diskon, 'Alumni yang berlaku, bukan rombongan.');
-        $this->assertSame(5000000, (int) $b->nominal_diskon);
+        // Rombongan 20% x 10 kursi = 2.000.000 mengalahkan alumni 50% x 1
+        // kursi = 500.000.
+        $this->assertSame('ROMBONGAN', $b->kode_diskon);
+        $this->assertSame(2000000, (int) $b->nominal_diskon);
     }
 
     #[Test]
@@ -1364,6 +1372,93 @@ class TindakanPendaftaranTest extends TestCase
             "Berkas ini menulis sendiri rentang kode uniknya:\n- " . implode("\n- ", $melenceng)
                 . "\nBacalah dari PendaftaranSemuaLayanan::KODE_UNIK.\n"
         );
+    }
+
+    #[Test]
+    public function rombongan_perorangan_dengan_satu_alumni_memotong_satu_kursi(): void
+    {
+        /*
+         * Si A mengajak enam temannya dan MEMBAYAR SENDIRI — bukan lembaga.
+         * A alumni, teman-temannya tidak.
+         *
+         * Dua hal yang dulu salah di keadaan ini. Pertama jalurnya tidak ada:
+         * isian jumlah orang hanya muncul di jalur lembaga. Kedua, potongan
+         * alumninya dihitung dari SELURUH rombongan — pada Scopus Camp
+         * Rp 5.500.000 itu Rp 3.850.000, padahal seharusnya Rp 550.000.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill([
+            'varian' => null, 'biaya' => '5500000', 'total_biaya' => '5500000',
+        ])->save();
+
+        // Alumni 10%, dan TANPA diskon rombongan supaya yang diuji murni
+        // perhitungan alumninya.
+        $this->tarif('scopus_camp', null, ['diskon_alumni_persen' => 10]);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'jenis' => 'perorangan',
+            'nama' => 'Si A Alumni',
+            'telp' => '0816-0000-0140',
+            'jumlah' => 7,
+            'alumni' => '1',
+            'peserta' => "Teman Satu\nTeman Dua\nTeman Tiga\nTeman Empat\nTeman Lima\nTeman Enam",
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Si A Alumni')->first();
+
+        $this->assertNotNull($b, 'Rombongan yang dibayar perorangan harus bisa disimpan.');
+        $this->assertSame(7, (int) $b->jumlah_pendaftar);
+
+        // 10% dari SATU kursi, bukan dari tujuh.
+        $this->assertSame(550000, (int) $b->nominal_diskon);
+        $this->assertSame('ALUMNI', $b->kode_diskon);
+
+        // 7 x 5.500.000 = 38.500.000, dipotong 550.000.
+        $this->assertSame(37950000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
+
+        // Keenam temannya ikut tercatat untuk daftar hadir.
+        $this->assertSame(
+            6,
+            \App\PendaftaranPeserta::milik('scopus_camp', (string) $b->id)->count()
+        );
+
+        // Tidak ada pesanan lembaga yang terbuat; yang membayar perorangan.
+        $this->assertNull(\App\PemesananLembaga::untukPendaftaran('scopus_camp', (string) $b->id));
+    }
+
+    #[Test]
+    public function alumni_sendirian_tetap_memotong_kursinya_sendiri(): void
+    {
+        /*
+         * Penjaga supaya perbaikan di atas tidak diam-diam mengubah keadaan
+         * yang paling lazim: alumni yang mendaftar sendirian. Satu kursi dan
+         * seluruh subtotal kebetulan sama besar di sini, dan itu memang
+         * harapannya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill([
+            'varian' => null, 'biaya' => '5500000', 'total_biaya' => '5500000',
+        ])->save();
+
+        $this->tarif('scopus_camp', null, ['diskon_alumni_persen' => 10]);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'jenis' => 'perorangan',
+            'nama' => 'Alumni Sendirian',
+            'telp' => '0816-0000-0141',
+            'alumni' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Alumni Sendirian')->first();
+
+        $this->assertSame(550000, (int) $b->nominal_diskon);
+        $this->assertSame(4950000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
     }
 
     // ------------------------------------------------------------- pembantu
@@ -2543,9 +2638,17 @@ class TindakanPendaftaranTest extends TestCase
         $b = PendaftaranScopusCamp::where('nama', 'Peserta Alumni')->first();
 
         $this->assertNotNull($b);
-        // 1.000.000 x 2 = 2.000.000, potongan 10% = 200.000.
-        $this->assertSame(200000, (int) $b->nominal_diskon);
-        $this->assertSame(1800000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
+
+        /*
+         * Potongannya 10% dari SATU KURSI, bukan dari dua.
+         *
+         * Pernyataan lamanya 200.000 — 10% dari seluruh subtotal — dan itu
+         * memang yang dulu dihitung kodenya. Status alumni milik satu orang,
+         * bukan milik teman yang ia ajak; dihitung dari subtotal, satu alumni
+         * yang mengajak enam teman memotong 10% dari tujuh kursi sekaligus.
+         */
+        $this->assertSame(100000, (int) $b->nominal_diskon);
+        $this->assertSame(1900000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
         $this->assertSame('ALUMNI', $b->kode_diskon);
     }
 

@@ -1171,7 +1171,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     <span class="bar-nomor" aria-hidden="true">1</span>
                     <div>
                         <p class="bar-langkah-judul">Untuk siapa?</p>
-                        <p class="bar-langkah-sub">Menentukan isian berikutnya; pilih dulu yang ini.</p>
+                        <p class="bar-langkah-sub">Yang menentukan siapa membayar; pilih dulu yang ini.</p>
                     </div>
                 </div>
 
@@ -1184,8 +1184,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                 <i class="fas fa-user"></i>
                             </span>
                             <span style="min-width: 0;">
-                                <span class="bar-kartu-nama">Satu orang</span>
-                                <span class="bar-kartu-ket">Mendaftar untuk dirinya sendiri.</span>
+                                <span class="bar-kartu-nama">Perorangan</span>
+                                <span class="bar-kartu-ket">
+                                    Dibayar sendiri — boleh sendirian, boleh mengajak teman.
+                                </span>
                             </span>
                             <span class="bar-kartu-centang" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
                         </span>
@@ -1198,8 +1200,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                 <i class="fas fa-building"></i>
                             </span>
                             <span style="min-width: 0;">
-                                <span class="bar-kartu-nama">Lembaga / rombongan</span>
-                                <span class="bar-kartu-ket">Satu penanggung jawab, beberapa peserta.</span>
+                                <span class="bar-kartu-nama">Lembaga / instansi</span>
+                                <span class="bar-kartu-ket">
+                                    Dibayar lembaga, dan fakturnya atas nama lembaga.
+                                </span>
                             </span>
                             <span class="bar-kartu-centang" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
                         </span>
@@ -2366,7 +2370,14 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             var potongan;
 
             if (pakaiAlumni) {
-                potongan = Math.round(subtotal * persen / 100);
+                /*
+                 * SATU KURSI, bukan subtotal — sama dengan aturan di peladen.
+                 *
+                 * Dihitung dari subtotal, angka di layar akan berbeda dari
+                 * yang tersimpan, dan panitia menyebut nominal yang salah ke
+                 * pendaftarnya sebelum sempat ada yang menyadarinya.
+                 */
+                potongan = Math.round(satuan * persen / 100);
             } else {
                 potongan = pilih.bisaPotongan ? angkaDari(isianPotongan.value) : 0;
             }
@@ -2409,8 +2420,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             tampil(bungkusAlumni, pilih.bisaPotongan && persen > 0 && !lembagaDipakai());
 
             if (persen > 0) {
-                ketAlumni.textContent = 'Potongan ' + persen
-                    + '% dari Tarif Layanan — menggantikan potongan khusus.';
+                var jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
+
+                /*
+                 * Disebutkan "untuk satu kursi" begitu rombongannya lebih dari
+                 * satu orang. Tanpa itu panitia mengira seluruh rombongan ikut
+                 * berdiskon, dan angka di layar terbaca seperti salah hitung.
+                 */
+                ketAlumni.textContent = 'Potongan ' + persen + '% dari Tarif Layanan'
+                    + (jml > 1 ? ', untuk satu kursi saja' : '')
+                    + ' — menggantikan potongan khusus.';
             } else {
                 // Tersembunyi berarti juga tidak ikut terkirim; centangnya
                 // dilepas supaya nilai lama tidak menempel saat berganti
@@ -2570,7 +2589,16 @@ Daftarkan Pendaftar | MIS Rumah Scopus
              * terakhir menang. Terukur: isian "jumlah orang" tetap muncul di
              * jalur perorangan walau selalu bernilai satu.
              */
-            tampil(bungkusJumlah, pilih.berangkatan && lembagaDipakai());
+            /*
+             * Jumlah orang ditawarkan di KEDUA jalur.
+             *
+             * Dulu hanya di jalur lembaga, jadi satu orang yang mengajak enam
+             * temannya dan membayar sendiri tidak punya jalan sama sekali —
+             * satu-satunya pilihan memilih "Lembaga", padahal tidak ada
+             * lembaga yang membayar, dan di sana centang alumninya justru
+             * disembunyikan.
+             */
+            tampil(bungkusJumlah, pilih.berangkatan);
             tampil(bungkusTotal, !pilih.berangkatan);
 
             // Layanan tanpa angkatan tidak punya apa pun untuk diringkas;
@@ -2733,7 +2761,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var segarkanPeserta = function () {
             var pilih = layananTerpilih();
             var jml = Math.max(1, angkaDari(isianJumlah.value) || 1);
-            var perlu = (lembagaDipakai() && pilih && pilih.berangkatan) ? jml - 1 : 0;
+            // Nama peserta dipakai membuat daftar hadir, dan rombongan yang
+            // dibayar perorangan sama saja butuhnya.
+            var perlu = (pilih && pilih.berangkatan) ? jml - 1 : 0;
 
             tampil(bungkusPeserta, perlu > 0);
 
@@ -2742,7 +2772,17 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         };
 
-        isianJumlah.addEventListener('input', segarkanPeserta);
+        isianJumlah.addEventListener('input', function () {
+            segarkanPeserta();
+
+            // Keterangan alumninya menyebut "untuk satu kursi saja" hanya saat
+            // rombongan, jadi ia ikut berubah saat jumlahnya berubah.
+            var pl = layananTerpilih();
+
+            if (pl) {
+                tawarkanAlumni(pl);
+            }
+        });
 
         /*
          * Isian yang dilipat: nilainya DIKOSONGKAN saat sakelarnya dimatikan.
@@ -2840,12 +2880,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
             tampil(blokLembaga, lembaga);
 
-            // Satu orang selalu berjumlah satu; isiannya tidak perlu ada.
-            tampil(bungkusJumlah, lembaga && !!pilih && pilih.berangkatan);
-
-            if (!lembaga) {
-                isianJumlah.value = 1;
-            }
+            tampil(bungkusJumlah, !!pilih && pilih.berangkatan);
 
             /*
              * Afiliasi disembunyikan untuk pesanan lembaga: nama lembaganya

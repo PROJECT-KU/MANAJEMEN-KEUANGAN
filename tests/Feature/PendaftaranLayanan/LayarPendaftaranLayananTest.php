@@ -989,8 +989,11 @@ class LayarPendaftaranLayananTest extends TestCase
 
         $jawab->assertOk();
         $jawab->assertSee('Untuk siapa?');
-        $jawab->assertSee('Satu orang');
-        $jawab->assertSee('Lembaga / rombongan');
+
+        // Kartunya tentang SIAPA YANG MEMBAYAR, bukan berapa orangnya:
+        // rombongan bisa dibayar sendiri maupun oleh lembaganya.
+        $jawab->assertSee('Perorangan');
+        $jawab->assertSee('Lembaga / instansi');
 
         $isi = $jawab->getContent();
 
