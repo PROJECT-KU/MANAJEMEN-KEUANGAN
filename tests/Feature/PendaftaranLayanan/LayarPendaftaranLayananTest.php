@@ -1047,6 +1047,59 @@ class LayarPendaftaranLayananTest extends TestCase
     }
 
     /**
+     * Saringan yang jarang dipakai dilipat — tetapi tidak pernah jadi
+     * saringan siluman.
+     *
+     * Delapan kendali sekaligus adalah delapan hal yang harus dibaca sebelum
+     * satu nama ditemukan, dan yang memakai layar ini bukan orang yang
+     * terbiasa dengan borang. Lima di antaranya dilipat sehingga yang tersisa
+     * cuma Cari, Layanan, dan Keadaan.
+     *
+     * Yang dijaga justru kebalikannya: saringan terlipat yang SEDANG
+     * TERPASANG harus terbuka sendiri. Kalau tidak, daftarnya terlihat kurang
+     * isinya tanpa ada satu pun tanda yang menjelaskan kenapa — dan itu
+     * berakhir dengan panitia menyimpulkan datanya hilang.
+     */
+    #[Test]
+    public function saringan_jarang_pakai_dilipat_tetapi_terbuka_saat_terpasang(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $tertutup = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index'))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="pdl-lain-tuas"', $tertutup);
+        $this->assertMatchesRegularExpression('/id="pdl-lain"[^>]*\shidden/', $tertutup);
+
+        // Ketiga kendali yang tersisa tetap di muka; melipat semuanya berarti
+        // mencari satu nama menuntut membuka lipatan lebih dulu.
+        foreach (['pdl-cari', 'pdl-layanan', 'pdl-keadaan'] as $tetap) {
+            $this->assertStringContainsString('id="' . $tetap . '"', $tertutup);
+        }
+
+        $terbuka = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['bukti' => 'belum']))
+            ->assertOk()->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/id="pdl-lain"[^>]*\shidden/', $terbuka);
+
+        /*
+         * Jumlahnya disebut di tuasnya. Dua saringan terpasang harus terbaca
+         * "2", bukan sekadar "ada yang aktif" — panitia yang melihat hasil
+         * sedikit perlu tahu berapa banyak yang harus dilepas.
+         */
+        $dua = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', ['bukti' => 'belum', 'bayar' => 'transfer']))
+            ->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/id="pdl-lain-tuas".*?mis-pil mis-pil-ungu">\s*2\s*</s',
+            $dua
+        );
+    }
+
+    /**
      * Sesi Scopus Kafe dipilih dari daftar, bukan diketik sendiri.
      *
      * Scopus Kafe berjalan pada jam tetap dan jamnya berbeda menurut varian:

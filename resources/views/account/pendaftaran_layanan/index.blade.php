@@ -508,23 +508,97 @@ Pendaftar Layanan | MIS Rumah Scopus
         /* Jumlah uang di kepala daftar. Bukan ubin saringan: ia tidak bisa
            jadi tautan ke mana pun, dan panduan menuntut tiap ubin ringkasan
            berupa saringan yang bisa ditekan. */
+        /*
+         * Kisi yang MELEBAR, bukan sebaris yang menggantung.
+         *
+         * Sebagai flex sebaris, isinya berakhir di 686px sementara kotaknya
+         * 1.160px — terukur 474px petak kosong di ujung kanan, dan ketiga
+         * angkanya berdesakan di kiri seolah sisa ruang itu menunggu sesuatu
+         * yang tidak pernah datang.
+         *
+         * auto-fit, bukan jumlah kolom tetap: dua baris terakhirnya muncul
+         * hanya kalau memang ada — pendaftaran yang menggantung dan status
+         * yang belum dikenali — jadi jumlahnya berubah-ubah antara dua sampai
+         * empat, dan kolom tetap akan menganggur persis seperti sebelumnya.
+         */
         .pdl-uang-total {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 4px 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
+            gap: 10px;
             margin: 0 0 var(--mis-jarak);
-            padding: 11px 15px;
-            border: 1px solid var(--mis-garis);
-            border-radius: var(--mis-radius-kecil);
-            background: var(--mis-kartu);
+            padding: 0;
+            border: 0;
+            background: none;
             font-size: .82rem;
             color: var(--mis-tinta-2);
         }
 
+        /* Tiap angka jadi kotaknya sendiri, sebentuk dengan ubin di atasnya —
+           keduanya sama-sama "angka yang menerangkan daftar ini", cuma yang
+           ini tidak bisa diklik untuk menyaring. */
+        .pdl-uang-total > * {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+            padding: 11px 14px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: var(--mis-kartu);
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .pdl-uang-total a:hover {
+            border-color: #c7d2fe;
+        }
+
+        /* Ikonnya tidak ikut menyusut saat angkanya panjang. */
+        .pdl-uang-total > * > i {
+            flex: 0 0 auto;
+        }
+
+        /*
+         * Lipatan saringan lain. Sebaris penuh di dalam .mis-saring yang
+         * flex, jadi isinya menata diri persis seperti saat ia belum dilipat.
+         */
+        .pdl-lain {
+            flex: 1 1 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .pdl-lain[hidden] {
+            display: none;
+        }
+
+        /* Tuasnya sejajar dasar kotak isian di sebelahnya, bukan dasar
+           labelnya: .mis-saring memakai align-items: flex-end, dan tombol
+           tanpa label di atasnya akan duduk lebih tinggi. */
+        .pdl-lain-tuas {
+            flex: 0 0 auto;
+            align-self: flex-end;
+        }
+
         .pdl-uang-total strong {
+            display: block;
+            font-size: 1.02rem;
             font-variant-numeric: tabular-nums;
             color: var(--mis-tinta);
+            overflow-wrap: anywhere;
+        }
+
+        .pdl-uang-angka {
+            min-width: 0;
+            line-height: 1.35;
+        }
+
+        .pdl-uang-angka span {
+            display: block;
+            font-size: .72rem;
+            color: var(--mis-tinta-4);
         }
 
         /* Ikon glifnya WAJIB mewarisi ukuran: layout memasang
@@ -828,16 +902,29 @@ Pendaftar Layanan | MIS Rumah Scopus
 
         {{-- Jumlah orang dan uangnya di luar ubin: keduanya tidak bisa jadi
              saringan, dan panduan menuntut tiap ubin ringkasan berupa tautan
-             yang menyaring. Ditaruh sebaris supaya tetap terbaca. --}}
-        <p class="pdl-uang-total">
+             yang menyaring.
+
+             Angkanya DI ATAS keterangannya, bukan di tengah kalimat. "Uang
+             masuk dari yang lunas Rp 495.438.943" menuntut dibaca sampai habis
+             sebelum angkanya ketemu; angka dulu lalu keterangan kecil terbaca
+             sekali lihat, dan itu bentuk yang sama dengan ubin di atasnya. --}}
+        <div class="pdl-uang-total">
             <span>
                 <i class="fas fa-users mis-ikon-ungu" aria-hidden="true"></i>
-                Jumlah orang <strong>{{ number_format($ringkasan['orang'], 0, ',', '.') }}</strong>
+                <span class="pdl-uang-angka">
+                    <strong>{{ number_format($ringkasan['orang'], 0, ',', '.') }}</strong>
+                    <span>orang terdaftar</span>
+                </span>
             </span>
+
             <span>
                 <i class="fas fa-wallet mis-ikon-hijau" aria-hidden="true"></i>
-                Uang masuk dari yang lunas <strong>Rp {{ number_format($ringkasan['uang_lunas'], 0, ',', '.') }}</strong>
+                <span class="pdl-uang-angka">
+                    <strong>Rp {{ number_format($ringkasan['uang_lunas'], 0, ',', '.') }}</strong>
+                    <span>uang masuk dari yang lunas</span>
+                </span>
             </span>
+
             @if ($ringkasan['menggantung'] > 0)
                 {{-- Pendaftaran yang menunggu terlalu lama. Ditaruh di baris
                      ini, bukan jadi ubin keenam: ubinnya sudah lima dan
@@ -851,7 +938,10 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <a href="{{ route($rute, $lingkup + ['lama' => '1']) }}"
                     title="Saring: menunggu bayar lebih dari {{ $ringkasan['hari_menggantung'] }} hari">
                     <i class="fas fa-hourglass-half mis-ikon-merah" aria-hidden="true"></i>
-                    {{ $ringkasan['menggantung'] }} menunggu lebih dari {{ $ringkasan['hari_menggantung'] }} hari
+                    <span class="pdl-uang-angka">
+                        <strong>{{ $ringkasan['menggantung'] }}</strong>
+                        <span>menunggu lebih dari {{ $ringkasan['hari_menggantung'] }} hari</span>
+                    </span>
                 </a>
             @endif
 
@@ -862,10 +952,13 @@ Pendaftar Layanan | MIS Rumah Scopus
                      bisa ditemukan, bukan hilang dari semua saringan. --}}
                 <a href="{{ route($rute, $lingkup + ['keadaan' => 'lain']) }}">
                     <i class="fas fa-exclamation-triangle mis-ikon-kuning" aria-hidden="true"></i>
-                    {{ $ringkasan['lain'] }} status belum dikenali
+                    <span class="pdl-uang-angka">
+                        <strong>{{ $ringkasan['lain'] }}</strong>
+                        <span>status belum dikenali</span>
+                    </span>
                 </a>
             @endif
-        </p>
+        </div>
 
         {{-- Saringan yang dipasang lewat TAUTAN, bukan lewat borang, wajib
              terlihat dan bisa dilepas di sini — saringan yang bekerja tanpa
@@ -921,6 +1014,19 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <span class="mis-saring-sibuk" id="pdl-sibuk" aria-hidden="true"></span>
             </div>
 
+            {{-- Pembuka saringan lipat. type=button supaya ia tidak ikut
+                 mengirim borangnya; jumlah yang sedang terpasang disebut di
+                 pilnya supaya yang terlipat tidak pernah jadi saringan
+                 siluman. --}}
+            <button type="button" class="mis-tombol mis-tombol-halus pdl-lain-tuas" id="pdl-lain-tuas"
+                aria-expanded="{{ $adaSaringanLain ? 'true' : 'false' }}" aria-controls="pdl-lain">
+                <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                <span>Saringan lain</span>
+                @if ($jumlahSaringanLain > 0)
+                    <span class="mis-pil mis-pil-ungu">{{ $jumlahSaringanLain }}</span>
+                @endif
+            </button>
+
             <div class="mis-isian mis-saring-pilih">
                 <label class="mis-label" for="pdl-layanan">Layanan</label>
                 <select class="form-control-modern" id="pdl-layanan" name="layanan">
@@ -944,79 +1050,109 @@ Pendaftar Layanan | MIS Rumah Scopus
                 </select>
             </div>
 
-            <div class="mis-isian mis-saring-pilih">
-                <label class="mis-label" for="pdl-bukti">Bukti bayar</label>
-                <select class="form-control-modern" id="pdl-bukti" name="bukti">
-                    <option value="">Semua</option>
-                    <option value="ada" @selected($bukti === 'ada')>Sudah diunggah</option>
-                    <option value="belum" @selected($bukti === 'belum')>Belum diunggah</option>
-                </select>
-            </div>
+            {{-- Reset DI SINI, sebelum lipatannya.
 
-            {{-- Seluruh katalog ditawarkan, bukan hanya yang boleh dipilih
-                 panitia: baris berbayar DOKU tidak bisa dibuat dari layar ini,
-                 tetapi tetap harus bisa DICARI dari sini. --}}
-            <div class="mis-isian mis-saring-pilih">
-                <label class="mis-label" for="pdl-bayar">Cara bayar</label>
-                <select class="form-control-modern" id="pdl-bayar" name="bayar">
-                    <option value="">Semua</option>
-                    @foreach (\App\Support\PendaftaranSemuaLayanan::CARA_BAYAR as $kb => $cb)
-                        <option value="{{ $kb }}" @selected($caraBayar === $kb)>{{ $cb['label'] }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Rentang tanggal pendaftaran.
-
-                 DIKEMBALIKAN, bukan fitur baru: ketiga layar pendaftaran yang
-                 dibuang punya kendali ini dan benar-benar dipakai. type=date
-                 memakai pemilih tanggal bawaan peramban, jadi orang yang tidak
-                 terbiasa mengetik format tanggal tidak perlu menebaknya. --}}
-            <div class="mis-isian mis-saring-pilih">
-                <label class="mis-label" for="pdl-dari">Mendaftar sejak</label>
-                <input type="date" class="form-control-modern" id="pdl-dari" name="dari"
-                    value="{{ $dari }}" max="{{ $sampai ?: now()->toDateString() }}">
-            </div>
-
-            <div class="mis-isian mis-saring-pilih">
-                <label class="mis-label" for="pdl-sampai">Sampai</label>
-                <input type="date" class="form-control-modern" id="pdl-sampai" name="sampai"
-                    value="{{ $sampai }}" min="{{ $dari }}" max="{{ now()->toDateString() }}">
-            </div>
-
-            {{-- Saringan "menggantung lama" dibawa sebagai isian tersembunyi:
-                 ia dipasang lewat tautan di baris ringkasan, bukan dari borang
-                 ini, dan tanpa ini ia hilang begitu penyaring lain diterapkan. --}}
-            @if ($menggantung)
-                <input type="hidden" name="lama" value="1">
+                 Lipatan di bawah memakai flex-basis 100% supaya isinya
+                 menempati barisnya sendiri — dan apa pun yang ditaruh
+                 SESUDAHNYA terdorong ke baris berikutnya. Di belakang
+                 lipatan, tombol ini berdiri sendirian di satu baris dengan
+                 1.029px petak kosong di kanannya. --}}
+            @if ($adaSaringan)
+                <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-halus pdl-lain-tuas"
+                    title="Hapus semua saringan">
+                    <i class="fas fa-times" aria-hidden="true"></i> Reset
+                </a>
             @endif
 
-            {{-- Menu angkatan.
+            {{-- Lima saringan yang jarang dipakai, DILIPAT.
 
-                 Sebelumnya saringan ini hanya bisa dipasang lewat tautan dari
-                 layar Angkatan Layanan — bekerja, tetapi untuk melihat semua
-                 pendaftar satu angkatan orang harus memutar lewat layar lain.
+                 Delapan kendali sekaligus adalah delapan hal yang harus
+                 dibaca sebelum satu nama ditemukan, dan yang memakai layar ini
+                 bukan orang yang terbiasa dengan borang. Terukur: delapan
+                 saringan memakan dua baris penuh, padahal mencari orang
+                 hampir selalu cukup dengan kotak Cari.
 
-                 Dikelompokkan per layanan dengan <optgroup>, dan skrip di
-                 bawah menyembunyikan kelompok yang bukan layanan terpilih.
-                 TANPA JavaScript seluruh kelompoknya tetap terlihat dan
-                 menunya masih bisa dipakai — label kelompoknya yang
-                 memberitahu mana milik siapa. --}}
-            <div class="mis-isian mis-saring-pilih">
-                <label class="mis-label" for="pdl-angkatan">Angkatan</label>
-                <select class="form-control-modern" id="pdl-angkatan" name="angkatan">
-                    <option value="">Semua angkatan</option>
-                    @foreach ($pilihanAngkatan as $kunciLayanan => $daftar)
-                        <optgroup label="{{ $katalog[$kunciLayanan]['nama'] ?? $kunciLayanan }}"
-                            data-layanan="{{ $kunciLayanan }}">
-                            @foreach ($daftar as $a)
-                                <option value="{{ $a['id'] }}" @selected($angkatan === $a['id'])>
-                                    {{ $a['ringkas'] }}@if ($a['nomor']) &middot; angkatan ke-{{ $a['nomor'] }}@endif@if ($a['mulai']) &middot; {{ \Illuminate\Support\Carbon::parse($a['mulai'])->translatedFormat('M Y') }}@endif
-                                </option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
+                 Dibuka sendiri kalau salah satunya sedang terpasang — lihat
+                 skrip di bawah. Saringan aktif yang tersembunyi membuat daftar
+                 terlihat kurang isinya tanpa ada yang bisa menjelaskan kenapa.
+
+                 Isiannya tetap di dalam borang walau terlipat, jadi nilainya
+                 ikut terkirim seperti biasa. --}}
+            <div class="pdl-lain" id="pdl-lain" @if (! $adaSaringanLain) hidden @endif>
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="pdl-bukti">Bukti bayar</label>
+                    <select class="form-control-modern" id="pdl-bukti" name="bukti">
+                        <option value="">Semua</option>
+                        <option value="ada" @selected($bukti === 'ada')>Sudah diunggah</option>
+                        <option value="belum" @selected($bukti === 'belum')>Belum diunggah</option>
+                    </select>
+                </div>
+
+                {{-- Seluruh katalog ditawarkan, bukan hanya yang boleh dipilih
+                     panitia: baris berbayar DOKU tidak bisa dibuat dari layar ini,
+                     tetapi tetap harus bisa DICARI dari sini. --}}
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="pdl-bayar">Cara bayar</label>
+                    <select class="form-control-modern" id="pdl-bayar" name="bayar">
+                        <option value="">Semua</option>
+                        @foreach (\App\Support\PendaftaranSemuaLayanan::CARA_BAYAR as $kb => $cb)
+                            <option value="{{ $kb }}" @selected($caraBayar === $kb)>{{ $cb['label'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Rentang tanggal pendaftaran.
+
+                     DIKEMBALIKAN, bukan fitur baru: ketiga layar pendaftaran yang
+                     dibuang punya kendali ini dan benar-benar dipakai. type=date
+                     memakai pemilih tanggal bawaan peramban, jadi orang yang tidak
+                     terbiasa mengetik format tanggal tidak perlu menebaknya. --}}
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="pdl-dari">Mendaftar sejak</label>
+                    <input type="date" class="form-control-modern" id="pdl-dari" name="dari"
+                        value="{{ $dari }}" max="{{ $sampai ?: now()->toDateString() }}">
+                </div>
+
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="pdl-sampai">Sampai</label>
+                    <input type="date" class="form-control-modern" id="pdl-sampai" name="sampai"
+                        value="{{ $sampai }}" min="{{ $dari }}" max="{{ now()->toDateString() }}">
+                </div>
+
+                {{-- Saringan "menggantung lama" dibawa sebagai isian tersembunyi:
+                     ia dipasang lewat tautan di baris ringkasan, bukan dari borang
+                     ini, dan tanpa ini ia hilang begitu penyaring lain diterapkan. --}}
+                @if ($menggantung)
+                    <input type="hidden" name="lama" value="1">
+                @endif
+
+                {{-- Menu angkatan.
+
+                     Sebelumnya saringan ini hanya bisa dipasang lewat tautan dari
+                     layar Angkatan Layanan — bekerja, tetapi untuk melihat semua
+                     pendaftar satu angkatan orang harus memutar lewat layar lain.
+
+                     Dikelompokkan per layanan dengan <optgroup>, dan skrip di
+                     bawah menyembunyikan kelompok yang bukan layanan terpilih.
+                     TANPA JavaScript seluruh kelompoknya tetap terlihat dan
+                     menunya masih bisa dipakai — label kelompoknya yang
+                     memberitahu mana milik siapa. --}}
+                <div class="mis-isian mis-saring-pilih">
+                    <label class="mis-label" for="pdl-angkatan">Angkatan</label>
+                    <select class="form-control-modern" id="pdl-angkatan" name="angkatan">
+                        <option value="">Semua angkatan</option>
+                        @foreach ($pilihanAngkatan as $kunciLayanan => $daftar)
+                            <optgroup label="{{ $katalog[$kunciLayanan]['nama'] ?? $kunciLayanan }}"
+                                data-layanan="{{ $kunciLayanan }}">
+                                @foreach ($daftar as $a)
+                                    <option value="{{ $a['id'] }}" @selected($angkatan === $a['id'])>
+                                        {{ $a['ringkas'] }}@if ($a['nomor']) &middot; angkatan ke-{{ $a['nomor'] }}@endif@if ($a['mulai']) &middot; {{ \Illuminate\Support\Carbon::parse($a['mulai'])->translatedFormat('M Y') }}@endif
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             {{-- Pengurut KHUSUS ponsel. Kepala kolom yang bisa diurutkan ada di
@@ -1041,11 +1177,6 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <i class="fas fa-search"></i> Terapkan
             </button>
 
-            @if ($adaSaringan)
-                <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-halus" title="Hapus semua saringan">
-                    <i class="fas fa-times"></i> Reset
-                </a>
-            @endif
         </form>
         </div>
         </details>
@@ -1136,6 +1267,27 @@ Pendaftar Layanan | MIS Rumah Scopus
 <script>
     (function () {
         'use strict';
+
+        /*
+         * Tuas lipatan "Saringan lain".
+         *
+         * Keadaan AWALNYA ditentukan peladen, bukan skrip ini: lipatannya
+         * sudah terbuka dari markah kalau ada saringan lipat yang terpasang.
+         * Dibiarkan skrip yang membukanya, ia sempat berkedip tertutup dulu —
+         * dan tanpa JavaScript, saringan yang sedang aktif tidak akan pernah
+         * terlihat sama sekali.
+         */
+        var tuasLain = document.getElementById('pdl-lain-tuas');
+        var kotakLain = document.getElementById('pdl-lain');
+
+        if (tuasLain && kotakLain) {
+            tuasLain.addEventListener('click', function () {
+                var tutup = kotakLain.hidden;
+
+                kotakLain.hidden = !tutup;
+                tuasLain.setAttribute('aria-expanded', tutup ? 'true' : 'false');
+            });
+        }
 
         /*
          * Kelompok angkatan disempitkan mengikuti layanan yang dipilih.
