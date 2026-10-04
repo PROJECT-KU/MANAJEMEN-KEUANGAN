@@ -243,7 +243,45 @@ Rincian Pendaftaran | MIS Rumah Scopus
          */
         @media (min-width: 768px) {
             #rin-tab > li {
-                flex: 0 1 auto;
+                flex: 1 1 auto;
+                /*
+                 * Batas atasnya WAJIB ada.
+                 *
+                 * `flex: 1 1 auto` membuat tiap tab tumbuh rata dari lebar
+                 * isinya — itu yang membuat deretnya mengisi penuh seperti di
+                 * halaman Profil. Tetapi saat barisnya membungkus, sisa tab di
+                 * baris kedua ikut tumbuh membagi SELURUH lebar baris itu:
+                 * terukur di 768px, tab "Hapus" sendirian melar jadi 694px —
+                 * satu tombol merah selebar kartunya.
+                 *
+                 * 200px kira-kira 1,6 kali tab terlebar ("Pembayaran", 130px),
+                 * jadi deretnya masih terbaca rata tanpa ada yang melar.
+                 */
+                max-width: 200px;
+            }
+
+            /*
+             * Tulisan tab MEMBUNGKUS, tidak dipotong.
+             *
+             * .mis-tab menyetel white-space: nowrap, dan itu benar untuk deret
+             * yang tabnya selebar isinya. Di sini lebarnya dibagi rata tujuh,
+             * jadi yang terpanjang tidak selalu kebagian cukup: terukur
+             * hurufnya meluber 12px di 1024px dan 1280px, dan 6px di 768px —
+             * meluber tanpa galat, tanpa penggulung, dan tanpa tanda apa pun
+             * bahwa ada tulisan yang tidak terbaca.
+             *
+             * Dibiarkan membungkus, stripnya bertambah tinggi di lebar-lebar
+             * itu dan tidak ada satu huruf pun yang hilang. Di 1470px dan
+             * 1920px ketujuhnya tetap sebaris.
+             */
+            #rin-tab .nav-link {
+                white-space: nowrap;
+            }
+
+            /* Lihat catatan di markahnya: yang membuatnya bisa membungkus
+               adalah pembungkus <span> ini, bukan white-space di atas. */
+            #rin-tab .rin-tab-teks {
+                min-width: 0;
             }
         }
 
@@ -913,14 +951,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $adaPeserta = $jumlahOrang > 1 || $pesertaLain->isNotEmpty();
 
     /* Deret tab, hanya yang memang punya isi. */
-    $tab = [['ringkasan', 'Ringkasan', 'fa-clipboard-check']];
+    $tab = [['ringkasan', 'Ringkasan', 'fa-clipboard-check', 'mis-ikon-ungu']];
 
     if ($bagianDiri !== []) {
-        $tab[] = ['diri', 'Identitas', 'fa-user-edit'];
+        $tab[] = ['diri', 'Identitas', 'fa-user-edit', 'mis-ikon-biru'];
     }
 
     if ($bagianBayar !== []) {
-        $tab[] = ['bayar', 'Pembayaran', 'fa-wallet'];
+        $tab[] = ['bayar', 'Pembayaran', 'fa-wallet', 'mis-ikon-hijau'];
     }
 
     /*
@@ -930,15 +968,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * PESANAN, bukan milik satu baris.
      */
     if ($indukBayar !== null) {
-        $tab[] = ['termin', 'Termin & DP', 'fa-receipt'];
+        $tab[] = ['termin', 'Termin & DP', 'fa-receipt', 'mis-ikon-kuning'];
     }
 
     if ($bagianSesi !== []) {
-        $tab[] = ['sesi', 'Jadwal', 'fa-calendar-alt'];
+        $tab[] = ['sesi', 'Jadwal', 'fa-calendar-alt', 'mis-ikon-jingga'];
     }
 
     if ($adaPeserta) {
-        $tab[] = ['peserta', 'Peserta', 'fa-users'];
+        $tab[] = ['peserta', 'Peserta', 'fa-users', 'mis-ikon-ungu'];
     }
 
     /*
@@ -950,7 +988,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * membatalkan pendaftaran tidak menemukan apa pun dan tidak tahu harus
      * meminta ke siapa.
      */
-    $tab[] = ['hapus', 'Hapus', 'fa-trash-alt'];
+    $tab[] = ['hapus', 'Hapus', 'fa-trash-alt', 'mis-ikon-merah'];
 
     $kunciTab = array_column($tab, 0);
     $tabSekarang = in_array($tabAktif, $kunciTab, true) ? $tabAktif : 'ringkasan';
@@ -1195,7 +1233,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                      ulang halaman, jadi tanpa penanda ini pembaca layar tidak
                      mengumumkan apa pun saat tabnya berganti. --}}
                 <ul class="mis-tab nav nav-pills" id="rin-tab" role="tablist">
-                    @foreach ($tab as [$kunci, $judul, $ikon])
+                    @foreach ($tab as [$kunci, $judul, $ikon, $warnaIkon])
                         <li class="nav-item" role="presentation">
                             {{-- Tab penghapus diberi rupa bahaya: di antara enam tab
                                  yang sekadar berpindah tampilan, satu tab yang
@@ -1204,7 +1242,13 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 id="rin-tab-{{ $kunci }}" data-toggle="pill" href="#rin-panel-{{ $kunci }}"
                                 role="tab" aria-controls="rin-panel-{{ $kunci }}"
                                 aria-selected="{{ $tabSekarang === $kunci ? 'true' : 'false' }}">
-                                <i class="fas {{ $ikon }}" aria-hidden="true"></i> {{ $judul }}
+                                <i class="fas {{ $ikon }} {{ $warnaIkon }}" aria-hidden="true"></i>
+                                {{-- Dibungkus <span>, bukan dibiarkan jadi simpul teks
+                                     telanjang: di dalam flex, teks telanjang jadi anonymous
+                                     flex item yang min-width-nya auto dan TIDAK bisa disetel
+                                     CSS mana pun — jadi ia menolak membungkus dan meluber
+                                     keluar tabnya. Terukur 12px di 1024px. --}}
+                                <span class="rin-tab-teks">{{ $judul }}</span>
                             </a>
                         </li>
                     @endforeach
