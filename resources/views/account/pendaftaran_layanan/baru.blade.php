@@ -1622,6 +1622,29 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                      kolom kanan. Kartu cara bayar lebih pendek daripada
                      notanya, jadi di sebelah kiri nota tersisa ruang kosong
                      selebar kolom kiri. --}}
+                {{-- DP dan cicilan dicatat SESUDAH ini, bukan di sini.
+
+                     Di layar inilah panitia mencari tombol DP-nya, jadi di
+                     sinilah jawabannya harus ada. Yang ditaruh KALIMAT, bukan
+                     isian: isian DP di borang ini muncul lagi tiap kali
+                     "Simpan & tambah lagi" ditekan — dan lembaga 30 orang
+                     berarti isian itu disodorkan 30 kali, kosong. Panitia yang
+                     mengisinya tiap kali membuat satu transfer Rp 25.000.000
+                     tercatat jadi Rp 750.000.000, tanpa galat apa pun, sampai
+                     ketahuan di depan orang keuangan lembaganya.
+
+                     Hanya untuk rombongan dan lembaga: pendaftar satu kursi
+                     memang tidak dibukakan pembayaran bertermin. --}}
+                <p class="bar-nota" id="bar-nota-dp" hidden>
+                    <i class="fas fa-receipt" aria-hidden="true"></i>
+                    <span>
+                        <strong>DP atau cicilan dicatat setelah ini.</strong> Simpan dulu
+                        pendaftarannya, lalu buka tab <strong>Termin &amp; DP</strong> di halaman
+                        rinciannya — di sana nominal, tanggal, dan bukti tiap pembayaran
+                        dicatat satu per satu, dan sisa tagihannya dihitung sendiri.
+                    </span>
+                </p>
+
                 <p class="bar-nota" id="bar-nota-bukti">
                     <i class="fas fa-info-circle" aria-hidden="true"></i>
                     <span>
@@ -2135,6 +2158,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         var lebihPeserta = el('bar-peserta-lebih');
         var lebihPesertaTeks = el('bar-peserta-lebih-teks');
         var bungkusSesi = el('bar-bungkus-sesi');
+        var notaDp = el('bar-nota-dp');
         var kartuSesi = el('bar-sesi-kartu');
         var ketSesi = el('bar-sesi-ket');
         var bungkusBukti = el('bar-bungkus-bukti');
@@ -3091,6 +3115,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
 
         isianJumlah.addEventListener('input', function () {
             segarkanPeserta();
+            segarkanNotaDp();
 
             // Keterangan alumninya menyebut "untuk satu kursi saja" hanya saat
             // rombongan, jadi ia ikut berubah saat jumlahnya berubah.
@@ -3215,6 +3240,22 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
 
             namaLembaga.required = lembaga && menuPemesanan.value === '';
+
+            segarkanNotaDp();
+        };
+
+        /*
+         * Nota DP menyala untuk rombongan dan lembaga saja.
+         *
+         * Syaratnya SAMA PERSIS dengan syarat tab "Termin & DP" di halaman
+         * rincian — lembaga, atau jumlah orangnya lebih dari satu. Kalau
+         * keduanya berbeda, nota ini menjanjikan tab yang tidak akan muncul,
+         * dan itu lebih buruk daripada tidak ada notanya sama sekali.
+         */
+        var segarkanNotaDp = function () {
+            var rombongan = angkaDari(isianJumlah.value) > 1;
+
+            tampil(notaDp, lembagaDipakai() || rombongan);
         };
 
         /*

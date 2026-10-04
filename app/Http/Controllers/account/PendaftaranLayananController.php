@@ -578,9 +578,31 @@ class PendaftaranLayananController extends Controller
                 ->with('sukses', $hasil['pesan'] . ' Silakan isi pendaftar berikutnya.');
         }
 
+        /*
+         * Pesanan rombongan: disebutkan DI MANA DP-nya dicatat.
+         *
+         * Tab "Termin & DP" sudah ada di halaman yang sedang dituju, tetapi
+         * tidak ada yang tahu ia ada sampai mencarinya — dan yang dicari
+         * panitia justru tombol DP di borang pembuatan. Kalimat ini muncul
+         * tepat saat halamannya terbuka, dengan tabnya terlihat di layar.
+         *
+         * Syaratnya diambil dari indukBayar(), bukan ditulis ulang: kalau ia
+         * berbeda dari syarat tabnya, kalimat ini menjanjikan tab yang tidak
+         * ada.
+         *
+         * TIDAK ditambahkan ke jalur "simpan & tambah lagi" di atas: jalur itu
+         * kembali ke borang pembuatan, dan menunjuk tab yang tidak terlihat di
+         * layar sama saja dengan tidak menjawab.
+         */
+        $pesan = $hasil['pesan'];
+
+        if ($this->indukBayar($layanan, (string) $hasil['model']->getKey()) !== null) {
+            $pesan .= ' Ini pesanan rombongan — kalau DP-nya sudah masuk, catat di tab "Termin & DP".';
+        }
+
         return redirect()
             ->route('account.pendaftaran-layanan.rincian', [$layanan, $hasil['model']->getKey()])
-            ->with('sukses', $hasil['pesan']);
+            ->with('sukses', $pesan);
     }
 
     /**
