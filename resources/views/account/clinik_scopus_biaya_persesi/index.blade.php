@@ -159,6 +159,28 @@ Tarif Layanan | MIS
     }
 
     .tar-fasilitas .fas { font-size: 10px !important; color: #10b981; margin-top: 3px; }
+
+    /* Sesi & jamnya. Bentuknya sengaja sama dengan daftar fasilitas di
+       atasnya — keduanya "apa yang didapat", cuma beda jenis — tetapi
+       ikonnya jam dan warnanya ungu supaya jadwal tidak terbaca sebagai
+       fasilitas tambahan. */
+    .tar-sesi {
+        display: grid;
+        gap: 5px;
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .tar-sesi li {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        font-size: .78rem;
+        color: var(--mis-tinta-3);
+    }
+
+    .tar-sesi .fas { font-size: 10px !important; color: #7c3aed; margin-top: 3px; }
     .tar-fasilitas .tar-lebih { display: none; }
 
 
@@ -791,6 +813,32 @@ Tarif Layanan | MIS
                         </div>
                     @endif
 
+                    {{-- Sesi beserta jamnya, untuk layanan yang memakainya.
+
+                         Ditampilkan di kartunya, bukan hanya di dalam borang:
+                         pertanyaan "sesi 2 jam berapa" dijawab panitia belasan
+                         kali sehari, dan jawabannya tidak boleh menuntut
+                         membuka dialog penyuntingan tarif lebih dulu.
+
+                         Dibaca lewat sesiPilihan(), bukan langsung dari kolom
+                         tarifnya: tarif yang belum menyetel sesi sendiri tetap
+                         punya jam — yang bawaan — dan kartu yang diam di situ
+                         terbaca seperti layanan tanpa jadwal. --}}
+                    @php($sesiKartu = \App\Support\PendaftaranSemuaLayanan::sesiPilihan($k['layanan'], $k['varian']))
+
+                    @if ($sesiKartu)
+                        <ul class="tar-sesi">
+                            @foreach ($sesiKartu as $sesi)
+                                <li>
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                    <span><strong>{{ $sesi['nama'] }}</strong>
+                                        {{ str_replace(':', '.', $sesi['mulai']) }} –
+                                        {{ str_replace(':', '.', $sesi['selesai']) }} WIB</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+
                     @if ($jadwal)
                         {{-- Bisa ditekan: di sinilah orang pertama kali melihat
                              jadwalnya, jadi di sinilah ia mencari cara mengubahnya. --}}
@@ -839,6 +887,22 @@ Tarif Layanan | MIS
                                     'rombongan' => $t ? $t->diskon_rombongan_persen : null,
                                     'fasilitas' => implode("\n", $fasilitas),
                                     'kegiatan' => $t ? implode("\n", $t->daftar_kegiatan) : '',
+                                    // Kotak sesinya ditawarkan hanya kalau
+                                    // baris pendaftaran layanan ini memang
+                                    // punya tempat menyimpannya.
+                                    'bersesi' => in_array($k['layanan'], \App\Support\PendaftaranSemuaLayanan::layananBersesi(), true),
+                                    /*
+                                     * Jam yang SEDANG berlaku, bukan hanya
+                                     * yang tersimpan di baris tarif ini.
+                                     * Tarif yang belum menyetel sesinya tetap
+                                     * punya jam — yang bawaan — dan kotak
+                                     * kosong di sebelah kartu yang menyebut
+                                     * dua sesi terbaca seperti data yang gagal
+                                     * dimuat.
+                                     */
+                                    'sesi' => \App\ClinikScopusBiayaPersesi::sesiSebagaiTeks(
+                                        \App\Support\PendaftaranSemuaLayanan::sesiPilihan($k['layanan'], $k['varian'])
+                                    ),
                                     'kontak' => $t?->kontak ?? '',
                                     'cetakan' => $t?->template_deskripsi ?? '',
                                     // Varian lain dari layanan yang sama, untuk disalin.
@@ -850,6 +914,10 @@ Tarif Layanan | MIS
                                             'ppn' => $x['tarif']->ppn !== null ? $x['tarif']->ppn_persen : null,
                                             'fasilitas' => implode("\n", $x['tarif']->daftar_fasilitas),
                                             'kegiatan' => implode("\n", $x['tarif']->daftar_kegiatan),
+                                            // Sesi TIDAK ikut disalin, dan itu
+                                            // disengaja: jam online dan offline
+                                            // memang berbeda — justru itu yang
+                                            // membuat variannya ada.
                                             'kontak' => $x['tarif']->kontak ?? '',
                                             'cetakan' => $x['tarif']->template_deskripsi ?? '',
                                         ])->values()->all(),
@@ -1323,6 +1391,29 @@ Tarif Layanan | MIS
                     </p>
                 </div>
 
+                {{-- Sesi beserta jamnya, hanya untuk layanan yang baris
+                     pendaftarannya punya tempat menyimpannya (Scopus Kafe).
+
+                     Jamnya dulu ditulis di kode, jadi mengubahnya menuntut
+                     deploy — padahal yang tahu jamnya berubah adalah panitia,
+                     bukan yang memegang kodenya. Ditaruh di tarif sebab
+                     daftarnya memang berbeda per varian: online dan offline
+                     punya jam yang tidak sama, dan pasangan layanan+varian
+                     persis kunci baris ini. --}}
+                <div class="mis-isian" id="tar-f-bungkus-sesi" hidden>
+                    <label class="mis-label" for="tar-f-sesi">Sesi &amp; jamnya</label>
+                    <textarea class="tar-area tar-pendek" id="tar-f-sesi" name="sesi" rows="3"
+                        placeholder="Sesi 1, 08.00 - 13.00&#10;Sesi 2, 13.00 - 18.00"></textarea>
+                    @error('sesi')
+                        <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                    @enderror
+                    <p class="mis-bantuan">
+                        Satu sesi per baris: namanya, lalu dua jamnya. Yang dipilih panitia
+                        saat mendaftarkan orang persis daftar ini.
+                        <strong>Dikosongkan</strong> berarti kembali ke jam bawaan.
+                    </p>
+                </div>
+
                 <div class="mis-isian">
                     <label class="mis-label" for="tar-f-kontak">Kontak panitia</label>
                     <textarea class="tar-area tar-pendek" id="tar-f-kontak" name="kontak" rows="2"
@@ -1688,6 +1779,19 @@ Tarif Layanan | MIS
             el('tar-f-rombongan').value = d.rombongan === null || d.rombongan === undefined ? '' : d.rombongan;
             el('tar-f-fasilitas').value = d.fasilitas;
             el('tar-f-kegiatan').value = d.kegiatan;
+            el('tar-f-sesi').value = d.sesi || '';
+            /*
+             * Disembunyikan DAN dikosongkan untuk layanan tanpa sesi: isian
+             * tersembunyi tetap terkirim, dan sesi yang tertinggal dari
+             * pembukaan sebelumnya akan tersimpan ke tarif yang tidak ada
+             * hubungannya dengan sesi sama sekali.
+             */
+            el('tar-f-bungkus-sesi').hidden = !d.bersesi;
+
+            if (!d.bersesi) {
+                el('tar-f-sesi').value = '';
+            }
+
             el('tar-f-kontak').value = d.kontak;
             el('tar-f-cetakan').value = d.cetakan;
 
