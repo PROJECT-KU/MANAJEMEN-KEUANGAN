@@ -3748,4 +3748,85 @@ class TindakanPendaftaranTest extends TestCase
                 'Masih ada tulisan tab di luar pembungkusnya: "' . $sisa . '"');
         }
     }
+
+    #[Test]
+    public function kartu_identitas_tidak_menawarkan_tindakan_yang_sama_dua_kali(): void
+    {
+        /*
+         * Kartu kiri sempat memuat deret tombol cepat (WhatsApp, Email, Salin
+         * nomor) DI ATAS daftar keterangannya — sementara baris Email dan
+         * WhatsApp di bawahnya juga sudah berupa tautan ke tempat yang sama.
+         *
+         * Dua tempat untuk satu hal membuat orang menduga keduanya berbeda,
+         * dan pada layar yang dipakai orang awam itu mahal: ia akan mencoba
+         * keduanya untuk memastikan. Terukur, kartunya 854px — 124px LEBIH
+         * TINGGI daripada kartu di sebelahnya, sebagian karena pengulangan
+         * itu. Sesudah tindakannya dipindahkan ke dalam barisnya
+         * masing-masing: 730px, sama persis dengan kartu kanan.
+         *
+         * Dijaga dengan menghitung TAUTANNYA, bukan tulisannya: tombol yang
+         * ditambahkan lagi dengan label berbeda tetap menunjuk alamat yang
+         * sama.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $camp->forceFill([
+            'email' => 'uji.kartu@contoh.test',
+            'telp' => '081234567890',
+        ])->save();
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match('#<section[^>]*rin-identitas[^>]*>(?<isi>.*?)</section>#s', $isi, $kartu),
+            'Kartu identitas tidak ketemu.');
+
+        $dalam = $kartu['isi'];
+
+        $this->assertSame(1, preg_match_all('#href="https://wa\.me/#', $dalam),
+            'Tautan WhatsApp muncul lebih dari sekali di kartu identitas.');
+
+        $this->assertSame(1, preg_match_all('#href="mailto:#', $dalam),
+            'Tautan email muncul lebih dari sekali di kartu identitas.');
+
+        $this->assertSame(1, preg_match_all('#data-rin-salin=#', $dalam),
+            'Tombol salin nomor muncul lebih dari sekali di kartu identitas.');
+    }
+
+    #[Test]
+    public function label_dan_nilai_di_kartu_identitas_dibungkus_bersama(): void
+    {
+        /*
+         * Barisnya berkisi TIGA lajur: medali, isi, tindakan.
+         *
+         * Label dan nilainya WAJIB berada dalam satu pembungkus. Tanpa itu,
+         * penempatan otomatis kisi menaruh keduanya BERJAJAR di lajur 2 dan 3
+         * — bukan bertumpuk. Terukur saat pembungkusnya belum ada: pada baris
+         * Afiliasi, labelnya menempati lajur 215px dan nilainya lajur 24px di
+         * sebelahnya.
+         *
+         * Jebakannya: dengan DUA lajur hal itu tidak terjadi, sebab isian
+         * kedua jatuh sendiri ke baris berikutnya. Menambah lajur ketiga
+         * diam-diam mengubah tata letaknya tanpa galat apa pun.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        preg_match_all('#<div class="rin-baris">(?<dalam>.*?)</div>\s*\n\s*(?=<div class="rin-baris">|</section>|<img)#s',
+            $isi, $baris);
+
+        $this->assertNotEmpty($baris['dalam'], 'Baris keterangan tidak ketemu.');
+
+        foreach ($baris['dalam'] as $b) {
+            $this->assertStringContainsString('rin-baris-isi', $b,
+                'Ada baris yang label dan nilainya tidak dibungkus bersama, jadi keduanya akan '
+                    . 'berjajar di lajur terpisah, bukan bertumpuk.');
+        }
+    }
 }

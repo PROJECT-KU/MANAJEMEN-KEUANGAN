@@ -84,11 +84,47 @@ Rincian Pendaftaran | MIS Rumah Scopus
             color: var(--mis-tinta-3);
         }
 
+        .rin-nomor-baris {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
         .rin-nomor-kode {
             font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             font-size: .82rem;
             font-weight: 600;
             color: var(--mis-tinta);
+            overflow-wrap: anywhere;
+        }
+
+        /* Tombol salin: sekecil ikonnya, menempel pada kodenya. */
+        .rin-salin {
+            display: grid;
+            place-items: center;
+            flex: 0 0 24px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 1px solid var(--mis-garis);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--mis-tinta-3);
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .rin-salin i {
+            font-size: 11px !important;
+            margin: 0 !important;
+        }
+
+        .rin-salin:hover {
+            border-color: #6366f1;
+            background: #eef2ff;
+            color: #4338ca;
         }
 
         .rin-pil-baris {
@@ -164,23 +200,82 @@ Rincian Pendaftaran | MIS Rumah Scopus
         /* Baris keterangan: medali mini + label + nilai. Kisi tiga kolom
            dengan medali merentang dua baris, jadi ia sejajar dengan BLOK
            teksnya — pola yang sama dipakai halaman Profil. */
+        /*
+         * Tiga lajur: medali, isi, tindakan.
+         *
+         * Lajur ketiga `auto` dan boleh kosong — baris yang tidak punya
+         * tindakan (afiliasi, waktu daftar) tidak menyisakan lubang, sebab
+         * jalur auto yang tak terisi lebarnya nol.
+         *
+         * Medali dan tombolnya merentang DUA baris supaya keduanya sejajar
+         * dengan blok teksnya, bukan dengan labelnya saja.
+         */
         .rin-baris {
             display: grid;
-            grid-template-columns: 25px minmax(0, 1fr);
+            grid-template-columns: 25px minmax(0, 1fr) auto;
             align-items: center;
             gap: 2px 10px;
-            padding: 11px 0;
+            padding: 10px 0;
             text-align: left;
             border-top: 1px dashed var(--mis-garis);
+        }
+
+        /*
+         * Label dan nilainya dibungkus SATU unsur.
+         *
+         * Tanpa pembungkus ini, kisi tiga lajur menempatkan keduanya
+         * BERJAJAR, bukan bertumpuk: terukur pada baris Afiliasi, label
+         * menempati lajur 215px dan nilainya lajur 24px di sebelahnya. Dengan
+         * dua lajur hal itu tidak terjadi karena isian kedua jatuh ke baris
+         * berikutnya; menambah lajur ketiga diam-diam mengubahnya.
+         */
+        .rin-baris-isi {
+            min-width: 0;
+        }
+
+        .rin-takpatah {
+            white-space: nowrap;
+        }
+
+        /*
+         * Tombol tindakan di ujung kanan barisnya.
+         *
+         * Berwarna keadaan yang diwakilinya — hijau WhatsApp, biru email —
+         * memakai peubah yang sama dengan tombol status, jadi satu aturan
+         * melayani keduanya dan warnanya tidak pernah berbeda sendiri.
+         */
+        .rin-aksi {
+            display: grid;
+            place-items: center;
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+            transition: all .2s ease;
+        }
+
+        .rin-aksi i {
+            font-size: 13px !important;
+            margin: 0 !important;
+        }
+
+        .rin-aksi:hover {
+            color: #fff;
+            background: var(--rin-tua);
+            transform: translateY(-1px);
+        }
+
+        a.rin-aksi,
+        a.rin-aksi:hover {
+            text-decoration: none;
         }
 
         .rin-baris:first-of-type {
             margin-top: 15px;
         }
 
-        .rin-baris .mis-medali {
-            grid-row: span 2;
-        }
 
         .rin-baris-label {
             margin: 0;
@@ -1056,9 +1151,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
                      pun yang menjelaskan ia apa — dan justru inilah yang
                      dicocokkan panitia dengan berita transfer atau dibacakan
                      lewat telepon. Kodenya sendiri tetap paling menonjol. --}}
+                {{-- Tombol salinnya MENEMPEL pada nomornya, bukan berdiri
+                     sendiri di deret tombol terpisah. Yang disalin orang
+                     adalah kode yang sedang dilihatnya; tombol yang jauh dari
+                     kodenya menuntut ia memastikan dulu kode mana yang
+                     tersalin. --}}
                 <p class="rin-nomor">
                     <span class="rin-nomor-label">Nomor pendaftaran</span>
-                    <span class="rin-nomor-kode">{{ $nomor }}</span>
+                    <span class="rin-nomor-baris">
+                        <span class="rin-nomor-kode">{{ $nomor }}</span>
+                        <button type="button" class="rin-salin" data-rin-salin="{{ $nomor }}"
+                            title="Salin nomor pendaftaran" aria-label="Salin nomor pendaftaran">
+                            <i class="fas fa-copy" aria-hidden="true"></i>
+                        </button>
+                    </span>
                 </p>
 
                 <div class="rin-pil-baris">
@@ -1072,146 +1178,142 @@ Rincian Pendaftaran | MIS Rumah Scopus
                     @endif
                 </div>
 
-                {{--
-                    Tindakan cepat, langsung di bawah lencana keadaannya.
-
-                    Ketiganya pekerjaan yang paling sering menyusul pembukaan
-                    halaman ini: menghubungi orangnya, mengirim email, dan
-                    menyalin nomor pendaftaran untuk dicocokkan dengan mutasi
-                    rekening. Ketiganya sebelumnya menuntut menyorot teks lalu
-                    menyalinnya sendiri — dan nomor yang tersalin setengah
-                    adalah kesalahan yang tidak kelihatan sampai transfernya
-                    tidak ketemu.
-
-                    Yang tidak bisa dikerjakan TIDAK disuguhkan: tombol
-                    WhatsApp untuk nomor yang tidak sah hanya menuntun ke
-                    halaman galat.
-                --}}
-                <div class="rin-cepat">
-                    @if ($wa)
-                        <a class="rin-cepat-tombol rin-warna-hijau" href="https://wa.me/{{ $wa }}"
-                            target="_blank" rel="noopener" title="Hubungi lewat WhatsApp">
-                            <span class="rin-cepat-ikon" aria-hidden="true"><i class="fab fa-whatsapp"></i></span>
-                            <span>WhatsApp</span>
-                        </a>
-                    @endif
-
-                    @if ($emailOrang)
-                        <a class="rin-cepat-tombol rin-warna-biru" href="mailto:{{ $emailOrang }}"
-                            title="Kirim email ke {{ $emailOrang }}">
-                            <span class="rin-cepat-ikon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                            <span>Email</span>
-                        </a>
-                    @endif
-
-                    <button type="button" class="rin-cepat-tombol rin-warna-ungu" data-rin-salin="{{ $nomor }}"
-                        title="Salin nomor pendaftaran">
-                        <span class="rin-cepat-ikon" aria-hidden="true"><i class="fas fa-copy"></i></span>
-                        <span>Salin nomor</span>
-                    </button>
-                </div>
-
                 {{-- Tiap baris keterangan diberi medali mini BERWARNA sesuai
                      kelompoknya, dan warnanya konsisten di seluruh MIS: biru
                      untuk email, hijau untuk WhatsApp, ungu untuk afiliasi,
                      jingga untuk sesi, kuning untuk waktu. Ikonnya dipusatkan
                      oleh place-items, bukan oleh bantalan kira-kira. --}}
+                {{-- Tindakannya ADA DI DALAM barisnya, bukan di deret tombol
+                     terpisah di atas. Sebelumnya WhatsApp dan Email muncul
+                     dua kali — sekali sebagai tombol, sekali lagi sebagai
+                     baris keterangan — dan dua tempat untuk satu hal membuat
+                     orang menduga keduanya berbeda. --}}
                 <div class="rin-baris">
                     <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                    <p class="rin-baris-label">Email</p>
-                    <p class="rin-baris-nilai">
-                        @if ($emailOrang)
-                            <a href="mailto:{{ $emailOrang }}" title="Kirim email ke {{ $emailOrang }}">{{ $emailOrang }}</a>
-                        @else
-                            <span class="rin-samar">belum diisi</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">Email</p>
+                        <p class="rin-baris-nilai">
+                            @if ($emailOrang)
+                                {{ $emailOrang }}
+                            @else
+                                <span class="rin-samar">belum diisi</span>
+                            @endif
+                        </p>
+                    </div>
+                    @if ($emailOrang)
+                        <a class="rin-aksi rin-warna-biru" href="mailto:{{ $emailOrang }}"
+                            title="Kirim email ke {{ $emailOrang }}" aria-label="Kirim email">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        </a>
+                    @endif
                 </div>
 
                 <div class="rin-baris">
                     <span class="mis-medali mini mis-hijau" aria-hidden="true"><i class="fab fa-whatsapp"></i></span>
-                    <p class="rin-baris-label">WhatsApp</p>
-                    <p class="rin-baris-nilai">
-                        @if ($wa)
-                            <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
-                                title="Hubungi lewat WhatsApp">{{ $telpOrang }}</a>
-                        @elseif ($telpOrang)
-                            {{-- Ditandai, bukan dijadikan tautan yang menuntun ke
-                                 halaman galat WhatsApp: nomor di bawah sembilan
-                                 angka bukan nomor telepon melainkan sisa isian. --}}
-                            <span title="Nomor ini tidak bisa dipakai menghubungi lewat WhatsApp.">
-                                <i class="fas fa-phone-slash mis-ikon-kuning" aria-hidden="true"></i> {{ $telpOrang }}
-                            </span>
-                        @else
-                            <span class="rin-samar">belum diisi</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">WhatsApp</p>
+                        <p class="rin-baris-nilai">
+                            @if ($wa)
+                                {{ $telpOrang }}
+                            @elseif ($telpOrang)
+                                {{-- Ditandai, bukan dijadikan tautan yang menuntun ke
+                                     halaman galat WhatsApp: nomor di bawah sembilan
+                                     angka bukan nomor telepon melainkan sisa isian. --}}
+                                <span title="Nomor ini tidak bisa dipakai menghubungi lewat WhatsApp.">
+                                    <i class="fas fa-phone-slash mis-ikon-kuning" aria-hidden="true"></i> {{ $telpOrang }}
+                                </span>
+                            @else
+                                <span class="rin-samar">belum diisi</span>
+                            @endif
+                        </p>
+                    </div>
+                    @if ($wa)
+                        <a class="rin-aksi rin-warna-hijau" href="https://wa.me/{{ $wa }}"
+                            target="_blank" rel="noopener" title="Hubungi lewat WhatsApp"
+                            aria-label="Hubungi lewat WhatsApp">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        </a>
+                    @endif
                 </div>
 
                 <div class="rin-baris">
                     <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-building"></i></span>
-                    <p class="rin-baris-label">Afiliasi</p>
-                    <p class="rin-baris-nilai">
-                        {{ $afiliasiOrang ?: '' }}
-                        @if (! $afiliasiOrang)
-                            <span class="rin-samar">belum diisi</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">Afiliasi</p>
+                        <p class="rin-baris-nilai">
+                            {{ $afiliasiOrang ?: '' }}
+                            @if (! $afiliasiOrang)
+                                <span class="rin-samar">belum diisi</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
 
                 <div class="rin-baris">
                     <span class="mis-medali mini mis-jingga" aria-hidden="true"><i class="fas fa-calendar-alt"></i></span>
-                    <p class="rin-baris-label">Sesi / angkatan</p>
-                    <p class="rin-baris-nilai">
-                        {{ $sesiBaris ?: '' }}
-                        @if (! $sesiBaris)
-                            <span class="rin-samar">tidak tercatat</span>
-                        @endif
-                        @if ($nomorAngkatan)
-                            {{-- Nomor angkatannya disebut: nama tempat saja tidak
-                                 menunjuk satu angkatan — Yogyakarta sudah ke-202
-                                 sementara Jakarta baru ke-9. --}}
-                            <span class="rin-samar">&middot; angkatan ke-{{ $nomorAngkatan }}</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">Sesi / angkatan</p>
+                        <p class="rin-baris-nilai">
+                            {{ $sesiBaris ?: '' }}
+                            @if (! $sesiBaris)
+                                <span class="rin-samar">tidak tercatat</span>
+                            @endif
+                            @if ($nomorAngkatan)
+                                {{-- Nomor angkatannya disebut: nama tempat saja tidak
+                                     menunjuk satu angkatan — Yogyakarta sudah ke-202
+                                     sementara Jakarta baru ke-9. --}}
+                                {{-- Tidak boleh terpatah di tengah: terukur, barisnya
+                                 berakhir "... Yogyakarta &middot; angkatan" lalu
+                                 "ke-199" sendirian di baris berikutnya, dan nomor
+                                 angkatan yang terpisah dari katanya terbaca seperti
+                                 keterangan lain. Dengan nowrap, yang berpindah baris
+                                 seluruh frasanya. --}}
+                            <span class="rin-samar rin-takpatah">&middot; angkatan ke-{{ $nomorAngkatan }}</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
 
                 <div class="rin-baris">
                     <span class="mis-medali mini mis-kuning" aria-hidden="true"><i class="fas fa-clock"></i></span>
-                    <p class="rin-baris-label">Mendaftar</p>
-                    <p class="rin-baris-nilai">
-                        {{ $waktuBaris ? $waktuBaris->translatedFormat('d F Y, H:i') . ' WIB' : '' }}
-                        @if (! $waktuBaris)
-                            <span class="rin-samar">tidak tercatat</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">Mendaftar</p>
+                        <p class="rin-baris-nilai">
+                            {{ $waktuBaris ? $waktuBaris->translatedFormat('d F Y, H:i') . ' WIB' : '' }}
+                            @if (! $waktuBaris)
+                                <span class="rin-samar">tidak tercatat</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
 
                 <div class="rin-baris">
                     <span class="mis-medali mini {{ $bukti['ada'] ? 'mis-hijau' : 'mis-merah' }}" aria-hidden="true">
                         <i class="fas fa-receipt"></i>
                     </span>
-                    <p class="rin-baris-label">Bukti bayar</p>
-                    <p class="rin-baris-nilai">
-                        @if (! $bukti['nilai'])
-                            <span class="rin-samar">
-                                @if ($layanan === 'webinar_eksklusif')
-                                    tidak memakai unggahan bukti
-                                @else
-                                    belum diunggah
-                                @endif
-                            </span>
-                        @elseif ($bukti['ada'])
-                            <a href="{{ $bukti['url'] }}" target="_blank" rel="noopener">
-                                Buka ukuran penuh <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                            </a>
-                        @else
-                            {{-- Dibedakan dari "belum diunggah": terukur 72 dari 183
-                                 nilai bukti menunjuk berkas yang sudah tidak ada di
-                                 cakram, dan keduanya menuntut tindakan berbeda. --}}
-                            <span style="color: #92400e;">berkasnya sudah tidak ada di server</span>
-                        @endif
-                    </p>
+                    <div class="rin-baris-isi">
+                        <p class="rin-baris-label">Bukti bayar</p>
+                        <p class="rin-baris-nilai">
+                            @if (! $bukti['nilai'])
+                                <span class="rin-samar">
+                                    @if ($layanan === 'webinar_eksklusif')
+                                        tidak memakai unggahan bukti
+                                    @else
+                                        belum diunggah
+                                    @endif
+                                </span>
+                            @elseif ($bukti['ada'])
+                                <a href="{{ $bukti['url'] }}" target="_blank" rel="noopener">
+                                    Buka ukuran penuh <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                                </a>
+                            @else
+                                {{-- Dibedakan dari "belum diunggah": terukur 72 dari 183
+                                     nilai bukti menunjuk berkas yang sudah tidak ada di
+                                     cakram, dan keduanya menuntut tindakan berbeda. --}}
+                                <span style="color: #92400e;">berkasnya sudah tidak ada di server</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
 
                 @if ($bukti['ada'])
