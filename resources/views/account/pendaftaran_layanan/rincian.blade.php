@@ -215,7 +215,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
             grid-template-columns: 25px minmax(0, 1fr) auto;
             align-items: center;
             gap: 2px 10px;
-            padding: 10px 0;
+            /* 13px, bukan 10px: terukur sebelumnya labelnya cuma 10px di
+               bawah garis pembatas dan terbaca menempel padanya. */
+            padding: 13px 0;
             text-align: left;
             border-top: 1px dashed var(--mis-garis);
         }
@@ -276,8 +278,23 @@ Rincian Pendaftaran | MIS Rumah Scopus
             text-decoration: none;
         }
 
-        .rin-baris:first-of-type {
-            margin-top: 15px;
+        /*
+         * Jarak lencana keadaan ke garis pembatas pertama.
+         *
+         * Dulu ditulis `.rin-baris:first-of-type` dan aturan itu TIDAK PERNAH
+         * cocok: `:first-of-type` menghitung tipe TAG, bukan kelas, dan <div>
+         * pertama di kartu ini adalah `.rin-pil-baris`. Jadi tidak ada satu
+         * pun `.rin-baris` yang pernah jadi "div pertama", margin-nya tidak
+         * pernah berlaku, dan terukur jarak lencana ke garis pertamanya 0 —
+         * garisnya menempel persis di bawah lencananya.
+         *
+         * Diamnya sempurna: CSS yang pemilihnya tidak cocok tidak
+         * memberitahu siapa pun. Pemilih sekarang menyebut tetangganya
+         * langsung, jadi ia tidak bergantung pada tag apa saja yang kebetulan
+         * ada di atasnya.
+         */
+        .rin-pil-baris + .rin-baris {
+            margin-top: 16px;
         }
 
 
