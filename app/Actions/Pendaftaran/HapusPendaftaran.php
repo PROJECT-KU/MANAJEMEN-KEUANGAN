@@ -86,6 +86,21 @@ class HapusPendaftaran
                     ->where('pendaftaran_id', (string) $pendaftaran->getKey())
                     ->delete();
 
+                /*
+                 * Termin yang menempel pada BARIS INI, alasannya sama lagi.
+                 *
+                 * Hanya yang berjenis 'pendaftaran' — rombongan yang dibayar
+                 * atas satu nama. Termin milik pesanan lembaga TIDAK ikut
+                 * terhapus walau salah satu pendaftarannya dibuang: uangnya
+                 * memang diterima untuk pesanannya, bukan untuk orang itu,
+                 * dan menghapusnya akan membuat sisa tagihan lembaganya
+                 * melonjak tanpa ada yang mengerti kenapa.
+                 */
+                \App\PembayaranPendaftaran::milik(
+                    \App\PembayaranPendaftaran::PENDAFTARAN,
+                    (string) $pendaftaran->getKey()
+                )->delete();
+
                 $pendaftaran->delete();
             });
         } catch (\Throwable $e) {
