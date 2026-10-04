@@ -3873,4 +3873,80 @@ class TindakanPendaftaranTest extends TestCase
             $gaya
         ), 'Tinggi barisnya disebut dalam piksel; pakai rasio supaya ia ikut ukuran hurufnya.');
     }
+
+    #[Test]
+    public function jarak_baris_pertama_tidak_bersandar_pada_first_of_type(): void
+    {
+        /*
+         * `:first-of-type` menghitung tipe TAG, bukan kelas.
+         *
+         * Jarak lencana keadaan ke garis pembatas pertama dulu ditulis
+         * `.rin-baris:first-of-type { margin-top: 15px }`. Aturan itu TIDAK
+         * PERNAH cocok: <div> pertama di kartu ini `.rin-pil-baris`, jadi
+         * tidak ada satu pun `.rin-baris` yang berstatus "div pertama".
+         * Terukur akibatnya: jarak lencana ke garisnya 0 — garisnya menempel
+         * persis di bawah lencananya.
+         *
+         * Diamnya sempurna. CSS yang pemilihnya tidak cocok tidak
+         * memberitahu siapa pun, dan aturannya TERLIHAT benar saat dibaca.
+         *
+         * Yang dijaga: pemilihnya menyebut tetangganya langsung, jadi ia
+         * tidak bergantung pada tag apa saja yang kebetulan ada di atasnya.
+         */
+        $gaya = preg_replace('#/\*.*?\*/#s', ' ', file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        )) ?? '';
+
+        $this->assertSame(0, preg_match('/\.rin-baris:first-of-type/', $gaya),
+            '.rin-baris:first-of-type dipakai lagi. Pemilih itu tidak pernah cocok karena '
+                . '<div> pertama di kartunya adalah .rin-pil-baris, jadi jaraknya diam-diam hilang.');
+
+        $this->assertSame(1, preg_match('/\.rin-pil-baris\s*\+\s*\.rin-baris\s*\{[^}]*margin-top:/', $gaya),
+            'Jarak lencana ke baris pertama tidak disetel lewat pemilih tetangga, '
+                . 'jadi baris pertamanya akan menempel pada lencana di atasnya.');
+
+        /*
+         * Urutan markahnya ikut dijaga: pemilih tetangga di atas hanya
+         * bekerja kalau .rin-baris memang datang TEPAT sesudah
+         * .rin-pil-baris. Menyelipkan apa pun di antaranya mematikannya
+         * tanpa galat.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        // Dicari lewat class="...", BUKAN nama kelasnya saja: nama itu muncul
+        // lebih dulu di blok gaya halaman, dan potongan yang dimulai dari sana
+        // tidak pernah memuat markahnya sama sekali.
+        $mulai = strpos($isi, 'class="rin-pil-baris"');
+
+        $this->assertNotFalse($mulai, 'Baris lencana keadaan tidak ketemu di markahnya.');
+
+        /*
+         * Diperiksa PERSIS pada celah antara penutup lencana dan baris
+         * pertamanya, bukan dengan mencari pola "</div> lalu .rin-baris" di
+         * sekitarnya. Percobaan pertama memakai pola itu dan LULUS walau
+         * sebuah <hr> sudah diselipkan di tengah: polanya cocok pada
+         * pasangan lain beberapa ratus huruf di bawahnya, yaitu penutup
+         * baris pertama dan pembuka baris kedua.
+         *
+         * Lencananya tidak memuat <div> bersarang, jadi </div> pertama
+         * sesudahnya memang penutupnya.
+         */
+        $tutup = strpos($isi, '</div>', $mulai);
+        $barisAwal = strpos($isi, '<div class="rin-baris">', $mulai);
+
+        $this->assertNotFalse($tutup);
+        $this->assertNotFalse($barisAwal);
+
+        $celah = substr($isi, $tutup + strlen('</div>'), $barisAwal - $tutup - strlen('</div>'));
+
+        $this->assertSame('', trim($celah),
+            'Ada unsur yang menyelip antara .rin-pil-baris dan baris pertamanya, jadi pemilih '
+                . 'tetangganya tidak lagi cocok dan jaraknya hilang diam-diam. Yang menyelip: '
+                . trim($celah));
+    }
 }
