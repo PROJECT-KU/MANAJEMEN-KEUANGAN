@@ -362,7 +362,7 @@ Data Pelanggan | MIS
                 <h1 class="mis-judul">Data Pelanggan</h1>
                 <p class="mis-sub">Orang luar yang memakai layanan jasa Rumah Scopus.</p>
             </div>
-            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="pel-aksi">
                 {{-- Ekspor membawa saringan yang sedang dipakai, bukan seluruh
                      tabel: yang diunduh orang hampir selalu yang dilihatnya.
 
@@ -396,6 +396,7 @@ Data Pelanggan | MIS
              angkanya terlihat tetapi daftarnya tidak bisa dipersempit jadi
              orang-orang itu. Berupa TAUTAN, bukan tombol berskrip, jadi
              alamatnya bisa disalin dan tetap bekerja tanpa JavaScript. --}}
+        <div id="pel-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
         <div class="mis-ringkas" aria-label="Ringkasan pelanggan">
             <a class="mis-ubin {{ ! $status && ! $verifikasi && ! $punyaPesanan && ! $baru ? 'terpilih' : '' }}"
@@ -444,6 +445,8 @@ Data Pelanggan | MIS
             </p>
         </div>
 
+        </div>{{-- pel-ringkas --}}
+
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkus penyaringnya, bukan berdiri sendiri: di
              ponsel tiga kendali yang selalu terbuka memakan satu layar penuh
@@ -460,7 +463,8 @@ Data Pelanggan | MIS
             </summary>
 
         <div class="mis-saring-kartu">
-        <form method="GET" action="{{ route('account.customer.index') }}" class="mis-saring" id="pel-borang" data-mis-saring="pel-hasil">
+        <form method="GET" action="{{ route('account.customer.index') }}" class="mis-saring" id="pel-borang" data-mis-saring="pel-hasil"
+            data-mis-saring-juga="pel-ringkas,pel-aksi">
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan Terapkan
                  diam-diam mengembalikan urutannya ke bawaan. --}}
             <input type="hidden" name="urut" value="{{ $urut }}">

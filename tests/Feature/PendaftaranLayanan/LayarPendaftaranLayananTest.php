@@ -1083,6 +1083,120 @@ class LayarPendaftaranLayananTest extends TestCase
                 . implode(', ', $tanpaKendali));
     }
 
+
+    #[Test]
+    public function layar_bersaring_hidup_ikut_memperbarui_ubin_dan_tombol_unduhnya(): void
+    {
+        /*
+         * Penyaring di MIS bekerja TANPA memuat ulang halaman: ia menukar
+         * bagian daftarnya saja, lalu memperbarui alamat.
+         *
+         * Menukar daftarnya saja tidak cukup, dan ini kerusakan yang paling
+         * sunyi di seluruh perangkat ini. Ubin ringkasan dan tautan tombol
+         * unduh dirakit saat halaman dirender, jadi sesudah penyaringan
+         * keduanya masih memegang keadaan LAMA.
+         *
+         * Terukur di peramban pada layar Pendaftar Layanan sebelum perbaikan:
+         * memilih satu angkatan menyisakan 3 baris di layar, sementara
+         * ubinnya tetap berbunyi 189 dan tautan Unduh PDF tetap tanpa
+         * angkatan — berkasnya berisi 189 pendaftaran dari SELURUH angkatan.
+         * Tidak ada galat, tidak ada tanda apa pun.
+         *
+         * Uji ini TIDAK bisa menangkapnya lewat permintaan biasa: memuat
+         * alamat bersaringan selalu memulangkan halaman yang benar. Yang
+         * rusak hanya jalur tukar-sebagian. Jadi yang dijaga PERJANJIANNYA:
+         * tiap borang bersaring-hidup wajib menyebut bagian lain yang ikut
+         * diperbarui, dan id yang disebutnya wajib benar-benar ada di
+         * halamannya.
+         */
+        $layar = [
+            'Pendaftar Layanan' => [
+                'rute' => route('account.pendaftaran-layanan.index'),
+                'berkas' => 'views/account/pendaftaran_layanan/index.blade.php',
+            ],
+            'Data Pelanggan' => [
+                'rute' => route('account.customer.index'),
+                'berkas' => 'views/account/customer/index.blade.php',
+            ],
+            'Angkatan Layanan' => [
+                'rute' => route('account.kategori-layanan.index'),
+                'berkas' => 'views/account/kategori_layanan/index.blade.php',
+            ],
+        ];
+
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        foreach ($layar as $nama => $d) {
+            $sumber = file_get_contents(resource_path($d['berkas']));
+
+            // Hanya layar yang memang memakai saringan hidup yang dituntut.
+            if (! str_contains($sumber, 'data-mis-saring=')) {
+                continue;
+            }
+
+            $isi = $this->actingAs($admin)->get($d['rute'])->assertOk()->getContent();
+
+            $this->assertSame(1, preg_match('/data-mis-saring-juga="([^"]*)"/', $isi, $cocok),
+                $nama . ': borang penyaringnya tidak menyebut bagian lain yang ikut diperbarui, '
+                    . 'jadi ubin ringkasan dan tombol unduhnya akan memegang saringan yang LAMA.');
+
+            $daftar = array_filter(array_map('trim', explode(',', $cocok[1])));
+
+            $this->assertNotEmpty($daftar, $nama . ': daftar bagiannya kosong.');
+
+            foreach ($daftar as $id) {
+                $this->assertSame(1, preg_match('/\bid="' . preg_quote($id, '/') . '"/', $isi),
+                    $nama . ': menyebut bagian "' . $id . '" tetapi tidak ada unsur berid itu di '
+                        . 'halamannya, jadi bagian itu diam-diam tidak pernah diperbarui.');
+            }
+
+            /*
+             * Tombol unduhnya WAJIB berada di dalam salah satu bagian itu.
+             * Menyebut bagian ringkasan saja membuat angkanya benar sementara
+             * berkas yang terunduh tetap salah — dan berkas yang salah jauh
+             * lebih berbahaya daripada angka yang salah, sebab ia diteruskan
+             * ke orang lain.
+             */
+            if (! preg_match('/href="[^"]*(unduh-pdf|unduh-excel|ekspor)[^"]*"/', $isi)) {
+                continue;
+            }
+
+            $adaUnduhDiDalam = false;
+
+            foreach ($daftar as $id) {
+                if (preg_match('/<div[^>]*\bid="' . preg_quote($id, '/') . '"[^>]*>(?<isi>.*?)<\/div>\s*(?=<|$)/s', $isi, $blok)
+                    && preg_match('/href="[^"]*(unduh-pdf|unduh-excel|ekspor)[^"]*"/', $blok['isi'])) {
+                    $adaUnduhDiDalam = true;
+                    break;
+                }
+            }
+
+            $this->assertTrue($adaUnduhDiDalam,
+                $nama . ': tombol unduhnya tidak berada di dalam bagian mana pun yang ikut '
+                    . 'diperbarui, jadi ia akan tetap menunjuk alamat tanpa saringan.');
+        }
+    }
+
+    #[Test]
+    public function penukar_sebagian_memang_memperbarui_bagian_yang_disebut(): void
+    {
+        /*
+         * Sisi skripnya. Perjanjian di markah tidak ada gunanya kalau
+         * penukarnya mengabaikan atributnya — dan sebaliknya.
+         *
+         * Dibaca dari sumbernya, sebab tidak ada peramban di dalam uji.
+         */
+        $js = file_get_contents(public_path('assets/js/mis-ui.js'));
+
+        $this->assertStringContainsString('misSaringJuga', $js,
+            'mis-ui.js tidak membaca data-mis-saring-juga, jadi bagian yang disebut markah '
+                . 'tidak akan pernah diperbarui.');
+
+        // Harus benar-benar MENYALIN isinya, bukan sekadar membaca atributnya.
+        $this->assertMatchesRegularExpression('/lamaEl\.innerHTML\s*=\s*baruEl\.innerHTML/', $js,
+            'Bagian yang disebut dibaca tetapi isinya tidak pernah ditukar.');
+    }
+
     // ---------------------------------------------------------------- menu
 
     #[Test]
