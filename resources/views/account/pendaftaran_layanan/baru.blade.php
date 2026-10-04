@@ -1810,7 +1810,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         <p class="mis-bantuan">Diisi hanya kalau pesanannya belum ada di daftar atas.</p>
                     </div>
 
-                    {{-- Alamat, NPWP, dan nomor PO: tiganya yang dituntut
+                    {{-- Alamat, NPWP, dan nomor surat pesanan: tiganya yang dituntut
                          lembaga untuk pencairan, dan tidak satu pun punya
                          tempat sebelum ini. --}}
                     <div class="mis-isian bar-penuh" id="bar-bungkus-lembaga" hidden>
@@ -1824,8 +1824,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                     <span>
                                         <span class="bar-centang-judul">Lembaganya minta faktur resmi</span>
                                         <span class="bar-centang-ket">
-                                            Alamat, NPWP, dan nomor PO — hanya perlu kalau fakturnya
-                                            dipakai untuk pencairan.
+                                            Alamat, NPWP, dan nomor surat pesanannya — hanya perlu
+                                            kalau fakturnya dipakai untuk pencairan.
                                         </span>
                                     </span>
                                     <span class="bar-centang-pilih" aria-hidden="true">
@@ -1847,10 +1847,13 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                     placeholder="boleh dikosongkan">
                             </div>
                             <div class="mis-isian bar-faktur" hidden>
-                                <label class="mis-label" for="bar-lembaga-po">Nomor PO</label>
+                                {{-- "Surat pesanan", bukan "PO": penggunanya bukan
+                                     orang pengadaan, dan singkatan Inggris
+                                     memaksa mereka menebak apa yang diminta. --}}
+                                <label class="mis-label" for="bar-lembaga-po">Nomor surat pesanan</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-po"
                                     name="lembaga_po" value="{{ old('lembaga_po') }}" maxlength="60"
-                                    placeholder="boleh dikosongkan">
+                                    placeholder="kalau lembaganya menerbitkan">
                             </div>
                             <div class="mis-isian bar-penuh">
                                 <label class="bar-centang" for="bar-pic-beda">

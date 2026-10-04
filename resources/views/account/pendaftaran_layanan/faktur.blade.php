@@ -125,7 +125,7 @@
                         <br>NPWP: {{ $lembaga->npwp }}
                     @endif
                     @if ($lembaga->no_po)
-                        <br>Nomor PO: {{ $lembaga->no_po }}
+                        <br>Nomor surat pesanan: {{ $lembaga->no_po }}
                     @endif
                 </p>
             </div>
