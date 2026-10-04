@@ -2520,6 +2520,77 @@ Rincian Pendaftaran | MIS Rumah Scopus
     });
 
     /*
+     * Kotak catatan tumbuh mengikuti isinya.
+     *
+     * rows="3" dipatok berapa pun panjang isinya, dan jejak status yang
+     * menumpuk membuat kalimatnya terpotong di tengah — yang terlihat cuma
+     * penggulung kecil di dalam kotak, dan orang tidak tahu masih ada berapa
+     * baris lagi di bawahnya.
+     *
+     * Dihitung dari scrollHeight, BUKAN dari jumlah baris teksnya: isinya
+     * satu kalimat panjang tanpa pergantian baris, jadi yang menentukan
+     * tingginya adalah pembungkusan kata — dan itu hanya diketahui peramban
+     * sesudah dirender.
+     *
+     * Dibatasi 320px. Tanpa batas, catatan yang sudah puluhan kali berganti
+     * status akan membuat satu kotak setinggi layar penuh dan tombol
+     * simpannya terdorong jauh ke bawah.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var BATAS = 320;
+
+        function tumbuhkan(kotak) {
+            // Dinolkan dulu: tanpa itu, kotak yang sudah tinggi tidak pernah
+            // MENYUSUT saat isinya dihapus, sebab scrollHeight-nya tetap
+            // sebesar kotaknya sendiri.
+            kotak.style.height = 'auto';
+
+            var perlu = kotak.scrollHeight;
+
+            kotak.style.height = Math.min(perlu, BATAS) + 'px';
+            kotak.style.overflowY = perlu > BATAS ? 'auto' : 'hidden';
+        }
+
+        document.querySelectorAll('textarea[data-mis-tumbuh]').forEach(function (kotak) {
+            tumbuhkan(kotak);
+            kotak.addEventListener('input', function () { tumbuhkan(kotak); });
+        });
+
+        /*
+         * Diulang saat tabnya dibuka: kotak di panel yang masih
+         * display:none tidak punya scrollHeight yang berarti, jadi
+         * perhitungan saat halaman dimuat memulangkan tinggi minimum untuk
+         * semua tab kecuali yang sedang aktif.
+         *
+         * Lewat 'shown.bs.tab', BUKAN 'click' berjeda tetap. Percobaan
+         * pertama memakai click + 60ms dan terukur kotaknya tetap 40px
+         * padahal isinya menuntut 107px — jedanya menebak kapan panelnya
+         * sudah terlihat, dan tebakan itu meleset. Peristiwa bawaan
+         * Bootstrap berbunyi SESUDAH panelnya benar-benar tampil.
+         *
+         * Jeda tetap tetap dipasang sebagai cadangan kalau jQuery atau
+         * peristiwanya tidak ada.
+         */
+        var segarkanSemua = function () {
+            document.querySelectorAll('textarea[data-mis-tumbuh]').forEach(tumbuhkan);
+        };
+
+        if (window.jQuery) {
+            window.jQuery('#rin-tab a[data-toggle="pill"]').on('shown.bs.tab', segarkanSemua);
+        }
+
+        document.querySelectorAll('#rin-tab .nav-link').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                setTimeout(segarkanSemua, 250);
+            });
+        });
+
+        // Lebar kotaknya berubah saat jendela diubah, dan pembungkusan katanya
+        // ikut berubah — tingginya harus dihitung ulang.
+        window.addEventListener('resize', segarkanSemua);
+    });
+
+    /*
      * Salin nomor pendaftaran.
      *
      * Lewat Clipboard API bila ada, dengan jalan mundur ke execCommand:
