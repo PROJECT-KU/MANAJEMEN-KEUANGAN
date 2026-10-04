@@ -1113,6 +1113,13 @@ class PendaftaranLayananController extends Controller
             // galat validasi dan penyimpanan yang berhasil keduanya mendarat
             // di tab yang bersangkutan.
             'tabAktif' => session('tab', 'ringkasan'),
+            /*
+             * Jejak perubahan, DARI TABELNYA SENDIRI — bukan dari kolom
+             * catatan panitia seperti dulu. Lihat migrasi jejak_pendaftaran
+             * soal kenapa keduanya dipisah.
+             */
+            'jejak' => \App\PendaftaranJejak::milik($layanan, (string) $pendaftaran->getKey())
+                ->terurut()->get(),
         ]);
     }
 
