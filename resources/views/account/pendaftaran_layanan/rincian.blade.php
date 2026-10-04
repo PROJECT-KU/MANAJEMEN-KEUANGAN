@@ -99,6 +99,68 @@ Rincian Pendaftaran | MIS Rumah Scopus
             margin-top: 11px;
         }
 
+        /*
+         * Tindakan cepat. Membungkus ke bawah, bukan menyusut: tiga tombol
+         * yang dipaksa muat di 258px (ruang yang tersedia di 320px) menyisakan
+         * tulisan terpotong, dan tombol bertulisan terpotong tidak memberi
+         * tahu apa pun.
+         */
+        .rin-cepat {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 13px;
+        }
+
+        .rin-cepat-tombol {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 12px 7px 7px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 999px;
+            background: #fff;
+            font-size: .76rem;
+            font-weight: 700;
+            color: var(--mis-tinta-2);
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        /* Ikonnya dipusatkan place-items, bukan line-height: glif WhatsApp dan
+           glif amplop tingginya berbeda, dan line-height meleset pada salah
+           satunya berapa pun nilainya. */
+        .rin-cepat-ikon {
+            display: grid;
+            place-items: center;
+            flex: 0 0 24px;
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+        }
+
+        .rin-cepat-ikon i {
+            font-size: 12px !important;
+            margin: 0 !important;
+        }
+
+        .rin-cepat-tombol:hover {
+            border-color: var(--rin-tua);
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+            transform: translateY(-1px);
+        }
+
+        /* Warna tautannya dipaksa: aturan global menyetel semua <a> jadi
+           indigo, dan dua dari tiga tombol ini memang <a>. */
+        a.rin-cepat-tombol,
+        a.rin-cepat-tombol:hover {
+            text-decoration: none;
+        }
+
         /* Baris keterangan: medali mini + label + nilai. Kisi tiga kolom
            dengan medali merentang dua baris, jadi ia sejajar dengan BLOK
            teksnya — pola yang sama dipakai halaman Profil. */
@@ -381,17 +443,151 @@ Rincian Pendaftaran | MIS Rumah Scopus
             border-top: 1px solid var(--mis-garis);
         }
 
-        .rin-status-baris {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            gap: 11px;
+        .rin-status-label {
+            margin: 0 0 9px;
         }
 
-        .rin-status-baris .mis-isian {
-            flex: 1 1 210px;
+        /*
+         * Deret tombol status.
+         *
+         * auto-fit dengan lantai 170px, BUKAN flex: enam status harus rata
+         * lebarnya supaya tidak ada yang tampak lebih utama dari yang lain —
+         * dan dengan flex, "Pendaftaran Dibatalkan" yang panjang akan dua kali
+         * lebih lebar daripada "Diproses" tanpa alasan.
+         *
+         * Lantainya 170px karena tulisan terpanjang di kelima layanan
+         * ("Pendaftaran Dibatalkan") menuntut sekitar itu; di bawahnya ia
+         * membungkus jadi dua baris, dan tombol setinggi dua baris di antara
+         * tombol sebaris membuat deretnya bergerigi.
+         */
+        .rin-status-pilih {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+            gap: 9px;
+        }
+
+        /*
+         * Tiga lajur: ikon, blok teks, penanda amplop.
+         *
+         * Kisi, BUKAN flex. Dengan flex, anak yang ber-min-width:0 boleh
+         * menyusut di bawah isinya dan HURUFNYA yang meluber keluar — kotaknya
+         * sendiri tidak pernah bertumpang tindih sehingga kerusakannya luput
+         * dari pengukuran kotak. `minmax(0, 1fr)` pada lajur tengah menahan
+         * lebarnya di sisa ruang yang sebenarnya.
+         */
+        .rin-status-tombol {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+            font-size: .82rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--mis-tinta-2);
+            text-align: left;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        /*
+         * Ikonnya di dalam kotak berwarna keadaannya, dan dipusatkan oleh
+         * place-items — bukan oleh bantalan kira-kira yang selalu meleset
+         * beberapa piksel pada glif yang tingginya berbeda-beda.
+         */
+        .rin-status-ikon {
+            display: grid;
+            place-items: center;
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+        }
+
+        .rin-status-ikon i {
+            font-size: 13px !important;
+            margin: 0 !important;
+        }
+
+        .rin-status-isi {
+            display: grid;
+            gap: 1px;
             min-width: 0;
         }
+
+        .rin-status-teks {
+            min-width: 0;
+            /* Nama status yang panjang MEMBUNGKUS, tidak dipotong: "Pendaftaran
+               dibatalkan" yang terpotong jadi "Pendaftaran dibat…" menuntut
+               orangnya menebak sisanya. */
+            overflow-wrap: break-word;
+        }
+
+        /* Penanda amplop & penanda "sekarang" didorong ke ujung kanan supaya
+           sejajar di seluruh deret, berapa pun panjang tulisannya. */
+        .rin-status-surat {
+            color: var(--mis-tinta-4);
+        }
+
+        .rin-status-surat i {
+            font-size: 11px !important;
+            margin: 0 !important;
+        }
+
+        .rin-status-kini {
+            font-size: .62rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--rin-tua);
+            opacity: .75;
+        }
+
+        .rin-status-tombol:not(:disabled):hover {
+            border-color: var(--rin-tua);
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px -12px var(--rin-tua);
+        }
+
+        .rin-status-tombol:not(:disabled):focus-visible {
+            outline: 2px solid var(--rin-tua);
+            outline-offset: 2px;
+        }
+
+        /*
+         * Status yang sedang berlaku dimatikan, bukan disembunyikan.
+         *
+         * Menyembunyikannya membuat deretnya berubah panjang tiap kali
+         * statusnya pindah, dan orang kehilangan patokan letak. Dimatikan,
+         * ia tetap di tempatnya dan sekaligus menjawab "sekarang apa".
+         *
+         * cursor: default — bukan not-allowed: ini bukan larangan, melainkan
+         * keadaan yang memang sudah tercapai.
+         */
+        .rin-status-tombol:disabled {
+            border-color: var(--rin-tua);
+            background: var(--rin-muda);
+            color: var(--rin-tua);
+            cursor: default;
+        }
+
+        /* Palet keadaan, disetel sebagai peubah supaya satu aturan tombol di
+           atas melayani kelima warnanya. Nilainya menyamai lencana .mis-pil
+           yang sudah dipakai di seluruh MIS. */
+        .rin-warna-hijau { --rin-muda: #ecfdf5; --rin-tua: #047857; }
+        .rin-warna-kuning { --rin-muda: #fffbeb; --rin-tua: #b45309; }
+        .rin-warna-biru { --rin-muda: #eff6ff; --rin-tua: #1d4ed8; }
+        .rin-warna-ungu { --rin-muda: #f5f3ff; --rin-tua: #6d28d9; }
+        .rin-warna-merah { --rin-muda: #fff1f2; --rin-tua: #be123c; }
+        .rin-warna-abu { --rin-muda: #f1f5f9; --rin-tua: #475569; }
 
         /* Kotak pemberitahuan. Kuning untuk yang perlu diketahui, merah untuk
            yang tidak bisa diurungkan — warnanya mengikuti keluarga yang sama
@@ -838,6 +1034,45 @@ Rincian Pendaftaran | MIS Rumah Scopus
                     @endif
                 </div>
 
+                {{--
+                    Tindakan cepat, langsung di bawah lencana keadaannya.
+
+                    Ketiganya pekerjaan yang paling sering menyusul pembukaan
+                    halaman ini: menghubungi orangnya, mengirim email, dan
+                    menyalin nomor pendaftaran untuk dicocokkan dengan mutasi
+                    rekening. Ketiganya sebelumnya menuntut menyorot teks lalu
+                    menyalinnya sendiri — dan nomor yang tersalin setengah
+                    adalah kesalahan yang tidak kelihatan sampai transfernya
+                    tidak ketemu.
+
+                    Yang tidak bisa dikerjakan TIDAK disuguhkan: tombol
+                    WhatsApp untuk nomor yang tidak sah hanya menuntun ke
+                    halaman galat.
+                --}}
+                <div class="rin-cepat">
+                    @if ($wa)
+                        <a class="rin-cepat-tombol rin-warna-hijau" href="https://wa.me/{{ $wa }}"
+                            target="_blank" rel="noopener" title="Hubungi lewat WhatsApp">
+                            <span class="rin-cepat-ikon" aria-hidden="true"><i class="fab fa-whatsapp"></i></span>
+                            <span>WhatsApp</span>
+                        </a>
+                    @endif
+
+                    @if ($emailOrang)
+                        <a class="rin-cepat-tombol rin-warna-biru" href="mailto:{{ $emailOrang }}"
+                            title="Kirim email ke {{ $emailOrang }}">
+                            <span class="rin-cepat-ikon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                            <span>Email</span>
+                        </a>
+                    @endif
+
+                    <button type="button" class="rin-cepat-tombol rin-warna-ungu" data-rin-salin="{{ $nomor }}"
+                        title="Salin nomor pendaftaran">
+                        <span class="rin-cepat-ikon" aria-hidden="true"><i class="fas fa-copy"></i></span>
+                        <span>Salin nomor</span>
+                    </button>
+                </div>
+
                 {{-- Tiap baris keterangan diberi medali mini BERWARNA sesuai
                      kelompoknya, dan warnanya konsisten di seluruh MIS: biru
                      untuk email, hijau untuk WhatsApp, ungu untuk afiliasi,
@@ -1061,46 +1296,83 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 </span>
                             </p>
 
-                            <form method="POST"
+                            {{--
+                                Status dipindahkan dengan SEKALI TEKAN, bukan lewat
+                                menu tarik lalu tombol Simpan.
+
+                                Menu tarik menyembunyikan pilihannya: panitia harus
+                                membukanya dulu untuk tahu ada status apa saja, lalu
+                                menekan tombol kedua di sebelahnya. Dua ketukan, dan
+                                yang pertama tidak memberi tahu apa pun. Di sini
+                                keenam statusnya terlihat sekaligus, masing-masing
+                                berwarna sesuai keadaannya — jadi "mana yang lunas"
+                                terjawab tanpa dibaca.
+
+                                Pengamannya PINDAH, tidak hilang: tombol Simpan dulu
+                                menjadi jeda sebelum perubahan terkirim, sekarang
+                                jedanya berupa penegasan SweetAlert2 yang menyebut
+                                akibatnya — termasuk email yang tidak bisa ditarik
+                                kembali. Penegasan yang menyebut akibat lebih
+                                menolong daripada tombol yang hanya berbunyi
+                                "Simpan".
+                            --}}
+                            <form method="POST" id="rin-borang-status"
                                 action="{{ route('account.pendaftaran-layanan.status', [$layanan, $pendaftaran->getKey()]) }}">
                                 @csrf
-                                <div class="rin-status-baris">
-                                    <div class="mis-isian">
-                                        {{-- Label menyebut status ASLINYA, bukan keadaan
-                                             ringkasnya. Versi sebelumnya berbunyi
-                                             "Status sekarang — Lunas" sementara pilihan di
-                                             bawahnya berbunyi "Pendaftaran diterima": dua
-                                             kosakata untuk satu hal, dan orang yang membaca
-                                             sekilas mengira keduanya berbeda. --}}
-                                        <label class="mis-label" for="rin-status">Pindahkan status</label>
-                                        <select class="form-control-modern" id="rin-status" name="status" required>
-                                            @foreach ($pilihanStatus as $nilaiStatus => $tulisan)
-                                                <option value="{{ $nilaiStatus }}" @selected($pendaftaran->status === $nilaiStatus)>{{ $tulisan }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="mis-tombol mis-tombol-ungu">
-                                        <i class="fas fa-check" aria-hidden="true"></i> Simpan status
-                                    </button>
-                                </div>
+                                <input type="hidden" name="status" id="rin-status-nilai" value="{{ $pendaftaran->status }}">
 
-                                @if ($statusBersurat !== [])
-                                    @php
-                                        // Dirakit di PHP, bukan di dalam {{ }}: kurung
-                                        // buka di dalam untaian ikut terbaca pemindai
-                                        // direktif Blade.
-                                        $kalimatSurat = implode(' atau ', $statusBersurat);
-                                    @endphp
-                                    {{-- Disebut DI MUKA, bukan sesudah terkirim: email
-                                         tidak bisa ditarik kembali. --}}
-                                    <p class="rin-nota">
-                                        <i class="fas fa-envelope" aria-hidden="true"></i>
-                                        <span>
-                                            Memilih <strong>{{ $kalimatSurat }}</strong> akan mengirim
-                                            email pemberitahuan ke pendaftarnya.
-                                        </span>
-                                    </p>
-                                @endif
+                                <p class="mis-label rin-status-label">Pindahkan status</p>
+
+                                <div class="rin-status-pilih" role="group" aria-label="Pindahkan status pendaftaran">
+                                    @foreach ($pilihanStatus as $nilaiStatus => $tulisan)
+                                        @php
+                                            // Warna dan ikonnya dibaca dari katalog keadaan
+                                            // yang sama dengan lencana di seluruh MIS, bukan
+                                            // dipilih sendiri di sini: kalau "Pendaftaran
+                                            // Diterima" hijau di daftar, ia harus hijau juga
+                                            // di sini.
+                                            $keadaanPilihan = Pendaftaran::keadaanDari($nilaiStatus);
+                                            $rupaPilihan = Pendaftaran::KEADAAN[$keadaanPilihan]
+                                                ?? ['warna' => 'abu', 'ikon' => 'fa-circle'];
+                                            $iniSekarang = $pendaftaran->status === $nilaiStatus;
+                                            $kirimSurat = Pendaftaran::suratUntuk($layanan, $nilaiStatus) !== null;
+                                        @endphp
+                                        <button type="button"
+                                            class="rin-status-tombol rin-warna-{{ $rupaPilihan['warna'] }} {{ $iniSekarang ? 'sekarang' : '' }}"
+                                            data-nilai="{{ $nilaiStatus }}"
+                                            data-tulisan="{{ $tulisan }}"
+                                            data-surat="{{ $kirimSurat ? '1' : '0' }}"
+                                            @disabled($iniSekarang)
+                                            aria-pressed="{{ $iniSekarang ? 'true' : 'false' }}">
+                                            <span class="rin-status-ikon" aria-hidden="true">
+                                                <i class="fas {{ $rupaPilihan['ikon'] }}"></i>
+                                            </span>
+                                            <span class="rin-status-isi">
+                                                <span class="rin-status-teks">{{ $tulisan }}</span>
+                                                @if ($iniSekarang)
+                                                    {{-- BERTINGKAT di bawah namanya, bukan di
+                                                         sebelahnya. Sebaris, keduanya berebut
+                                                         lebar yang sama dan nama status yang
+                                                         pendek justru kalah: terukur huruf
+                                                         "Diproses" meluber 24px keluar
+                                                         kotaknya dan tercetak menimpa
+                                                         lencananya. --}}
+                                                    <span class="rin-status-kini">status sekarang</span>
+                                                @endif
+                                            </span>
+                                            @if (! $iniSekarang && $kirimSurat)
+                                                {{-- Penanda amplop di tombolnya sendiri, bukan
+                                                     hanya di catatan bawah: catatan itu
+                                                     menyebut nama status, dan orang yang
+                                                     sedang mengarahkan kursor ke tombol tidak
+                                                     sedang membacanya. --}}
+                                                <span class="rin-status-surat" title="Memindahkan ke status ini mengirim email ke pendaftarnya">
+                                                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                                                </span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
 
                                 @if ($layanan === 'webinar_eksklusif')
                                     <p class="rin-nota">
@@ -1663,6 +1935,117 @@ Rincian Pendaftaran | MIS Rumah Scopus
             if (setuju) {
                 tombolTermin.closest('form').submit();
             }
+        });
+    });
+
+    /*
+     * Salin nomor pendaftaran.
+     *
+     * Lewat Clipboard API bila ada, dengan jalan mundur ke execCommand:
+     * Clipboard API hanya tersedia pada konteks aman, dan MIS dijalankan
+     * panitia lewat http://127.0.0.1 maupun lewat domainnya. Tanpa jalan
+     * mundur, tombolnya diam saja di salah satu dari keduanya — dan tombol
+     * yang diam terbaca sebagai rusak.
+     *
+     * Hasilnya dikabarkan lewat misToast yang sama dengan seluruh MIS,
+     * termasuk saat GAGAL: menyalin yang gagal tanpa kabar membuat orang
+     * menempelkan isi papan klip yang lama.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-rin-salin]').forEach(function (tombol) {
+            tombol.addEventListener('click', function () {
+                var teks = tombol.dataset.rinSalin || '';
+
+                var kabarkan = function (berhasil) {
+                    window.misToast(
+                        berhasil ? 'berhasil' : 'gagal',
+                        berhasil
+                            ? 'Nomor ' + teks + ' tersalin.'
+                            : 'Nomornya tidak bisa disalin otomatis. Silakan sorot lalu salin sendiri.'
+                    );
+                };
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(teks)
+                        .then(function () { kabarkan(true); })
+                        .catch(function () { kabarkan(false); });
+
+                    return;
+                }
+
+                var kotak = document.createElement('textarea');
+                kotak.value = teks;
+                // Di luar layar, BUKAN display:none: unsur yang tidak dirender
+                // tidak bisa dipilih, jadi execCommand tidak menyalin apa pun.
+                kotak.setAttribute('readonly', '');
+                kotak.style.position = 'fixed';
+                kotak.style.left = '-9999px';
+                document.body.appendChild(kotak);
+                kotak.select();
+
+                var berhasil = false;
+
+                try {
+                    berhasil = document.execCommand('copy');
+                } catch (e) {
+                    berhasil = false;
+                }
+
+                document.body.removeChild(kotak);
+                kabarkan(berhasil);
+            });
+        });
+    });
+
+    /*
+     * Pemindahan status: sekali tekan, dengan penegasan yang menyebut akibat.
+     *
+     * Pengamannya BUKAN tombol Simpan yang dulu ada di sebelah menu tarik,
+     * melainkan penegasan ini — dan ia menyebut hal yang tombol Simpan tidak
+     * pernah sebut: status mana yang dituju, dan apakah langkah itu mengirim
+     * email yang tidak bisa ditarik kembali.
+     *
+     * Dipasang satu kali di wadahnya, bukan satu penyimak per tombol:
+     * jumlahnya berbeda tiap layanan, dan penyimak per tombol berarti enam
+     * penutupan yang semuanya menyimpan salinan borang yang sama.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var wadah = document.querySelector('.rin-status-pilih');
+        var borang = document.getElementById('rin-borang-status');
+        var nilai = document.getElementById('rin-status-nilai');
+
+        if (!wadah || !borang || !nilai) {
+            return;
+        }
+
+        wadah.addEventListener('click', function (e) {
+            var tombol = e.target.closest('.rin-status-tombol');
+
+            if (!tombol || tombol.disabled) {
+                return;
+            }
+
+            var berkirim = tombol.dataset.surat === '1';
+
+            window.misKonfirmasi({
+                judul: 'Pindahkan status ke sini?',
+                pesan: berkirim
+                    // Emailnya disebut DI MUKA dan dengan kata "tidak bisa
+                    // ditarik kembali": sesudah terkirim, tidak ada yang bisa
+                    // dikerjakan panitia untuk membatalkannya.
+                    ? 'Pendaftarnya langsung dikirimi email pemberitahuan. Email yang sudah terkirim tidak bisa ditarik kembali.'
+                    : 'Status di seluruh daftar dan laporan ikut berubah.',
+                sorot: tombol.dataset.tulisan,
+                tombol: 'Ya, pindahkan',
+                jenis: berkirim ? 'peringatan' : 'tanya',
+            }).then(function (setuju) {
+                if (!setuju) {
+                    return;
+                }
+
+                nilai.value = tombol.dataset.nilai;
+                borang.submit();
+            });
         });
     });
 
