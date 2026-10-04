@@ -520,6 +520,31 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * Label isian berikon, menyamai baris di kartu identitas kiri.
+         *
+         * Medalinya 20px, bukan 25px seperti di kartu kiri: label isian
+         * hurufnya lebih kecil, dan medali seukuran kartu kiri membuat
+         * barisnya lebih tinggi daripada tulisannya sendiri.
+         */
+        .rin-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .rin-label .mis-medali {
+            flex: 0 0 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 7px;
+        }
+
+        .rin-label .mis-medali i {
+            font-size: 10px !important;
+            margin: 0 !important;
+        }
+
+        /*
          * Jumlah lajurnya dipatok sesuai jumlah isian, lihat catatan di
          * markahnya. Hanya sejak 680px: di bawah itu auto-fit di atas yang
          * berlaku dan isiannya menumpuk satu per baris, seperti seharusnya di
@@ -2013,6 +2038,24 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                         'nilai' => old($kolom, $pendaftaran->{$kolom}),
                                                         'penuh' => in_array($kolom, $medanPenuh, true),
                                                         'rentang' => $kolom === $medanTerakhir ? $rentangTerakhir : 1,
+                                                        /*
+                                                         * Label disembunyikan kalau bagiannya
+                                                         * HANYA berisi isian ini DAN namanya sama
+                                                         * dengan judul bagiannya.
+                                                         *
+                                                         * Terjadi pada "Catatan panitia":
+                                                         * judul kartunya dan label isiannya
+                                                         * berbunyi sama persis, berikut ikon
+                                                         * kuning yang sama, bertumpuk langsung.
+                                                         * Satu hal disebut dua kali membuat orang
+                                                         * mencari bedanya — dan tidak ada.
+                                                         *
+                                                         * Syaratnya dua-duanya, bukan salah satu:
+                                                         * bagian berisi banyak medan tetap butuh
+                                                         * labelnya walau salah satunya senama.
+                                                         */
+                                                        'sembunyiLabel' => count($daftarMedan) === 1
+                                                            && strcasecmp($label[$kolom] ?? '', $judulBagian) === 0,
                                                         'uang' => in_array($kolom, $medanUang, true),
                                                         'angkatan' => $angkatan,
                                                     ])
