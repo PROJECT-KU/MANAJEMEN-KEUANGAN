@@ -526,6 +526,37 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * hurufnya lebih kecil, dan medali seukuran kartu kiri membuat
          * barisnya lebih tinggi daripada tulisannya sendiri.
          */
+        /*
+         * Kotak nominal dengan awalan Rp di dalamnya.
+         *
+         * Awalannya diletakkan MUTLAK di atas kotak lalu kotaknya diberi
+         * bantalan kiri — bukan dua unsur berdampingan: dengan berdampingan,
+         * garis tepi dan keadaan fokus kotaknya terputus jadi dua kotak yang
+         * terlihat terpisah.
+         */
+        .rin-uang-kotak {
+            position: relative;
+            display: block;
+        }
+
+        .rin-uang-awalan {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            transform: translateY(-50%);
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--mis-tinta-4);
+            pointer-events: none;
+        }
+
+        /* Bantalan kirinya !important: aturan global .form-control memasang
+           bantalan sendiri dan menang atas kelas biasa. */
+        .rin-uang-isian {
+            padding-left: 38px !important;
+            font-variant-numeric: tabular-nums;
+        }
+
         .rin-label {
             display: flex;
             align-items: center;
@@ -2570,6 +2601,44 @@ Rincian Pendaftaran | MIS Rumah Scopus
             if (setuju) {
                 tombolTermin.closest('form').submit();
             }
+        });
+    });
+
+    /*
+     * Nominal diberi pemisah ribuan sambil diketik.
+     *
+     * Peladen membuang seluruh karakter bukan angka sebelum menyimpan, jadi
+     * titiknya tidak pernah ikut tersimpan — ia murni alat baca.
+     *
+     * Letak kursor DIJAGA: tanpa itu, kursor melompat ke ujung kanan tiap
+     * kali pemisahnya bertambah, dan menyunting digit di tengah jadi
+     * mustahil. Yang dihitung jumlah DIGIT di kiri kursor, bukan posisinya,
+     * sebab jumlah titik di kirinya berubah.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var pisah = function (angka) {
+            return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        };
+
+        document.querySelectorAll('input[data-mis-rupiah]').forEach(function (kotak) {
+            kotak.addEventListener('input', function () {
+                var sebelum = kotak.value.slice(0, kotak.selectionStart || 0);
+                var digitKiri = (sebelum.match(/\d/g) || []).length;
+
+                var angka = kotak.value.replace(/\D+/g, '');
+
+                kotak.value = angka === '' ? '' : pisah(angka);
+
+                // Kursor dikembalikan sesudah digit ke-N yang sama.
+                var pos = 0, hitung = 0;
+
+                while (pos < kotak.value.length && hitung < digitKiri) {
+                    if (/\d/.test(kotak.value[pos])) { hitung++; }
+                    pos++;
+                }
+
+                kotak.setSelectionRange(pos, pos);
+            });
         });
     });
 

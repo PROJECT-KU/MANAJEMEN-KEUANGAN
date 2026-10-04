@@ -4247,4 +4247,78 @@ class TindakanPendaftaranTest extends TestCase
             'Ada nama direktif Blade di dalam komentar CSS; Blade tetap mengompilasinya dan '
                 . 'halamannya bisa 500. Sebut dengan kata: ' . implode(', ', array_unique($tersangka)));
     }
+
+    #[Test]
+    public function nominal_berpemisah_tetap_tersimpan_sebagai_angka(): void
+    {
+        /*
+         * Kotak nominal kini menampilkan "Rp" di dalamnya dan memberi pemisah
+         * ribuan sambil diketik. Keduanya alat BACA — yang tersimpan harus
+         * tetap angkanya saja.
+         *
+         * Ini pasangan wajib dari perubahan tampilannya: kalau peladen
+         * berhenti membuang pemisahnya, "82.500.022" akan tersimpan jadi 82
+         * dan selisihnya tidak akan ketahuan sampai ada yang mencocokkan
+         * mutasi rekening.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))->put(
+            route('account.pendaftaran-layanan.ubah', ['scopus_camp', $camp->getKey()]),
+            ['total_pembayaran' => 'Rp 82.500.022', 'ppn' => '1.000', 'nominal_diskon' => '450.000']
+        )->assertRedirect();
+
+        $segar = $camp->fresh();
+
+        $this->assertSame(82500022, (int) $segar->total_pembayaran,
+            'Pemisah ribuan ikut tersimpan; nominalnya jadi salah.');
+        $this->assertSame(1000, (int) $segar->ppn);
+        $this->assertSame(450000, (int) $segar->nominal_diskon);
+    }
+
+    #[Test]
+    public function kotak_nominal_membawa_awalan_rupiah_di_dalamnya(): void
+    {
+        /*
+         * Kepala berkas partial isian sudah MENJANJIKAN "Rp menempel di dalam
+         * kotaknya" sejak lama, tetapi yang ada hanya kalimat bantuan "Dalam
+         * rupiah" di bawah kotak — dan kalimat di bawah kotak tidak terbaca
+         * saat mata sedang berada di dalam kotaknya.
+         *
+         * Dijaga per-kotak: medan nominal yang ditambahkan nanti harus ikut
+         * membawanya, bukan sebagian saja.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        /*
+         * Dicocokkan sebagai JENDELA sesudah pembungkusnya, bukan sampai
+         * penutupnya.
+         *
+         * Dua percobaan sebelumnya meleset dan keduanya memulangkan nol kotak
+         * pada markah yang justru benar: yang pertama menuntut <p> bantuan
+         * sesudahnya — kalimat itu sudah dibuang; yang kedua menuntut dua
+         * </span> berurutan — padahal ada <input> di antaranya.
+         */
+        $jumlah = preg_match_all('#<span class="rin-uang-kotak">(?<dalam>.{0,400})#s', $isi, $kotak, PREG_SET_ORDER);
+
+        $this->assertGreaterThanOrEqual(4, $jumlah,
+            'Kotak nominal berawalan Rp terlalu sedikit; ada medan uang yang terlewat.');
+
+        foreach ($kotak as $k) {
+            $this->assertStringContainsString('rin-uang-awalan', $k['dalam'],
+                'Ada kotak nominal tanpa awalan Rp di dalamnya.');
+            $this->assertStringContainsString('data-mis-rupiah', $k['dalam'],
+                'Ada kotak nominal yang tidak ikut diberi pemisah ribuan.');
+        }
+
+        // Kalimat bantuan lama yang kini keliru tidak boleh kembali: titiknya
+        // justru ditampilkan sekarang.
+        $this->assertStringNotContainsString('Dalam rupiah, tanpa titik.', $isi,
+            'Kalimat bantuan lama bertentangan dengan tampilannya sekarang.');
+    }
 }
