@@ -102,6 +102,12 @@ Route::get('/Webinar-Eksklusif/Status/{id}', 'Publict\PublicWebinarEksklusifCont
 Route::post('/Webinar-Eksklusif/Status/{id}/kirim-ulang', 'Publict\PublicWebinarEksklusifController@kirimUlang')
     ->middleware('throttle:3,1')
     ->name('public.webinareksklusif.kirimulang');
+// Unggahan gambar; dibatasi 6 per menit. Tiap unggahan membongkar gambar
+// penuh ke memori untuk diubah jadi WebP, jadi yang dijaga bukan surat
+// melainkan beban peladennya sendiri.
+Route::post('/Webinar-Eksklusif/Status/{id}/bukti', 'Publict\PublicWebinarEksklusifController@unggahBukti')
+    ->middleware('throttle:6,1')
+    ->name('public.webinareksklusif.bukti');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
 // penggantinya pemeriksaan tanda tangan di dalam pengendalinya.
 Route::post('/Webinar-Eksklusif/pemberitahuan/doku', 'Publict\PublicWebinarEksklusifController@pemberitahuan')->name('public.webinareksklusif.pemberitahuan');

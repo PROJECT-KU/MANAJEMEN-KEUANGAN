@@ -200,6 +200,73 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                             Kirim bukti transfer
                         </a>
                     </div>
+
+                    {{--
+                        UNGGAH BUKTI TRANSFER.
+
+                        Selama gerbang pembayaran DOKU belum terverifikasi,
+                        WhatsApp panitia satu-satunya jalan mengirim bukti —
+                        dan bukti yang menumpuk di satu nomor pribadi tidak
+                        pernah sampai ke baris pendaftarannya.
+
+                        Tombol WhatsApp di atas SENGAJA dibiarkan: sebagian
+                        peserta sudah terbiasa ke sana, dan menghapusnya
+                        memaksa mereka belajar jalan baru di saat mereka justru
+                        sedang ingin cepat selesai.
+                    --}}
+                    <div class="sta-unggah">
+                        <p class="sta-bayar-judul">Sudah transfer? Unggah buktinya di sini</p>
+
+                        @if ($buktiAda)
+                            <div class="sta-unggah-ada">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                <span>
+                                    Bukti Anda sudah kami terima.
+                                    <a href="{{ $buktiUrl }}" target="_blank" rel="noopener">Lihat berkasnya</a>
+                                    &mdash; masih bisa diganti kalau salah kirim.
+                                </span>
+                            </div>
+                        @endif
+
+                        @error('bukti')
+                            <p class="sta-unggah-galat" role="alert">{{ $message }}</p>
+                        @enderror
+
+                        <form method="POST"
+                            action="{{ route('public.webinareksklusif.bukti', $pendaftaran->getKey()) }}"
+                            enctype="multipart/form-data" class="sta-unggah-borang">
+                            @csrf
+
+                            {{-- Isian aslinya disembunyikan 1x1 TRANSPARAN, bukan
+                                 display:none, supaya tetap bisa menerima fokus
+                                 papan ketik; labelnya yang jadi sasaran ketukan. --}}
+                            <input type="file" id="sta-bukti" name="bukti" class="sta-berkas"
+                                accept=".jpg,.jpeg,.png,.heic,.heif,image/jpeg,image/png,image/heic,image/heif"
+                                required>
+
+                            <label for="sta-bukti" class="sta-unggah-tombol">
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <span class="sta-unggah-teks">
+                                    <strong id="sta-bukti-nama">Pilih foto bukti transfer</strong>
+                                    <small>JPG, PNG, atau HEIC &middot; paling besar 8 MB</small>
+                                </span>
+                            </label>
+
+                            <button type="submit">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                Kirim bukti
+                            </button>
+                        </form>
+
+                        {{-- Yang BENAR-BENAR terjadi pada berkasnya. Orang yang
+                             mengunggah foto dari ponselnya berhak tahu bahwa
+                             yang disimpan versi ringkasnya, bukan fotonya
+                             apa adanya. --}}
+                        <p class="sta-unggah-nota">
+                            Fotonya kami ringkas jadi WebP supaya hemat ruang; berkas aslinya
+                            tidak kami simpan.
+                        </p>
+                    </div>
                 @endif
             @endif
 
@@ -624,6 +691,137 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-wa:hover { background: #1ebe5a; color: #fff; text-decoration: none; }
     .sta-wa > .fab { margin: 0 !important; font-size: 1.2rem; }
 
+
+    /* ---------------------------------------------- unggah bukti transfer */
+
+    .sta-unggah {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px dashed #d9e1ef;
+    }
+
+    .sta-unggah-ada {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-bottom: 12px;
+        padding: 11px 13px;
+        border-radius: 11px;
+        background: #ecfdf3;
+        color: #166534;
+        font-size: .86rem;
+        line-height: 1.5;
+    }
+
+    .sta-unggah-ada > .fas { margin: 2px 0 0 !important; }
+    .sta-unggah-ada a { color: #166534; font-weight: 700; text-decoration: underline; }
+
+    .sta-unggah-galat {
+        margin-bottom: 12px;
+        padding: 11px 13px;
+        border-radius: 11px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: .86rem;
+        line-height: 1.5;
+    }
+
+    .sta-unggah-borang { margin: 0; }
+
+    /* Isian berkas bawaan peramban disembunyikan 1x1 TRANSPARAN, BUKAN
+       display:none: yang display:none dilewati sama sekali oleh papan ketik,
+       dan labelnya tidak bisa menerima fokus menggantikannya. */
+    .sta-berkas {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .sta-unggah-tombol {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        margin: 0;
+        padding: 14px 15px;
+        border: 1.5px dashed #c7d2fe;
+        border-radius: 13px;
+        background: #f8faff;
+        cursor: pointer;
+    }
+
+    .sta-unggah-tombol:hover { border-color: #818cf8; background: #f1f5ff; }
+
+    /* Penanda fokus dipasang di LABELNYA, sebab isiannya sendiri tidak
+       terlihat — tanpa ini yang berpindah dengan Tab tidak tahu di mana ia. */
+    .sta-berkas:focus-visible + .sta-unggah-tombol {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .18);
+    }
+
+    .sta-unggah-tombol > .fas {
+        flex: 0 0 auto;
+        margin: 0 !important;
+        font-size: 1.35rem;
+        color: #6366f1;
+    }
+
+    /* min-width: 0 supaya nama berkas yang panjang BOLEH menyusut dan
+       terpotong rapi; tanpa itu unsur lentur memakai min-width:auto dan
+       borangnya melebar melewati kartunya.
+
+       text-align: left MELAWAN rata tengah yang diwarisi dari kartunya.
+       Terukur di 375px: tanpa ini ikon awannya menempel di kiri sementara
+       tulisannya melayang di tengah, dan keduanya terbaca tidak sejajar. */
+    .sta-unggah-teks { min-width: 0; text-align: left; }
+
+    .sta-unggah-teks strong {
+        display: block;
+        overflow: hidden;
+        color: #1e293b;
+        font-size: .9rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Keterangan formatnya TIDAK boleh patah: dipatahkan, "MB" turun
+       sendirian ke baris kedua dan kotaknya jadi setinggi 100px di ponsel. */
+    .sta-unggah-teks small {
+        display: block;
+        color: #64748b;
+        font-size: .78rem;
+        white-space: nowrap;
+    }
+
+    .sta-unggah-borang button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        min-height: 48px;
+        margin-top: 11px;
+        border: 0;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #ff3131, #ff914d);
+        color: #fff;
+        font-size: .95rem;
+        font-weight: 700;
+    }
+
+    .sta-unggah-borang button:hover { filter: brightness(1.05); }
+    .sta-unggah-borang button:active { transform: scale(.98); }
+    .sta-unggah-borang button > .fas { margin: 0 !important; }
+
+    .sta-unggah-nota {
+        margin: 10px 0 0;
+        color: #94a3b8;
+        font-size: .78rem;
+        line-height: 1.5;
+    }
+
     .sta-aksi { margin-top: 24px; }
 
     .sta-tombol {
@@ -654,4 +852,28 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-rincian dd { text-align: left; }
     }
 </style>
+
+<script>
+    /*
+     * Nama berkas yang dipilih ditulis di labelnya.
+     *
+     * Isian aslinya tidak terlihat, jadi tanpa ini tidak ada satu pun tanda di
+     * layar bahwa berkasnya sudah terpilih — dan orang menekan "Pilih foto"
+     * berkali-kali, atau mengira unggahannya gagal padahal belum dikirim.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var kotak = document.getElementById('sta-bukti');
+        var nama = document.getElementById('sta-bukti-nama');
+
+        if (!kotak || !nama) { return; }
+
+        var semula = nama.textContent;
+
+        kotak.addEventListener('change', function () {
+            nama.textContent = kotak.files && kotak.files.length
+                ? kotak.files[0].name
+                : semula;
+        });
+    });
+</script>
 @stop
