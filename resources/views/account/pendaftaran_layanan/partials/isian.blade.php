@@ -8,6 +8,7 @@
     $nilai     nilai sekarang
     $penuh     true kalau isiannya memakai lebar penuh kisinya
     $rentang   berapa lajur yang ditempatinya (boleh tidak dikirim; bawaannya 1)
+    $sembunyiLabel  true kalau labelnya mengulang judul bagiannya (boleh tidak dikirim)
     $uang      true kalau nominal — diberi awalan Rp di dalam kotaknya
     $angkatan  pilihan angkatan, hanya dipakai kolom kategori_id
 
@@ -34,7 +35,73 @@
      beberapa kelas yang ditulis di muka. --}}
 <div class="mis-isian {{ $penuh ? 'rin-isian-penuh' : '' }}"
     @if (! $penuh && ($rentang ?? 1) > 1) style="grid-column: span {{ $rentang }};" @endif>
-    <label class="mis-label" for="{{ $id }}">{{ $tulisan }}</label>
+    @php
+        /*
+         * Ikon berwarna per isian.
+         *
+         * Kartu di tab Ringkasan penuh ikon berwarna, sementara borang di tab
+         * lain polos sama sekali — kartunya sendiri sudah identik (bantalan,
+         * radius, bayangan, tipografi judul semuanya sama terukur), yang
+         * membuatnya terasa beda hanya isinya.
+         *
+         * Warnanya SENGAJA menyamai baris di kartu identitas sebelah kiri:
+         * email biru, WhatsApp hijau, afiliasi ungu. Satu hal yang sama tidak
+         * boleh berganti warna hanya karena dilihat di tab yang berbeda.
+         *
+         * Yang tidak terdaftar jatuh ke ikon netral — menambah medan baru
+         * tidak pernah membuat barisnya kosong.
+         */
+        $petaIkon = [
+            'nama' => ['fas fa-user', 'ungu'], 'nama_pemesan' => ['fas fa-user', 'ungu'],
+            'email' => ['fas fa-envelope', 'biru'], 'email_pemesan' => ['fas fa-envelope', 'biru'],
+            'telp' => ['fab fa-whatsapp', 'hijau'], 'telp_pemesan' => ['fab fa-whatsapp', 'hijau'],
+            'affiliasi' => ['fas fa-building', 'ungu'], 'afiliasi_pemesan' => ['fas fa-building', 'ungu'],
+            'note' => ['fas fa-sticky-note', 'kuning'],
+            'kendala' => ['fas fa-exclamation-triangle', 'merah'],
+            'desc_kendala' => ['fas fa-exclamation-triangle', 'merah'],
+            'kategori_id' => ['fas fa-layer-group', 'jingga'],
+            'jumlah_pendaftar' => ['fas fa-users', 'ungu'],
+            'ppn' => ['fas fa-percent', 'biru'],
+            'kode_unik' => ['fas fa-hashtag', 'biru'],
+            'kode_unik_pembayaran' => ['fas fa-hashtag', 'biru'],
+            'kode_unik_pembayaran_kedua' => ['fas fa-hashtag', 'biru'],
+            'kode_unik_pembayaran_ketiga' => ['fas fa-hashtag', 'biru'],
+            'kode_diskon' => ['fas fa-tag', 'kuning'],
+            'nominal_diskon' => ['fas fa-tag', 'kuning'],
+            'group_wa' => ['fab fa-whatsapp', 'hijau'],
+            'tanggal_pemesanan' => ['fas fa-calendar-alt', 'jingga'],
+            'tanggal_reschedule' => ['fas fa-calendar-alt', 'jingga'],
+        ];
+
+        $rupaIkon = $petaIkon[$kolom] ?? null;
+
+        if ($rupaIkon === null) {
+            // Dikelompokkan dari AWALAN namanya: sesi kedua dan ketiga memakai
+            // kolom bernama sama berakhiran _kedua/_ketiga, dan mendaftarkan
+            // ketiganya satu per satu berarti tiga tempat yang harus sepakat.
+            $rupaIkon = match (true) {
+                str_starts_with($kolom, 'sesi') => ['fas fa-clipboard-list', 'jingga'],
+                str_starts_with($kolom, 'jam_') => ['fas fa-clock', 'kuning'],
+                str_starts_with($kolom, 'waktu_') => ['fas fa-clock', 'kuning'],
+                str_starts_with($kolom, 'lokasi') => ['fas fa-map-marker-alt', 'merah'],
+                str_starts_with($kolom, 'biaya') => ['fas fa-money-bill-wave', 'hijau'],
+                str_starts_with($kolom, 'subtotal') => ['fas fa-money-bill-wave', 'hijau'],
+                str_starts_with($kolom, 'total') => ['fas fa-money-bill-wave', 'hijau'],
+                default => ['fas fa-pen', 'abu'],
+            };
+        }
+    @endphp
+
+    {{-- Labelnya tetap ADA untuk pembaca layar walau disembunyikan dari mata:
+         isian tanpa label sama sekali tidak bisa dikenali pemakainya. --}}
+    <label class="mis-label rin-label {{ ($sembunyiLabel ?? false) ? 'sr-only' : '' }}" for="{{ $id }}">
+        @if (! ($sembunyiLabel ?? false))
+            <span class="mis-medali mini mis-{{ $rupaIkon[1] }}" aria-hidden="true">
+                <i class="{{ $rupaIkon[0] }}"></i>
+            </span>
+        @endif
+        <span>{{ $tulisan }}</span>
+    </label>
 
     @if ($kolom === 'kategori_id')
         <select class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" required>

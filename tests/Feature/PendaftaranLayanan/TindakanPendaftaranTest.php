@@ -4082,4 +4082,83 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count($kelasAnak),
             'Prasyarat ujinya hilang: panel Ringkasan harusnya memuat tiga kartu.');
     }
+
+    #[Test]
+    public function tiap_isian_borang_berikon_berwarna(): void
+    {
+        /*
+         * Kartu di tab Ringkasan penuh ikon berwarna, sementara borang di tab
+         * lain polos sama sekali — dan kartunya sendiri IDENTIK: terukur
+         * bantalan 15px 16px, radius 15px, bayangan, medali 30x30, dan
+         * tipografi judul sama persis di keduanya. Yang membuatnya terasa
+         * berbeda hanya isinya.
+         *
+         * Warnanya menyamai baris di kartu identitas sebelah kiri — email
+         * biru, WhatsApp hijau, afiliasi ungu. Satu hal yang sama tidak boleh
+         * berganti warna hanya karena dilihat di tab yang berbeda.
+         *
+         * Dijaga per-isian, bukan sekadar "ada ikon di panel": medan yang
+         * ditambahkan nanti akan jatuh ke ikon netral, dan yang dituntut di
+         * sini setiap isian PUNYA ikon, bukan sebagian.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        preg_match_all('#<label class="mis-label rin-label(?<kelas>[^"]*)"[^>]*>(?<dalam>.*?)</label>#s',
+            $isi, $label, PREG_SET_ORDER);
+
+        $this->assertGreaterThanOrEqual(4, count($label),
+            'Prasyarat ujinya hilang: isian borangnya terlalu sedikit.');
+
+        $tanpaIkon = [];
+
+        foreach ($label as $l) {
+            // Label yang sengaja disembunyikan tidak perlu ikon: ia memang
+            // tidak dilihat siapa pun.
+            if (str_contains($l['kelas'], 'sr-only')) {
+                continue;
+            }
+
+            if (! preg_match('/mis-medali[^"]*mis-(hijau|biru|ungu|merah|kuning|jingga|abu)/', $l['dalam'])) {
+                $tanpaIkon[] = trim(strip_tags($l['dalam']));
+            }
+        }
+
+        $this->assertSame([], $tanpaIkon,
+            'Ada isian borang tanpa ikon berwarna, jadi tabnya terbaca lebih polos daripada '
+                . 'tab Ringkasan: ' . implode(', ', $tanpaIkon));
+    }
+
+    #[Test]
+    public function label_yang_mengulang_judul_bagiannya_disembunyikan(): void
+    {
+        /*
+         * Bagian "Catatan panitia" berisi satu isian yang labelnya berbunyi
+         * sama persis dengan judul kartunya, berikut ikon kuning yang sama,
+         * bertumpuk langsung. Satu hal disebut dua kali membuat orang mencari
+         * bedanya — dan tidak ada.
+         *
+         * Disembunyikan dari MATA saja, bukan dibuang: isian tanpa label sama
+         * sekali tidak bisa dikenali pembaca layar.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match(
+            '#<label class="mis-label rin-label sr-only"[^>]*for="rin-note"[^>]*>(?<dalam>.*?)</label>#s',
+            $isi, $cocok
+        ), 'Label "Catatan panitia" tidak disembunyikan, jadi judulnya tercetak dua kali.');
+
+        $this->assertStringContainsString('Catatan panitia', $cocok['dalam'],
+            'Labelnya disembunyikan tetapi tulisannya ikut hilang; pembaca layar jadi '
+                . 'menemui isian tanpa nama.');
+    }
 }
