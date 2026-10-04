@@ -484,6 +484,15 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.simpan');
 
             /*
+             * Membaca daftar peserta dari berkas Excel/CSV yang dikirim
+             * lembaga. Juga SEBELUM rute rincian: 'baca-peserta' tidak boleh
+             * terbaca sebagai nama layanan. Tidak menyimpan apa pun — hasil
+             * bacanya dikembalikan ke borangnya untuk diperiksa panitia.
+             */
+            Route::post('Pendaftaran-Layanan/baca-peserta', 'account\\PendaftaranLayananController@bacaPeserta')
+                ->name('account.pendaftaran-layanan.baca-peserta');
+
+            /*
              * Rincian satu pendaftaran, dan ketiga tindakannya.
              *
              * {layanan} ditaruh di alamatnya supaya satu rute melayani kelima

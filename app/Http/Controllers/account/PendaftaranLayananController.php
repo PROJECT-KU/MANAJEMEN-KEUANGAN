@@ -549,6 +549,101 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Membaca daftar peserta dari berkas Excel/CSV, lalu mengembalikannya
+     * sebagai teks untuk ditaruh di kotak isiannya.
+     *
+     * TIDAK menyimpan apa pun. Hasil bacanya ditulis balik ke kotak teks yang
+     * sama supaya panitia MELIHAT apa yang terbaca dan bisa membetulkannya
+     * sebelum menekan simpan; langsung masuk ke basis data berarti satu kolom
+     * yang salah terbaca baru ketahuan di hari acara.
+     *
+     * Lembaga mengirim daftar pesertanya sebagai lampiran Excel, bukan
+     * diketik di badan pesan. Tanpa jalur ini, rombongan 30 orang berarti 30
+     * baris yang disalin satu per satu — pekerjaan yang paling mungkin
+     * dilewati panitia, dan begitu dilewati, 29 nomor pesertanya hilang.
+     */
+    public function bacaPeserta(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        /*
+         * Jenisnya diperiksa dari NAMA berkasnya, bukan lewat aturan `mimes`.
+         * CSV yang dibuat Excel di macOS terkirim sebagai `text/plain`
+         * sedangkan yang dari Windows `application/vnd.ms-excel`, dan aturan
+         * mimes menolak salah satunya tergantung komputer panitianya —
+         * penolakan yang tidak mungkin ia pahami sebab berkasnya memang .csv.
+         */
+        $request->validate([
+            'berkas' => ['required', 'file', 'max:2048'],
+        ], [
+            'berkas.required' => 'Berkasnya belum dipilih.',
+            'berkas.max' => 'Berkasnya lebih dari 2 MB.',
+        ]);
+
+        $berkas = $request->file('berkas');
+        $jenis = strtolower((string) $berkas->getClientOriginalExtension());
+
+        if (! in_array($jenis, ['xlsx', 'xls', 'csv', 'txt'], true)) {
+            return response()->json([
+                'ok' => false,
+                'pesan' => 'Berkasnya harus Excel (.xlsx atau .xls) atau CSV.',
+            ], 422);
+        }
+
+        try {
+            // Lembar PERTAMA saja. Berkas lembaga kerap punya lembar lain
+            // berisi anggaran atau catatan, dan menggabungkan semuanya
+            // memasukkan baris yang bukan orang ke daftar pesertanya.
+            /*
+             * Jenis pembacanya disebut, tidak dibiarkan ditebak. Berkas
+             * unggahan tersimpan dengan nama sementara tanpa akhiran, jadi
+             * tebakan dari nama berkas bisa meleset — dan melesetnya berupa
+             * galat yang menyebut "Unable to identify file type", kalimat
+             * yang tidak memberi tahu panitia harus berbuat apa.
+             */
+            $pembaca = match ($jenis) {
+                'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+                'xls' => \Maatwebsite\Excel\Excel::XLS,
+                default => \Maatwebsite\Excel\Excel::CSV,
+            };
+
+            $lembar = \Maatwebsite\Excel\Facades\Excel::toArray(new class {}, $berkas, null, $pembaca);
+            $baris = $lembar[0] ?? [];
+        } catch (\Throwable $e) {
+            \Log::error('Daftar peserta gagal dibaca', [
+                'nama' => $berkas->getClientOriginalName(),
+                'sebab' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'pesan' => 'Berkasnya tidak bisa dibaca. Coba simpan ulang sebagai .xlsx atau .csv.',
+            ], 422);
+        }
+
+        $orang = \App\Support\DaftarPeserta::dariBaris($baris);
+
+        if ($orang === []) {
+            return response()->json([
+                'ok' => false,
+                'pesan' => 'Tidak ada nama yang terbaca di berkas itu.',
+            ], 422);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'jumlah' => count($orang),
+            // Berapa yang BERNOMOR disebut terpisah: daftar yang terbaca
+            // namanya saja terlihat berhasil, padahal justru nomornya yang
+            // hendak dikumpulkan.
+            'bernomor' => count(array_filter($orang, fn ($o) => $o['telp'] !== '')),
+            'teks' => \App\Support\DaftarPeserta::sebagaiTeks($orang),
+        ]);
+    }
+
+    /**
      * Halaman rincian satu pendaftaran.
      *
      * Satu halaman untuk kelima layanan, dengan bagian borang yang berbeda
@@ -631,7 +726,7 @@ class PendaftaranLayananController extends Controller
             'angkatan' => Pendaftaran::angkatanBaris($baris),
             'caraBayar' => Pendaftaran::caraBayar($baris->cara_bayar ?? null),
             'keadaan' => Pendaftaran::KEADAAN[Pendaftaran::keadaanDari($baris->status)] ?? null,
-            'peserta' => \App\PendaftaranPeserta::milik($layanan, $id)->terurut()->get(['nama']),
+            'peserta' => \App\PendaftaranPeserta::milik($layanan, $id)->terurut()->get(['nama', 'telp']),
         ]);
     }
 
