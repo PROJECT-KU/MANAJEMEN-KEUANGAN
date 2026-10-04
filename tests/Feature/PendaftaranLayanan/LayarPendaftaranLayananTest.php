@@ -9,10 +9,12 @@ use App\PendaftaranScopusCamp;
 use App\PendaftaranScopusKafe;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use App\User;
+use App\Exports\PendaftaranLayananExport;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -684,6 +686,229 @@ class LayarPendaftaranLayananTest extends TestCase
         $this->assertStringContainsString('Layanan: Scopus Camp', $html);
         $this->assertStringContainsString('Keadaan: Lunas', $html);
         $this->assertStringNotContainsString('Tanpa saringan', $html);
+    }
+
+
+    #[Test]
+    public function tombol_unduh_di_layar_membawa_SELURUH_saringannya(): void
+    {
+        /*
+         * Diperiksa dari TAUTAN DI HALAMANNYA, bukan dari peladennya.
+         *
+         * Uji di atas membuktikan peladen menghormati saringan yang sampai ke
+         * alamatnya — dan itu memang sudah benar sejak awal. Yang tidak
+         * terjaga sama sekali adalah apakah tombol unduhnya benar-benar
+         * MENGIRIM saringan itu. Keduanya kelihatan sama dari luar: halamannya
+         * tersaring, berkasnya terunduh, tidak ada galat apa pun. Bedanya cuma
+         * isi berkasnya — dan orang yang mengunduhnya tidak punya cara tahu.
+         *
+         * Terukur sebelum perbaikan: `bayar` TIDAK ada di daftar yang dibawa
+         * tautannya, padahal borangnya mengirimkannya dan peladennya
+         * menyaringnya. Jadi menyaring "Transfer bank" lalu menekan Unduh
+         * Excel memulangkan SELURUH cara bayar, dan kepala berkasnya pun tidak
+         * menyebut "Cara bayar" sehingga tidak ada petunjuk bahwa saringannya
+         * tertinggal.
+         *
+         * Dijaga dengan menuntut SETIAP medan borangnya ada di kedua tautan,
+         * bukan dengan menyebut 'bayar' saja: saringan berikutnya yang
+         * ditambahkan akan jatuh ke lubang yang sama.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan();
+
+        $saringan = [
+            'cari' => 'Budi',
+            'layanan' => 'scopus_camp',
+            'keadaan' => 'lunas',
+            'bukti' => 'ada',
+            'bayar' => 'transfer',
+            'angkatan' => (string) $angkatan->id,
+            'dari' => '2026-09-01',
+            'sampai' => '2026-09-30',
+            'lama' => '1',
+        ];
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', $saringan))
+            ->assertOk()
+            ->getContent();
+
+        foreach (['excel', 'pdf'] as $bentuk) {
+            $tautan = $this->tautanUnduh($isi, $bentuk);
+
+            $this->assertNotNull(
+                $tautan,
+                'Tombol Unduh ' . $bentuk . ' tidak ditemukan di halamannya.'
+            );
+
+            // Alamatnya dibongkar jadi larik, bukan dicari sebagai untaian:
+            // tanda & di markah tertulis sebagai &amp; dan urutan medannya
+            // tidak dijamin.
+            parse_str((string) parse_url(html_entity_decode($tautan), PHP_URL_QUERY), $medan);
+
+            foreach ($saringan as $nama => $nilai) {
+                $this->assertSame(
+                    $nilai,
+                    $medan[$nama] ?? null,
+                    'Tombol Unduh ' . $bentuk . ' tidak membawa saringan "' . $nama
+                        . '", jadi berkasnya berisi baris yang tidak terlihat di layar.'
+                );
+            }
+        }
+    }
+
+    #[Test]
+    public function mengurutkan_kolom_tidak_melepaskan_saringannya(): void
+    {
+        /*
+         * Lubang yang sama persis, lewat pintu lain: kepala kolom yang bisa
+         * diurutkan memakai daftar bawaan yang itu juga. Menekan "Pendaftar"
+         * untuk mengurutkan A–Z diam-diam melepaskan saringan cara bayarnya,
+         * dan barisnya bertambah tanpa ada yang mengubah saringan apa pun.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.index', [
+                'bayar' => 'transfer',
+                'bukti' => 'ada',
+            ]))
+            ->assertOk()
+            ->getContent();
+
+        // Tautan urut kolom 'nama'; dicari lewat medan urut= supaya tidak
+        // tertukar dengan tautan lain di halaman yang sama.
+        $this->assertMatchesRegularExpression(
+            '/href="[^"]*urut=nama[^"]*"/',
+            $isi,
+            'Kepala kolom Pendaftar harus berupa tautan pengurut.'
+        );
+
+        preg_match('/href="([^"]*urut=nama[^"]*)"/', $isi, $cocok);
+        parse_str((string) parse_url(html_entity_decode($cocok[1]), PHP_URL_QUERY), $medan);
+
+        $this->assertSame('transfer', $medan['bayar'] ?? null,
+            'Mengurutkan kolom melepaskan saringan cara bayarnya.');
+        $this->assertSame('ada', $medan['bukti'] ?? null,
+            'Mengurutkan kolom melepaskan saringan bukti bayarnya.');
+    }
+
+    /**
+     * Alamat satu tombol unduh dari markah halaman daftarnya.
+     *
+     * Dicocokkan lewat alamat rutenya, bukan lewat tulisan tombolnya: label
+     * tombolnya boleh berubah tanpa membuat tautannya salah.
+     */
+    private function tautanUnduh(string $isi, string $bentuk): ?string
+    {
+        $jalur = parse_url(route('account.pendaftaran-layanan.' . $bentuk), PHP_URL_PATH);
+
+        // Jalurnya dicari di MANA SAJA di dalam hrefnya, tidak dikaitkan ke
+        // awalnya: route() memulangkan alamat penuh berikut hostnya, jadi
+        // pola yang mengait awal href tidak pernah cocok sekali pun — dan
+        // ujinya akan gagal dengan alasan yang salah ("tombol tidak
+        // ditemukan") walau tombolnya ada.
+        return preg_match('#href="([^"]*' . preg_quote((string) $jalur, '#') . '[^"]*)"#', $isi, $cocok) === 1
+            ? $cocok[1]
+            : null;
+    }
+
+
+    #[Test]
+    public function isi_lembar_kerja_benar_benar_menyusut_mengikuti_saringannya(): void
+    {
+        /*
+         * Yang diperiksa di sini ISI berkasnya, bukan alamat tombolnya.
+         *
+         * Dua uji di atas membuktikan tautannya membawa saringannya dan
+         * peladennya membacanya — tetapi keduanya masih bisa benar sementara
+         * berkasnya tetap berisi semuanya, misalnya kalau unduhannya merakit
+         * kuerinya sendiri tanpa lewat saringan bersamanya. Jadi barisnya
+         * dihitung langsung dari obyek ekspornya.
+         *
+         * Dua baris yang HANYA berbeda cara bayarnya, supaya yang menentukan
+         * hasilnya cuma satu hal.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        /*
+         * Kata kuncinya HURUF SAJA, bukan Str::random().
+         *
+         * Pencariannya memungut angka dari kata kunci lalu mencocokkannya ke
+         * nomor telepon — itu memang disengaja supaya nomor bertanda hubung
+         * tetap bisa dicari. Tetapi kata kunci acak biasanya memuat angka,
+         * dan angka itu lalu menarik baris lain yang nomornya kebetulan
+         * memuatnya: terukur 12 baris ikut terbawa, bukan 1. Yang diuji di
+         * sini saringan cara bayarnya, jadi kata kuncinya tidak boleh
+         * menyumbang keraguan.
+         */
+        $tanda = substr(preg_replace('/[^A-Za-z]/', '', Str::random(40)) ?? '', 0, 10);
+        $angkatan = $this->angkatan();
+
+        foreach (['transfer', 'tunai'] as $cara) {
+            PendaftaranScopusCamp::create([
+                'id_transaksi' => 'UJI-' . strtoupper($cara) . '-' . $tanda,
+                'kategori_id' => $angkatan->id,
+                'nama' => 'Peserta ' . $cara . ' ' . $tanda,
+                'email' => $cara . '.' . $tanda . '@contoh.test',
+                'telp' => '081200000000',
+                'jumlah_pendaftar' => 1,
+                'total_pembayaran' => 500000,
+                'cara_bayar' => $cara,
+                'status' => 'diproses',
+            ]);
+        }
+
+        Excel::fake();
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.excel', [
+                'cari' => $tanda,
+                'bayar' => 'transfer',
+            ]))
+            ->assertOk();
+
+        Excel::assertDownloaded(
+            'pendaftar-layanan-' . now()->format('Y-m-d-Hi') . '.xlsx',
+            function (PendaftaranLayananExport $ekspor) use ($tanda) {
+                $baris = $ekspor->array();
+
+                $this->assertCount(1, $baris,
+                    'Lembar kerja memuat ' . count($baris) . ' baris, padahal saringan '
+                        . 'cara bayarnya menyisakan 1.');
+
+                // Kolom ke-4 = Nama; lihat headings().
+                $this->assertSame('Peserta transfer ' . $tanda, $baris[0][3]);
+
+                return true;
+            }
+        );
+    }
+
+    #[Test]
+    public function kepala_berkas_menyebut_saringan_cara_bayarnya(): void
+    {
+        /*
+         * Nama saringannya WAJIB ikut tercetak, bukan cuma dihormati.
+         *
+         * Berkas yang isinya sudah tersaring tetapi tidak menyebut saringannya
+         * justru lebih menyesatkan daripada berkas yang tidak tersaring: ia
+         * terbaca seperti daftar yang lengkap, dan berkas unduhan adalah yang
+         * paling sering diteruskan ke orang lain.
+         */
+        $saringan = (new \ReflectionClass(\App\Http\Controllers\account\PendaftaranLayananController::class))
+            ->newInstanceWithoutConstructor();
+
+        $metode = new \ReflectionMethod($saringan, 'ringkasanSaringan');
+        $metode->setAccessible(true);
+
+        $hasil = $metode->invoke($saringan, [
+            'cari' => '', 'layanan' => '', 'angkatan' => '', 'keadaanDipilih' => '',
+            'bukti' => '', 'caraBayar' => 'transfer', 'dari' => '', 'sampai' => '',
+            'menggantung' => false, 'urut' => 'waktu', 'arah' => 'desc',
+        ]);
+
+        $this->assertSame('Transfer bank', $hasil['Cara bayar'] ?? null);
     }
 
     // ---------------------------------------------------------------- menu

@@ -364,16 +364,24 @@ Data Pelanggan | MIS
             </div>
             <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
                 {{-- Ekspor membawa saringan yang sedang dipakai, bukan seluruh
-                     tabel: yang diunduh orang hampir selalu yang dilihatnya. --}}
+                     tabel: yang diunduh orang hampir selalu yang dilihatnya.
+
+                     $bawa datang dari pengendalinya, TIDAK dirakit di sini.
+                     Dulu daftarnya ditulis tangan di baris ini, dan dua
+                     saringan dari ubin ringkasan — "Pernah memesan" dan "30
+                     hari terakhir" — tidak ada di dalamnya: berkasnya
+                     memulangkan seluruh pelanggan tanpa satu pun tanda bahwa
+                     saringannya tertinggal. Lihat MEDAN_SARINGAN di
+                     pengendalinya. --}}
                 {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibaca dan
                      dilampirkan, lembar kerja untuk diolah. Daftar pelanggan
                      hampir selalu berakhir di spreadsheet. --}}
                 <a class="mis-tombol mis-tombol-halus"
-                    href="{{ route('account.customer.ekspor.excel', request()->only('cari', 'status', 'verifikasi')) }}">
+                    href="{{ route('account.customer.ekspor.excel', $bawa) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
                 </a>
                 <a class="mis-tombol mis-tombol-halus"
-                    href="{{ route('account.customer.ekspor', request()->only('cari', 'status', 'verifikasi')) }}">
+                    href="{{ route('account.customer.ekspor', $bawa) }}">
                     <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
                 </a>
             </div>
@@ -613,11 +621,11 @@ Data Pelanggan | MIS
                                     </label>
                                 </th>
                             @endif
-                            <th aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'nama', 'label' => 'Pelanggan'])</th>
+                            <th aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => $bawa, 'kolom' => 'nama', 'label' => 'Pelanggan'])</th>
                             <th>Kontak</th>
-                            <th aria-sort="{{ $ariaUrut('status') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'status', 'label' => 'Status'])</th>
-                            <th aria-sort="{{ $ariaUrut('pesanan') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
-                            <th aria-sort="{{ $ariaUrut('bergabung') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => request()->only('cari', 'status', 'verifikasi'), 'kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
+                            <th aria-sort="{{ $ariaUrut('status') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => $bawa, 'kolom' => 'status', 'label' => 'Status'])</th>
+                            <th aria-sort="{{ $ariaUrut('pesanan') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => $bawa, 'kolom' => 'pesanan', 'label' => 'Pesanan'])</th>
+                            <th aria-sort="{{ $ariaUrut('bergabung') }}">@include('partials.urut-kolom', ['rute' => 'account.customer.index', 'bawa' => $bawa, 'kolom' => 'bergabung', 'label' => 'Bergabung'])</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>

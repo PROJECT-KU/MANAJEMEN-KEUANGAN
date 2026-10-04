@@ -80,6 +80,26 @@ class CustomerController extends Controller
     }
 
     /**
+     * Nama medan saringan di alamat halaman, SELURUHNYA.
+     *
+     * Daftar ini yang dibawa serta oleh tombol unduh dan kepala kolom
+     * pengurut, jadi ia menentukan apa yang masih terpasang sesudah salah
+     * satunya ditekan.
+     *
+     * 'pesanan' dan 'baru' WAJIB ikut, dan dulu tidak. Keduanya dipasang oleh
+     * ubin ringkasan, disaring sungguh-sungguh di terurutUntukEkspor(), dan
+     * namanya pun sudah tercetak di kepala berkasnya — tetapi tautan unduhnya
+     * cuma membawa tiga medan yang ditulis tangan di markah halaman. Jadi
+     * menekan ubin "Pernah memesan" lalu Unduh Excel memulangkan SELURUH
+     * pelanggan, tanpa galat, dan kepala berkasnya ikut berbohong karena
+     * saringannya memang tidak pernah sampai ke sana.
+     *
+     * 'urut' dan 'arah' TIDAK di sini: keduanya bukan saringan, dan kepala
+     * kolom pengurut justru harus boleh menimpanya.
+     */
+    private const MEDAN_SARINGAN = ['cari', 'status', 'verifikasi', 'pesanan', 'baru'];
+
+    /**
      * Daftar pelanggan.
      *
      * Penyaringnya sengaja tinggal tiga: kata kunci, status akun, dan status
@@ -163,6 +183,19 @@ class CustomerController extends Controller
              * padahal ada 101, hanya saringannya yang mengecualikan semua.
              */
             'adaSaringan' => $cari !== '' || (bool) $status || (bool) $verifikasi || $punyaPesanan || $baru,
+            /*
+             * Saringan yang sedang terpasang, siap ditempelkan ke tautan.
+             *
+             * Dirakit DI SINI, bukan di markah halamannya: ini satu-satunya
+             * tempat yang tahu medan apa saja yang dimengerti layar ini.
+             * Sebelumnya daftarnya ditulis tangan enam kali di markah — sekali
+             * per tautan unduh dan sekali per kepala kolom — dan keenamnya
+             * ketinggalan dua medan. Lihat MEDAN_SARINGAN.
+             */
+            'bawa' => array_filter(
+                $request->only(self::MEDAN_SARINGAN),
+                fn ($n) => $n !== null && $n !== ''
+            ),
         ]);
     }
 
