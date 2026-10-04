@@ -327,16 +327,121 @@ class UnggahBuktiTest extends TestCase
     }
 
     #[Test]
-    public function bukti_yang_sudah_ada_bisa_dibuka_dari_halaman_status(): void
+    public function sesudah_bukti_masuk_halamannya_berhenti_menawarkan_unggahan(): void
     {
+        /*
+         * Dulu sesudah mengunggah, peserta kembali ke layar yang SAMA PERSIS:
+         * nomor rekening, langkah "transfer dulu", hitung mundur, dan borang
+         * unggah yang masih menganga. Yang awam membacanya sebagai "belum
+         * berhasil", lalu mengunggah lagi. Dan lagi.
+         *
+         * Yang dijaga: sesudah buktinya masuk, TIDAK ADA satu pun ajakan
+         * mengulang yang tergambar.
+         */
         $p = $this->pendaftaran();
 
         $this->kirim($p, UploadedFile::fake()->image('bukti.jpg', 600, 400))->assertRedirect();
 
-        $this->get(route('public.webinareksklusif.status', $p->getKey()))
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
-            ->assertSee('Bukti Anda sudah kami terima', false)
-            ->assertSee('storage/' . $p->fresh()->gambar, false);
+            ->getContent();
+
+        // Yang HARUS ada: kabar selesai dan buktinya sendiri.
+        $this->assertStringContainsString('Bukti pembayaran Anda sudah masuk', $isi);
+        $this->assertStringContainsString('Anda tidak perlu mengirim apa pun lagi', $isi);
+        $this->assertStringContainsString('storage/' . $p->fresh()->gambar, $isi);
+
+        // Yang HARUS hilang. Nomor rekening dan ajakan transfer di layar orang
+        // yang baru saja membayar adalah yang membuatnya mengira gagal.
+        $this->assertStringNotContainsString('2164 0100 0467 563', $isi,
+            'Nomor rekening masih tergambar untuk orang yang buktinya sudah masuk.');
+        $this->assertStringNotContainsString('Cara membayar', $isi,
+            'Langkah "cara membayar" masih tergambar sesudah buktinya masuk.');
+        $this->assertStringNotContainsString('Sudah transfer? Unggah buktinya di sini', $isi,
+            'Borang unggahnya masih ditawarkan seperti belum pernah dikirim.');
+        /*
+         * Dicari UNSUR-nya, bukan kata mentahnya: "data-mis-mundur" juga muncul
+         * sebagai pemilih di dalam skrip hitung mundurnya sendiri, dan
+         * percobaan pertama merah pada markah yang justru benar.
+         */
+        $this->assertSame(0, preg_match_all('/<strong[^>]*data-mis-mundur=/', $isi),
+            'Hitung mundurnya masih berjalan, padahal kursinya justru sedang ditahan.');
+
+        /*
+         * Penggantian bukti tetap MUNGKIN — ada yang memotret layar yang
+         * salah — tetapi terlipat, bukan terbuka sejak awal.
+         */
+        $this->assertStringContainsString('Salah kirim? Ganti buktinya', $isi);
+        $this->assertStringNotContainsString('<details class="sta-ganti" open>', $isi,
+            'Borang penggantinya terbuka sejak awal; yang tidak perlu mengganti akan ikut menekannya.');
+    }
+
+    #[Test]
+    public function unggahan_jadi_jalur_utama_dan_whatsapp_jadi_bantuan(): void
+    {
+        /*
+         * Dulu tombol WhatsApp hijau SELEBAR KARTU berdiri lebih dulu, dan
+         * borang unggahnya di bawahnya. Yang paling besar dan paling atas yang
+         * ditekan orang — jadi buktinya tetap mengalir ke nomor pribadi
+         * panitia dan tidak pernah menempel ke barisnya.
+         */
+        $p = $this->pendaftaran();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $borang = strpos($isi, 'sta-unggah-borang');
+        $wa = strpos($isi, 'wa.me/');
+
+        $this->assertNotFalse($borang, 'Borang unggahnya tidak tergambar.');
+        $this->assertNotFalse($wa, 'Jalan keluar lewat WhatsApp hilang sama sekali.');
+
+        $this->assertLessThan($wa, $borang,
+            'WhatsApp masih berdiri sebelum borang unggahnya.');
+
+        // Tombol selebar kartu itu sudah turun jadi satu baris bantuan.
+        $this->assertStringNotContainsString('class="sta-wa"', $isi,
+            'Tombol WhatsApp selebar kartu masih jadi ajakan utama.');
+        $this->assertStringContainsString('class="sta-bantuan"', $isi);
+
+        // Langkah keduanya menunjuk ke borang di halaman ini, bukan ke WhatsApp.
+        $this->assertStringContainsString('Unggah bukti transfernya di halaman ini', $isi);
+    }
+
+    #[Test]
+    public function kursi_yang_buktinya_sudah_masuk_tidak_ikut_dilepas(): void
+    {
+        /*
+         * Kalau layarnya berkata "kursi Anda ditahan sampai pemeriksaan
+         * selesai", itu harus BENAR.
+         *
+         * Peserta yang mengunggah bukti di jam ke-23 sudah membayar; yang
+         * tersisa cuma panitia mencocokkannya, dan itu pekerjaan jam kerja.
+         * Dilepas juga, uangnya sudah pindah tetapi kursinya hilang.
+         */
+        $sesi = $this->sesi();
+
+        $berbukti = $this->pendaftaran([
+            'kategori_id' => $sesi->id,
+            'kedaluwarsa_pada' => now()->subMinutes(5),
+            'gambar' => 'bukti/webinar_eksklusif/contoh.webp',
+        ]);
+
+        $kosong = $this->pendaftaran([
+            'kategori_id' => $sesi->id,
+            'kedaluwarsa_pada' => now()->subMinutes(5),
+        ]);
+
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->id);
+
+        $this->assertSame('pending', $berbukti->fresh()->status,
+            'Kursi yang buktinya sudah masuk ikut dilepas; uangnya pindah tetapi tempatnya hilang.');
+        $this->assertSame('expired', $kosong->fresh()->status,
+            'prasyarat: yang tanpa bukti memang harus dilepas');
+
+        // Dan halamannya tidak boleh berkata "batas waktunya lewat".
+        $this->assertFalse($berbukti->fresh()->sudah_kedaluwarsa);
     }
 
     #[Test]

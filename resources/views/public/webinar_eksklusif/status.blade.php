@@ -34,6 +34,18 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         @php($habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired')
         @php($batal = $pendaftaran->status === 'cancel')
 
+        {{-- Keadaan KEEMPAT: bukti sudah dikirim, panitia belum mencocokkan.
+
+             Dulu halaman ini cuma punya tiga keadaan, jadi sesudah mengunggah
+             peserta kembali ke layar yang sama persis — lengkap dengan nomor
+             rekening, langkah "transfer dulu", dan borang unggah yang masih
+             menganga. Yang awam membacanya sebagai "belum berhasil", lalu
+             mengunggah lagi. Dan lagi.
+
+             Sejak ada keadaan ini, yang sudah mengirim bukti tidak lagi
+             disuguhi satu pun hal yang bisa ditekan berulang. --}}
+        @php($menunggu = ! $lunas && ! $batal && ! $habis && $buktiAda)
+
         <div class="sta-kartu">
 
             {{-- Nama kelas dan ikonnya DIRAKIT UTUH di PHP, bukan ditempel
@@ -46,7 +58,9 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  nama FA6 tidak merender apa pun TANPA galat sama sekali. --}}
             @php($rupa = $lunas
                 ? ['hijau', 'fa-check-circle']
-                : (($habis || $batal) ? ['merah', 'fa-times-circle'] : ['kuning', 'fa-hourglass-half']))
+                : (($habis || $batal)
+                    ? ['merah', 'fa-times-circle']
+                    : ($menunggu ? ['hijau', 'fa-check-circle'] : ['kuning', 'fa-hourglass-half'])))
             <span class="sta-ubin sta-ubin-{{ $rupa[0] }}" aria-hidden="true">
                 <i class="fas {{ $rupa[1] }}"></i>
             </span>
@@ -58,6 +72,8 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     Pendaftaran ini dibatalkan
                 @elseif ($habis)
                     Batas waktu pembayarannya sudah lewat
+                @elseif ($menunggu)
+                    Bukti pembayaran Anda sudah masuk
                 @else
                     Pendaftaran Anda sudah masuk
                 @endif
@@ -69,6 +85,13 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <strong>{{ $pendaftaran->email }}</strong> paling lambat sehari sebelum acara.
                 @elseif ($batal || $habis)
                     Kursinya sudah dilepas kembali. Silakan daftar ulang kalau masih ingin ikut.
+                @elseif ($menunggu)
+                    {{-- Kalimat terpentingnya: TIDAK ADA LAGI yang harus ia
+                         kerjakan. Tanpa itu orang menunggu sambil menduga-duga
+                         apakah ada langkah yang terlewat. --}}
+                    Panitia memeriksanya pada jam kerja.
+                    <strong>Anda tidak perlu mengirim apa pun lagi.</strong>
+                    Kursi Anda ditahan sampai pemeriksaannya selesai.
                 @else
                     Tinggal satu langkah: selesaikan pembayarannya.
                 @endif
@@ -131,7 +154,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 </div>
             </dl>
 
-            @if (! $lunas && ! $batal && ! $habis)
+            @if (! $lunas && ! $batal && ! $habis && ! $menunggu)
                 @if ($pendaftaran->sisa_waktu)
                     {{--
                         Kalimatnya DIBUNGKUS <span>, dan itu bukan hiasan.
@@ -193,8 +216,17 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                             <small>a.n. Rumah Scopus Akademi</small>
                         </div>
                         <ol start="2">
-                            <li>Kirim bukti transfer beserta nomor
-                                <code>{{ $pendaftaran->id_transaksi }}</code> ke panitia lewat WhatsApp.</li>
+                            {{-- Langkah keduanya MENUNJUK KE BAWAH, ke borang di
+                                 halaman ini. Sebelumnya tertulis "kirim ke
+                                 panitia lewat WhatsApp" — dan bukti yang
+                                 menumpuk di satu nomor pribadi tidak pernah
+                                 sampai ke baris pendaftarannya; yang memeriksa
+                                 harus mencocokkan tangkapan layar dengan
+                                 daftar, satu per satu. --}}
+                            <li><strong>Unggah bukti transfernya di halaman ini</strong>,
+                                di kotak tepat di bawah. Nomor
+                                <code>{{ $pendaftaran->id_transaksi }}</code> sudah menempel
+                                sendiri, jadi tidak perlu Anda ketik.</li>
                             {{-- Yang BENAR-BENAR terjadi. Sebelumnya tertulis
                                  "tautan masuk dikirim ke email Anda", padahal
                                  tidak ada mekanismenya di sistem — panitia
@@ -202,41 +234,24 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                             <li>Panitia mengonfirmasi, lalu Anda dimasukkan ke grup peserta
                                 di WhatsApp — tautan masuk sesinya dibagikan di sana.</li>
                         </ol>
-
-                        <a class="sta-wa"
-                            href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya sudah mendaftar Webinar Eksklusif dengan nomor ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Berikut bukti transfernya.') }}"
-                            target="_blank" rel="noopener">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Kirim bukti transfer
-                        </a>
                     </div>
 
                     {{--
-                        UNGGAH BUKTI TRANSFER.
+                        UNGGAH BUKTI TRANSFER — jalur UTAMA.
 
-                        Selama gerbang pembayaran DOKU belum terverifikasi,
-                        WhatsApp panitia satu-satunya jalan mengirim bukti —
-                        dan bukti yang menumpuk di satu nomor pribadi tidak
-                        pernah sampai ke baris pendaftarannya.
+                        Dulu tombol WhatsApp hijau selebar kartu berdiri lebih
+                        dulu, dan borang ini di bawahnya. Yang paling besar dan
+                        paling atas yang ditekan orang, jadi buktinya tetap
+                        mengalir ke nomor pribadi panitia dan tidak pernah
+                        menempel ke barisnya.
 
-                        Tombol WhatsApp di atas SENGAJA dibiarkan: sebagian
-                        peserta sudah terbiasa ke sana, dan menghapusnya
-                        memaksa mereka belajar jalan baru di saat mereka justru
-                        sedang ingin cepat selesai.
+                        Sekarang terbalik: borangnya yang utama, dan WhatsApp
+                        turun jadi satu baris bantuan untuk yang unggahannya
+                        bermasalah. Tombolnya tidak DIHAPUS — peserta yang
+                        fotonya ditolak terus tetap butuh jalan keluar.
                     --}}
                     <div class="sta-unggah">
                         <p class="sta-bayar-judul">Sudah transfer? Unggah buktinya di sini</p>
-
-                        @if ($buktiAda)
-                            <div class="sta-unggah-ada">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i>
-                                <span>
-                                    Bukti Anda sudah kami terima.
-                                    <a href="{{ $buktiUrl }}" target="_blank" rel="noopener">Lihat berkasnya</a>
-                                    &mdash; masih bisa diganti kalau salah kirim.
-                                </span>
-                            </div>
-                        @endif
 
                         @error('bukti')
                             <p class="sta-unggah-galat" role="alert">{{ $message }}</p>
@@ -276,8 +291,91 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                             Fotonya kami ringkas jadi WebP supaya hemat ruang; berkas aslinya
                             tidak kami simpan.
                         </p>
+
+                        {{-- WhatsApp: BANTUAN, bukan jalur utama lagi.
+
+                             Kalimatnya menyebut syaratnya di depan ("kalau
+                             fotonya ditolak terus"), supaya yang unggahannya
+                             lancar tidak merasa masih ada langkah tersisa. --}}
+                        <p class="sta-bantuan">
+                            Kalau fotonya ditolak terus atau ada kendala lain,
+                            <a href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya kesulitan mengunggah bukti transfer untuk pendaftaran ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '.') }}"
+                                target="_blank" rel="noopener">
+                                <i class="fab fa-whatsapp" aria-hidden="true"></i> hubungi panitia
+                            </a>.
+                        </p>
                     </div>
                 @endif
+            @endif
+
+            {{--
+                LAYAR SELESAI — buktinya sudah dikirim, panitia belum mencocokkan.
+
+                Tidak ada satu pun yang bisa ditekan berulang di sini: nomor
+                rekening, langkah "transfer dulu", hitung mundur, dan borang
+                unggahnya semua TIDAK digambar. Yang awam tidak punya apa pun
+                untuk diulang.
+
+                Penggantian bukti tetap mungkin — ada yang memotret layar yang
+                salah — tetapi DILIPAT di balik <details>. Yang terbuka sejak
+                awal akan ditekan juga oleh yang tidak perlu menggantinya.
+            --}}
+            @if ($menunggu)
+                <div class="sta-selesai">
+                    <div class="sta-selesai-isi">
+                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                        <span>
+                            Kursi Anda ditahan sampai panitia selesai memeriksa &mdash;
+                            batas waktu 24 jam itu <strong>tidak lagi berjalan</strong> untuk Anda.
+                        </span>
+                    </div>
+
+                    @if ($buktiUrl)
+                        <a class="sta-lihat-bukti" href="{{ $buktiUrl }}" target="_blank" rel="noopener">
+                            <i class="fas fa-image" aria-hidden="true"></i>
+                            Lihat bukti yang Anda kirim
+                        </a>
+                    @endif
+
+                    @error('bukti')
+                        <p class="sta-unggah-galat" role="alert">{{ $message }}</p>
+                    @enderror
+
+                    <details class="sta-ganti" @if ($errors->has('bukti')) open @endif>
+                        <summary>Salah kirim? Ganti buktinya</summary>
+
+                        <form method="POST"
+                            action="{{ route('public.webinareksklusif.bukti', $pendaftaran->getKey()) }}"
+                            enctype="multipart/form-data" class="sta-unggah-borang">
+                            @csrf
+
+                            <input type="file" id="sta-bukti" name="bukti" class="sta-berkas"
+                                accept=".jpg,.jpeg,.png,.heic,.heif,image/jpeg,image/png,image/heic,image/heif"
+                                required>
+
+                            <label for="sta-bukti" class="sta-unggah-tombol">
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <span class="sta-unggah-teks">
+                                    <strong id="sta-bukti-nama">Pilih foto penggantinya</strong>
+                                    <small>JPG, PNG, atau HEIC &middot; paling besar 8 MB</small>
+                                </span>
+                            </label>
+
+                            <button type="submit">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                Ganti bukti
+                            </button>
+                        </form>
+                    </details>
+
+                    <p class="sta-bantuan">
+                        Ada kendala?
+                        <a href="https://wa.me/{{ config('panitia.whatsapp') }}?text={{ rawurlencode('Halo, saya sudah mengunggah bukti transfer untuk pendaftaran ' . $pendaftaran->id_transaksi . ' atas nama ' . $pendaftaran->nama . '. Mohon dibantu pengecekannya.') }}"
+                            target="_blank" rel="noopener">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i> hubungi panitia
+                        </a>.
+                    </p>
+                </div>
             @endif
 
             {{--
@@ -683,24 +781,6 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-rekening strong { display: block; margin: 4px 0; font-size: 1.3rem; font-weight: 800; letter-spacing: .04em; }
     .sta-rekening small { font-size: .78rem; opacity: .85; }
 
-    .sta-wa {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        min-height: 50px;
-        margin-top: 16px;
-        border-radius: 13px;
-        background: #25d366;
-        color: #fff;
-        font-size: .95rem;
-        font-weight: 700;
-        text-decoration: none;
-    }
-
-    .sta-wa:hover { background: #1ebe5a; color: #fff; text-decoration: none; }
-    .sta-wa > .fab { margin: 0 !important; font-size: 1.2rem; }
-
 
     /* Angka hitung mundurnya TIDAK boleh patah antar-baris.
 
@@ -714,6 +794,98 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         white-space: nowrap;
         font-variant-numeric: tabular-nums;
     }
+
+
+    /* ------------------------------------------------- layar bukti terkirim */
+
+    .sta-selesai { margin-top: 20px; }
+
+    .sta-selesai-isi {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 13px 15px;
+        border-radius: 13px;
+        background: #ecfdf3;
+        color: #166534;
+        font-size: .88rem;
+        line-height: 1.55;
+        text-align: left;
+    }
+
+    .sta-selesai-isi > .fas { margin: 2px 0 0 !important; font-size: 1.05rem; }
+
+    .sta-lihat-bukti {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 48px;
+        margin-top: 12px;
+        border: 1.5px solid #d9e1ef;
+        border-radius: 13px;
+        background: #fff;
+        color: var(--navy);
+        font-size: .92rem;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .sta-lihat-bukti:hover {
+        border-color: #818cf8;
+        color: var(--navy);
+        text-decoration: none;
+    }
+
+    .sta-lihat-bukti > .fas { margin: 0 !important; color: #6366f1; }
+
+    /* Penggantian bukti DILIPAT. Yang terbuka sejak awal akan ditekan juga
+       oleh yang tidak perlu menggantinya — dan itu persis kebiasaan yang
+       hendak dihentikan layar ini. */
+    .sta-ganti { margin-top: 14px; }
+
+    .sta-ganti > summary {
+        cursor: pointer;
+        color: var(--tinta-2);
+        font-size: .84rem;
+        font-weight: 600;
+        list-style: none;
+    }
+
+    /* Segitiga bawaannya dibuang di kedua mesin: Safari/Chrome lama memakai
+       ::-webkit-details-marker, yang baru memakai list-style di atas. */
+    .sta-ganti > summary::-webkit-details-marker { display: none; }
+
+    .sta-ganti > summary::before {
+        content: '\f067';
+        margin-right: 7px;
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: .72rem;
+    }
+
+    .sta-ganti[open] > summary::before { content: '\f068'; }
+
+    .sta-ganti > summary:hover { color: var(--navy); }
+
+    .sta-ganti > form { margin-top: 12px; }
+
+    /* Baris bantuan WhatsApp. Sengaja sekecil ini: ia jalan keluar untuk yang
+       tersangkut, bukan langkah yang harus dilewati semua orang. */
+    .sta-bantuan {
+        margin: 14px 0 0;
+        color: var(--tinta-2);
+        font-size: .82rem;
+        line-height: 1.55;
+    }
+
+    .sta-bantuan a {
+        color: #128c7e;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    .sta-bantuan .fab { margin: 0 2px 0 0 !important; }
 
     /* ---------------------------------------------- unggah bukti transfer */
 
