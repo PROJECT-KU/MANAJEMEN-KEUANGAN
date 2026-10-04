@@ -63,6 +63,40 @@ class PemesananLembaga extends Model
         return $awalan . str_pad((string) $urut, 3, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Jumlah tagihan pesanan ini: total seluruh pendaftaran yang terikat.
+     *
+     * DIHITUNG, tidak disimpan. Disimpan, ia akan berselisih dengan jumlah
+     * barisnya begitu satu pendaftaran ditambahkan ke pesanan yang sama — dan
+     * selisihnya baru ketahuan saat menagih, di depan orang keuangan lembaga.
+     */
+    public function tagihan(): int
+    {
+        return (int) $this->pendaftaran()->sum(fn ($b) => (int) $b->total);
+    }
+
+    /**
+     * Ringkasan uangnya: tagihan, yang sudah masuk, dan sisanya.
+     *
+     * @return array{tagihan: int, terbayar: int, sisa: int, lunas: bool, jumlah: int}
+     */
+    public function ringkasBayar(): array
+    {
+        return PembayaranPendaftaran::ringkas(
+            PembayaranPendaftaran::LEMBAGA,
+            (string) $this->getKey(),
+            $this->tagihan()
+        );
+    }
+
+    /** Seluruh pembayarannya, terurut termin. */
+    public function pembayaran()
+    {
+        return PembayaranPendaftaran::milik(PembayaranPendaftaran::LEMBAGA, (string) $this->getKey())
+            ->terurut()
+            ->get();
+    }
+
     /** Baris pengikatnya; satu baris per pendaftaran. */
     public function baris()
     {
