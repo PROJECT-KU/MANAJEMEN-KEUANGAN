@@ -519,6 +519,22 @@ Rincian Pendaftaran | MIS Rumah Scopus
             grid-column: 1 / -1;
         }
 
+        /*
+         * Jumlah lajurnya dipatok sesuai jumlah isian, lihat catatan di
+         * markahnya. Hanya sejak 680px: di bawah itu auto-fit di atas yang
+         * berlaku dan isiannya menumpuk satu per baris, seperti seharusnya di
+         * ponsel.
+         */
+        @media (min-width: 680px) {
+            .rin-isian-kolom-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .rin-isian-kolom-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
         /* ------------------------------------------- termin & DP */
 
         /* Ringkasan uang. Tiga baris, yang terakhir ditebalkan: pertanyaan
@@ -1949,7 +1965,46 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 <span class="teks">{{ $judulBagian }}</span>
                                             </p>
 
-                                            <div class="rin-isian-kisi">
+                                            @php
+                                                /*
+                                                 * Lajurnya dihitung dari jumlah isian
+                                                 * yang TIDAK merentang penuh — aturan
+                                                 * yang sama dengan deret tombol status.
+                                                 *
+                                                 * Dengan auto-fit, bagian Identitas yang
+                                                 * berisi empat isian jatuh 3 + 1: dua
+                                                 * petak kanan baris kedua kosong, dan
+                                                 * itu yang terlihat sebagai petak
+                                                 * menganga di sebelah "Afiliasi".
+                                                 *
+                                                 * Isian yang merentang penuh tidak ikut
+                                                 * dihitung: ia memang memakai sebaris
+                                                 * sendiri berapa pun lajurnya.
+                                                 */
+                                                $medanBiasa = count(array_diff($daftarMedan, $medanPenuh));
+                                                $lajurIsian = $medanBiasa > 0 && $medanBiasa % 3 === 0
+                                                    ? 3
+                                                    : ($medanBiasa > 0 && $medanBiasa % 2 === 0 ? 2 : 3);
+
+                                                /*
+                                                 * Sisa petak di baris terakhir DIISI oleh
+                                                 * isian terakhir, bukan dibiarkan menganga.
+                                                 *
+                                                 * Membagi lajur saja tidak cukup: bagian
+                                                 * yang berisi 5 atau 1 isian biasa tidak
+                                                 * habis dibagi 3 maupun 2, dan terukur
+                                                 * menyisakan 1 dan 2 petak kosong. Isian
+                                                 * terakhir dilebarkan sebanyak sisanya, jadi
+                                                 * barisnya selalu penuh berapa pun jumlah
+                                                 * medannya.
+                                                 */
+                                                $sisaPetak = $medanBiasa > 0 ? $medanBiasa % $lajurIsian : 0;
+                                                $rentangTerakhir = $sisaPetak === 0 ? 1 : $lajurIsian - $sisaPetak + 1;
+                                                $medanTerakhir = $medanBiasa > 0
+                                                    ? array_values(array_diff($daftarMedan, $medanPenuh))[$medanBiasa - 1]
+                                                    : null;
+                                            @endphp
+                                            <div class="rin-isian-kisi rin-isian-kolom-{{ $lajurIsian }}">
                                                 @foreach ($daftarMedan as $kolom)
                                                     @include('account.pendaftaran_layanan.partials.isian', [
                                                         'kolom' => $kolom,
@@ -1957,6 +2012,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                         'tulisan' => $label[$kolom],
                                                         'nilai' => old($kolom, $pendaftaran->{$kolom}),
                                                         'penuh' => in_array($kolom, $medanPenuh, true),
+                                                        'rentang' => $kolom === $medanTerakhir ? $rentangTerakhir : 1,
                                                         'uang' => in_array($kolom, $medanUang, true),
                                                         'angkatan' => $angkatan,
                                                     ])

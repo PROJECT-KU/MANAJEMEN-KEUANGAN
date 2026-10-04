@@ -7,6 +7,7 @@
     $tulisan   label yang dibaca orang
     $nilai     nilai sekarang
     $penuh     true kalau isiannya memakai lebar penuh kisinya
+    $rentang   berapa lajur yang ditempatinya (boleh tidak dikirim; bawaannya 1)
     $uang      true kalau nominal — diberi awalan Rp di dalam kotaknya
     $angkatan  pilihan angkatan, hanya dipakai kolom kategori_id
 
@@ -28,7 +29,11 @@
         default => 'text',
     };
 @endphp
-<div class="mis-isian {{ $penuh ? 'rin-isian-penuh' : '' }}">
+{{-- Rentangnya lewat gaya sebaris, bukan kelas: jumlah lajurnya dihitung
+     per bagian dari jumlah isiannya, jadi nilainya tidak terbatas pada
+     beberapa kelas yang ditulis di muka. --}}
+<div class="mis-isian {{ $penuh ? 'rin-isian-penuh' : '' }}"
+    @if (! $penuh && ($rentang ?? 1) > 1) style="grid-column: span {{ $rentang }};" @endif>
     <label class="mis-label" for="{{ $id }}">{{ $tulisan }}</label>
 
     @if ($kolom === 'kategori_id')
